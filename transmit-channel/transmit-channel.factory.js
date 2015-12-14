@@ -4,44 +4,44 @@ var TransmitChannel = (function () {
     _TransmitChannel.$inject = [];
 
     function _TransmitChannel() {
-        var
-            TC,
-            oscillatorNode,
-            scriptNode,
-            filterNode;
-
+        var TC;
+            
         TC = function (frequency) {
-            init(frequency);
+            this.oscillatorNode,
+            this.scriptNode,
+            this.filterNode; 
+
+            this.init(frequency);
         };
 
         TC.prototype.getLastNode = function () {
-            return filterNode;
-        }
+            return this.filterNode;
+        };
 
-        function init(frequency) {
-            oscillatorNode = Audio.createOscillator();
-            scriptNode = Audio.createScriptProcessor(4096, 1, 1);
-            filterNode = Audio.createBiquadFilter();
+        TC.prototype.init = function (frequency) {
+            this.oscillatorNode = Audio.createOscillator();
+            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.filterNode = Audio.createBiquadFilter();
 
-            oscillatorNode.connect(scriptNode);
-            scriptNode.connect(filterNode);
+            this.oscillatorNode.connect(this.scriptNode);
+            this.scriptNode.connect(this.filterNode);
 
-            scriptNode.onaudioprocess = onAudioProcess;
-            oscillatorNode.type = 'sine';
-            oscillatorNode.frequency.value = frequency; // value in hertz
-            oscillatorNode.start();
+            this.scriptNode.onaudioprocess = this.onAudioProcess;
+            this.oscillatorNode.type = 'sine';
+            this.oscillatorNode.frequency.value = frequency; // value in hertz
+            this.oscillatorNode.start();
 
             console.log(frequency, 'start');
-        }
+        };
 
-        function onAudioProcess(audioProcessingEvent) {
+        TC.prototype.onAudioProcess = function (audioProcessingEvent) {
             var
                 inputBuffer = audioProcessingEvent.inputBuffer,
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 inputData,
                 outputData;
 
-            console.log('Freqency: ', oscillatorNode.frequency.value, ' currentTime: ', Audio.getCurrentTime());
+            // console.log('Freqency: ', this.oscillatorNode.frequency.value, ' currentTime: ', Audio.getCurrentTime());
 
             for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
                 inputData = inputBuffer.getChannelData(channel);

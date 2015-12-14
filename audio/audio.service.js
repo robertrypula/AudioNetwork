@@ -26,8 +26,16 @@ var Audio = (function () {
             return context.createOscillator();
         }
 
+        function createGain() {
+            return context.createGain();
+        }
+
         function createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels) {
             return context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
+        }
+
+        function createChannelMerger(numberOfInputs) {
+            return context.createChannelMerger(numberOfInputs);
         }
 
         function init() {
@@ -45,7 +53,9 @@ var Audio = (function () {
             createAnalyser: createAnalyser,
             createBiquadFilter: createBiquadFilter,
             createOscillator: createOscillator,
+            createGain: createGain,
             createScriptProcessor: createScriptProcessor,
+            createChannelMerger: createChannelMerger,
             getContext: getContext
         };
     }
