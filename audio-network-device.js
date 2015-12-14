@@ -12,7 +12,7 @@ var AudioNetworkDevice = (function () {
             canvasHeight = canvas.height,
             sourceBuffer = null,
             analyser,
-            analyserMethod = 0 ? 'getByteFrequencyData' : 'getByteTimeDomainData',
+            analyserMethod = 1 ? 'getByteFrequencyData' : 'getByteTimeDomainData',
             filterEnable = 0,
             chartActive = true;
 
@@ -120,6 +120,14 @@ var AudioNetworkDevice = (function () {
             chartActive = !chartActive;
         }
 
+        function toggleTimeFreq() {
+            if (analyserMethod == 'getByteFrequencyData') {
+                analyserMethod = 'getByteTimeDomainData';
+            } else {
+                analyserMethod = 'getByteFrequencyData';
+            }
+        }
+
         function init() {
             configureNodes();
         }
@@ -129,7 +137,8 @@ var AudioNetworkDevice = (function () {
         return {
             addSignal: addSignal,
             getSignal: getSignal,
-            toggleChart: toggleChart
+            toggleChart: toggleChart,
+            toggleTimeFreq: toggleTimeFreq
         };
     }
 
