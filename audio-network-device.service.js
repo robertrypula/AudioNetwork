@@ -10,11 +10,11 @@ var AudioNetworkDevice = (function () {
             canvasContext = canvas.getContext("2d"),
             canvasWidth = canvas.width,
             canvasHeight = canvas.height,
-            sourceBuffer = null,
             analyser,
             analyserMethod = 1 ? 'getByteFrequencyData' : 'getByteTimeDomainData',
-            filterEnable = 0,
+            filterEnable = 1,
             chartActive = true;
+
 
         function getQ(bandwidth) {
             return Math.sqrt( Math.pow(2, bandwidth) ) / ( Math.pow(2, bandwidth) - 1 );
@@ -32,7 +32,7 @@ var AudioNetworkDevice = (function () {
             freq = 0;
             while (freq < resolution * bufferLength) {
                 pix = Math.round(freq / resolution);
-                divContent += '<div style="border-left: 1px solid gray; position: absolute; width: 64px; top: 0px; left: ' + pix + 'px">' + freq + 'Hz</div>';
+                divContent += '<div style="border-left: 1px solid gray; font-size: 10px; font-family: Tahoma; position: absolute; width: 64px; top: 0px; left: ' + pix + 'px">' + freq + 'Hz</div>';
                 freq += step;
             }
             if (analyserMethod == 'getByteFrequencyData') {
@@ -70,33 +70,29 @@ var AudioNetworkDevice = (function () {
         }
 
         function configureNodes() {
-            // var source = Audio.getContext().createBufferSource();
             var filter = Audio.createBiquadFilter();
-            var f = 1 ? 2025 : 1070;      // 2025 or 1070
-            var bw = 40;
-            var test1 = new TransmitChannel(2025);
-            var test2 = new TransmitChannel(1070);
-            var gainNode = Audio.createGain();
+            var f = 4355;
+            var bw = 20;
 
-            test1.getLastNode().connect(gainNode);
-            test2.getLastNode().connect(gainNode);
-
-            console.log('Sampling rate: ', Audio.sampleRate);
+            ChannelTransmitManager.create([
+                750, 1200, 2100, 4355
+            ]);
 
             analyser = Audio.createAnalyser();
-            analyser.fftSize = 4 * 1024;
-
-            if (filterEnable) {
-                gainNode.connect(filter);
-                filter.connect(analyser);
-            } else {
-                gainNode.connect(analyser);
-            }
-            analyser.connect(Audio.destination);
-
+            analyser.fftSize = 2 * 1024;
             filter.type = 'bandpass';
             filter.frequency.value = f;
             filter.Q.value = f / bw;
+
+            if (filterEnable) {
+                ChannelTransmitManager.getGainNode().connect(filter);
+                filter.connect(analyser);
+            } else {
+                ChannelTransmitManager.getGainNode().connect(analyser);
+            }
+            analyser.connect(Audio.destination);
+
+            console.log('Sampling rate: ', Audio.sampleRate);
 
             startDrawing();
         }
