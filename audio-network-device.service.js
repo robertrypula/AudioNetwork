@@ -12,7 +12,7 @@ var AudioNetworkDevice = (function () {
             canvasHeight = canvas.height,
             analyser,
             analyserMethod = 1 ? 'getByteFrequencyData' : 'getByteTimeDomainData',
-            filterEnable = 1,
+            filterEnable = 0,
             chartActive = true;
 
 
@@ -22,7 +22,7 @@ var AudioNetworkDevice = (function () {
 
         function generateAxisXLabel(bufferLength) {
             var resolution = Audio.sampleRate / analyser.fftSize;
-            var step = 1000;
+            var step = 250;
             var freq;
             var pix;
             var divContent = '';
@@ -75,11 +75,11 @@ var AudioNetworkDevice = (function () {
             var bw = 20;
 
             ChannelTransmitManager.create([
-                750, 1200, 2100, 4355
+                1850, 900, 3123
             ]);
 
             analyser = Audio.createAnalyser();
-            analyser.fftSize = 2 * 1024;
+            analyser.fftSize = 8 * 1024;
             filter.type = 'bandpass';
             filter.frequency.value = f;
             filter.Q.value = f / bw;
@@ -101,14 +101,16 @@ var AudioNetworkDevice = (function () {
         function addSignal(queue) {
             /*
             queue = [
-                { channel: 'A', signal: 1, duration: 50 }
+                { channelIndex: 0, symbol: 1, sampleDuration: 50 }
             ]
             */
         }
 
         function getSignal() {
             return [
-                { channel: 'A', signal: null }
+            /*
+                { channelIndex: 0, symbol: null, sampleDuration: { start: 344, end: 430 } }
+            */
             ];
         }
 
@@ -124,6 +126,48 @@ var AudioNetworkDevice = (function () {
             }
         }
 
+        function addQueueTest(channelIndex) {
+            var sd = Math.round(Audio.sampleRate * 0.010);
+
+            console.log('queue Added, sd=', sd);
+
+            ChannelTransmitManager.getChannel(channelIndex).addSignalToQueue([
+                { symbol: null, sampleDuration: 0.2 * Audio.sampleRate },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 1, sampleDuration: sd },
+                { symbol: 0, sampleDuration: sd }
+            ]);
+        }
+
         function init() {
             configureNodes();
         }
@@ -134,7 +178,8 @@ var AudioNetworkDevice = (function () {
             addSignal: addSignal,
             getSignal: getSignal,
             toggleChart: toggleChart,
-            toggleTimeFreq: toggleTimeFreq
+            toggleTimeFreq: toggleTimeFreq,
+            addQueueTest: addQueueTest
         };
     }
 
