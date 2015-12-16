@@ -8,14 +8,7 @@
   <h1>Audio network</h1>
 
 
-  <div style="width: 2048px; height: 256px; border: 1px solid red; position: relative;">
-    <canvas onClick="AudioNetworkDevice.toggleChart()" id="theCanvas" width="2048" height="256"></canvas>
-    <div id="theDiv" style="position: absolute; top: 256px; left: 0px; width: 2048px; height: 16px;"></div>
-  </div>
-
-
-  <br/><br/><br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.toggleTimeFreq()">Toggle time/freq</a>
+  <div id="test"></div>
 
   <br/>
   <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0)">AddQueueTest 0</a>
@@ -24,7 +17,16 @@
   <br/>
   <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(2)">AddQueueTest 2</a>
 
+  <br/>
+  <a href="javascript:void(0)" onClick="ChannelTransmitManager.getChannel(0).filterToggle()">Filter toggle 0</a>
+  <br/>
+  <a href="javascript:void(0)" onClick="ChannelTransmitManager.getChannel(1).filterToggle()">Filter toggle 1</a>
+  <br/>
+  <a href="javascript:void(0)" onClick="ChannelTransmitManager.getChannel(2).filterToggle()">Filter toggle 2</a>
+
   <script src="audio/audio.service.js"></script>
+  <script src="analyser-chart/analyser-chart.factory.js"></script>
+  <script src="analyser-chart/analyser-chart-builder.service.js"></script>
   <script src="channel-transmit-manager/channel-transmit-manager.service.js"></script>
   <script src="channel-transmit/channel-transmit.factory.js"></script>
   <script src="channel-transmit/channel-transmit-builder.service.js"></script>

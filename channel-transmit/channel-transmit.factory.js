@@ -7,13 +7,43 @@ var ChannelTransmit = (function () {
         var CT;
             
         CT = function (frequency) {
-            this.oscillatorNode,
-            this.scriptNode,
-            this.filterNode; 
+            this.oscillatorNode = null;
+            this.scriptNode = null;
+            this.filterNode = null;
+            this.gainNode = null;
             this.sampleCount = 0;
             this.signalQueue = [];
+            this.filterActive = true;
 
             this.init(frequency);
+        };
+
+        CT.prototype.filterToggle = function () {
+            if (this.filterActive) {
+                this.filterDisable();
+            } else {
+                this.filterEnable();
+            }
+        };
+
+        CT.prototype.filterEnable = function () {
+            if (this.filterActive === true) {
+                return;
+            }
+            this.filterActive = true;
+            this.scriptNode.disconnect(this.gainNode);
+            this.scriptNode.connect(this.filterNode);
+            this.filterNode.connect(this.gainNode);
+        };
+
+        CT.prototype.filterDisable = function () {
+            if (this.filterActive === false) {
+                return;
+            }
+            this.filterActive = false;
+            this.scriptNode.disconnect(this.filterNode);
+            this.filterNode.disconnect(this.gainNode);
+            this.scriptNode.connect(this.gainNode);
         };
 
         CT.prototype.addSignalToQueue = function (signalQueue) {
@@ -21,12 +51,12 @@ var ChannelTransmit = (function () {
 
             for (i = 0; i < signalQueue.length; i++) {
                 sq = signalQueue[i];
-                if (sq.sampleDuration <= 0) {
+                if (sq.duration <= 0) {
                     continue;
                 }
                 this.signalQueue.push({
                     symbol: sq.symbol,
-                    sampleDuration: sq.sampleDuration
+                    duration: sq.duration
                 });
             }
         };
@@ -39,9 +69,9 @@ var ChannelTransmit = (function () {
             }
 
             symbol = this.signalQueue[0].symbol;
-            this.signalQueue[0].sampleDuration--;
+            this.signalQueue[0].duration--;
 
-            if (this.signalQueue[0].sampleDuration === 0) {
+            if (this.signalQueue[0].duration === 0) {
                 this.signalQueue.splice(0, 1);
             }
 
@@ -49,29 +79,31 @@ var ChannelTransmit = (function () {
         };
 
         CT.prototype.getLastNode = function () {
-            return this.filterNode;
+            return this.gainNode;
         };
 
         CT.prototype.init = function (frequency) {
             var self = this;
 
             this.oscillatorNode = Audio.createOscillator();
-            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
-            this.filterNode = Audio.createBiquadFilter();
-
-            this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
-                self.onAudioProcess(audioProcessingEvent);
-            };
             this.oscillatorNode.type = 'sine';
             this.oscillatorNode.frequency.value = frequency; // value in hertz
 
+            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
+                self.onAudioProcess(audioProcessingEvent);
+            };
+
+            this.filterNode = Audio.createBiquadFilter();
             this.filterNode.type = 'bandpass';
             this.filterNode.frequency.value = frequency;
             this.filterNode.Q.value = frequency / 100.0;      // TODO change hardcoded bandwidth
 
+            this.gainNode = Audio.createGain();
+
             this.oscillatorNode.connect(this.scriptNode);
             this.scriptNode.connect(this.filterNode);
-
+            this.filterNode.connect(this.gainNode);
             this.oscillatorNode.start();
         };
 
@@ -107,6 +139,7 @@ var ChannelTransmit = (function () {
             this.oscillatorNode.stop();
             this.oscillatorNode.disconnect(this.scriptNode);
             this.scriptNode.disconnect(this.filterNode);
+            this.filterNode.disconnect(this.gainNode);
         };
 
         return CT;
