@@ -106,11 +106,12 @@ var AnalyserChart = (function () {
         };
 
         AC.prototype.generateAxisX = function () {
-            var resolution = Audio.sampleRate / this.analyser.fftSize;
-            var step = 500;
-            var freq;
-            var pix;
-            var divContent = '';
+            var 
+                resolution = Audio.sampleRate / this.analyser.fftSize,
+                step = 500,
+                freq,
+                pix,
+                divContent = '';
 
             freq = 0;
             while (freq < resolution * this.data.length) {
@@ -126,19 +127,22 @@ var AnalyserChart = (function () {
         };
 
         AC.prototype.updateChart = function () {
-            var length = this.data.length;
+            var 
+                length = this.data.length,
+                ctx = this.canvasContext,
+                i;
 
             if (this.freezeChart) {
                 return;
             }
-            this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.analyser[this.analyserMethod](this.data);
-            for (var i = 0; i < length; i++) {
-                this.canvasContext.beginPath();
-                this.canvasContext.moveTo(i, 255);
-                this.canvasContext.lineTo(i, 255 - this.data[i]);
-                this.canvasContext.closePath();
-                this.canvasContext.stroke();
+            for (i = 0; i < length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i, 255);
+                ctx.lineTo(i, 255 - this.data[i]);
+                ctx.closePath();
+                ctx.stroke();
             }
         };
 
