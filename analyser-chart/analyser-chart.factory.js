@@ -7,7 +7,7 @@ var AnalyserChart = (function () {
         var
           AC,
           AXIS_LABEL_X_ONE_ITEM_WITH = 40;
-
+        
         AC = function (parentDiv, analyser) {
             this.$$parentDiv = parentDiv;
             this.$$analyser = analyser;
@@ -94,19 +94,34 @@ var AnalyserChart = (function () {
 
         AC.prototype.$$renderTemplate = function () {
             var tpl =
-                '<div class="analyser-container" style="overflow: hidden; width: {{ width }}px; height: 256px; position: relative; line-height: 10px; font-family: Tahoma; color: red; font-size: 9px; outline: 1px solid gray;">' +
-                '   <canvas class="analyser-chart" style="width: {{ width }}px; height: 256px; position: absolute;" width="{{ width }}" height="256"></canvas>' +
-                '   <div class="analyser-action" style="width: 500px; height: 10px; position: absolute;">' +
-                '       <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft512">FFT512</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft1024">FFT1024</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft2048">FFT2048</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft4096">FFT4096</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft8192">FFT8192</a>' +
-                '       <a href="javascript:void(0)" class="analyser-action-fft16384">FFT16384</a>' +
-                '   </div>' +
-                '   <div class="analyser-axis-x" style="position: absolute; bottom: 0px; left: 0px; width: {{ width }}px; height: 10px;"></div>' +
+                '<div ' +
+                '    class="analyser-container" ' +
+                '    style="overflow: hidden; width: {{ width }}px; height: 256px; ' +
+                '           position: relative; line-height: 10px; font-family: Tahoma; ' +
+                '           color: red; font-size: 9px; outline: 1px solid gray;"' +
+                '    >' +
+                '    <canvas ' +
+                '        class="analyser-chart" ' +
+                '        style="width: {{ width }}px; height: 256px; position: absolute;" ' +
+                '        width="{{ width }}" height="256"' +
+                '        ></canvas>' +
+                '    <div ' +
+                '        class="analyser-action" ' +
+                '        style="width: 500px; height: 10px; position: absolute;"' +
+                '        >' +
+                '        <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft512">FFT512</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft1024">FFT1024</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft2048">FFT2048</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft4096">FFT4096</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft8192">FFT8192</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft16384">FFT16384</a>' +
+                '    </div>' +
+                '    <div ' +
+                '        class="analyser-axis-x" ' +
+                '        style="position: absolute; bottom: 0px; left: 0px; width: {{ width }}px; height: 10px;"' +
+                '        ></div>' +
                 '</div>';
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$analyser.frequencyBinCount).toString());
