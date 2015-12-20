@@ -59,6 +59,8 @@ var AnalyserChart = (function () {
             } else {
                 this.analyserMethod = 'getByteFrequencyData';
             }
+
+            this.generateAxisX();
         };
 
         AC.prototype.actionFreezeChart = function () {
@@ -87,8 +89,8 @@ var AnalyserChart = (function () {
 
         AC.prototype.renderTemplate = function () {
             var tpl =
-                '<div class="analyser-container" style="overflow: hidden; width: {{ vm.width }}px; height: 256px; position: relative; line-height: 10px; font-family: Tahoma; font-size: 9px; outline: 1px solid gray;">' +
-                '   <canvas class="analyser-chart" style="width: {{ vm.width }}px; height: 256px; position: absolute;" width="{{ vm.width }}" height="256"></canvas>' +
+                '<div class="analyser-container" style="overflow: hidden; width: {{ width }}px; height: 256px; position: relative; line-height: 10px; font-family: Tahoma; color: red; font-size: 9px; outline: 1px solid gray;">' +
+                '   <canvas class="analyser-chart" style="width: {{ width }}px; height: 256px; position: absolute;" width="{{ width }}" height="256"></canvas>' +
                 '   <div class="analyser-action" style="width: 256px; height: 10px; position: absolute;">' +
                 '       <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
                 '       <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
@@ -97,32 +99,58 @@ var AnalyserChart = (function () {
                 '       <a href="javascript:void(0)" class="analyser-action-fft4096">FFT4096</a>' +
                 '       <a href="javascript:void(0)" class="analyser-action-fft16384">FFT16384</a>' +
                 '   </div>' +
-                '   <div class="analyser-axis-x" style="position: absolute; bottom: 0px; left: 0px; width: {{ vm.width }}px; height: 10px;"></div>' +
+                '   <div class="analyser-axis-x" style="position: absolute; bottom: 0px; left: 0px; width: {{ width }}px; height: 10px;"></div>' +
                 '</div>';
 
-            tpl = tpl.replace(/\{\{ vm\.width \}\}/g, this.analyser.fftSize / 2);
+            tpl = tpl.replace(/\{\{ width \}\}/g, this.analyser.fftSize / 2);
 
             return tpl;
         };
 
-        AC.prototype.generateAxisX = function () {
-            var 
-                resolution = Audio.sampleRate / this.analyser.fftSize,
-                step = 500,
-                freq,
-                pix,
-                divContent = '';
+        AC.prototype.renderTemplateAxisXLabel = function (width, left, label) {
+            var tpl =
+                '<span style="display: block; box-sizing: border-box; border-left: 1px solid gray; ' +
+                '             position: absolute; width: {{ width }}px; top: 0px; left: {{ left }}px;"' +
+                '    >' +
+                '    {{ label }}' +
+                '</span>';
 
-            freq = 0;
-            while (freq < resolution * this.data.length) {
-                pix = Math.round(freq / resolution);
-                divContent += '<div style="border-left: 1px solid gray; position: absolute; width: 64px; top: 0px; left: ' + pix + 'px">' + freq + 'Hz</div>';
-                freq += step;
+            tpl = tpl.replace(/\{\{ width \}\}/, width);
+            tpl = tpl.replace(/\{\{ left \}\}/, left);
+            tpl = tpl.replace(/\{\{ label \}\}/, label);
+
+            return tpl;
+        };
+
+        AC.prototype.generateAxisXForTimeDomain = function () {
+            return '';
+        };
+
+        AC.prototype.generateAxisXForFrequency = function () {
+            var
+              resolution = Audio.sampleRate / this.analyser.fftSize,
+              step = 500,
+              frequency,
+              left,
+              divContent = '';
+
+            frequency = 0;
+            while (frequency < resolution * this.data.length) {
+                left = Math.round(frequency / resolution);
+                divContent += this.renderTemplateAxisXLabel(64, left, frequency + 'Hz');
+                frequency += step;
             }
+
+            return divContent;
+        };
+
+        AC.prototype.generateAxisX = function () {
+            var axisX = this.parentDiv.querySelectorAll('.analyser-axis-x')[0];
+
             if (this.analyserMethod == 'getByteFrequencyData') {
-                this.parentDiv.querySelectorAll('.analyser-axis-x')[0].innerHTML = divContent;
+                axisX.innerHTML = this.generateAxisXForFrequency();
             } else {
-                this.parentDiv.querySelectorAll('.analyser-axis-x')[0].innerHTML = '';
+                axisX.innerHTML = this.generateAxisXForTimeDomain();
             }
         };
 
