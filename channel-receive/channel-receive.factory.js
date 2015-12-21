@@ -7,11 +7,21 @@ var ChannelReceive = (function () {
         var CR;
             
         CR = function (frequency) {
-            this.scriptNode = null;
-            this.filterNode = null;
             this.gainNode = null;
+            this.filterNode = null;
+            this.analyserNode = null;
+            this.scriptNode = null;
+            this.analyserNode = null;
+            
+            //                         .-> analyser
+            //                        /
+            // GAIN --+-> (filter) --+---> script ---------------> analyser -> script --------------> analyser -> script ----------------------> analyser
+            //            raw data         mul by carrier                      integral with                      treshhold with
+            //                             or zero                             (sin period span)                  'delayed' state trans 
+
+            
             this.sampleCount = 0;
-            this.filterActive = true;
+            // this.filterActive = true;
 
             // TODO add analyser
             // change order of filter
@@ -19,6 +29,7 @@ var ChannelReceive = (function () {
             this.init(frequency);
         };
 
+        /*
         CR.prototype.filterToggle = function () {
             if (this.filterActive) {
                 this.filterDisable();
@@ -45,6 +56,11 @@ var ChannelReceive = (function () {
             this.scriptNode.disconnect(this.filterNode);
             this.filterNode.disconnect(this.gainNode);
             this.scriptNode.connect(this.gainNode);
+        };
+        */
+
+        CR.prototype.getFirstNode = function () {
+            return this.gainNode;
         };
 
         CR.prototype.init = function (frequency) {

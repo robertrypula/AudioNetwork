@@ -17,7 +17,7 @@ var ChannelTransmitManager = (function () {
         CTM.prototype.clear = function () {
             var i, ct;
 
-            for (i = 0; this.channelTransmit.length; i++) {
+            for (i = 0; i < this.channelTransmit.length; i++) {
                 ct = this.channelTransmit[i];
                 ct.getLastNode().disconnect(this.gainNode);
                 ct.destroy();
