@@ -7,14 +7,15 @@ var AudioNetworkDevice = (function () {
         var
             analyser,
             filterEnable = 0,
-            analyserChart;
+            analyserChart,
+            channelTransmitManager;
 
         function configureNodes() {
             var filter = Audio.createBiquadFilter();
             var f = 4355;
             var bw = 20;
 
-            ChannelTransmitManager.create([
+            channelTransmitManager = ChannelTransmitManagerBuilder.build([
                 2000, 900, 5000
             ]);
 
@@ -25,10 +26,10 @@ var AudioNetworkDevice = (function () {
             filter.Q.value = f / bw;
 
             if (filterEnable) {
-                ChannelTransmitManager.getGainNode().connect(filter);
+                channelTransmitManager.getGainNode().connect(filter);
                 filter.connect(analyser);
             } else {
-                ChannelTransmitManager.getGainNode().connect(analyser);
+                channelTransmitManager.getGainNode().connect(analyser);
             }
             analyser.connect(Audio.destination);
 
@@ -59,7 +60,7 @@ var AudioNetworkDevice = (function () {
 
             console.log('queue Added, sd=', sd);
 
-            ChannelTransmitManager.getChannel(channelIndex).addSignalToQueue([
+            channelTransmitManager.getChannel(channelIndex).addSignalToQueue([
                 { symbol: null, duration: 0.2 * Audio.sampleRate },
                 { symbol: 0, duration: sd },
                 { symbol: 1, duration: sd },
@@ -96,6 +97,10 @@ var AudioNetworkDevice = (function () {
             ]);
         }
 
+        function getChannelTransmit(channelIndex) {
+            return channelTransmitManager.getChannel(channelIndex);
+        }
+
         function init() {
             configureNodes();
         }
@@ -105,7 +110,8 @@ var AudioNetworkDevice = (function () {
         return {
             addSignal: addSignal,
             getSignal: getSignal,
-            addQueueTest: addQueueTest
+            addQueueTest: addQueueTest,
+            getChannelTransmit: getChannelTransmit
         };
     }
 
