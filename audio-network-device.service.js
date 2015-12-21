@@ -6,31 +6,22 @@ var AudioNetworkDevice = (function () {
     function _AudioNetworkDevice() {
         var
             analyser,
-            filterEnable = 0,
             analyserChart,
-            channelTransmitManager;
+            channelTransmitManager,
+            channelReceiveManager;
 
         function configureNodes() {
-            var filter = Audio.createBiquadFilter();
-            var f = 4355;
-            var bw = 20;
-
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
+                2000, 900, 5000
+            ]);
+            channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 2000, 900, 5000
             ]);
 
             analyser = Audio.createAnalyser();
             analyser.fftSize = 4 * 1024;
-            filter.type = 'bandpass';
-            filter.frequency.value = f;
-            filter.Q.value = f / bw;
 
-            if (filterEnable) {
-                channelTransmitManager.getGainNode().connect(filter);
-                filter.connect(analyser);
-            } else {
-                channelTransmitManager.getGainNode().connect(analyser);
-            }
+            channelTransmitManager.getGainNode().connect(analyser);
             analyser.connect(Audio.destination);
 
             console.log('Sampling rate: ', Audio.sampleRate);
@@ -101,6 +92,10 @@ var AudioNetworkDevice = (function () {
             return channelTransmitManager.getChannel(channelIndex);
         }
 
+        function getChannelReceive(channelIndex) {
+            return channelReceiveManager.getChannel(channelIndex);
+        }
+
         function init() {
             configureNodes();
         }
@@ -110,8 +105,11 @@ var AudioNetworkDevice = (function () {
         return {
             addSignal: addSignal,
             getSignal: getSignal,
-            addQueueTest: addQueueTest,
-            getChannelTransmit: getChannelTransmit
+            getChannelTransmit: getChannelTransmit,
+            getChannelReceive: getChannelReceive,
+
+            // test methods
+            addQueueTest: addQueueTest
         };
     }
 

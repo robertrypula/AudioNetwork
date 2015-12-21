@@ -13,6 +13,9 @@ var ChannelReceive = (function () {
             this.sampleCount = 0;
             this.filterActive = true;
 
+            // TODO add analyser
+            // change order of filter
+
             this.init(frequency);
         };
 

@@ -9,6 +9,11 @@ var ChannelReceiveManager = (function () {
         CRM = function (frequencyList) {
         };
 
+        // clear
+        // configure
+        // setSource
+        // getChannel
+
         return CRM;
     }
 
