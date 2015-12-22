@@ -234,7 +234,7 @@ var AnalyserChart = (function () {
             this.$$data = new Uint8Array(this.$$analyser.frequencyBinCount);
             this.$$generateAxisX();
             this.$$canvasContext.lineWidth = 1;
-            this.$$canvasContext.strokeStyle = 'rgba(0, 0, 0, 1)';
+            this.$$canvasContext.strokeStyle = 'rgba(245, 245, 245, 1)';
         };
 
         AC.prototype.$$initAnimationFrame = function () {
