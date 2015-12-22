@@ -7,6 +7,9 @@ var AudioNetworkDevice = (function () {
         var
             analyser,
             analyserChart,
+            receive01Chart,
+            receive02Chart,
+            receive03Chart,
             channelTransmitManager,
             channelReceiveManager;
 
@@ -21,12 +24,16 @@ var AudioNetworkDevice = (function () {
             analyser = Audio.createAnalyser();
             analyser.fftSize = 4 * 1024;
 
-            channelTransmitManager.getGainNode().connect(analyser);
+            channelTransmitManager.getOutputNode().connect(analyser);
             analyser.connect(Audio.destination);
+            channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
 
             console.log('Sampling rate: ', Audio.sampleRate);
 
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
+            receive01Chart = AnalyserChartBuilder.build(document.getElementById('receive-01'), channelReceiveManager.getChannel(0).analyserStageThrNode);
+            receive02Chart = AnalyserChartBuilder.build(document.getElementById('receive-02'), channelReceiveManager.getChannel(1).analyserStageThrNode);
+            receive03Chart = AnalyserChartBuilder.build(document.getElementById('receive-03'), channelReceiveManager.getChannel(2).analyserStageThrNode);
         }
 
         

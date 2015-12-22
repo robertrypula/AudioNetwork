@@ -9,24 +9,67 @@ var ChannelReceive = (function () {
         CR = function (frequency) {
             this.gainNode = null;
             this.filterNode = null;
-            this.analyserNode = null;
-            this.scriptNode = null;
-            this.analyserNode = null;
-            
-            //                         .-> analyser
-            //                        /
-            // GAIN --+-> (filter) --+---> script ---------------> analyser -> script --------------> analyser -> script ----------------------> analyser
-            //            raw data         mul by carrier                      integral with                      treshhold with
-            //                             or zero                             (sin period span)                  'delayed' state trans 
+            this.scriptStageMulNode = null;
+            this.scriptStageIntNode = null;
+            this.scriptStageThrNode = null;
+
+            this.analyserStageRawNode = null;
+            this.analyserStageMulNode = null;
+            this.analyserStageIntNode = null;
+            this.analyserStageThrNode = null;
+
 
             
-            this.sampleCount = 0;
+            //                   analyser         analyser               analyser                    analyser
+            //                       |                |                      |                           |
+            // GAIN --+-> (filter) --+---> script ----+-------> script ------+---------> script ---------+
+            //            raw data         mul by carrier       integral with            threshold with
+            //                             or zero              (sin period span)        'delayed' state trans
+
+            
+            this.sampleCountMul = 0;
+            this.sampleCountInt = 0;
+            this.sampleCountThr = 0;
             // this.filterActive = true;
 
-            // TODO add analyser
-            // change order of filter
-
             this.init(frequency);
+        };
+
+        CR.prototype.init = function (frequency) {
+            var self = this;
+
+            this.gainNode = Audio.createGain();
+
+            this.filterNode = Audio.createBiquadFilter();
+            this.filterNode.type = 'bandpass';
+            this.filterNode.frequency.value = frequency;
+            this.filterNode.Q.value = frequency / 100.0;      // TODO change hardcoded bandwidth
+
+            this.scriptStageMulNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.scriptStageMulNode.onaudioprocess = function (audioProcessingEvent) {
+                self.onAudioProcessStageMul(audioProcessingEvent);
+            };
+
+            this.scriptStageIntNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.scriptStageIntNode.onaudioprocess = function (audioProcessingEvent) {
+                self.onAudioProcessStageInt(audioProcessingEvent);
+            };
+
+            this.scriptStageThrNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.scriptStageThrNode.onaudioprocess = function (audioProcessingEvent) {
+                self.onAudioProcessStageThr(audioProcessingEvent);
+            };
+
+            this.gainNode.connect(this.filterNode);
+            this.filterNode.connect(this.scriptStageMulNode);
+            this.scriptStageMulNode.connect(this.scriptStageIntNode);
+            this.scriptStageIntNode.connect(this.scriptStageThrNode);
+
+            // attach analysers
+            this.analyserStageThrNode = Audio.createAnalyser();
+            this.analyserStageThrNode.fftSize = 2 * 1024;
+            this.scriptStageThrNode.connect(this.analyserStageThrNode);
+
         };
 
         /*
@@ -63,38 +106,37 @@ var ChannelReceive = (function () {
             return this.gainNode;
         };
 
-        CR.prototype.init = function (frequency) {
-            var self = this;
+        CR.prototype.onAudioProcessStageMul = function (audioProcessingEvent) {
+            var
+                inp = audioProcessingEvent.inputBuffer.getChannelData(0),
+                out = audioProcessingEvent.outputBuffer.getChannelData(0);
 
-            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
-            this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
-                self.onAudioProcess(audioProcessingEvent);
-            };
-
-            this.filterNode = Audio.createBiquadFilter();
-            this.filterNode.type = 'bandpass';
-            this.filterNode.frequency.value = frequency;
-            this.filterNode.Q.value = frequency / 100.0;      // TODO change hardcoded bandwidth
-
-            this.gainNode = Audio.createGain();
-
-            this.scriptNode.connect(this.filterNode);
-            this.filterNode.connect(this.gainNode);
+            for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
+                out[sample] = inp[sample];
+                this.sampleCountMul++;
+            }
         };
 
-        CR.prototype.onAudioProcess = function (audioProcessingEvent) {
+        CR.prototype.onAudioProcessStageInt = function (audioProcessingEvent) {
             var
-                inputBuffer = audioProcessingEvent.inputBuffer,
-                outputBuffer = audioProcessingEvent.outputBuffer,
-                inputData,
-                outputData;
+                inp = audioProcessingEvent.inputBuffer.getChannelData(0),
+                out = audioProcessingEvent.outputBuffer.getChannelData(0);
 
-            inputData = inputBuffer.getChannelData(0);
-            outputData = outputBuffer.getChannelData(0);
+            for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
+                out[sample] = inp[sample];
+                this.sampleCountInt++;
+            }
+        };
 
-            for (var sample = 0; sample < inputBuffer.length; sample++) {
-                outputData[sample] = inputData[sample]
-                this.sampleCount++;
+        CR.prototype.onAudioProcessStageThr = function (audioProcessingEvent) {
+            var
+                inp = audioProcessingEvent.inputBuffer.getChannelData(0),
+                out = audioProcessingEvent.outputBuffer.getChannelData(0);
+
+            for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
+                out[sample] = inp[sample];
+                // out[sample] = inp[sample] > 0.5 ? 1 : inp[sample];
+                this.sampleCountThr++;
             }
         };
 

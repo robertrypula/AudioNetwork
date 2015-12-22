@@ -36,8 +36,8 @@ var ChannelReceiveManager = (function () {
             }
         };
 
-        CRM.prototype.setSource = function (sourceNode) {
-            sourceNode.connect(this.gainNode);
+        CRM.prototype.getInputNode = function () {
+            return this.gainNode;
         };
 
         CRM.prototype.$$init = function () {

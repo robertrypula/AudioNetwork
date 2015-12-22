@@ -36,7 +36,7 @@ var ChannelTransmitManager = (function () {
             }
         };
 
-        CTM.prototype.getGainNode = function () {
+        CTM.prototype.getOutputNode = function () {
             return this.gainNode;
         };
 
