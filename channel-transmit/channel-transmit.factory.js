@@ -123,14 +123,12 @@ var ChannelTransmit = (function () {
             for (var sample = 0; sample < inputBuffer.length; sample++) {
                 symbol = this.getSymbolFromSignalQueue();
 
-
                 if (symbol === null) {
                     outputData[sample] = 0;
                 } else {
-                    //outputData[sample] = (inputData[sample] * 0.1 + 0.5) * (symbol === 1 ? -1 : 1);
                     outputData[sample] = inputData[sample] * (symbol === 1 ? -1 : 1);
                 }
-                // outputData[sample] += ((Math.random() * 2) - 1) * 0.2;
+                outputData[sample] += ((Math.random() * 2) - 1) * 0.2;
                 this.sampleCount++;
             }
         };

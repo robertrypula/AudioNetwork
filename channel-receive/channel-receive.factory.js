@@ -30,6 +30,8 @@ var ChannelReceive = (function () {
             this.sampleCountMul = 0;
             this.sampleCountInt = 0;
             this.sampleCountThr = 0;
+            this.frequency = 0;
+            this.samplesPerPeriod = 0;
             // this.filterActive = true;
 
             this.init(frequency);
@@ -37,6 +39,9 @@ var ChannelReceive = (function () {
 
         CR.prototype.init = function (frequency) {
             var self = this;
+
+            this.frequency = frequency;
+            this.samplesPerPeriod = Audio.sampleRate / this.frequency;
 
             this.gainNode = Audio.createGain();
 
@@ -108,22 +113,58 @@ var ChannelReceive = (function () {
 
         CR.prototype.onAudioProcessStageMul = function (audioProcessingEvent) {
             var
+                carrier,
+                signalSquared,
+                carrierSampleOffset = this.samplesPerPeriod,
                 inp = audioProcessingEvent.inputBuffer.getChannelData(0),
                 out = audioProcessingEvent.outputBuffer.getChannelData(0);
 
             for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
-                out[sample] = inp[sample];
+                carrier = Math.sin(
+                    2 * Math.PI * ((this.sampleCountMul - carrierSampleOffset) / this.samplesPerPeriod)
+                );
+                signalSquared = inp[sample] * inp[sample];
+
+                /*       .
+                        / \
+                      -    -   -
+                            \./
+                */
+                for (var sampleBack = 0; sampleBack < this.samplesPerPeriod; sampleBack++) {
+                    inp[sample - sampleBack]
+                }
+
+                //out[sample] = signalSquared;
+
+                out[sample] = inp[sample] * carrier;
                 this.sampleCountMul++;
             }
         };
 
         CR.prototype.onAudioProcessStageInt = function (audioProcessingEvent) {
             var
+                sum,
+                sumItemSize,
+                sampleStart,
+                sampleStop,
                 inp = audioProcessingEvent.inputBuffer.getChannelData(0),
                 out = audioProcessingEvent.outputBuffer.getChannelData(0);
 
             for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
-                out[sample] = inp[sample];
+                sampleStart = Math.round(sample - 0.5 * this.samplesPerPeriod);
+                sampleStart = sampleStart < 0 ? 0 : sampleStart;
+                sampleStop = Math.round(sample - 0.5 * this.samplesPerPeriod);
+                sampleStop = sampleStop >= audioProcessingEvent.inputBuffer.length ? audioProcessingEvent.inputBuffer.length - 1 : sampleStop;
+                sum = 0;
+                sumItemSize = 0;
+                for (var i = sample + 1; i <= sampleStop; i++) {
+                    sum = 0;
+                    sum += inp[i];
+                    sumItemSize++;
+                }
+
+                out[sample] = sum / sumItemSize;
+
                 this.sampleCountInt++;
             }
         };

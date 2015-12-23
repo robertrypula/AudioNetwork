@@ -15,10 +15,10 @@ var AudioNetworkDevice = (function () {
 
         function configureNodes() {
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                2000, 900, 5000
+                573, 900, 5000
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
-                2000, 900, 5000
+                573//, 900, 5000
             ]);
 
             analyser = Audio.createAnalyser();
@@ -32,8 +32,8 @@ var AudioNetworkDevice = (function () {
 
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
             receive01Chart = AnalyserChartBuilder.build(document.getElementById('receive-01'), channelReceiveManager.getChannel(0).analyserStageThrNode);
-            receive02Chart = AnalyserChartBuilder.build(document.getElementById('receive-02'), channelReceiveManager.getChannel(1).analyserStageThrNode);
-            receive03Chart = AnalyserChartBuilder.build(document.getElementById('receive-03'), channelReceiveManager.getChannel(2).analyserStageThrNode);
+            //receive02Chart = AnalyserChartBuilder.build(document.getElementById('receive-02'), channelReceiveManager.getChannel(1).analyserStageThrNode);
+            //receive03Chart = AnalyserChartBuilder.build(document.getElementById('receive-03'), channelReceiveManager.getChannel(2).analyserStageThrNode);
         }
 
         
