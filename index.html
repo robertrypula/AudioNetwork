@@ -1,58 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title></title>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
 
-  <style>
-    a { 
-      color: gray;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <h1>AN</h1>
-
-
-  <h2>Tx</h2>
-  <div id="test"></div>
-
-  <h2>R1</h2>
-  <div id="receive-01"></div>
-
-  <h2>R2</h2>
-  <div id="receive-02"></div>
-
-  <h2>R3</h2>
-  <div id="receive-03"></div>
+        <style>
+            a {
+                color: gray;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>AN</h1>
 
 
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0)">AddQueueTest 0</a>
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1)">AddQueueTest 1</a>
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(2)">AddQueueTest 2</a>
+        <h2>Tx</h2>
 
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(0).filterToggle()">Filter toggle 0</a>
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(1).filterToggle()">Filter toggle 1</a>
-  <br/>
-  <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(2).filterToggle()">Filter toggle 2</a>
+        <div id="test"></div>
 
-  <script src="audio/audio.service.js"></script>
-  <script src="analyser-chart/analyser-chart.factory.js"></script>
-  <script src="analyser-chart/analyser-chart-builder.service.js"></script>
-  <script src="channel-receive-manager/channel-receive-manager.factory.js"></script>
-  <script src="channel-receive-manager/channel-receive-manager-builder.service.js"></script>
-  <script src="channel-transmit-manager/channel-transmit-manager.factory.js"></script>
-  <script src="channel-transmit-manager/channel-transmit-manager-builder.service.js"></script>
-  <script src="channel-transmit/channel-transmit.factory.js"></script>
-  <script src="channel-transmit/channel-transmit-builder.service.js"></script>
-  <script src="channel-receive/channel-receive.factory.js"></script>
-  <script src="channel-receive/channel-receive-builder.service.js"></script>
-  <script src="audio-network-device.service.js"></script>
-</body>
+        <h2>R1</h2>
+
+        <div id="receive-01"></div>
+
+        <h2>R2</h2>
+
+        <div id="receive-02"></div>
+
+        <h2>R3</h2>
+
+        <div id="receive-03"></div>
+
+
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0)">AddQueueTest 0</a>
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1)">AddQueueTest 1</a>
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(2)">AddQueueTest 2</a>
+
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(0).filterToggle()">Filter toggle
+            0</a>
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(1).filterToggle()">Filter toggle
+            1</a>
+        <br/>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.getChannelTransmit(2).filterToggle()">Filter toggle
+            2</a>
+
+        <script src="audio/audio.service.js"></script>
+        <script src="carrier-recovery/carrier-recovery.factory.js"></script>
+        <script src="carrier-recovery/carrier-recovery-builder.service.js"></script>
+        <script src="analyser-chart/analyser-chart.factory.js"></script>
+        <script src="analyser-chart/analyser-chart-builder.service.js"></script>
+        <script src="channel-receive-manager/channel-receive-manager.factory.js"></script>
+        <script src="channel-receive-manager/channel-receive-manager-builder.service.js"></script>
+        <script src="channel-transmit-manager/channel-transmit-manager.factory.js"></script>
+        <script src="channel-transmit-manager/channel-transmit-manager-builder.service.js"></script>
+        <script src="channel-transmit/channel-transmit.factory.js"></script>
+        <script src="channel-transmit/channel-transmit-builder.service.js"></script>
+        <script src="channel-receive/channel-receive.factory.js"></script>
+        <script src="channel-receive/channel-receive-builder.service.js"></script>
+        <script src="audio-network-device.service.js"></script>
+    </body>
 </html>

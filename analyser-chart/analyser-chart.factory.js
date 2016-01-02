@@ -14,7 +14,7 @@ var AnalyserChart = (function () {
             this.$$canvas = null;
             this.$$canvasContext = null;
             this.$$canvasWidth = null;
-            this.$$canvasHeight = 128;
+            this.$$canvasHeight = 256;
             this.$$data = null;
             this.$$freezeChart = false;
             this.$$analyserMethod = 'getByteFrequencyData';
@@ -96,14 +96,14 @@ var AnalyserChart = (function () {
             var tpl =
                 '<div ' +
                 '    class="analyser-container" ' +
-                '    style="overflow: hidden; width: {{ width }}px; height: 128px; ' +
+                '    style="overflow: hidden; width: {{ width }}px; height: 256px; ' +
                 '           position: relative; line-height: 10px; font-family: Tahoma; ' +
                 '           color: red; font-size: 9px; outline: 1px solid gray;"' +
                 '    >' +
                 '    <canvas ' +
                 '        class="analyser-chart" ' +
-                '        style="width: {{ width }}px; height: 128px; position: absolute;" ' +
-                '        width="{{ width }}" height="128"' +
+                '        style="width: {{ width }}px; height: 256px; position: absolute;" ' +
+                '        width="{{ width }}" height="256"' +
                 '        ></canvas>' +
                 '    <div ' +
                 '        class="analyser-action" ' +
@@ -223,8 +223,8 @@ var AnalyserChart = (function () {
             this.$$analyser[this.$$analyserMethod](this.$$data);
             for (i = 0; i < length; i++) {
                 ctx.beginPath();
-                ctx.moveTo(i, 127);
-                ctx.lineTo(i, 127 - Math.round(0.5 * this.$$data[i]));
+                ctx.moveTo(i, 255);
+                ctx.lineTo(i, 255 - Math.round(this.$$data[i]));
                 ctx.closePath();
                 ctx.stroke();
             }

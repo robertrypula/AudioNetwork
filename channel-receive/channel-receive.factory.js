@@ -54,6 +54,7 @@ var ChannelReceive = (function () {
             this.scriptStageMulNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcessStageMul(audioProcessingEvent);
             };
+            this.carrierRecovery = CarrierRecoveryBuilder.build(this.samplesPerPeriod);
 
             this.scriptStageIntNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
             this.scriptStageIntNode.onaudioprocess = function (audioProcessingEvent) {
@@ -72,7 +73,7 @@ var ChannelReceive = (function () {
 
             // attach analysers
             this.analyserStageThrNode = Audio.createAnalyser();
-            this.analyserStageThrNode.fftSize = 2 * 1024;
+            this.analyserStageThrNode.fftSize = 4 * 1024;
             this.scriptStageThrNode.connect(this.analyserStageThrNode);
 
         };
@@ -113,30 +114,21 @@ var ChannelReceive = (function () {
 
         CR.prototype.onAudioProcessStageMul = function (audioProcessingEvent) {
             var
-                carrier,
-                signalSquared,
-                carrierSampleOffset = this.samplesPerPeriod,
                 inp = audioProcessingEvent.inputBuffer.getChannelData(0),
-                out = audioProcessingEvent.outputBuffer.getChannelData(0);
+                out = audioProcessingEvent.outputBuffer.getChannelData(0),
+                inputSample,
+                outputSample;
 
-            for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
-                carrier = Math.sin(
-                    2 * Math.PI * ((this.sampleCountMul - carrierSampleOffset) / this.samplesPerPeriod)
-                );
-                signalSquared = inp[sample] * inp[sample];
+            for (var sampleIndex = 0; sampleIndex < audioProcessingEvent.inputBuffer.length; sampleIndex++) {
+                inputSample = inp[sampleIndex];
+                outputSample = 0;
 
-                /*       .
-                        / \
-                      -    -   -
-                            \./
-                */
-                for (var sampleBack = 0; sampleBack < this.samplesPerPeriod; sampleBack++) {
-                    inp[sample - sampleBack]
+                this.carrierRecovery.handleSample(inputSample);
+                if (this.carrierRecovery.carrierAvailable()) {
+                    outputSample = inputSample * this.carrierRecovery.getCarrier();
                 }
 
-                //out[sample] = signalSquared;
-
-                out[sample] = inp[sample] * carrier;
+                out[sampleIndex] = outputSample;
                 this.sampleCountMul++;
             }
         };
@@ -151,6 +143,7 @@ var ChannelReceive = (function () {
                 out = audioProcessingEvent.outputBuffer.getChannelData(0);
 
             for (var sample = 0; sample < audioProcessingEvent.inputBuffer.length; sample++) {
+                /*
                 sampleStart = Math.round(sample - 0.5 * this.samplesPerPeriod);
                 sampleStart = sampleStart < 0 ? 0 : sampleStart;
                 sampleStop = Math.round(sample - 0.5 * this.samplesPerPeriod);
@@ -164,6 +157,8 @@ var ChannelReceive = (function () {
                 }
 
                 out[sample] = sum / sumItemSize;
+                */
+                out[sample] = inp[sample];
 
                 this.sampleCountInt++;
             }

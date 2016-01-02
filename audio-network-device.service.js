@@ -22,7 +22,7 @@ var AudioNetworkDevice = (function () {
             ]);
 
             analyser = Audio.createAnalyser();
-            analyser.fftSize = 4 * 1024;
+            analyser.fftSize = 1 * 1024;
 
             channelTransmitManager.getOutputNode().connect(analyser);
             analyser.connect(Audio.destination);
