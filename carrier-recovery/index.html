@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+
+        <canvas width="3000" height="128" id="buffer-raw" style="border: 1px solid red;"></canvas>
+        <canvas width="3000" height="128" id="buffer-carrier" style="border: 1px solid green;"></canvas>
+        <canvas width="3000" height="128" id="buffer-multiply-raw-by-carrier" style="border: 1px solid green;"></canvas>
+        <canvas width="3000" height="128" id="buffer-integral" style="border: 1px solid green;"></canvas>
+        <canvas width="3000" height="128" id="buffer-threshold" style="border: 1px solid green;"></canvas>
+
+        <script src="carrier-recovery.factory.js"></script>
+        <script src="carrier-recovery-builder.service.js"></script>
+
+        <script>
+
+            var
+                samplesPerPeriod = 40,
+                carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriod),
+                bufferRaw = [],
+                bufferCar = [],
+                bufferMul = [],
+                bufferInt = [],
+                bufferThr = [];
+
+            function fillBuffer(buffer, start, stop, sampleCallback) {
+                var i, x;
+
+                for (i = start; i < stop; i++) {
+                    x = i - start;
+                    buffer.push(sampleCallback(x))
+                }
+            }
+
+            function createBufferRaw(bufferRaw) {
+                var start, stop;
+
+                start = 0;
+                stop = start + 8.4 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return 0;
+                });
+
+                start = stop;
+                stop = start + 8 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                });
+
+                start = stop;
+                stop = start + 8 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return -Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                });
+
+                start = stop;
+                stop = start + 8 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                });
+
+                start = stop;
+                stop = start + 8 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return Math.sin( 2 * Math.PI * (x / (0.7 * samplesPerPeriod)));
+                });
+
+                start = stop;
+                stop = start + 11.74 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return 0;
+                });
+            }
+
+            function addNoise(buffer) {
+                var i;
+
+                for (i = 0; i < buffer.length; i++) {
+                    buffer[i] += ((Math.random() * 2) - 1.0) * 0.04;
+                }
+            }
+
+            function draw(canvasId, buffer) {
+                var i;
+                var canvas = document.getElementById(canvasId);
+                var ctx = canvas.getContext("2d");
+                var offsetY;
+
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(128, 128, 128, 1)';
+                ctx.clearRect(0, 0, 3000, 128);
+                for (i = 0; i < buffer.length; i++) {
+                    offsetY = Math.round(buffer[i] * 64);
+                    ctx.beginPath();
+                    ctx.moveTo(i, 64);
+                    ctx.lineTo(i, 64 - (offsetY === 0 ? 1 : offsetY));
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            }
+
+            function createBufferCarrier(bufferRaw, bufferCar) {
+                var i, carrierSample;
+
+                for (i = 0; i < bufferRaw.length; i++) {
+                    carrierRecovery.handleSample(bufferRaw[i]);
+                    carrierSample = 0;
+
+                    if (carrierRecovery.carrierAvailable()) {
+                        carrierSample = carrierRecovery.getCarrier();
+                    }
+
+                    bufferCar.push(carrierSample);
+                }
+            }
+
+            function createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul) {
+                var i;
+
+                for (i = 0; i < bufferRaw.length; i++) {
+                    bufferMul.push(
+                        bufferRaw[i] * bufferCar[i]
+                    );
+                }
+            }
+
+            createBufferRaw(bufferRaw);
+            // addNoise(bufferRaw);
+            createBufferCarrier(bufferRaw, bufferCar);
+            createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul);
+
+            draw('buffer-raw', bufferRaw);
+            draw('buffer-carrier', bufferCar);
+            draw('buffer-multiply-raw-by-carrier', bufferMul);
+            draw('buffer-integral', bufferInt);
+            draw('buffer-threshold', bufferThr);
+
+        </script>
+    </body>
+</html>
