@@ -52,7 +52,7 @@ var CarrierRecovery = (function () {
                 errorTotal += error;
             }
 
-            this.carrierStartSampleNumber = errorTotal;
+            this.carrierStartSampleNumber = errorTotal / 2560;
         };
 
         CR.prototype.carrierAvailable = function () {
