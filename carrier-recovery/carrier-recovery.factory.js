@@ -16,6 +16,7 @@ var CarrierRecovery = (function () {
             this.carrierStartSampleNumber = null;
             this.previousSquaredSample = 0;
             this.previousDifference = 0;
+            this.previousCarrierStartSampleNumber = null;
             
             this.$$init();
         };
@@ -32,27 +33,54 @@ var CarrierRecovery = (function () {
             }
         };
 
+        CR.prototype.findCarrierStartSampleNumber = function () {
+            var i, sampleNumber;
+
+            sampleNumber = this.minimumHistory[0].sampleNumber;
+            for (i = 0; i < this.minimumHistory.length; i++) {
+                if (this.minimumHistory[i].squaredSample < 0.1) {
+                    sampleNumber = this.minimumHistory[i].sampleNumber;
+                    break;
+                }
+            }
+
+            return sampleNumber;
+        };
+
         CR.prototype.tryFindCarrier = function () {
             var i, error, errorTotal, sampleNumber, sampleNumberDiff, sampleNumberDiffExpected;
 
-            this.carrierStartSampleNumber = null;
             if (this.minimumHistory.length !== MINIMUM_BUFFER_LENGTH) {
                 return;
             }
 
-            // if (this.$$sampleCount - this.minimumHistory[MINIMUM_BUFFER_LENGTH - 1].sampleNumber)
+            if (this.$$sampleCount - this.minimumHistory[MINIMUM_BUFFER_LENGTH - 1].sampleNumber > 3 * this.$$samplesPerPeriod) {
+                this.carrierStartSampleNumber = null;
+                this.previousCarrierStartSampleNumber = this.carrierStartSampleNumber;
+                return;
+            }
 
             sampleNumber = this.minimumHistory[0].sampleNumber;
             errorTotal = 0;
             for (i = 1; i < this.minimumHistory.length; i++) {
                 sampleNumberDiff = this.minimumHistory[i].sampleNumber - sampleNumber;
-                sampleNumberDiffExpected = 0.5 * this.$$samplesPerPeriod * i;
-                error = Math.abs(sampleNumberDiffExpected - sampleNumberDiff);
-
+                sampleNumberDiffExpected = 0.25 * this.$$samplesPerPeriod * i;
+                error = Math.abs(sampleNumberDiffExpected - sampleNumberDiff) / (0.25 * this.$$samplesPerPeriod);
                 errorTotal += error;
             }
 
-            this.carrierStartSampleNumber = errorTotal / 2560;
+            errorTotal = errorTotal / (this.minimumHistory.length - 1);
+
+            if (errorTotal < 0.8) {
+                if (this.previousCarrierStartSampleNumber === null) {
+                    this.carrierStartSampleNumber = this.findCarrierStartSampleNumber();
+                    console.log(this.carrierStartSampleNumber);
+                }
+            } else {
+                this.carrierStartSampleNumber = null;
+            }
+
+            this.previousCarrierStartSampleNumber = this.carrierStartSampleNumber;
         };
 
         CR.prototype.carrierAvailable = function () {
@@ -86,8 +114,6 @@ var CarrierRecovery = (function () {
             }
 
             x = this.$$sampleCount - this.carrierStartSampleNumber;
-
-            return this.carrierStartSampleNumber;
 
             return Math.sin(2 * Math.PI * (x / this.$$samplesPerPeriod));
         };

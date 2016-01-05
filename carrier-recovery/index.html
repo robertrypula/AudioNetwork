@@ -45,27 +45,39 @@
                 });
 
                 start = stop;
-                stop = start + 8 * samplesPerPeriod;
+                stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
                     return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
                 });
 
                 start = stop;
-                stop = start + 8 * samplesPerPeriod;
+                stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
                     return -Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
                 });
 
                 start = stop;
-                stop = start + 8 * samplesPerPeriod;
+                stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
                     return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
                 });
 
                 start = stop;
-                stop = start + 8 * samplesPerPeriod;
+                stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
                     return Math.sin( 2 * Math.PI * (x / (0.7 * samplesPerPeriod)));
+                });
+
+                start = stop;
+                stop = start + 5 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return -Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                });
+
+                start = stop;
+                stop = start + 5 * samplesPerPeriod;
+                fillBuffer(bufferRaw, start, stop, function (x) {
+                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
                 });
 
                 start = stop;
