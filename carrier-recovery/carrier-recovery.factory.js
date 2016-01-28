@@ -131,7 +131,7 @@ var CarrierRecovery = (function () {
         CR = function (samplesPerPeriod) {
             this.$$samplesPerPeriod = samplesPerPeriod;
             this.$$sampleCount = 0;
-            this.carrierStartSampleNumber = samplesPerPeriod * 0.45;
+            // this.carrierStartSampleNumber = samplesPerPeriod * 0.45;
             this.test = 0;
 
             this.$$sampleHistory = [];
@@ -144,8 +144,12 @@ var CarrierRecovery = (function () {
         };
 
         CR.prototype.computeComplexCarrier = function () {
-            this.complexCarrierReal = Math.cos(2 * Math.PI * (this.$$sampleCount / this.$$samplesPerPeriod));
-            this.complexCarrierIm = Math.sin(2 * Math.PI * (this.$$sampleCount / this.$$samplesPerPeriod));
+            var 
+                omega = (2 * Math.PI) / this.$$samplesPerPeriod,
+                x = 2 * omega * this.$$sampleCount;
+
+            this.complexCarrierReal = Math.cos(x);
+            this.complexCarrierIm = Math.sin(x);
         };
 
         CR.prototype.carrierAvailable = function () {
@@ -174,9 +178,6 @@ var CarrierRecovery = (function () {
                 sh,
                 i;
 
-            if (n === 0) {
-                return;
-            }
             this.complexRealAvg = 0;
             this.complexImAvg = 0;
             for (i = 0; i < n; i++) {
@@ -187,17 +188,30 @@ var CarrierRecovery = (function () {
 
             this.complexRealAvg = this.complexRealAvg / n;
             this.complexImAvg = this.complexImAvg / n;
+
+            /*
+            console.log(
+                'average ', this.complexRealAvg, this.complexImAvg, 
+                'power', 
+                Math.sqrt(
+                    this.complexRealAvg * this.complexRealAvg + 
+                    this.complexImAvg * this.complexImAvg
+                ),
+                'length', n
+            );
+            */
         };
 
         CR.prototype.handleSample = function (sample) {
-
-
             this.computeComplexCarrier();
             this.$$addToHistory(sample);
             this.computeComplexAverage();
 
             this.$$sampleCount++;
-            this.test = 40 * Math.sqrt(this.complexRealAvg * this.complexRealAvg + this.complexImAvg * this.complexImAvg);
+            this.test = 3.5 * Math.sqrt(
+                this.complexRealAvg * this.complexRealAvg + 
+                this.complexImAvg * this.complexImAvg
+            );
         };
 
         CR.prototype.getCarrier = function () {

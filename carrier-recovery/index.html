@@ -36,7 +36,9 @@
             }
 
             function createBufferRaw(bufferRaw) {
-                var start, stop;
+                var start, stop, omega;
+
+                omega = (2 * Math.PI) / samplesPerPeriod;
 
                 start = 0;
                 stop = start + 8.4 * samplesPerPeriod;
@@ -47,37 +49,37 @@
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                    return Math.sin(omega * x);
                 });
 
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return -Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                    return -Math.sin(omega * x);
                 });
 
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                    return Math.sin(omega * x);
                 });
 
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin( 2 * Math.PI * (x / (0.7 * samplesPerPeriod)));
+                    return Math.sin(1.43 * omega * x);
                 });
 
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return -Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                    return -Math.sin(omega * x);
                 });
 
                 start = stop;
                 stop = start + 5 * samplesPerPeriod;
                 fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin( 2 * Math.PI * (x / samplesPerPeriod));
+                    return Math.sin(omega * x);
                 });
 
                 start = stop;
@@ -91,7 +93,7 @@
                 var i;
 
                 for (i = 0; i < buffer.length; i++) {
-                    buffer[i] += ((Math.random() * 2) - 1.0) * 0.04;
+                    buffer[i] += ((Math.random() * 2) - 1.0) * 0.2;
                 }
             }
 
@@ -102,7 +104,7 @@
                 var offsetY;
 
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(128, 128, 128, 1)';
+                ctx.strokeStyle = 'rgba(250, 250, 250, 1)';
                 ctx.clearRect(0, 0, 3000, 128);
                 for (i = 0; i < buffer.length; i++) {
                     offsetY = Math.round(buffer[i] * 64);
@@ -140,7 +142,7 @@
             }
 
             createBufferRaw(bufferRaw);
-            // addNoise(bufferRaw);
+            addNoise(bufferRaw);
             createBufferCarrier(bufferRaw, bufferCar);
             createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul);
 
