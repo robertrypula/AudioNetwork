@@ -9,8 +9,11 @@
         <canvas width="3000" height="128" id="buffer-raw" style="border: 1px solid red;"></canvas>
         <canvas width="3000" height="128" id="buffer-carrier" style="border: 1px solid green;"></canvas>
         <canvas width="3000" height="128" id="buffer-multiply-raw-by-carrier" style="border: 1px solid green;"></canvas>
-        <canvas width="3000" height="128" id="buffer-integral" style="border: 1px solid green;"></canvas>
-        <canvas width="3000" height="128" id="buffer-threshold" style="border: 1px solid green;"></canvas>
+        <!--<canvas width="3000" height="128" id="buffer-integral" style="border: 1px solid green;"></canvas>-->
+        <!--<canvas width="3000" height="128" id="buffer-threshold" style="border: 1px solid green;"></canvas>-->
+
+
+        <input type="number" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="40" />
 
         <script src="carrier-recovery.factory.js"></script>
         <script src="carrier-recovery-builder.service.js"></script>
@@ -25,6 +28,11 @@
                 bufferMul = [],
                 bufferInt = [],
                 bufferThr = [];
+
+            function onSamplesPerPeriodChange(input) {
+                carrierRecovery.setSamplesPerPeriod(parseInt(input.value));
+                nextFrame();
+            }
 
             function fillBuffer(buffer, start, stop, sampleCallback) {
                 var i, x;
@@ -104,7 +112,7 @@
                 var offsetY;
 
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(250, 250, 250, 1)';
+                ctx.strokeStyle = 'rgba(150, 50, 150, 1)';
                 ctx.clearRect(0, 0, 3000, 128);
                 for (i = 0; i < buffer.length; i++) {
                     offsetY = Math.round(buffer[i] * 64);
@@ -141,16 +149,27 @@
                 }
             }
 
-            createBufferRaw(bufferRaw);
-            addNoise(bufferRaw);
-            createBufferCarrier(bufferRaw, bufferCar);
-            createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul);
 
-            draw('buffer-raw', bufferRaw);
-            draw('buffer-carrier', bufferCar);
-            draw('buffer-multiply-raw-by-carrier', bufferMul);
-            draw('buffer-integral', bufferInt);
-            draw('buffer-threshold', bufferThr);
+            function nextFrame() {
+                bufferRaw.length = 0;
+                bufferCar.length = 0;
+                bufferMul.length = 0;
+                bufferInt.length = 0;
+                bufferThr.length = 0;
+
+                createBufferRaw(bufferRaw);
+                //addNoise(bufferRaw);
+                createBufferCarrier(bufferRaw, bufferCar);
+                createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul);
+
+                draw('buffer-raw', bufferRaw);
+                draw('buffer-carrier', bufferCar);
+                draw('buffer-multiply-raw-by-carrier', bufferMul);
+                //draw('buffer-integral', bufferInt);
+                //draw('buffer-threshold', bufferThr);
+            }
+
+            nextFrame();
 
         </script>
     </body>
