@@ -4,6 +4,7 @@ var CarrierRecovery = (function () {
     _CarrierRecovery.$inject = [];
 
     function _CarrierRecovery() {
+        /*
         var
             CR,
             MINIMUM_BUFFER_PERIOD_LENGTH = 3,
@@ -21,7 +22,7 @@ var CarrierRecovery = (function () {
             this.$$init();
         };
 
-        CR.prototype.addMinimumEntry = function (difference, squaredSample, sampleNumber) {
+        CR.prototype.$$addMinimumEntry = function (difference, squaredSample, sampleNumber) {
             this.minimumHistory.push({
                 difference: difference,
                 squaredSample: squaredSample,
@@ -33,7 +34,7 @@ var CarrierRecovery = (function () {
             }
         };
 
-        CR.prototype.findCarrierStartSampleNumber = function () {
+        CR.prototype.$$findCarrierStartSampleNumber = function () {
             var i, sampleNumber;
 
             sampleNumber = this.minimumHistory[0].sampleNumber;
@@ -47,7 +48,7 @@ var CarrierRecovery = (function () {
             return sampleNumber;
         };
 
-        CR.prototype.tryFindCarrier = function () {
+        CR.prototype.$$tryFindCarrier = function () {
             var i, error, errorTotal, sampleNumber, sampleNumberDiff, sampleNumberDiffExpected;
 
             if (this.minimumHistory.length !== MINIMUM_BUFFER_LENGTH) {
@@ -73,7 +74,7 @@ var CarrierRecovery = (function () {
 
             if (errorTotal < 0.8) {
                 if (this.previousCarrierStartSampleNumber === null) {
-                    this.carrierStartSampleNumber = this.findCarrierStartSampleNumber();
+                    this.carrierStartSampleNumber = this.$$findCarrierStartSampleNumber();
                     console.log(this.carrierStartSampleNumber);
                 }
             } else {
@@ -96,10 +97,10 @@ var CarrierRecovery = (function () {
                 (difference >= 0 && this.previousDifference < 0) ||
                 (difference <= 0 && this.previousDifference > 0)
             ) {
-                this.addMinimumEntry(difference, squaredSample, this.$$sampleCount);
+                this.$$addMinimumEntry(difference, squaredSample, this.$$sampleCount);
             }
 
-            this.tryFindCarrier();
+            this.$$tryFindCarrier();
 
             this.previousSquaredSample = squaredSample;
             this.previousDifference = difference;
@@ -116,6 +117,100 @@ var CarrierRecovery = (function () {
             x = this.$$sampleCount - this.carrierStartSampleNumber;
 
             return Math.sin(2 * Math.PI * (x / this.$$samplesPerPeriod));
+        };
+
+        CR.prototype.$$init = function () {
+
+        };
+        */
+
+        var
+            CR,
+            SAMPLE_HISTORY_PERIOD_LENGTH = 4;
+
+        CR = function (samplesPerPeriod) {
+            this.$$samplesPerPeriod = samplesPerPeriod;
+            this.$$sampleCount = 0;
+            this.carrierStartSampleNumber = samplesPerPeriod * 0.45;
+            this.test = 0;
+
+            this.$$sampleHistory = [];
+            this.complexCarrierReal = 0;
+            this.complexCarrierIm = 0;
+            this.complexRealAvg = 0;
+            this.complexImAvg = 0;
+
+            this.$$init();
+        };
+
+        CR.prototype.computeComplexCarrier = function () {
+            this.complexCarrierReal = Math.cos(2 * Math.PI * (this.$$sampleCount / this.$$samplesPerPeriod));
+            this.complexCarrierIm = Math.sin(2 * Math.PI * (this.$$sampleCount / this.$$samplesPerPeriod));
+        };
+
+        CR.prototype.carrierAvailable = function () {
+            // return this.carrierStartSampleNumber !== null;
+            return true;
+        };
+
+        CR.prototype.$$addToHistory = function (sample) {
+            var squaredSample = sample * sample;
+
+            this.$$sampleHistory.push({
+                squaredSample: squaredSample,
+                sampleNumber: this.$$sampleCount,
+                complexReal: this.complexCarrierReal * squaredSample,
+                complexIm: this.complexCarrierIm * squaredSample
+            });
+
+            if (this.$$sampleHistory.length > SAMPLE_HISTORY_PERIOD_LENGTH * this.$$samplesPerPeriod) {
+                this.$$sampleHistory.splice(0, 1);
+            }
+        };
+
+        CR.prototype.computeComplexAverage = function () {
+            var
+                n = this.$$sampleHistory.length,
+                sh,
+                i;
+
+            if (n === 0) {
+                return;
+            }
+            this.complexRealAvg = 0;
+            this.complexImAvg = 0;
+            for (i = 0; i < n; i++) {
+                sh = this.$$sampleHistory[i];
+                this.complexRealAvg += sh.complexReal;
+                this.complexImAvg += sh.complexIm;
+            }
+
+            this.complexRealAvg = this.complexRealAvg / n;
+            this.complexImAvg = this.complexImAvg / n;
+        };
+
+        CR.prototype.handleSample = function (sample) {
+
+
+            this.computeComplexCarrier();
+            this.$$addToHistory(sample);
+            this.computeComplexAverage();
+
+            this.$$sampleCount++;
+            this.test = 40 * Math.sqrt(this.complexRealAvg * this.complexRealAvg + this.complexImAvg * this.complexImAvg);
+        };
+
+        CR.prototype.getCarrier = function () {
+            var x;
+
+            if (!this.carrierAvailable()) {
+                return 0;
+            }
+
+            // x = this.$$sampleCount - this.carrierStartSampleNumber;
+            //return Math.sin(2 * Math.PI * (x / this.$$samplesPerPeriod));
+
+            return this.test;
         };
 
         CR.prototype.$$init = function () {
