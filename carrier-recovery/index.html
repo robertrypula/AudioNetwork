@@ -29,7 +29,7 @@
             var
                 samplesPerPeriod = 40,
                 omegaFirst = (2 * Math.PI) / (samplesPerPeriod + 0),
-                omegaSecond = (2 * Math.PI) / (samplesPerPeriod + 20),
+                omegaSecond = (2 * Math.PI) / (samplesPerPeriod + 50),
                 omegaThird = (2 * Math.PI) / (samplesPerPeriod - 20),
                 carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriod),
                 bufferSample = [],
@@ -38,12 +38,12 @@
                 bufferPowerBPSK = [],
                 dataFirst = [
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 5.00 * samplesPerPeriod },
-                    { amplitude: -0.30, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 16.00 * samplesPerPeriod },
+                    { amplitude: +0.30, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 16.00 * samplesPerPeriod },
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 10.00 * samplesPerPeriod }
                 ],
                 dataSecond = [
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 5.00 * samplesPerPeriod },
-                    { amplitude: -0.30, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 16.00 * samplesPerPeriod },
+                    { amplitude: +0.30, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 16.00 * samplesPerPeriod },
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 10.00 * samplesPerPeriod }
                 ],
                 dataThird = [
@@ -141,7 +141,7 @@
                         continue;
                     }
                     x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
-                    y = 256 + 256 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
+                    y = 256 - 256 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
                     ctx.fillRect(x - 1, y - 1, 3, 3);
                 }
             }
