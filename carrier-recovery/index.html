@@ -22,79 +22,70 @@
 
             var
                 samplesPerPeriod = 40,
+                omegaFirst = (2 * Math.PI) / (samplesPerPeriod + 0),
+                omegaSecond = (2 * Math.PI) / (samplesPerPeriod + 40),
                 carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriod),
                 bufferRaw = [],
                 bufferCar = [],
                 bufferMul = [],
                 bufferInt = [],
-                bufferThr = [];
+                bufferThr = [],
+                dataFirst = [
+                    { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 2.40 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.25, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.50, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.25, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.75, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +1.00, phaseOffset: +0.25, omega: 1.00 * omegaFirst, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 11.47 * samplesPerPeriod }
+                ],
+                dataSecond = [
+                    { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 5.40 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.50, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 4.00 * samplesPerPeriod },
+                    { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 11.47 * samplesPerPeriod }
+                ];
 
             function onSamplesPerPeriodChange(input) {
                 carrierRecovery.setSamplesPerPeriod(parseInt(input.value));
                 nextFrame();
             }
 
-            function fillBuffer(buffer, start, stop, sampleCallback) {
+            function fillBuffer(buffer, start, stop, mix, sampleCallback) {
                 var i, x;
 
                 for (i = start; i < stop; i++) {
                     x = i - start;
-                    buffer.push(sampleCallback(x))
+
+                    if (mix) {
+                        buffer[i] += sampleCallback(x);
+                    } else {
+                        buffer.push(sampleCallback(x))
+                    }
                 }
             }
 
-            function createBufferRaw(bufferRaw) {
-                var start, stop, omega;
+            function createBufferRaw(bufferRaw, data, mix) {
+                var start = 0, stop = 0, i, d;
 
-                omega = (2 * Math.PI) / samplesPerPeriod;
-
-                start = 0;
-                stop = start + 8.4 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return 0;
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin(omega * x);
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return -Math.sin(omega * x);
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin(omega * x);
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin(1.43 * omega * x);
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return -Math.sin(omega * x);
-                });
-
-                start = stop;
-                stop = start + 5 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return Math.sin(omega * x);
-                });
-
-                start = stop;
-                stop = start + 11.74 * samplesPerPeriod;
-                fillBuffer(bufferRaw, start, stop, function (x) {
-                    return 0;
-                });
+                for (i = 0; i < data.length; i++) {
+                    d = data[i];
+                    start = stop;
+                    stop = start + d.duration;
+                    fillBuffer(bufferRaw, start, stop, mix, function (x) {
+                        return (
+                            d.amplitude *
+                            Math.sin(
+                              d.omega * x - 2 * Math.PI * d.phaseOffset
+                            )
+                        );
+                    });
+                }
             }
 
             function addNoise(buffer) {
@@ -129,11 +120,7 @@
 
                 for (i = 0; i < bufferRaw.length; i++) {
                     carrierRecovery.handleSample(bufferRaw[i]);
-                    carrierSample = 0;
-
-                    if (carrierRecovery.carrierAvailable()) {
-                        carrierSample = carrierRecovery.getCarrier();
-                    }
+                    carrierSample = carrierRecovery.getCarrier();
 
                     bufferCar.push(carrierSample);
                 }
@@ -157,7 +144,8 @@
                 bufferInt.length = 0;
                 bufferThr.length = 0;
 
-                createBufferRaw(bufferRaw);
+                createBufferRaw(bufferRaw, dataFirst, false);
+                //createBufferRaw(bufferRaw, dataSecond, true);
                 //addNoise(bufferRaw);
                 createBufferCarrier(bufferRaw, bufferCar);
                 createBufferMultiplyRawByCarrier(bufferRaw, bufferCar, bufferMul);

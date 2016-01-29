@@ -27,6 +27,10 @@ var CarrierRecovery = (function () {
             this.carrierPhase;
         };
 
+        CR.prototype.$$guessAngle = function (x, y) {
+            return 0.0;
+        };
+
         CR.prototype.$$computeReference = function () {
             var 
                 omega = (2 * Math.PI) / this.$$samplesPerPeriod,
@@ -91,7 +95,8 @@ var CarrierRecovery = (function () {
         };
 
         CR.prototype.$$computePhase = function () {
-
+            this.carrierPhase = this.$$guessAngle(this.carrierAvgReal, this.carrierAvgIm);
+            this.carrierPhaseBPSK = this.$$guessAngle(this.carrierAvgBPSKReal, this.carrierAvgBPSKIm);
         };
 
         CR.prototype.handleSample = function (sample) {
@@ -109,12 +114,8 @@ var CarrierRecovery = (function () {
         };
 
         CR.prototype.getCarrier = function () {
-            if (!this.carrierAvailable()) {
-                return 0;
-            }
-
-            //return this.carrierPower;
-            return this.carrierPowerBPSK;
+            return this.carrierPower;
+            //return this.carrierPowerBPSK;
         };
 
         CR.prototype.setSamplesPerPeriod = function (samplesPerPeriod) {
