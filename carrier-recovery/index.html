@@ -12,8 +12,6 @@
         <canvas width="3000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
         <div>Phase</div>
         <canvas width="3000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
-        <div>Power BPSK</div>
-        <canvas width="3000" height="128" id="buffer-powerBPSK" style="border: 1px solid green;"></canvas>
 
         <div>Constellation</div>
         <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
@@ -21,6 +19,7 @@
 
         <input type="number" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="40" />
 
+        <script src="../audio-util/audio-util.js"></script>
         <script src="carrier-recovery.factory.js"></script>
         <script src="carrier-recovery-builder.service.js"></script>
 
@@ -29,26 +28,25 @@
             var
                 samplesPerPeriod = 40,
                 omegaFirst = (2 * Math.PI) / (samplesPerPeriod + 0),
-                omegaSecond = (2 * Math.PI) / (samplesPerPeriod + 50),
-                omegaThird = (2 * Math.PI) / (samplesPerPeriod - 20),
+                omegaSecond = (2 * Math.PI) / (samplesPerPeriod + 10),
+                omegaThird = (2 * Math.PI) / (samplesPerPeriod + 20),
                 carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriod),
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
-                bufferPowerBPSK = [],
                 dataFirst = [
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 5.00 * samplesPerPeriod },
-                    { amplitude: +0.30, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 16.00 * samplesPerPeriod },
+                    { amplitude: +0.30, phaseOffset: +0.125, omega: 1.00 * omegaFirst, duration: 16.00 * samplesPerPeriod },
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaFirst, duration: 10.00 * samplesPerPeriod }
                 ],
                 dataSecond = [
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 5.00 * samplesPerPeriod },
-                    { amplitude: +0.30, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 16.00 * samplesPerPeriod },
+                    { amplitude: +0.30, phaseOffset: +0.125 + 0.25, omega: 1.00 * omegaSecond, duration: 16.00 * samplesPerPeriod },
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaSecond, duration: 10.00 * samplesPerPeriod }
                 ],
                 dataThird = [
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaThird, duration: 5.00 * samplesPerPeriod },
-                    { amplitude: +0.30, phaseOffset: +0.00, omega: 1.00 * omegaThird, duration: 16.00 * samplesPerPeriod },
+                    { amplitude: +0.30, phaseOffset: +0.625, omega: 1.00 * omegaThird, duration: 16.00 * samplesPerPeriod },
                     { amplitude: +0.00, phaseOffset: +0.00, omega: 1.00 * omegaThird, duration: 10.00 * samplesPerPeriod }
                 ];
 
@@ -140,13 +138,13 @@
                     if (i < 512 || i > 560) {
                         continue;
                     }
-                    x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
-                    y = 256 - 256 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
+                    x = 256 + 256 * 2 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
+                    y = 256 - 256 * 2 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
                     ctx.fillRect(x - 1, y - 1, 3, 3);
                 }
             }
 
-            function analyzeBufferSample(bufferSample, bufferPower, bufferPhase, bufferPowerBPSK) {
+            function analyzeBufferSample(bufferSample, bufferPower, bufferPhase) {
                 var i, carrierSample;
 
                 for (i = 0; i < bufferSample.length; i++) {
@@ -160,10 +158,6 @@
                     bufferPhase.push(
                         carrierSample.phase
                     );
-
-                    bufferPowerBPSK.push(
-                        carrierSample.powerBPSK
-                    );
                 }
             }
 
@@ -171,7 +165,6 @@
                 bufferSample.length = 0;
                 bufferPower.length = 0;
                 bufferPhase.length = 0;
-                bufferPowerBPSK.length = 0;
 
                 fillBufferSample(bufferSample, dataFirst);
                 fillBufferSample(bufferSample, dataSecond);
@@ -179,12 +172,11 @@
 
                 addNoise(bufferSample);
 
-                analyzeBufferSample(bufferSample, bufferPower, bufferPhase, bufferPowerBPSK);
+                analyzeBufferSample(bufferSample, bufferPower, bufferPhase);
 
                 draw('buffer-sample', bufferSample);
                 draw('buffer-power', bufferPower);
                 draw('buffer-phase', bufferPhase);
-                draw('buffer-powerBPSK', bufferPowerBPSK);
                 drawConstellationDiagram('constellation-diagram', bufferPhase, bufferPower);
             }
 
