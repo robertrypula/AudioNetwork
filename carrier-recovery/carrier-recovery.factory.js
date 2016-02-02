@@ -45,7 +45,8 @@ var CarrierRecovery = (function () {
         CR.prototype.$$computeAverage = function () {
             var n, history, i;
 
-            // TODO implement windowing, compute values only at overlapping ends of each window
+            // TODO Implement windowing, compute values only at overlapping ends of each window
+            // not per each sample. This will increase performance.
 
             n = this.$$history.length;
             this.$$real = 0;

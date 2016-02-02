@@ -104,7 +104,7 @@
                 var offsetY;
 
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(150, 150, 250, 1)';
+                ctx.strokeStyle = 'rgba(250, 250, 250, 1)';
                 ctx.clearRect(0, 0, 3000, 128);
                 for (i = 0; i < buffer.length; i++) {
                     offsetY = Math.round(buffer[i] * 64);
@@ -122,10 +122,10 @@
                 var ctx = canvas.getContext("2d");
                 var x, y;
 
-                ctx.fillStyle = 'rgba(130, 130, 230, 1)';
+                ctx.fillStyle = 'rgba(250, 250, 250, 1)';
 
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(130, 130, 230, 1)';
+                ctx.strokeStyle = 'rgba(250, 250, 250, 1)';
                 ctx.clearRect(0, 0, 512, 512);
                 ctx.beginPath();
                 ctx.moveTo(0, 256);
@@ -157,7 +157,7 @@
                     if (0) {
                         powerNormalized = carrierSample.power;
                     } else {
-                        powerNormalized = (carrierSample.powerDecibel + 100) / 100;
+                        powerNormalized = (carrierSample.powerDecibel + 20) / 20;
                         powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                     }
 
