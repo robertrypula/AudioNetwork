@@ -32,7 +32,7 @@
                 omegaFirst = (2 * Math.PI) / samplesPerPeriodFirst,
                 omegaSecond = (2 * Math.PI) / samplesPerPeriodSecond,
                 omegaThird = (2 * Math.PI) / samplesPerPeriodThird,
-                carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriodFirst),
+                carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriodFirst, 512),
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
@@ -53,7 +53,7 @@
                 ];
 
             function onSamplesPerPeriodChange(input) {
-                carrierRecovery.setSamplesPerPeriod(parseInt(input.value));
+                carrierRecovery.setSamplePerPeriod(parseInt(input.value));
                 nextFrame();
             }
 
@@ -141,26 +141,28 @@
                     if (i < 512 || i > 560) {
                         continue;
                     }
-                    x = 256 + 256 * 3 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
-                    y = 256 - 256 * 3 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
+                    x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
+                    y = 256 - 256 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
                     ctx.fillRect(x - 1, y - 1, 3, 3);
                 }
             }
 
             function analyzeBufferSample(bufferSample, bufferPower, bufferPhase) {
-                var i, carrierSample;
+                var i, carrierSample, powerNormalized;
 
                 for (i = 0; i < bufferSample.length; i++) {
                     carrierRecovery.handleSample(bufferSample[i]);
                     carrierSample = carrierRecovery.getCarrier();
 
-                    bufferPower.push(
-                        carrierSample.power
-                    );
+                    if (0) {
+                        powerNormalized = carrierSample.power;
+                    } else {
+                        powerNormalized = (carrierSample.powerDecibel + 100) / 100;
+                        powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
+                    }
 
-                    bufferPhase.push(
-                        carrierSample.phase
-                    );
+                    bufferPower.push(powerNormalized);
+                    bufferPhase.push(carrierSample.phase);
                 }
             }
 

@@ -4,82 +4,78 @@ var CarrierRecovery = (function () {
     _CarrierRecovery.$inject = [];
 
     function _CarrierRecovery() {
+        var CR;
 
-        /*
-
-        1ms
-
-         */
-
-        var
-            CR,
-            SAMPLE_HISTORY_PERIOD_LENGTH = 20;
-
-        CR = function (samplesPerPeriod) {
-            this.$$samplesPerPeriod = samplesPerPeriod;
-            this.$$sampleCount = 0;
-            this.$$sampleHistory = [];
-            this.carrierReferenceReal;
-            this.carrierReferenceImm;
-            this.carrierAvgReal;
-            this.carrierAvgImm;
-            this.carrierPower;
-            this.carrierPhase;
+        CR = function (samplesPerPeriod, sizeDFT) {
+            this.$$samplePerPeriod = samplesPerPeriod;
+            this.$$sizeDFT = sizeDFT;
+            this.$$sampleNumber = 0;
+            this.$$history = [];
+            this.$$referenceReal;
+            this.$$referenceImm;
+            this.$$real;
+            this.$$imm;
+            this.$$power;
+            this.$$powerDecibel;
+            this.$$phase;
         };
 
         CR.prototype.$$computeReference = function () {
             var 
-                omega = (2 * Math.PI) / this.$$samplesPerPeriod,
-                x = omega * this.$$sampleCount;
+                omega = (2 * Math.PI) / this.$$samplePerPeriod,  // omega in revolutions per sample
+                x = omega * this.$$sampleNumber;
 
-            this.carrierReferenceReal = Math.cos(x);
-            this.carrierReferenceImm = Math.sin(x);
+            this.$$referenceReal = Math.cos(x);
+            this.$$referenceImm = Math.sin(x);
         };
 
         CR.prototype.$$addToHistory = function (sample) {
-            this.$$sampleHistory.push({
+            this.$$history.push({
                 sample: sample,
-                sampleNumber: this.$$sampleCount,
-                carrierReal: this.carrierReferenceReal * sample,
-                carrierImm: this.carrierReferenceImm * sample
+                sampleNumber: this.$$sampleNumber,
+                real: this.$$referenceReal * sample,
+                imm: this.$$referenceImm * sample
             });
 
-            if (this.$$sampleHistory.length > SAMPLE_HISTORY_PERIOD_LENGTH * this.$$samplesPerPeriod) {
-                this.$$sampleHistory.splice(0, 1);
+            if (this.$$history.length > this.$$sizeDFT) {
+                this.$$history.splice(0, 1);
             }
         };
 
         CR.prototype.$$computeAverage = function () {
-            var n, sh, i;
+            var n, history, i;
 
-            n = this.$$sampleHistory.length;
-            this.carrierAvgReal = 0;
-            this.carrierAvgImm = 0;
+            // TODO implement windowing, compute values only at overlapping ends of each window
+
+            n = this.$$history.length;
+            this.$$real = 0;
+            this.$$imm = 0;
 
             for (i = 0; i < n; i++) {
-                sh = this.$$sampleHistory[i];
-                this.carrierAvgReal += sh.carrierReal;
-                this.carrierAvgImm += sh.carrierImm;
+                history = this.$$history[i];
+                this.$$real += history.real;
+                this.$$imm += history.imm;
             }
 
-            this.carrierAvgReal = this.carrierAvgReal / n;
-            this.carrierAvgImm = this.carrierAvgImm / n;
+            this.$$real = this.$$real / n;
+            this.$$imm = this.$$imm / n;
         };
 
         CR.prototype.$$computePower = function () {
-            this.carrierPower = 2.0 * Math.sqrt(
-                this.carrierAvgReal * this.carrierAvgReal +
-                this.carrierAvgImm * this.carrierAvgImm
+            this.$$power = Math.sqrt(
+                this.$$real * this.$$real +
+                this.$$imm * this.$$imm
             );
+            this.$$powerDecibel = 10 * Math.log(this.$$power) / Math.LN10;
         };
 
         CR.prototype.$$computePhase = function () {
-            this.carrierPhase = AudioUtil.findUnitAngle(this.carrierAvgReal, this.carrierAvgImm);
+            this.$$phase = AudioUtil.findUnitAngle(this.$$real, this.$$imm);
 
             // correct phase to start from positive side of X axis counterclockwise
-            this.carrierPhase = this.carrierPhase - 0.25;
-            if (this.carrierPhase < 0) {
-                this.carrierPhase += 1;
+            this.$$phase = this.$$phase - 0.25;
+            if (this.$$phase < 0) {
+                this.$$phase += 1;
             }
         };
 
@@ -90,26 +86,29 @@ var CarrierRecovery = (function () {
             this.$$computePower();
             this.$$computePhase();
 
-            this.$$sampleCount++;
-        };
-
-        CR.prototype.carrierAvailable = function () {
-            return true;
+            this.$$sampleNumber++;
         };
 
         CR.prototype.getCarrier = function () {
             return {
-                phase: this.carrierPhase,
-                power: this.carrierPower,
-                avgReal: this.carrierAvgReal,
-                avgImm: this.carrierAvgImm
+                phase: this.$$phase,
+                power: this.$$power,
+                powerDecibel: this.$$powerDecibel,
+                real: this.$$real,
+                imm: this.$$imm
             };
         };
 
-        CR.prototype.setSamplesPerPeriod = function (samplesPerPeriod) {
-            this.$$samplesPerPeriod = samplesPerPeriod;
-            this.$$sampleHistory.length = 0;
-            this.$$sampleCount = 0;
+        CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            this.$$samplePerPeriod = samplePerPeriod;
+            this.$$history.length = 0;
+            this.$$sampleNumber = 0;
+        };
+
+        CR.prototype.setSizeDFT = function (sizeDFT) {
+            this.$$sizeDFT = sizeDFT;
+            this.$$history.length = 0;
+            this.$$sampleNumber = 0;
         };
 
         return CR;
