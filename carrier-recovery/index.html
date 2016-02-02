@@ -8,7 +8,7 @@
 
         <div>Sample</div>
         <canvas width="3000" height="128" id="buffer-sample" style="border: 1px solid red;"></canvas>
-        <div>Power</div>
+        <div>Power [dB]</div>
         <canvas width="3000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
         <div>Phase</div>
         <canvas width="3000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
@@ -32,7 +32,7 @@
                 omegaFirst = (2 * Math.PI) / samplesPerPeriodFirst,
                 omegaSecond = (2 * Math.PI) / samplesPerPeriodSecond,
                 omegaThird = (2 * Math.PI) / samplesPerPeriodThird,
-                carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriodFirst, 512),
+                carrierRecovery = CarrierRecoveryBuilder.build(samplesPerPeriodFirst, 1024),
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
@@ -138,7 +138,7 @@
                 ctx.closePath();
                 ctx.stroke();
                 for (i = 0; i < bufferPhase.length; i++) {
-                    if (i < 512 || i > 560) {
+                    if (i < 512 || i > 1024) {
                         continue;
                     }
                     x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
