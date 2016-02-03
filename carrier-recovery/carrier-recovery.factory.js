@@ -6,8 +6,8 @@ var CarrierRecovery = (function () {
     function _CarrierRecovery() {
         var CR;
 
-        CR = function (samplesPerPeriod, sizeDFT) {
-            this.$$samplePerPeriod = samplesPerPeriod;
+        CR = function (samplePerPeriod, sizeDFT) {
+            this.$$samplePerPeriod = samplePerPeriod;
             this.$$sizeDFT = sizeDFT;
             this.$$sampleNumber = 0;
             this.$$history = [];
@@ -46,7 +46,7 @@ var CarrierRecovery = (function () {
             var n, history, i;
 
             // TODO Implement windowing, compute values only at overlapping ends of each window
-            // not per each sample. This will increase performance.
+            // TODO not per each sample. This will increase performance.
 
             n = this.$$history.length;
             this.$$real = 0;

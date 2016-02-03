@@ -5,8 +5,8 @@ var CarrierRecoveryBuilder = (function () {
 
     function _CarrierRecoveryBuilder() {
 
-        function build(samplesPerPeriod) {
-            return new CarrierRecovery(samplesPerPeriod);
+        function build(samplePerPeriod) {
+            return new CarrierRecovery(samplePerPeriod);
         }
 
         return {

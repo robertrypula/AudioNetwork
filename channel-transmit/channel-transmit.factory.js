@@ -89,7 +89,7 @@ var ChannelTransmit = (function () {
             this.oscillatorNode.type = 'sine';
             this.oscillatorNode.frequency.value = frequency; // value in hertz
 
-            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
+            this.scriptNode = Audio.createScriptProcessor(4 * 1024, 1, 1);
             this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcess(audioProcessingEvent);
             };

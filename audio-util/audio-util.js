@@ -29,8 +29,59 @@ var AudioUtil = (function () {
             return angle / (2 * Math.PI);
         }
 
+        function unitFadeIn(x) {
+            x  = x < 0 ? 0 : x;
+            x  = x > 1 ? 1 : x;
+
+            return 0.5 * (Math.sin((x - 0.5) * Math.PI) + 1);
+        }
+
+        function unitFadeOut(x) {
+            return 1 - unitFadeIn(x);
+        }
+
+        function queueAdd(queue, itemList, copyCallback, amountFieldName) {
+            var i, item, queueItem;
+
+            amountFieldName = amountFieldName === undefined ? 'duration' : amountFieldName;
+
+            for (i = 0; i < itemList.length; i++) {
+                item = itemList[i];
+                if (item[amountFieldName] <= 0) {
+                    continue;
+                }
+                queueItem = {};
+                queueItem[amountFieldName] = item[amountFieldName];
+                copyCallback(queueItem, item);
+                queue.push(queueItem);
+            }
+        }
+
+        function queuePop(queue, amountFieldName) {
+            var queueItem;
+
+            amountFieldName = amountFieldName === undefined ? 'duration' : amountFieldName;
+
+            if (queue.length === 0) {
+                return null;
+            }
+
+            queue[0][amountFieldName]--;
+            if (queue[0][amountFieldName] === 0) {
+                queueItem = queue.splice(0, 1);
+            } else {
+                queueItem = queue[0];
+            }
+
+            return queueItem;
+        }
+
         return {
-            findUnitAngle: findUnitAngle
+            findUnitAngle: findUnitAngle,
+            unitFadeIn: unitFadeIn,
+            unitFadeOut: unitFadeOut,
+            queueAdd: queueAdd,
+            queuePop: queuePop
         };
     }
 
