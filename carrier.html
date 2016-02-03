@@ -26,69 +26,44 @@
         <script>
 
             var
-                color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)';
-                samplesPerPeriodFirst = 40,
-                samplesPerPeriodSecond = 60,
-                samplesPerPeriodThird = 80,
-                omegaFirst = (2 * Math.PI) / samplesPerPeriodFirst,
-                omegaSecond = (2 * Math.PI) / samplesPerPeriodSecond,
-                omegaThird = (2 * Math.PI) / samplesPerPeriodThird,
-                carrierRecovery = new CarrierRecovery(samplesPerPeriodFirst, 1024),
-                carrierGenerate = new CarrierGenerate(samplesPerPeriodFirst, 20),
+                color = 0 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
+                sampleMax = 3000,
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
-                dataFirst = [
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaFirst, duration: 5.00 * samplesPerPeriodFirst },
-                    { amplitude: +0.30, phase: +0.125 + 0.000, omega: 1.00 * omegaFirst, duration: 16.00 * samplesPerPeriodFirst },
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaFirst, duration: 10.00 * samplesPerPeriodFirst }
-                ],
-                dataSecond = [
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaSecond, duration: 5.00 * samplesPerPeriodSecond },
-                    { amplitude: +0.30, phase: +0.125 + 0.250, omega: 1.00 * omegaSecond, duration: 16.00 * samplesPerPeriodSecond },
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaSecond, duration: 10.00 * samplesPerPeriodSecond }
-                ],
-                dataThird = [
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaThird, duration: 5.00 * samplesPerPeriodThird },
-                    { amplitude: +0.30, phase: +0.125 + 0.500, omega: 1.00 * omegaThird, duration: 16.00 * samplesPerPeriodThird },
-                    { amplitude: +0.00, phase: +0.000, omega: 1.00 * omegaThird, duration: 10.00 * samplesPerPeriodThird }
+                samplesPerPeriod = [ 
+                    40, 
+                    60, 
+                    80 
                 ];
+                carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], 1024),
+                carrierGenerate = [];
+                data = [
+                    [
+                        { amplitude: +0.00, duration: 200, phase: +0.000 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.000 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.000 },
+                        { amplitude: +0.00, duration: 200, phase: +0.000 }
+                    ],
+                    [
+                        { amplitude: +0.00, duration: 200, phase: +0.000 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
+                        { amplitude: +0.00, duration: 200, phase: +0.000 }
+                    ],
+                    [
+                        { amplitude: +0.00, duration: 200, phase: +0.000 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
+                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
+                        { amplitude: +0.00, duration: 200, phase: +0.000 },
+                        { amplitude: +1.00, duration: 600, phase: +0.000 }
+                    ]
+                ]
+            ;
 
             function onSamplesPerPeriodChange(input) {
                 carrierRecovery.setSamplePerPeriod(parseInt(input.value));
                 nextFrame();
-            }
-
-            function fillBuffer(buffer, start, stop, sampleCallback) {
-                var i, x;
-
-                for (i = start; i < stop; i++) {
-                    x = i - start;
-
-                    if (i < buffer.length) {
-                        buffer[i] += sampleCallback(x);
-                    } else {
-                        buffer[i] = sampleCallback(x);
-                    }
-                }
-            }
-
-            function fillBufferSample(bufferSample, data) {
-                var start = 0, stop = 0, i, d;
-
-                for (i = 0; i < data.length; i++) {
-                    d = data[i];
-                    start = stop;
-                    stop = start + d.duration;
-                    fillBuffer(bufferSample, start, stop, function (x) {
-                        return (
-                            d.amplitude *
-                            Math.sin(
-                              d.omega * x - 2 * Math.PI * d.phase
-                            )
-                        );
-                    });
-                }
             }
 
             function addNoise(buffer) {
@@ -169,37 +144,76 @@
             }
 
             function nextFrame() {
+                var i, sampleNumber, sample;
+
+                carrierGenerate.length = 0;
                 bufferSample.length = 0;
                 bufferPower.length = 0;
                 bufferPhase.length = 0;
 
-                fillBufferSample(bufferSample, dataFirst);
-                fillBufferSample(bufferSample, dataSecond);
-                fillBufferSample(bufferSample, dataThird);
+                // create carrier generators and add data to queue
+                for (i = 0; i < samplesPerPeriod.length; i++) {
+                    carrierGenerate.push(
+                        new CarrierGenerate(samplesPerPeriod[i], 40)
+                    );
+                    carrierGenerate[i].addToQueue(data[i]);
+                }
 
+                // fill sample buffer
+                for (i = 0; i < data.length; i++) {
+                    for (sampleNumber = 0; sampleNumber < sampleMax; sampleNumber++) {
+                        sample = carrierGenerate[i].getSample();
+                        if (sampleNumber < bufferSample.length) {
+                            bufferSample[sampleNumber] += sample;
+                        } else {
+                            bufferSample[sampleNumber] = sample;
+                        }
+                        
+                        carrierGenerate[i].nextSample();
+                    }
+                }
+
+                // ----
                 //addNoise(bufferSample);
-
                 analyzeBufferSample(bufferSample, bufferPower, bufferPhase);
-
                 draw('buffer-sample', bufferSample);
                 draw('buffer-power', bufferPower);
                 draw('buffer-phase', bufferPhase);
                 drawConstellationDiagram('constellation-diagram', bufferPhase, bufferPower);
             }
 
-            nextFrame();
+
+            function initialize() {
+                nextFrame();
+            }
 
 
-            var sample;
+            initialize();
+            
 
-            sample = carrierGenerate.getSample();
-            carrierGenerate.nextSample();
-            console.log(sample);
+            // --------------
 
-            sample = carrierGenerate.getSample();
-            carrierGenerate.nextSample();
-            console.log(sample);
 
+            var cg = new CarrierGenerate(40, 20);
+
+            function testCarrierGenerate(size) {
+                var sample, i;
+
+                for (i = 0; i < size; i++) {
+                    sample = cg.getSample();
+                    cg.nextSample();
+                    console.log(sample); 
+                    console.log(" ----");
+                }                
+            }
+
+            testCarrierGenerate(2);
+
+            cg.addToQueue([
+                { duration: 3, amplitude: 0.5, phase: 0.0 }
+            ]);
+
+            testCarrierGenerate(4);
 
         </script>
     </body>

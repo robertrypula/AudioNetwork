@@ -26,21 +26,31 @@ var CarrierGenerate = (function () {
             fadeFactor = 1.0;
             currentCarrierData = this.$$currentCarrier.data;
 
-            if (!currentCarrierData) {
-                return 0;
+            if (currentCarrierData) {
+                this.$$sampleComputed = (
+                    fadeFactor *
+                    currentCarrierData.amplitude *
+                    Math.sin(
+                        this.$$omega * this.$$sampleNumber - 2 * Math.PI * currentCarrierData.phase
+                    )
+                );
+            } else {
+                this.$$sampleComputed = 0;
             }
-
-            this.$$sampleComputed = (
-                fadeFactor *
-                currentCarrierData.amplitude *
-                Math.sin(
-                    this.$$omega * this.$$sampleNumber - 2 * Math.PI * currentCarrierData.phase
-                )
-            );
         };
 
         CG.prototype.$$grabCurrentCarrier = function () {
-            this.$$currentCarrier.data = AudioUtil.queuePop(this.$$queue);
+            var fromQueue, isSameAsBefore;
+
+            fromQueue = AudioUtil.queuePop(this.$$queue);
+
+            // console.log('this.$$sampleNumber', this.$$sampleNumber);
+
+            isSameAsBefore = fromQueue === this.$$currentCarrier.data
+            this.$$currentCarrier.data = fromQueue;
+            if (!isSameAsBefore) {
+                
+            }
         };
 
         CG.prototype.nextSample = function () {
@@ -55,6 +65,8 @@ var CarrierGenerate = (function () {
 
             this.$$grabCurrentCarrier();
             this.$$sampleCompute();
+
+            return this.$$sampleComputed;
         };
 
         CG.prototype.addToQueue = function (carrierData) {

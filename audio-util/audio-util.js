@@ -67,10 +67,9 @@ var AudioUtil = (function () {
             }
 
             queue[0][amountFieldName]--;
+            queueItem = queue[0];
             if (queue[0][amountFieldName] === 0) {
-                queueItem = queue.splice(0, 1);
-            } else {
-                queueItem = queue[0];
+                 queue.splice(0, 1);
             }
 
             return queueItem;
