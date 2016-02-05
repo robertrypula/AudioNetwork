@@ -21,12 +21,32 @@ var CarrierGenerate = (function () {
         };
 
         CG.prototype.$$sampleCompute = function () {
-            var fadeFactor, currentCarrierData;
+            var 
+                fadeFactor, 
+                currentCarrierData,
+                fadePositionStart,
+                fadePositionEnd
+            ;
 
             fadeFactor = 1.0;
             currentCarrierData = this.$$currentCarrier.data;
 
             if (currentCarrierData) {
+                fadePositionStart = this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart;
+                fadePositionEnd = this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber;
+
+                fadePositionStart /= this.$$samplePerFade;
+                fadePositionEnd /= this.$$samplePerFade;
+
+                if (fadePositionStart >= 0 && fadePositionStart <= 1) {
+                    fadeFactor = AudioUtil.unitFadeIn(fadePositionStart);
+                }
+                if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
+                    fadeFactor = AudioUtil.unitFadeIn(fadePositionEnd);
+                }
+
+                // console.log(this.$$sampleNumber, fadePositionStart, fadePositionEnd, fadeFactor);
+
                 this.$$sampleComputed = (
                     fadeFactor *
                     currentCarrierData.amplitude *
@@ -48,8 +68,14 @@ var CarrierGenerate = (function () {
 
             isSameAsBefore = fromQueue === this.$$currentCarrier.data
             this.$$currentCarrier.data = fromQueue;
-            if (!isSameAsBefore) {
-                
+            if (!isSameAsBefore && fromQueue) {
+                this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
+                this.$$currentCarrier.sampleNumberEnd = this.$$currentCarrier.sampleNumberStart + fromQueue.duration;
+            }
+
+            if (!fromQueue) {
+                this.$$currentCarrier.sampleNumberStart = null;
+                this.$$currentCarrier.sampleNumberEnd = null;
             }
         };
 

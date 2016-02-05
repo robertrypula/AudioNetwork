@@ -41,8 +41,8 @@
                 data = [
                     [
                         { amplitude: +0.00, duration: 200, phase: +0.000 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.000 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.000 },
+                        { amplitude: +1.00, duration: 700, phase: +0.125 + 0.000 },
+                        { amplitude: +1.00, duration: 700, phase: +0.125 + 0.000 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
@@ -154,13 +154,13 @@
                 // create carrier generators and add data to queue
                 for (i = 0; i < samplesPerPeriod.length; i++) {
                     carrierGenerate.push(
-                        new CarrierGenerate(samplesPerPeriod[i], 40)
+                        new CarrierGenerate(samplesPerPeriod[i], 100)
                     );
                     carrierGenerate[i].addToQueue(data[i]);
                 }
 
                 // fill sample buffer
-                for (i = 0; i < data.length; i++) {
+                for (i = 0; i < 1 /* data.length*/; i++) {
                     for (sampleNumber = 0; sampleNumber < sampleMax; sampleNumber++) {
                         sample = carrierGenerate[i].getSample();
                         if (sampleNumber < bufferSample.length) {
@@ -194,7 +194,7 @@
             // --------------
 
 
-            var cg = new CarrierGenerate(40, 20);
+            var cg = new CarrierGenerate(40, 5);
 
             function testCarrierGenerate(size) {
                 var sample, i;
@@ -210,10 +210,10 @@
             testCarrierGenerate(2);
 
             cg.addToQueue([
-                { duration: 3, amplitude: 0.5, phase: 0.0 }
+                { duration: 20, amplitude: 0.5, phase: 0.0 }
             ]);
 
-            testCarrierGenerate(4);
+            testCarrierGenerate(35);
 
         </script>
     </body>
