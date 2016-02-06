@@ -17,7 +17,7 @@
         <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
 
 
-        <input type="number" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="40" />
+        <input type="number" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="10" />
 
         <script src="audio-util/audio-util.js"></script>
         <script src="carrier-recovery/carrier-recovery.factory.js"></script>
@@ -26,35 +26,35 @@
         <script>
 
             var
-                color = 0 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
+                color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
                 sampleMax = 3000,
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
                 samplesPerPeriod = [ 
-                    40, 
-                    60, 
-                    80 
+                    10,
+                    11,
+                    12
                 ];
                 carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], 1024),
                 carrierGenerate = [];
                 data = [
                     [
-                        { amplitude: +0.00, duration: 200, phase: +0.000 },
-                        { amplitude: +1.00, duration: 700, phase: +0.125 + 0.000 },
-                        { amplitude: +1.00, duration: 700, phase: +0.125 + 0.000 },
+                        { amplitude: +0.00, duration: 100, phase: +0.000 },
+                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.000 },
+                        //{ amplitude: +1.00, duration: 200, phase: +0.125 + 0.000 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
-                        { amplitude: +0.00, duration: 200, phase: +0.000 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
+                        { amplitude: +0.00, duration: 100, phase: +0.000 },
+                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.250 },
+                        //{ amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
-                        { amplitude: +0.00, duration: 200, phase: +0.000 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
-                        { amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
+                        { amplitude: +0.00, duration: 100, phase: +0.000 },
+                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.500 },
+                        //{ amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 },
                         { amplitude: +1.00, duration: 600, phase: +0.000 }
                     ]
@@ -66,11 +66,11 @@
                 nextFrame();
             }
 
-            function addNoise(buffer) {
+            function addNoise(buffer, amount) {
                 var i;
 
                 for (i = 0; i < buffer.length; i++) {
-                    buffer[i] += ((Math.random() * 2) - 1.0) * 0.2;
+                    buffer[i] += ((Math.random() * 2) - 1.0) * amount;
                 }
             }
 
@@ -115,7 +115,7 @@
                 ctx.closePath();
                 ctx.stroke();
                 for (i = 0; i < bufferPhase.length; i++) {
-                    if (i < 512 || i > 1024) {
+                    if (i < 1200 || i > 1500) {
                         continue;
                     }
                     x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
@@ -160,7 +160,7 @@
                 }
 
                 // fill sample buffer
-                for (i = 0; i < 1 /* data.length*/; i++) {
+                for (i = 0; i < 0 + 1 * data.length; i++) {
                     for (sampleNumber = 0; sampleNumber < sampleMax; sampleNumber++) {
                         sample = carrierGenerate[i].getSample();
                         if (sampleNumber < bufferSample.length) {
@@ -174,7 +174,7 @@
                 }
 
                 // ----
-                //addNoise(bufferSample);
+                addNoise(bufferSample, 0.2);
                 analyzeBufferSample(bufferSample, bufferPower, bufferPhase);
                 draw('buffer-sample', bufferSample);
                 draw('buffer-power', bufferPower);
