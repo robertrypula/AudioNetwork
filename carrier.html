@@ -29,37 +29,34 @@
 
             var
                 sampleFrequency = 44100,
+                brustDuration = sampleFrequency * 0.040,  // 1764 samples per brust, 25 baud / sec
                 color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
                 sampleMax = 3000,
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
                 samplesPerPeriod = [
-                    sampleFrequency / 7000,
-                    sampleFrequency / 7200,
-                    sampleFrequency / 7400
+                    sampleFrequency / (7000 + 0),
+                    sampleFrequency / (7000 + 100),
+                    sampleFrequency / (7000 + 200)
                 ];
-                carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], 1024),
+                carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], brustDuration),
                 carrierGenerate = [];
                 data = [
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.000 },
-                        //{ amplitude: +1.00, duration: 200, phase: +0.125 + 0.000 },
+                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.000 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.250 },
-                        //{ amplitude: +0.30, duration: 700, phase: +0.125 + 0.250 },
+                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.250 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: 1500, phase: +0.125 + 0.500 },
-                        //{ amplitude: +0.30, duration: 700, phase: +0.125 + 0.500 },
-                        { amplitude: +0.00, duration: 200, phase: +0.000 },
-                        { amplitude: +1.00, duration: 600, phase: +0.000 }
+                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.500 },
+                        { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ]
                 ]
             ;
@@ -118,7 +115,7 @@
                 ctx.closePath();
                 ctx.stroke();
                 for (i = 0; i < bufferPhase.length; i++) {
-                    if (i < 1200 || i > 1500) {
+                    if (i < (100 + brustDuration) - 50 || i > (100 + brustDuration) + 50) {
                         continue;
                     }
                     x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
@@ -157,24 +154,22 @@
                 // create carrier generators and add data to queue
                 for (i = 0; i < samplesPerPeriod.length; i++) {
                     carrierGenerate.push(
-                        new CarrierGenerate(samplesPerPeriod[i], 100)
+                        new CarrierGenerate(samplesPerPeriod[i], 50)
                     );
                     carrierGenerate[i].addToQueue(data[i]);
                 }
 
                 // fill sample buffer
-                for (i = 0; i < 0 + 1 * data.length; i++) {
-                    for (sampleNumber = 0; sampleNumber < sampleMax; sampleNumber++) {
-                        sample = carrierGenerate[i].getSample();
-                        if (sampleNumber < bufferSample.length) {
-                            bufferSample[sampleNumber] += sample;
-                        } else {
-                            bufferSample[sampleNumber] = sample;
-                        }
-                        
+                for (sampleNumber = 0; sampleNumber < sampleMax; sampleNumber++) {
+                    sample = 0;
+                    for (i = 0; i < samplesPerPeriod.length; i++) {
+                        sample += carrierGenerate[i].getSample();
                         carrierGenerate[i].nextSample();
                     }
+                    bufferSample[sampleNumber] = sample;
                 }
+                
+                
 
                 // ----
                 addNoise(bufferSample, 0.2);
