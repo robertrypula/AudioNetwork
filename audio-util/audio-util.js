@@ -29,15 +29,11 @@ var AudioUtil = (function () {
             return angle / (2 * Math.PI);
         }
 
-        function unitFadeIn(x) {
+        function unitFade(x) {
             x  = x < 0 ? 0 : x;
             x  = x > 1 ? 1 : x;
 
             return 0.5 * (Math.sin((x - 0.5) * Math.PI) + 1);
-        }
-
-        function unitFadeOut(x) {
-            return 1 - unitFadeIn(x);
         }
 
         function queueAdd(queue, itemList, copyCallback, amountFieldName) {
@@ -77,8 +73,7 @@ var AudioUtil = (function () {
 
         return {
             findUnitAngle: findUnitAngle,
-            unitFadeIn: unitFadeIn,
-            unitFadeOut: unitFadeOut,
+            unitFade: unitFade,
             queueAdd: queueAdd,
             queuePop: queuePop
         };

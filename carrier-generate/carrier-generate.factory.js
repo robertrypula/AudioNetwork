@@ -7,6 +7,13 @@ var CarrierGenerate = (function () {
         var CG;
 
         CG = function (samplePerPeriod, samplePerFade) {
+            /*
+            // TODO fix this condition!
+            if (samplePerPeriod < 2 * samplePerFade) {
+                throw 'samplePerFade overlaps with samplePerFade';
+            }
+            */
+
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = 2 * Math.PI / samplePerPeriod; // revolutions per sample
             this.$$samplePerFade = samplePerFade;
@@ -21,42 +28,40 @@ var CarrierGenerate = (function () {
         };
 
         CG.prototype.$$sampleCompute = function () {
-            var 
-                fadeFactor, 
-                currentCarrierData,
+            var
+                currentCarrierData = this.$$currentCarrier.data,
+                fadeFactor,
                 fadePositionStart,
                 fadePositionEnd
             ;
 
-            fadeFactor = 1.0;
-            currentCarrierData = this.$$currentCarrier.data;
-
-            if (currentCarrierData) {
-                fadePositionStart = this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart;
-                fadePositionEnd = this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber;
-
-                fadePositionStart /= this.$$samplePerFade;
-                fadePositionEnd /= this.$$samplePerFade;
-
-                if (fadePositionStart >= 0 && fadePositionStart <= 1) {
-                    fadeFactor = AudioUtil.unitFadeIn(fadePositionStart);
-                }
-                if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
-                    fadeFactor = AudioUtil.unitFadeIn(fadePositionEnd);
-                }
-
-                // console.log(this.$$sampleNumber, fadePositionStart, fadePositionEnd, fadeFactor);
-
-                this.$$sampleComputed = (
-                    fadeFactor *
-                    currentCarrierData.amplitude *
-                    Math.sin(
-                        this.$$omega * this.$$sampleNumber - 2 * Math.PI * currentCarrierData.phase
-                    )
-                );
-            } else {
+            if (!currentCarrierData) {
                 this.$$sampleComputed = 0;
+                return;
             }
+
+            fadeFactor = 1.0;
+            fadePositionStart = (this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart) / this.$$samplePerFade;
+            fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
+
+            if (fadePositionStart >= 0 && fadePositionStart <= 1) {
+                fadeFactor = AudioUtil.unitFade(fadePositionStart);
+            } else {
+                if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
+                    fadeFactor = AudioUtil.unitFade(fadePositionEnd);
+                }
+            }
+
+            // console.log(this.$$sampleNumber, fadePositionStart, fadePositionEnd, fadeFactor);
+
+            this.$$sampleComputed = (
+                fadeFactor *
+                currentCarrierData.amplitude *
+                Math.sin(
+                    this.$$omega * this.$$sampleNumber
+                    - 2 * Math.PI * currentCarrierData.phase
+                )
+            );
         };
 
         CG.prototype.$$grabCurrentCarrier = function () {
@@ -66,14 +71,18 @@ var CarrierGenerate = (function () {
 
             // console.log('this.$$sampleNumber', this.$$sampleNumber);
 
-            isSameAsBefore = fromQueue === this.$$currentCarrier.data
-            this.$$currentCarrier.data = fromQueue;
-            if (!isSameAsBefore && fromQueue) {
-                this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
-                this.$$currentCarrier.sampleNumberEnd = this.$$currentCarrier.sampleNumberStart + fromQueue.duration;
-            }
-
-            if (!fromQueue) {
+            if (fromQueue) {
+                // console.log('from queue');
+                isSameAsBefore = (fromQueue === this.$$currentCarrier.data);
+                if (!isSameAsBefore) {
+                    // console.log('  --> from queue NOT SAME AS BEFORE');
+                    this.$$currentCarrier.data = fromQueue;
+                    this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
+                    this.$$currentCarrier.sampleNumberEnd = this.$$currentCarrier.sampleNumberStart + fromQueue.duration;
+                }
+            } else {
+                // console.log('from queue NULL');
+                this.$$currentCarrier.data = null;
                 this.$$currentCarrier.sampleNumberStart = null;
                 this.$$currentCarrier.sampleNumberEnd = null;
             }

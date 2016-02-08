@@ -213,10 +213,16 @@
             testCarrierGenerate(2);
 
             cg.addToQueue([
-                { duration: 20, amplitude: 0.5, phase: 0.0 }
+                { duration: 8, amplitude: 0.5, phase: 0.0 }
             ]);
 
-            testCarrierGenerate(35);
+            testCarrierGenerate(10);
+
+            cg.addToQueue([
+                { duration: 4, amplitude: 0.5, phase: 0.0 }
+            ]);
+
+            testCarrierGenerate(5);
 
         </script>
     </body>
