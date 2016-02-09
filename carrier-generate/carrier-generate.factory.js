@@ -7,13 +7,6 @@ var CarrierGenerate = (function () {
         var CG;
 
         CG = function (samplePerPeriod, samplePerFade) {
-            /*
-            // TODO fix this condition!
-            if (samplePerPeriod < 2 * samplePerFade) {
-                throw 'samplePerFade overlaps with samplePerFade';
-            }
-            */
-
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = 2 * Math.PI / samplePerPeriod; // revolutions per sample
             this.$$samplePerFade = samplePerFade;
@@ -52,8 +45,6 @@ var CarrierGenerate = (function () {
                 }
             }
 
-            // console.log(this.$$sampleNumber, fadePositionStart, fadePositionEnd, fadeFactor);
-
             this.$$sampleComputed = (
                 fadeFactor *
                 currentCarrierData.amplitude *
@@ -68,20 +59,16 @@ var CarrierGenerate = (function () {
             var fromQueue, isSameAsBefore;
 
             fromQueue = AudioUtil.queuePop(this.$$queue);
-
-            // console.log('this.$$sampleNumber', this.$$sampleNumber);
-
             if (fromQueue) {
-                // console.log('from queue');
                 isSameAsBefore = (fromQueue === this.$$currentCarrier.data);
                 if (!isSameAsBefore) {
-                    // console.log('  --> from queue NOT SAME AS BEFORE');
                     this.$$currentCarrier.data = fromQueue;
                     this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
-                    this.$$currentCarrier.sampleNumberEnd = this.$$currentCarrier.sampleNumberStart + fromQueue.duration;
+                    this.$$currentCarrier.sampleNumberEnd = (
+                        this.$$currentCarrier.sampleNumberStart + fromQueue.duration
+                    );
                 }
             } else {
-                // console.log('from queue NULL');
                 this.$$currentCarrier.data = null;
                 this.$$currentCarrier.sampleNumberStart = null;
                 this.$$currentCarrier.sampleNumberEnd = null;

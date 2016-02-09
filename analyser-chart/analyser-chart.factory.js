@@ -193,7 +193,11 @@ var AnalyserChart = (function () {
 
             while (frequency < 0.5 * Audio.sampleRate) {
                 left = Math.round(frequency * resolution);
-                divContent += this.$$renderTemplateAxisXLabel(AXIS_LABEL_X_ONE_ITEM_WITH, left, frequency + 'Hz');
+                divContent += this.$$renderTemplateAxisXLabel(
+                    AXIS_LABEL_X_ONE_ITEM_WITH,
+                    left,
+                    frequency + 'Hz'
+                );
                 frequency += step;
             }
 

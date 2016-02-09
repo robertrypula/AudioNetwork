@@ -7,11 +7,11 @@
     <body>
 
         <div>Sample</div>
-        <canvas width="3000" height="128" id="buffer-sample" style="border: 1px solid red;"></canvas>
+        <canvas width="5000" height="128" id="buffer-sample" style="border: 1px solid red;"></canvas>
         <div>Power [dB]</div>
-        <canvas width="3000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
+        <canvas width="5000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
         <div>Phase</div>
-        <canvas width="3000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
+        <canvas width="5000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
 
         <div>Constellation</div>
         <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
@@ -31,31 +31,44 @@
                 sampleFrequency = 44100,
                 brustDuration = sampleFrequency * 0.040,  // 1764 samples per brust, 25 baud / sec
                 color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
-                sampleMax = 3000,
+                sampleMax = 5000,
                 bufferSample = [],
                 bufferPower = [],
                 bufferPhase = [],
                 samplesPerPeriod = [
-                    sampleFrequency / (7000 + 0),
+                    sampleFrequency / (7000),
                     sampleFrequency / (7000 + 100),
-                    sampleFrequency / (7000 + 200)
-                ];
+                    sampleFrequency / (7000 + 200),
+                    sampleFrequency / (7000 + 300),
+                    sampleFrequency / (7000 + 400),
+                    sampleFrequency / (7000 + 500),
+                    sampleFrequency / (7000 + 600),
+                    sampleFrequency / (7000 + 700),
+                    sampleFrequency / (7000 + 800),
+                    sampleFrequency / (7000 + 900)
+                ],
                 carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], brustDuration),
                 carrierGenerate = [];
                 data = [
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.000 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.000 },
+                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.500 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.250 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.250 },
+                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.750 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.30, duration: brustDuration, phase: +0.125 + 0.500 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.500 },
+                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.000 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ]
                 ]
@@ -125,21 +138,21 @@
             }
 
             function analyzeBufferSample(bufferSample, bufferPower, bufferPhase) {
-                var i, carrierSample, powerNormalized;
+                var i, carrier, powerNormalized;
 
                 for (i = 0; i < bufferSample.length; i++) {
                     carrierRecovery.handleSample(bufferSample[i]);
-                    carrierSample = carrierRecovery.getCarrier();
+                    carrier = carrierRecovery.getCarrier();
 
                     if (0) {
-                        powerNormalized = carrierSample.power;
+                        powerNormalized = carrier.power;
                     } else {
-                        powerNormalized = (carrierSample.powerDecibel + 20) / 20;
+                        powerNormalized = (carrier.powerDecibel + 20) / 20;
                         powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                     }
 
                     bufferPower.push(powerNormalized);
-                    bufferPhase.push(carrierSample.phase);
+                    bufferPhase.push(carrier.phase);
                 }
             }
 
@@ -156,7 +169,7 @@
                     carrierGenerate.push(
                         new CarrierGenerate(samplesPerPeriod[i], 50)
                     );
-                    carrierGenerate[i].addToQueue(data[i]);
+                    carrierGenerate[i].addToQueue(data[i % 3]);
                 }
 
                 // fill sample buffer
@@ -172,7 +185,7 @@
                 
 
                 // ----
-                addNoise(bufferSample, 0.2);
+                // addNoise(bufferSample, 0.2);
                 analyzeBufferSample(bufferSample, bufferPower, bufferPhase);
                 draw('buffer-sample', bufferSample);
                 draw('buffer-power', bufferPower);
@@ -192,8 +205,29 @@
             // --------------
 
 
-            var cg = new CarrierGenerate(40, 5);
+            var
+                cg = new CarrierGenerate(5, 5),
+                cr = new CarrierRecovery(5, 1024),
+                secondsStart = new Date().getTime(),
+                secondsEnd,
+                sample,
+                carrier
+            ;
 
+            for (var i = 0; i < -0.1 * 1000000; i++) {
+                sample = cg.getSample();
+                cg.nextSample();
+
+                cr.handleSample(sample);
+                carrier = cr.getCarrier();
+            }
+            secondsEnd = new Date().getTime();
+
+            console.log(
+                (secondsEnd - secondsStart) + ' ms'
+            );
+
+            /*
             function testCarrierGenerate(size) {
                 var sample, i;
 
@@ -218,6 +252,7 @@
             ]);
 
             testCarrierGenerate(5);
+            */
 
         </script>
     </body>

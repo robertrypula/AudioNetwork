@@ -7,23 +7,23 @@ var CarrierRecovery = (function () {
         var CR;
 
         CR = function (samplePerPeriod, sizeDFT) {
-            this.$$samplePerPeriod = samplePerPeriod;
             this.$$sizeDFT = sizeDFT;
             this.$$sampleNumber = 0;
             this.$$history = [];
-            this.$$referenceReal;
-            this.$$referenceImm;
-            this.$$real;
-            this.$$imm;
-            this.$$power;
-            this.$$powerDecibel;
-            this.$$phase;
+            this.$$referenceReal = 0;
+            this.$$referenceImm = 0;
+            this.$$real = 0;
+            this.$$imm = 0;
+            this.$$power = 0;
+            this.$$powerDecibel = 0;
+            this.$$phase = 0;
+            this.$$samplePerPeriod = null;
+            this.$$omega = null;
+            this.setSamplePerPeriod(samplePerPeriod);
         };
 
         CR.prototype.$$computeReference = function () {
-            var 
-                omega = (2 * Math.PI) / this.$$samplePerPeriod,  // omega in revolutions per sample
-                x = omega * this.$$sampleNumber;
+            var x = this.$$omega * this.$$sampleNumber;
 
             this.$$referenceReal = Math.cos(x);
             this.$$referenceImm = Math.sin(x);
@@ -102,6 +102,7 @@ var CarrierRecovery = (function () {
 
         CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
+            this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
             this.$$history.length = 0;
             this.$$sampleNumber = 0;
         };
