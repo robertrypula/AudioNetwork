@@ -1,3 +1,5 @@
+var FAST_MODE = 1;
+
 var CarrierRecovery = (function () {
     'use strict';
 
@@ -10,6 +12,10 @@ var CarrierRecovery = (function () {
             this.$$sizeDFT = sizeDFT;
             this.$$sampleNumber = 0;
             this.$$history = [];
+            this.$$queueReal = QueueBuilder.build(sizeDFT);
+            this.$$queueImm = QueueBuilder.build(sizeDFT);
+            this.$$queueSumReal = 0;
+            this.$$queueSumImm = 0;
             this.$$referenceReal = 0;
             this.$$referenceImm = 0;
             this.$$real = 0;
@@ -31,8 +37,6 @@ var CarrierRecovery = (function () {
 
         CR.prototype.$$addToHistory = function (sample) {
             this.$$history.push({
-                sample: sample,
-                sampleNumber: this.$$sampleNumber,
                 real: this.$$referenceReal * sample,
                 imm: this.$$referenceImm * sample
             });
@@ -42,24 +46,57 @@ var CarrierRecovery = (function () {
             }
         };
 
-        CR.prototype.$$computeAverage = function () {
-            var n, history, i;
+        CR.prototype.$$computeAverage = function (sample) {
+            var
+                real,
+                imm,
+                n,
+                history,
+                i
+            ;
 
-            // TODO Implement windowing, compute values only at overlapping ends of each window
-            // TODO not per each sample. This will increase performance.
-
-            n = this.$$history.length;
-            this.$$real = 0;
-            this.$$imm = 0;
-
-            for (i = 0; i < n; i++) {
-                history = this.$$history[i];
-                this.$$real += history.real;
-                this.$$imm += history.imm;
+            if (this.$$queueReal.isFull()) {
+                this.$$queueSumReal -= this.$$queueReal.pop();
+                this.$$queueSumImm -= this.$$queueImm.pop();
             }
+            real = this.$$referenceReal * sample;
+            imm = this.$$referenceImm * sample;
+            this.$$queueReal.push(real);
+            this.$$queueImm.push(imm);
+            this.$$queueSumReal += real;
+            this.$$queueSumImm += imm;
 
-            this.$$real = this.$$real / n;
-            this.$$imm = this.$$imm / n;
+            real = this.$$queueSumReal / this.$$queueReal.getSize();
+            imm = this.$$queueSumImm / this.$$queueImm.getSize();
+
+            if (!FAST_MODE) {
+                n = this.$$history.length;
+                this.$$real = 0;
+                this.$$imm = 0;
+
+                for (i = 0; i < n; i++) {
+                    history = this.$$history[i];
+                    this.$$real += history.real;
+                    this.$$imm += history.imm;
+                }
+
+                this.$$real = this.$$real / n;
+                this.$$imm = this.$$imm / n;
+
+
+                if (
+                    Math.abs(this.$$real - real) > 0.000000001 ||
+                    Math.abs(this.$$imm - imm) > 0.000000001
+                ) {
+                    console.log(
+                        this.$$real, real, this.$$imm, imm
+                    );
+                    throw 'DATA NOT EQUAL';
+                }
+            } else {
+                this.$$real = real;
+                this.$$imm = imm;
+            }
         };
 
         CR.prototype.$$computePower = function () {
@@ -82,8 +119,10 @@ var CarrierRecovery = (function () {
 
         CR.prototype.handleSample = function (sample) {
             this.$$computeReference();
-            this.$$addToHistory(sample);
-            this.$$computeAverage();
+            if (!FAST_MODE) {
+                this.$$addToHistory(sample);
+            }
+            this.$$computeAverage(sample);
             this.$$computePower();
             this.$$computePhase();
 
