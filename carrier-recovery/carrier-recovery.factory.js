@@ -12,8 +12,7 @@ var CarrierRecovery = (function () {
             this.$$sizeDFT = sizeDFT;
             this.$$sampleNumber = 0;
             this.$$history = [];
-            this.$$queueReal = QueueBuilder.build(sizeDFT);
-            this.$$queueImm = QueueBuilder.build(sizeDFT);
+            this.$$queue = QueueBuilder.build(2 * sizeDFT);
             this.$$queueSumReal = 0;
             this.$$queueSumImm = 0;
             this.$$referenceReal = 0;
@@ -55,19 +54,20 @@ var CarrierRecovery = (function () {
                 i
             ;
 
-            if (this.$$queueReal.isFull()) {
-                this.$$queueSumReal -= this.$$queueReal.pop();
-                this.$$queueSumImm -= this.$$queueImm.pop();
+            if (this.$$queue.isFull()) {
+                this.$$queueSumReal -= this.$$queue.pop();
+                this.$$queueSumImm -= this.$$queue.pop();
             }
             real = this.$$referenceReal * sample;
             imm = this.$$referenceImm * sample;
-            this.$$queueReal.push(real);
-            this.$$queueImm.push(imm);
+            this.$$queue.push(real);
+            this.$$queue.push(imm);
             this.$$queueSumReal += real;
             this.$$queueSumImm += imm;
 
-            real = this.$$queueSumReal / this.$$queueReal.getSize();
-            imm = this.$$queueSumImm / this.$$queueImm.getSize();
+            n = this.$$queue.getSize() >>> 1;
+            real = this.$$queueSumReal / n;
+            imm = this.$$queueSumImm / n;
 
             if (!FAST_MODE) {
                 n = this.$$history.length;
@@ -89,6 +89,7 @@ var CarrierRecovery = (function () {
                     Math.abs(this.$$imm - imm) > 0.000000001
                 ) {
                     console.log(
+                        this.$$sampleNumber, this.$$queue.getSize(),
                         this.$$real, real, this.$$imm, imm
                     );
                     throw 'DATA NOT EQUAL';
@@ -142,12 +143,6 @@ var CarrierRecovery = (function () {
         CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
-            this.$$history.length = 0;
-            this.$$sampleNumber = 0;
-        };
-
-        CR.prototype.setSizeDFT = function (sizeDFT) {
-            this.$$sizeDFT = sizeDFT;
             this.$$history.length = 0;
             this.$$sampleNumber = 0;
         };

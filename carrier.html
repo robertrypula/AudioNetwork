@@ -209,14 +209,18 @@
 
             var
                 cg = new CarrierGenerate(5, 5),
-                cr = new CarrierRecovery(5, 1024),
+                cr = new CarrierRecovery(5, 1764),
                 secondsStart = new Date().getTime(),
                 secondsEnd,
                 sample,
                 carrier
             ;
 
-            for (var i = 0; i < 26 * 1000; i++) {
+//            cg.addToQueue([
+//                { duration: 1.65 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
+//            ]);
+
+            for (var i = 0; i < 1.65 * 1000 * 1000; i++) {
                 sample = cg.getSample();
                 cg.nextSample();
 
