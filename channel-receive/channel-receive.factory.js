@@ -54,7 +54,7 @@ var ChannelReceive = (function () {
             this.scriptStageMulNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcessStageMul(audioProcessingEvent);
             };
-            this.carrierRecovery = CarrierRecoveryBuilder.build(this.samplesPerPeriod);
+            this.carrierRecovery = CarrierRecoveryBuilder.build(this.samplesPerPeriod, 1000);
 
             this.scriptStageIntNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
             this.scriptStageIntNode.onaudioprocess = function (audioProcessingEvent) {
@@ -124,9 +124,12 @@ var ChannelReceive = (function () {
                 outputSample = 0;
 
                 this.carrierRecovery.handleSample(inputSample);
+                /*
+                // TODO use new interface
                 if (this.carrierRecovery.carrierAvailable()) {
                     outputSample = inputSample * this.carrierRecovery.getCarrier();
                 }
+                */
 
                 out[sampleIndex] = outputSample;
                 this.sampleCountMul++;
