@@ -26,7 +26,7 @@ var Queue = (function () {
             this.$$size++;
 
             return true;
-        }
+        };
 
         Q.prototype.pop = function () {
             var result;
@@ -39,15 +39,15 @@ var Queue = (function () {
             this.$$size--;
 
             return result;
-        }
+        };
 
         Q.prototype.getSize = function () {
             return this.$$size;
-        }
+        };
 
         Q.prototype.isFull = function () {
             return this.$$size === this.$$sizeMax;
-        }
+        };
 
         return Q;
     }

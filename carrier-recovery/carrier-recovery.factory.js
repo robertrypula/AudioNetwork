@@ -1,5 +1,3 @@
-var FAST_MODE = 1;
-
 var CarrierRecovery = (function () {
     'use strict';
 
@@ -9,9 +7,7 @@ var CarrierRecovery = (function () {
         var CR;
 
         CR = function (samplePerPeriod, sizeDFT) {
-            this.$$sizeDFT = sizeDFT;
             this.$$sampleNumber = 0;
-            this.$$history = [];
             this.$$queue = QueueBuilder.build(2 * sizeDFT);
             this.$$queueSumReal = 0;
             this.$$queueSumImm = 0;
@@ -34,25 +30,8 @@ var CarrierRecovery = (function () {
             this.$$referenceImm = Math.sin(x);
         };
 
-        CR.prototype.$$addToHistory = function (sample) {
-            this.$$history.push({
-                real: this.$$referenceReal * sample,
-                imm: this.$$referenceImm * sample
-            });
-
-            if (this.$$history.length > this.$$sizeDFT) {
-                this.$$history.splice(0, 1);
-            }
-        };
-
         CR.prototype.$$computeAverage = function (sample) {
-            var
-                real,
-                imm,
-                n,
-                history,
-                i
-            ;
+            var real, imm, n;
 
             if (this.$$queue.isFull()) {
                 this.$$queueSumReal -= this.$$queue.pop();
@@ -66,38 +45,8 @@ var CarrierRecovery = (function () {
             this.$$queueSumImm += imm;
 
             n = this.$$queue.getSize() >>> 1;
-            real = this.$$queueSumReal / n;
-            imm = this.$$queueSumImm / n;
-
-            if (!FAST_MODE) {
-                n = this.$$history.length;
-                this.$$real = 0;
-                this.$$imm = 0;
-
-                for (i = 0; i < n; i++) {
-                    history = this.$$history[i];
-                    this.$$real += history.real;
-                    this.$$imm += history.imm;
-                }
-
-                this.$$real = this.$$real / n;
-                this.$$imm = this.$$imm / n;
-
-
-                if (
-                    Math.abs(this.$$real - real) > 0.000000001 ||
-                    Math.abs(this.$$imm - imm) > 0.000000001
-                ) {
-                    console.log(
-                        this.$$sampleNumber, this.$$queue.getSize(),
-                        this.$$real, real, this.$$imm, imm
-                    );
-                    throw 'DATA NOT EQUAL';
-                }
-            } else {
-                this.$$real = real;
-                this.$$imm = imm;
-            }
+            this.$$real = this.$$queueSumReal / n;
+            this.$$imm = this.$$queueSumImm / n;
         };
 
         CR.prototype.$$computePower = function () {
@@ -120,9 +69,6 @@ var CarrierRecovery = (function () {
 
         CR.prototype.handleSample = function (sample) {
             this.$$computeReference();
-            if (!FAST_MODE) {
-                this.$$addToHistory(sample);
-            }
             this.$$computeAverage(sample);
             this.$$computePower();
             this.$$computePhase();
@@ -143,7 +89,6 @@ var CarrierRecovery = (function () {
         CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
-            this.$$history.length = 0;
             this.$$sampleNumber = 0;
         };
 

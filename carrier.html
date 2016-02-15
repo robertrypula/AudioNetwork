@@ -5,21 +5,17 @@
         <title></title>
     </head>
     <body>
-
         <div>Sample</div>
         <canvas width="5000" height="128" id="buffer-sample" style="border: 1px solid red;"></canvas>
         <div>Power [dB]</div>
         <canvas width="5000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
         <div>Phase</div>
         <canvas width="5000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
-
         <div>Constellation</div>
         <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
-
-
-        <input type="number" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="7000" />
-
-
+        <br/>
+        <label for="samples-per-period">Samples per period</label>
+        <input type="number" name="samples-per-period" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="7000" />
 
         <script src="audio-util/audio-util.js"></script>
         <script src="queue/queue-builder.service.js"></script>
@@ -28,10 +24,9 @@
         <script src="carrier-generate/carrier-generate.factory.js"></script>
 
         <script>
-
             var
                 sampleFrequency = 44100,
-                brustDuration = sampleFrequency * 0.040,  // 1764 samples per brust, 25 baud / sec
+                burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec
                 color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
                 sampleMax = 5000,
                 bufferSample = [],
@@ -49,28 +44,28 @@
                     sampleFrequency / (7000 + 800),
                     sampleFrequency / (7000 + 900)
                 ],
-                carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], brustDuration),
+                carrierRecovery = new CarrierRecovery(samplesPerPeriod[0], burstDuration),
                 carrierGenerate = [];
                 data = [
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.000 },
-                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.500 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.000 },
+                        { amplitude: +0.00, duration: 0.5 * burstDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.500 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.250 },
-                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.750 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.250 },
+                        { amplitude: +0.00, duration: 0.5 * burstDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.750 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ],
                     [
                         { amplitude: +0.00, duration: 100, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.500 },
-                        { amplitude: +0.00, duration: 0.5 * brustDuration, phase: +0.000 },
-                        { amplitude: +0.10, duration: brustDuration, phase: +0.125 + 0.000 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.500 },
+                        { amplitude: +0.00, duration: 0.5 * burstDuration, phase: +0.000 },
+                        { amplitude: +0.10, duration: burstDuration, phase: +0.125 + 0.000 },
                         { amplitude: +0.00, duration: 200, phase: +0.000 }
                     ]
                 ]
@@ -130,7 +125,7 @@
                 ctx.closePath();
                 ctx.stroke();
                 for (i = 0; i < bufferPhase.length; i++) {
-                    if (i < (100 + brustDuration) - 50 || i > (100 + brustDuration) + 50) {
+                    if (i < (100 + burstDuration) - 50 || i > (100 + burstDuration) + 50) {
                         continue;
                     }
                     x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
@@ -184,9 +179,8 @@
                     bufferSample[sampleNumber] = sample;
                 }
 
-
-
                 // ----
+
                 // addNoise(bufferSample, 0.2);
                 analyzeBufferSample(bufferSample, bufferPower, bufferPhase);
                 draw('buffer-sample', bufferSample);
@@ -195,13 +189,11 @@
                 drawConstellationDiagram('constellation-diagram', bufferPhase, bufferPower);
             }
 
-
             function initialize() {
                 nextFrame();
             }
 
-
-            // initialize();
+            initialize();
 
 
             // --------------
@@ -216,52 +208,20 @@
                 carrier
             ;
 
-//            cg.addToQueue([
-//                { duration: 1.65 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
-//            ]);
+            cg.addToQueue([
+                { duration: 1.65 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
+            ]);
 
-            for (var i = 0; i < 1.65 * 1000 * 1000; i++) {
+            for (var i = 0; i < -1.65 * 1000 * 1000; i++) {
                 sample = cg.getSample();
                 cg.nextSample();
-
                 cr.handleSample(sample);
                 carrier = cr.getCarrier();
             }
+
             secondsEnd = new Date().getTime();
-
-            console.log(
-                (secondsEnd - secondsStart) + ' ms'
-            );
-            document.write(
-                (secondsEnd - secondsStart) + ' ms'
-            );
-
-            /*
-            function testCarrierGenerate(size) {
-                var sample, i;
-
-                for (i = 0; i < size; i++) {
-                    sample = cg.getSample();
-                    cg.nextSample();
-                    console.log(sample);
-                    console.log(" ----");
-                }
-            }
-
-            testCarrierGenerate(2);
-
-            cg.addToQueue([
-                { duration: 8, amplitude: 0.5, phase: 0.0 }
-            ]);
-
-            testCarrierGenerate(10);
-
-            cg.addToQueue([
-                { duration: 4, amplitude: 0.5, phase: 0.0 }
-            ]);
-
-            testCarrierGenerate(5);
-            */
+            console.log((secondsEnd - secondsStart) + ' ms');
+            document.write((secondsEnd - secondsStart) + ' ms');
 
         </script>
     </body>
