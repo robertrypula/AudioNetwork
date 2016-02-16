@@ -15,7 +15,7 @@ var AudioNetworkDevice = (function () {
 
         function configureNodes() {
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                573, 900, 5000
+                4000, 900, 5000
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 573//, 900, 5000
@@ -23,12 +23,14 @@ var AudioNetworkDevice = (function () {
 
             analyser = Audio.createAnalyser();
             analyser.fftSize = 1 * 1024;
+            // analyser.minDecibels = -81;
+            // analyser.maxDecibels = -70;
 
             channelTransmitManager.getOutputNode().connect(analyser);
             analyser.connect(Audio.destination);
             channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
 
-            console.log('Sampling rate: ', Audio.sampleRate);
+            console.log('Sampling rate: ', Audio.getSampleRate());
 
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
             receive01Chart = AnalyserChartBuilder.build(document.getElementById('receive-01'), channelReceiveManager.getChannel(0).analyserStageThrNode);
@@ -54,44 +56,12 @@ var AudioNetworkDevice = (function () {
         }
 
         function addQueueTest(channelIndex) {
-            var sd = Math.round(Audio.sampleRate * 0.010);
+            var sd = Math.round(Audio.getSampleRate() * 1.500);
 
             console.log('queue Added, sd=', sd);
 
-            channelTransmitManager.getChannel(channelIndex).addSignalToQueue([
-                { symbol: null, duration: 0.2 * Audio.sampleRate },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 1, duration: sd },
-                { symbol: 0, duration: sd }
+            channelTransmitManager.getChannel(channelIndex).addToQueue([
+                { amplitude: +1.00, duration: sd, phase: +0.000 }
             ]);
         }
 

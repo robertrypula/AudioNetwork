@@ -38,6 +38,10 @@ var Audio = (function () {
             return context.createChannelMerger(numberOfInputs);
         }
 
+        function getSampleRate() {
+            return context.sampleRate;
+        }
+
         function init() {
             var AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -47,7 +51,7 @@ var Audio = (function () {
         init();
 
         return {
-            sampleRate: context.sampleRate,
+            getSampleRate: getSampleRate,
             destination: context.destination,
             getCurrentTime: getCurrentTime,
             createAnalyser: createAnalyser,

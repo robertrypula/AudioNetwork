@@ -41,7 +41,7 @@ var ChannelReceive = (function () {
             var self = this;
 
             this.frequency = frequency;
-            this.samplesPerPeriod = Audio.sampleRate / this.frequency;
+            this.samplesPerPeriod = Audio.getSampleRate() / this.frequency;
 
             this.gainNode = Audio.createGain();
 
