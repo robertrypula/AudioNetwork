@@ -6,12 +6,12 @@ var ChannelReceiveManager = (function () {
     function _ChannelReceiveManager() {
         var CRM;
 
-        CRM = function (frequencyList) {
+        CRM = function (configuration) {
             this.channelReceive = [];
             this.gainNode;
 
             this.$$init();
-            this.configure(frequencyList);
+            this.configure(configuration);
         };
 
         CRM.prototype.clear = function () {
@@ -25,12 +25,12 @@ var ChannelReceiveManager = (function () {
             this.channelReceive.length = 0;
         };
 
-        CRM.prototype.configure = function (frequencyList) {
+        CRM.prototype.configure = function (configuration) {
             var i, cr;
 
             this.clear();
-            for (i = 0; i < frequencyList.length; i++) {
-                cr = ChannelReceiveBuilder.build(frequencyList[i]);
+            for (i = 0; i < configuration.length; i++) {
+                cr = ChannelReceiveBuilder.build(configuration[i]);
                 this.gainNode.connect(cr.getFirstNode());
                 this.channelReceive.push(cr);
             }

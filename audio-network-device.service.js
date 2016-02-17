@@ -13,14 +13,40 @@ var AudioNetworkDevice = (function () {
             channelTransmitManager,
             channelReceiveManager;
 
+        function notifyHandler(baseFrequency, carrierData) {
+            var state, i, cd, spaces;
+
+            spaces = "        ";
+            state = (spaces + baseFrequency).slice(-6) + 'Hz | ';
+            for (i = 0; i < carrierData.length; i++) {
+                cd = carrierData[i];
+                if (cd.powerDecibel === -Infinity) {
+                    cd.powerDecibel = -999;
+                }
+                state += (
+                    (spaces + Math.round(cd.powerDecibel)).slice(-4) + 'dB ' +
+                    (spaces + Math.round(cd.phase * 360)).slice(-3) + 'deg ' +
+                    ' | '
+                );
+            }
+
+            document.getElementById('receive-01').innerHTML = state;
+        }
+
         function configureNodes() {
+            var
+                dftSize = Audio.getSampleRate() * 0.050,
+                notificationPerSecond = 10,
+                notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
+
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                { baseFrequency: 1000, ofdmSize: 10, ofdmFrequencySpacing: 100 },
-                { baseFrequency: 2300, ofdmSize: 1, ofdmFrequencySpacing: 100 },
-                { baseFrequency: 4200, ofdmSize: 1, ofdmFrequencySpacing: 100 }
+                { baseFrequency: 1000, ofdmSize: 4, ofdmFrequencySpacing: 100 }
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
-                573//, 900, 5000
+                {
+                    baseFrequency: 1000, ofdmSize: 4, ofdmFrequencySpacing: 100,
+                    dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
+                }
             ]);
 
             analyser = Audio.createAnalyser();
@@ -28,14 +54,14 @@ var AudioNetworkDevice = (function () {
             // analyser.minDecibels = -81;
             // analyser.maxDecibels = -70;
 
+            channelTransmitManager.getOutputNode().connect(Audio.destination);
             channelTransmitManager.getOutputNode().connect(analyser);
-            analyser.connect(Audio.destination);
             channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
 
             console.log('Sampling rate: ', Audio.getSampleRate());
 
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
-            receive01Chart = AnalyserChartBuilder.build(document.getElementById('receive-01'), channelReceiveManager.getChannel(0).analyserStageThrNode);
+            //receive01Chart = AnalyserChartBuilder.build(document.getElementById('receive-01'), channelReceiveManager.getChannel(0).analyserStageThrNode);
             //receive02Chart = AnalyserChartBuilder.build(document.getElementById('receive-02'), channelReceiveManager.getChannel(1).analyserStageThrNode);
             //receive03Chart = AnalyserChartBuilder.build(document.getElementById('receive-03'), channelReceiveManager.getChannel(2).analyserStageThrNode);
         }
@@ -60,19 +86,11 @@ var AudioNetworkDevice = (function () {
         function addQueueTest(channelIndex) {
             var sd = Math.round(Audio.getSampleRate() * 1.500);
 
-            console.log('queue Added, sd=', sd);
-
             channelTransmitManager.getChannel(channelIndex).addToQueue([
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 0
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 1
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 2
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 3
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 4
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 5
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 6
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 7
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }], // 8
-                [{ amplitude: +0.10, duration: sd, phase: +0.000 }]  // 9
+                [{ amplitude: +0.25, duration: sd, phase: +0.000 }], // 0
+                [{ amplitude: +0.25, duration: sd, phase: +0.250 }], // 1
+                [{ amplitude: +0.25, duration: sd, phase: +0.500 }], // 2
+                [{ amplitude: +0.25, duration: sd, phase: +0.750 }]  // 3
             ]);
         }
 

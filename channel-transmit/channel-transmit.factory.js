@@ -32,23 +32,21 @@ var ChannelTransmit = (function () {
         };
 
         CT.prototype.configure = function (configuration) {
-            var i, cg;
+            var i, cg, samplePerPeriod, subcarrierFrequency;
 
             this.carrierGenerate.length = 0;
             for (i = 0; i < configuration.ofdmSize; i++) {
-                cg = CarrierGenerateBuilder.build(
-                    Audio.getSampleRate() /
-                    (configuration.baseFrequency + i * configuration.ofdmFrequencySpacing)
-                );
+                subcarrierFrequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
+                samplePerPeriod = Audio.getSampleRate() / subcarrierFrequency;
+                cg = CarrierGenerateBuilder.build(samplePerPeriod);
                 this.carrierGenerate.push(cg);
-
             }
         };
 
         CT.prototype.init = function () {
             var self = this;
 
-            this.scriptNode = Audio.createScriptProcessor(2 * 1024, 1, 1);
+            this.scriptNode = Audio.createScriptProcessor(4 * 1024, 1, 1);
             this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcess(audioProcessingEvent);
             };
@@ -62,6 +60,7 @@ var ChannelTransmit = (function () {
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 outputData = outputBuffer.getChannelData(0),
                 sample,
+                cg,
                 i,
                 j
             ;
@@ -70,8 +69,10 @@ var ChannelTransmit = (function () {
                 sample = 0;
 
                 for (j = 0; j < this.carrierGenerate.length; j++) {
-                    sample += this.carrierGenerate[j].getSample();
-                    this.carrierGenerate[j].nextSample();
+                    cg = this.carrierGenerate[j];
+
+                    sample += cg.getSample();
+                    cg.nextSample();
                 }
 
                 outputData[i] = sample;

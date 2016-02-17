@@ -5,8 +5,8 @@ var ChannelTransmitManagerBuilder = (function () {
 
     function _ChannelTransmitManagerBuilder() {
 
-        function build(frequencyList) {
-            return new ChannelTransmitManager(frequencyList);
+        function build(configuration) {
+            return new ChannelTransmitManager(configuration);
         }
 
         return {
