@@ -43,6 +43,7 @@ var AudioUtil = (function () {
 
             for (i = 0; i < itemList.length; i++) {
                 item = itemList[i];
+
                 if (item[amountFieldName] <= 0) {
                     continue;
                 }

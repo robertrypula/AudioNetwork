@@ -43,7 +43,6 @@ var ChannelTransmit = (function () {
                 this.carrierGenerate.push(cg);
 
             }
-            console.log(this.carrierGenerate);
         };
 
         CT.prototype.init = function () {
