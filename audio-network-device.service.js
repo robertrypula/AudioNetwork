@@ -15,7 +15,9 @@ var AudioNetworkDevice = (function () {
 
         function configureNodes() {
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                4000, 900, 5000
+                { baseFrequency: 1000, ofdmSize: 4, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 2300, ofdmSize: 1, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 4200, ofdmSize: 1, ofdmFrequencySpacing: 100 }
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 573//, 900, 5000
@@ -61,7 +63,10 @@ var AudioNetworkDevice = (function () {
             console.log('queue Added, sd=', sd);
 
             channelTransmitManager.getChannel(channelIndex).addToQueue([
-                { amplitude: +1.00, duration: sd, phase: +0.000 }
+                { amplitude: +0.25, duration: sd, phase: +0.000 },
+                { amplitude: +0.25, duration: sd, phase: +0.000 },
+                { amplitude: +0.25, duration: sd, phase: +0.000 },
+                { amplitude: +0.25, duration: sd, phase: +0.000 }
             ]);
         }
 

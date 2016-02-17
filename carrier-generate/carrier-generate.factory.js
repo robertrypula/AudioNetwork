@@ -96,6 +96,9 @@ var CarrierGenerate = (function () {
                 queueItem.amplitude = item.amplitude;
                 queueItem.phase = item.phase;
             });
+
+            console.log(carrierData);
+            console.log(this.$$queue);
         };
 
         return CG;

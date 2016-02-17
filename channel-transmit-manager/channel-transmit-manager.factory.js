@@ -6,12 +6,12 @@ var ChannelTransmitManager = (function () {
     function _ChannelTransmitManager() {
         var CTM;
 
-        CTM = function (frequencyList) {
+        CTM = function (configuration) {
             this.channelTransmit = [];
             this.gainNode;
 
             this.$$init();
-            this.configure(frequencyList);
+            this.configure(configuration);
         };
 
         CTM.prototype.clear = function () {
@@ -25,12 +25,12 @@ var ChannelTransmitManager = (function () {
             this.channelTransmit.length = 0;
         };
 
-        CTM.prototype.configure = function (frequencyList) {
+        CTM.prototype.configure = function (configuration) {
             var i, ct;
 
             this.clear();
-            for (i = 0; i < frequencyList.length; i++) {
-                ct = ChannelTransmitBuilder.build(frequencyList[i]);
+            for (i = 0; i < configuration.length; i++) {
+                ct = ChannelTransmitBuilder.build(configuration[i]);
                 ct.getLastNode().connect(this.gainNode);
                 this.channelTransmit.push(ct);
             }
