@@ -30,7 +30,7 @@ var AudioNetworkDevice = (function () {
                 );
             }
 
-            document.getElementById('receive-01').innerHTML = state;
+            document.getElementById('receive-' + baseFrequency).innerHTML = state;
         }
 
         function configureNodes() {
@@ -40,23 +40,33 @@ var AudioNetworkDevice = (function () {
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                { baseFrequency: 1000, ofdmSize: 4, ofdmFrequencySpacing: 100 }
-            ]);
+                { baseFrequency: 1000, ofdmSize: 2, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 3000, ofdmSize: 2, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 5000, ofdmSize: 2, ofdmFrequencySpacing: 100 }
+            ])
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 {
-                    baseFrequency: 1000, ofdmSize: 4, ofdmFrequencySpacing: 100,
+                    baseFrequency: 1000, ofdmSize: 2, ofdmFrequencySpacing: 100,
+                    dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
+                },
+                {
+                    baseFrequency: 3000, ofdmSize: 2, ofdmFrequencySpacing: 100,
+                    dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
+                },
+                {
+                    baseFrequency: 5000, ofdmSize: 2, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 }
             ]);
 
             analyser = Audio.createAnalyser();
             analyser.fftSize = 1 * 1024;
-            // analyser.minDecibels = -81;
-            // analyser.maxDecibels = -70;
+            // analyser.minDecibels = -80;
+            // analyser.maxDecibels = -40;
 
             channelTransmitManager.getOutputNode().connect(Audio.destination);
-            channelTransmitManager.getOutputNode().connect(analyser);
-            channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
+            Audio.getMicrofoneNode().connect(analyser);
+            Audio.getMicrofoneNode().connect(channelReceiveManager.getInputNode());
 
             console.log('Sampling rate: ', Audio.getSampleRate());
 
@@ -88,9 +98,9 @@ var AudioNetworkDevice = (function () {
 
             channelTransmitManager.getChannel(channelIndex).addToQueue([
                 [{ amplitude: +0.25, duration: sd, phase: +0.000 }], // 0
-                [{ amplitude: +0.25, duration: sd, phase: +0.250 }], // 1
-                [{ amplitude: +0.25, duration: sd, phase: +0.500 }], // 2
-                [{ amplitude: +0.25, duration: sd, phase: +0.750 }]  // 3
+                [{ amplitude: +0.25, duration: sd, phase: +0.250 }] // 1
+                //[{ amplitude: +0.25, duration: sd, phase: +0.500 }], // 2
+                //[{ amplitude: +0.25, duration: sd, phase: +0.750 }]  // 3
             ]);
         }
 

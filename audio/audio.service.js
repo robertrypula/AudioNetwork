@@ -4,7 +4,12 @@ var Audio = (function () {
     _Audio.$inject = [];
 
     function _Audio() {
-        var context = null;
+        var
+            context = null,
+            microfoneNode = null,
+            microfoneSplitterNode = null,
+            microfoneMergerNode = null
+        ;
 
         function getContext() {
             return context;
@@ -42,15 +47,54 @@ var Audio = (function () {
             return context.sampleRate;
         }
 
+        function getMicrofoneNode() {
+            return microfoneNode;
+        }
+
+        function userMediaStreamSuccess(stream) {
+            var rawMicrofoneNode = context.createMediaStreamSource(stream);
+
+            microfoneSplitterNode = context.createChannelSplitter(2);
+            microfoneMergerNode = context.createChannelMerger(2);
+            rawMicrofoneNode.connect(microfoneSplitterNode);
+            microfoneSplitterNode.connect(microfoneMergerNode, 0, 0);
+            microfoneSplitterNode.connect(microfoneMergerNode, 0, 1);
+            microfoneMergerNode.connect(microfoneNode);
+        }
+
         function init() {
             var AudioContext = window.AudioContext || window.webkitAudioContext;
 
             context = new AudioContext();
+            microfoneNode = context.createGain();
+
+            if (!navigator.getUserMedia) {
+                navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            }
+            navigator.getUserMedia(
+                {
+                    audio: {
+                        mandatory: {
+                            googEchoCancellation: false,
+                            googAutoGainControl: false,
+                            googNoiseSuppression: false,
+                            googHighpassFilter: false
+                        },
+                        optional: []
+                    }
+                },
+                userMediaStreamSuccess,
+                function(e) {
+                    alert('Error getting audio');
+                    console.log(e);
+                }
+            );
         }
 
         init();
 
         return {
+            getMicrofoneNode: getMicrofoneNode,
             getSampleRate: getSampleRate,
             destination: context.destination,
             getCurrentTime: getCurrentTime,
