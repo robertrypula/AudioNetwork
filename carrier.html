@@ -27,7 +27,7 @@
             var
                 sampleFrequency = 44100,
                 burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec
-                color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
+                color = 0 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
                 sampleMax = 5000,
                 bufferSample = [],
                 bufferPower = [],
@@ -198,30 +198,33 @@
 
             // --------------
 
+            function benchmark() {
+                var
+                    cg = new CarrierGenerate(5, 5),
+                    cr = new CarrierRecovery(5, 44100 * 0.75),
+                    secondsStart = new Date().getTime(),
+                    secondsEnd,
+                    sample,
+                    carrier
+                ;
 
-            var
-                cg = new CarrierGenerate(5, 5),
-                cr = new CarrierRecovery(5, 44100 * 0.75),
-                secondsStart = new Date().getTime(),
-                secondsEnd,
-                sample,
-                carrier
-            ;
+                cg.addToQueue([
+                    { duration: 2.4 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
+                ]);
 
-            cg.addToQueue([
-                { duration: 1.65 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
-            ]);
+                for (var i = 0; i < 2.00 * 1000 * 1000; i++) {
+                    sample = cg.getSample();
+                    cg.nextSample();
+                    cr.handleSample(sample);
+                    carrier = cr.getCarrier();
+                }
 
-            for (var i = 0; i < 1.35 * 1000 * 1000; i++) {
-                sample = cg.getSample();
-                cg.nextSample();
-                cr.handleSample(sample);
-                carrier = cr.getCarrier();
+                secondsEnd = new Date().getTime();
+                console.log((secondsEnd - secondsStart) + ' ms');
+                document.write((secondsEnd - secondsStart) + ' ms');   
             }
 
-            secondsEnd = new Date().getTime();
-            console.log((secondsEnd - secondsStart) + ' ms');
-            document.write((secondsEnd - secondsStart) + ' ms');
+            setTimeout(benchmark, 3000);
 
         </script>
     </body>
