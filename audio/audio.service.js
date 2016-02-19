@@ -94,10 +94,13 @@ var Audio = (function () {
                         video: false,
                         audio: {
                             mandatory: {
-                                googEchoCancellation: false,
+                                // echoCancellation: false,
+                                googEchoCancellation: false, // disabling audio processing
                                 googAutoGainControl: false,
                                 googNoiseSuppression: false,
-                                googHighpassFilter: false
+                                googHighpassFilter: false,
+                                googTypingNoiseDetection: false
+                                //googAudioMirroring: true
                             },
                             optional: []
                         }

@@ -13,6 +13,7 @@
         <canvas width="5000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
         <div>Constellation</div>
         <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
+        <div id="constellation-diagram-v2"></div>
         <br/>
         <label for="samples-per-period">Samples per period</label>
         <input type="number" name="samples-per-period" id="samples-per-period" onChange="onSamplesPerPeriodChange(this)" value="7000" />
@@ -20,6 +21,7 @@
         <script src="audio-util/audio-util.js"></script>
         <script src="queue/queue-builder.service.js"></script>
         <script src="queue/queue.factory.js"></script>
+        <script src="constellation-diagram/constellation-diagram.factory.js"></script>
         <script src="carrier-recovery/carrier-recovery.factory.js"></script>
         <script src="carrier-generate/carrier-generate.factory.js"></script>
 
@@ -27,7 +29,7 @@
             var
                 sampleFrequency = 44100,
                 burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec
-                color = 0 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
+                color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
                 sampleMax = 5000,
                 bufferSample = [],
                 bufferPower = [],
@@ -189,11 +191,38 @@
                 drawConstellationDiagram('constellation-diagram', bufferPhase, bufferPower);
             }
 
-            function initialize() {
-                nextFrame();
+            var constellationDiagram;
+            var cdQueue;
+
+            function testConstellationDiagramV2() {
+                cdQueue = new Queue(10);
+
+                cdQueue.push(0.25); // x
+                cdQueue.push(0.25); // y
+
+                cdQueue.push(0.80); // x
+                cdQueue.push(0.25); // y
+
+                cdQueue.push(0.80); // x
+                cdQueue.push(0.80); // y
+
+                cdQueue.push(0.25); // x
+                cdQueue.push(0.80); // y
+
+                constellationDiagram = new ConstellationDiagram(
+                    document.getElementById('constellation-diagram-v2'),
+                    cdQueue,
+                    512,
+                    512
+                );
             }
 
-            // initialize();
+            function initialize() {
+                nextFrame();
+                testConstellationDiagramV2();
+            }
+
+            initialize();
 
 
             // --------------
@@ -224,7 +253,7 @@
                 document.write((secondsEnd - secondsStart) + ' ms');   
             }
 
-            setTimeout(benchmark, 3000);
+            // setTimeout(benchmark, 3000);
 
         </script>
     </body>

@@ -41,6 +41,14 @@ var Queue = (function () {
             return result;
         };
 
+        Q.prototype.getItem = function (index) {
+            if (index >= this.$$size) {
+                return null;
+            }
+
+            return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
+        };
+
         Q.prototype.getSize = function () {
             return this.$$size;
         };
