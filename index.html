@@ -18,23 +18,48 @@
         <div id="test"></div>
 
         <h2>R1</h2>
-        <div id="receive-1000" style="font-family: monospace; white-space: pre"></div>
+        <div id="receive-0" style="font-family: monospace; white-space: pre"></div>
+        <div>
+            <div id="receive-0-cd-0" style="float: left; margin-right: 5px;"></div>
+            <div id="receive-0-cd-1" style="float: left; margin-right: 5px;"></div>
+            <div style="clear: both"></div>
+        </div>
 
         <h2>R2</h2>
-        <div id="receive-3000" style="font-family: monospace; white-space: pre"></div>
+        <div id="receive-1" style="font-family: monospace; white-space: pre"></div>
+        <div>
+            <div id="receive-1-cd-0" style="float: left; margin-right: 5px;"></div>
+            <div id="receive-1-cd-1" style="float: left; margin-right: 5px;"></div>
+            <div style="clear: both"></div>
+        </div>
 
+        <!--
         <h2>R3</h2>
-        <div id="receive-5000" style="font-family: monospace; white-space: pre"></div>
+        <div id="receive-2" style="font-family: monospace; white-space: pre"></div>
+        <div>
+            <div id="receive-2-cd-0" style="float: left; margin-right: 5px;"></div>
+            <div id="receive-2-cd-1" style="float: left; margin-right: 5px;"></div>
+            <div style="clear: both"></div>
+        </div>
+        -->
 
         <br/>
-        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0)">AddQueueTest 0</a>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0, 0)">AddQueueTest 0</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0, 0.25)">AddQueueTest 0 + 0.25</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0, 0.50)">AddQueueTest 0 + 0.50</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(0, 0.75)">AddQueueTest 0 + 0.75</a>
         <br/>
-        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1)">AddQueueTest 1</a>
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1, 0)">AddQueueTest 1</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1, 0.25)">AddQueueTest 1 + 0.25</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1, 0.50)">AddQueueTest 1 + 0.50</a> |
+        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(1, 0.75)">AddQueueTest 1 + 0.75</a>
         <br/>
-        <a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(2)">AddQueueTest 2</a>
+        <!--<a href="javascript:void(0)" onClick="AudioNetworkDevice.addQueueTest(2)">AddQueueTest 2</a>-->
 
         <script src="audio/audio.service.js"></script>
         <script src="audio-util/audio-util.js"></script>
+        <script src="constellation-diagram/constellation-diagram.factory.js"></script>
+        <script src="constellation-diagram/constellation-diagram-builder.service.js"></script>
         <script src="queue/queue-builder.service.js"></script>
         <script src="queue/queue.factory.js"></script>
         <script src="carrier-generate/carrier-generate.factory.js"></script>

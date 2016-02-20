@@ -70,6 +70,8 @@ var ConstellationDiagram = (function () {
                 halfW = 0.5 * this.$$canvasWidth,
                 halfH = 0.5 * this.$$canvasHeight,
                 q = this.$$queue,
+                halfQSize = 0.5 * q.getSize(),
+                color,
                 x,
                 y,
                 i;
@@ -80,18 +82,20 @@ var ConstellationDiagram = (function () {
 
             ctx.clearRect(0, 0, w, h);
             ctx.beginPath();
-            ctx.moveTo(0, 256);
-            ctx.lineTo(512, 256);
+            ctx.moveTo(0, halfH);
+            ctx.lineTo(w, halfH);
             ctx.closePath();
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(256, 0);
-            ctx.lineTo(256, 512);
+            ctx.moveTo(halfW, 0);
+            ctx.lineTo(halfW, h);
             ctx.closePath();
             ctx.stroke();
-            for (i = 0; i < 0.5 * q.getSize(); i++) {
+            for (i = 0; i < halfQSize; i++) {
                 x = halfW + halfW * q.getItem(2 * i);
                 y = halfH - halfH * q.getItem(2 * i + 1);
+                color = 128 - 128 * (i / (halfQSize - 1));
+                ctx.fillStyle = 'rgba(' + color + ', ' + color + ', 100, 1)';
                 ctx.fillRect(x - 1, y - 1, 3, 3);
             }
         };
