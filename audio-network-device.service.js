@@ -68,16 +68,16 @@ var AudioNetworkDevice = (function () {
             var
                 queue,
                 dftSize = Audio.getSampleRate() * 0.050,
-                notificationPerSecond = 6,
+                notificationPerSecond = 10,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                { baseFrequency: 1000, ofdmSize: 2, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 1000, ofdmSize: 1, ofdmFrequencySpacing: 100 },
                 { baseFrequency: 3000, ofdmSize: 1, ofdmFrequencySpacing: 100 }
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 {
-                    baseFrequency: 1000, ofdmSize: 2, ofdmFrequencySpacing: 100,
+                    baseFrequency: 1000, ofdmSize: 1, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 },
                 {
@@ -90,9 +90,11 @@ var AudioNetworkDevice = (function () {
             mapping.baseFrequency1000.queue.push(queue);
             mapping.baseFrequency1000.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
 
+            /*
             queue = QueueBuilder.build(2 * 10);
             mapping.baseFrequency1000.queue.push(queue);
             mapping.baseFrequency1000.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
+            */
 
             queue = QueueBuilder.build(2 * 10);
             mapping.baseFrequency3000.queue.push(queue);
@@ -125,13 +127,13 @@ var AudioNetworkDevice = (function () {
             switch (channelIndex) {
                 case 0:
                     channelTransmitManager.getChannel(channelIndex).addToQueue([
-                        [{ amplitude: +0.25, duration: sd, phase: +0.000 + offset }],
-                        [{ amplitude: +0.25, duration: sd, phase: +0.250 + offset }]
+                        [{ amplitude: +1.00, duration: sd, phase: +0.000 + offset }]//,
+                        //[{ amplitude: +0.25, duration: sd, phase: +0.250 + offset }]
                     ]);
                     break;
                 case 1:
                     channelTransmitManager.getChannel(channelIndex).addToQueue([
-                        [{ amplitude: +0.25, duration: sd, phase: +0.000 + offset }]
+                        [{ amplitude: +1.00, duration: sd, phase: +0.000 + offset }]
                     ]);
                     break;
             }

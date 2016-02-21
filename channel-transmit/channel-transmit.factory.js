@@ -76,7 +76,7 @@ var ChannelTransmit = (function () {
                 }
 
                 outputData[i] = sample;
-                outputData[i] += ((Math.random() * 2) - 1) * 0.1;
+                // outputData[i] += ((Math.random() * 2) - 1) * 0.1;
             }
         };
 
