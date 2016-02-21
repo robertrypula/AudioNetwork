@@ -108,7 +108,7 @@ var AudioNetworkDevice = (function () {
 
             channelTransmitManager.getOutputNode().connect(Audio.destination);
 
-            if (0) {
+            if (1) {
                 Audio.getMicrofoneNode().connect(analyser);
                 Audio.getMicrofoneNode().connect(channelReceiveManager.getInputNode());
             } else {
