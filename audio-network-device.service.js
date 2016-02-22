@@ -10,12 +10,12 @@ var AudioNetworkDevice = (function () {
             channelTransmitManager,
             channelReceiveManager,
             mapping = {
-                baseFrequency1000: {
+                baseFrequency1070: {
                     index: 0,
                     constellationDiagram: [],
                     queue: []
                 },
-                baseFrequency3000: {
+                baseFrequency2025: {
                     index: 1,
                     constellationDiagram: [],
                     queue: []
@@ -70,33 +70,33 @@ var AudioNetworkDevice = (function () {
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                { baseFrequency: 1000, ofdmSize: 1, ofdmFrequencySpacing: 100 },
-                { baseFrequency: 3000, ofdmSize: 1, ofdmFrequencySpacing: 100 }
+                { baseFrequency: 1070, ofdmSize: 1, ofdmFrequencySpacing: 100 },
+                { baseFrequency: 2025, ofdmSize: 1, ofdmFrequencySpacing: 100 }
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 {
-                    baseFrequency: 1000, ofdmSize: 1, ofdmFrequencySpacing: 100,
+                    baseFrequency: 1070, ofdmSize: 1, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 },
                 {
-                    baseFrequency: 3000, ofdmSize: 1, ofdmFrequencySpacing: 100,
+                    baseFrequency: 2025, ofdmSize: 1, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 }
             ]);
 
             queue = QueueBuilder.build(2 * 10);
-            mapping.baseFrequency1000.queue.push(queue);
-            mapping.baseFrequency1000.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
+            mapping.baseFrequency1070.queue.push(queue);
+            mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
 
             /*
             queue = QueueBuilder.build(2 * 10);
-            mapping.baseFrequency1000.queue.push(queue);
-            mapping.baseFrequency1000.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
+            mapping.baseFrequency1070.queue.push(queue);
+            mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
             */
 
             queue = QueueBuilder.build(2 * 10);
-            mapping.baseFrequency3000.queue.push(queue);
-            mapping.baseFrequency3000.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-1-cd-0'), queue, 200, 200));
+            mapping.baseFrequency2025.queue.push(queue);
+            mapping.baseFrequency2025.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-1-cd-0'), queue, 200, 200));
 
 
             analyser = Audio.createAnalyser();
