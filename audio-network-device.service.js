@@ -120,7 +120,10 @@ var AudioNetworkDevice = (function () {
         }
 
         function addQueueTest(channelIndex, offset) {
-            var sd = Math.round(Audio.getSampleRate() * 1.500);
+            var
+                symbolDuration = parseFloat(document.getElementById('symbol-duration').value),
+                sd = Math.round(Audio.getSampleRate() * symbolDuration / 1000)
+            ;
 
             switch (channelIndex) {
                 case 0:
