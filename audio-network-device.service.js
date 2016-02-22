@@ -29,11 +29,9 @@ var AudioNetworkDevice = (function () {
         ;
 
         function notifyHandler(baseFrequency, carrierData) {
-            var state, i, cd, spaces, _, q, x, y, powerNormalized;
+            var state, i, cd, spaces, _, q, powerNormalized;
 
             _ = mapping['baseFrequency' + baseFrequency];
-
-
 
             spaces = "        ";
             state = (spaces + baseFrequency).slice(-6) + 'Hz | ';
@@ -67,8 +65,8 @@ var AudioNetworkDevice = (function () {
         function configureNodes() {
             var
                 queue,
-                dftSize = Audio.getSampleRate() * 0.050,
-                notificationPerSecond = 10,
+                dftSize = Audio.getSampleRate() * 0.05,
+                notificationPerSecond = 25,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
@@ -116,7 +114,7 @@ var AudioNetworkDevice = (function () {
                 channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
             }
 
-            console.log('Sampling rate: ', Audio.getSampleRate());
+            document.getElementById('sampling-frequency').innerHTML = Audio.getSampleRate() + 'Hz';
 
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
         }
