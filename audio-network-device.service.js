@@ -43,7 +43,7 @@ var AudioNetworkDevice = (function () {
                     cd.powerDecibel = -999;
                 }
                 if (q) {
-                    powerNormalized = (cd.powerDecibel + 20) / 20;
+                    powerNormalized = (cd.powerDecibel + 40) / 40;
                     powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                     if (q.isFull()) {
                         q.pop();
