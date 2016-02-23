@@ -6,9 +6,8 @@ var Audio = (function () {
     function _Audio() {
         var
             context = null,
-            microfoneNode = null,
-            microfoneSplitterNode = null,
-            microfoneMergerNode = null
+            microphoneNode = null,
+            recordedNode = null
         ;
 
         function getContext() {
@@ -47,26 +46,43 @@ var Audio = (function () {
             return context.sampleRate;
         }
 
-        function getMicrofoneNode() {
-            return microfoneNode;
+        function getMicrophoneNode() {
+            return microphoneNode;
+        }
+
+        function getRecordedNode() {
+            return recordedNode;
         }
 
         function userMediaStreamSuccess(stream) {
-            var rawMicrofoneNode = context.createMediaStreamSource(stream);
+            var rawMicrophoneNode = context.createMediaStreamSource(stream);
 
-            /*
-            microfoneSplitterNode = context.createChannelSplitter(2);
-            microfoneMergerNode = context.createChannelMerger(2);
-            rawMicrofoneNode.connect(microfoneSplitterNode);
-            microfoneSplitterNode.connect(microfoneMergerNode, 0, 0);
-            microfoneSplitterNode.connect(microfoneMergerNode, 0, 1);
-            microfoneMergerNode.connect(microfoneNode);
-            */
+            rawMicrophoneNode.connect(microphoneNode);
+        }
 
-            rawMicrofoneNode.connect(microfoneNode);
+        function loadRecordedAudio(url) {
+            var request = new XMLHttpRequest();
 
-            console.log(rawMicrofoneNode);
-            console.log(microfoneNode);
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
+
+            request.onload = function() {
+                context.decodeAudioData(
+                    request.response,
+                    function(buffer) {
+                        var rawRecordedNode = context.createBufferSource();
+                        rawRecordedNode.buffer = buffer;
+                        rawRecordedNode.connect(recordedNode);
+                        rawRecordedNode.loop = true;
+                        rawRecordedNode.start(0);
+                    },
+                    function (e) {
+                        alert('Cannot load audio file');
+                        console.log(e);
+                    }
+                );
+            };
+            request.send();
         }
 
         function init() {
@@ -87,7 +103,8 @@ var Audio = (function () {
                 console.log(e);
             }
 
-            microfoneNode = context.createGain();
+            microphoneNode = context.createGain();
+            recordedNode = context.createGain();
             try {
                 navigator.getUserMedia(
                     {
@@ -112,7 +129,7 @@ var Audio = (function () {
                     }
                 );
             } catch (e) {
-                alert('Microphone initialization failed')
+                alert('Microphone initialization failed');
                 console.log(e);
             }
         }
@@ -120,7 +137,9 @@ var Audio = (function () {
         init();
 
         return {
-            getMicrofoneNode: getMicrofoneNode,
+            loadRecordedAudio: loadRecordedAudio,
+            getMicrophoneNode: getMicrophoneNode,
+            getRecordedNode: getRecordedNode,
             getSampleRate: getSampleRate,
             destination: context.destination,
             getCurrentTime: getCurrentTime,

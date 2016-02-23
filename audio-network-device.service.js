@@ -1,6 +1,19 @@
 var AudioNetworkDevice = (function () {
     'use strict';
 
+    /*
+    TODO
+         + real/imm delete
+         + compute at getCarrier
+         - ability to change frequency
+         - index passed into handler
+         - cleanup inside main service
+         + decibel power/amplitude check
+         + load wav file
+         - use dedicated constellation at carrier.html
+         - move sin/cos to internal Math service (to give ability to quickly add lookup tables)
+    */
+
     _AudioNetworkDevice.$inject = [];
 
     function _AudioNetworkDevice() {
@@ -65,8 +78,9 @@ var AudioNetworkDevice = (function () {
         function configureNodes() {
             var
                 queue,
-                dftSize = Audio.getSampleRate() * 0.05,
-                notificationPerSecond = 25,
+                queueSize = 50,
+                dftSize = Audio.getSampleRate() * 0.020,
+                notificationPerSecond = 50,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
@@ -84,17 +98,17 @@ var AudioNetworkDevice = (function () {
                 }
             ]);
 
-            queue = QueueBuilder.build(2 * 10);
+            queue = QueueBuilder.build(2 * queueSize);
             mapping.baseFrequency1070.queue.push(queue);
             mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
 
             /*
-            queue = QueueBuilder.build(2 * 10);
+            queue = QueueBuilder.build(2 * queueSize);
             mapping.baseFrequency1070.queue.push(queue);
             mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
             */
 
-            queue = QueueBuilder.build(2 * 10);
+            queue = QueueBuilder.build(2 * queueSize);
             mapping.baseFrequency2025.queue.push(queue);
             mapping.baseFrequency2025.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-1-cd-0'), queue, 200, 200));
 
@@ -106,12 +120,23 @@ var AudioNetworkDevice = (function () {
 
             channelTransmitManager.getOutputNode().connect(Audio.destination);
 
-            if (1) {
-                Audio.getMicrofoneNode().connect(analyser);
-                Audio.getMicrofoneNode().connect(channelReceiveManager.getInputNode());
-            } else {
-                channelTransmitManager.getOutputNode().connect(analyser);
-                channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
+            switch (1) {
+                case 0:
+                    Audio.getMicrophoneNode().connect(analyser);
+                    Audio.getMicrophoneNode().connect(channelReceiveManager.getInputNode());
+                    break;
+                case 1:
+                    Audio.loadRecordedAudio('http://codebuild.pl/an.wav');
+                    //Audio.loadRecordedAudio('http://codebuild.pl/an100ms.wav');
+                    //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an.wav');
+                    //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an100ms.wav');
+                    Audio.getRecordedNode().connect(analyser);
+                    Audio.getRecordedNode().connect(channelReceiveManager.getInputNode());
+                    break;
+                case 2:
+                    channelTransmitManager.getOutputNode().connect(analyser);
+                    channelTransmitManager.getOutputNode().connect(channelReceiveManager.getInputNode());
+                    break;
             }
 
             document.getElementById('sampling-frequency').innerHTML = Audio.getSampleRate() + 'Hz';

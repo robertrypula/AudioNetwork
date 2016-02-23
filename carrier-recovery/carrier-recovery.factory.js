@@ -70,19 +70,18 @@ var CarrierRecovery = (function () {
         CR.prototype.handleSample = function (sample) {
             this.$$computeReference();
             this.$$computeAverage(sample);
-            this.$$computePower();
-            this.$$computePhase();
 
             this.$$sampleNumber++;
         };
 
         CR.prototype.getCarrier = function () {
+            this.$$computePower();
+            this.$$computePhase();
+
             return {
                 phase: this.$$phase,
                 power: this.$$power,
-                powerDecibel: this.$$powerDecibel,
-                real: this.$$real,
-                imm: this.$$imm
+                powerDecibel: this.$$powerDecibel
             };
         };
 

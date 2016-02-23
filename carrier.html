@@ -222,12 +222,13 @@
                 testConstellationDiagramV2();
             }
 
-            initialize();
+            // initialize();
 
 
             // --------------
 
             function benchmark() {
+                console.log('GO');
                 var
                     cg = new CarrierGenerate(5, 5),
                     cr = new CarrierRecovery(5, 44100 * 0.75),
@@ -253,7 +254,7 @@
                 document.write((secondsEnd - secondsStart) + ' ms');   
             }
 
-            // setTimeout(benchmark, 3000);
+            setTimeout(benchmark, 3000);
 
         </script>
     </body>

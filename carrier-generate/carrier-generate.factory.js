@@ -34,14 +34,16 @@ var CarrierGenerate = (function () {
             }
 
             fadeFactor = 1.0;
-            fadePositionStart = (this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart) / this.$$samplePerFade;
-            fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
+            if (this.$$samplePerFade > 0) {
+                fadePositionStart = (this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart) / this.$$samplePerFade;
+                fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
 
-            if (fadePositionStart >= 0 && fadePositionStart <= 1) {
-                fadeFactor = AudioUtil.unitFade(fadePositionStart);
-            } else {
-                if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
-                    fadeFactor = AudioUtil.unitFade(fadePositionEnd);
+                if (fadePositionStart >= 0 && fadePositionStart <= 1) {
+                    fadeFactor = AudioUtil.unitFade(fadePositionStart);
+                } else {
+                    if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
+                        fadeFactor = AudioUtil.unitFade(fadePositionEnd);
+                    }
                 }
             }
 
