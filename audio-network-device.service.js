@@ -22,32 +22,28 @@ var AudioNetworkDevice = (function () {
             analyserChart,
             channelTransmitManager,
             channelReceiveManager,
-            mapping = {
-                baseFrequency1070: {
-                    index: 0,
+            constellationData = [
+                {
                     constellationDiagram: [],
                     queue: []
                 },
-                baseFrequency2025: {
-                    index: 1,
+                {
                     constellationDiagram: [],
                     queue: []
                 },
-                baseFrequency5000: {
-                    index: 2,
+                {
                     constellationDiagram: [],
                     queue: []
                 }
-            }
+            ]
         ;
 
-        function notifyHandler(baseFrequency, carrierData) {
+        function notifyHandler(index, baseFrequency, carrierData) {
             var state, i, cd, spaces, _, q, powerNormalized;
 
-            _ = mapping['baseFrequency' + baseFrequency];
-
-            spaces = "        ";
-            state = (spaces + baseFrequency).slice(-6) + 'Hz | ';
+            _ = constellationData[index];
+            spaces = "             ";
+            state = (spaces + baseFrequency).slice(-10) + 'Hz | ';
             for (i = 0; i < carrierData.length; i++) {
                 q = _.queue[i];
 
@@ -72,13 +68,13 @@ var AudioNetworkDevice = (function () {
                 );
             }
 
-            document.getElementById('receive-' + _.index).innerHTML = state;
+            document.getElementById('receive-' + index).innerHTML = state;
         }
 
         function configureNodes() {
             var
                 queue,
-                queueSize = 50,
+                queueSize = 20,
                 dftSize = Audio.getSampleRate() * 0.020,
                 notificationPerSecond = 50,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
@@ -89,28 +85,28 @@ var AudioNetworkDevice = (function () {
             ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 {
-                    baseFrequency: 1070, ofdmSize: 1, ofdmFrequencySpacing: 100,
+                    baseFrequency: 1070.04, ofdmSize: 1, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 },
                 {
-                    baseFrequency: 2025, ofdmSize: 1, ofdmFrequencySpacing: 100,
+                    baseFrequency: 2025.05, ofdmSize: 1, ofdmFrequencySpacing: 100,
                     dftSize: dftSize, notifyInterval: notifyInterval, notifyHandler: notifyHandler
                 }
             ]);
 
             queue = QueueBuilder.build(2 * queueSize);
-            mapping.baseFrequency1070.queue.push(queue);
-            mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
+            constellationData[0].queue.push(queue);
+            constellationData[0].constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
 
             /*
             queue = QueueBuilder.build(2 * queueSize);
-            mapping.baseFrequency1070.queue.push(queue);
-            mapping.baseFrequency1070.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
+            constellationData[0].queue.push(queue);
+            constellationData[0].constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-1'), queue, 200, 200));
             */
 
             queue = QueueBuilder.build(2 * queueSize);
-            mapping.baseFrequency2025.queue.push(queue);
-            mapping.baseFrequency2025.constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-1-cd-0'), queue, 200, 200));
+            constellationData[1].queue.push(queue);
+            constellationData[1].constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-1-cd-0'), queue, 200, 200));
 
 
             analyser = Audio.createAnalyser();
@@ -126,9 +122,9 @@ var AudioNetworkDevice = (function () {
                     Audio.getMicrophoneNode().connect(channelReceiveManager.getInputNode());
                     break;
                 case 1:
-                    Audio.loadRecordedAudio('http://codebuild.pl/an.wav');
+                    //Audio.loadRecordedAudio('http://codebuild.pl/an.wav');
                     //Audio.loadRecordedAudio('http://codebuild.pl/an100ms.wav');
-                    //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an.wav');
+                    Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an.wav');
                     //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an100ms.wav');
                     Audio.getRecordedNode().connect(analyser);
                     Audio.getRecordedNode().connect(channelReceiveManager.getInputNode());

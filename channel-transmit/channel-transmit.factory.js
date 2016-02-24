@@ -6,10 +6,11 @@ var ChannelTransmit = (function () {
     function _ChannelTransmit() {
         var CT;
             
-        CT = function (configuration) {
+        CT = function (index, configuration) {
             this.scriptNode = null;
             this.gainNode = null;
             this.carrierGenerate = [];
+            this.$$index = index;
 
             this.init();
             this.configure(configuration);

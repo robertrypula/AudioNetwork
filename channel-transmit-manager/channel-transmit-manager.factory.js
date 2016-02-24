@@ -30,7 +30,7 @@ var ChannelTransmitManager = (function () {
 
             this.clear();
             for (i = 0; i < configuration.length; i++) {
-                ct = ChannelTransmitBuilder.build(configuration[i]);
+                ct = ChannelTransmitBuilder.build(i, configuration[i]);
                 ct.getLastNode().connect(this.gainNode);
                 this.channelTransmit.push(ct);
             }

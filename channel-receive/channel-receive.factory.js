@@ -6,7 +6,7 @@ var ChannelReceive = (function () {
     function _ChannelReceive() {
         var CR;
             
-        CR = function (configuration) {
+        CR = function (index, configuration) {
             this.analyserNode = null;
             this.scriptNode = null;
             this.carrierRecovery = [];
@@ -14,6 +14,7 @@ var ChannelReceive = (function () {
             this.$$notifyInterval = null;
             this.$$notifyHandler = null;
             this.$$sampleNumber = 0;
+            this.$$index = index;
 
             this.init();
             this.configure(configuration);
@@ -80,7 +81,7 @@ var ChannelReceive = (function () {
                 }
 
                 if (notifyIteration) {
-                    this.$$notifyHandler(this.$$baseFrequency, carrierData);
+                    this.$$notifyHandler(this.$$index, this.$$baseFrequency, carrierData);
                 }
 
                 this.$$sampleNumber++;

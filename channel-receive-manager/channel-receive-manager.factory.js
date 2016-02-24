@@ -30,7 +30,7 @@ var ChannelReceiveManager = (function () {
 
             this.clear();
             for (i = 0; i < configuration.length; i++) {
-                cr = ChannelReceiveBuilder.build(configuration[i]);
+                cr = ChannelReceiveBuilder.build(i, configuration[i]);
                 this.gainNode.connect(cr.getFirstNode());
                 this.channelReceive.push(cr);
             }

@@ -5,8 +5,8 @@ var ChannelTransmitBuilder = (function () {
 
     function _ChannelTransmitBuilder() {
 
-        function build(frequency) {
-            return new ChannelTransmit(frequency);
+        function build(index, configuration) {
+            return new ChannelTransmit(index, configuration);
         }
 
         return {
