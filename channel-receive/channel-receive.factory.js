@@ -7,10 +7,9 @@ var ChannelReceive = (function () {
         var CR;
             
         CR = function (index, configuration) {
-            this.analyserNode = null;
+            this.analyserNode = null;  // empty analyser needs to be connected to script node
             this.scriptNode = null;
             this.carrierRecovery = [];
-            this.$$baseFrequency = null;
             this.$$notifyInterval = null;
             this.$$notifyHandler = null;
             this.$$sampleNumber = 0;
@@ -31,7 +30,6 @@ var ChannelReceive = (function () {
                 this.carrierRecovery.push(cr);
             }
 
-            this.$$baseFrequency = configuration.baseFrequency;
             this.$$notifyInterval = configuration.notifyInterval;
             this.$$notifyHandler = configuration.notifyHandler;
             this.$$sampleNumber = 0;
@@ -40,7 +38,7 @@ var ChannelReceive = (function () {
         CR.prototype.init = function () {
             var self = this;
 
-            this.scriptNode = Audio.createScriptProcessor(4 * 1024, 1, 1);
+            this.scriptNode = Audio.createScriptProcessor(1 * 1024, 1, 1);
             this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcess(audioProcessingEvent);
             };
@@ -81,7 +79,7 @@ var ChannelReceive = (function () {
                 }
 
                 if (notifyIteration) {
-                    this.$$notifyHandler(this.$$index, this.$$baseFrequency, carrierData);
+                    this.$$notifyHandler(this.$$index, carrierData);
                 }
 
                 this.$$sampleNumber++;

@@ -8,7 +8,7 @@ var ChannelReceiveManager = (function () {
 
         CRM = function (configuration) {
             this.channelReceive = [];
-            this.gainNode;
+            this.gainNode = null;
 
             this.$$init();
             this.configure(configuration);

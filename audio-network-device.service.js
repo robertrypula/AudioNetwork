@@ -38,12 +38,12 @@ var AudioNetworkDevice = (function () {
             ]
         ;
 
-        function notifyHandler(index, baseFrequency, carrierData) {
+        function notifyHandler(index, carrierData) {
             var state, i, cd, spaces, _, q, powerNormalized;
 
             _ = constellationData[index];
             spaces = "             ";
-            state = (spaces + baseFrequency).slice(-10) + 'Hz | ';
+            state = "";//(spaces + baseFrequency).slice(-10) + 'Hz | ';
             for (i = 0; i < carrierData.length; i++) {
                 q = _.queue[i];
 
@@ -74,9 +74,9 @@ var AudioNetworkDevice = (function () {
         function configureNodes() {
             var
                 queue,
-                queueSize = 20,
-                dftSize = Audio.getSampleRate() * 0.020,
-                notificationPerSecond = 50,
+                queueSize = 50,
+                dftSize = Audio.getSampleRate() * 0.100,
+                notificationPerSecond = 20,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
             channelTransmitManager = ChannelTransmitManagerBuilder.build([
@@ -116,7 +116,7 @@ var AudioNetworkDevice = (function () {
 
             channelTransmitManager.getOutputNode().connect(Audio.destination);
 
-            switch (1) {
+            switch (0) {
                 case 0:
                     Audio.getMicrophoneNode().connect(analyser);
                     Audio.getMicrophoneNode().connect(channelReceiveManager.getInputNode());
@@ -124,7 +124,7 @@ var AudioNetworkDevice = (function () {
                 case 1:
                     //Audio.loadRecordedAudio('http://codebuild.pl/an.wav');
                     //Audio.loadRecordedAudio('http://codebuild.pl/an100ms.wav');
-                    Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an.wav');
+                    //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an.wav');
                     //Audio.loadRecordedAudio('http://localhost:63342/ucEmu/an100ms.wav');
                     Audio.getRecordedNode().connect(analyser);
                     Audio.getRecordedNode().connect(channelReceiveManager.getInputNode());
