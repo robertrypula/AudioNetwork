@@ -5,12 +5,20 @@ var AudioNetworkDevice = (function () {
     TODO
          + real/imm delete
          + compute at getCarrier
-         - ability to change frequency
-         - index passed into handler
-         - cleanup inside main service
+         + index passed into handler
          + decibel power/amplitude check
          + load wav file
+
+         - rewrite main API
+            - move code to factory
+            - ability to change frequency
+            - cleanup inside main service
+            - internal notifyHandler for constellation update, external for user purposes
          - use dedicated constellation at carrier.html
+
+        Performance
+         - move scipt processor node to receive manager
+         - do not redraw constellation if queue wasn't changed
          - move sin/cos to internal Math service (to give ability to quickly add lookup tables)
     */
 

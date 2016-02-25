@@ -47,7 +47,7 @@ var ChannelTransmit = (function () {
         CT.prototype.init = function () {
             var self = this;
 
-            this.scriptNode = Audio.createScriptProcessor(4 * 1024, 1, 1);
+            this.scriptNode = Audio.createScriptProcessor(2 * 1024, 1, 1);
             this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcess(audioProcessingEvent);
             };
