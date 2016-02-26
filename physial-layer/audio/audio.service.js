@@ -124,7 +124,7 @@ var Audio = (function () {
                     },
                     userMediaStreamSuccess,
                     function (e) {
-                        alert('Error getting audio');
+                        alert('Microphone initialization failed');
                         console.log(e);
                     }
                 );
