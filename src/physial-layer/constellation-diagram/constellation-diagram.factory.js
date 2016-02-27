@@ -5,28 +5,36 @@ var ConstellationDiagram = (function () {
 
     function _ConstellationDiagram() {
         var CD;
-        
-        CD = function (parentDiv, queue, width, height) {
-            this.$$parentDiv = parentDiv;
+
+        CD = function (parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
+            this.$$parentElement = parentElement;
             this.$$queue = queue;
             this.$$canvas = null;
             this.$$canvasContext = null;
             this.$$canvasWidth = width;
             this.$$canvasHeight = height;
+            this.$$colorAxis = colorAxis;
+            this.$$colorHistoryPoint = colorHistoryPoint;
+            this.$$destroy = false;
             
             this.$$initAnimationFrame();
             this.$$init();
         };
 
+        CD.prototype.destroy = function () {
+            this.$$destroy = true;
+        };
+
         CD.prototype.$$init = function () {
             this.$$canvasContext = null;
-            this.$$parentDiv.innerHTML = this.$$renderTemplate();
+            this.$$parentElement.innerHTML = this.$$renderTemplate();
             this.$$connectTemplate();
             this.$$initCanvasContext();
         };
 
+        // TODO move it to dedicated service
         CD.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentDiv.querySelectorAll(selector);
+            var jsObject = this.$$parentElement.querySelectorAll(selector);
 
             if (jsObject.length === 0) {
                 throw 'Cannot $$find given selector';
@@ -40,19 +48,26 @@ var ConstellationDiagram = (function () {
             this.$$canvasContext = this.$$canvas.getContext("2d");
         };
 
-
         CD.prototype.$$renderTemplate = function () {
             var tpl =
-                '<div ' +
-                '    class="constellation-diagram-container" ' +
-                '    style="overflow: hidden; width: {{ width }}px; height: {{ height }}px; ' +
-                '           position: relative; line-height: 10px; font-family: Tahoma; ' +
-                '           color: red; font-size: 9px; outline: 1px solid gray;"' +
+                '<div' +
+                '    class="constellation-diagram-container"' +
+                '    style="' +
+                '        overflow: hidden;' +
+                '        width: {{ width }}px;' +
+                '        height: {{ height }}px;' +
+                '        position: relative;' +
+                '    "' +
                 '    >' +
                 '    <canvas ' +
-                '        class="constellation-diagram" ' +
-                '        style="width: {{ width }}px; height: {{ height }}px; position: absolute;" ' +
-                '        width="{{ width }}" height="{{ height }}"' +
+                '        class="constellation-diagram"' +
+                '        style="' +
+                '            width: {{ width }}px;' +
+                '            height: {{ height }}px;' +
+                '            position: absolute;' +
+                '        "' +
+                '        width="{{ width }}"' +
+                '        height="{{ height }}"' +
                 '        ></canvas>' +
                 '</div>';
 
@@ -71,13 +86,15 @@ var ConstellationDiagram = (function () {
                 halfH = 0.5 * this.$$canvasHeight,
                 q = this.$$queue,
                 halfQSize = 0.5 * q.getSize(),
-                color,
-                x,
-                y,
-                i;
+                color, x, y, i;
+
+            if (this.$$destroy) {
+                this.$$parentElement.innerHTML = '';
+                return false;
+            }
 
             if (ctx === null) {
-                return;
+                return true;
             }
 
             ctx.clearRect(0, 0, w, h);
@@ -98,19 +115,22 @@ var ConstellationDiagram = (function () {
                 ctx.fillStyle = 'rgba(' + color + ', ' + color + ', 100, 1)';
                 ctx.fillRect(x - 1, y - 1, 3, 3);
             }
+
+            return true;
         };
 
         CD.prototype.$$initCanvasContext = function () {
             this.$$canvasContext.lineWidth = 1;
-            this.$$canvasContext.strokeStyle = 'rgba(128, 128, 128, 1)';
+            this.$$canvasContext.strokeStyle = this.$$colorAxis;
         };
 
         CD.prototype.$$initAnimationFrame = function () {
             var self = this;
 
             function drawAgain() {
-                self.$$updateChart();
-                requestAnimationFrame(drawAgain);
+                if (self.$$updateChart()) {
+                    requestAnimationFrame(drawAgain);
+                }
             }
             requestAnimationFrame(drawAgain);
         };

@@ -5,8 +5,8 @@ var ConstellationDiagramBuilder = (function () {
 
     function _ConstellationDiagramBuilder() {
 
-        function build(parentDiv, queue, width, height) {
-            return new ConstellationDiagram(parentDiv, queue, width, height);
+        function build(parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
+            return new ConstellationDiagram(parentElement, queue, width, height, colorAxis, colorHistoryPoint);
         }
 
         return {

@@ -78,7 +78,7 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                                     end: a(c, 'rx.constellationDiagram.color.historyPoint.blue.end') || 0
                                 }
                             },
-                            axis: a(c, 'rx.constellationDiagram.color.axis') || '#888888'
+                            axis: a(c, 'rx.constellationDiagram.color.axis') || 'green'
                         },
                         historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || 50,
                         width: a(c, 'rx.constellationDiagram.width') || 200,
@@ -86,9 +86,6 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                     }
                 }
             };
-
-            console.log(c);
-            console.log(finalConfiguration);
 
             return finalConfiguration;
         }

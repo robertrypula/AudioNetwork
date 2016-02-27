@@ -17,6 +17,8 @@ var AudioNetworkPhysicalLayer = (function () {
                 - internal notifyHandler for constellation update, external for user purposes
                 - add ability to choose destination source
                 - fix recorded file loading logic
+                - fix history point colors
+                - add rx method outside the factory
 
         TODO performance
             - move script processor node to receive manager
@@ -30,23 +32,24 @@ var AudioNetworkPhysicalLayer = (function () {
         var ANPL;
 
         ANPL = function (configuration) {
-            this.configuration = AudioNetworkPhysicalLayerConfiguration.parse(configuration);
-            this.channelTransmitManager = null;
-            this.channelReceiveManager = null;
-            this.currentInput = null;
-            this.rxAnalyser = null;
-            this.rxAnalyserChart = null;
+            this.$$configuration = AudioNetworkPhysicalLayerConfiguration.parse(configuration);
+            this.$$channelTransmitManager = null;
+            this.$$channelReceiveManager = null;
+            this.$$currentInput = null;
+            this.$$rxAnalyser = null;
+            this.$$rxAnalyserChart = null;
+            this.$$rxConstellationDiagram = [];
 
             this.$$initTx();
             this.$$initRx();
-            this.setRxInput(this.configuration.rx.input);
+            this.setRxInput(this.$$configuration.rx.input);
         };
 
         ANPL.prototype.$$notifyHandler = function (index, carrierData) {
             return;
             var state, i, cd, spaces, _, q, powerNormalized;
 
-            _ = constellationData[index];
+            _ = this.$$rxConstellationDiagram[index];
             spaces = "             ";
             state = "";//(spaces + baseFrequency).slice(-10) + 'Hz | ';
             for (i = 0; i < carrierData.length; i++) {
@@ -77,47 +80,60 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.$$initTx = function () {
-            this.channelTransmitManager = ChannelTransmitManagerBuilder.build(
-                this.configuration.tx.channel
+            this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
+                this.$$configuration.tx.channel
             );
-            this.channelTransmitManager.getOutputNode().connect(Audio.getDestination()); // TODO change it later
+            this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination()); // TODO change it later
         };
 
         ANPL.prototype.$$initRx = function () {
             var
-                dftSize = Audio.getSampleRate() * this.configuration.rx.dftTimeSpan,
-                notifyInterval = Audio.getSampleRate() / this.configuration.rx.notificationPerSecond,
+                dftSize = Audio.getSampleRate() * this.$$configuration.rx.dftTimeSpan,
+                notifyInterval = Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond,
                 channelList = [],
-                channel, i
+                channel, i, j, queue, constellationDiagram
             ;
 
-            for (i = 0; i < this.configuration.rx.channel.length; i++) {
-                channel = this.configuration.rx.channel[i];
+            for (i = 0; i < this.$$configuration.rx.channel.length; i++) {
+                channel = this.$$configuration.rx.channel[i];
                 channel.dftSize = dftSize;
                 channel.notifyInterval = notifyInterval;
                 channel.notifyHandler = this.$$notifyHandler.bind(this);
                 channelList.push(channel);
-            }
-            this.channelReceiveManager = ChannelReceiveManagerBuilder.build(channelList);
 
-            this.rxAnalyser = Audio.createAnalyser();
-            this.rxAnalyser.fftSize = this.configuration.rx.spectrum.fftSize;
-            this.rxAnalyser.connect(this.channelReceiveManager.getInputNode());
-            if (this.configuration.rx.spectrum.elementId) {
-                this.rxAnalyserChart = AnalyserChartBuilder.build(
-                    document.getElementById(this.configuration.rx.spectrum.elementId),
-                    this.rxAnalyser,
-                    this.configuration.rx.spectrum.height,
-                    this.configuration.rx.spectrum.color.data,
-                    this.configuration.rx.spectrum.color.axis
+                queue = [];
+                constellationDiagram = [];
+                for (j = 0; j < channel.ofdmSize; j++) {
+                    queue.push(
+                        QueueBuilder.build(2 * this.$$configuration.rx.constellationDiagram.historyPointSize)
+                    );
+                    /*
+                    constellationDiagram.push(
+                        ConstellationDiagramBuilder.build(
+                            //parentElement, queue, width, height, colorAxis, colorHistoryPoint
+                        )
+                    );
+                    */
+                }
+                this.$$rxConstellationDiagram.push({
+                    queue: queue,
+                    constellationDiagram: constellationDiagram
+                });
+            }
+            this.$$channelReceiveManager = ChannelReceiveManagerBuilder.build(channelList);
+
+            this.$$rxAnalyser = Audio.createAnalyser();
+            this.$$rxAnalyser.fftSize = this.$$configuration.rx.spectrum.fftSize;
+            this.$$rxAnalyser.connect(this.$$channelReceiveManager.getInputNode());
+            if (this.$$configuration.rx.spectrum.elementId) {
+                this.$$rxAnalyserChart = AnalyserChartBuilder.build(
+                    document.getElementById(this.$$configuration.rx.spectrum.elementId),
+                    this.$$rxAnalyser,
+                    this.$$configuration.rx.spectrum.height,
+                    this.$$configuration.rx.spectrum.color.data,
+                    this.$$configuration.rx.spectrum.color.axis
                 );
             }
-
-            /*
-             queue = QueueBuilder.build(2 * queueSize);
-             constellationData[0].queue.push(queue);
-             constellationData[0].constellationDiagram.push(new ConstellationDiagram(document.getElementById('receive-0-cd-0'), queue, 200, 200));
-             */
         };
 
         ANPL.prototype.$$getTxInputNode = function (input) {
@@ -131,7 +147,7 @@ var AudioNetworkPhysicalLayer = (function () {
                     node = Audio.getRecordedNode();
                     break;
                 case AudioNetworkPhysicalLayerConfiguration.INPUT.RX_LOOPBACK:
-                    node = this.channelTransmitManager.getOutputNode();
+                    node = this.$$channelTransmitManager.getOutputNode();
                     break;
             }
 
@@ -141,22 +157,22 @@ var AudioNetworkPhysicalLayer = (function () {
         ANPL.prototype.setRxInput = function (input) {
             var node;
 
-            if (this.currentInput) {
-                this.$$getTxInputNode(this.currentInput).disconnect(this.rxAnalyser);
+            if (this.$$currentInput) {
+                this.$$getTxInputNode(this.$$currentInput).disconnect(this.$$rxAnalyser);
             }
 
             node = this.$$getTxInputNode(input);
             if (node) {
-                node.connect(this.rxAnalyser);
-                this.currentInput = input;
+                node.connect(this.$$rxAnalyser);
+                this.$$currentInput = input;
             } else {
-                this.currentInput = null;
+                this.$$currentInput = null;
             }
         };
 
         ANPL.prototype.tx = function (channelIndex, data) {
             var
-                channelTx = this.channelTransmitManager.getChannel(channelIndex),
+                channelTx = this.$$channelTransmitManager.getChannel(channelIndex),
                 d, i, dataParsed = []
             ;
 
@@ -186,18 +202,18 @@ var AudioNetworkPhysicalLayer = (function () {
             this.setRxInput(null);
 
             // rx
-            if (this.rxAnalyserChart) {
-                this.rxAnalyserChart.destroy();
-                this.rxAnalyserChart = null;
+            if (this.$$rxAnalyserChart) {
+                this.$$rxAnalyserChart.destroy();
+                this.$$rxAnalyserChart = null;
             }
-            this.rxAnalyser.disconnect(this.channelReceiveManager.getInputNode());
-            this.channelReceiveManager.destroy();
-            this.channelReceiveManager = null;
+            this.$$rxAnalyser.disconnect(this.$$channelReceiveManager.getInputNode());
+            this.$$channelReceiveManager.destroy();
+            this.$$channelReceiveManager = null;
 
             // tx
-            this.channelTransmitManager.getOutputNode().disconnect(Audio.getDestination()); // TODO change it later
-            this.channelTransmitManager.destroy();
-            this.channelTransmitManager = null;
+            this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination()); // TODO change it later
+            this.$$channelTransmitManager.destroy();
+            this.$$channelTransmitManager = null;
         };
 
         return ANPL;
