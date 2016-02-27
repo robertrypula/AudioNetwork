@@ -14,7 +14,11 @@ var ChannelReceiveManager = (function () {
             this.configure(configuration);
         };
 
-        CRM.prototype.clear = function () {
+        CRM.prototype.destroy = function () {
+            this.$$clear();
+        };
+
+        CRM.prototype.$$clear = function () {
             var i, cr;
 
             for (i = 0; i < this.channelReceive.length; i++) {
@@ -28,7 +32,7 @@ var ChannelReceiveManager = (function () {
         CRM.prototype.configure = function (configuration) {
             var i, cr;
 
-            this.clear();
+            this.$$clear();
             for (i = 0; i < configuration.length; i++) {
                 cr = ChannelReceiveBuilder.build(i, configuration[i]);
                 this.gainNode.connect(cr.getFirstNode());

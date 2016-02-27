@@ -50,6 +50,12 @@ h1 {
     margin-bottom: 20px;
 }
 
+#rx-spectrum {
+    overflow-x: auto;
+    margin: 10px 0 10px;
+    border: 1px solid #eee;
+}
+
 .main-container {
     width: 1200px;
     margin: 0 auto;

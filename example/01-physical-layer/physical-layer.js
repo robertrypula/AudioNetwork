@@ -1,9 +1,21 @@
 var anpl;
 
 function onLoad() {
-    anpl = new AudioNetworkPhysicalLayer();
+    anpl = new AudioNetworkPhysicalLayer({
+        rx: {
+            notificationPerSecond: 1,
+            spectrum: {
+                elementId: 'rx-spectrum',
+                height: 150
+            }
+        }
+    });
 
     document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
+}
+
+function destroy() {
+    anpl.destroy();
 }
 
 function transmit(channelIndex, offset) {
@@ -30,7 +42,7 @@ anpl.getTxFrequency(0, 0);
 anpl.setRxInput('');
 
 // optional methods
-// anpl.setRxDftRange(0.43);
+// anpl.setRxDftTimeSpan(0.43);
 // anpl.setRxConstellationDiagramPointSize(0.43);
 // anpl.setRxNotificationPerSecond(25)
 // anpl.rxSpectrumDisable()

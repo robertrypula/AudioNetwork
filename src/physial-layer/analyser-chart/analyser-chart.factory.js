@@ -5,33 +5,42 @@ var AnalyserChart = (function () {
 
     function _AnalyserChart() {
         var
-          AC,
-          AXIS_LABEL_X_ONE_ITEM_WITH = 40;
+            AC,
+            AXIS_LABEL_X_ONE_ITEM_WITH = 40
+        ;
         
-        AC = function (parentDiv, analyser) {
-            this.$$parentDiv = parentDiv;
+        AC = function (parentElement, analyser, height, colorData, colorAxis) {
+            this.$$parentElement = parentElement;
             this.$$analyser = analyser;
             this.$$canvas = null;
             this.$$canvasContext = null;
             this.$$canvasWidth = null;
-            this.$$canvasHeight = 256;
+            this.$$canvasHeight = height;
+            this.$$colorData = colorData;
+            this.$$colorAxis = colorAxis;
             this.$$data = null;
             this.$$freezeChart = false;
             this.$$analyserMethod = 'getByteFrequencyData';
+            this.$$destroy = false;
 
             this.$$initAnimationFrame();
             this.$$init();
         };
 
+        AC.prototype.destroy = function () {
+            this.$$destroy = true;
+        };
+
         AC.prototype.$$init = function () {
             this.$$canvasContext = null;
-            this.$$parentDiv.innerHTML = this.$$renderTemplate();
+            this.$$parentElement.innerHTML = this.$$renderTemplate();
             this.$$connectTemplate();
             this.$$initCanvasContext();
         };
 
+        // TODO move it to dedicated service
         AC.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentDiv.querySelectorAll(selector);
+            var jsObject = this.$$parentElement.querySelectorAll(selector);
 
             if (jsObject.length === 0) {
                 throw 'Cannot $$find given selector';
@@ -52,6 +61,9 @@ var AnalyserChart = (function () {
             });
             this.$$find('.analyser-action-freeze').addEventListener('click', function () {
                 self.actionFreezeChart();
+            });
+            this.$$find('.analyser-action-fft256').addEventListener('click', function () {
+                self.actionChangeFFTSize(256);
             });
             this.$$find('.analyser-action-fft512').addEventListener('click', function () {
                 self.actionChangeFFTSize(512);
@@ -94,53 +106,70 @@ var AnalyserChart = (function () {
 
         AC.prototype.$$renderTemplate = function () {
             var tpl =
-                '<div ' +
-                '    class="analyser-container" ' +
+                '<div' +
+                '    class="analyser-container"' +
                 '    style="' +
                 '        overflow: hidden;' +
                 '        width: {{ width }}px;' +
-                '        height: 256px;' +
+                '        height: {{ height }}px;' +
                 '        position: relative;' +
                 '    "' +
                 '    >' +
-                '    <canvas ' +
-                '        class="analyser-chart" ' +
+                '    <canvas' +
+                '        class="analyser-chart"' +
                 '        style="' +
                 '            width: {{ width }}px;' +
-                '            height: 256px;' +
+                '            height: {{ height }}px;' +
                 '            position: absolute;' +
                 '        "' +
                 '        width="{{ width }}"' +
-                '        height="256"' +
+                '        height="{{ height }}"' +
                 '        ></canvas>' +
-                '    <div ' +
-                '        class="analyser-action" ' +
-                '        style="width: 500px; height: 10px; position: absolute;"' +
+                '    <div' +
+                '        class="analyser-action"' +
+                '        style="' +
+                '            position: absolute;' +
+                '        "' +
                 '        >' +
-                '        <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-fft256">FFT256</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft512">FFT512</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft1024">FFT1024</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft2048">FFT2048</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft4096">FFT4096</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft8192">FFT8192</a>' +
                 '        <a href="javascript:void(0)" class="analyser-action-fft16384">FFT16384</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
+                '        <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
                 '    </div>' +
                 '    <div ' +
                 '        class="analyser-axis-x" ' +
-                '        style="position: absolute; bottom: 0px; left: 0px; width: {{ width }}px; height: 10px;"' +
+                '        style="' +
+                '            position: absolute;' +
+                '            bottom: 0px;' +
+                '            left: 0px;' +
+                '            width: {{ width }}px;' +
+                '        "' +
                 '        ></div>' +
                 '</div>';
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$analyser.frequencyBinCount).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
 
             return tpl;
         };
 
         AC.prototype.$$renderTemplateAxisXLabel = function (width, left, label) {
             var tpl =
-                '<span style="display: block; box-sizing: border-box; border-left: 1px solid gray; ' +
-                '             position: absolute; width: {{ width }}px; top: 0px; left: {{ left }}px;"' +
+                '<span' +
+                '    style="' +
+                '        display: block;' +
+                '        box-sizing: border-box;' +
+                '        border-left: 1px solid {{ colorAxis }};' +
+                '        position: absolute;' +
+                '        width: {{ width }}px;' +
+                '        top: 0px;' +
+                '        left: {{ left }}px;' +
+                '        "' +
                 '    >' +
                 '    {{ label }}' +
                 '</span>';
@@ -148,6 +177,7 @@ var AnalyserChart = (function () {
             tpl = tpl.replace(/\{\{ width \}\}/, width);
             tpl = tpl.replace(/\{\{ left \}\}/, left);
             tpl = tpl.replace(/\{\{ label \}\}/, label);
+            tpl = tpl.replace(/\{\{ colorAxis \}\}/, this.$$colorAxis);
 
             return tpl;
         };
@@ -216,9 +246,9 @@ var AnalyserChart = (function () {
             var axisX = this.$$find('.analyser-axis-x');
 
             if (this.$$analyserMethod == 'getByteFrequencyData') {
-                axisX.innerHTML = this.$$generateAxisXForFrequency();
+                axisX.innerHTML = '<span>&nbsp;</span>' + this.$$generateAxisXForFrequency();
             } else {
-                axisX.innerHTML = this.$$generateAxisXForTimeDomain();
+                axisX.innerHTML = '<span>&nbsp;</span>' + this.$$generateAxisXForTimeDomain();
             }
         };
 
@@ -228,33 +258,43 @@ var AnalyserChart = (function () {
                 ctx = this.$$canvasContext,
                 i;
 
+            if (this.$$destroy) {
+                this.$$parentElement.innerHTML = '';
+                return false;
+            }
             if (ctx === null || this.$$freezeChart) {
-                return;
+                return true;
             }
             ctx.clearRect(0, 0, this.$$canvasWidth, this.$$canvasHeight);
             this.$$analyser[this.$$analyserMethod](this.$$data);
             for (i = 0; i < length; i++) {
                 ctx.beginPath();
-                ctx.moveTo(i, 255);
-                ctx.lineTo(i, 255 - Math.round(this.$$data[i]));
+                ctx.moveTo(i, this.$$canvasHeight);
+                ctx.lineTo(
+                    i,
+                    this.$$canvasHeight - Math.round(this.$$canvasHeight * this.$$data[i] / 255)
+                );
                 ctx.closePath();
                 ctx.stroke();
             }
+
+            return true;
         };
 
         AC.prototype.$$initCanvasContext = function () {
             this.$$data = new Uint8Array(this.$$analyser.frequencyBinCount);
             this.$$generateAxisX();
             this.$$canvasContext.lineWidth = 1;
-            this.$$canvasContext.strokeStyle = 'rgba(128, 128, 128, 1)';
+            this.$$canvasContext.strokeStyle = this.$$colorData;
         };
 
         AC.prototype.$$initAnimationFrame = function () {
             var self = this;
 
             function drawAgain() {
-                self.$$updateChart();
-                requestAnimationFrame(drawAgain);
+                if (self.$$updateChart()) {
+                    requestAnimationFrame(drawAgain);
+                }
             }
             requestAnimationFrame(drawAgain);
         };

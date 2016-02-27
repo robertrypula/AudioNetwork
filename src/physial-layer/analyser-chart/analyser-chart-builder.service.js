@@ -5,8 +5,8 @@ var AnalyserChartBuilder = (function () {
 
     function _AnalyserChartBuilder() {
 
-        function build(parentDiv, analyser) {
-            return new AnalyserChart(parentDiv, analyser);
+        function build(parentElement, analyser, height, colorData, colorAxis) {
+            return new AnalyserChart(parentElement, analyser, height, colorData, colorAxis);
         }
 
         return {

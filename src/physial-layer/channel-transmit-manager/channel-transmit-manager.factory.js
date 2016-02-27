@@ -11,10 +11,14 @@ var ChannelTransmitManager = (function () {
             this.gainNode;
 
             this.$$init();
-            this.configure(configuration);
+            this.$$configure(configuration);
         };
 
-        CTM.prototype.clear = function () {
+        CTM.prototype.destroy = function () {
+            this.$$clear();
+        };
+
+        CTM.prototype.$$clear = function () {
             var i, ct;
 
             for (i = 0; i < this.channelTransmit.length; i++) {
@@ -25,10 +29,10 @@ var ChannelTransmitManager = (function () {
             this.channelTransmit.length = 0;
         };
 
-        CTM.prototype.configure = function (configuration) {
+        CTM.prototype.$$configure = function (configuration) {
             var i, ct;
 
-            this.clear();
+            this.$$clear();
             for (i = 0; i < configuration.length; i++) {
                 ct = ChannelTransmitBuilder.build(i, configuration[i]);
                 ct.getLastNode().connect(this.gainNode);

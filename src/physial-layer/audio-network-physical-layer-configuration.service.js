@@ -49,20 +49,19 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                     input: a(c, 'rx.input') || INPUT.MICROPHONE,
                     inputPath: a(c, 'rx.inputPath') || null,
                     notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,
-                    dftRange: a(c, 'rx.dftRange') || 0.1,
+                    dftTimeSpan: a(c, 'rx.dftTimeSpan') || 0.1,
                     spectrum: {
-                        elementId: a(c, 'rx.spectrum.elementId') || 'rx-spectrum',
+                        elementId: a(c, 'rx.spectrum.elementId') || null,
                         color: {
-                            axis: a(c, 'rx.spectrum.color.axis') || '#888888',
+                            axis: a(c, 'rx.spectrum.color.axis') || '#444',
                             data: a(c, 'rx.spectrum.color.data') || '#888888'
                         },
-                        fftSize: a(c, 'rx.spectrum.fftSize') || 256,
+                        fftSize: a(c, 'rx.spectrum.fftSize') || 2048,
                         height: a(c, 'rx.spectrum.height') || 200
                     },
                     constellationDiagram: {
                         elementId: (
-                            a(c, 'rx.constellationDiagram.elementId') ||
-                            'rx-constellation-diagram-{{channelIndex}}-{{ofdmIndex}}'
+                            a(c, 'rx.constellationDiagram.elementId') || null
                         ),
                         color: {
                             historyPoint: {
