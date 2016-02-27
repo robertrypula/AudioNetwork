@@ -17,7 +17,7 @@ var AudioNetworkDevice = (function () {
          - use dedicated constellation at carrier.html
 
         Performance
-         - move scipt processor node to receive manager
+         - move script processor node to receive manager
          - do not redraw constellation if queue wasn't changed
          - move sin/cos to internal Math service (to give ability to quickly add lookup tables)
     */
@@ -87,10 +87,6 @@ var AudioNetworkDevice = (function () {
                 notificationPerSecond = 20,
                 notifyInterval = Audio.getSampleRate() * (1 / notificationPerSecond);
 
-            channelTransmitManager = ChannelTransmitManagerBuilder.build([
-                { baseFrequency: 1070, ofdmSize: 1, ofdmFrequencySpacing: 100 },
-                { baseFrequency: 2025, ofdmSize: 1, ofdmFrequencySpacing: 100 }
-            ]);
             channelReceiveManager = ChannelReceiveManagerBuilder.build([
                 {
                     baseFrequency: 1070.04, ofdmSize: 1, ofdmFrequencySpacing: 100,
@@ -119,10 +115,6 @@ var AudioNetworkDevice = (function () {
 
             analyser = Audio.createAnalyser();
             analyser.fftSize = 1 * 1024;
-            // analyser.minDecibels = -80;
-            // analyser.maxDecibels = -40;
-
-            channelTransmitManager.getOutputNode().connect(Audio.destination);
 
             switch (0) {
                 case 0:
@@ -143,51 +135,11 @@ var AudioNetworkDevice = (function () {
                     break;
             }
 
-            document.getElementById('sampling-frequency').innerHTML = Audio.getSampleRate() + 'Hz';
-
             analyserChart = AnalyserChartBuilder.build(document.getElementById('test'), analyser);
         }
 
-        function addQueueTest(channelIndex, offset) {
-            var
-                symbolDuration = parseFloat(document.getElementById('symbol-duration').value),
-                sd = Math.round(Audio.getSampleRate() * symbolDuration / 1000)
-            ;
-
-            switch (channelIndex) {
-                case 0:
-                    channelTransmitManager.getChannel(channelIndex).addToQueue([
-                        [{ amplitude: +1.00, duration: sd, phase: +0.000 + offset }]//,
-                        //[{ amplitude: +0.25, duration: sd, phase: +0.250 + offset }]
-                    ]);
-                    break;
-                case 1:
-                    channelTransmitManager.getChannel(channelIndex).addToQueue([
-                        [{ amplitude: +1.00, duration: sd, phase: +0.000 + offset }]
-                    ]);
-                    break;
-            }
-
-        }
-
-        function getChannelTransmit(channelIndex) {
-            return channelTransmitManager.getChannel(channelIndex);
-        }
-
-        function getChannelReceive(channelIndex) {
-            return channelReceiveManager.getChannel(channelIndex);
-        }
-
-        function init() {
-            configureNodes();
-        }
-
-        init();
-
         return {
-            getChannelTransmit: getChannelTransmit,
-            getChannelReceive: getChannelReceive,
-            addQueueTest: addQueueTest  // temporary test method
+
         };
     }
 

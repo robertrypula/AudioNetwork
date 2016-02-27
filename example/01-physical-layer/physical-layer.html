@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Audio network - physical layer example</title>
+        <link rel="stylesheet" type="text/css" href="physical-layer.css">
+    </head>
+    <body onLoad="onLoad()">
+
+        <div class="main-container">
+
+            <h1>Audio network - physical layer example</h1>
+
+            <h2>Status</h2>
+            <div class="container">
+                <div>
+                    <b>Sample rate [Hz]:</b>
+                    <span id="sample-rate"></span>
+                </div>
+                <div>
+                    <label for="symbol-duration">
+                        Symbol duration [ms]:
+                    </label>
+                    <input type="text" id="symbol-duration" value="200" />
+                </div>
+            </div>
+
+            <h2>Receive</h2>
+            <div class="container">
+                <b>Input spectrum:</b>
+                <div id="rx-spectrum"></div>
+
+                <div>
+                    <b>Channel #0:</b>
+                    <div>
+                        <div id="rx-info-0-0"></div>
+                        <div id="rx-constellation-diagram-0-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Transmit</h2>
+            <div class="container">
+                <a href="javascript:void(0)" onClick="transmit(0, 0.00)">Channel #0 (phase + 0.00)</a> |
+                <a href="javascript:void(0)" onClick="transmit(0, 0.25)">Channel #0 (phase + 0.25)</a> |
+                <a href="javascript:void(0)" onClick="transmit(0, 0.50)">Channel #0 (phase + 0.50)</a> |
+                <a href="javascript:void(0)" onClick="transmit(0, 0.75)">Channel #0 (phase + 0.75)</a>
+                <br/>
+                <a href="javascript:void(0)" onClick="transmit(1, 0.00)">Channel #1 (phase + 0.00)</a> |
+                <a href="javascript:void(0)" onClick="transmit(1, 0.25)">Channel #1 (phase + 0.25)</a> |
+                <a href="javascript:void(0)" onClick="transmit(1, 0.50)">Channel #1 (phase + 0.50)</a> |
+                <a href="javascript:void(0)" onClick="transmit(1, 0.75)">Channel #1 (phase + 0.75)</a>
+                <br/>
+            </div>
+
+        </div>
+
+        <!-- audio network BEGIN -->
+        <script src="../../src/common/audio-util/audio-util.service.js"></script>
+        <script src="../../src/common/queue/queue.factory.js"></script>
+        <script src="../../src/common/queue/queue-builder.service.js"></script>
+        <script src="../../src/physial-layer/analyser-chart/analyser-chart.factory.js"></script>
+        <script src="../../src/physial-layer/audio/audio.service.js"></script>
+        <script src="../../src/physial-layer/constellation-diagram/constellation-diagram.factory.js"></script>
+        <script src="../../src/physial-layer/carrier-generate/carrier-generate.factory.js"></script>
+        <script src="../../src/physial-layer/channel-receive/channel-receive.factory.js"></script>
+        <script src="../../src/physial-layer/carrier-recovery/carrier-recovery.factory.js"></script>
+        <script src="../../src/physial-layer/channel-transmit/channel-transmit.factory.js"></script>
+        <script src="../../src/physial-layer/channel-transmit-manager/channel-transmit-manager.factory.js"></script>
+        <script src="../../src/physial-layer/channel-receive-manager/channel-receive-manager.factory.js"></script>
+        <script src="../../src/physial-layer/constellation-diagram/constellation-diagram-builder.service.js"></script>
+        <script src="../../src/physial-layer/channel-transmit-manager/channel-transmit-manager-builder.service.js"></script>
+        <script src="../../src/physial-layer/channel-receive-manager/channel-receive-manager-builder.service.js"></script>
+        <script src="../../src/physial-layer/carrier-recovery/carrier-recovery-builder.service.js"></script>
+        <script src="../../src/physial-layer/channel-transmit/channel-transmit-builder.service.js"></script>
+        <script src="../../src/physial-layer/channel-receive/channel-receive-builder.service.js"></script>
+        <script src="../../src/physial-layer/carrier-generate/carrier-generate-builder.service.js"></script>
+        <script src="../../src/physial-layer/analyser-chart/analyser-chart-builder.service.js"></script>
+        <script src="../../src/physial-layer/audio-network-physical-layer.factory.js"></script>
+        <script src="../../src/physial-layer/audio-network-physical-layer-configuration.service.js"></script>
+        <!-- audio network END -->
+
+        <script src="physical-layer.js"></script>
+    </body>
+</html>

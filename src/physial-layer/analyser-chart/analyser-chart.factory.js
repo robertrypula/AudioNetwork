@@ -96,14 +96,22 @@ var AnalyserChart = (function () {
             var tpl =
                 '<div ' +
                 '    class="analyser-container" ' +
-                '    style="overflow: hidden; width: {{ width }}px; height: 256px; ' +
-                '           position: relative; line-height: 10px; font-family: Tahoma; ' +
-                '           color: red; font-size: 9px; outline: 1px solid gray;"' +
+                '    style="' +
+                '        overflow: hidden;' +
+                '        width: {{ width }}px;' +
+                '        height: 256px;' +
+                '        position: relative;' +
+                '    "' +
                 '    >' +
                 '    <canvas ' +
                 '        class="analyser-chart" ' +
-                '        style="width: {{ width }}px; height: 256px; position: absolute;" ' +
-                '        width="{{ width }}" height="256"' +
+                '        style="' +
+                '            width: {{ width }}px;' +
+                '            height: 256px;' +
+                '            position: absolute;' +
+                '        "' +
+                '        width="{{ width }}"' +
+                '        height="256"' +
                 '        ></canvas>' +
                 '    <div ' +
                 '        class="analyser-action" ' +

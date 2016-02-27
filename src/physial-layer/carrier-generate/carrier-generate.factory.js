@@ -94,10 +94,16 @@ var CarrierGenerate = (function () {
         };
 
         CG.prototype.addToQueue = function (carrierData) {
-            AudioUtil.queueAdd(this.$$queue, carrierData, function (queueItem, item) {
-                queueItem.amplitude = item.amplitude;
-                queueItem.phase = item.phase;
-            });
+            AudioUtil.queueAdd(
+                this.$$queue,
+                [
+                    carrierData
+                ],
+                function (queueItem, item) {
+                    queueItem.amplitude = item.amplitude;
+                    queueItem.phase = item.phase;
+                }
+            );
         };
 
         return CG;

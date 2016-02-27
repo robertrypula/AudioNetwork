@@ -5,6 +5,27 @@ var AudioUtil = (function () {
 
     function _AudioUtil() {
 
+        function accessor(element, path) {
+            var
+                pathList = path.split('.'),
+                result = element,
+                i
+            ;
+
+            if (!element) {
+                return undefined;
+            }
+
+            for (i = 0; i < pathList.length; i++) {
+                result = result[pathList[i]];
+                if (!result) {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
          function findUnitAngle(x, y) {
             var length, q, angle;
 
@@ -73,6 +94,7 @@ var AudioUtil = (function () {
         }
 
         return {
+            accessor: accessor,
             findUnitAngle: findUnitAngle,
             unitFade: unitFade,
             queueAdd: queueAdd,

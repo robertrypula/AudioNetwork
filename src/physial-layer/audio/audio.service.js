@@ -46,6 +46,10 @@ var Audio = (function () {
             return context.sampleRate;
         }
 
+        function getDestination() {
+            return context.destination;
+        }
+
         function getMicrophoneNode() {
             return microphoneNode;
         }
@@ -141,7 +145,7 @@ var Audio = (function () {
             getMicrophoneNode: getMicrophoneNode,
             getRecordedNode: getRecordedNode,
             getSampleRate: getSampleRate,
-            destination: context.destination,
+            getDestination: getDestination,
             getCurrentTime: getCurrentTime,
             createAnalyser: createAnalyser,
             createBiquadFilter: createBiquadFilter,
