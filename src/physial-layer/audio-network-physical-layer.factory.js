@@ -13,12 +13,13 @@ var AudioNetworkPhysicalLayer = (function () {
             -/+ rewrite main API
                 + move code to factory
                 + cleanup inside main service
+                + internal notifyHandler for constellation update, external for user purposes
+                + add rx method outside the factory
+                - destroy constellation
                 - ability to change frequency
-                - internal notifyHandler for constellation update, external for user purposes
                 - add ability to choose destination source
                 - fix recorded file loading logic
                 - fix history point colors
-                - add rx method outside the factory
 
         TODO performance
             - move script processor node to receive manager
@@ -39,6 +40,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyser = null;
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
+            this.$$rxHandler = null;
 
             this.$$initTx();
             this.$$initRx();
@@ -65,6 +67,10 @@ var AudioNetworkPhysicalLayer = (function () {
                     queue.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
                     queue.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
                 }
+            }
+
+            if (this.$$rxHandler) {
+                this.$$rxHandler(channelIndex, carrierData);
             }
         };
 
@@ -202,6 +208,14 @@ var AudioNetworkPhysicalLayer = (function () {
             }
 
             channelTx.addToQueue(dataParsed);
+        };
+
+        ANPL.prototype.rx = function (rxHandler) {
+            this.$$rxHandler = (
+                (typeof rxHandler === 'function') ?
+                rxHandler :
+                null
+            );
         };
 
         ANPL.prototype.getSampleRate = function () {
