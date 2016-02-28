@@ -98,15 +98,18 @@ var ConstellationDiagram = (function () {
             }
 
             ctx.clearRect(0, 0, w, h);
+
             ctx.beginPath();
             ctx.moveTo(0, halfH);
             ctx.lineTo(w, halfH);
             ctx.closePath();
             ctx.stroke();
+
             ctx.beginPath();
             ctx.moveTo(halfW, 0);
             ctx.lineTo(halfW, h);
             ctx.closePath();
+
             ctx.stroke();
             for (i = 0; i < halfQSize; i++) {
                 x = halfW + halfW * q.getItem(2 * i);

@@ -45,38 +45,27 @@ var AudioNetworkPhysicalLayer = (function () {
             this.setRxInput(this.$$configuration.rx.input);
         };
 
-        ANPL.prototype.$$notifyHandler = function (index, carrierData) {
-            return;
-            var state, i, cd, spaces, _, q, powerNormalized;
+        ANPL.prototype.$$notifyHandler = function (channelIndex, carrierData) {
+            var i, cd, queue, powerNormalized;
 
-            _ = this.$$rxConstellationDiagram[index];
-            spaces = "             ";
-            state = "";//(spaces + baseFrequency).slice(-10) + 'Hz | ';
             for (i = 0; i < carrierData.length; i++) {
-                q = _.queue[i];
+                queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
 
                 cd = carrierData[i];
                 if (cd.powerDecibel === -Infinity) {
-                    cd.powerDecibel = -999;
+                    cd.powerDecibel = -99;
                 }
-                if (q) {
+                if (queue) {
                     powerNormalized = (cd.powerDecibel + 40) / 40;
                     powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                    if (q.isFull()) {
-                        q.pop();
-                        q.pop();
+                    if (queue.isFull()) {
+                        queue.pop();
+                        queue.pop();
                     }
-                    q.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
-                    q.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
+                    queue.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
+                    queue.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
                 }
-                state += (
-                    (spaces + Math.round(cd.powerDecibel)).slice(-4) + 'dB ' +
-                    (spaces + Math.round(cd.phase * 360)).slice(-3) + 'deg ' +
-                    ' | '
-                );
             }
-
-            document.getElementById('receive-' + index).innerHTML = state;
         };
 
         ANPL.prototype.$$initTx = function () {
@@ -86,12 +75,45 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination()); // TODO change it later
         };
 
+        ANPL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
+            var ofdmIndex, queue, constellationDiagram, elementId;
+
+            queue = [];
+            constellationDiagram = [];
+            for (ofdmIndex = 0; ofdmIndex < channel.ofdmSize; ofdmIndex++) {
+                elementId = this.$$configuration.rx.constellationDiagram.elementId;
+                elementId = elementId.replace('{{ channelIndex }}', channelIndex + '');
+                elementId = elementId.replace('{{ ofdmIndex }}', ofdmIndex + '');
+                if (!document.getElementById(elementId)) {
+                    throw 'Constellation diagram DOM element not found';
+                }
+
+                queue.push(
+                    QueueBuilder.build(2 * this.$$configuration.rx.constellationDiagram.historyPointSize)
+                );
+                constellationDiagram.push(
+                    ConstellationDiagramBuilder.build(
+                        document.getElementById(elementId),
+                        queue[queue.length - 1],
+                        this.$$configuration.rx.constellationDiagram.width,
+                        this.$$configuration.rx.constellationDiagram.height,
+                        this.$$configuration.rx.constellationDiagram.color.axis,
+                        this.$$configuration.rx.constellationDiagram.color.historyPoint
+                    )
+                );
+            }
+            this.$$rxConstellationDiagram.push({
+                constellationDiagram: constellationDiagram,
+                queue: queue
+            });
+        };
+
         ANPL.prototype.$$initRx = function () {
             var
                 dftSize = Audio.getSampleRate() * this.$$configuration.rx.dftTimeSpan,
                 notifyInterval = Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond,
                 channelList = [],
-                channel, i, j, queue, constellationDiagram
+                channel, i
             ;
 
             for (i = 0; i < this.$$configuration.rx.channel.length; i++) {
@@ -101,24 +123,9 @@ var AudioNetworkPhysicalLayer = (function () {
                 channel.notifyHandler = this.$$notifyHandler.bind(this);
                 channelList.push(channel);
 
-                queue = [];
-                constellationDiagram = [];
-                for (j = 0; j < channel.ofdmSize; j++) {
-                    queue.push(
-                        QueueBuilder.build(2 * this.$$configuration.rx.constellationDiagram.historyPointSize)
-                    );
-                    /*
-                    constellationDiagram.push(
-                        ConstellationDiagramBuilder.build(
-                            //parentElement, queue, width, height, colorAxis, colorHistoryPoint
-                        )
-                    );
-                    */
+                if (this.$$configuration.rx.constellationDiagram.elementId) {
+                    this.$$initConstellationDiagram(i, channel);
                 }
-                this.$$rxConstellationDiagram.push({
-                    queue: queue,
-                    constellationDiagram: constellationDiagram
-                });
             }
             this.$$channelReceiveManager = ChannelReceiveManagerBuilder.build(channelList);
 
@@ -126,6 +133,9 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyser.fftSize = this.$$configuration.rx.spectrum.fftSize;
             this.$$rxAnalyser.connect(this.$$channelReceiveManager.getInputNode());
             if (this.$$configuration.rx.spectrum.elementId) {
+                if (!document.getElementById(this.$$configuration.rx.spectrum.elementId)) {
+                    throw 'Spectrum DOM element not found';
+                }
                 this.$$rxAnalyserChart = AnalyserChartBuilder.build(
                     document.getElementById(this.$$configuration.rx.spectrum.elementId),
                     this.$$rxAnalyser,

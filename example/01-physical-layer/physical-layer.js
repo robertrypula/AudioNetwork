@@ -3,10 +3,13 @@ var anpl;
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         rx: {
-            notificationPerSecond: 1,
+            notificationPerSecond: 25,
             spectrum: {
                 elementId: 'rx-spectrum',
                 height: 150
+            },
+            constellationDiagram: {
+                elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}'
             }
         }
     });
