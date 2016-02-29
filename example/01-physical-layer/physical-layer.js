@@ -18,6 +18,12 @@ function onLoad() {
 
     anpl.rx(receive);
     document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
+
+
+    frequencyUpdate(true, 'tx', 0, 0);
+    frequencyUpdate(true, 'tx', 1, 0);
+    frequencyUpdate(false, 'tx', 0, 0);
+    frequencyUpdate(false, 'tx', 1, 0);
 }
 
 function destroy() {
@@ -28,8 +34,8 @@ function receive(channelIndex, carrierData) {
     var i, elementPower, elementPhase;
 
     for (i = 0; i < carrierData.length; i++) {
-        elementPower = document.getElementById('rx-info-power-' + channelIndex + '-' + i);
-        elementPhase = document.getElementById('rx-info-phase-' + channelIndex + '-' + i);
+        elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);
+        elementPhase = document.getElementById('rx-phase-' + channelIndex + '-' + i);
 
         elementPower.innerHTML = Math.round(carrierData[i].powerDecibel);
         elementPhase.innerHTML = Math.round(carrierData[i].phase * 360);
@@ -47,6 +53,33 @@ function transmit(channelIndex, offset) {
         phase: 0 + offset
     });
     anpl.tx(channelIndex, data);
+}
+
+function frequencyUpdate(isLabel, rxTx, channelIndex, ofdmIndex) {
+    var elementId, element, frequency;
+
+    elementId = rxTx + '-frequency-' + (isLabel ? '' : 'change-') + channelIndex + '-' + ofdmIndex;
+    element = document.getElementById(elementId);
+
+    frequency = (
+        rxTx === 'tx' ?
+        anpl.getTxFrequency(channelIndex, ofdmIndex) :
+        anpl.getRxFrequency(channelIndex, ofdmIndex)
+    );
+    if (isLabel) {
+        element.innerHTML = frequency;
+    } else {
+        element.value = frequency;
+    }
+}
+
+function frequencyChange(rxTx, channelIndex, ofdmIndex) {
+    var elementId, element;
+
+    elementId = rxTx + '-frequency-change-' + channelIndex + '-' + ofdmIndex;
+    element = document.getElementById(elementId);
+
+    console.log(rxTx, element.value);
 }
 
 /*

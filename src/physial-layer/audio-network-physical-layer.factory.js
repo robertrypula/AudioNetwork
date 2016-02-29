@@ -249,6 +249,14 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager = null;
         };
 
+        ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
+            return 'get rx ' + channelIndex + ' ' + ofdmIndex;
+        };
+
+        ANPL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
+            return 'get tx ' + channelIndex + ' ' + ofdmIndex;
+        };
+
         return ANPL;
     }
 
