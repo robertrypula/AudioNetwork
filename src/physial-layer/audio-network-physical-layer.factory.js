@@ -250,11 +250,19 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
-            return 'get rx ' + channelIndex + ' ' + ofdmIndex;
+            return Math.random() + 'get rx ' + channelIndex + ' ' + ofdmIndex;
         };
 
         ANPL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
-            return 'get tx ' + channelIndex + ' ' + ofdmIndex;
+            return Math.random() + 'get tx ' + channelIndex + ' ' + ofdmIndex;
+        };
+
+        ANPL.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
+            console.log('set rx ' + channelIndex + ' ' + ofdmIndex +' = ' + frequency);
+        };
+
+        ANPL.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
+            console.log('set tx ' + channelIndex + ' ' + ofdmIndex +' = ' + frequency);
         };
 
         return ANPL;

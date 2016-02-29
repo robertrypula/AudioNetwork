@@ -19,11 +19,15 @@ function onLoad() {
     anpl.rx(receive);
     document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
 
-
     frequencyUpdate(true, 'tx', 0, 0);
     frequencyUpdate(true, 'tx', 1, 0);
     frequencyUpdate(false, 'tx', 0, 0);
     frequencyUpdate(false, 'tx', 1, 0);
+
+    frequencyUpdate(true, 'rx', 0, 0);
+    frequencyUpdate(true, 'rx', 1, 0);
+    frequencyUpdate(false, 'rx', 0, 0);
+    frequencyUpdate(false, 'rx', 1, 0);
 }
 
 function destroy() {
@@ -78,28 +82,13 @@ function frequencyChange(rxTx, channelIndex, ofdmIndex) {
 
     elementId = rxTx + '-frequency-change-' + channelIndex + '-' + ofdmIndex;
     element = document.getElementById(elementId);
-
-    console.log(rxTx, element.value);
+    anpl.setTxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+    frequencyUpdate(true, rxTx, channelIndex, ofdmIndex);
 }
 
 /*
-
-anpl.setTxFrequency(0, 0, 1000.04);
-anpl.getTxFrequency(0, 0);
-anpl.setRxInput('');
-
-anpl.setRxFrequency(0, 0, 1000.04);
-anpl.getRxFrequency(0, 0);
-
 // optional methods
 // anpl.setRxDftTimeSpan(0.43);
 // anpl.setRxConstellationDiagramPointSize(0.43);
 // anpl.setRxNotificationPerSecond(25)
-// anpl.rxSpectrumDisable()
-// anpl.rxSpectrumEnable()
-// anpl.rxConstellationDiagramDisable()
-// anpl.rxConstellationDiagramEnable()
-
-
-
 */
