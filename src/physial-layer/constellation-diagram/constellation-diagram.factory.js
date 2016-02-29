@@ -85,7 +85,7 @@ var ConstellationDiagram = (function () {
                 halfW = 0.5 * this.$$canvasWidth,
                 halfH = 0.5 * this.$$canvasHeight,
                 q = this.$$queue,
-                halfQSize = 0.5 * q.getSize(),
+                halfQSize,
                 color, x, y, i;
 
             if (this.$$destroy) {
@@ -109,8 +109,9 @@ var ConstellationDiagram = (function () {
             ctx.moveTo(halfW, 0);
             ctx.lineTo(halfW, h);
             ctx.closePath();
-
             ctx.stroke();
+
+            halfQSize = 0.5 * q.getSize();
             for (i = 0; i < halfQSize; i++) {
                 x = halfW + halfW * q.getItem(2 * i);
                 y = halfH - halfH * q.getItem(2 * i + 1);

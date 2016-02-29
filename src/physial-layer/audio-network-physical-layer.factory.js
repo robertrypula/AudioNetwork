@@ -15,7 +15,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + cleanup inside main service
                 + internal notifyHandler for constellation update, external for user purposes
                 + add rx method outside the factory
-                - destroy constellation
+                + destroy constellation
                 - ability to change frequency
                 - add ability to choose destination source
                 - fix recorded file loading logic
@@ -223,6 +223,8 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.destroy = function () {
+            var i, j;
+
             this.setRxInput(null);
 
             // rx
@@ -231,6 +233,13 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$rxAnalyserChart = null;
             }
             this.$$rxAnalyser.disconnect(this.$$channelReceiveManager.getInputNode());
+            if (this.$$rxConstellationDiagram) {
+                for (i = 0; i < this.$$rxConstellationDiagram.length; i++) {
+                    for (j = 0; j < this.$$rxConstellationDiagram[i].constellationDiagram.length; j++) {
+                        this.$$rxConstellationDiagram[i].constellationDiagram[j].destroy();
+                    }
+                }
+            }
             this.$$channelReceiveManager.destroy();
             this.$$channelReceiveManager = null;
 
