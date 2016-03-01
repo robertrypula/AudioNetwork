@@ -79,6 +79,7 @@ var ConstellationDiagram = (function () {
 
         CD.prototype.$$updateChart = function () {
             var
+                chp = this.$$colorHistoryPoint,
                 ctx = this.$$canvasContext,
                 w = this.$$canvasWidth,
                 h = this.$$canvasHeight,
@@ -86,7 +87,7 @@ var ConstellationDiagram = (function () {
                 halfH = 0.5 * this.$$canvasHeight,
                 q = this.$$queue,
                 halfQSize,
-                color, x, y, i;
+                colorUnitPosition, x, y, i;
 
             if (this.$$destroy) {
                 this.$$parentElement.innerHTML = '';
@@ -112,15 +113,28 @@ var ConstellationDiagram = (function () {
             ctx.stroke();
 
             halfQSize = 0.5 * q.getSize();
+            // from oldest to newest
             for (i = 0; i < halfQSize; i++) {
-                x = halfW + halfW * q.getItem(2 * i);
+                x = halfW + halfW * q.getItem(2 * i);     
                 y = halfH - halfH * q.getItem(2 * i + 1);
-                color = 128 - 128 * (i / (halfQSize - 1));
-                ctx.fillStyle = 'rgba(' + color + ', ' + color + ', 100, 1)';
+                colorUnitPosition = 1 - (i / (0.5 * q.getSizeMax() - 1));
+
+                ctx.fillStyle = (
+                    'rgba(' + 
+                    this.$$colorInterpolate(chp.red.newest, chp.red.oldest, colorUnitPosition) + ', ' + 
+                    this.$$colorInterpolate(chp.green.newest, chp.green.oldest, colorUnitPosition) + ', ' + 
+                    this.$$colorInterpolate(chp.blue.newest, chp.blue.oldest, colorUnitPosition) + ', ' + 
+                    '1)'
+                );
+
                 ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
             return true;
+        };
+
+        CD.prototype.$$colorInterpolate = function (start, end, unitPosition) {
+            return start + ((end - start) * unitPosition);
         };
 
         CD.prototype.$$initCanvasContext = function () {

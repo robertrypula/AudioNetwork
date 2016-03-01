@@ -9,6 +9,7 @@ var AudioNetworkPhysicalLayer = (function () {
             + decibel power/amplitude check
             + load wav file
             - use dedicated constellation at carrier.html
+            - refactor DOM helpers (move to service)
 
             -/+ rewrite main API
                 + move code to factory
@@ -18,8 +19,8 @@ var AudioNetworkPhysicalLayer = (function () {
                 + destroy constellation
                 + ability to change frequency
                 + fix recorded file loading logic
+                +/- fix history point colors
                 - add ability to choose destination source
-                - fix history point colors
 
         TODO performance
             - move script processor node to receive manager

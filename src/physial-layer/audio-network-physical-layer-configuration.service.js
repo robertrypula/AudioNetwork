@@ -65,16 +65,16 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                         color: {
                             historyPoint: {
                                 red: {
-                                    start: a(c, 'rx.constellationDiagram.color.historyPoint.red.start') || 128,
-                                    end: a(c, 'rx.constellationDiagram.color.historyPoint.red.end') || 0
+                                    newest: a(c, 'rx.constellationDiagram.color.historyPoint.red.newest') || 0,
+                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.red.oldest') || 150
                                 },
                                 green: {
-                                    start: a(c, 'rx.constellationDiagram.color.historyPoint.green.start') || 128,
-                                    end: a(c, 'rx.constellationDiagram.color.historyPoint.green.end') || 0
+                                    newest: a(c, 'rx.constellationDiagram.color.historyPoint.green.newest') || 0,
+                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.green.oldest') || 160
                                 },
                                 blue: {
-                                    start: a(c, 'rx.constellationDiagram.color.historyPoint.blue.start') || 0,
-                                    end: a(c, 'rx.constellationDiagram.color.historyPoint.blue.end') || 0
+                                    newest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.newest') || 0,
+                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.oldest') || 100
                                 }
                             },
                             axis: a(c, 'rx.constellationDiagram.color.axis') || 'green'

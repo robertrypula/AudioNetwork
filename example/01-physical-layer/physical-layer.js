@@ -3,7 +3,8 @@ var anpl;
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         rx: {
-            notificationPerSecond: 20,
+            notificationPerSecond: 20, // default: 20
+            dftTimeSpan: 0.1, // default: 0.1
             spectrum: {
                 elementId: 'rx-spectrum',
                 height: 150
@@ -12,6 +13,7 @@ function onLoad() {
                 elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
                 width: 128,
                 height: 128
+                historyPointSize: 50 // default: 50
             }
         }
     });
@@ -119,8 +121,8 @@ function loadRecordedAudio() {
 }
 
 /*
-// optional methods
-// anpl.setRxDftTimeSpan(0.43);
-// anpl.setRxConstellationDiagramPointSize(0.43);
-// anpl.setRxNotificationPerSecond(25)
+    optional methods:
+        - anpl.setRxDftTimeSpan(0.43);
+        - anpl.setRxConstellationDiagramPointSize(0.43);
+        - anpl.setRxNotificationPerSecond(25)
 */

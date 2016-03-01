@@ -53,6 +53,10 @@ var Queue = (function () {
             return this.$$size;
         };
 
+        Q.prototype.getSizeMax = function () {
+            return this.$$sizeMax;
+        };
+
         Q.prototype.isFull = function () {
             return this.$$size === this.$$sizeMax;
         };
