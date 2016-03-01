@@ -66,20 +66,23 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                             historyPoint: {
                                 red: {
                                     newest: a(c, 'rx.constellationDiagram.color.historyPoint.red.newest') || 0,
-                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.red.oldest') || 150
+                                    tailNewest: a(c, 'rx.constellationDiagram.color.historyPoint.red.tailNewest') || 100,
+                                    tailOldest: a(c, 'rx.constellationDiagram.color.historyPoint.red.tailOldest') || 180
                                 },
                                 green: {
                                     newest: a(c, 'rx.constellationDiagram.color.historyPoint.green.newest') || 0,
-                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.green.oldest') || 160
+                                    tailNewest: a(c, 'rx.constellationDiagram.color.historyPoint.green.tailNewest') || 100,
+                                    tailOldest: a(c, 'rx.constellationDiagram.color.historyPoint.green.tailOldest') || 200
                                 },
                                 blue: {
                                     newest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.newest') || 0,
-                                    oldest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.oldest') || 100
+                                    tailNewest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.tailNewest') || 100,
+                                    tailOldest: a(c, 'rx.constellationDiagram.color.historyPoint.blue.tailOldest') || 150
                                 }
                             },
                             axis: a(c, 'rx.constellationDiagram.color.axis') || 'green'
                         },
-                        historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || 50,
+                        historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || 40,
                         width: a(c, 'rx.constellationDiagram.width') || 200,
                         height: a(c, 'rx.constellationDiagram.height') || 200
                     }

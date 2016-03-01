@@ -3,17 +3,17 @@ var anpl;
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         rx: {
-            notificationPerSecond: 20, // default: 20
-            dftTimeSpan: 0.1, // default: 0.1
+            notificationPerSecond: 25, // default: 20
+            dftTimeSpan: 0.5, // default: 0.1
             spectrum: {
                 elementId: 'rx-spectrum',
                 height: 150
             },
             constellationDiagram: {
                 elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
-                width: 128,
-                height: 128,
-                historyPointSize: 50 // default: 50
+                width: 256,
+                height: 256,
+                historyPointSize: 25 // default: 40
             }
         }
     });

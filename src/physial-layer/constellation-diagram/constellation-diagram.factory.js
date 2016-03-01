@@ -87,7 +87,8 @@ var ConstellationDiagram = (function () {
                 halfH = 0.5 * this.$$canvasHeight,
                 q = this.$$queue,
                 halfQSize,
-                colorUnitPosition, x, y, i;
+                tailUnitPosition, color, x, y, i, isNewest
+            ;
 
             if (this.$$destroy) {
                 this.$$parentElement.innerHTML = '';
@@ -113,28 +114,42 @@ var ConstellationDiagram = (function () {
             ctx.stroke();
 
             halfQSize = 0.5 * q.getSize();
+
             // from oldest to newest
             for (i = 0; i < halfQSize; i++) {
-                x = halfW + halfW * q.getItem(2 * i);     
+                x = halfW + halfW * q.getItem(2 * i);
                 y = halfH - halfH * q.getItem(2 * i + 1);
-                colorUnitPosition = 1 - (i / (0.5 * q.getSizeMax() - 1));
+                tailUnitPosition = 1 - (i / (halfQSize - 2));
+                isNewest = (i === halfQSize - 1);
 
-                ctx.fillStyle = (
-                    'rgba(' + 
-                    this.$$colorInterpolate(chp.red.newest, chp.red.oldest, colorUnitPosition) + ', ' + 
-                    this.$$colorInterpolate(chp.green.newest, chp.green.oldest, colorUnitPosition) + ', ' + 
-                    this.$$colorInterpolate(chp.blue.newest, chp.blue.oldest, colorUnitPosition) + ', ' + 
-                    '1)'
+                if (isNewest) {
+                    color = (
+                        'rgba(' + chp.red.newest + ', ' + chp.green.newest + ', ' + chp.blue.newest + ', ' + '1)'
+                    );
+                } else {
+                    color = (
+                        'rgba(' +
+                        this.$$colorInterpolate(chp.red.tailNewest, chp.red.tailOldest, tailUnitPosition) + ', ' +
+                        this.$$colorInterpolate(chp.green.tailNewest, chp.green.tailOldest, tailUnitPosition) + ', ' +
+                        this.$$colorInterpolate(chp.blue.tailNewest, chp.blue.tailOldest, tailUnitPosition) + ', ' +
+                        '1)'
+                    );
+                }
+
+                ctx.fillStyle = color;
+                ctx.fillRect(
+                    x - (isNewest ? 2 : 1),
+                    y - (isNewest ? 2 : 1),
+                    (isNewest ? 5 : 3),
+                    (isNewest ? 5 : 3)
                 );
-
-                ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
             return true;
         };
 
         CD.prototype.$$colorInterpolate = function (start, end, unitPosition) {
-            return start + ((end - start) * unitPosition);
+            return Math.round(start + ((end - start) * unitPosition));
         };
 
         CD.prototype.$$initCanvasContext = function () {

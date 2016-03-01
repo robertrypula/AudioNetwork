@@ -19,7 +19,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + destroy constellation
                 + ability to change frequency
                 + fix recorded file loading logic
-                +/- fix history point colors
+                + fix history point colors
                 - add ability to choose destination source
 
         TODO performance
