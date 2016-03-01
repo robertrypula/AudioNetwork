@@ -79,6 +79,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$configuration.tx.channel
             );
             this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination()); // TODO change it later
+            Audio.getRecordedNode().connect(Audio.getDestination()); // TODO change it later
         };
 
         ANPL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
@@ -249,6 +250,7 @@ var AudioNetworkPhysicalLayer = (function () {
 
             // tx
             this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination()); // TODO change it later
+            Audio.getRecordedNode().disconnect(Audio.getDestination()); // TODO change it later
             this.$$channelTransmitManager.destroy();
             this.$$channelTransmitManager = null;
         };
