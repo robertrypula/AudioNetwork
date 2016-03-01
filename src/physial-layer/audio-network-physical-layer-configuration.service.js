@@ -47,7 +47,6 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                 rx: {
                     channel: parseChannel(c, 'rx'),
                     input: a(c, 'rx.input') || INPUT.MICROPHONE,
-                    inputPath: a(c, 'rx.inputPath') || null,
                     notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,
                     dftTimeSpan: a(c, 'rx.dftTimeSpan') || 0.1,
                     spectrum: {

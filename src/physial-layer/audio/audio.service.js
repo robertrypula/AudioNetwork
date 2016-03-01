@@ -7,7 +7,8 @@ var Audio = (function () {
         var
             context = null,
             microphoneNode = null,
-            recordedNode = null
+            recordedNode = null,
+            recordedRawNode = null
         ;
 
         function getContext() {
@@ -64,7 +65,7 @@ var Audio = (function () {
             rawMicrophoneNode.connect(microphoneNode);
         }
 
-        function loadRecordedAudio(url) {
+        function loadRecordedAudio(url, successCallback, errorCallback) {
             var request = new XMLHttpRequest();
 
             request.open('GET', url, true);
@@ -74,15 +75,24 @@ var Audio = (function () {
                 context.decodeAudioData(
                     request.response,
                     function(buffer) {
-                        var rawRecordedNode = context.createBufferSource();
-                        rawRecordedNode.buffer = buffer;
-                        rawRecordedNode.connect(recordedNode);
-                        rawRecordedNode.loop = true;
-                        rawRecordedNode.start(0);
+                        if (recordedRawNode) {
+                            recordedRawNode.disconnect(recordedNode);
+                        }
+
+                        recordedRawNode = context.createBufferSource();
+                        recordedRawNode.buffer = buffer;
+                        recordedRawNode.connect(recordedNode);
+                        recordedRawNode.loop = true;
+                        recordedRawNode.start(0);
+
+                        if (typeof successCallback === 'function') {
+                            successCallback();
+                        }
                     },
                     function (e) {
-                        alert('Cannot load audio file');
-                        console.log(e);
+                        if (typeof errorCallback === 'function') {
+                            errorCallback(e);
+                        }
                     }
                 );
             };

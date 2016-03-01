@@ -17,7 +17,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + add rx method outside the factory
                 + destroy constellation
                 + ability to change frequency
-                - fix recorded file loading logic
+                + fix recorded file loading logic
                 - add ability to choose destination source
                 - fix history point colors
 
@@ -184,6 +184,10 @@ var AudioNetworkPhysicalLayer = (function () {
             } else {
                 this.$$currentInput = null;
             }
+        };
+
+        ANPL.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
+            Audio.loadRecordedAudio(url, successCallback, errorCallback);
         };
 
         ANPL.prototype.tx = function (channelIndex, data) {

@@ -23,6 +23,21 @@
                     </label>
                     <input type="text" id="symbol-duration" value="200" />
                 </div>
+                <div>
+                    <b>Rx input:</b>
+                    <span>
+                        <a href="javascript:void(0)" onClick="rxInput('mic')">Microphone</a>
+                        <a href="javascript:void(0)" onClick="rxInput('rxLoop')">RxLoopback</a>
+                        <a href="javascript:void(0)" onClick="rxInput('rec')">Recorded file</a>
+                    </span>
+                </div>
+                <div>
+                    <b>Recorded audio url:</b>
+                    <span>
+                        <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
+                        <a href="javascript:void(0)" onClick="loadRecordedAudio()">Load</a>
+                    </span>
+                </div>
             </div>
 
             <h2>Receive</h2>

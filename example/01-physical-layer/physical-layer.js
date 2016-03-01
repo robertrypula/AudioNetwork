@@ -92,6 +92,32 @@ function frequencyChange(rxTx, channelIndex, ofdmIndex) {
     frequencyUpdate(true, rxTx, channelIndex, ofdmIndex);
 }
 
+function rxInput(type) {
+    switch (type) {
+        case 'mic':
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE);
+            break;
+        case 'rxLoop':
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RX_LOOPBACK);
+            break;
+        case 'rec':
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_FILE);
+            break;
+    }
+}
+
+function loadRecordedAudio() {
+    anpl.loadRecordedAudio(
+        document.getElementById('recorded-audio-url').value,
+        function () {
+            alert('Audio loaded!');
+        },
+        function () {
+            alert('Error');
+        }
+    );
+}
+
 /*
 // optional methods
 // anpl.setRxDftTimeSpan(0.43);
