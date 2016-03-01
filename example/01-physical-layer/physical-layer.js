@@ -12,7 +12,7 @@ function onLoad() {
             constellationDiagram: {
                 elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
                 width: 128,
-                height: 128
+                height: 128,
                 historyPointSize: 50 // default: 50
             }
         }
