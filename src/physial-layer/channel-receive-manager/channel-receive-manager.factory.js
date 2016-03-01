@@ -50,7 +50,7 @@ var ChannelReceiveManager = (function () {
 
         CRM.prototype.getChannel = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.channelReceive.length) {
-                throw 'Channel Index out of range: ' + channelIndex;
+                throw 'Channel index out of range: ' + channelIndex;
             }
 
             return this.channelReceive[channelIndex];

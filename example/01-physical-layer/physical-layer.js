@@ -82,7 +82,13 @@ function frequencyChange(rxTx, channelIndex, ofdmIndex) {
 
     elementId = rxTx + '-frequency-change-' + channelIndex + '-' + ofdmIndex;
     element = document.getElementById(elementId);
-    anpl.setTxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+
+    if (rxTx === 'tx') {
+        anpl.setTxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+    } else {
+        anpl.setRxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+    }
+
     frequencyUpdate(true, rxTx, channelIndex, ofdmIndex);
 }
 

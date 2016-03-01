@@ -7,10 +7,7 @@ var CarrierGenerate = (function () {
         var CG;
 
         CG = function (samplePerPeriod, samplePerFade) {
-            this.$$samplePerPeriod = samplePerPeriod;
-            this.$$omega = 2 * Math.PI / samplePerPeriod; // revolutions per sample
             this.$$samplePerFade = samplePerFade;
-            this.$$sampleNumber = 0;
             this.$$queue = [];
             this.$$sampleComputed = null;
             this.$$currentCarrier = {
@@ -18,6 +15,11 @@ var CarrierGenerate = (function () {
                 sampleNumberStart: null,
                 sampleNumberEnd: null
             };
+
+            this.$$samplePerPeriod = null;
+            this.$$omega = null;
+            this.$$sampleNumber = 0;
+            this.setSamplePerPeriod(samplePerPeriod);
         };
 
         CG.prototype.$$sampleCompute = function () {
@@ -96,14 +98,18 @@ var CarrierGenerate = (function () {
         CG.prototype.addToQueue = function (carrierData) {
             AudioUtil.queueAdd(
                 this.$$queue,
-                [
-                    carrierData
-                ],
+                carrierData,
                 function (queueItem, item) {
                     queueItem.amplitude = item.amplitude;
                     queueItem.phase = item.phase;
                 }
             );
+        };
+
+        CG.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            this.$$samplePerPeriod = samplePerPeriod;
+            this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
+            this.$$sampleNumber = 0;
         };
 
         return CG;

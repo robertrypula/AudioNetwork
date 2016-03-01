@@ -10,6 +10,7 @@ var ChannelReceive = (function () {
             this.analyserNode = null;  // empty analyser needs to be connected to script node
             this.scriptNode = null;
             this.carrierRecovery = [];
+            this.carrierFrequency = [];
             this.$$notifyInterval = null;
             this.$$notifyHandler = null;
             this.$$sampleNumber = 0;
@@ -20,14 +21,15 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.configure = function (configuration) {
-            var i, cr, samplePerPeriod, subcarrierFrequency;
+            var i, cr, samplePerPeriod, frequency;
 
             this.carrierRecovery.length = 0;
             for (i = 0; i < configuration.ofdmSize; i++) {
-                subcarrierFrequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
-                samplePerPeriod = Audio.getSampleRate() / subcarrierFrequency;
+                frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
+                samplePerPeriod = Audio.getSampleRate() / frequency;
                 cr = CarrierRecoveryBuilder.build(samplePerPeriod, configuration.dftSize);
                 this.carrierRecovery.push(cr);
+                this.carrierFrequency.push(frequency);
             }
 
             this.$$notifyInterval = configuration.notifyInterval;
@@ -52,6 +54,26 @@ var ChannelReceive = (function () {
 
         CR.prototype.getFirstNode = function () {
             return this.scriptNode;
+        };
+
+        CR.prototype.getFrequency = function (ofdmIndex) {
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+                throw 'OFDM index out of range: ' + ofdmIndex;
+            }
+
+            return this.carrierFrequency[ofdmIndex];
+        };
+
+        CR.prototype.setFrequency = function (ofdmIndex, frequency) {
+            var samplePerPeriod;
+
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+                throw 'OFDM index out of range: ' + ofdmIndex;
+            }
+
+            samplePerPeriod = Audio.getSampleRate() / frequency;
+            this.carrierRecovery[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
+            this.carrierFrequency[ofdmIndex] = frequency;
         };
 
         CR.prototype.onAudioProcess = function (audioProcessingEvent) {

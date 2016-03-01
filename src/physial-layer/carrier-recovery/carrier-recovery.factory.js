@@ -7,7 +7,6 @@ var CarrierRecovery = (function () {
         var CR;
 
         CR = function (samplePerPeriod, sizeDFT) {
-            this.$$sampleNumber = 0;
             this.$$queue = QueueBuilder.build(2 * sizeDFT);
             this.$$queueSumReal = 0;
             this.$$queueSumImm = 0;
@@ -18,8 +17,10 @@ var CarrierRecovery = (function () {
             this.$$power = 0;
             this.$$powerDecibel = 0;
             this.$$phase = 0;
+
             this.$$samplePerPeriod = null;
             this.$$omega = null;
+            this.$$sampleNumber = 0;
             this.setSamplePerPeriod(samplePerPeriod);
         };
 

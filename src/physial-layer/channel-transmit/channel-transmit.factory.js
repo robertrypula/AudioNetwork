@@ -10,6 +10,7 @@ var ChannelTransmit = (function () {
             this.scriptNode = null;
             this.gainNode = null;
             this.carrierGenerate = [];
+            this.carrierFrequency = [];
             this.$$index = index;
 
             this.init();
@@ -20,7 +21,7 @@ var ChannelTransmit = (function () {
             var i;
 
             if (data.length !== this.carrierGenerate.length) {
-                throw 'Wrong subcarriers size';
+                throw 'Data array length does not match configures OFDM size';
             }
 
             for (i = 0; i < this.carrierGenerate.length; i++) {
@@ -32,15 +33,36 @@ var ChannelTransmit = (function () {
             return this.gainNode;
         };
 
+        CT.prototype.getFrequency = function (ofdmIndex) {
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+                throw 'OFDM index out of range: ' + ofdmIndex;
+            }
+
+            return this.carrierFrequency[ofdmIndex];
+        };
+
+        CT.prototype.setFrequency = function (ofdmIndex, frequency) {
+            var samplePerPeriod;
+
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+                throw 'OFDM index out of range: ' + ofdmIndex;
+            }
+
+            samplePerPeriod = Audio.getSampleRate() / frequency;
+            this.carrierGenerate[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
+            this.carrierFrequency[ofdmIndex] = frequency;
+        };
+
         CT.prototype.configure = function (configuration) {
-            var i, cg, samplePerPeriod, subcarrierFrequency;
+            var i, cg, samplePerPeriod, frequency;
 
             this.carrierGenerate.length = 0;
             for (i = 0; i < configuration.ofdmSize; i++) {
-                subcarrierFrequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
-                samplePerPeriod = Audio.getSampleRate() / subcarrierFrequency;
+                frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
+                samplePerPeriod = Audio.getSampleRate() / frequency;
                 cg = CarrierGenerateBuilder.build(samplePerPeriod);
                 this.carrierGenerate.push(cg);
+                this.carrierFrequency.push(frequency);
             }
         };
 

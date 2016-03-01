@@ -16,9 +16,9 @@ var AudioNetworkPhysicalLayer = (function () {
                 + internal notifyHandler for constellation update, external for user purposes
                 + add rx method outside the factory
                 + destroy constellation
-                - ability to change frequency
-                - add ability to choose destination source
+                + ability to change frequency
                 - fix recorded file loading logic
+                - add ability to choose destination source
                 - fix history point colors
 
         TODO performance
@@ -198,13 +198,13 @@ var AudioNetworkPhysicalLayer = (function () {
 
             for (i = 0; i < data.length; i++) {
                 d = data[i];
-                dataParsed.push({
+                dataParsed.push([{
                     amplitude: d.amplitude || 1,
                     duration: Math.round(
                         Audio.getSampleRate() * (d.duration || 0.200)
                     ),
                     phase: d.phase || 0
-                });
+                }]);
             }
 
             channelTx.addToQueue(dataParsed);
@@ -250,19 +250,33 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
-            return Math.random() + 'get rx ' + channelIndex + ' ' + ofdmIndex;
+            return (
+                this.$$channelReceiveManager
+                    .getChannel(channelIndex)
+                    .getFrequency(ofdmIndex)
+            );
         };
 
         ANPL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
-            return Math.random() + 'get tx ' + channelIndex + ' ' + ofdmIndex;
+            return (
+                this.$$channelTransmitManager
+                .getChannel(channelIndex)
+                .getFrequency(ofdmIndex)
+            );
         };
 
         ANPL.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
-            console.log('set rx ' + channelIndex + ' ' + ofdmIndex +' = ' + frequency);
+            this.$$channelReceiveManager
+                .getChannel(channelIndex)
+                .setFrequency(ofdmIndex, frequency)
+            ;
         };
 
         ANPL.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
-            console.log('set tx ' + channelIndex + ' ' + ofdmIndex +' = ' + frequency);
+            this.$$channelTransmitManager
+                .getChannel(channelIndex)
+                .setFrequency(ofdmIndex, frequency)
+            ;
         };
 
         return ANPL;

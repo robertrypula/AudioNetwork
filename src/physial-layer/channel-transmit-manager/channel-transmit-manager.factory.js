@@ -8,7 +8,7 @@ var ChannelTransmitManager = (function () {
 
         CTM = function (configuration) {
             this.channelTransmit = [];
-            this.gainNode;
+            this.gainNode = null;
 
             this.$$init();
             this.$$configure(configuration);
@@ -46,7 +46,7 @@ var ChannelTransmitManager = (function () {
 
         CTM.prototype.getChannel = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.channelTransmit.length) {
-                throw 'Channel Index out of range: ' + channelIndex;
+                throw 'Channel index out of range: ' + channelIndex;
             }
 
             return this.channelTransmit[channelIndex];
