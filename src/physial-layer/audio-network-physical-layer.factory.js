@@ -11,7 +11,7 @@ var AudioNetworkPhysicalLayer = (function () {
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
 
-            -/+ rewrite main API
+            + rewrite main API
                 + move code to factory
                 + cleanup inside main service
                 + internal notifyHandler for constellation update, external for user purposes
@@ -54,22 +54,25 @@ var AudioNetworkPhysicalLayer = (function () {
             var i, cd, queue, powerNormalized;
 
             for (i = 0; i < carrierData.length; i++) {
-                queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-
                 cd = carrierData[i];
                 if (cd.powerDecibel === -Infinity) {
                     cd.powerDecibel = -99;
                 }
-                if (queue) {
-                    powerNormalized = (cd.powerDecibel + 40) / 40;
-                    powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                    if (queue.isFull()) {
-                        queue.pop();
-                        queue.pop();
-                    }
-                    queue.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
-                    queue.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
+                cd.powerDecibel = cd.powerDecibel < -99 ? -99 : cd.powerDecibel;
+
+                if (this.$$rxConstellationDiagram.length === 0) {
+                    continue;
                 }
+
+                queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
+                powerNormalized = (cd.powerDecibel + 40) / 40;
+                powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
+                if (queue.isFull()) {
+                    queue.pop();
+                    queue.pop();
+                }
+                queue.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
+                queue.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
             }
 
             if (this.$$rxHandler) {

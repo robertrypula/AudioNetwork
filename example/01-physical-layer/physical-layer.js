@@ -15,6 +15,7 @@ function onLoad() {
                 height: 256,
                 historyPointSize: 25 // default: 40
             }
+
         }
     });
 
@@ -113,6 +114,7 @@ function loadRecordedAudio() {
         document.getElementById('recorded-audio-url').value,
         function () {
             alert('Audio loaded!');
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_FILE);
         },
         function () {
             alert('Error');
