@@ -10,6 +10,10 @@ var AudioNetworkPhysicalLayer = (function () {
             + load wav file
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
+            - check inverse phase shift issue
+            - add auto tuning feature
+            - add getOutput* methods
+            - add outputTxEnable/outputTxDisable methods
 
             + rewrite main API
                 + move code to factory
@@ -212,11 +216,11 @@ var AudioNetworkPhysicalLayer = (function () {
             for (i = 0; i < data.length; i++) {
                 d = data[i];
                 dataParsed.push([{
-                    amplitude: d.amplitude || 1,
+                    amplitude: (typeof d.amplitude !== 'undefined') ? d.amplitude : 1,
                     duration: Math.round(
                         Audio.getSampleRate() * (d.duration || 0.200)
                     ),
-                    phase: d.phase || 0
+                    phase: (typeof d.phase !== 'undefined') ? d.phase : 0
                 }]);
             }
 

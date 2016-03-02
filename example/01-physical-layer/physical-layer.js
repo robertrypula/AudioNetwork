@@ -4,7 +4,7 @@ function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         rx: {
             notificationPerSecond: 25, // default: 20
-            dftTimeSpan: 0.5, // default: 0.1
+            dftTimeSpan: 0.2, // default: 0.1
             spectrum: {
                 elementId: 'rx-spectrum',
                 height: 150
@@ -51,15 +51,43 @@ function receive(channelIndex, carrierData) {
 
 function transmit(channelIndex, offset) {
     var
-        symbolDuration = parseFloat(document.getElementById('symbol-duration').value),
+        symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         data = []
     ;
 
     data.push({
-        duration: symbolDuration / 1000,
+        duration: symbolDuration,
         phase: 0 + offset
     });
     anpl.tx(channelIndex, data);
+}
+
+function transmitSequence(channelIndex) {
+    var
+        symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
+        guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
+        sequeceData = document.getElementById('tx-sequence-data-' + channelIndex + '-0').value + '',
+        pskSize = parseInt(document.getElementById('tx-sequence-psk-size-' + channelIndex + '-0').value),
+        s = sequeceData.split(' '),
+        data,
+        i
+    ;
+
+    for (i = 0; i < s.length; i++) {
+        data = [];
+        data.push({
+            duration: symbolDuration,
+            phase: 0 + (parseInt(s[i]) % pskSize) / pskSize
+        });
+        anpl.tx(channelIndex, data);
+
+        data = [];
+        data.push({
+            duration: guardInterval,
+            amplitude: 0
+        });
+        anpl.tx(channelIndex, data);
+    }
 }
 
 function frequencyUpdate(isLabel, rxTx, channelIndex, ofdmIndex) {
