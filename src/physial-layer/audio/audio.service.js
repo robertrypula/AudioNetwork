@@ -55,7 +55,7 @@ var Audio = (function () {
             return microphoneNode;
         }
 
-        function getRecordedNode() {
+        function getRecordedAudioNode() {
             return recordedNode;
         }
 
@@ -153,7 +153,7 @@ var Audio = (function () {
         return {
             loadRecordedAudio: loadRecordedAudio,
             getMicrophoneNode: getMicrophoneNode,
-            getRecordedNode: getRecordedNode,
+            getRecordedAudioNode: getRecordedAudioNode,
             getSampleRate: getSampleRate,
             getDestination: getDestination,
             getCurrentTime: getCurrentTime,

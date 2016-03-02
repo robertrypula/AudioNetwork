@@ -27,8 +27,8 @@ var CarrierRecovery = (function () {
         CR.prototype.$$computeReference = function () {
             var x = this.$$omega * this.$$sampleNumber;
 
-            this.$$referenceReal = Math.cos(x);
-            this.$$referenceImm = Math.sin(x);
+            this.$$referenceReal = MathUtil.cos(x);
+            this.$$referenceImm = MathUtil.sin(x);
         };
 
         CR.prototype.$$computeAverage = function (sample) {
@@ -51,11 +51,11 @@ var CarrierRecovery = (function () {
         };
 
         CR.prototype.$$computePower = function () {
-            this.$$power = Math.sqrt(
+            this.$$power = MathUtil.sqrt(
                 this.$$real * this.$$real +
                 this.$$imm * this.$$imm
             );
-            this.$$powerDecibel = 10 * Math.log(this.$$power) / Math.LN10;
+            this.$$powerDecibel = 10 * MathUtil.log(this.$$power) / MathUtil.LN10;
         };
 
         CR.prototype.$$computePhase = function () {
@@ -88,7 +88,7 @@ var CarrierRecovery = (function () {
 
         CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
-            this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
+            this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
         };
 

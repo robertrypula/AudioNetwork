@@ -31,6 +31,15 @@
                 </div>
                 <div>
                     <b>
+                        Output [tx]:
+                    </b>
+                    <span>
+                        <a href="javascript:void(0)" onClick="output('tx', true)">Enable</a>
+                        <a href="javascript:void(0)" onClick="output('tx', false)">Disable</a>
+                    </span>
+                </div>
+                <div>
+                    <b>
                         Output [microphone]:
                     </b>
                     <span>
@@ -175,6 +184,7 @@
         </div>
 
         <!-- audio network BEGIN -->
+        <script src="../../src/common/math-util/math-util.service.js"></script>
         <script src="../../src/common/audio-util/audio-util.service.js"></script>
         <script src="../../src/common/queue/queue.factory.js"></script>
         <script src="../../src/common/queue/queue-builder.service.js"></script>

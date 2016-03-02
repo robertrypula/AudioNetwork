@@ -200,11 +200,11 @@ var AnalyserChart = (function () {
             }
 
             while (time < (this.$$analyser.frequencyBinCount / Audio.getSampleRate())) {
-                left = Math.round(time * resolution);
+                left = MathUtil.round(time * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
                   AXIS_LABEL_X_ONE_ITEM_WITH,
                   left,
-                  Math.round(time * 1000) + 'ms'
+                  MathUtil.round(time * 1000) + 'ms'
                 );
                 time += step;
             }
@@ -230,7 +230,7 @@ var AnalyserChart = (function () {
             }
 
             while (frequency < 0.5 * Audio.getSampleRate()) {
-                left = Math.round(frequency * resolution);
+                left = MathUtil.round(frequency * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
                     AXIS_LABEL_X_ONE_ITEM_WITH,
                     left,
@@ -272,7 +272,7 @@ var AnalyserChart = (function () {
                 ctx.moveTo(i, this.$$canvasHeight);
                 ctx.lineTo(
                     i,
-                    this.$$canvasHeight - Math.round(this.$$canvasHeight * this.$$data[i] / 255)
+                    this.$$canvasHeight - MathUtil.round(this.$$canvasHeight * this.$$data[i] / 255)
                 );
                 ctx.closePath();
                 ctx.stroke();

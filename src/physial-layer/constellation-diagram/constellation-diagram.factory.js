@@ -149,7 +149,7 @@ var ConstellationDiagram = (function () {
         };
 
         CD.prototype.$$colorInterpolate = function (start, end, unitPosition) {
-            return Math.round(start + ((end - start) * unitPosition));
+            return MathUtil.round(start + ((end - start) * unitPosition));
         };
 
         CD.prototype.$$initCanvasContext = function () {

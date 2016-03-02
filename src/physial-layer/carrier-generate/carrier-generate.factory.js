@@ -52,9 +52,9 @@ var CarrierGenerate = (function () {
             this.$$sampleComputed = (
                 fadeFactor *
                 currentCarrierData.amplitude *
-                Math.sin(
+                MathUtil.sin(
                     this.$$omega * this.$$sampleNumber
-                    - 2 * Math.PI * currentCarrierData.phase
+                    - MathUtil.TWO_PI * currentCarrierData.phase
                 )
             );
         };
@@ -108,7 +108,7 @@ var CarrierGenerate = (function () {
 
         CG.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
-            this.$$omega = (2 * Math.PI) / this.$$samplePerPeriod;  // revolutions per sample
+            this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
         };
 

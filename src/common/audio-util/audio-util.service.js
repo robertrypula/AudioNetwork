@@ -29,32 +29,32 @@ var AudioUtil = (function () {
          function findUnitAngle(x, y) {
             var length, q, angle;
 
-            length = Math.sqrt(x * x + y * y);
+            length = MathUtil.sqrt(x * x + y * y);
             length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
             q = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
             switch (q) {
                 case 0:
-                    angle = Math.asin(y / length);
+                    angle = MathUtil.asin(y / length);
                     break;
                 case 1:
-                    angle = Math.asin(-x / length) + 0.5 * Math.PI;
+                    angle = MathUtil.asin(-x / length) + MathUtil.HALF_PI;
                     break;
                 case 2:
-                    angle = Math.asin(-y / length) + Math.PI;
+                    angle = MathUtil.asin(-y / length) + MathUtil.PI;
                     break;
                 case 3:
-                    angle = Math.asin(x / length) + 1.5 * Math.PI;
+                    angle = MathUtil.asin(x / length) + 1.5 * MathUtil.PI;
                     break;
             }
 
-            return angle / (2 * Math.PI);
+            return angle / MathUtil.TWO_PI;
         }
 
         function unitFade(x) {
             x  = x < 0 ? 0 : x;
             x  = x > 1 ? 1 : x;
 
-            return 0.5 * (Math.sin((x - 0.5) * Math.PI) + 1);
+            return 0.5 * (MathUtil.sin((x - 0.5) * MathUtil.PI) + 1);
         }
 
         function queueAdd(queue, itemList, copyCallback, amountFieldName) {

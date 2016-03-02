@@ -8,12 +8,14 @@ var AudioNetworkPhysicalLayer = (function () {
             + index passed into handler
             + decibel power/amplitude check
             + load wav file
+            + add getOutput* methods
+            + add outputTxEnable/outputTxDisable methods
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
-            - check inverse phase shift issue
+            + check inverse phase shift issue
             - add auto tuning feature
-            - add getOutput* methods
-            - add outputTxEnable/outputTxDisable methods
+            - add script node sample to config
+            - add html generation as js + ofdm support
 
             + rewrite main API
                 + move code to factory
@@ -29,7 +31,7 @@ var AudioNetworkPhysicalLayer = (function () {
         TODO performance
             - move script processor node to receive manager
             - do not redraw constellation if queue wasn't changed
-            - move sin/cos to internal Math service (to give ability to quickly add lookup tables)
+            + move sin/cos to internal Math service (to give ability to quickly add lookup tables)
     */
 
     _AudioNetworkPhysicalLayer.$inject = [];
@@ -46,6 +48,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
             this.$$rxHandler = null;
+            this.$$outputTx = undefined;
             this.$$outputMicrophone = undefined;
             this.$$outputRecordedAudio = undefined;
 
@@ -75,8 +78,8 @@ var AudioNetworkPhysicalLayer = (function () {
                     queue.pop();
                     queue.pop();
                 }
-                queue.push(powerNormalized * Math.cos(2 * Math.PI * cd.phase));
-                queue.push(powerNormalized * Math.sin(2 * Math.PI * cd.phase));
+                queue.push(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
+                queue.push(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
             }
 
             if (this.$$rxHandler) {
@@ -88,8 +91,8 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
                 this.$$configuration.tx.channel
             );
-            this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
 
+            this.outputTxEnable();
             this.outputMicrophoneDisable();
             this.outputRecordedAudioEnable();
         };
@@ -172,10 +175,10 @@ var AudioNetworkPhysicalLayer = (function () {
                 case AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_FILE:
-                    node = Audio.getRecordedNode();
+                case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+                    node = Audio.getRecordedAudioNode();
                     break;
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.RX_LOOPBACK:
+                case AudioNetworkPhysicalLayerConfiguration.INPUT.TX:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
             }
@@ -217,9 +220,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 d = data[i];
                 dataParsed.push([{
                     amplitude: (typeof d.amplitude !== 'undefined') ? d.amplitude : 1,
-                    duration: Math.round(
-                        Audio.getSampleRate() * (d.duration || 0.200)
-                    ),
+                    duration: MathUtil.round(Audio.getSampleRate() * (d.duration || 0.200)),
                     phase: (typeof d.phase !== 'undefined') ? d.phase : 0
                 }]);
             }
@@ -261,11 +262,37 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelReceiveManager = null;
 
             // tx
-            this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
+            this.outputTxDisable();
             this.outputRecordedAudioDisable();
             this.outputMicrophoneDisable();
             this.$$channelTransmitManager.destroy();
             this.$$channelTransmitManager = null;
+        };
+
+        ANPL.prototype.getOutputTxState = function () {
+            return this.$$outputTx;
+        };
+
+        ANPL.prototype.getOutputMicrophoneState = function () {
+            return this.$$outputMicrophone;
+        };
+
+        ANPL.prototype.getOutputRecordedAudioState = function () {
+            return this.$$outputRecordedAudio;
+        };
+
+        ANPL.prototype.outputTxEnable = function () {
+            if (!this.$$outputTx) {
+                this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
+            }
+            this.$$outputTx = true;
+        };
+
+        ANPL.prototype.outputTxDisable = function () {
+            if (this.$$outputTx) {
+                this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
+            }
+            this.$$outputTx = false;
         };
 
         ANPL.prototype.outputMicrophoneEnable = function () {
@@ -284,14 +311,14 @@ var AudioNetworkPhysicalLayer = (function () {
 
         ANPL.prototype.outputRecordedAudioEnable = function () {
             if (!this.$$outputRecordedAudio) {
-                Audio.getRecordedNode().connect(Audio.getDestination());
+                Audio.getRecordedAudioNode().connect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = true;
         };
 
         ANPL.prototype.outputRecordedAudioDisable = function () {
             if (this.$$outputRecordedAudio) {
-                Audio.getRecordedNode().disconnect(Audio.getDestination());
+                Audio.getRecordedAudioNode().disconnect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = false;
         };

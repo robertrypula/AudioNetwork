@@ -11,8 +11,8 @@ function onLoad() {
             },
             constellationDiagram: {
                 elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
-                width: 256,
-                height: 256,
+                width: 140,
+                height: 140,
                 historyPointSize: 25 // default: 40
             }
 
@@ -129,10 +129,10 @@ function rxInput(type) {
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE);
             break;
         case 'rxLoop':
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RX_LOOPBACK);
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.TX);
             break;
         case 'rec':
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_FILE);
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
             break;
     }
 }
@@ -141,8 +141,7 @@ function loadRecordedAudio() {
     anpl.loadRecordedAudio(
         document.getElementById('recorded-audio-url').value,
         function () {
-            alert('Audio loaded!');
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_FILE);
+            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
         },
         function () {
             alert('Error');
@@ -152,6 +151,13 @@ function loadRecordedAudio() {
 
 function output(type, state) {
     switch (type) {
+        case 'tx':
+            if (state) {
+                anpl.outputTxEnable();
+            } else {
+                anpl.outputTxDisable();
+            }
+            break;
         case 'mic':
             if (state) {
                 anpl.outputMicrophoneEnable();

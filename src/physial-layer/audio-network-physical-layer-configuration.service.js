@@ -6,8 +6,8 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
     function _AudioNetworkPhysicalLayerConfiguration() {
         var INPUT = {
             MICROPHONE: 'MICROPHONE',
-            RX_LOOPBACK: 'RX_LOOPBACK',
-            RECORDED_FILE: 'RECORDED_FILE'
+            TX: 'TX',
+            RECORDED_AUDIO: 'RECORDED_AUDIO'
         };
 
         function parseChannel(configuration, txRx) {
