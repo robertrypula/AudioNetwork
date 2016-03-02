@@ -120,6 +120,25 @@ function loadRecordedAudio() {
     );
 }
 
+function output(type, state) {
+    switch (type) {
+        case 'mic':
+            if (state) {
+                anpl.outputMicrophoneEnable();
+            } else {
+                anpl.outputMicrophoneDisable();
+            }
+            break;
+        case 'rec':
+            if (state) {
+                anpl.outputRecordedAudioEnable();
+            } else {
+                anpl.outputRecordedAudioDisable();
+            }
+            break;
+    }
+}
+
 /*
     optional methods:
         - anpl.setRxDftTimeSpan(0.43);

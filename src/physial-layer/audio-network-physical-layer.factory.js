@@ -20,7 +20,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + ability to change frequency
                 + fix recorded file loading logic
                 + fix history point colors
-                - add ability to choose destination source
+                + add ability to choose destination source
 
         TODO performance
             - move script processor node to receive manager
@@ -42,6 +42,8 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
             this.$$rxHandler = null;
+            this.$$outputMicrophone = undefined;
+            this.$$outputRecordedAudio = undefined;
 
             this.$$initTx();
             this.$$initRx();
@@ -79,8 +81,10 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
                 this.$$configuration.tx.channel
             );
-            this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination()); // TODO change it later
-            Audio.getRecordedNode().connect(Audio.getDestination()); // TODO change it later
+            this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
+
+            this.outputMicrophoneDisable();
+            this.outputRecordedAudioEnable();
         };
 
         ANPL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
@@ -250,10 +254,39 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelReceiveManager = null;
 
             // tx
-            this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination()); // TODO change it later
-            Audio.getRecordedNode().disconnect(Audio.getDestination()); // TODO change it later
+            this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
+            this.outputRecordedAudioDisable();
+            this.outputMicrophoneDisable();
             this.$$channelTransmitManager.destroy();
             this.$$channelTransmitManager = null;
+        };
+
+        ANPL.prototype.outputMicrophoneEnable = function () {
+            if (!this.$$outputMicrophone) {
+                Audio.getMicrophoneNode().connect(Audio.getDestination());
+            }
+            this.$$outputMicrophone = true;
+        };
+
+        ANPL.prototype.outputMicrophoneDisable = function () {
+            if (this.$$outputMicrophone) {
+                Audio.getMicrophoneNode().disconnect(Audio.getDestination());
+            }
+            this.$$outputMicrophone = false;
+        };
+
+        ANPL.prototype.outputRecordedAudioEnable = function () {
+            if (!this.$$outputRecordedAudio) {
+                Audio.getRecordedNode().connect(Audio.getDestination());
+            }
+            this.$$outputRecordedAudio = true;
+        };
+
+        ANPL.prototype.outputRecordedAudioDisable = function () {
+            if (this.$$outputRecordedAudio) {
+                Audio.getRecordedNode().disconnect(Audio.getDestination());
+            }
+            this.$$outputRecordedAudio = false;
         };
 
         ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
