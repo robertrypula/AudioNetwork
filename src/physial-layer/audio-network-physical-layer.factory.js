@@ -140,22 +140,25 @@ var AudioNetworkPhysicalLayer = (function () {
             var
                 dftSize = Audio.getSampleRate() * this.$$configuration.rx.dftTimeSpan,
                 notifyInterval = Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond,
-                channelList = [],
                 channel, i
             ;
 
             for (i = 0; i < this.$$configuration.rx.channel.length; i++) {
                 channel = this.$$configuration.rx.channel[i];
+
+                // attach additional fields to channel object
                 channel.dftSize = dftSize;
                 channel.notifyInterval = notifyInterval;
                 channel.notifyHandler = this.$$notifyHandler.bind(this);
-                channelList.push(channel);
 
                 if (this.$$configuration.rx.constellationDiagram.elementId) {
                     this.$$initConstellationDiagram(i, channel);
                 }
             }
-            this.$$channelReceiveManager = ChannelReceiveManagerBuilder.build(channelList);
+            this.$$channelReceiveManager = ChannelReceiveManagerBuilder.build(
+                this.$$configuration.rx.channel,
+                this.$$configuration.rx.bufferSize
+            );
 
             this.$$rxAnalyser = Audio.createAnalyser();
             this.$$rxAnalyser.fftSize = this.$$configuration.rx.spectrum.fftSize;

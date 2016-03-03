@@ -5,8 +5,8 @@ var ChannelReceiveManagerBuilder = (function () {
 
     function _ChannelReceiveManagerBuilder() {
 
-        function build(configuration) {
-            return new ChannelReceiveManager(configuration);
+        function build(configuration, bufferSize) {
+            return new ChannelReceiveManager(configuration, bufferSize);
         }
 
         return {

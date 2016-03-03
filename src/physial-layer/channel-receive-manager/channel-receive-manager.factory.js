@@ -6,9 +6,11 @@ var ChannelReceiveManager = (function () {
     function _ChannelReceiveManager() {
         var CRM;
 
-        CRM = function (configuration) {
+        CRM = function (configuration, bufferSize) {
             this.channelReceive = [];
             this.gainNode = null;
+            this.$$configuration = configuration;
+            this.$$bufferSize = bufferSize;
 
             this.$$init();
             this.configure(configuration);
