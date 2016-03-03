@@ -42,9 +42,11 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
 
             finalConfiguration = {
                 tx: {
+                    bufferSize: c && c.tx && (typeof c.tx.bufferSize !== 'undefined') ? c.tx.bufferSize : 2048,
                     channel: parseChannel(c, 'tx')
                 },
                 rx: {
+                    bufferSize: c && c.rx && (typeof c.rx.bufferSize !== 'undefined') ? c.rx.bufferSize : 1024,
                     channel: parseChannel(c, 'rx'),
                     input: a(c, 'rx.input') || INPUT.MICROPHONE,
                     notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,

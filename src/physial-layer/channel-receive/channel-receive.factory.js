@@ -40,7 +40,7 @@ var ChannelReceive = (function () {
         CR.prototype.init = function () {
             var self = this;
 
-            this.scriptNode = Audio.createScriptProcessor(1 * 1024, 1, 1);
+            this.scriptNode = Audio.createScriptProcessor(8 * 1024, 1, 1);
             this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
                 self.onAudioProcess(audioProcessingEvent);
             };

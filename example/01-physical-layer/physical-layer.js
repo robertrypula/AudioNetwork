@@ -2,6 +2,9 @@ var anpl;
 
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
+        tx: {
+            bufferSize: 16 * 1024
+        },
         rx: {
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: 0.2, // default: 0.1

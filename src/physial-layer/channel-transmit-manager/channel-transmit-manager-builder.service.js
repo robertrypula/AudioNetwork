@@ -5,8 +5,8 @@ var ChannelTransmitManagerBuilder = (function () {
 
     function _ChannelTransmitManagerBuilder() {
 
-        function build(configuration) {
-            return new ChannelTransmitManager(configuration);
+        function build(configuration, bufferSize) {
+            return new ChannelTransmitManager(configuration, bufferSize);
         }
 
         return {

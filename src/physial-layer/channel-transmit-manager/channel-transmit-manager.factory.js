@@ -6,42 +6,27 @@ var ChannelTransmitManager = (function () {
     function _ChannelTransmitManager() {
         var CTM;
 
-        CTM = function (configuration) {
+        CTM = function (configuration, bufferSize) {
             this.channelTransmit = [];
-            this.gainNode = null;
+            this.scriptNode = null;
+            this.$$configuration = configuration;
+            this.$$bufferSize = bufferSize;
 
             this.$$init();
-            this.$$configure(configuration);
         };
 
         CTM.prototype.destroy = function () {
-            this.$$clear();
-        };
-
-        CTM.prototype.$$clear = function () {
             var i, ct;
 
             for (i = 0; i < this.channelTransmit.length; i++) {
                 ct = this.channelTransmit[i];
-                ct.getLastNode().disconnect(this.gainNode);
                 ct.destroy();
             }
             this.channelTransmit.length = 0;
         };
 
-        CTM.prototype.$$configure = function (configuration) {
-            var i, ct;
-
-            this.$$clear();
-            for (i = 0; i < configuration.length; i++) {
-                ct = ChannelTransmitBuilder.build(i, configuration[i]);
-                ct.getLastNode().connect(this.gainNode);
-                this.channelTransmit.push(ct);
-            }
-        };
-
         CTM.prototype.getOutputNode = function () {
-            return this.gainNode;
+            return this.scriptNode;
         };
 
         CTM.prototype.getChannel = function (channelIndex) {
@@ -53,7 +38,34 @@ var ChannelTransmitManager = (function () {
         };
 
         CTM.prototype.$$init = function () {
-            this.gainNode = Audio.createGain();
+            var i, ct;
+
+            this.scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
+
+            for (i = 0; i < this.$$configuration.length; i++) {
+                ct = ChannelTransmitBuilder.build(i, this.$$configuration[i]);
+                this.channelTransmit.push(ct);
+            }
+        };
+
+        CTM.prototype.onAudioProcess = function (audioProcessingEvent) {
+            var
+                outputBuffer = audioProcessingEvent.outputBuffer,
+                outputData = outputBuffer.getChannelData(0),
+                sample,
+                i,
+                j
+                ;
+
+            for (i = 0; i < outputBuffer.length; i++) {
+                sample = 0;
+                for (j = 0; j < this.channelTransmit.length; j++) {
+                    sample += this.channelTransmit[j].getSample();
+                }
+                outputData[i] = sample;
+                // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.1;
+            }
         };
 
         return CTM;

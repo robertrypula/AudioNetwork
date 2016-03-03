@@ -10,12 +10,17 @@ var AudioNetworkPhysicalLayer = (function () {
             + load wav file
             + add getOutput* methods
             + add outputTxEnable/outputTxDisable methods
+            + check inverse phase shift issue
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
-            + check inverse phase shift issue
-            - add auto tuning feature
+            - add phase offset input to align symbol '0'
+            - add auto tuning feature with ability to align phase offset
             - add script node sample to config
             - add html generation as js + ofdm support
+
+            - internal loop for notifications
+                - add script node block time (from audiocontext)
+                - add sample offset time from script node block time
 
             + rewrite main API
                 + move code to factory
@@ -89,7 +94,8 @@ var AudioNetworkPhysicalLayer = (function () {
 
         ANPL.prototype.$$initTx = function () {
             this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
-                this.$$configuration.tx.channel
+                this.$$configuration.tx.channel,
+                this.$$configuration.tx.bufferSize
             );
 
             this.outputTxEnable();

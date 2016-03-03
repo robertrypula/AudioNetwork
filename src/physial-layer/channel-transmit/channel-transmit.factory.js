@@ -7,13 +7,10 @@ var ChannelTransmit = (function () {
         var CT;
             
         CT = function (index, configuration) {
-            this.scriptNode = null;
-            this.gainNode = null;
             this.carrierGenerate = [];
             this.carrierFrequency = [];
             this.$$index = index;
 
-            this.init();
             this.configure(configuration);
         };
 
@@ -27,10 +24,6 @@ var ChannelTransmit = (function () {
             for (i = 0; i < this.carrierGenerate.length; i++) {
                 this.carrierGenerate[i].addToQueue(data[i]);
             }
-        };
-
-        CT.prototype.getLastNode = function () {
-            return this.gainNode;
         };
 
         CT.prototype.getFrequency = function (ofdmIndex) {
@@ -66,45 +59,20 @@ var ChannelTransmit = (function () {
             }
         };
 
-        CT.prototype.init = function () {
-            var self = this;
+        CT.prototype.getSample = function () {
+            var sample, cg, i;
 
-            this.scriptNode = Audio.createScriptProcessor(2 * 1024, 1, 1);
-            this.scriptNode.onaudioprocess = function (audioProcessingEvent) {
-                self.onAudioProcess(audioProcessingEvent);
-            };
-
-            this.gainNode = Audio.createGain();
-            this.scriptNode.connect(this.gainNode);
-        };
-
-        CT.prototype.onAudioProcess = function (audioProcessingEvent) {
-            var
-                outputBuffer = audioProcessingEvent.outputBuffer,
-                outputData = outputBuffer.getChannelData(0),
-                sample,
-                cg,
-                i,
-                j
-            ;
-
-            for (i = 0; i < outputBuffer.length; i++) {
-                sample = 0;
-
-                for (j = 0; j < this.carrierGenerate.length; j++) {
-                    cg = this.carrierGenerate[j];
-
-                    sample += cg.getSample();
-                    cg.nextSample();
-                }
-
-                outputData[i] = sample;
-                // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.1;
+            sample = 0;
+            for (i = 0; i < this.carrierGenerate.length; i++) {
+                cg = this.carrierGenerate[i];
+                sample += cg.getSample();
+                cg.nextSample();
             }
+
+            return sample;
         };
 
         CT.prototype.destroy = function () {
-            this.scriptNode.disconnect(this.gainNode);
         };
 
         return CT;
