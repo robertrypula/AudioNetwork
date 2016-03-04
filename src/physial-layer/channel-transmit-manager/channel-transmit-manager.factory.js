@@ -37,6 +37,10 @@ var ChannelTransmitManager = (function () {
             return this.channelTransmit[channelIndex];
         };
 
+        CTM.prototype.getBufferSize = function () {
+            return this.scriptNode.bufferSize;
+        };
+
         CTM.prototype.$$init = function () {
             var i, ct;
 

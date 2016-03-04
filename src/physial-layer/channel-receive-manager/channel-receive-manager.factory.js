@@ -8,46 +8,27 @@ var ChannelReceiveManager = (function () {
 
         CRM = function (configuration, bufferSize) {
             this.channelReceive = [];
-            this.gainNode = null;
+            this.scriptNode = null;
+            this.analyserNode = null;  // empty analyser needs to be connected to script node
             this.$$configuration = configuration;
             this.$$bufferSize = bufferSize;
+            this.$$sampleNumber = 0;
 
             this.$$init();
-            this.configure(configuration);
         };
 
         CRM.prototype.destroy = function () {
-            this.$$clear();
-        };
-
-        CRM.prototype.$$clear = function () {
             var i, cr;
 
             for (i = 0; i < this.channelReceive.length; i++) {
                 cr = this.channelReceive[i];
-                this.gainNode.disconnect(cr.getFirstNode());
                 cr.destroy();
             }
             this.channelReceive.length = 0;
         };
 
-        CRM.prototype.configure = function (configuration) {
-            var i, cr;
-
-            this.$$clear();
-            for (i = 0; i < configuration.length; i++) {
-                cr = ChannelReceiveBuilder.build(i, configuration[i]);
-                this.gainNode.connect(cr.getFirstNode());
-                this.channelReceive.push(cr);
-            }
-        };
-
         CRM.prototype.getInputNode = function () {
-            return this.gainNode;
-        };
-
-        CRM.prototype.$$init = function () {
-            this.gainNode = Audio.createGain();
+            return this.scriptNode;
         };
 
         CRM.prototype.getChannel = function (channelIndex) {
@@ -57,6 +38,47 @@ var ChannelReceiveManager = (function () {
 
             return this.channelReceive[channelIndex];
         };
+
+        CRM.prototype.getBufferSize = function () {
+            return this.scriptNode.bufferSize;
+        };
+
+        CRM.prototype.$$init = function () {
+            var i, cr;
+
+            this.scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
+
+            this.analyserNode = Audio.createAnalyser();
+            this.analyserNode.fftSize = 256;
+
+            this.scriptNode.connect(this.analyserNode);
+
+            for (i = 0; i < this.$$configuration.length; i++) {
+                cr = ChannelReceiveBuilder.build(i, this.$$configuration[i]);
+                this.channelReceive.push(cr);
+            }
+        };
+
+        CRM.prototype.onAudioProcess = function (audioProcessingEvent) {
+            var
+                inputBuffer = audioProcessingEvent.inputBuffer,
+                inputData = inputBuffer.getChannelData(0),
+                sample, i, j
+            ;
+
+            for (i = 0; i < inputBuffer.length; i++) {
+                sample = inputData[i];
+
+                for (j = 0; j < this.channelReceive.length; j++) {
+                    this.channelReceive[j].handleSample(sample, this.$$sampleNumber);
+                }
+
+                this.$$sampleNumber++;
+            }
+        };
+
+
 
         return CRM;
     }

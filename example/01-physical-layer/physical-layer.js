@@ -3,17 +3,16 @@ var anpl;
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
-            bufferSize: 16 * 1024
         },
         rx: {
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: 0.2, // default: 0.1
             spectrum: {
-                elementId: 'rx-spectrum',
+                //elementId: 'rx-spectrum',
                 height: 150
             },
             constellationDiagram: {
-                elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
+                //elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
                 width: 140,
                 height: 140,
                 historyPointSize: 25 // default: 40
@@ -24,6 +23,8 @@ function onLoad() {
 
     anpl.rx(receive);
     document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
+    document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
+    document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
 
     frequencyUpdate(true, 'tx', 0, 0);
     frequencyUpdate(true, 'tx', 1, 0);
@@ -177,10 +178,3 @@ function output(type, state) {
             break;
     }
 }
-
-/*
-    optional methods:
-        - anpl.setRxDftTimeSpan(0.43);
-        - anpl.setRxConstellationDiagramPointSize(0.43);
-        - anpl.setRxNotificationPerSecond(25)
-*/

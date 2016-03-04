@@ -73,6 +73,8 @@ var ChannelTransmit = (function () {
         };
 
         CT.prototype.destroy = function () {
+            this.carrierGenerate.length = 0;
+            this.carrierFrequency.length = 0;
         };
 
         return CT;
