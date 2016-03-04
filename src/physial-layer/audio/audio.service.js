@@ -117,6 +117,13 @@ var Audio = (function () {
                 console.log(e);
             }
 
+            /*
+             navigator.mediaDevices.getUserMedia(constraints)
+             .then(function(mediaStream) { ... })
+             .catch(function(error) { ... })
+             */
+
+
             microphoneNode = context.createGain();
             recordedNode = context.createGain();
             try {

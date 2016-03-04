@@ -8,11 +8,11 @@ function onLoad() {
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: 0.2, // default: 0.1
             spectrum: {
-                //elementId: 'rx-spectrum',
+                elementId: 'rx-spectrum',
                 height: 150
             },
             constellationDiagram: {
-                //elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
+                elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
                 width: 140,
                 height: 140,
                 historyPointSize: 25 // default: 40
