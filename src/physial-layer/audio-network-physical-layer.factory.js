@@ -12,17 +12,6 @@ var AudioNetworkPhysicalLayer = (function () {
             + add outputTxEnable/outputTxDisable methods
             + check inverse phase shift issue
             + add script node sample to config
-            - use dedicated constellation at carrier.html
-            - refactor DOM helpers (move to service)
-            - add phase offset input to align symbol '0'
-            - add auto tuning feature with ability to align phase offset
-            - add html generation as js + ofdm support
-            - anpl.setRxDftTimeSpan(0.43);     optional clearSampleNumber param (default true but in this case false)
-
-            - internal loop for notifications
-                - add script node block time (from audiocontext)
-                - add sample offset time from script node block time
-
             + rewrite main API
                 + move code to factory
                 + cleanup inside main service
@@ -33,11 +22,29 @@ var AudioNetworkPhysicalLayer = (function () {
                 + fix recorded file loading logic
                 + fix history point colors
                 + add ability to choose destination source
-
-        TODO performance
             + move script processor node to receive manager
-            - do not redraw constellation if queue wasn't changed
             + move sin/cos to internal Math service (to give ability to quickly add lookup tables)
+            - use dedicated constellation at carrier.html
+            - refactor DOM helpers (move to service)
+            - do not redraw constellation if queue wasn't changed
+            
+            Important:
+            - add phase offset input to align symbol '0'
+            - add html generation as js + ofdm support
+            - change send logic (add amplitude, symbolCout, symbol to each OFDM block)
+            - change send sequence logic (use format: '5.5.2.0 1.2.4.1')
+            - setRxDftTimeSpan(0.43), optional clearSampleNumber param (default true but in this case false)
+
+            Important but little harder:
+            - add auto tuning feature with ability to align phase offset
+            - internal loop for notifications
+                - add script node block time (from audiocontext)
+                - add sample offset time from script node block time
+
+
+            
+            
+            
     */
 
     _AudioNetworkPhysicalLayer.$inject = [];
@@ -368,6 +375,37 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .setFrequency(ofdmIndex, frequency)
+            ;
+        };
+
+
+        ANPL.prototype.getRxPhaseCorrection = function (channelIndex, ofdmIndex) {
+            return (
+                this.$$channelReceiveManager
+                    .getChannel(channelIndex)
+                    .getFrequency(ofdmIndex) // TODO implement me
+            );
+        };
+
+        ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
+            return (
+                this.$$channelTransmitManager
+                .getChannel(channelIndex)
+                .getFrequency(ofdmIndex) // TODO implement me
+            );
+        };
+
+        ANPL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+            this.$$channelReceiveManager
+                .getChannel(channelIndex)
+                .setFrequency(ofdmIndex, phaseCorrection) // TODO implement me
+            ;
+        };
+
+        ANPL.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+            this.$$channelTransmitManager
+                .getChannel(channelIndex)
+                .setFrequency(ofdmIndex, phaseCorrection) // TODO implement me
             ;
         };
 

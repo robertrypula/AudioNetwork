@@ -14,32 +14,32 @@
             <h2>Settings/info</h2>
             <div class="container">
                 <div>
-                    <b>Sample rate [Hz]:</b>
+                    <b>Sample rate [Hz]</b>
                     <span id="sample-rate"></span>
                 </div>
                 <div>
-                    <b>Tx buffer size:</b>
+                    <b>Tx buffer size</b>
                     <span id="tx-buffer-size"></span>
                 </div>
                 <div>
-                    <b>Rx buffer size:</b>
+                    <b>Rx buffer size</b>
                     <span id="rx-buffer-size"></span>
                 </div>
                 <div>
                     <label for="symbol-duration">
-                        Symbol duration [ms]:
+                        Symbol duration [ms]
                     </label>
                     <input type="text" id="symbol-duration" value="400" />
                 </div>
                 <div>
                     <label for="guard-interval">
-                        Guard interval [ms]:
+                        Guard interval [ms]
                     </label>
                     <input type="text" id="guard-interval" value="200" />
                 </div>
                 <div>
                     <b>
-                        Output [tx]:
+                        Output [tx]
                     </b>
                     <span>
                         <a href="javascript:void(0)" onClick="output('tx', true)">Enable</a>
@@ -48,7 +48,7 @@
                 </div>
                 <div>
                     <b>
-                        Output [microphone]:
+                        Output [microphone]
                     </b>
                     <span>
                         <a href="javascript:void(0)" onClick="output('mic', true)">Enable</a>
@@ -57,7 +57,7 @@
                 </div>
                 <div>
                     <b>
-                        Output [recorded audio]:
+                        Output [recorded audio]
                     </b>
                     <span>
                         <a href="javascript:void(0)" onClick="output('rec', true)">Enable</a>
@@ -65,7 +65,7 @@
                     </span>
                 </div>
                 <div>
-                    <b>Rx input:</b>
+                    <b>Rx input</b>
                     <span>
                         <a href="javascript:void(0)" onClick="rxInput('mic')">Microphone</a>
                         <a href="javascript:void(0)" onClick="rxInput('rxLoop')">RxLoopback</a>
@@ -73,7 +73,7 @@
                     </span>
                 </div>
                 <div>
-                    <b>Recorded audio url:</b>
+                    <b>Recorded audio url</b>
                     <span>
                         <br/>
                         http://codebuild.pl/an.wav
@@ -87,54 +87,84 @@
 
             <h2>Receive</h2>
             <div class="container">
-                <b>Input spectrum:</b>
-                <div id="rx-spectrum"></div>
 
-                <b>Channel #0:</b>
-                <div class="container-inner">
-                    <div>
-                        <div>
-                            <b>Phase [deg]:</b>
-                            <span id="rx-phase-0-0"></span>
-                        </div>
-                        <div>
-                            <b>Power [dB]:</b>
-                            <span id="rx-power-0-0"></span>
-                        </div>
-                        <div>
-                            <label for="rx-frequency-change-0-0">Frequency [Hz]:</label>
-                            <span>
-                                <span id="rx-frequency-0-0"></span>
-                                <input type="number" id="rx-frequency-change-0-0" />
-                                <a href="javascript:void(0)" onClick="frequencyChange('rx', 0, 0)">Update</a>
-                            </span>
-                        </div>
-                        <div id="rx-constellation-diagram-0-0"></div>
+                <div class="row">
+                    <div class="col-12">
+                        <h3>Input spectrum</h3>
+                    </div>                    
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div id="rx-spectrum"></div>
                     </div>
                 </div>
 
+                <div class="row" id="tx-channel-container">
 
-                <b>Channel #1:</b>
-                <div class="container-inner">
-                    <div>
-                        <div>
-                            <b>Phase [deg]:</b>
-                            <span id="rx-phase-1-0"></span>
+                    <!-- channel begin -->
+                    <div class="col tx-channel">
+                        <div class="row">
+                            <div class="col-12">
+                                <h3>Channel #0</h3>
+                            </div>
                         </div>
-                        <div>
-                            <b>Power [dB]:</b>
-                            <span id="rx-power-1-0"></span>
+                        <div class="row" id="tx-channel-0-ofdm-container">
+
+                            <!-- ofdm begin -->
+                            <div class="col tx-channel-ofdm">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4>Channel #0, OFDM #0</h4>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="rx-constellation-diagram" id="rx-constellation-diagram-0-0"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Phase [deg]</b>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="rx-phase-0-0"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Power [dB]</b>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="rx-power-0-0"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="rx-frequency-input-0-0">Frequency [Hz]</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="rx-frequency-label-0-0"></span>
+                                        <input type="number" id="rx-frequency-input-0-0" />
+                                        <a href="javascript:void(0)" onClick="frequencyUpdate('rx', 0, 0)">Update</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="rx-phase-correction-input-0-0">Phase correction</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="rx-phase-correction-label-0-0"></span>
+                                        <input type="number" id="rx-phase-correction-input-0-0" />
+                                        <a href="javascript:void(0)" onClick="phaseCorrectionUpdate('rx', 0, 0)">Update</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ofdm end -->
+
                         </div>
-                        <div>
-                            <label for="rx-frequency-change-1-0">Frequency [Hz]:</label>
-                            <span>
-                                <span id="rx-frequency-1-0"></span>
-                                <input type="number" id="rx-frequency-change-1-0" />
-                                <a href="javascript:void(0)" onClick="frequencyChange('rx', 1, 0)">Update</a>
-                            </span>
-                        </div>
-                        <div id="rx-constellation-diagram-1-0"></div>
                     </div>
+                    <!-- channel end -->
+
                 </div>
 
             </div>
@@ -142,50 +172,74 @@
             <h2>Transmit</h2>
             <div class="container">
 
-                <b>Channel #0</b>
-                <div class="container-inner">
-                    <div>
-                        <label for="tx-frequency-change-0-0">Frequency [Hz]:</label>
-                        <span>
-                            <span id="tx-frequency-0-0"></span>
-                            <input type="number" id="tx-frequency-change-0-0" />
-                            <a href="javascript:void(0)" onClick="frequencyChange('tx', 0, 0)">Update</a>
-                        </span>
-                    </div>
-                    <div>
-                        <a href="javascript:void(0)" onClick="transmit(0, 0.00)">[phase + 0.00]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(0, 0.25)">[phase + 0.25]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(0, 0.50)">[phase + 0.50]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(0, 0.75)">[phase + 0.75]</a> |
-                        <br/>
-                        <br/>
-                        <input type="text" id="tx-sequence-data-0-0" value="0 1 2 3 3 2 1 0" />
-                        <input type="number" id="tx-sequence-psk-size-0-0" value="4" />
-                        <a href="javascript:void(0)" onClick="transmitSequence(0)">Send sequence</a>
-                    </div>
-                </div>
+                <div class="row" id="rx-channel-container">
 
-                <b>Channel #1</b>
-                <div class="container-inner">
-                    <div>
-                        <label for="tx-frequency-change-1-0">Frequency [Hz]:</label>
-                        <span>
-                            <span id="tx-frequency-1-0"></span>
-                            <input type="number" id="tx-frequency-change-1-0" />
-                            <a href="javascript:void(0)" onClick="frequencyChange('tx', 1, 0)">Update</a>
-                        </span>
+                    <!-- channel begin -->
+                    <div class="col rx-channel">
+                        <div class="row">
+                            <div class="col-12">
+                                <h3>Channel #0</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <b>Send sequence</b>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="tx-sequence-data-0" value="0 1 2 3 3 2 1 0" />
+                                <input type="number" id="tx-sequence-psk-size-0" value="4" />
+                                <a href="javascript:void(0)" onClick="transmitSequence(0)">Send sequence</a>
+                            </div>
+                        </div>
+                        <div class="row" id="rx-channel-0-ofdm-container">
+
+                            <!-- ofdm begin -->
+                            <div class="col tx-channel-ofdm">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4>Channel #0, OFDM #0</h4>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="tx-frequency-input-0-0">Frequency [Hz]</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="tx-frequency-label-0-0"></span>
+                                        <input type="number" id="tx-frequency-input-0-0" />
+                                        <a href="javascript:void(0)" onClick="frequencyUpdate('tx', 0, 0)">Update</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="tx-phase-correction-input-0-0">Phase correction</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <span id="tx-phase-correction-label-0-0"></span>
+                                        <input type="number" id="tx-phase-correction-input-0-0" />
+                                        <a href="javascript:void(0)" onClick="phaseCorrectionUpdate('tx', 0, 0)">Update</a>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Send</b>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.00)">[phase + 0.00]</a> |
+                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.25)">[phase + 0.25]</a> |
+                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.50)">[phase + 0.50]</a> |
+                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.75)">[phase + 0.75]</a> |
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ofdm end -->
+
+                        </div>
                     </div>
-                    <div>
-                        <a href="javascript:void(0)" onClick="transmit(1, 0.00)">[phase + 0.00]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(1, 0.25)">[phase + 0.25]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(1, 0.50)">[phase + 0.50]</a> |
-                        <a href="javascript:void(0)" onClick="transmit(1, 0.75)">[phase + 0.75]</a>
-                        <br/>
-                        <br/>
-                        <input type="text" id="tx-sequence-data-1-0" value="7 6 5 4 3 2 1 0" />
-                        <input type="number" id="tx-sequence-psk-size-1-0" value="8" />
-                        <a href="javascript:void(0)" onClick="transmitSequence(1)">Send sequence</a>
-                    </div>
+                    <!-- channel end -->
+
                 </div>
             </div>
 

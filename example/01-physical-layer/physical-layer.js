@@ -3,8 +3,14 @@ var anpl;
 function onLoad() {
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
+            channel: [
+                {}
+            ]
         },
         rx: {
+            channel: [
+                {}
+            ],
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: 0.2, // default: 0.1
             spectrum: {
@@ -17,7 +23,6 @@ function onLoad() {
                 height: 140,
                 historyPointSize: 25 // default: 40
             }
-
         }
     });
 
@@ -26,15 +31,15 @@ function onLoad() {
     document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
     document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
 
-    frequencyUpdate(true, 'tx', 0, 0);
-    frequencyUpdate(true, 'tx', 1, 0);
-    frequencyUpdate(false, 'tx', 0, 0);
-    frequencyUpdate(false, 'tx', 1, 0);
+    uiRefresh('frequency', true, 'tx', 0, 0);
+    uiRefresh('frequency', false, 'tx', 0, 0);
+    uiRefresh('frequency', true, 'rx', 0, 0);
+    uiRefresh('frequency', false, 'rx', 0, 0);
 
-    frequencyUpdate(true, 'rx', 0, 0);
-    frequencyUpdate(true, 'rx', 1, 0);
-    frequencyUpdate(false, 'rx', 0, 0);
-    frequencyUpdate(false, 'rx', 1, 0);
+    uiRefresh('phase-correction', true, 'tx', 0, 0);
+    uiRefresh('phase-correction', false, 'tx', 0, 0);
+    uiRefresh('phase-correction', true, 'rx', 0, 0);
+    uiRefresh('phase-correction', false, 'rx', 0, 0);
 }
 
 function destroy() {
@@ -53,7 +58,7 @@ function receive(channelIndex, carrierData) {
     }
 }
 
-function transmit(channelIndex, offset) {
+function transmit(channelIndex, ofdmIndex, offset) {
     var
         symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         data = []
@@ -70,8 +75,8 @@ function transmitSequence(channelIndex) {
     var
         symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
-        sequeceData = document.getElementById('tx-sequence-data-' + channelIndex + '-0').value + '',
-        pskSize = parseInt(document.getElementById('tx-sequence-psk-size-' + channelIndex + '-0').value),
+        sequeceData = document.getElementById('tx-sequence-data-' + channelIndex).value + '',
+        pskSize = parseInt(document.getElementById('tx-sequence-psk-size-' + channelIndex).value),
         s = sequeceData.split(' '),
         data,
         i
@@ -94,37 +99,60 @@ function transmitSequence(channelIndex) {
     }
 }
 
-function frequencyUpdate(isLabel, rxTx, channelIndex, ofdmIndex) {
-    var elementId, element, frequency;
+function uiRefresh(type, isLabel, rxTx, channelIndex, ofdmIndex) {
+    var elementId, element, value;
 
-    elementId = rxTx + '-frequency-' + (isLabel ? '' : 'change-') + channelIndex + '-' + ofdmIndex;
+    elementId = rxTx + '-' + type + '-' + (isLabel ? 'label-' : 'input-') + channelIndex + '-' + ofdmIndex;
     element = document.getElementById(elementId);
 
-    frequency = (
-        rxTx === 'tx' ?
-        anpl.getTxFrequency(channelIndex, ofdmIndex) :
-        anpl.getRxFrequency(channelIndex, ofdmIndex)
-    );
-    if (isLabel) {
-        element.innerHTML = frequency;
-    } else {
-        element.value = frequency;
+    switch (type) {
+        case 'frequency':
+            value = (
+                rxTx === 'tx' ?
+                anpl.getTxFrequency(channelIndex, ofdmIndex) :
+                anpl.getRxFrequency(channelIndex, ofdmIndex)
+            );
+            break;
+        case 'phase-correction':
+            value = (
+                rxTx === 'tx' ?
+                anpl.getTxPhaseCorrection(channelIndex, ofdmIndex) :
+                anpl.getRxPhaseCorrection(channelIndex, ofdmIndex)
+            );
+            break;
     }
+    
+    element[isLabel ? 'innerHTML' : 'value'] = value;
 }
 
-function frequencyChange(rxTx, channelIndex, ofdmIndex) {
-    var elementId, element;
+function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
+    var elementId, newFrequency;
 
-    elementId = rxTx + '-frequency-change-' + channelIndex + '-' + ofdmIndex;
-    element = document.getElementById(elementId);
-
+    elementId = rxTx + '-frequency-input-' + channelIndex + '-' + ofdmIndex;
+    newFrequency = parseFloat(document.getElementById(elementId).value);
+    
     if (rxTx === 'tx') {
-        anpl.setTxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+        anpl.setTxFrequency(channelIndex, ofdmIndex, newFrequency);
     } else {
-        anpl.setRxFrequency(channelIndex, ofdmIndex, parseFloat(element.value));
+        anpl.setRxFrequency(channelIndex, ofdmIndex, newFrequency);
     }
 
-    frequencyUpdate(true, rxTx, channelIndex, ofdmIndex);
+    uiRefresh('frequency', true, rxTx, channelIndex, ofdmIndex);
+}
+
+function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
+    var elementId, newFrequency;
+
+    elementId = rxTx + '-phase-correction-input-' + channelIndex + '-' + ofdmIndex;
+    newFrequency = parseFloat(document.getElementById(elementId).value);
+    
+    if (rxTx === 'tx') {
+        anpl.setTxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
+    } else {
+        anpl.setRxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
+    }
+
+    uiRefresh('phase-correction', true, rxTx, channelIndex, ofdmIndex);
 }
 
 function rxInput(type) {
