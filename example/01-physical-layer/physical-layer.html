@@ -9,28 +9,56 @@
 
         <div class="main-container">
 
-            <h1 onClick="destroy()">Audio network - physical layer example</h1>
+            <h1>Audio network - physical layer example</h1>
 
             <h2>Settings/info</h2>
             <div class="container">
+
                 <div class="row">
                     <div class="col-6">
                         <b>
-                            Channel config [rx/rx ofdmSize]
+                            dftTimeSpan [sec]
                         </b>
                     </div>
                     <div class="col-6">
                         <input
                             type="text"
-                            id="tx-channel"
-                            value="1"
+                            id="rx-dft-time-span"
+                            value="0.2"
                             />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>
+                            Channel config [rx/tx]
+                        </b>
+                    </div>
+                    <div class="col-6">
                         <input
                             type="text"
                             id="rx-channel"
+                            value="1070-1-100"
+                            />
+                        <input
+                            type="text"
+                            id="tx-channel"
+                            value="1070-1-100"
+                            />
+                        <input
+                            type="checkbox"
+                            checked="checked"
+                            id="rx-spectrum-visible"
+                            value="1"
+                            />
+                        <input
+                            type="checkbox"
+                            checked="checked"
+                            id="rx-constellation-diagram-visible"
                             value="1"
                             />
                         <a href="javascript:void(0)" onClick="reinitialize()">Reinitialize</a>
+                        <a href="javascript:void(0)" onClick="destroy()">Destroy</a>
                     </div>
                 </div>
 

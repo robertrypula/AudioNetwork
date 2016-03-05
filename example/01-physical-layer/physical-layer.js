@@ -5,29 +5,49 @@ function onLoad() {
 }
 
 function reinitialize() {
-    var txChannel, rxChannel, channelData, i;
+    var
+        txChannel = [],
+        rxChannel = [],
+        txRx = [],
+        dftTimeSpan,
+        rxSpectrumVisible, rxConstellationDiagramVisible,
+        value, channelDataList, channelData, i, j;
 
-    channelData = (document.getElementById('tx-channel').value).split(' ');
-    txChannel = [];
-    for (i = 0; i < channelData.length; i++) {
-        txChannel.push({
-            ofdmSize: parseInt(channelData[i])
-        });
+    txRx.push({
+        id: 'tx',
+        data: txChannel
+    });
+    txRx.push({
+        id: 'rx',
+        data: rxChannel
+    });
+
+    for (i = 0; i < txRx.length; i++) {
+        value = document.getElementById(txRx[i].id + '-channel').value;
+        channelDataList = value === '' ? [] : (value).split(' ');
+        for (j = 0; j < channelDataList.length; j++) {
+            channelData = channelDataList[j].split('-');
+            txRx[i].data.push({
+                baseFrequency: parseFloat(channelData[0]),
+                ofdmSize: parseInt(channelData[1]),
+                ofdmFrequencySpacing: parseFloat(channelData[2])
+            });
+        }
     }
 
-    channelData = (document.getElementById('rx-channel').value).split(' ');
-    rxChannel = [];
-    for (i = 0; i < channelData.length; i++) {
-        rxChannel.push({
-            ofdmSize: parseInt(channelData[i])
-        });
-    }
+    rxSpectrumVisible = document.getElementById('rx-spectrum-visible').checked ? true : false;
+    rxConstellationDiagramVisible = document.getElementById('rx-constellation-diagram-visible').checked ? true : false;
+    dftTimeSpan = parseFloat(document.getElementById('rx-dft-time-span').value);
 
-    initialize(txChannel, rxChannel, false, false);
+    destroy();
+
+    // we need to wait because canvas related objects are cleaned on next drawing frame that is asynchronous
+    setTimeout(function () {
+        initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, dftTimeSpan);
+    }, 500);
 }
 
-function initialize(txChannel, rxChannel, showSpectrum, showConstellationDiagram) {
-    destroy();
+function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, dftTimeSpan) {
     generateHtml(txChannel, rxChannel);
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
@@ -36,14 +56,14 @@ function initialize(txChannel, rxChannel, showSpectrum, showConstellationDiagram
         rx: {
             channel: rxChannel,
             notificationPerSecond: 25, // default: 20
-            dftTimeSpan: 0.2, // default: 0.1
+            dftTimeSpan: dftTimeSpan, // default: 0.1
             spectrum: {
-                elementId: showSpectrum ? 'rx-spectrum' : null,
+                elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
                 height: 150
             },
             constellationDiagram: {
                 elementId: (
-                    showConstellationDiagram ?
+                    rxConstellationDiagramVisible ?
                     'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}' :
                     null
                 ),
@@ -73,9 +93,6 @@ function generateHtmlForChannel(channel, id) {
         html = document.getElementById('template-' + id + '-channel').innerHTML;
         html = html.replace(/\[\[ channelIndex ]]/g, i + '');
         element = document.getElementById(id + '-channel-container');
-        if (i === 0) {
-            element.innerHTML = '';
-        }
         element.innerHTML = element.innerHTML + html;
         for (j = 0; j < channel[i].ofdmSize; j++) {
             html = document.getElementById('template-' + id + '-channel-ofdm').innerHTML;
@@ -115,6 +132,8 @@ function initializeHtmlForChannel(channel, id, fieldType) {
 function destroy() {
     if (anpl) {
         anpl.destroy();
+        document.getElementById('tx-channel-container').innerHTML = '';
+        document.getElementById('rx-channel-container').innerHTML = '';
         anpl = null;
     }
 }
