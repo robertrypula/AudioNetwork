@@ -13,6 +13,27 @@
 
             <h2>Settings/info</h2>
             <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <b>
+                            Channel config [rx/rx ofdmSize]
+                        </b>
+                    </div>
+                    <div class="col-6">
+                        <input
+                            type="text"
+                            id="tx-channel"
+                            value="1"
+                            />
+                        <input
+                            type="text"
+                            id="rx-channel"
+                            value="1"
+                            />
+                        <a href="javascript:void(0)" onClick="reinitialize()">Reinitialize</a>
+                    </div>
+                </div>
+
                 <div>
                     <b>Sample rate [Hz]</b>
                     <span id="sample-rate"></span>
@@ -99,72 +120,7 @@
                     </div>
                 </div>
 
-                <div class="row" id="tx-channel-container">
-
-                    <!-- channel begin -->
-                    <div class="col tx-channel">
-                        <div class="row">
-                            <div class="col-12">
-                                <h3>Channel #0</h3>
-                            </div>
-                        </div>
-                        <div class="row" id="tx-channel-0-ofdm-container">
-
-                            <!-- ofdm begin -->
-                            <div class="col tx-channel-ofdm">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <h4>Channel #0, OFDM #0</h4>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="rx-constellation-diagram" id="rx-constellation-diagram-0-0"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <b>Phase [deg]</b>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="rx-phase-0-0"></span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <b>Power [dB]</b>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="rx-power-0-0"></span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="rx-frequency-input-0-0">Frequency [Hz]</label>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="rx-frequency-label-0-0"></span>
-                                        <input type="number" id="rx-frequency-input-0-0" />
-                                        <a href="javascript:void(0)" onClick="frequencyUpdate('rx', 0, 0)">Update</a>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="rx-phase-correction-input-0-0">Phase correction</label>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="rx-phase-correction-label-0-0"></span>
-                                        <input type="number" id="rx-phase-correction-input-0-0" />
-                                        <a href="javascript:void(0)" onClick="phaseCorrectionUpdate('rx', 0, 0)">Update</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- ofdm end -->
-
-                        </div>
-                    </div>
-                    <!-- channel end -->
-
+                <div class="row" id="rx-channel-container">
                 </div>
 
             </div>
@@ -172,75 +128,9 @@
             <h2>Transmit</h2>
             <div class="container">
 
-                <div class="row" id="rx-channel-container">
-
-                    <!-- channel begin -->
-                    <div class="col rx-channel">
-                        <div class="row">
-                            <div class="col-12">
-                                <h3>Channel #0</h3>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <b>Send sequence</b>
-                            </div>
-                            <div class="col-6">
-                                <input type="text" id="tx-sequence-data-0" value="0 1 2 3 3 2 1 0" />
-                                <input type="number" id="tx-sequence-psk-size-0" value="4" />
-                                <a href="javascript:void(0)" onClick="transmitSequence(0)">Send sequence</a>
-                            </div>
-                        </div>
-                        <div class="row" id="rx-channel-0-ofdm-container">
-
-                            <!-- ofdm begin -->
-                            <div class="col tx-channel-ofdm">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <h4>Channel #0, OFDM #0</h4>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="tx-frequency-input-0-0">Frequency [Hz]</label>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="tx-frequency-label-0-0"></span>
-                                        <input type="number" id="tx-frequency-input-0-0" />
-                                        <a href="javascript:void(0)" onClick="frequencyUpdate('tx', 0, 0)">Update</a>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="tx-phase-correction-input-0-0">Phase correction</label>
-                                    </div>
-                                    <div class="col-6">
-                                        <span id="tx-phase-correction-label-0-0"></span>
-                                        <input type="number" id="tx-phase-correction-input-0-0" />
-                                        <a href="javascript:void(0)" onClick="phaseCorrectionUpdate('tx', 0, 0)">Update</a>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-6">
-                                        <b>Send</b>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.00)">[phase + 0.00]</a> |
-                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.25)">[phase + 0.25]</a> |
-                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.50)">[phase + 0.50]</a> |
-                                        <a href="javascript:void(0)" onClick="transmit(0, 0, 0.75)">[phase + 0.75]</a> |
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- ofdm end -->
-
-                        </div>
-                    </div>
-                    <!-- channel end -->
-
+                <div class="row" id="tx-channel-container">
                 </div>
+
             </div>
 
         </div>
@@ -270,6 +160,177 @@
         <script src="../../src/physial-layer/audio-network-physical-layer.factory.js"></script>
         <script src="../../src/physial-layer/audio-network-physical-layer-configuration.service.js"></script>
         <!-- audio network END -->
+
+        <script id="template-tx-channel" type="text/html">
+            <!-- channel begin -->
+            <div class="col tx-channel">
+                <div class="row">
+                    <div class="col-12">
+                        <h3>Channel #[[ channelIndex ]]</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Send sequence</b>
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="tx-sequence-data-[[ channelIndex ]]" value="0 1 2 3 3 2 1 0" />
+                        <input type="number" id="tx-sequence-psk-size-[[ channelIndex ]]" value="4" />
+                        <a href="javascript:void(0)" onClick="transmitSequence([[ channelIndex ]])">Send sequence</a>
+                    </div>
+                </div>
+                <div class="row" id="tx-channel-[[ channelIndex ]]-ofdm-container">
+                </div>
+            </div>
+            <!-- channel end -->
+        </script>
+
+        <script id="template-tx-channel-ofdm" type="text/html">
+            <!-- ofdm begin -->
+            <div class="col tx-channel-ofdm">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <label for="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">Frequency [Hz]</label>
+                    </div>
+                    <div class="col-6">
+                        <span id="tx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                        <input type="number" id="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                        <a
+                            href="javascript:void(0)"
+                            onClick="frequencyUpdate('tx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                            >
+                            Update
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
+                            Phase correction
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <span id="tx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                        <input type="number" id="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                        <a
+                            href="javascript:void(0)"
+                            onClick="phaseCorrectionUpdate('tx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                            >
+                            Update
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Send</b>
+                    </div>
+                    <div class="col-6">
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.00)">
+                            [phase + 0.00]
+                        </a> |
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.25)">
+                            [phase + 0.25]
+                        </a> |
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.50)">
+                            [phase + 0.50]
+                        </a> |
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.75)">
+                            [phase + 0.75]
+                        </a> |
+                    </div>
+                </div>
+            </div>
+            <!-- ofdm end -->
+        </script>
+
+        <script id="template-rx-channel" type="text/html">
+            <!-- channel begin -->
+            <div class="col rx-channel">
+                <div class="row">
+                    <div class="col-12">
+                        <h3>Channel #[[ channelIndex ]]</h3>
+                    </div>
+                </div>
+                <div class="row" id="rx-channel-[[ channelIndex ]]-ofdm-container">
+                </div>
+            </div>
+            <!-- channel end -->
+        </script>
+
+        <script id="template-rx-channel-ofdm" type="text/html">
+            <!-- ofdm begin -->
+            <div class="col rx-channel-ofdm">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div
+                            class="rx-constellation-diagram"
+                            id="rx-constellation-diagram-[[ channelIndex ]]-[[ ofdmIndex ]]"
+                        ></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Phase [deg]</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-phase-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Power [dB]</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-power-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">Frequency [Hz]</label>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                        <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                        <a
+                            href="javascript:void(0)"
+                            onClick="frequencyUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                            >
+                            Update
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
+                            Phase correction
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                        <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                        <a
+                            href="javascript:void(0)"
+                            onClick="phaseCorrectionUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                            >
+                            Update
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- ofdm end -->
+        </script>
 
         <script src="physical-layer.js"></script>
     </body>

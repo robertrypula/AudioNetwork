@@ -64,7 +64,8 @@ var ChannelReceiveManager = (function () {
             var
                 inputBuffer = audioProcessingEvent.inputBuffer,
                 inputData = inputBuffer.getChannelData(0),
-                sample, i, j
+                timeBefore = Audio.getCurrentTime(),
+                timeDelta, sample, i, j
             ;
 
             for (i = 0; i < inputBuffer.length; i++) {
@@ -76,6 +77,10 @@ var ChannelReceiveManager = (function () {
 
                 this.$$sampleNumber++;
             }
+
+            timeDelta = Audio.getCurrentTime() - timeBefore;
+            // console.log(Audio.getCurrentTime());
+            // console.log(timeDelta);
         };
 
 

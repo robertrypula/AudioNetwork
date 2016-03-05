@@ -31,7 +31,7 @@ var AudioNetworkPhysicalLayer = (function () {
             Important:
             - add phase offset input to align symbol '0'
             - add html generation as js + ofdm support
-            - change send logic (add amplitude, symbolCout, symbol to each OFDM block)
+            - change send logic (add amplitude, symbolCount, symbol to each OFDM block)
             - change send sequence logic (use format: '5.5.2.0 1.2.4.1')
             - setRxDftTimeSpan(0.43), optional clearSampleNumber param (default true but in this case false)
 
@@ -384,7 +384,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
                     .getFrequency(ofdmIndex) // TODO implement me
-            );
+            ) + 1000;
         };
 
         ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
@@ -392,7 +392,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .getFrequency(ofdmIndex) // TODO implement me
-            );
+            ) + 1000;
         };
 
         ANPL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {

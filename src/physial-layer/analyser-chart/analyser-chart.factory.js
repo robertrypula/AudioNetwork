@@ -174,10 +174,10 @@ var AnalyserChart = (function () {
                 '    {{ label }}' +
                 '</span>';
 
-            tpl = tpl.replace(/\{\{ width \}\}/, width);
-            tpl = tpl.replace(/\{\{ left \}\}/, left);
-            tpl = tpl.replace(/\{\{ label \}\}/, label);
-            tpl = tpl.replace(/\{\{ colorAxis \}\}/, this.$$colorAxis);
+            tpl = tpl.replace(/\{\{ width \}\}/g, width);
+            tpl = tpl.replace(/\{\{ left \}\}/g, left);
+            tpl = tpl.replace(/\{\{ label \}\}/g, label);
+            tpl = tpl.replace(/\{\{ colorAxis \}\}/g, this.$$colorAxis);
 
             return tpl;
         };

@@ -1,27 +1,55 @@
-var anpl;
+var anpl = null;
 
 function onLoad() {
+    reinitialize();
+}
+
+function reinitialize() {
+    var txChannel, rxChannel, channelData, i;
+
+    channelData = (document.getElementById('tx-channel').value).split(' ');
+    txChannel = [];
+    for (i = 0; i < channelData.length; i++) {
+        txChannel.push({
+            ofdmSize: parseInt(channelData[i])
+        });
+    }
+
+    channelData = (document.getElementById('rx-channel').value).split(' ');
+    rxChannel = [];
+    for (i = 0; i < channelData.length; i++) {
+        rxChannel.push({
+            ofdmSize: parseInt(channelData[i])
+        });
+    }
+
+    initialize(txChannel, rxChannel, false, false);
+}
+
+function initialize(txChannel, rxChannel, showSpectrum, showConstellationDiagram) {
+    destroy();
+    generateHtml(txChannel, rxChannel);
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
-            channel: [
-                {}
-            ]
+            channel: txChannel
         },
         rx: {
-            channel: [
-                {}
-            ],
+            channel: rxChannel,
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: 0.2, // default: 0.1
             spectrum: {
-                elementId: 'rx-spectrum',
+                elementId: showSpectrum ? 'rx-spectrum' : null,
                 height: 150
             },
             constellationDiagram: {
-                elementId: 'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}',
+                elementId: (
+                    showConstellationDiagram ?
+                    'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}' :
+                    null
+                ),
                 width: 140,
                 height: 140,
-                historyPointSize: 25 // default: 40
+                historyPointSize: 25 // default: 20
             }
         }
     });
@@ -30,20 +58,65 @@ function onLoad() {
     document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
     document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
     document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
+    initializeHtml(txChannel, rxChannel);
+}
 
-    uiRefresh('frequency', true, 'tx', 0, 0);
-    uiRefresh('frequency', false, 'tx', 0, 0);
-    uiRefresh('frequency', true, 'rx', 0, 0);
-    uiRefresh('frequency', false, 'rx', 0, 0);
+function generateHtml(tx, rx) {
+    generateHtmlForChannel(tx, 'tx');
+    generateHtmlForChannel(rx, 'rx');
+}
 
-    uiRefresh('phase-correction', true, 'tx', 0, 0);
-    uiRefresh('phase-correction', false, 'tx', 0, 0);
-    uiRefresh('phase-correction', true, 'rx', 0, 0);
-    uiRefresh('phase-correction', false, 'rx', 0, 0);
+function generateHtmlForChannel(channel, id) {
+    var i, j, html, element;
+
+    for (i = 0; i < channel.length; i++) {
+        html = document.getElementById('template-' + id + '-channel').innerHTML;
+        html = html.replace(/\[\[ channelIndex ]]/g, i + '');
+        element = document.getElementById(id + '-channel-container');
+        if (i === 0) {
+            element.innerHTML = '';
+        }
+        element.innerHTML = element.innerHTML + html;
+        for (j = 0; j < channel[i].ofdmSize; j++) {
+            html = document.getElementById('template-' + id + '-channel-ofdm').innerHTML;
+            html = html.replace(/\[\[ channelIndex ]]/g, i + '');
+            html = html.replace(/\[\[ ofdmIndex ]]/g, j + '');
+            element = document.getElementById(id + '-channel-' + i + '-ofdm-container');
+            element.innerHTML = element.innerHTML + html;
+        }
+    }
+}
+
+function initializeHtml(tx, rx) {
+    var fieldType, i;
+
+    fieldType = [
+        'frequency',
+        'phase-correction'
+    ];
+    for (i = 0; i < fieldType.length; i++) {
+        initializeHtmlForChannel(tx, 'tx', fieldType[i]);
+        initializeHtmlForChannel(rx, 'rx', fieldType[i]);
+    }
+
+}
+
+function initializeHtmlForChannel(channel, id, fieldType) {
+    var i, j;
+
+    for (i = 0; i < channel.length; i++) {
+        for (j = 0; j < channel[i].ofdmSize; j++) {
+            uiRefresh(fieldType, true, id, i, j);
+            uiRefresh(fieldType, false, id, i, j);
+        }
+    }
 }
 
 function destroy() {
-    anpl.destroy();
+    if (anpl) {
+        anpl.destroy();
+        anpl = null;
+    }
 }
 
 function receive(channelIndex, carrierData) {
@@ -86,7 +159,7 @@ function transmitSequence(channelIndex) {
         data = [];
         data.push({
             duration: symbolDuration,
-            phase: 0 + (parseInt(s[i]) % pskSize) / pskSize
+            phase: (parseInt(s[i]) % pskSize) / pskSize
         });
         anpl.tx(channelIndex, data);
 

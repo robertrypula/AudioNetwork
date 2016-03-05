@@ -57,10 +57,9 @@ var ChannelTransmitManager = (function () {
             var
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 outputData = outputBuffer.getChannelData(0),
-                sample,
-                i,
-                j
-                ;
+                timeBefore = Audio.getCurrentTime(),
+                timeDelta, sample, i, j
+            ;
 
             for (i = 0; i < outputBuffer.length; i++) {
                 sample = 0;
@@ -70,6 +69,10 @@ var ChannelTransmitManager = (function () {
                 outputData[i] = sample;
                 // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.1;
             }
+
+            timeDelta = Audio.getCurrentTime() - timeBefore;
+            // console.log(Audio.getCurrentTime());
+            // console.log(timeDelta);
         };
 
         return CTM;
