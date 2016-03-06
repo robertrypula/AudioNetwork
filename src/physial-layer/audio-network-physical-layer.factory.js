@@ -30,7 +30,7 @@ var AudioNetworkPhysicalLayer = (function () {
             - fix layout
             
             Important:
-            - add phase offset input to align symbol '0'
+            + add phase offset input to align symbol '0'
             + add html generation as js + ofdm support
             - change send logic (add amplitude, symbolCount, symbol to each OFDM block)
             - change send sequence logic (use format: '5.5.2.0 1.2.4.1')

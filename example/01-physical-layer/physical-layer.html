@@ -257,21 +257,10 @@
 
                 <div class="row">
                     <div class="col-6">
-                        <b>Send</b>
+                        <b>Amplitude</b>
                     </div>
                     <div class="col-6">
-                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.00)">
-                            [phase + 0.00]
-                        </a> |
-                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.25)">
-                            [phase + 0.25]
-                        </a> |
-                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.50)">
-                            [phase + 0.50]
-                        </a> |
-                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]], [[ ofdmIndex ]], 0.75)">
-                            [phase + 0.75]
-                        </a> |
+                        <input type="number" id="tx-amplitude-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="1" />
                     </div>
                 </div>
             </div>

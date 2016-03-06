@@ -150,44 +150,51 @@ function receive(channelIndex, carrierData) {
     }
 }
 
-function transmit(channelIndex, ofdmIndex, offset) {
-    var
-        symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
-        data = []
-    ;
-
-    data.push({
-        duration: symbolDuration,
-        phase: 0 + offset
-    });
-    anpl.tx(channelIndex, data);
-}
-
 function transmitSequence(channelIndex) {
     var
         symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
-        sequeceData = document.getElementById('tx-sequence-data-' + channelIndex).value + '',
+        sequenceData = document.getElementById('tx-sequence-data-' + channelIndex).value + '',
         pskSize = parseInt(document.getElementById('tx-sequence-psk-size-' + channelIndex).value),
-        s = sequeceData.split(' '),
-        data,
-        i
+        ofdmBurstList = sequenceData.split(' '),
+        ofdmBurstSymbolList, ofdmBurstSymbol,
+        amplitude, data, dataFrame, mute, i, j
     ;
 
-    for (i = 0; i < s.length; i++) {
-        data = [];
-        data.push({
-            duration: symbolDuration,
-            phase: (parseInt(s[i]) % pskSize) / pskSize
-        });
-        anpl.tx(channelIndex, data);
+    dataFrame = [];
+    for (i = 0; i < ofdmBurstList.length; i++) {
+        ofdmBurstSymbolList = ofdmBurstList[i].split('.');
 
         data = [];
-        data.push({
-            duration: guardInterval,
-            amplitude: 0
-        });
-        anpl.tx(channelIndex, data);
+        for (j = 0; j < ofdmBurstSymbolList.length; j++) {
+            mute = ofdmBurstSymbolList[j] === '-';
+            ofdmBurstSymbol = mute ? 0 : parseInt(ofdmBurstSymbolList[j]) % pskSize;
+            amplitude = parseFloat(document.getElementById('tx-amplitude-input-' + channelIndex + '-' + j).value);
+
+            data.push({
+                amplitude: mute ? 0 : amplitude,
+                duration: symbolDuration,
+                phase: ofdmBurstSymbol / pskSize
+            });
+        }
+        dataFrame.push(data);
+
+        if (guardInterval === 0) {
+            continue;
+        }
+
+        data = [];
+        for (j = 0; j < ofdmBurstSymbolList.length; j++) {
+            data.push({
+                amplitude: 0,
+                duration: guardInterval
+            });
+        }
+        dataFrame.push(data);
+    }
+    
+    for (i = 0; i < dataFrame.length; i++) {
+        anpl.tx(channelIndex, dataFrame[i]);
     }
 }
 
