@@ -35,8 +35,8 @@ function reinitialize() {
         }
     }
 
-    rxSpectrumVisible = document.getElementById('rx-spectrum-visible').checked ? true : false;
-    rxConstellationDiagramVisible = document.getElementById('rx-constellation-diagram-visible').checked ? true : false;
+    rxSpectrumVisible = !!document.getElementById('rx-spectrum-visible').checked;
+    rxConstellationDiagramVisible = !!document.getElementById('rx-constellation-diagram-visible').checked;
     dftTimeSpan = parseFloat(document.getElementById('rx-dft-time-span').value);
 
     destroy();
@@ -192,25 +192,18 @@ function transmitSequence(channelIndex) {
 }
 
 function uiRefresh(type, isLabel, rxTx, channelIndex, ofdmIndex) {
-    var elementId, element, value;
+    var elementId, element, value, methodSubName;
 
     elementId = rxTx + '-' + type + '-' + (isLabel ? 'label-' : 'input-') + channelIndex + '-' + ofdmIndex;
     element = document.getElementById(elementId);
+    methodSubName = rxTx === 'tx' ? 'Tx' : 'Rx';
 
     switch (type) {
         case 'frequency':
-            value = (
-                rxTx === 'tx' ?
-                anpl.getTxFrequency(channelIndex, ofdmIndex) :
-                anpl.getRxFrequency(channelIndex, ofdmIndex)
-            );
+            value = anpl['get' + methodSubName + 'Frequency'](channelIndex, ofdmIndex);
             break;
         case 'phase-correction':
-            value = (
-                rxTx === 'tx' ?
-                anpl.getTxPhaseCorrection(channelIndex, ofdmIndex) :
-                anpl.getRxPhaseCorrection(channelIndex, ofdmIndex)
-            );
+            value = anpl['get' + methodSubName + 'PhaseCorrection'](channelIndex, ofdmIndex);
             break;
     }
     
@@ -274,27 +267,17 @@ function loadRecordedAudio() {
 }
 
 function output(type, state) {
+    var methodSuffix = state ? 'Enable' : 'Disable';
+
     switch (type) {
         case 'tx':
-            if (state) {
-                anpl.outputTxEnable();
-            } else {
-                anpl.outputTxDisable();
-            }
+            anpl['outputTx' + methodSuffix]();
             break;
         case 'mic':
-            if (state) {
-                anpl.outputMicrophoneEnable();
-            } else {
-                anpl.outputMicrophoneDisable();
-            }
+            anpl['outputMicrophone' + methodSuffix]();
             break;
         case 'rec':
-            if (state) {
-                anpl.outputRecordedAudioEnable();
-            } else {
-                anpl.outputRecordedAudioDisable();
-            }
+            anpl['outputRecordedAudio' + methodSuffix]();
             break;
     }
 }

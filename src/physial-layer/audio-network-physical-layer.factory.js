@@ -30,10 +30,10 @@ var AudioNetworkPhysicalLayer = (function () {
             
             Important:
             - add phase offset input to align symbol '0'
-            - add html generation as js + ofdm support
+            + add html generation as js + ofdm support
             - change send logic (add amplitude, symbolCount, symbol to each OFDM block)
             - change send sequence logic (use format: '5.5.2.0 1.2.4.1')
-            - setRxDftTimeSpan(0.43), optional clearSampleNumber param (default true but in this case false)
+            + add DFT time span to config
 
             Important but little harder:
             - add auto tuning feature with ability to align phase offset
