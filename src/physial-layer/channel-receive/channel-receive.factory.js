@@ -62,7 +62,7 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.handleSample = function (sample, sampleNumber) {
-            var notifyIteration, cr, i, carrierData;
+            var notifyIteration, cr, c, i, carrierData;
 
             notifyIteration = (sampleNumber % this.$$notifyInterval === 0);
 
@@ -74,7 +74,10 @@ var ChannelReceive = (function () {
                 cr = this.carrierRecovery[i];
                 cr.handleSample(sample);
                 if (notifyIteration) {
-                    carrierData.push(cr.getCarrier());
+                    c = cr.getCarrier();
+                    c.phase = c.phase - this.$$phaseCorrection;
+                    c.phase = c.phase - Math.floor(c.phase);
+                    carrierData.push(c);
                 }
             }
 
