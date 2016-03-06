@@ -21,6 +21,10 @@ var MathUtil = (function () {
             return Math.random();
         }
 
+        function floor(v) {
+            return Math.floor(v);
+        }
+
         function sin(v) {
             return Math.sin(v);
         }
@@ -38,6 +42,7 @@ var MathUtil = (function () {
             HALF_PI: 0.5 * Math.PI,
             TWO_PI: 2 * Math.PI,
             PI: Math.PI,
+            floor: floor,
             asin: asin,
             sqrt: sqrt,
             round: round,

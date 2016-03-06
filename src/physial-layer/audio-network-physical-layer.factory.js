@@ -27,6 +27,7 @@ var AudioNetworkPhysicalLayer = (function () {
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
+            - fix layout
             
             Important:
             - add phase offset input to align symbol '0'
@@ -383,15 +384,15 @@ var AudioNetworkPhysicalLayer = (function () {
             return (
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
-                    .getFrequency(ofdmIndex) // TODO implement me
+                    .getRxPhaseCorrection(ofdmIndex)
             );
         };
-
+        
         ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
-                .getFrequency(ofdmIndex) // TODO implement me
+                .getTxPhaseCorrection(ofdmIndex)
             );
         };
 
@@ -405,7 +406,7 @@ var AudioNetworkPhysicalLayer = (function () {
         ANPL.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
-                .setFrequency(ofdmIndex, phaseCorrection) // TODO implement me
+                .setTxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 

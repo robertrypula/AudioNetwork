@@ -9,6 +9,7 @@ var ChannelTransmit = (function () {
         CT = function (index, configuration) {
             this.carrierGenerate = [];
             this.carrierFrequency = [];
+            this.carrierPhaseCorrection = [];
             this.$$index = index;
 
             this.configure(configuration);
@@ -26,20 +27,35 @@ var ChannelTransmit = (function () {
             }
         };
 
-        CT.prototype.getFrequency = function (ofdmIndex) {
+        CT.prototype.$$checkOfdmIndex = function (ofdmIndex) {
             if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
                 throw 'OFDM index out of range: ' + ofdmIndex;
             }
+        };
+
+        CT.prototype.getTxPhaseCorrection = function (ofdmIndex) {
+            this.$$checkOfdmIndex(ofdmIndex);
+
+            return this.carrierPhaseCorrection[ofdmIndex];
+        };
+
+        CT.prototype.getFrequency = function (ofdmIndex) {
+            this.$$checkOfdmIndex(ofdmIndex);
 
             return this.carrierFrequency[ofdmIndex];
+        };
+
+        CT.prototype.setTxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
+            this.$$checkOfdmIndex(ofdmIndex);
+
+            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - Math.floor(phaseCorrection);
+            this.carrierGenerate[ofdmIndex].setPhaseCorrection(this.carrierPhaseCorrection[ofdmIndex]);
         };
 
         CT.prototype.setFrequency = function (ofdmIndex, frequency) {
             var samplePerPeriod;
 
-            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
-                throw 'OFDM index out of range: ' + ofdmIndex;
-            }
+            this.$$checkOfdmIndex(ofdmIndex);
 
             samplePerPeriod = Audio.getSampleRate() / frequency;
             this.carrierGenerate[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
@@ -56,6 +72,7 @@ var ChannelTransmit = (function () {
                 cg = CarrierGenerateBuilder.build(samplePerPeriod);
                 this.carrierGenerate.push(cg);
                 this.carrierFrequency.push(frequency);
+                this.carrierPhaseCorrection.push(0);
             }
         };
 
@@ -75,6 +92,7 @@ var ChannelTransmit = (function () {
         CT.prototype.destroy = function () {
             this.carrierGenerate.length = 0;
             this.carrierFrequency.length = 0;
+            this.carrierPhaseCorrection.length = 0;
         };
 
         return CT;

@@ -19,6 +19,7 @@ var CarrierGenerate = (function () {
             this.$$samplePerPeriod = null;
             this.$$omega = null;
             this.$$sampleNumber = 0;
+            this.$$phaseCorrection = 0;
             this.setSamplePerPeriod(samplePerPeriod);
         };
 
@@ -54,7 +55,7 @@ var CarrierGenerate = (function () {
                 currentCarrierData.amplitude *
                 MathUtil.sin(
                     this.$$omega * this.$$sampleNumber
-                    - MathUtil.TWO_PI * currentCarrierData.phase
+                    - MathUtil.TWO_PI * (currentCarrierData.phase - this.$$phaseCorrection)
                 )
             );
         };
@@ -77,6 +78,10 @@ var CarrierGenerate = (function () {
                 this.$$currentCarrier.sampleNumberStart = null;
                 this.$$currentCarrier.sampleNumberEnd = null;
             }
+        };
+
+        CG.prototype.setPhaseCorrection = function (phaseCorrection) {
+            this.$$phaseCorrection = phaseCorrection;
         };
 
         CG.prototype.nextSample = function () {
