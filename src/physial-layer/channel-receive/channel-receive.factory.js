@@ -12,6 +12,7 @@ var ChannelReceive = (function () {
             this.$$notifyInterval = null;
             this.$$notifyHandler = null;
             this.$$index = index;
+            this.$$phaseCorrection = 0;
 
             this.configure(configuration);
         };
@@ -38,6 +39,14 @@ var ChannelReceive = (function () {
             }
 
             return this.carrierFrequency[ofdmIndex];
+        };
+
+        CR.prototype.setRxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+                throw 'OFDM index out of range: ' + ofdmIndex;
+            }
+
+            this.$$phaseCorrection = phaseCorrection - Math.floor(phaseCorrection);
         };
 
         CR.prototype.setFrequency = function (ofdmIndex, frequency) {

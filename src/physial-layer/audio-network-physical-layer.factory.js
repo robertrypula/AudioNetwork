@@ -108,7 +108,7 @@ var AudioNetworkPhysicalLayer = (function () {
 
             this.outputTxEnable();
             this.outputMicrophoneDisable();
-            this.outputRecordedAudioEnable();
+            this.outputRecordedAudioDisable();
         };
 
         ANPL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
@@ -384,7 +384,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
                     .getFrequency(ofdmIndex) // TODO implement me
-            ) + 1000;
+            );
         };
 
         ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
@@ -392,13 +392,13 @@ var AudioNetworkPhysicalLayer = (function () {
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .getFrequency(ofdmIndex) // TODO implement me
-            ) + 1000;
+            );
         };
 
         ANPL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelReceiveManager
                 .getChannel(channelIndex)
-                .setFrequency(ofdmIndex, phaseCorrection) // TODO implement me
+                .setRxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 
