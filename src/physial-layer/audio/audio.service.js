@@ -6,6 +6,7 @@ var Audio = (function () {
     function _Audio() {
         var
             context = null,
+            rawMicrophoneNode = null,
             microphoneNode = null,
             recordedNode = null,
             recordedRawNode = null
@@ -60,8 +61,7 @@ var Audio = (function () {
         }
 
         function userMediaStreamSuccess(stream) {
-            var rawMicrophoneNode = context.createMediaStreamSource(stream);
-
+            rawMicrophoneNode = context.createMediaStreamSource(stream);
             rawMicrophoneNode.connect(microphoneNode);
         }
 
