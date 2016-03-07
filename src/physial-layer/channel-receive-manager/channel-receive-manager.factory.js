@@ -1,3 +1,5 @@
+var blockBeginTimePrevious = 0;      // TODO remove me
+
 var ChannelReceiveManager = (function () {
     'use strict';
 
@@ -12,7 +14,7 @@ var ChannelReceiveManager = (function () {
             this.analyserNode = null;  // empty analyser needs to be connected to script node
             this.$$configuration = configuration;
             this.$$bufferSize = bufferSize;
-            this.$$sampleNumber = 0;
+            this.$$sampleNumberGlobal = 0;
 
             this.$$init();
         };
@@ -64,23 +66,35 @@ var ChannelReceiveManager = (function () {
             var
                 inputBuffer = audioProcessingEvent.inputBuffer,
                 inputData = inputBuffer.getChannelData(0),
-                timeBefore = Audio.getCurrentTime(),
-                timeDelta, sample, i, j
+                blockBeginTime = Audio.getCurrentTime(),
+                sample, sampleNumberInBlock, j
             ;
 
-            for (i = 0; i < inputBuffer.length; i++) {
-                sample = inputData[i];
+            // TODO remove me
+            console.log(
+                'RX BLOCK DELTA: time = ' + 
+                (blockBeginTime - blockBeginTimePrevious) + 
+                ', samples = ' + 
+                Math.round(-(this.$$bufferSize) + (blockBeginTime - blockBeginTimePrevious) * Audio.getSampleRate())
+            );
+            blockBeginTimePrevious = blockBeginTime;
+            // --
+
+
+            for (sampleNumberInBlock = 0; sampleNumberInBlock < inputBuffer.length; sampleNumberInBlock++) {
+                sample = inputData[sampleNumberInBlock];
 
                 for (j = 0; j < this.channelReceive.length; j++) {
-                    this.channelReceive[j].handleSample(sample, this.$$sampleNumber);
+                    this.channelReceive[j].handleSample(
+                        sample, 
+                        this.$$sampleNumberGlobal,
+                        blockBeginTime,
+                        sampleNumberInBlock
+                    );
                 }
 
-                this.$$sampleNumber++;
+                this.$$sampleNumberGlobal++;
             }
-
-            timeDelta = Audio.getCurrentTime() - timeBefore;
-            // console.log(Audio.getCurrentTime());
-            // console.log(timeDelta);
         };
 
 

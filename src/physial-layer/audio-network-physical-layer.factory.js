@@ -67,7 +67,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.setRxInput(this.$$configuration.rx.input);
         };
 
-        ANPL.prototype.$$notifyHandler = function (channelIndex, carrierData) {
+        ANPL.prototype.$$notifyHandler = function (channelIndex, carrierData, time) {
             var i, cd, queue, powerNormalized;
 
             for (i = 0; i < carrierData.length; i++) {
@@ -93,7 +93,7 @@ var AudioNetworkPhysicalLayer = (function () {
             }
 
             if (this.$$rxHandler) {
-                this.$$rxHandler(channelIndex, carrierData);
+                this.$$rxHandler(channelIndex, carrierData, time);
             }
         };
 

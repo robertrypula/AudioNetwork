@@ -68,10 +68,10 @@ var ChannelReceive = (function () {
             this.carrierFrequency[ofdmIndex] = frequency;
         };
 
-        CR.prototype.handleSample = function (sample, sampleNumber) {
-            var notifyIteration, cr, c, i, carrierData;
+        CR.prototype.handleSample = function (sample, sampleNumberGlobal, blockBeginTime, sampleNumberInBlock) {
+            var notifyIteration, cr, c, i, carrierData, sampleTimeOffsetInBlock;
 
-            notifyIteration = (sampleNumber % this.$$notifyInterval === 0);
+            notifyIteration = (sampleNumberGlobal % this.$$notifyInterval === 0);
 
             if (notifyIteration) {
                 carrierData = [];
@@ -89,7 +89,13 @@ var ChannelReceive = (function () {
             }
 
             if (notifyIteration) {
-                this.$$notifyHandler(this.$$index, carrierData);
+                sampleTimeOffsetInBlock = sampleNumberInBlock / Audio.getSampleRate();
+
+                this.$$notifyHandler(
+                    this.$$index, 
+                    carrierData,
+                    blockBeginTime + sampleTimeOffsetInBlock
+                );
             }
         };
 
