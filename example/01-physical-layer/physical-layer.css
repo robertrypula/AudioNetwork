@@ -72,3 +72,8 @@ h1 {
     padding: 5px 0;
     border: 1px solid #eee;
 }
+
+.sequence-textarea {
+    width: 500px;
+    height: 80px;
+}

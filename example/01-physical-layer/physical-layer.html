@@ -16,6 +16,15 @@
 
                 <div class="row">
                     <div class="col-6">
+                        <b>Sample rate [Hz]</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="sample-rate"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
                         <b>
                             DFT time span [sec]
                         </b>
@@ -25,6 +34,36 @@
                             type="text"
                             id="rx-dft-time-span"
                             value="0.2"
+                            />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>
+                            Rx spectrum
+                        </b>
+                    </div>
+                    <div class="col-6">
+                        <input
+                            type="checkbox"
+                            checked="checked"
+                            id="rx-spectrum-visible"
+                            value="1"
+                            />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>
+                            Constellation diagram
+                        </b>
+                    </div>
+                    <div class="col-6">
+                        <input
+                            type="checkbox"
+                            checked="checked"
+                            id="rx-constellation-diagram-visible"
+                            value="1"
                             />
                     </div>
                 </div>
@@ -45,101 +84,61 @@
                             id="tx-channel"
                             value="1070-1-100"
                             />
-                        <input
-                            type="checkbox"
-                            checked="checked"
-                            id="rx-spectrum-visible"
-                            value="1"
-                            />
-                        <input
-                            type="checkbox"
-                            checked="checked"
-                            id="rx-constellation-diagram-visible"
-                            value="1"
-                            />
                         <a href="javascript:void(0)" onClick="reinitialize()">Reinitialize</a>
                         <a href="javascript:void(0)" onClick="destroy()">Destroy</a>
                     </div>
                 </div>
 
-                <div>
-                    <b>Sample rate [Hz]</b>
-                    <span id="sample-rate"></span>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="symbol-duration">
+                            Symbol duration [ms]
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="symbol-duration" value="400" />
+                    </div>
                 </div>
-                <div>
-                    <b>Tx buffer size</b>
-                    <span id="tx-buffer-size"></span>
+
+                <div class="row">
+                    <div class="col-6">
+                        <label for="guard-interval">
+                            Guard interval [ms]
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="guard-interval" value="200" />
+                    </div>
                 </div>
-                <div>
-                    <b>Rx buffer size</b>
-                    <span id="rx-buffer-size"></span>
-                </div>
-                <div>
-                    <label for="symbol-duration">
-                        Symbol duration [ms]
-                    </label>
-                    <input type="text" id="symbol-duration" value="400" />
-                </div>
-                <div>
-                    <label for="guard-interval">
-                        Guard interval [ms]
-                    </label>
-                    <input type="text" id="guard-interval" value="200" />
-                </div>
-                <div>
-                    <b>
-                        Output [tx]
-                    </b>
-                    <span>
-                        <a href="javascript:void(0)" onClick="output('tx', true)">Enable</a>
-                        <a href="javascript:void(0)" onClick="output('tx', false)">Disable</a>
-                    </span>
-                </div>
-                <div>
-                    <b>
-                        Output [microphone]
-                    </b>
-                    <span>
-                        <a href="javascript:void(0)" onClick="output('mic', true)">Enable</a>
-                        <a href="javascript:void(0)" onClick="output('mic', false)">Disable</a>
-                    </span>
-                </div>
-                <div>
-                    <b>
-                        Output [recorded audio]
-                    </b>
-                    <span>
-                        <a href="javascript:void(0)" onClick="output('rec', true)">Enable</a>
-                        <a href="javascript:void(0)" onClick="output('rec', false)">Disable</a>
-                    </span>
-                </div>
-                <div>
-                    <b>Rx input</b>
-                    <span>
-                        <a href="javascript:void(0)" onClick="rxInput('mic')">Microphone</a>
-                        <a href="javascript:void(0)" onClick="rxInput('rxLoop')">RxLoopback</a>
-                        <a href="javascript:void(0)" onClick="rxInput('rec')">Recorded file</a>
-                    </span>
-                </div>
-                <div>
-                    <b>Recorded audio url</b>
-                    <span>
-                        <br/>
-                        http://codebuild.pl/an.wav
-                        <br/>
-                        <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
-                        <br/>
-                        <a href="javascript:void(0)" onClick="loadRecordedAudio()">Load</a>
-                    </span>
-                </div>
+
             </div>
 
             <h2>Receive</h2>
             <div class="container">
 
                 <div class="row">
+                    <div class="col-6">
+                        <b>Rx buffer size</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-buffer-size"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Source</b>
+                    </div>
+                    <div class="col-6">
+                        <a href="javascript:void(0)" onClick="rxInput('mic')">Microphone</a>
+                        <a href="javascript:void(0)" onClick="rxInput('rxLoop')">RxLoopback</a>
+                        <a href="javascript:void(0)" onClick="rxInput('rec')">Recorded audio</a>
+                    </div>
+                </div>
+
+                <div class="row">
                     <div class="col-12">
-                        <h3>Input spectrum</h3>
+                        <h3>Source spectrum</h3>
                     </div>                    
                 </div>
                 <div class="row">
@@ -155,6 +154,53 @@
 
             <h2>Transmit</h2>
             <div class="container">
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Tx buffer size</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="tx-buffer-size"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Recorded audio url</b>
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
+                        <a href="javascript:void(0)" onClick="loadRecordedAudio()">Load</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Output [tx]</b>
+                    </div>
+                    <div class="col-6">
+                        <a href="javascript:void(0)" onClick="output('tx', true)">Enable</a>
+                        <a href="javascript:void(0)" onClick="output('tx', false)">Disable</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Output [microphone]</b>
+                    </div>
+                    <div class="col-6">
+                        <a href="javascript:void(0)" onClick="output('mic', true)">Enable</a>
+                        <a href="javascript:void(0)" onClick="output('mic', false)">Disable</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Output [recorded audio]</b>
+                    </div>
+                    <div class="col-6">
+                        <a href="javascript:void(0)" onClick="output('rec', true)">Enable</a>
+                        <a href="javascript:void(0)" onClick="output('rec', false)">Disable</a>
+                    </div>
+                </div>
 
                 <div class="row" id="tx-channel-container">
                 </div>
@@ -202,7 +248,12 @@
                         <b>Send sequence</b>
                     </div>
                     <div class="col-6">
-                        <input type="text" id="tx-sequence-data-[[ channelIndex ]]" value="0 1 2 3 3 2 1 0" />
+                        <textarea
+                            type="text" 
+                            class="sequence-textarea"
+                            id="tx-sequence-data-[[ channelIndex ]]" 
+                            value=""
+                            >0 1 2 3 3 2 1 0</textarea>
                         <input type="number" id="tx-sequence-psk-size-[[ channelIndex ]]" value="4" />
                         <a href="javascript:void(0)" onClick="transmitSequence([[ channelIndex ]])">Send sequence</a>
                     </div>

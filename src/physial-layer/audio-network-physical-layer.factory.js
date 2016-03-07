@@ -2,7 +2,7 @@ var AudioNetworkPhysicalLayer = (function () {
     'use strict';
 
     /*
-        TODO development
+        TODO
             + real/imm delete
             + compute at getCarrier
             + index passed into handler
@@ -24,27 +24,23 @@ var AudioNetworkPhysicalLayer = (function () {
                 + add ability to choose destination source
             + move script processor node to receive manager
             + move sin/cos to internal Math service (to give ability to quickly add lookup tables)
+            + fix layout
+            + add phase offset input to align symbol '0'
+            + add html generation as js + ofdm support
+            + change send logic (add amplitude, symbolCount, symbol to each OFDM block)
+            + change send sequence logic (use format: '5.5.2.0 1.2.4.1')
+            + add DFT time span to config
+
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
-            - fix layout
-            
-            Important:
-            + add phase offset input to align symbol '0'
-            + add html generation as js + ofdm support
-            - change send logic (add amplitude, symbolCount, symbol to each OFDM block)
-            - change send sequence logic (use format: '5.5.2.0 1.2.4.1')
-            + add DFT time span to config
+            - fix styles 
 
-            Important but little harder:
+        TODO Important but little harder:
             - add auto tuning feature with ability to align phase offset
             - internal loop for notifications
                 - add script node block time (from audiocontext)
                 - add sample offset time from script node block time
-
-
-            
-            
             
     */
 
