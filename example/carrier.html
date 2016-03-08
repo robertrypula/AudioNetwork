@@ -137,21 +137,21 @@
             }
 
             function analyzeBufferSample(bufferSample, bufferPower, bufferPhase) {
-                var i, carrier, powerNormalized;
+                var i, carrierDetail, powerNormalized;
 
                 for (i = 0; i < bufferSample.length; i++) {
                     carrierRecovery.handleSample(bufferSample[i]);
-                    carrier = carrierRecovery.getCarrier();
+                    carrierDetail = carrierRecovery.getCarrierDetail();
 
                     if (0) {
-                        powerNormalized = carrier.power;
+                        powerNormalized = carrierDetail.power;
                     } else {
-                        powerNormalized = (carrier.powerDecibel + 20) / 20;
+                        powerNormalized = (carrierDetail.powerDecibel + 20) / 20;
                         powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                     }
 
                     bufferPower.push(powerNormalized);
-                    bufferPhase.push(carrier.phase);
+                    bufferPhase.push(carrierDetail.phase);
                 }
             }
 
@@ -235,7 +235,7 @@
                     secondsStart = new Date().getTime(),
                     secondsEnd,
                     sample,
-                    carrier
+                    carrierDetail
                 ;
 
                 cg.addToQueue([
@@ -246,7 +246,7 @@
                     sample = cg.getSample();
                     cg.nextSample();
                     cr.handleSample(sample);
-                    carrier = cr.getCarrier();
+                    carrierDetail = cr.getCarrierDetail();
                 }
 
                 secondsEnd = new Date().getTime();

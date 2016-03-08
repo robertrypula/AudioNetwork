@@ -75,7 +75,7 @@ var CarrierRecovery = (function () {
             this.$$sampleNumber++;
         };
 
-        CR.prototype.getCarrier = function () {
+        CR.prototype.getCarrierDetail = function () {
             this.$$computePower();
             this.$$computePhase();
 

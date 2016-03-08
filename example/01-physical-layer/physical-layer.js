@@ -139,17 +139,17 @@ function destroy() {
     }
 }
 
-function receive(channelIndex, carrierData, time) {
+function receive(channelIndex, carrierDetail, time) {
     var i, elementPower, elementPhase;
 
-    // console.log(time);   // TODO remove me
+    console.log(time);   // TODO remove me
 
-    for (i = 0; i < carrierData.length; i++) {
+    for (i = 0; i < carrierDetail.length; i++) {
         elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);
         elementPhase = document.getElementById('rx-phase-' + channelIndex + '-' + i);
 
-        elementPower.innerHTML = Math.round(carrierData[i].powerDecibel);
-        elementPhase.innerHTML = Math.round(carrierData[i].phase * 360);
+        elementPower.innerHTML = Math.round(carrierDetail[i].powerDecibel);
+        elementPhase.innerHTML = Math.round(carrierDetail[i].phase * 360);
     }
 }
 

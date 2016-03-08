@@ -69,22 +69,22 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.handleSample = function (sample, sampleNumberGlobal, blockBeginTime, sampleNumberInBlock) {
-            var notifyIteration, cr, c, i, carrierData, sampleTimeOffsetInBlock;
+            var notifyIteration, cr, cd, i, carrierDetail, sampleTimeOffsetInBlock;
 
             notifyIteration = (sampleNumberGlobal % this.$$notifyInterval === 0);
 
             if (notifyIteration) {
-                carrierData = [];
+                carrierDetail = [];
             }
 
             for (i = 0; i < this.carrierRecovery.length; i++) {
                 cr = this.carrierRecovery[i];
                 cr.handleSample(sample);
                 if (notifyIteration) {
-                    c = cr.getCarrier();
-                    c.phase = c.phase - this.carrierPhaseCorrection[i];
-                    c.phase = c.phase - MathUtil.floor(c.phase);
-                    carrierData.push(c);
+                    cd = cr.getCarrierDetail();
+                    cd.phase = cd.phase - this.carrierPhaseCorrection[i];
+                    cd.phase = cd.phase - MathUtil.floor(cd.phase);
+                    carrierDetail.push(cd);
                 }
             }
 
@@ -93,7 +93,7 @@ var ChannelReceive = (function () {
 
                 this.$$notifyHandler(
                     this.$$index, 
-                    carrierData,
+                    carrierDetail,
                     blockBeginTime + sampleTimeOffsetInBlock
                 );
             }

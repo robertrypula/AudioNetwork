@@ -4,7 +4,7 @@ var AudioNetworkPhysicalLayer = (function () {
     /*
         TODO
             + real/imm delete
-            + compute at getCarrier
+            + compute at getCarrierDetail
             + index passed into handler
             + decibel power/amplitude check
             + load wav file
@@ -34,7 +34,8 @@ var AudioNetworkPhysicalLayer = (function () {
             - use dedicated constellation at carrier.html
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
-            - fix styles 
+            - fix styles
+            - move notification logic to manager
 
         TODO Important but little harder:
             - add auto tuning feature with ability to align phase offset
@@ -57,44 +58,20 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyser = null;
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
-            this.$$rxHandler = null;
+            this.$$rxHandler = {
+                callback: null
+            };
             this.$$outputTx = undefined;
             this.$$outputMicrophone = undefined;
             this.$$outputRecordedAudio = undefined;
+            this.$$delayLoopHandler = DelayLoopHandlerBuilder.build(
+                this.$$rxConstellationDiagram,
+                this.$$rxHandler
+            );
 
             this.$$initTx();
             this.$$initRx();
             this.setRxInput(this.$$configuration.rx.input);
-        };
-
-        ANPL.prototype.$$notifyHandler = function (channelIndex, carrierData, time) {
-            var i, cd, queue, powerNormalized;
-
-            for (i = 0; i < carrierData.length; i++) {
-                cd = carrierData[i];
-                if (cd.powerDecibel === -Infinity) {
-                    cd.powerDecibel = -99;
-                }
-                cd.powerDecibel = cd.powerDecibel < -99 ? -99 : cd.powerDecibel;
-
-                if (this.$$rxConstellationDiagram.length === 0) {
-                    continue;
-                }
-
-                queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + 40) / 40;
-                powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                if (queue.isFull()) {
-                    queue.pop();
-                    queue.pop();
-                }
-                queue.push(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
-                queue.push(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
-            }
-
-            if (this.$$rxHandler) {
-                this.$$rxHandler(channelIndex, carrierData, time);
-            }
         };
 
         ANPL.prototype.$$initTx = function () {
@@ -154,7 +131,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 // attach additional fields to channel object
                 channel.dftSize = dftSize;
                 channel.notifyInterval = notifyInterval;
-                channel.notifyHandler = this.$$notifyHandler.bind(this);
+                channel.notifyHandler = this.$$delayLoopHandler.handle.bind(this);
 
                 if (this.$$configuration.rx.constellationDiagram.elementId) {
                     this.$$initConstellationDiagram(i, channel);
@@ -251,7 +228,7 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.rx = function (rxHandler) {
-            this.$$rxHandler = (
+            this.$$rxHandler.callback = (
                 (typeof rxHandler === 'function') ?
                 rxHandler :
                 null
@@ -289,6 +266,8 @@ var AudioNetworkPhysicalLayer = (function () {
             this.outputMicrophoneDisable();
             this.$$channelTransmitManager.destroy();
             this.$$channelTransmitManager = null;
+
+            this.$$delayLoopHandler.destroy();
         };
 
         ANPL.prototype.getOutputTxState = function () {
