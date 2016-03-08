@@ -56,7 +56,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         rx: {
             bufferSize: 16 * 1024,
             channel: rxChannel,
-            notificationPerSecond: 25, // default: 20
+            notificationPerSecond: 5, // default: 20
             dftTimeSpan: dftTimeSpan, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
@@ -142,7 +142,7 @@ function destroy() {
 function receive(channelIndex, carrierDetail, time) {
     var i, elementPower, elementPhase;
 
-    console.log(time);   // TODO remove me
+    // console.log(time);   // TODO remove me
 
     for (i = 0; i < carrierDetail.length; i++) {
         elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);

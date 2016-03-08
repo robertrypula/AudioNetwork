@@ -40,7 +40,7 @@ var AudioNetworkPhysicalLayer = (function () {
         TODO Important but little harder:
             - add auto tuning feature with ability to align phase offset
             - internal loop for notifications
-                - add script node block time (from audiocontext)
+                + add script node block time (from audiocontext)
                 - add sample offset time from script node block time
             
     */
@@ -131,7 +131,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 // attach additional fields to channel object
                 channel.dftSize = dftSize;
                 channel.notifyInterval = notifyInterval;
-                channel.notifyHandler = this.$$delayLoopHandler.handle.bind(this);
+                channel.notifyHandler = this.$$delayLoopHandler.handle.bind(this.$$delayLoopHandler);
 
                 if (this.$$configuration.rx.constellationDiagram.elementId) {
                     this.$$initConstellationDiagram(i, channel);

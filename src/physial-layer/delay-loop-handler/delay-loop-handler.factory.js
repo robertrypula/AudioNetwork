@@ -7,11 +7,60 @@ var DelayLoopHandler = (function () {
         var DLH;
 
         DLH = function (rxConstellationDiagram, rxHandler) {
+            this.$$delay = 1.0;
+            this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
             this.$$rxHandler = rxHandler;
+
+            // console.log(this.$$rxConstellationDiagram);
+
+            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), 400);
+        };
+
+        DLH.prototype.$$intervalHandler = function () {
+            var 
+                currentTime = Audio.getCurrentTime(),
+                item,
+                i
+            ;
+          
+            if (this.$$delayedData.length > 0) {
+                console.log('-----------------');
+            }
+
+
+            for (i = 0; i < this.$$delayedData.length; i++) {
+                item = this.$$delayedData[i];
+
+                DLH.prototype.$$handle(
+                    item.channelIndex, 
+                    item.carrierDetail, 
+                    item.time
+                );
+            }
+
+            /*
+            this.$$delayedData.length = 0;
+            */
+
+            // this.$$delayedData.splice(0, 1);
+            //  x      x      x      x
+            //  . . . . . . . . . . . .
+
+            // console.log(':::::::::  ' + Audio.getCurrentTime());
         };
 
         DLH.prototype.handle = function (channelIndex, carrierDetail, time) {
+            this.$$delayedData.push({
+                channelIndex: channelIndex,
+                carrierDetail: carrierDetail,
+                time: time
+            });
+
+            
+        };
+
+        DLH.prototype.$$handle = function (channelIndex, carrierDetail, time) {
             var i, cd, queue, powerNormalized;
 
             for (i = 0; i < carrierDetail.length; i++) {
