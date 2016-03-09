@@ -31,11 +31,15 @@ var AudioNetworkPhysicalLayer = (function () {
             + change send sequence logic (use format: '5.5.2.0 1.2.4.1')
             + add DFT time span to config
 
-            - use dedicated constellation at carrier.html
+            - add symbol config to rx
+            - add symbol detection to rx
+            - prefill amplitude value basing on ofdm size at channel tx
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
             - fix styles
             - move notification logic to manager
+
+            - use dedicated constellation at carrier.html
 
         TODO Important but little harder:
             - add auto tuning feature with ability to align phase offset

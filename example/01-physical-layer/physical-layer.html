@@ -245,6 +245,16 @@
                         <h3>Channel #[[ channelIndex ]]</h3>
                     </div>
                 </div>
+                
+                <div class="row">
+                    <div class="col-6">
+                        <b>PSK symbol size:</b>
+                    </div>
+                    <div class="col-6">
+                        <input type="number" id="tx-sequence-psk-size-[[ channelIndex ]]" value="4" />
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-6">
                         <b>Send sequence</b>
@@ -256,10 +266,10 @@
                             id="tx-sequence-data-[[ channelIndex ]]" 
                             value=""
                             >0 1 2 3 3 2 1 0</textarea>
-                        <input type="number" id="tx-sequence-psk-size-[[ channelIndex ]]" value="4" />
                         <a href="javascript:void(0)" onClick="transmitSequence([[ channelIndex ]])">Send sequence</a>
                     </div>
                 </div>
+
                 <div class="row" id="tx-channel-[[ channelIndex ]]-ofdm-container">
                 </div>
             </div>
@@ -313,7 +323,11 @@
                         <b>Amplitude</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="tx-amplitude-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="1" />
+                        <input 
+                            type="number" 
+                            id="tx-amplitude-input-[[ channelIndex ]]-[[ ofdmIndex ]]" 
+                            value="1" 
+                            />
                     </div>
                 </div>
             </div>

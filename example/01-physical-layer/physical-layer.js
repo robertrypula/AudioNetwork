@@ -54,7 +54,6 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             channel: txChannel
         },
         rx: {
-            bufferSize: 16 * 1024,
             channel: rxChannel,
             notificationPerSecond: 25, // default: 20
             dftTimeSpan: dftTimeSpan, // default: 0.1
