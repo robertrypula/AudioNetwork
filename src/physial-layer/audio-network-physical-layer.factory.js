@@ -39,9 +39,9 @@ var AudioNetworkPhysicalLayer = (function () {
 
         TODO Important but little harder:
             - add auto tuning feature with ability to align phase offset
-            - internal loop for notifications
+            + internal loop for notifications
                 + add script node block time (from audiocontext)
-                - add sample offset time from script node block time
+                + add sample offset time from script node block time
             
     */
 

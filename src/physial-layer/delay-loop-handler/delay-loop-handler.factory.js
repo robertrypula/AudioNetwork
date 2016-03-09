@@ -4,50 +4,51 @@ var DelayLoopHandler = (function () {
     _DelayLoopHandler.$inject = [];
 
     function _DelayLoopHandler() {
-        var DLH;
+        var
+            DLH,
+            RX_EXTRA_DELAY = 0.05, // [sec]
+            DELAY_LOOP_RESOLUTION = 4 // [ms]
+        ;
 
         DLH = function (rxConstellationDiagram, rxHandler) {
-            this.$$delay = 1.0;
             this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
             this.$$rxHandler = rxHandler;
-
-            // console.log(this.$$rxConstellationDiagram);
-
-            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), 400);
+            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), DELAY_LOOP_RESOLUTION);
         };
 
         DLH.prototype.$$intervalHandler = function () {
-            var 
+            var
                 currentTime = Audio.getCurrentTime(),
-                item,
-                i
+                removedCount = 0,
+                item, i
             ;
-          
-            if (this.$$delayedData.length > 0) {
-                console.log('-----------------');
-            }
-
 
             for (i = 0; i < this.$$delayedData.length; i++) {
                 item = this.$$delayedData[i];
 
-                DLH.prototype.$$handle(
-                    item.channelIndex, 
-                    item.carrierDetail, 
-                    item.time
-                );
+                if (item.time < (currentTime - RX_EXTRA_DELAY)) {
+                    this.$$handle(
+                        item.channelIndex,
+                        item.carrierDetail,
+                        item.time
+                    );
+                    removedCount++;
+                } else {
+                    break;
+                }
             }
 
             /*
-            this.$$delayedData.length = 0;
+            // TODO enable if needed
+            if (console && removedCount > 1) {
+                console.log('Delay loop warning - processed more than one rx item: ' + removedCount);
+            }
             */
 
-            // this.$$delayedData.splice(0, 1);
-            //  x      x      x      x
-            //  . . . . . . . . . . . .
-
-            // console.log(':::::::::  ' + Audio.getCurrentTime());
+            if (removedCount > 0) {
+                this.$$delayedData.splice(0, removedCount);
+            }
         };
 
         DLH.prototype.handle = function (channelIndex, carrierDetail, time) {
@@ -56,8 +57,6 @@ var DelayLoopHandler = (function () {
                 carrierDetail: carrierDetail,
                 time: time
             });
-
-            
         };
 
         DLH.prototype.$$handle = function (channelIndex, carrierDetail, time) {
@@ -86,12 +85,12 @@ var DelayLoopHandler = (function () {
             }
 
             if (this.$$rxHandler.callback) {
-                this.$$rxHandler.callback(channelIndex, carrierDetail, time);
+                this.$$rxHandler.callback(channelIndex, carrierDetail, Audio.getCurrentTime());
             }
         };
 
         DLH.prototype.destroy = function () {
-
+            clearInterval(this.$$intervalId);
         };
 
         return DLH;

@@ -56,7 +56,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         rx: {
             bufferSize: 16 * 1024,
             channel: rxChannel,
-            notificationPerSecond: 5, // default: 20
+            notificationPerSecond: 25, // default: 20
             dftTimeSpan: dftTimeSpan, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
@@ -140,7 +140,7 @@ function destroy() {
 }
 
 function receive(channelIndex, carrierDetail, time) {
-    var i, elementPower, elementPhase;
+    var i, elementPower, elementPhase, cd;
 
     // console.log(time);   // TODO remove me
 
@@ -148,8 +148,12 @@ function receive(channelIndex, carrierDetail, time) {
         elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);
         elementPhase = document.getElementById('rx-phase-' + channelIndex + '-' + i);
 
-        elementPower.innerHTML = Math.round(carrierDetail[i].powerDecibel);
-        elementPhase.innerHTML = Math.round(carrierDetail[i].phase * 360);
+        cd = carrierDetail[i];
+        elementPower.innerHTML = Math.round(cd.powerDecibel);
+        elementPhase.innerHTML = (
+            Math.round(cd.phase * 360) + ' / ' +
+            Math.round(cd.phase * 100) / 100
+        );
     }
 }
 
@@ -269,6 +273,7 @@ function loadRecordedAudio() {
         document.getElementById('recorded-audio-url').value,
         function () {
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            anpl.outputRecordedAudioEnable();
         },
         function () {
             alert('Error');

@@ -1,5 +1,3 @@
-var blockBeginTimePrevious = 0;      // TODO remove me
-
 var ChannelReceiveManager = (function () {
     'use strict';
 
@@ -71,15 +69,18 @@ var ChannelReceiveManager = (function () {
             ;
 
             // TODO remove me
-            console.log(
-                'RX BLOCK DELTA: time = ' + 
-                (blockBeginTime - blockBeginTimePrevious) + 
-                ', samples = ' + 
-                Math.round(-(this.$$bufferSize) + (blockBeginTime - blockBeginTimePrevious) * Audio.getSampleRate())
-            );
-            blockBeginTimePrevious = blockBeginTime;
-            // --
+            /*
+            var blockBeginTimePrevious = 0;      // this var goes to global scope
 
+            console.log(
+                '[[RX BLOCK]] ' +
+                'beginTime = ' + (blockBeginTime) + ', ' +
+                'delta = ' + (blockBeginTime - blockBeginTimePrevious) + ', ' +
+                'samples = ' + Math.round(-(this.$$bufferSize) + (blockBeginTime - blockBeginTimePrevious) * Audio.getSampleRate())
+            );
+
+            blockBeginTimePrevious = blockBeginTime;
+            */
 
             for (sampleNumberInBlock = 0; sampleNumberInBlock < inputBuffer.length; sampleNumberInBlock++) {
                 sample = inputData[sampleNumberInBlock];
