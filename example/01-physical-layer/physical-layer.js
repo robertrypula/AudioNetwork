@@ -75,9 +75,6 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     });
 
     anpl.rx(receive);
-    document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
-    document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
-    document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
     initializeHtml(txChannel, rxChannel);
 }
 
@@ -102,10 +99,23 @@ function generateHtmlForChannel(channel, id) {
             element.innerHTML = element.innerHTML + html;
         }
     }
+
+    if (id === 'tx') {
+        for (i = 0; i < channel.length; i++) {
+            for (j = 0; j < channel[i].ofdmSize; j++) {
+                element = document.getElementById('tx-amplitude-input-' + i + '-' + j);
+                element.value = Math.floor(1000 / channel[i].ofdmSize) / 1000;
+            }
+        }
+    }
 }
 
 function initializeHtml(tx, rx) {
     var fieldType, i;
+
+    document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
+    document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
+    document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
 
     fieldType = [
         'frequency',
@@ -139,7 +149,10 @@ function destroy() {
 }
 
 function receive(channelIndex, carrierDetail, time) {
-    var i, elementPower, elementPhase, cd;
+    var
+        pskSize = parseInt(document.getElementById('rx-sequence-psk-size-' + channelIndex).value),
+        i, elementPower, elementPhase, cd
+    ;
 
     // console.log(time);   // TODO remove me
 
