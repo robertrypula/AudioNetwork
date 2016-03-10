@@ -251,7 +251,7 @@
                         <b>PSK symbol size:</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="tx-sequence-psk-size-[[ channelIndex ]]" value="4" />
+                        <input type="number" id="tx-psk-size-[[ channelIndex ]]" value="4" />
                     </div>
                 </div>
 
@@ -266,7 +266,7 @@
                             id="tx-sequence-data-[[ channelIndex ]]" 
                             value=""
                             >0 1 2 3 3 2 1 0</textarea>
-                        <a href="javascript:void(0)" onClick="transmitSequence([[ channelIndex ]])">Send sequence</a>
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]])">Send sequence</a>
                     </div>
                 </div>
 
@@ -345,10 +345,19 @@
 
                 <div class="row">
                     <div class="col-6">
-                        <b>PSK symbol size:</b>
+                        <b>PSK symbol size</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="rx-sequence-psk-size-[[ channelIndex ]]" value="4" />
+                        <input type="number" id="rx-psk-size-[[ channelIndex ]]" value="4" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Power threshold [dB]</b>
+                    </div>
+                    <div class="col-6">
+                        <input type="number" id="rx-power-threshold-[[ channelIndex ]]" value="-25" />
                     </div>
                 </div>
 
@@ -376,7 +385,15 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <b>Phase [deg / unit]</b>
+                        <b>Symbol</b>
+                    </div>
+                    <div class="col-6">
+                        <span id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <b>Phase [deg, unit]</b>
                     </div>
                     <div class="col-6">
                         <span id="rx-phase-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>

@@ -150,8 +150,9 @@ function destroy() {
 
 function receive(channelIndex, carrierDetail, time) {
     var
-        pskSize = parseInt(document.getElementById('rx-sequence-psk-size-' + channelIndex).value),
-        i, elementPower, elementPhase, cd
+        pskSize = parseInt(document.getElementById('rx-psk-size-' + channelIndex).value),
+        powerThreshold = parseInt(document.getElementById('rx-power-threshold-' + channelIndex).value),
+        i, elementPower, elementPhase, elementSymbol, cd, symbol
     ;
 
     // console.log(time);   // TODO remove me
@@ -159,22 +160,31 @@ function receive(channelIndex, carrierDetail, time) {
     for (i = 0; i < carrierDetail.length; i++) {
         elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);
         elementPhase = document.getElementById('rx-phase-' + channelIndex + '-' + i);
+        elementSymbol = document.getElementById('rx-symbol-' + channelIndex + '-' + i);
 
         cd = carrierDetail[i];
+
+        if (cd.powerDecibel >= powerThreshold) {
+            symbol = Math.round(cd.phase * pskSize) % pskSize;
+        } else {
+            symbol = null;
+        }
+
+        elementSymbol.innerHTML = symbol === null ? '-' : symbol;
         elementPower.innerHTML = Math.round(cd.powerDecibel);
         elementPhase.innerHTML = (
-            Math.round(cd.phase * 360) + ' / ' +
+            Math.round(cd.phase * 360) + ', ' +
             Math.round(cd.phase * 100) / 100
         );
     }
 }
 
-function transmitSequence(channelIndex) {
+function transmit(channelIndex) {
     var
         symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
         sequenceData = document.getElementById('tx-sequence-data-' + channelIndex).value + '',
-        pskSize = parseInt(document.getElementById('tx-sequence-psk-size-' + channelIndex).value),
+        pskSize = parseInt(document.getElementById('tx-psk-size-' + channelIndex).value),
         ofdmBurstList = sequenceData.split(' '),
         ofdmBurstSymbolList, ofdmBurstSymbol,
         amplitude, data, dataFrame, mute, i, j

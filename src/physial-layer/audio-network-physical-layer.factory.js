@@ -36,8 +36,8 @@ var AudioNetworkPhysicalLayer = (function () {
 
             + add symbol config to rx
             + prefill amplitude value basing on ofdm size at channel tx
+            + add symbol detection to rx
             - add auto tuning feature with ability to align phase offset
-            - add symbol detection to rx
 
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
