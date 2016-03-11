@@ -42,8 +42,7 @@ function initializeHtml() {
 
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {
     $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex);
-
-    // TODO add text area update
+    $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex);
 }
 
 function uiRefresh() {
@@ -84,6 +83,25 @@ function $$generateHtmlForChannel(channel, rxTx) {
             element.innerHTML = element.innerHTML + html;
         }
     }
+}
+
+function $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex) {
+    var pskSize, element, channelOfdmSize, i, j, dataFrameList, ofdmList;
+
+    pskSize = parseInt(document.getElementById('tx-psk-size-' + channelIndex).value);
+    element = document.getElementById('tx-data-frame-' + channelIndex);
+    channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
+    dataFrameList = [];
+
+    for (i = 0; i < pskSize; i++) {
+        ofdmList = [];
+        for (j = 0; j < channelOfdmSize; j++) {
+            ofdmList.push(i);
+        }
+        dataFrameList.push(ofdmList.join('.'));
+    }
+
+    element.value = dataFrameList.join(' ');
 }
 
 function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {

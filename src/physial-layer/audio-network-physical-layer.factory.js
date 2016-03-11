@@ -37,14 +37,14 @@ var AudioNetworkPhysicalLayer = (function () {
             + add symbol config to rx
             + prefill amplitude value basing on ofdm size at channel tx
             + add symbol detection to rx
-            + move example code relatd to html generation to separate file with comment
+            + move example code related to html generation to separate file with comment
             + add buttons for symbols (TX)
             + add squares with symbol number (RX)
             - update sequence textarea after pskSize change
             - take average of symbol set RX
             - each frame will change one or two zero symbol to fine tune phase offset (add checkbox for that feature)
             - add auto tuning feature with ability to align phase offset
-                - separete class where we can pass data from rx
+                - separate class where we can pass data from rx
 
             - rename delay-loop-handler
             - refactor DOM helpers (move to service)
