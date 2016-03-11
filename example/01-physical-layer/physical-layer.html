@@ -255,7 +255,7 @@
                             type="number"
                             id="tx-psk-size-[[ channelIndex ]]"
                             value="4"
-                            onChange="refreshHtmlForSymbolButton('tx', [[ channelIndex ]])"
+                            onChange="uiRefreshOnPskSizeChange('tx', [[ channelIndex ]])"
                             />
                     </div>
                 </div>
@@ -268,7 +268,7 @@
                         <textarea
                             class="data-frame-textarea"
                             id="tx-data-frame-[[ channelIndex ]]"
-                            >0 1 2 3 3 2 1 0</textarea>
+                            ></textarea>
                         <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]])">Send frame</a>
                     </div>
                 </div>
@@ -363,7 +363,7 @@
                         <input
                             type="number"
                             id="rx-psk-size-[[ channelIndex ]]"
-                            onChange="refreshHtmlForSymbolButton('rx', [[ channelIndex ]])"
+                            onChange="uiRefreshOnPskSizeChange('rx', [[ channelIndex ]])"
                             value="4"
                             />
                     </div>
@@ -462,6 +462,7 @@
             <!-- ofdm end -->
         </script>
 
+        <script src="physical-layer-template-util.js"></script>
         <script src="physical-layer.js"></script>
     </body>
 </html>

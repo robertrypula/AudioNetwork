@@ -1,3 +1,5 @@
+'use strict';
+
 var anpl = null;
 
 function onLoad() {
@@ -75,114 +77,9 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     });
 
     anpl.rx(receive);
-    initializeHtml(txChannel, rxChannel);
+    initializeHtml();
 }
 
-function generateHtml(tx, rx) {
-    generateHtmlForChannel(tx, 'tx');
-    generateHtmlForChannel(rx, 'rx');
-}
-
-function generateHtmlForChannel(channel, id) {
-    var i, j, html, element;
-
-    for (i = 0; i < channel.length; i++) {
-        html = document.getElementById('template-' + id + '-channel').innerHTML;
-        html = html.replace(/\[\[ channelIndex ]]/g, i + '');
-        element = document.getElementById(id + '-channel-container');
-        element.innerHTML = element.innerHTML + html;
-        for (j = 0; j < channel[i].ofdmSize; j++) {
-            html = document.getElementById('template-' + id + '-channel-ofdm').innerHTML;
-            html = html.replace(/\[\[ channelIndex ]]/g, i + '');
-            html = html.replace(/\[\[ ofdmIndex ]]/g, j + '');
-            element = document.getElementById(id + '-channel-' + i + '-ofdm-container');
-            element.innerHTML = element.innerHTML + html;
-        }
-    }
-
-    if (id === 'tx') {
-        // amplitude value setup
-        for (i = 0; i < channel.length; i++) {
-            for (j = 0; j < channel[i].ofdmSize; j++) {
-                element = document.getElementById('tx-amplitude-input-' + i + '-' + j);
-                element.value = Math.floor(1000 / channel[i].ofdmSize) / 1000;
-            }
-        }
-    }
-}
-
-function refreshHtmlForSymbolButton(rxTx, channelIndex) {
-    var i, j, k, element, pskSize, dataFrame, dataFrameList, channelOfdmSize;
-
-    channelOfdmSize = anpl['get' + (rxTx === 'rx' ? 'Rx' : 'Tx') + 'ChannelOfdmSize'](channelIndex);
-    pskSize = parseInt(document.getElementById(rxTx + '-psk-size-' + channelIndex).value);
-
-    for (i = 0; i < channelOfdmSize; i++) {
-        element = document.getElementById(rxTx + '-symbol-' + channelIndex + '-' + i);
-        element.innerHTML = '';
-        for (j = 0; j < pskSize; j++) {
-            if (rxTx === 'tx') {
-                dataFrameList = [];
-                for (k = 0; k < channelOfdmSize; k++) {
-                    dataFrameList.push(i === k ? j : '-');
-                }
-                dataFrame = dataFrameList.join('.');
-                element.innerHTML += (
-                    '<a ' +
-                    '    href="javascript:void(0)" ' +
-                    '    onClick="transmitDataFrame(' + channelIndex + ', \'' + dataFrame + '\')" ' +
-                    '    >' +
-                    '   ' + j +
-                    '</a>'
-                );
-            } else {
-                element.innerHTML += (
-                    '<span ' +
-                    '    id="rx-symbol-' + channelIndex + '-' + i + '-' + j + '" '+
-                    '    >' +
-                    '   ' + j +
-                    '</span>'
-                );
-            }
-        }
-    }
-}
-
-function initializeHtml(tx, rx) {
-    var fieldType, i;
-
-    document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
-    document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
-    document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
-
-    fieldType = [
-        'frequency',
-        'phase-correction'
-    ];
-    for (i = 0; i < fieldType.length; i++) {
-        initializeHtmlForChannel(tx, 'tx', fieldType[i]);
-        initializeHtmlForChannel(rx, 'rx', fieldType[i]);
-    }
-
-    for (i = 0; i < anpl.getTxChannelSize(); i++) {
-        refreshHtmlForSymbolButton('tx', i);
-    }
-
-    for (i = 0; i < anpl.getRxChannelSize(); i++) {
-        refreshHtmlForSymbolButton('rx', i);
-    }
-}
-
-function initializeHtmlForChannel(channel, id, fieldType) {
-    var i, j;
-
-    for (i = 0; i < channel.length; i++) {
-        for (j = 0; j < channel[i].ofdmSize; j++) {
-            uiRefresh(fieldType, true, id, i, j);
-            uiRefresh(fieldType, false, id, i, j);
-        }
-    }
-}
 
 function destroy() {
     if (anpl) {
@@ -280,25 +177,6 @@ function transmitDataFrame(channelIndex, dataFrame) {
     }
 }
 
-function uiRefresh(type, isLabel, rxTx, channelIndex, ofdmIndex) {
-    var elementId, element, value, methodSubName;
-
-    elementId = rxTx + '-' + type + '-' + (isLabel ? 'label-' : 'input-') + channelIndex + '-' + ofdmIndex;
-    element = document.getElementById(elementId);
-    methodSubName = rxTx === 'tx' ? 'Tx' : 'Rx';
-
-    switch (type) {
-        case 'frequency':
-            value = anpl['get' + methodSubName + 'Frequency'](channelIndex, ofdmIndex);
-            break;
-        case 'phase-correction':
-            value = anpl['get' + methodSubName + 'PhaseCorrection'](channelIndex, ofdmIndex);
-            break;
-    }
-    
-    element[isLabel ? 'innerHTML' : 'value'] = value;
-}
-
 function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
     var elementId, newFrequency;
 
@@ -311,7 +189,7 @@ function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
         anpl.setRxFrequency(channelIndex, ofdmIndex, newFrequency);
     }
 
-    uiRefresh('frequency', true, rxTx, channelIndex, ofdmIndex);
+    uiRefresh();
 }
 
 function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
@@ -326,10 +204,12 @@ function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
         anpl.setRxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
     }
 
-    uiRefresh('phase-correction', true, rxTx, channelIndex, ofdmIndex);
+    uiRefresh();
 }
 
 function rxInput(type) {
+    var refresh = true;
+
     switch (type) {
         case 'mic':
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE);
@@ -339,7 +219,12 @@ function rxInput(type) {
             break;
         case 'rec':
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
-            break;
+        default:
+            refresh = false;
+    }
+
+    if (refresh) {
+        uiRefresh();
     }
 }
 
@@ -349,6 +234,7 @@ function loadRecordedAudio() {
         function () {
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
             anpl.outputRecordedAudioEnable();
+            uiRefresh();
         },
         function () {
             alert('Error');
@@ -357,17 +243,35 @@ function loadRecordedAudio() {
 }
 
 function output(type, state) {
-    var methodSuffix = state ? 'Enable' : 'Disable';
+    var refresh = true;
 
     switch (type) {
         case 'tx':
-            anpl['outputTx' + methodSuffix]();
+            if (state) {
+                anpl.outputTxEnable();
+            } else {
+                anpl.outputTxDisable();
+            }
             break;
         case 'mic':
-            anpl['outputMicrophone' + methodSuffix]();
+            if (state) {
+                anpl.outputMicrophoneEnable();
+            } else {
+                anpl.outputMicrophoneDisable();
+            }
             break;
         case 'rec':
-            anpl['outputRecordedAudio' + methodSuffix]();
+            if (state) {
+                anpl.outputRecordedAudioEnable();
+            } else {
+                anpl.outputRecordedAudioDisable();
+            }
             break;
+        default:
+            refresh = false;
+    }
+
+    if (refresh) {
+        uiRefresh();
     }
 }
