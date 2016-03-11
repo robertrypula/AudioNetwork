@@ -275,7 +275,7 @@ function transmitDataFrame(channelIndex, dataFrame) {
         dataFrameParsed.push(data);
     }
     
-    for (i = 0; i < dataFrame.length; i++) {
+    for (i = 0; i < dataFrameParsed.length; i++) {
         anpl.tx(channelIndex, dataFrameParsed[i]);
     }
 }
