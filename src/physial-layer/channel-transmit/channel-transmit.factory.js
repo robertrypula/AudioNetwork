@@ -27,8 +27,12 @@ var ChannelTransmit = (function () {
             }
         };
 
+        CT.prototype.getOfdmSize = function () {
+            return this.carrierGenerate.length;
+        };
+
         CT.prototype.$$checkOfdmIndex = function (ofdmIndex) {
-            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierGenerate.length) {
                 throw 'OFDM index out of range: ' + ofdmIndex;
             }
         };
@@ -65,7 +69,6 @@ var ChannelTransmit = (function () {
         CT.prototype.configure = function (configuration) {
             var i, cg, samplePerPeriod, frequency;
 
-            this.carrierGenerate.length = 0;
             for (i = 0; i < configuration.ofdmSize; i++) {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
                 samplePerPeriod = Audio.getSampleRate() / frequency;

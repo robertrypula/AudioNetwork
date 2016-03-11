@@ -73,7 +73,37 @@ h1 {
     border: 1px solid #eee;
 }
 
-.sequence-textarea {
+.data-frame-textarea {
     width: 500px;
-    height: 80px;
+    height: 30px;
+}
+
+.rx-symbol span {
+    display: inline-block;
+    padding: 5px;
+    margin: 0 3px 3px 0;
+    border: 1px solid lightgray;
+    color: gray;
+}
+
+.rx-symbol span.active {
+    font-weight: bold;
+    border: 1px solid black;
+    color: black;
+    background-color: yellow;
+}
+
+.tx-symbol a {
+    display: inline-block;
+    padding: 5px;
+    margin: 0 3px 3px 0;
+    border: 1px solid lightgray;
+    color: gray;
+}
+
+.tx-symbol a:hover {
+    font-weight: bold;
+    border: 1px solid black;
+    color: black;
+    background-color: yellow;
 }

@@ -251,22 +251,25 @@
                         <b>PSK symbol size:</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="tx-psk-size-[[ channelIndex ]]" value="4" />
+                        <input
+                            type="number"
+                            id="tx-psk-size-[[ channelIndex ]]"
+                            value="4"
+                            onChange="refreshHtmlForSymbolButton('tx', [[ channelIndex ]])"
+                            />
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-6">
-                        <b>Send sequence</b>
+                        <b>Send frame</b>
                     </div>
                     <div class="col-6">
                         <textarea
-                            type="text" 
-                            class="sequence-textarea"
-                            id="tx-sequence-data-[[ channelIndex ]]" 
-                            value=""
+                            class="data-frame-textarea"
+                            id="tx-data-frame-[[ channelIndex ]]"
                             >0 1 2 3 3 2 1 0</textarea>
-                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]])">Send sequence</a>
+                        <a href="javascript:void(0)" onClick="transmit([[ channelIndex ]])">Send frame</a>
                     </div>
                 </div>
 
@@ -330,6 +333,15 @@
                             />
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <b>Symbol send</b>
+                    </div>
+                    <div class="col-6">
+                        <div class="tx-symbol" id="tx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
+                    </div>
+                </div>
             </div>
             <!-- ofdm end -->
         </script>
@@ -348,7 +360,12 @@
                         <b>PSK symbol size</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="rx-psk-size-[[ channelIndex ]]" value="4" />
+                        <input
+                            type="number"
+                            id="rx-psk-size-[[ channelIndex ]]"
+                            onChange="refreshHtmlForSymbolButton('rx', [[ channelIndex ]])"
+                            value="4"
+                            />
                     </div>
                 </div>
 
@@ -383,14 +400,16 @@
                         ></div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-6">
-                        <b>Symbol</b>
+                        <b>Symbol received</b>
                     </div>
                     <div class="col-6">
-                        <span id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                        <div class="rx-symbol" id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-6">
                         <b>Phase [deg, unit]</b>

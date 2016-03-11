@@ -29,6 +29,10 @@ var ChannelTransmitManager = (function () {
             return this.scriptNode;
         };
 
+        CTM.prototype.getChannelSize = function () {
+            return this.channelTransmit.length;
+        };
+
         CTM.prototype.getChannel = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.channelTransmit.length) {
                 throw 'Channel index out of range: ' + channelIndex;

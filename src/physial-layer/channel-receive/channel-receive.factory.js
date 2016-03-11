@@ -20,7 +20,6 @@ var ChannelReceive = (function () {
         CR.prototype.configure = function (configuration) {
             var i, cr, samplePerPeriod, frequency;
 
-            this.carrierRecovery.length = 0;
             for (i = 0; i < configuration.ofdmSize; i++) {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
                 samplePerPeriod = Audio.getSampleRate() / frequency;
@@ -35,9 +34,13 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.$$checkOfdmIndex = function (ofdmIndex) {
-            if (ofdmIndex < 0 || ofdmIndex >= this.carrierFrequency.length) {
+            if (ofdmIndex < 0 || ofdmIndex >= this.carrierRecovery.length) {
                 throw 'OFDM index out of range: ' + ofdmIndex;
             }
+        };
+
+        CR.prototype.getOfdmSize = function () {
+            return this.carrierRecovery.length;
         };
 
         CR.prototype.getRxPhaseCorrection = function (ofdmIndex) {

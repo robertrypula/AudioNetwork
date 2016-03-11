@@ -38,6 +38,11 @@ var AudioNetworkPhysicalLayer = (function () {
             + prefill amplitude value basing on ofdm size at channel tx
             + add symbol detection to rx
             - add auto tuning feature with ability to align phase offset
+                - separete class where we can pass data from rx
+            + add buttons for symbols (TX)
+            + add squares with symbol number (RX)
+            - take average of symbol set RX
+            - each frame will change one or two zero symbol to fine tune phase offset
 
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
@@ -386,6 +391,22 @@ var AudioNetworkPhysicalLayer = (function () {
                 .getChannel(channelIndex)
                 .setTxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
+        };
+
+        ANPL.prototype.getTxChannelSize = function () {
+            return this.$$channelTransmitManager.getChannelSize();
+        };
+
+        ANPL.prototype.getRxChannelSize = function () {
+            return this.$$channelReceiveManager.getChannelSize();
+        };
+
+        ANPL.prototype.getTxChannelOfdmSize = function (channelIndex) {
+            return this.$$channelTransmitManager.getChannel(channelIndex).getOfdmSize();
+        };
+
+        ANPL.prototype.getRxChannelOfdmSize = function (channelIndex) {
+            return this.$$channelReceiveManager.getChannel(channelIndex).getOfdmSize();
         };
 
         return ANPL;

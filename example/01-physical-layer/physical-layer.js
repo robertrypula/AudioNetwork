@@ -101,10 +101,48 @@ function generateHtmlForChannel(channel, id) {
     }
 
     if (id === 'tx') {
+        // amplitude value setup
         for (i = 0; i < channel.length; i++) {
             for (j = 0; j < channel[i].ofdmSize; j++) {
                 element = document.getElementById('tx-amplitude-input-' + i + '-' + j);
                 element.value = Math.floor(1000 / channel[i].ofdmSize) / 1000;
+            }
+        }
+    }
+}
+
+function refreshHtmlForSymbolButton(rxTx, channelIndex) {
+    var i, j, k, element, pskSize, dataFrame, dataFrameList, channelOfdmSize;
+
+    channelOfdmSize = anpl['get' + (rxTx === 'rx' ? 'Rx' : 'Tx') + 'ChannelOfdmSize'](channelIndex);
+    pskSize = parseInt(document.getElementById(rxTx + '-psk-size-' + channelIndex).value);
+
+    for (i = 0; i < channelOfdmSize; i++) {
+        element = document.getElementById(rxTx + '-symbol-' + channelIndex + '-' + i);
+        element.innerHTML = '';
+        for (j = 0; j < pskSize; j++) {
+            if (rxTx === 'tx') {
+                dataFrameList = [];
+                for (k = 0; k < channelOfdmSize; k++) {
+                    dataFrameList.push(i === k ? j : '-');
+                }
+                dataFrame = dataFrameList.join('.');
+                element.innerHTML += (
+                    '<a ' +
+                    '    href="javascript:void(0)" ' +
+                    '    onClick="transmitDataFrame(' + channelIndex + ', \'' + dataFrame + '\')" ' +
+                    '    >' +
+                    '   ' + j +
+                    '</a>'
+                );
+            } else {
+                element.innerHTML += (
+                    '<span ' +
+                    '    id="rx-symbol-' + channelIndex + '-' + i + '-' + j + '" '+
+                    '    >' +
+                    '   ' + j +
+                    '</span>'
+                );
             }
         }
     }
@@ -126,6 +164,13 @@ function initializeHtml(tx, rx) {
         initializeHtmlForChannel(rx, 'rx', fieldType[i]);
     }
 
+    for (i = 0; i < anpl.getTxChannelSize(); i++) {
+        refreshHtmlForSymbolButton('tx', i);
+    }
+
+    for (i = 0; i < anpl.getRxChannelSize(); i++) {
+        refreshHtmlForSymbolButton('rx', i);
+    }
 }
 
 function initializeHtmlForChannel(channel, id, fieldType) {
@@ -152,7 +197,7 @@ function receive(channelIndex, carrierDetail, time) {
     var
         pskSize = parseInt(document.getElementById('rx-psk-size-' + channelIndex).value),
         powerThreshold = parseInt(document.getElementById('rx-power-threshold-' + channelIndex).value),
-        i, elementPower, elementPhase, elementSymbol, cd, symbol
+        i, j, elementPower, elementPhase, elementSymbolContainer, elementSymbolList, cd, symbol
     ;
 
     // console.log(time);   // TODO remove me
@@ -160,7 +205,8 @@ function receive(channelIndex, carrierDetail, time) {
     for (i = 0; i < carrierDetail.length; i++) {
         elementPower = document.getElementById('rx-power-' + channelIndex + '-' + i);
         elementPhase = document.getElementById('rx-phase-' + channelIndex + '-' + i);
-        elementSymbol = document.getElementById('rx-symbol-' + channelIndex + '-' + i);
+        elementSymbolContainer = document.getElementById('rx-symbol-' + channelIndex + '-' + i);
+        elementSymbolList = document.querySelectorAll('#rx-symbol-' + channelIndex + '-' + i + ' > span');
 
         cd = carrierDetail[i];
 
@@ -170,7 +216,9 @@ function receive(channelIndex, carrierDetail, time) {
             symbol = null;
         }
 
-        elementSymbol.innerHTML = symbol === null ? '-' : symbol;
+        for (j = 0; j < elementSymbolList.length; j++) {
+            elementSymbolList[j].className = j === symbol ? 'active' : '';
+        }
         elementPower.innerHTML = Math.round(cd.powerDecibel);
         elementPhase.innerHTML = (
             Math.round(cd.phase * 360) + ', ' +
@@ -180,17 +228,22 @@ function receive(channelIndex, carrierDetail, time) {
 }
 
 function transmit(channelIndex) {
+    var dataFrame = document.getElementById('tx-data-frame-' + channelIndex).value + '';
+
+    transmitDataFrame(channelIndex, dataFrame);
+}
+
+function transmitDataFrame(channelIndex, dataFrame) {
     var
         symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
         guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
-        sequenceData = document.getElementById('tx-sequence-data-' + channelIndex).value + '',
         pskSize = parseInt(document.getElementById('tx-psk-size-' + channelIndex).value),
-        ofdmBurstList = sequenceData.split(' '),
+        ofdmBurstList = dataFrame.split(' '),
         ofdmBurstSymbolList, ofdmBurstSymbol,
-        amplitude, data, dataFrame, mute, i, j
+        amplitude, data, dataFrameParsed, mute, i, j
     ;
 
-    dataFrame = [];
+    dataFrameParsed = [];
     for (i = 0; i < ofdmBurstList.length; i++) {
         ofdmBurstSymbolList = ofdmBurstList[i].split('.');
 
@@ -206,7 +259,7 @@ function transmit(channelIndex) {
                 phase: ofdmBurstSymbol / pskSize
             });
         }
-        dataFrame.push(data);
+        dataFrameParsed.push(data);
 
         if (guardInterval === 0) {
             continue;
@@ -219,11 +272,11 @@ function transmit(channelIndex) {
                 duration: guardInterval
             });
         }
-        dataFrame.push(data);
+        dataFrameParsed.push(data);
     }
     
     for (i = 0; i < dataFrame.length; i++) {
-        anpl.tx(channelIndex, dataFrame[i]);
+        anpl.tx(channelIndex, dataFrameParsed[i]);
     }
 }
 
