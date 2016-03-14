@@ -25,7 +25,7 @@ function reinitialize() {
     });
 
     for (i = 0; i < txRx.length; i++) {
-        value = document.getElementById(txRx[i].id + '-channel').value;
+        value = getStrById(txRx[i].id + '-channel');
         channelDataList = value === '' ? [] : (value).split(' ');
         for (j = 0; j < channelDataList.length; j++) {
             channelData = channelDataList[j].split('-');
@@ -39,7 +39,7 @@ function reinitialize() {
 
     rxSpectrumVisible = !!document.getElementById('rx-spectrum-visible').checked;
     rxConstellationDiagramVisible = !!document.getElementById('rx-constellation-diagram-visible').checked;
-    dftTimeSpan = parseFloat(document.getElementById('rx-dft-time-span').value);
+    dftTimeSpan = getFloatById('rx-dft-time-span');
 
     destroy();
 
@@ -92,8 +92,8 @@ function destroy() {
 
 function receive(channelIndex, carrierDetail, time) {
     var
-        pskSize = parseInt(document.getElementById('rx-psk-size-' + channelIndex).value),
-        powerThreshold = parseInt(document.getElementById('rx-power-threshold-' + channelIndex).value),
+        pskSize = getIntById('rx-psk-size-' + channelIndex),
+        powerThreshold = getIntById('rx-power-threshold-' + channelIndex),
         i, j, elementPower, elementPhase, elementSymbolContainer, elementSymbolList, cd, symbol
     ;
 
@@ -125,16 +125,16 @@ function receive(channelIndex, carrierDetail, time) {
 }
 
 function transmit(channelIndex) {
-    var dataFrame = document.getElementById('tx-data-frame-' + channelIndex).value + '';
+    var dataFrame = getStrById('tx-data-frame-' + channelIndex);
 
     transmitDataFrame(channelIndex, dataFrame);
 }
 
 function transmitDataFrame(channelIndex, dataFrame) {
     var
-        symbolDuration = parseFloat(document.getElementById('symbol-duration').value) / 1000,
-        guardInterval = parseFloat(document.getElementById('guard-interval').value) / 1000,
-        pskSize = parseInt(document.getElementById('tx-psk-size-' + channelIndex).value),
+        symbolDuration = getFloatById('symbol-duration') / 1000,
+        guardInterval = getFloatById('guard-interval') / 1000,
+        pskSize = getIntById('tx-psk-size-' + channelIndex),
         ofdmBurstList = dataFrame.split(' '),
         ofdmBurstSymbolList, ofdmBurstSymbol,
         amplitude, data, dataFrameParsed, mute, i, j
@@ -148,7 +148,7 @@ function transmitDataFrame(channelIndex, dataFrame) {
         for (j = 0; j < ofdmBurstSymbolList.length; j++) {
             mute = ofdmBurstSymbolList[j] === '-';
             ofdmBurstSymbol = mute ? 0 : parseInt(ofdmBurstSymbolList[j]) % pskSize;
-            amplitude = parseFloat(document.getElementById('tx-amplitude-input-' + channelIndex + '-' + j).value);
+            amplitude = getFloatById('tx-amplitude-input-' + channelIndex + '-' + j);
 
             data.push({
                 amplitude: mute ? 0 : amplitude,
@@ -181,7 +181,7 @@ function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
     var elementId, newFrequency;
 
     elementId = rxTx + '-frequency-input-' + channelIndex + '-' + ofdmIndex;
-    newFrequency = parseFloat(document.getElementById(elementId).value);
+    newFrequency = getFloatById(elementId);
     
     if (rxTx === 'tx') {
         anpl.setTxFrequency(channelIndex, ofdmIndex, newFrequency);
@@ -196,7 +196,7 @@ function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
     var elementId, newFrequency;
 
     elementId = rxTx + '-phase-correction-input-' + channelIndex + '-' + ofdmIndex;
-    newFrequency = parseFloat(document.getElementById(elementId).value);
+    newFrequency = getFloatById(elementId);
     
     if (rxTx === 'tx') {
         anpl.setTxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
@@ -230,7 +230,7 @@ function rxInput(type) {
 
 function loadRecordedAudio() {
     anpl.loadRecordedAudio(
-        document.getElementById('recorded-audio-url').value,
+        getStrById('recorded-audio-url'),
         function () {
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
             anpl.outputRecordedAudioEnable();

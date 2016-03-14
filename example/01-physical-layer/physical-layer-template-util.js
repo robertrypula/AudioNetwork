@@ -1,7 +1,21 @@
 'use strict';
 
-// Madness starts below... Don't ask me why I wanted to 
-// keep examples framework-free (like AngularJs) :)
+/*
+    Madness starts below... Don't ask me why I wanted to
+    keep examples framework-free (like AngularJs) :)
+*/
+
+function getFloatById(elementId) {
+    return parseFloat(document.getElementById(elementId).value);
+}
+
+function getIntById(elementId) {
+    return parseInt(document.getElementById(elementId).value);
+}
+
+function getStrById(elementId) {
+    return document.getElementById(elementId).value + '';
+}
 
 function generateHtml(tx, rx) {
     $$generateHtmlForChannel(tx, 'tx');
@@ -88,7 +102,7 @@ function $$generateHtmlForChannel(channel, rxTx) {
 function $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex) {
     var pskSize, element, channelOfdmSize, i, j, dataFrameList, ofdmList;
 
-    pskSize = parseInt(document.getElementById('tx-psk-size-' + channelIndex).value);
+    pskSize = getIntById('tx-psk-size-' + channelIndex);
     element = document.getElementById('tx-data-frame-' + channelIndex);
     channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
     dataFrameList = [];
@@ -112,7 +126,7 @@ function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
     } else {
         channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
     }
-    pskSize = parseInt(document.getElementById(rxTx + '-psk-size-' + channelIndex).value);
+    pskSize = getIntById(rxTx + '-psk-size-' + channelIndex);
 
     for (i = 0; i < channelOfdmSize; i++) {
         element = document.getElementById(rxTx + '-symbol-' + channelIndex + '-' + i);
@@ -182,14 +196,14 @@ function $$loopChannelOfdm(rxTx, callback) {
 
     if (rxTx === 'rx') {
         for (i = 0; i < anpl.getRxChannelSize(); i++) {
-            pskSize = parseInt(document.getElementById(rxTx + '-psk-size-' + i).value);
+            pskSize = getIntById(rxTx + '-psk-size-' + i);
             for (j = 0; j < anpl.getRxChannelOfdmSize(i); j++) {
                 callback(i, j, pskSize);
             }
         }
     } else {
         for (i = 0; i < anpl.getTxChannelSize(); i++) {
-            pskSize = parseInt(document.getElementById(rxTx + '-psk-size-' + i).value);
+            pskSize = getIntById(rxTx + '-psk-size-' + i);
             for (j = 0; j < anpl.getTxChannelOfdmSize(i); j++) {
                 callback(i, j, pskSize);
             }
