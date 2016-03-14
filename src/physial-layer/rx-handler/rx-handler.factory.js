@@ -1,23 +1,24 @@
-var DelayLoopHandler = (function () {
+var RxHandler = (function () {
     'use strict';
 
-    _DelayLoopHandler.$inject = [];
+    _RxHandler.$inject = [];
 
-    function _DelayLoopHandler() {
+    function _RxHandler() {
         var
-            DLH,
+            RH,
             RX_EXTRA_DELAY = 0.05, // [sec]
-            DELAY_LOOP_RESOLUTION = 4 // [ms]
+            DELAY_LOOP_RESOLUTION = 8, // [ms]
+            DECIBEL_LIMIT = 40
         ;
 
-        DLH = function (rxConstellationDiagram, rxHandler) {
+        RH = function (rxConstellationDiagram, rxHandler) {
             this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
             this.$$rxHandler = rxHandler;
             this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), DELAY_LOOP_RESOLUTION);
         };
 
-        DLH.prototype.$$intervalHandler = function () {
+        RH.prototype.$$intervalHandler = function () {
             var
                 currentTime = Audio.getCurrentTime(),
                 removedCount = 0,
@@ -51,7 +52,7 @@ var DelayLoopHandler = (function () {
             }
         };
 
-        DLH.prototype.handle = function (channelIndex, carrierDetail, time) {
+        RH.prototype.handle = function (channelIndex, carrierDetail, time) {
             this.$$delayedData.push({
                 channelIndex: channelIndex,
                 carrierDetail: carrierDetail,
@@ -59,7 +60,7 @@ var DelayLoopHandler = (function () {
             });
         };
 
-        DLH.prototype.$$handle = function (channelIndex, carrierDetail, time) {
+        RH.prototype.$$handle = function (channelIndex, carrierDetail, time) {
             var i, cd, queue, powerNormalized;
 
             for (i = 0; i < carrierDetail.length; i++) {
@@ -74,7 +75,7 @@ var DelayLoopHandler = (function () {
                 }
 
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + 40) / 40;
+                powerNormalized = (cd.powerDecibel + DECIBEL_LIMIT) / DECIBEL_LIMIT;
                 powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                 if (queue.isFull()) {
                     queue.pop();
@@ -89,13 +90,13 @@ var DelayLoopHandler = (function () {
             }
         };
 
-        DLH.prototype.destroy = function () {
+        RH.prototype.destroy = function () {
             clearInterval(this.$$intervalId);
         };
 
-        return DLH;
+        return RH;
     }
 
-    return _DelayLoopHandler();        // TODO change it to dependency injection
+    return _RxHandler();        // TODO change it to dependency injection
 
 })();

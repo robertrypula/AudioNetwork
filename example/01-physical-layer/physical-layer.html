@@ -33,7 +33,7 @@
                         <input
                             type="text"
                             id="rx-dft-time-span"
-                            value="0.2"
+                            value="0.250"
                             />
                     </div>
                 </div>
@@ -77,12 +77,12 @@
                         <input
                             type="text"
                             id="rx-channel"
-                            value="1070-1-100"
+                            value="1070-1-16"
                             />
                         <input
                             type="text"
                             id="tx-channel"
-                            value="1070-1-100"
+                            value="1070-1-16"
                             />
                         <a href="javascript:void(0)" onClick="reinitialize()">Reinitialize</a>
                         <a href="javascript:void(0)" onClick="destroy()">Destroy</a>
@@ -96,7 +96,7 @@
                         </label>
                     </div>
                     <div class="col-6">
-                        <input type="text" id="symbol-duration" value="400" />
+                        <input type="text" id="symbol-duration" value="250" />
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@
                         </label>
                     </div>
                     <div class="col-6">
-                        <input type="text" id="guard-interval" value="200" />
+                        <input type="text" id="guard-interval" value="250" />
                     </div>
                 </div>
 
@@ -231,8 +231,8 @@
         <script src="../../src/physial-layer/channel-receive/channel-receive-builder.service.js"></script>
         <script src="../../src/physial-layer/carrier-generate/carrier-generate-builder.service.js"></script>
         <script src="../../src/physial-layer/analyser-chart/analyser-chart-builder.service.js"></script>
-        <script src="../../src/physial-layer/delay-loop-handler/delay-loop-handler.factory.js"></script>
-        <script src="../../src/physial-layer/delay-loop-handler/delay-loop-handler-builder.service.js"></script>
+        <script src="../../src/physial-layer/rx-handler/rx-handler.factory.js"></script>
+        <script src="../../src/physial-layer/rx-handler/rx-handler-builder.service.js"></script>
         <script src="../../src/physial-layer/audio-network-physical-layer.factory.js"></script>
         <script src="../../src/physial-layer/audio-network-physical-layer-configuration.service.js"></script>
         <!-- audio network END -->
@@ -374,7 +374,7 @@
                         <b>Power threshold [dB]</b>
                     </div>
                     <div class="col-6">
-                        <input type="number" id="rx-power-threshold-[[ channelIndex ]]" value="-25" />
+                        <input type="number" id="rx-power-threshold-[[ channelIndex ]]" value="-28" />
                     </div>
                 </div>
 

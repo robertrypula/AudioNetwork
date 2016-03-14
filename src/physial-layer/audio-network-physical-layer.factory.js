@@ -40,13 +40,14 @@ var AudioNetworkPhysicalLayer = (function () {
             + move example code related to html generation to separate file with comment
             + add buttons for symbols (TX)
             + add squares with symbol number (RX)
-            - update sequence textarea after pskSize change
+            + update sequence textarea after pskSize change
+
+            + rename delay-loop-handler
             - take average of symbol set RX
             - each frame will change one or two zero symbol to fine tune phase offset (add checkbox for that feature)
             - add auto tuning feature with ability to align phase offset
                 - separate class where we can pass data from rx
 
-            - rename delay-loop-handler
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
             - fix styles
@@ -76,7 +77,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$outputTx = undefined;
             this.$$outputMicrophone = undefined;
             this.$$outputRecordedAudio = undefined;
-            this.$$delayLoopHandler = DelayLoopHandlerBuilder.build(
+            this.$$rxHandler = RxHandlerBuilder.build(
                 this.$$rxConstellationDiagram,
                 this.$$rxHandler
             );
@@ -143,7 +144,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 // attach additional fields to channel object
                 channel.dftSize = dftSize;
                 channel.notifyInterval = notifyInterval;
-                channel.notifyHandler = this.$$delayLoopHandler.handle.bind(this.$$delayLoopHandler);
+                channel.notifyHandler = this.$$rxHandler.handle.bind(this.$$rxHandler);
 
                 if (this.$$configuration.rx.constellationDiagram.elementId) {
                     this.$$initConstellationDiagram(i, channel);
@@ -279,7 +280,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$channelTransmitManager.destroy();
             this.$$channelTransmitManager = null;
 
-            this.$$delayLoopHandler.destroy();
+            this.$$rxHandler.destroy();
         };
 
         ANPL.prototype.getOutputTxState = function () {
