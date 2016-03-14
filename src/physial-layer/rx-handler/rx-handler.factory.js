@@ -11,10 +11,10 @@ var RxHandler = (function () {
             DECIBEL_LIMIT = 40
         ;
 
-        RH = function (rxConstellationDiagram, rxHandler) {
+        RH = function (rxConstellationDiagram, rxExternalHandler) {
             this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
-            this.$$rxHandler = rxHandler;
+            this.$$rxExternalHandler = rxExternalHandler;
             this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), DELAY_LOOP_RESOLUTION);
         };
 
@@ -85,8 +85,8 @@ var RxHandler = (function () {
                 queue.push(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
             }
 
-            if (this.$$rxHandler.callback) {
-                this.$$rxHandler.callback(channelIndex, carrierDetail, Audio.getCurrentTime());
+            if (this.$$rxExternalHandler.callback) {
+                this.$$rxExternalHandler.callback(channelIndex, carrierDetail, Audio.getCurrentTime());
             }
         };
 

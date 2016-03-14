@@ -71,7 +71,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$rxAnalyser = null;
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
-            this.$$rxHandler = {
+            this.$$rxExternalHandler = {
                 callback: null
             };
             this.$$outputTx = undefined;
@@ -79,7 +79,7 @@ var AudioNetworkPhysicalLayer = (function () {
             this.$$outputRecordedAudio = undefined;
             this.$$rxHandler = RxHandlerBuilder.build(
                 this.$$rxConstellationDiagram,
-                this.$$rxHandler
+                this.$$rxExternalHandler
             );
 
             this.$$initTx();
@@ -241,7 +241,7 @@ var AudioNetworkPhysicalLayer = (function () {
         };
 
         ANPL.prototype.rx = function (rxHandler) {
-            this.$$rxHandler.callback = (
+            this.$$rxExternalHandler.callback = (
                 (typeof rxHandler === 'function') ?
                 rxHandler :
                 null

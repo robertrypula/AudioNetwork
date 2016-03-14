@@ -5,8 +5,8 @@ var RxHandlerBuilder = (function () {
 
     function _RxHandlerBuilder() {
 
-        function build(rxConstellationDiagram, rxHandler) {
-            return new RxHandler(rxConstellationDiagram, rxHandler);
+        function build(rxConstellationDiagram, rxExternalHandler) {
+            return new RxHandler(rxConstellationDiagram, rxExternalHandler);
         }
 
         return {
