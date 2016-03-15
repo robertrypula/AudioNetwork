@@ -14,6 +14,41 @@ body, html {
     text-decoration: none;
 }
 
+.row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.row:before {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+.row:after {
+    content: " ";
+    display: table;
+    clear: both;
+}
+
+.col-6 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    float: left;
+    width: 50%;
+}
+
+.col {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    float: left;
+    width: 100%;
+}
+
 h1, h2, h3, h4, h5 {
     color: #555;
     padding: 0 0 10px 0;
@@ -58,13 +93,11 @@ h1 {
 
 .main-container {
     width: 1200px;
-    margin: 0 auto;
-    padding: 10px 25px 25px 25px;
     background-color: white;
-}
-
-.container {
-    padding: 0 0 20px 20px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .container-inner {

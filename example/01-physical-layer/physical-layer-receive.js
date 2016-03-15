@@ -1,10 +1,10 @@
 var RECEIVE_SAMPLE_STATE = {
-    IDDLE: 'IDDLE',
+    IDLE: 'IDLE',
     SYMBOL: 'SYMBOL',
     GUARD: 'GUARD',
     ERROR: 'ERROR'
 };
-var receiveSamplerState = RECEIVE_SAMPLE_STATE.IDDLE;
+var receiveSamplerState = RECEIVE_SAMPLE_STATE.IDLE;
 var receiveSymbolData = [];
 var receivePacket = [];
 var receivePacketHistory = [];
@@ -98,7 +98,7 @@ function receiveSamplerGuard(symbolData, time) {
         }
 
         if (receiveStateDuration > 1.0) {
-            receiveSamplerState = RECEIVE_SAMPLE_STATE.IDDLE;
+            receiveSamplerState = RECEIVE_SAMPLE_STATE.IDLE;
             receiveStateBegin = time;
             receiveSamplerIddle(symbolData, time);
         }
@@ -119,7 +119,7 @@ function receiveSampler(channelIndex, symbolData, time) {
     }
 
     switch (receiveSamplerState) {
-        case RECEIVE_SAMPLE_STATE.IDDLE:
+        case RECEIVE_SAMPLE_STATE.IDLE:
             receiveSamplerIddle(symbolData, time);
             break;
         case RECEIVE_SAMPLE_STATE.SYMBOL:
@@ -130,7 +130,7 @@ function receiveSampler(channelIndex, symbolData, time) {
             break;
     }
 
-    uiState.innerHTML = '&nbsp;' + receiveSamplerState;
+    uiState.innerHTML = receiveSamplerState + '&nbsp;';
 
     str = '';
     for (i = receiveSymbolData.length - 1; i >= 0; i--) {
@@ -141,15 +141,15 @@ function receiveSampler(channelIndex, symbolData, time) {
             ' | '
         );
     }
-    uiSymbol.innerHTML = '&nbsp;' + str;    
+    uiSymbol.innerHTML = str + '&nbsp;';
 
-    uiPacket.innerHTML = '&nbsp;' + receivePacket.join(', ');
+    uiPacket.innerHTML = receivePacket.join(', ') + '&nbsp;';
 
     str = '';
     for (i = receivePacketHistory.length - 1; i >= 0; i--) {
         str += receivePacketHistory[i].join(', ') + '<br/>';
     }
-    uiPacketHistory.innerHTML = '&nbsp;' + str;
+    uiPacketHistory.innerHTML = str + '&nbsp;';
 }
 
 function receive(channelIndex, carrierDetail, time) {
