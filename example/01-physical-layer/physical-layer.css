@@ -31,6 +31,15 @@ body, html {
     clear: both;
 }
 
+.col-3 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    float: left;
+    width: 25%;
+}
+
 .col-6 {
     position: relative;
     min-height: 1px;
