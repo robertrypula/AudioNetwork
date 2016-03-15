@@ -44,13 +44,15 @@ var AudioNetworkPhysicalLayer = (function () {
 
             + rename delay-loop-handler
             - take average of symbol set RX
+                - move packet rx code to physical layer package at a class
             - each frame will change one or two zero symbol to fine tune phase offset (add checkbox for that feature)
             - add auto tuning feature with ability to align phase offset
                 - separate class where we can pass data from rx
 
             - refactor DOM helpers (move to service)
-            - do not redraw constellation if queue wasn't changed
             - fix styles
+                - add source button active class
+                - improove responsive design
             - move notification logic to manager
             - use dedicated constellation at carrier.html
             - add callback to destroy

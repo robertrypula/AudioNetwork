@@ -61,9 +61,16 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             dftTimeSpan: dftTimeSpan, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
-                height: 150
+                height: 150,
+                color: {
+                    axis: '#999',
+                    data: '#FAA61A'
+                }
             },
             constellationDiagram: {
+                color: {
+                    axis: '#43B581'
+                },
                 elementId: (
                     rxConstellationDiagramVisible ?
                     'rx-constellation-diagram-{{ channelIndex }}-{{ ofdmIndex }}' :

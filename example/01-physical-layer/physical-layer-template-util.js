@@ -17,6 +17,32 @@ function getStrById(elementId) {
     return document.getElementById(elementId).value + '';
 }
 
+function addClass(elementId, className) {
+    var element = document.getElementById(elementId);
+
+    if (element.classList) {
+        element.classList.add(className);
+    } else {
+        element.className += ' ' + className;
+    }
+}
+
+function removeClass(elementId, className) {
+    var element = document.getElementById(elementId);
+
+    if (element.classList) {
+        element.classList.remove(className);
+    } else {
+        element.className = element
+            .className
+            .replace(
+                new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), 
+                ' '
+            )
+        ;
+    }
+}
+
 function generateHtml(tx, rx) {
     $$generateHtmlForChannel(tx, 'tx');
     $$generateHtmlForChannel(rx, 'rx');
@@ -77,6 +103,9 @@ function uiRefresh() {
             $$uiRefreshOfdmSpecific(fieldType[i], true, 'tx', channelIndex, ofdmIndex);
         });
     }
+
+    // buttons states
+    $$uiRefreshButtonSpecific();
 }
 
 // ---
@@ -96,6 +125,32 @@ function $$generateHtmlForChannel(channel, rxTx) {
             element = document.getElementById(rxTx + '-channel-' + i + '-ofdm-container');
             element.innerHTML = element.innerHTML + html;
         }
+    }
+}
+
+function $$uiRefreshButtonSpecific() {
+    if (anpl.getOutputTxState()) {
+        addClass('tx-output-tx-enable', 'active');
+        removeClass('tx-output-tx-disable', 'active');
+    } else {
+        removeClass('tx-output-tx-enable', 'active');
+        addClass('tx-output-tx-disable', 'active');
+    }
+
+    if (anpl.getOutputMicrophoneState()) {
+        addClass('tx-output-mic-enable', 'active');
+        removeClass('tx-output-mic-disable', 'active');
+    } else {
+        removeClass('tx-output-mic-enable', 'active');
+        addClass('tx-output-mic-disable', 'active');
+    }
+
+    if (anpl.getOutputRecordedAudioState()) {
+        addClass('tx-output-rec-enable', 'active');
+        removeClass('tx-output-rec-disable', 'active');
+    } else {
+        removeClass('tx-output-rec-enable', 'active');
+        addClass('tx-output-rec-disable', 'active');
     }
 }
 

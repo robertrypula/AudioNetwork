@@ -1,5 +1,7 @@
+/* reset */
+
 body, html {
-    background-color: #eee;
+    background-color: rgb(46, 49, 54);
 }
 
 * {
@@ -9,10 +11,12 @@ body, html {
     padding: 0;
     font-size: 12px;
     line-height: 1.3em;
-    color: #999;
-    font-family: 'Tahoma';
+    color: #87909c;
+    font-family: 'Helvetica';
     text-decoration: none;
 }
+
+/* simple bootstrap */
 
 .row {
     margin-right: -15px;
@@ -31,67 +35,173 @@ body, html {
     clear: both;
 }
 
-.col-3 {
+.col {
     position: relative;
     min-height: 1px;
     padding-right: 15px;
     padding-left: 15px;
     float: left;
+}
+
+.col-3 {
     width: 25%;
 }
 
+.col-4 {
+    width: 33.333333%;
+}
+
 .col-6 {
-    position: relative;
-    min-height: 1px;
-    padding-right: 15px;
-    padding-left: 15px;
-    float: left;
     width: 50%;
 }
 
-.col-12, .col {
-    position: relative;
-    min-height: 1px;
+.col-12 {
+    width: 100%;
+    float: none;
+}
+
+.container, footer {
     padding-right: 15px;
     padding-left: 15px;
-    float: left;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .container, footer {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container, footer {
+        width: 970px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container, footer {
+        width: 1170px;
+    }
+}
+
+.margin-bottom {
+    margin-bottom: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 2px 8px 0 5px;
+    height: 24px;
+    font-size: 12px;
+    line-height: 1em;
+    cursor: pointer;
+    border-radius: 3px;
+    border: none;
+    outline: none;
+}
+
+.btn-default {
+    background-color: lightgray;
+    color: white;    
+}
+
+.btn-default.active {
+    background-color: rgb(46, 49, 54);
+}
+
+.btn-default:hover {
+    background-color: rgb(158, 158, 158);
+}
+
+.btn-default.active:hover {
+    background-color: rgb(78, 81, 85);
+}
+
+/* example specific styles */
+
+.container {
+    background-color: #F7F7F7;
+}
+
+input[type=text], input[type=number] {
+    display: inline-block;
+    line-height: 14px;
+    font-size: 14px;
+    height: 30px;
+    color: #747f8d;
+    background: #fff;
+    border: 1px solid #e1e3e5;
+    border-radius: 3px;
+    padding-left: 6px;
+    outline: none;
     width: 100%;
 }
 
+textarea {
+    display: inline-block;
+    line-height: 1.3em;
+    font-size: 14px;
+    height: 30px;
+    color: #747f8d;
+    background: #fff;
+    border: 1px solid #e1e3e5;
+    border-radius: 3px;
+    padding: 6px;
+    outline: none;
+    width: 100%;
+    height: 60px;
+}
+
 h1, h2, h3, h4, h5 {
-    color: #555;
     padding: 0 0 10px 0;
+    display: block;
 }
 
 h1 {
+    text-align: center;
     font-size: 2.0em;
+    line-height: 1.1em;
+    color: white;
+    padding: 10px 0 10px 0;
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    background-color: rgb(242, 101, 34);
 }
 
 h2 {
+    color: white;
     font-size: 1.8em;
+    line-height: 1em;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: #738BD7;
+    margin-bottom: 15px;
 }
 
 h3 {
+    color: #738bd7;
     font-size: 1.6em;
 }
 
 h4 {
+    color: #738bd7;
     font-size: 1.4em;
 }
 
 h5 {
+    color: #738bd7;
     font-size: 1.2em;
 }
 
 label {
     font-weight: bold;
-}
-
-h1 {
-    text-align: center;
-    display: block;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 20px;
 }
 
 #rx-spectrum {
@@ -100,24 +210,11 @@ h1 {
     border: 1px solid #eee;
 }
 
-.main-container {
-    width: 1200px;
-    background-color: white;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-.container-inner {
-    margin: 5px 0 20px 0;
-    padding: 5px 0;
-    border: 1px solid #eee;
-}
-
-.data-frame-textarea {
-    width: 500px;
-    height: 30px;
+.tx-channel-ofdm, .rx-channel-ofdm {
+    border: 1px solid #EEE;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: rgb(243, 243, 243);
 }
 
 .rx-symbol span {
@@ -148,4 +245,11 @@ h1 {
     border: 1px solid black;
     color: black;
     background-color: yellow;
+}
+
+
+.copyright {
+    display: block;
+    padding: 10px 0 25px 0;
+    text-align: right;
 }
