@@ -16,12 +16,12 @@
             <div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>
                             DFT time span [sec]
                         </b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="text"
                             id="rx-dft-time-span"
@@ -31,12 +31,27 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
+                        <b>
+                            Rx notifications per second
+                        </b>
+                    </div>
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
+                        <input
+                            type="text"
+                            id="rx-notification-per-second"
+                            value="25"
+                            />
+                    </div>
+                </div>
+
+                <div class="row margin-bottom">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>
                             Rx spectrum
                         </b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="checkbox"
                             checked="checked"
@@ -47,12 +62,12 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>
                             Constellation diagram
                         </b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="checkbox"
                             checked="checked"
@@ -63,22 +78,39 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>
-                            Channel config [rx/tx]
+                            RX channel config
                         </b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="text"
                             id="rx-channel"
                             value="1070-1-16"
                             />
+                    </div>
+                </div>
+
+                <div class="row margin-bottom">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
+                        <b>
+                            TX channel config
+                        </b>
+                    </div>
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="text"
                             id="tx-channel"
                             value="1070-1-16"
                             />
+                    </div>
+                </div>
+
+                <div class="row margin-bottom">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
+                    </div>
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <button class="btn btn-default" onClick="reinitialize()">Reinitialize</button>
                         <button class="btn btn-default" onClick="destroy()">Destroy</button>
                     </div>
@@ -90,32 +122,32 @@
             <div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Sample rate [Hz]</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="sample-rate"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <label for="symbol-duration">
                             Symbol duration [ms]
                         </label>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input type="text" id="symbol-duration" value="250" />
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <label for="guard-interval">
                             Guard interval [ms]
                         </label>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input type="text" id="guard-interval" value="250" />
                     </div>
                 </div>
@@ -126,19 +158,19 @@
             <div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Rx buffer size</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="rx-buffer-size"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Source</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <button class="btn btn-default" onClick="rxInput('mic')">Microphone</button>
                         <button class="btn btn-default" onClick="rxInput('rxLoop')">RxLoopback</button>
                         <button class="btn btn-default" onClick="rxInput('rec')">Recorded audio</button>
@@ -146,12 +178,12 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-12">
+                    <div class="col">
                         <h3>Source spectrum</h3>
                     </div>                    
                 </div>
                 <div class="row margin-bottom">
-                    <div class="col col-12">
+                    <div class="col col-xs-12">
                         <div id="rx-spectrum"></div>
                     </div>
                 </div>
@@ -165,29 +197,29 @@
             <div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Tx buffer size</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="tx-buffer-size"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Recorded audio url</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
                         <button class="btn btn-default" onClick="loadRecordedAudio()">Load</button>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Output [tx]</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <button 
                             id="tx-output-tx-enable"
                             class="btn btn-default" 
@@ -205,10 +237,10 @@
                     </div>
                 </div>
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Output [microphone]</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <button 
                             id="tx-output-mic-enable"
                             class="btn btn-default" 
@@ -226,10 +258,10 @@
                     </div>
                 </div>
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Output [recorded audio]</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <button 
                             id="tx-output-rec-enable"   
                             class="btn btn-default" 
@@ -256,7 +288,7 @@
 
         <footer>
             <div class="row">
-                <div class="col col-12">
+                <div class="col col-xs-12">
                     <div class="copyright">Robert Rypula 2016</div>
                 </div>
             </div>
@@ -292,18 +324,18 @@
 
         <script id="template-tx-channel" type="text/html">
             <!-- channel begin -->
-            <div class="col col-12 tx-channel">
+            <div class="col  col-xs-12 tx-channel">
                 <div class="row margin-bottom">
-                    <div class="col col-12">
+                    <div class="col col-xs-12">
                         <h3>Channel #[[ channelIndex ]]</h3>
                     </div>
                 </div>
                 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>PSK symbol size:</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="number"
                             id="tx-psk-size-[[ channelIndex ]]"
@@ -314,10 +346,10 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Send frame</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <textarea
                             class="data-frame-textarea"
                             id="tx-data-frame-[[ channelIndex ]]"
@@ -334,19 +366,19 @@
 
         <script id="template-tx-channel-ofdm" type="text/html">
             <!-- ofdm begin -->
-            <div class="col col-4">
+            <div class="col col-xs-12 col-md-6 col-lg-4">
                 <div class="tx-channel-ofdm">
                     <div class="row margin-bottom">
-                        <div class="col col-12">
+                        <div class="col col-xs-12">
                             <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
                         </div>
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <label for="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">Frequency [Hz]</label>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="tx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                             <input type="number" id="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
                             <button 
@@ -358,12 +390,12 @@
                         </div>
                     </div>
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <label for="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
                                 Phase correction
                             </label>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="tx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                             <input type="number" id="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
                             <button 
@@ -376,10 +408,10 @@
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <b>Amplitude</b>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <input 
                                 type="number" 
                                 id="tx-amplitude-input-[[ channelIndex ]]-[[ ofdmIndex ]]" 
@@ -389,10 +421,10 @@
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <b>Symbol send</b>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <div class="tx-symbol" id="tx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
                         </div>
                     </div>
@@ -403,54 +435,54 @@
 
         <script id="template-rx-channel" type="text/html">
             <!-- channel begin -->
-            <div class="col col-12 rx-channel">
+            <div class="col  col-xs-12 rx-channel">
                 <div class="row margin-bottom">
-                    <div class="col col-12">
+                    <div class="col  col-xs-12">
                         <h3>Channel #[[ channelIndex ]]</h3>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>RX sampling - STATE</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="rx-sampling-state-[[ channelIndex ]]"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>RX sampling - SYMBOL</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="rx-sampling-symbol-[[ channelIndex ]]"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>RX sampling - PACKET</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="rx-sampling-packet-[[ channelIndex ]]"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>RX sampling - PACKET HISTORY</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <span id="rx-sampling-packet-history-[[ channelIndex ]]"></span>
                     </div>
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>PSK symbol size</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input
                             type="number"
                             id="rx-psk-size-[[ channelIndex ]]"
@@ -461,10 +493,10 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col col-3">
+                    <div class="col col-md-3 col-sm-5 col-xs-6">
                         <b>Power threshold [dB]</b>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-md-6 col-sm-7 col-xs-6">
                         <input type="number" id="rx-power-threshold-[[ channelIndex ]]" value="-20" />
                     </div>
                 </div>
@@ -477,15 +509,15 @@
 
         <script id="template-rx-channel-ofdm" type="text/html">
             <!-- ofdm begin -->
-            <div class="col col-4">
+            <div class="col col-xs-12 col-md-6 col-lg-4">
                 <div class="rx-channel-ofdm">
                     <div class="row margin-bottom">
-                        <div class="col col-12">
+                        <div class="col col-xs-12">
                             <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
                         </div>
                     </div>
                     <div class="row margin-bottom">
-                        <div class="col col-12">
+                        <div class="col col-xs-12">
                             <div
                                 class="rx-constellation-diagram"
                                 id="rx-constellation-diagram-[[ channelIndex ]]-[[ ofdmIndex ]]"
@@ -494,35 +526,35 @@
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <b>Symbol received</b>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <div class="rx-symbol" id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <b>Phase [deg, unit]</b>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="rx-phase-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                         </div>
                     </div>
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <b>Power [dB]</b>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="rx-power-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                         </div>
                     </div>
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <label for="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">Frequency [Hz]</label>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="rx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                             <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
                             <button 
@@ -534,12 +566,12 @@
                         </div>
                     </div>
                     <div class="row margin-bottom">
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <label for="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
                                 Phase correction
                             </label>
                         </div>
-                        <div class="col col-6">
+                        <div class="col col-xs-6">
                             <span id="rx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
                             <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
                             <button 

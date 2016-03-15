@@ -12,6 +12,7 @@ function reinitialize() {
         rxChannel = [],
         txRx = [],
         dftTimeSpan,
+        notificationPerSecond,
         rxSpectrumVisible, rxConstellationDiagramVisible,
         value, channelDataList, channelData, i, j;
 
@@ -40,16 +41,17 @@ function reinitialize() {
     rxSpectrumVisible = !!document.getElementById('rx-spectrum-visible').checked;
     rxConstellationDiagramVisible = !!document.getElementById('rx-constellation-diagram-visible').checked;
     dftTimeSpan = getFloatById('rx-dft-time-span');
+    notificationPerSecond = getIntById('rx-notification-per-second');
 
     destroy();
 
     // we need to wait because canvas related objects are cleaned on next drawing frame that is asynchronous
     setTimeout(function () {
-        initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, dftTimeSpan);
+        initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
     }, 500);
 }
 
-function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, dftTimeSpan) {
+function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan) {
     generateHtml(txChannel, rxChannel);
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
@@ -57,7 +59,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         },
         rx: {
             channel: rxChannel,
-            notificationPerSecond: 25, // default: 20
+            notificationPerSecond: notificationPerSecond, // default: 20
             dftTimeSpan: dftTimeSpan, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
