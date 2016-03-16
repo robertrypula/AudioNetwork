@@ -82,7 +82,9 @@ function initializeHtml() {
 
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {
     $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex);
-    $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex);
+    if (rxTx === 'tx') {
+        $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex);
+    }
 }
 
 function uiRefresh() {

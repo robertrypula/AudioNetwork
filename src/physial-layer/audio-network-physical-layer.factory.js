@@ -41,10 +41,10 @@ var AudioNetworkPhysicalLayer = (function () {
             + add buttons for symbols (TX)
             + add squares with symbol number (RX)
             + update sequence textarea after pskSize change
-
             + rename delay-loop-handler
-            - after psk change only related tx/rx should be updated
-            - add rx/tx to channel headers
+            + after psk change only related tx/rx should be updated
+            + add rx/tx to channel headers
+
             - take average of symbol set RX
                 - move packet rx code to physical layer package at a class
             - each frame will change one or two zero symbol to fine tune phase offset (add checkbox for that feature)
@@ -57,8 +57,9 @@ var AudioNetworkPhysicalLayer = (function () {
                 - add source button active class
                 - improve responsive design
             - move notification logic to manager
-            - use dedicated constellation at carrier.html
             - add callback to destroy
+
+            - use dedicated constellation at carrier.html
 
 
     */

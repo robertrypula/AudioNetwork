@@ -11,6 +11,28 @@
         <div class="container">
 
             <h1>Audio network - physical layer example</h1>
+            <div>
+                <div class="row">
+                    <div class="col col-sx-12">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.
+                        </p>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <h2>Initialize</h2>
             <div>
@@ -178,11 +200,6 @@
                 </div>
 
                 <div class="row margin-bottom">
-                    <div class="col">
-                        <h3>Source spectrum</h3>
-                    </div>                    
-                </div>
-                <div class="row margin-bottom">
                     <div class="col col-xs-12">
                         <div id="rx-spectrum"></div>
                     </div>
@@ -324,10 +341,10 @@
 
         <script id="template-tx-channel" type="text/html">
             <!-- channel begin -->
-            <div class="col  col-xs-12 tx-channel">
+            <div class="col col-xs-12 tx-channel">
                 <div class="row margin-bottom">
                     <div class="col col-xs-12">
-                        <h3>Channel #[[ channelIndex ]]</h3>
+                        <h3>TX Channel #[[ channelIndex ]]</h3>
                     </div>
                 </div>
                 
@@ -370,7 +387,7 @@
                 <div class="tx-channel-ofdm">
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
-                            <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
+                            <h4>TX Channel #[[ channelIndex ]] - subcarrier #[[ ofdmIndex ]]</h4>
                         </div>
                     </div>
 
@@ -435,10 +452,10 @@
 
         <script id="template-rx-channel" type="text/html">
             <!-- channel begin -->
-            <div class="col  col-xs-12 rx-channel">
+            <div class="col col-xs-12 rx-channel">
                 <div class="row margin-bottom">
                     <div class="col  col-xs-12">
-                        <h3>Channel #[[ channelIndex ]]</h3>
+                        <h3>RX Channel #[[ channelIndex ]]</h3>
                     </div>
                 </div>
 
@@ -513,7 +530,7 @@
                 <div class="rx-channel-ofdm">
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
-                            <h4>Channel #[[ channelIndex ]], OFDM #[[ ofdmIndex ]]</h4>
+                            <h4>RX Channel #[[ channelIndex ]] - subcarrier #[[ ofdmIndex ]]</h4>
                         </div>
                     </div>
                     <div class="row margin-bottom">
