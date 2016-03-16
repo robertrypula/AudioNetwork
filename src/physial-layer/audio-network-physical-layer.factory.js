@@ -45,20 +45,25 @@ var AudioNetworkPhysicalLayer = (function () {
             + after psk change only related tx/rx should be updated
             + add rx/tx to channel headers
 
-            - take average of symbol set RX
-                - move packet rx code to physical layer package at a class
-            - each frame will change one or two zero symbol to fine tune phase offset (add checkbox for that feature)
-            - add auto tuning feature with ability to align phase offset
-                - separate class where we can pass data from rx
-
-            - refactor DOM helpers (move to service)
-            - do not redraw constellation if queue wasn't changed
+            + change 'frame' to 'packet'
+            + add 'Send sync signal' to TX
+            - ability to hide some of the widgets: 'Easy' and 'Advanced' view
             - fix styles
                 - add source button active class
                 - improve responsive design
-            - move notification logic to manager
-            - add callback to destroy
+            - use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
 
+            - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
+                - add callback to destroy
+            - take average of symbol set RX
+                - move packet rx code to physical layer package at a class
+            - add auto tuning feature with ability to align phase offset
+                - ? separate class where we can pass data from rx ?
+                - ? add 'SYNCH' state to receiveSampler and detect synch signal ?
+
+            - refactor DOM helpers (move to service)
+            - do not redraw constellation if queue wasn't changed
+            - move notification logic to manager
             - use dedicated constellation at carrier.html
 
 

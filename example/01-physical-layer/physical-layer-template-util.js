@@ -83,7 +83,7 @@ function initializeHtml() {
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {
     $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex);
     if (rxTx === 'tx') {
-        $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex);
+        $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex);
     }
 }
 
@@ -156,27 +156,27 @@ function $$uiRefreshButtonSpecific() {
     }
 }
 
-function $$uiRefreshOnPskSizeChangeDataFrameSpecific(channelIndex) {
-    var pskSize, element, channelOfdmSize, i, j, dataFrameList, ofdmList;
+function $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex) {
+    var pskSize, element, channelOfdmSize, i, j, dataPacketList, ofdmList;
 
     pskSize = getIntById('tx-psk-size-' + channelIndex);
-    element = document.getElementById('tx-data-frame-' + channelIndex);
+    element = document.getElementById('tx-data-packet-' + channelIndex);
     channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
-    dataFrameList = [];
+    dataPacketList = [];
 
     for (i = 0; i < pskSize; i++) {
         ofdmList = [];
         for (j = 0; j < channelOfdmSize; j++) {
             ofdmList.push(i);
         }
-        dataFrameList.push(ofdmList.join('.'));
+        dataPacketList.push(ofdmList.join('.'));
     }
 
-    element.value = dataFrameList.join(' ');
+    element.value = dataPacketList.join(' ');
 }
 
 function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
-    var i, j, k, element, pskSize, dataFrame, dataFrameList, channelOfdmSize;
+    var i, j, k, element, pskSize, dataPacket, dataPacketList, channelOfdmSize;
 
     if (rxTx === 'rx') {
         channelOfdmSize = anpl.getRxChannelOfdmSize(channelIndex);
@@ -190,15 +190,15 @@ function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
         element.innerHTML = '';
         for (j = 0; j < pskSize; j++) {
             if (rxTx === 'tx') {
-                dataFrameList = [];
+                dataPacketList = [];
                 for (k = 0; k < channelOfdmSize; k++) {
-                    dataFrameList.push(i === k ? j : '-');
+                    dataPacketList.push(i === k ? j : '-');
                 }
-                dataFrame = dataFrameList.join('.');
+                dataPacket = dataPacketList.join('.');
                 element.innerHTML += (
                     '<a ' +
                     '    href="javascript:void(0)" ' +
-                    '    onClick="transmitDataFrame(' + channelIndex + ', \'' + dataFrame + '\')" ' +
+                    '    onClick="transmitDataPacket(' + channelIndex + ', \'' + dataPacket + '\')" ' +
                     '    >' +
                     '   ' + j +
                     '</a>'

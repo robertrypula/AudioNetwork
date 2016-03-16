@@ -1,20 +1,42 @@
-function transmit(channelIndex) {
-    var dataFrame = getStrById('tx-data-frame-' + channelIndex);
+var 
+    SYNCHRONIZATION_SIGNAL_DURATION = 8,
+    SYNCHRONIZATION_SIGNAL_GAP_DURATION = 1
+;
 
-    transmitDataFrame(channelIndex, dataFrame);
+function transmit(channelIndex) {
+    var 
+        dataPacket = getStrById('tx-data-packet-' + channelIndex),
+        symbolDuration = getFloatById('symbol-duration') / 1000,
+        guardInterval = getFloatById('guard-interval') / 1000
+    ;
+
+    transmitDataPacket(channelIndex, dataPacket, symbolDuration, guardInterval);
 }
 
-function transmitDataFrame(channelIndex, dataFrame) {
+function transmitSynchronizationSignal(channelIndex) {
+    var synchronizationSignal = '';
+
+    for (i = 0; i < anpl.getRxChannelOfdmSize(channelIndex); i++) {
+        synchronizationSignal += synchronizationSignal === '' ? '0' : '.0';
+    }
+
+    transmitDataPacket(
+        channelIndex, 
+        synchronizationSignal, 
+        SYNCHRONIZATION_SIGNAL_DURATION, 
+        SYNCHRONIZATION_SIGNAL_GAP_DURATION
+    );
+}
+
+function transmitDataPacket(channelIndex, dataPacket, symbolDuration, guardInterval) {
     var
-        symbolDuration = getFloatById('symbol-duration') / 1000,
-        guardInterval = getFloatById('guard-interval') / 1000,
         pskSize = getIntById('tx-psk-size-' + channelIndex),
-        ofdmBurstList = dataFrame.split(' '),
+        ofdmBurstList = dataPacket.split(' '),
         ofdmBurstSymbolList, ofdmBurstSymbol,
-        amplitude, data, dataFrameParsed, mute, i, j
+        amplitude, data, dataPacketParsed, mute, i, j
         ;
 
-    dataFrameParsed = [];
+    dataPacketParsed = [];
     for (i = 0; i < ofdmBurstList.length; i++) {
         ofdmBurstSymbolList = ofdmBurstList[i].split('.');
 
@@ -30,7 +52,7 @@ function transmitDataFrame(channelIndex, dataFrame) {
                 phase: ofdmBurstSymbol / pskSize
             });
         }
-        dataFrameParsed.push(data);
+        dataPacketParsed.push(data);
 
         if (guardInterval === 0) {
             continue;
@@ -43,10 +65,10 @@ function transmitDataFrame(channelIndex, dataFrame) {
                 duration: guardInterval
             });
         }
-        dataFrameParsed.push(data);
+        dataPacketParsed.push(data);
     }
 
-    for (i = 0; i < dataFrameParsed.length; i++) {
-        anpl.tx(channelIndex, dataFrameParsed[i]);
+    for (i = 0; i < dataPacketParsed.length; i++) {
+        anpl.tx(channelIndex, dataPacketParsed[i]);
     }
 }

@@ -26,7 +26,7 @@ function reinitialize() {
     });
 
     for (i = 0; i < txRx.length; i++) {
-        value = getStrById(txRx[i].id + '-channel');
+        value = getStrById(txRx[i].id + '-channel-config');
         channelDataList = value === '' ? [] : (value).split(' ');
         for (j = 0; j < channelDataList.length; j++) {
             channelData = channelDataList[j].split('-');
@@ -47,6 +47,7 @@ function reinitialize() {
 
     // we need to wait because canvas related objects are cleaned on next drawing frame that is asynchronous
     setTimeout(function () {
+        receivePacketHistory = [];
         initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
     }, 500);
 }
