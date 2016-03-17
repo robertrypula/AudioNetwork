@@ -613,7 +613,7 @@
 
         <script id="template-rx-channel-ofdm" type="text/html">
             <!-- ofdm begin -->
-            <div class="col col-xs-12 col-md-6 col-lg-4">
+            <div class="col col-xs-12 col-md-6 col-lg-6">
                 <div class="rx-channel-ofdm">
 
                     <div class="row margin-bottom">
@@ -623,82 +623,88 @@
                     </div>
 
                     <div class="row margin-bottom">
-                        <div class="col col-xs-12">
+
+                        <div class="col col-xs-12 col-lg-4">
                             <div
-                                class="rx-constellation-diagram"
+                                class="rx-constellation-diagram margin-bottom"
                                 id="rx-constellation-diagram-[[ channelIndex ]]-[[ ofdmIndex ]]"
                                 >
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6">
-                            <b>
-                                Symbol received
-                            </b>
-                        </div>
-                        <div class="col col-xs-6">
-                            <div class="rx-symbol" id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
-                        </div>
-                    </div>
+                        <div class="col col-xs-12 col-lg-8">
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6">
-                            <b>
-                                Phase [deg, unit]
-                            </b>
-                        </div>
-                        <div class="col col-xs-6">
-                            <span id="rx-phase-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
-                        </div>
-                    </div>
+                            <div class="row margin-bottom">
+                                <div class="col col-xs-6">
+                                    <b>
+                                        Symbol received
+                                    </b>
+                                </div>
+                                <div class="col col-xs-6">
+                                    <div class="rx-symbol" id="rx-symbol-[[ channelIndex ]]-[[ ofdmIndex ]]"></div>
+                                </div>
+                            </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6">
-                            <b>
-                                Power [dB]
-                            </b>
-                        </div>
-                        <div class="col col-xs-6">
-                            <span id="rx-power-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
-                        </div>
-                    </div>
+                            <div class="row margin-bottom">
+                                <div class="col col-xs-6">
+                                    <b>
+                                        Phase [deg, unit]
+                                    </b>
+                                </div>
+                                <div class="col col-xs-6">
+                                    <span id="rx-phase-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                                </div>
+                            </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6">
-                            <label for="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
-                                Frequency [Hz]
-                            </label>
-                        </div>
-                        <div class="col col-xs-6">
-                            <span id="rx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
-                            <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
-                            <button 
-                                class="btn btn-default"
-                                onClick="frequencyUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
-                                >
-                                Update
-                            </button>
-                        </div>
-                    </div>
+                            <div class="row margin-bottom">
+                                <div class="col col-xs-6">
+                                    <b>
+                                        Power [dB]
+                                    </b>
+                                </div>
+                                <div class="col col-xs-6">
+                                    <span id="rx-power-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                                </div>
+                            </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6">
-                            <label for="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
-                                Phase correction
-                            </label>
+                            <div class="row margin-bottom">
+                                <div class="col col-xs-6">
+                                    <label for="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
+                                        Frequency [Hz]
+                                    </label>
+                                </div>
+                                <div class="col col-xs-6">
+                                    <span id="rx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                                    <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                                    <button
+                                            class="btn btn-default"
+                                            onClick="frequencyUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                                            >
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row margin-bottom">
+                                <div class="col col-xs-6">
+                                    <label for="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]">
+                                        Phase correction
+                                    </label>
+                                </div>
+                                <div class="col col-xs-6">
+                                    <span id="rx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
+                                    <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                                    <button
+                                            class="btn btn-default"
+                                            onClick="phaseCorrectionUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
+                                            >
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
-                        <div class="col col-xs-6">
-                            <span id="rx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"></span>
-                            <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
-                            <button 
-                                class="btn btn-default"
-                                onClick="phaseCorrectionUpdate('rx', [[ channelIndex ]], [[ ofdmIndex ]])"
-                                >
-                                Update
-                            </button>
-                        </div>
+
                     </div>
 
                 </div>
