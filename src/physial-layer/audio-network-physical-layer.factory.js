@@ -49,7 +49,7 @@ var AudioNetworkPhysicalLayer = (function () {
             + add 'Send sync signal' to TX
             - ability to hide some of the widgets: 'Easy' and 'Advanced' view
             - fix styles
-                - add source button active class
+                + add source button active class
                 - improve responsive design
             - use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
 
@@ -190,15 +190,19 @@ var AudioNetworkPhysicalLayer = (function () {
                 case AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
-                    node = Audio.getRecordedAudioNode();
-                    break;
                 case AudioNetworkPhysicalLayerConfiguration.INPUT.TX:
                     node = this.$$channelTransmitManager.getOutputNode();
+                    break;
+                case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+                    node = Audio.getRecordedAudioNode();
                     break;
             }
 
             return node;
+        };
+
+        ANPL.prototype.getRxInput = function () {
+            return this.$$currentInput;
         };
 
         ANPL.prototype.setRxInput = function (input) {

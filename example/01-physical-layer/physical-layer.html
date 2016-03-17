@@ -200,9 +200,27 @@
                         </b>
                     </div>
                     <div class="col col-md-6 col-sm-7 col-xs-6">
-                        <button class="btn btn-default" onClick="rxInput('mic')">Microphone</button>
-                        <button class="btn btn-default" onClick="rxInput('rxLoop')">RxLoopback</button>
-                        <button class="btn btn-default" onClick="rxInput('rec')">Recorded audio</button>
+                        <button
+                            id="rx-input-mic"
+                            class="btn btn-default"
+                            onClick="rxInput('mic')"
+                            >
+                            Microphone
+                        </button>
+                        <button
+                            id="rx-input-tx"
+                            class="btn btn-default"
+                            onClick="rxInput('tx')"
+                            >
+                            Tx
+                        </button>
+                        <button
+                            id="rx-input-rec"
+                            class="btn btn-default"
+                            onClick="rxInput('rec')"
+                            >
+                            Recorded audio
+                        </button>
                     </div>
                 </div>
 

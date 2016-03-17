@@ -131,6 +131,11 @@ function $$generateHtmlForChannel(channel, rxTx) {
 }
 
 function $$uiRefreshButtonSpecific() {
+    $$uiRefreshButtonOutputSpecific();
+    $$uiRefreshButtonInputSpecific();
+}
+
+function $$uiRefreshButtonOutputSpecific() {
     if (anpl.getOutputTxState()) {
         addClass('tx-output-tx-enable', 'active');
         removeClass('tx-output-tx-disable', 'active');
@@ -153,6 +158,24 @@ function $$uiRefreshButtonSpecific() {
     } else {
         removeClass('tx-output-rec-enable', 'active');
         addClass('tx-output-rec-disable', 'active');
+    }
+}
+
+function $$uiRefreshButtonInputSpecific() {
+    removeClass('rx-input-mic', 'active');
+    removeClass('rx-input-tx', 'active');
+    removeClass('rx-input-rec', 'active');
+
+    switch (anpl.getRxInput()) {
+        case AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE:
+            addClass('rx-input-mic', 'active');
+            break;
+        case AudioNetworkPhysicalLayerConfiguration.INPUT.TX:
+            addClass('rx-input-tx', 'active');
+            break;
+        case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+            addClass('rx-input-rec', 'active');
+            break;
     }
 }
 

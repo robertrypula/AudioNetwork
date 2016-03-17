@@ -137,11 +137,12 @@ function rxInput(type) {
         case 'mic':
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE);
             break;
-        case 'rxLoop':
+        case 'tx':
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.TX);
             break;
         case 'rec':
             anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            break;
         default:
             refresh = false;
     }
