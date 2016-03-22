@@ -17,8 +17,12 @@ function getStrById(elementId) {
     return document.getElementById(elementId).value + '';
 }
 
-function addClass(elementId, className) {
-    var element = document.getElementById(elementId);
+function addClass(elementIdOrElement, className) {
+    var 
+        element = typeof elementIdOrElement === 'string' ? 
+            document.getElementById(elementIdOrElement) : 
+            elementIdOrElement
+    ;
 
     if (element.classList) {
         element.classList.add(className);
@@ -27,8 +31,12 @@ function addClass(elementId, className) {
     }
 }
 
-function removeClass(elementId, className) {
-    var element = document.getElementById(elementId);
+function removeClass(elementIdOrElement, className) {
+    var 
+        element = typeof elementIdOrElement === 'string' ? 
+            document.getElementById(elementIdOrElement) : 
+            elementIdOrElement
+    ;
 
     if (element.classList) {
         element.classList.remove(className);
@@ -49,7 +57,7 @@ function generateHtml(tx, rx) {
 }
 
 function initializeHtml() {
-    var fieldType, i, element;
+    var fieldType, elementId, i, element, rxConstellationDiagramVisible, rxSpectrumVisible;
 
     // tx/rx inputs
     fieldType = ['frequency', 'phase-correction'];
@@ -76,8 +84,57 @@ function initializeHtml() {
         element.value = Math.floor(1000 / anpl.getTxChannelOfdmSize(channelIndex)) / 1000;
     });
 
+    // conditional css setup - spectrum
+    rxSpectrumVisible = !!document.getElementById('rx-spectrum-visible').checked;
+    element = document.getElementById('rx-conditional-css-class-spectrum');
+    if (rxSpectrumVisible) {
+        element.className = element.getAttribute("class-with-spectrum");
+    } else {
+        element.className = element.getAttribute("class-without-spectrum");
+    }
+
+    // conditional css setup - constellation
+    rxConstellationDiagramVisible = !!document.getElementById('rx-constellation-diagram-visible').checked;
+    elementId = [
+        'rx-conditional-css-class-cont-',
+        'rx-conditional-css-class-cd-',
+        'rx-conditional-css-class-widget-'
+    ];
+    $$loopChannelOfdm('rx', function (channelIndex, ofdmIndex) {
+        for (i = 0; i < elementId.length; i++) {
+            element = document.getElementById(
+                elementId[i] + channelIndex + '-' + ofdmIndex
+            );
+            if (rxConstellationDiagramVisible) {
+                element.className = element.getAttribute("class-with-constellation-diagram");
+            } else {
+                element.className = element.getAttribute("class-without-constellation-diagram");
+            }
+        }
+    });
+
     // refresh other stuff
     uiRefresh();
+    viewType('simple');
+}
+
+function viewType(type) {
+    var query, i;
+
+    query = document.querySelectorAll('.view-type')
+    for (i = 0; i < query.length; i++) {
+        addClass(query[i], 'hidden');
+    }
+
+    query = document.querySelectorAll('.view-type-' + type);
+    for (i = 0; i < query.length; i++) {
+        removeClass(query[i], 'hidden');
+    }
+
+    removeClass('view-type-simple', 'active');
+    removeClass('view-type-medium', 'active');
+    removeClass('view-type-complex', 'active');
+    addClass('view-type-' + type, 'active');
 }
 
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {

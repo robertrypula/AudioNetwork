@@ -47,11 +47,13 @@ var AudioNetworkPhysicalLayer = (function () {
 
             + change 'frame' to 'packet'
             + add 'Send sync signal' to TX
-            - ability to hide some of the widgets: 'Easy' and 'Advanced' view
-            - fix styles
+            + ability to hide some of the widgets: 'Easy' and 'Advanced' view
+            + fix styles
                 + add source button active class
-                - improve responsive design
+                + improve responsive design
+            - add checkbox for tx/rx config
             - use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
+            - add inter-packet gap duration
 
             - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
                 - add callback to destroy
@@ -65,6 +67,27 @@ var AudioNetworkPhysicalLayer = (function () {
             - do not redraw constellation if queue wasn't changed
             - move notification logic to manager
             - use dedicated constellation at carrier.html
+
+
+1  1  0  1  11
+0  1  1  0  10
+0  1  0  0  01
+0  1  0  1  10
+
+01 11 01 10 
+
+D6 45 
+
+8 subcarriers
+3 bit/baud (PSK-8)
+4 baud (125ms symbol, 125ms guard)
+=
+96 bit/sec = 12 B/sec
+
+
+SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
+
+            1 B         1 B          1 B       0...255 B         2 B                
 
 
     */

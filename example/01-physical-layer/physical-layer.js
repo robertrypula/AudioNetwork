@@ -61,7 +61,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         rx: {
             channel: rxChannel,
             notificationPerSecond: notificationPerSecond, // default: 20
-            dftTimeSpan: dftTimeSpan, // default: 0.1
+            dftTimeSpan: dftTimeSpan / 1000, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
                 height: 150,

@@ -50,6 +50,23 @@ body, html {
     margin-left: auto;
 }
 
+.hidden {
+    display: none !important;
+}
+
+b.label {
+    display: block;
+}
+
+label {
+    display: block;
+    padding-top: 9px;
+}
+
+label.label-for-checkbox {
+    padding-top: 0;
+}
+
 /* Extra small devices Phones (<768px) */
 .col-xs-3 { float: left; width: 25%; }
 .col-xs-4 { float: left; width: 33.333333%; }
@@ -222,6 +239,10 @@ label {
 
 p {
     margin-bottom: 15px;
+}
+
+.right-info-label {
+    padding: 8px 0 10px 0;
 }
 
 #rx-spectrum {

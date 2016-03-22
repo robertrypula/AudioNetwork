@@ -114,6 +114,10 @@ function receiveSampler(channelIndex, symbolData, time) {
         str, i
     ;
 
+    if (!symbolData) {
+        return;
+    }
+
     if (receiveStateBegin === null) {
         receiveStateBegin = time;
     }
