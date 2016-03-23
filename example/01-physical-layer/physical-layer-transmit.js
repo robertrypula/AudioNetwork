@@ -1,42 +1,59 @@
 var 
-    SYNCHRONIZATION_SIGNAL_DURATION = 8,
-    SYNCHRONIZATION_SIGNAL_GAP_DURATION = 1
+    SYNCHRONIZATION_SYMBOL_DURATION = 8.0,
+    SYNCHRONIZATION_GUARD_INTERVAL = 0.0,
+    SYNCHRONIZATION_INTERPACKET_GAP = 1.0
 ;
 
-function transmit(channelIndex) {
+function transmitSymbol(channelIndex, packetData) {
+    // TODO refactor to: transmitSymbol(channelIndex, ofdmIndex, symbol);
     var 
-        dataPacket = getStrById('tx-data-packet-' + channelIndex),
         symbolDuration = getFloatById('symbol-duration') / 1000,
-        guardInterval = getFloatById('guard-interval') / 1000
+        guardInterval = getFloatById('guard-interval') / 1000,
+        interpacketGap = getFloatById('interpacket-gap') / 1000
     ;
 
-    transmitDataPacket(channelIndex, dataPacket, symbolDuration, guardInterval);
+    $$transmit(channelIndex, packetData, symbolDuration, guardInterval, interpacketGap);
 }
 
-function transmitSynchronizationSignal(channelIndex) {
-    var synchronizationSignal = '';
+function transmitPacket(channelIndex) {
+    var 
+        packetData = getStrById('tx-packet-data-' + channelIndex),
+        symbolDuration = getFloatById('symbol-duration') / 1000,
+        guardInterval = getFloatById('guard-interval') / 1000,
+        interpacketGap = getFloatById('interpacket-gap') / 1000
+    ;
+
+    // TODO use syncPreamble
+    // syncPreamble = !!document.getElementById('sync-preamble').checked
+
+    $$transmit(channelIndex, packetData, symbolDuration, guardInterval, interpacketGap);
+}
+
+function transmitSynchronization(channelIndex) {
+    var synchronizationData = '';
 
     for (i = 0; i < anpl.getRxChannelOfdmSize(channelIndex); i++) {
-        synchronizationSignal += synchronizationSignal === '' ? '0' : '.0';
+        synchronizationData += synchronizationData === '' ? '0' : '.0';
     }
 
-    transmitDataPacket(
+    $$transmit(
         channelIndex, 
-        synchronizationSignal, 
-        SYNCHRONIZATION_SIGNAL_DURATION, 
-        SYNCHRONIZATION_SIGNAL_GAP_DURATION
+        synchronizationData, 
+        SYNCHRONIZATION_SYMBOL_DURATION, 
+        SYNCHRONIZATION_GUARD_INTERVAL,
+        SYNCHRONIZATION_INTERPACKET_GAP
     );
 }
 
-function transmitDataPacket(channelIndex, dataPacket, symbolDuration, guardInterval) {
+function $$transmit(channelIndex, data, symbolDuration, guardInterval, interpacketGap) {
     var
         pskSize = getIntById('tx-psk-size-' + channelIndex),
-        ofdmBurstList = dataPacket.split(' '),
+        ofdmBurstList = data.split(' '),
         ofdmBurstSymbolList, ofdmBurstSymbol,
-        amplitude, data, dataPacketParsed, mute, i, j
-        ;
+        amplitude, data, packetDataParsed, mute, i, j
+    ;
 
-    dataPacketParsed = [];
+    packetDataParsed = [];
     for (i = 0; i < ofdmBurstList.length; i++) {
         ofdmBurstSymbolList = ofdmBurstList[i].split('.');
 
@@ -52,23 +69,32 @@ function transmitDataPacket(channelIndex, dataPacket, symbolDuration, guardInter
                 phase: ofdmBurstSymbol / pskSize
             });
         }
-        dataPacketParsed.push(data);
+        packetDataParsed.push(data);
 
-        if (guardInterval === 0) {
-            continue;
+        if (guardInterval > 0) {
+            data = [];
+            for (j = 0; j < ofdmBurstSymbolList.length; j++) {
+                data.push({
+                    amplitude: 0,
+                    duration: guardInterval
+                });
+            }
+            packetDataParsed.push(data);
         }
+    }
 
+    if (interpacketGap > 0 && ofdmBurstSymbolList) {
         data = [];
         for (j = 0; j < ofdmBurstSymbolList.length; j++) {
             data.push({
                 amplitude: 0,
-                duration: guardInterval
+                duration: interpacketGap
             });
         }
-        dataPacketParsed.push(data);
+        packetDataParsed.push(data);
     }
 
-    for (i = 0; i < dataPacketParsed.length; i++) {
-        anpl.tx(channelIndex, dataPacketParsed[i]);
+    for (i = 0; i < packetDataParsed.length; i++) {
+        anpl.tx(channelIndex, packetDataParsed[i]);
     }
 }

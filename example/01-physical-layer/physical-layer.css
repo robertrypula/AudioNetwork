@@ -24,13 +24,18 @@ body, html {
     margin-left: -15px;
 }
 
-.row:before {
+.row:before, .row:after {
     content: " ";
     display: table;
     clear: both;
 }
 
-.row:after {
+.clearfix {
+    position: relative;
+    min-height: 1px;
+}
+
+.clearfix:before, .clearfix:after {
     content: " ";
     display: table;
     clear: both;

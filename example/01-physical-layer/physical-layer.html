@@ -11,7 +11,7 @@
         <div class="container">
 
             <h1>Audio network - physical layer example</h1>
-            <div>
+            <div class="clearfix margin-bottom">
                 <div class="row margin-bottom">
                     <div class="col col-sx-12">
                         <p>
@@ -35,7 +35,7 @@
             </div>
 
             <h2>Initialize</h2>
-            <div>
+            <div class="clearfix margin-bottom">
 
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -173,7 +173,7 @@
             </div>
 
             <h2>General info/settings</h2>
-            <div>
+            <div class="clearfix margin-bottom">
 
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -208,10 +208,38 @@
                     </div>
                 </div>
 
+                <div class="row margin-bottom view-type view-type-medium view-type-complex">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="interpacket-gap">
+                            Interpacket gap [ms]
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input type="text" id="interpacket-gap" value="500" />
+                    </div>
+                </div>
+
+
+                <div class="row margin-bottom view-type view-type-medium view-type-complex">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="sync-preamble" class="label-for-checkbox">
+                            Add SyncPreamble to each packet
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="checkbox"
+                            checked="checked"
+                            id="sync-preamble"
+                            value="1"
+                            />
+                    </div>
+                </div>
+
             </div>
 
             <h2>Receive</h2>
-            <div>
+            <div class="clearfix margin-bottom">
 
                 <div class="row margin-bottom view-type view-type-complex">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -272,7 +300,7 @@
             </div>
 
             <h2>Transmit</h2>
-            <div>
+            <div class="clearfix margin-bottom">
 
                 <div class="row margin-bottom view-type view-type-complex">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -445,7 +473,7 @@
                         </b>
                     </div>
                     <div class="col col-xs-7 col-md-6">
-                        <button class="btn btn-default" onClick="transmitSynchronizationSignal([[ channelIndex ]])">
+                        <button class="btn btn-default" onClick="transmitSynchronization([[ channelIndex ]])">
                             SYNC
                         </button>
                     </div>
@@ -453,18 +481,18 @@
 
                 <div class="row margin-bottom">
                     <div class="col col-xs-5 col-md-3">
-                        <label for="tx-data-packet-[[ channelIndex ]]">
+                        <label for="tx-packet-data-[[ channelIndex ]]">
                             Send packet
                         </label>
                     </div>
                     <div class="col col-xs-7 col-md-6">
                         <textarea
-                            class="data-packet-textarea"
-                            id="tx-data-packet-[[ channelIndex ]]"
+                            class="packet-data-textarea"
+                            id="tx-packet-data-[[ channelIndex ]]"
                             ></textarea>
                         <button 
                             class="btn btn-default" 
-                            onClick="transmit([[ channelIndex ]])"
+                            onClick="transmitPacket([[ channelIndex ]])"
                             >
                             Send packet
                         </button>
@@ -549,7 +577,7 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-5">
                             <b class="label">
-                                Symbol send
+                                Send symbol
                             </b>
                         </div>
                         <div class="col col-xs-7">

@@ -237,26 +237,26 @@ function $$uiRefreshButtonInputSpecific() {
 }
 
 function $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex) {
-    var pskSize, element, channelOfdmSize, i, j, dataPacketList, ofdmList;
+    var pskSize, element, channelOfdmSize, i, j, packetDataList, ofdmList;
 
     pskSize = getIntById('tx-psk-size-' + channelIndex);
-    element = document.getElementById('tx-data-packet-' + channelIndex);
+    element = document.getElementById('tx-packet-data-' + channelIndex);
     channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
-    dataPacketList = [];
+    packetDataList = [];
 
     for (i = 0; i < pskSize; i++) {
         ofdmList = [];
         for (j = 0; j < channelOfdmSize; j++) {
             ofdmList.push(i);
         }
-        dataPacketList.push(ofdmList.join('.'));
+        packetDataList.push(ofdmList.join('.'));
     }
 
-    element.value = dataPacketList.join(' ');
+    element.value = packetDataList.join(' ');
 }
 
 function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
-    var i, j, k, element, pskSize, dataPacket, dataPacketList, channelOfdmSize;
+    var i, j, k, element, pskSize, packetData, packetDataList, channelOfdmSize;
 
     if (rxTx === 'rx') {
         channelOfdmSize = anpl.getRxChannelOfdmSize(channelIndex);
@@ -270,15 +270,16 @@ function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
         element.innerHTML = '';
         for (j = 0; j < pskSize; j++) {
             if (rxTx === 'tx') {
-                dataPacketList = [];
+                packetDataList = [];
                 for (k = 0; k < channelOfdmSize; k++) {
-                    dataPacketList.push(i === k ? j : '-');
+                    packetDataList.push(i === k ? j : '-');
                 }
-                dataPacket = dataPacketList.join('.');
+                packetData = packetDataList.join('.');
+                // TODO refactor to: transmitSymbol(channelIndex, ofdmIndex, symbol);
                 element.innerHTML += (
                     '<a ' +
                     '    href="javascript:void(0)" ' +
-                    '    onClick="transmitDataPacket(' + channelIndex + ', \'' + dataPacket + '\')" ' +
+                    '    onClick="transmitSymbol(' + channelIndex + ', \'' + packetData + '\')" ' +
                     '    >' +
                     '   ' + j +
                     '</a>'
