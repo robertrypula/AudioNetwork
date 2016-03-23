@@ -52,6 +52,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + add source button active class
                 + improve responsive design
             - add checkbox for tx/rx config
+            - add margin to sections
             - use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
             - add inter-packet gap duration
 
