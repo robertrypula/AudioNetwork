@@ -21,14 +21,26 @@ var AnalyserChart = (function () {
             this.$$data = null;
             this.$$freezeChart = false;
             this.$$analyserMethod = 'getByteFrequencyData';
-            this.$$destroy = false;
+            this.$$destroy = null;
 
             this.$$initAnimationFrame();
             this.$$init();
         };
 
         AC.prototype.destroy = function () {
-            this.$$destroy = true;
+            var self = this;
+
+            if (this.$$destroy) {
+                return this.$$destroy.promise;
+            }
+
+            self.$$destroy = {};
+            this.$$destroy.promise = new Promise(function (resolve, reject) {
+                self.$$destroy.resolve = resolve;
+                self.$$destroy.reject = reject;
+            });
+
+            return this.$$destroy.promise;
         };
 
         AC.prototype.$$init = function () {
@@ -256,14 +268,11 @@ var AnalyserChart = (function () {
             var 
                 length = this.$$data.length,
                 ctx = this.$$canvasContext,
-                i;
+                i
+            ;
 
-            if (this.$$destroy) {
-                this.$$parentElement.innerHTML = '';
-                return false;
-            }
             if (ctx === null || this.$$freezeChart) {
-                return true;
+                return;
             }
             ctx.clearRect(0, 0, this.$$canvasWidth, this.$$canvasHeight);
             this.$$analyser[this.$$analyserMethod](this.$$data);
@@ -277,8 +286,6 @@ var AnalyserChart = (function () {
                 ctx.closePath();
                 ctx.stroke();
             }
-
-            return true;
         };
 
         AC.prototype.$$initCanvasContext = function () {
@@ -292,7 +299,11 @@ var AnalyserChart = (function () {
             var self = this;
 
             function drawAgain() {
-                if (self.$$updateChart()) {
+                if (self.$$destroy) {
+                    self.$$parentElement.innerHTML = '';
+                    self.$$destroy.resolve();
+                } else {
+                    self.$$updateChart();
                     requestAnimationFrame(drawAgain);
                 }
             }
