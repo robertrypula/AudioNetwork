@@ -35,9 +35,8 @@ var AnalyserChart = (function () {
             }
 
             self.$$destroy = {};
-            this.$$destroy.promise = new Promise(function (resolve, reject) {
+            this.$$destroy.promise = new Promise(function (resolve) {
                 self.$$destroy.resolve = resolve;
-                self.$$destroy.reject = reject;
             });
 
             return this.$$destroy.promise;

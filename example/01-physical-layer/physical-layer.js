@@ -43,13 +43,10 @@ function reinitialize() {
     dftTimeSpan = getFloatById('rx-dft-time-span');
     notificationPerSecond = getIntById('rx-notification-per-second');
 
-    destroy();
-
-    // we need to wait because canvas related objects are cleaned on next drawing frame that is asynchronous
-    setTimeout(function () {
+    destroy(function () {
         receivePacketHistory = [];
         initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
-    }, 500);
+    });
 }
 
 function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan) {
@@ -91,12 +88,21 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 }
 
 
-function destroy() {
+function destroy(cb) {
     if (anpl) {
-        anpl.destroy();
-        document.getElementById('tx-channel-container').innerHTML = '';
-        document.getElementById('rx-channel-container').innerHTML = '';
-        anpl = null;
+        anpl.destroy().then(function () {
+            document.getElementById('tx-channel-container').innerHTML = '';
+            document.getElementById('rx-channel-container').innerHTML = '';
+            if (typeof cb === 'function') {
+                cb();
+            } else {
+                anpl = null;
+            }
+        });
+    } else {
+        if (typeof cb === 'function') {
+            cb();
+        }
     }
 }
 

@@ -55,7 +55,7 @@ var AudioNetworkPhysicalLayer = (function () {
         
             - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
                 - add checkbox for tx/rx config
-                - add callback to destroy
+                + add callback to destroy
                 - add bit speed information at UI
 
             - refactor all transmit and receive logic (move it to physical layer internals)
@@ -295,20 +295,43 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         ANPL.prototype.destroy = function () {
-            var i, j;
+            var i, j, promiseResolve, promise, destroyAsyncCount;
+
+            destroyAsyncCount = 0;
+            promise = new Promise(function (resolve) {
+                promiseResolve = resolve;
+            });
 
             this.setRxInput(null);
 
             // rx
             if (this.$$rxAnalyserChart) {
-                this.$$rxAnalyserChart.destroy();
+                destroyAsyncCount++;
+                this.$$rxAnalyserChart
+                    .destroy()
+                    .then(function () {
+                        destroyAsyncCount--;
+                        if (destroyAsyncCount === 0) {
+                            promiseResolve();
+                        }
+                    })
+                ;
                 this.$$rxAnalyserChart = null;
             }
             this.$$rxAnalyser.disconnect(this.$$channelReceiveManager.getInputNode());
             if (this.$$rxConstellationDiagram) {
                 for (i = 0; i < this.$$rxConstellationDiagram.length; i++) {
                     for (j = 0; j < this.$$rxConstellationDiagram[i].constellationDiagram.length; j++) {
-                        this.$$rxConstellationDiagram[i].constellationDiagram[j].destroy();
+                        destroyAsyncCount++;
+                        this.$$rxConstellationDiagram[i].constellationDiagram[j]
+                            .destroy()
+                            .then(function () {
+                                destroyAsyncCount--;
+                                if (destroyAsyncCount === 0) {
+                                    promiseResolve();
+                                }
+                            })
+                        ;
                     }
                 }
             }
@@ -323,6 +346,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$channelTransmitManager = null;
 
             this.$$rxHandler.destroy();
+
+            return promise;
         };
 
         ANPL.prototype.getOutputTxState = function () {

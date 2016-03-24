@@ -15,14 +15,25 @@ var ConstellationDiagram = (function () {
             this.$$canvasHeight = height;
             this.$$colorAxis = colorAxis;
             this.$$colorHistoryPoint = colorHistoryPoint;
-            this.$$destroy = false;
+            this.$$destroy = null;
             
             this.$$initAnimationFrame();
             this.$$init();
         };
 
         CD.prototype.destroy = function () {
-            this.$$destroy = true;
+            var self = this;
+
+            if (this.$$destroy) {
+                return this.$$destroy.promise;
+            }
+
+            self.$$destroy = {};
+            this.$$destroy.promise = new Promise(function (resolve) {
+                self.$$destroy.resolve = resolve;
+            });
+
+            return this.$$destroy.promise;
         };
 
         CD.prototype.$$init = function () {
@@ -90,13 +101,8 @@ var ConstellationDiagram = (function () {
                 tailUnitPosition, color, x, y, i, isNewest
             ;
 
-            if (this.$$destroy) {
-                this.$$parentElement.innerHTML = '';
-                return false;
-            }
-
             if (ctx === null) {
-                return true;
+                return;
             }
 
             ctx.clearRect(0, 0, w, h);
@@ -144,8 +150,6 @@ var ConstellationDiagram = (function () {
                     (isNewest ? 5 : 3)
                 );
             }
-
-            return true;
         };
 
         CD.prototype.$$colorInterpolate = function (start, end, unitPosition) {
@@ -161,7 +165,11 @@ var ConstellationDiagram = (function () {
             var self = this;
 
             function drawAgain() {
-                if (self.$$updateChart()) {
+                if (self.$$destroy) {
+                    self.$$parentElement.innerHTML = '';
+                    self.$$destroy.resolve();
+                } else {
+                    self.$$updateChart();
                     requestAnimationFrame(drawAgain);
                 }
             }
