@@ -52,9 +52,9 @@ var AudioNetworkPhysicalLayer = (function () {
             + add margin to sections
             + use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
             + add inter-packet gap duration
-        
+
             - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
-                - add checkbox for tx/rx config
+                + add checkbox for tx/rx config
                 + add callback to destroy
                 - add bit speed information at UI
 
@@ -78,9 +78,9 @@ var AudioNetworkPhysicalLayer = (function () {
 0  1  0  0  01
 0  1  0  1  10
 
-01 11 01 10 
+01 11 01 10
 
-D6 45 
+D6 45
 
 8 subcarriers
 3 bit/baud (PSK-8)
@@ -91,7 +91,7 @@ D6 45
 
 SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
 
-            1 B         1 B          1 B       0...255 B         2 B                
+            1 B         1 B          1 B       0...255 B         2 B
 
 
     */
@@ -442,7 +442,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                     .getRxPhaseCorrection(ofdmIndex)
             );
         };
-        
+
         ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager

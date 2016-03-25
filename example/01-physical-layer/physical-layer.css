@@ -142,7 +142,7 @@ label.label-for-checkbox {
 
 .btn-default {
     background-color: lightgray;
-    color: white;    
+    color: white;
 }
 
 .btn-default.active {
@@ -176,6 +176,12 @@ input[type=text], input[type=number] {
     outline: none;
     width: 100%;
     margin-bottom: 3px;
+}
+
+input[type=text]:disabled, input[type=number]:disabled, textarea:disabled {
+    color: #a4afbd;
+    background: #ddd;
+    border-color: #ccc;
 }
 
 textarea {

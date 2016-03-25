@@ -14,6 +14,7 @@ function reinitialize() {
         dftTimeSpan,
         notificationPerSecond,
         rxSpectrumVisible, rxConstellationDiagramVisible,
+        enabled,
         value, channelDataList, channelData, i, j;
 
     txRx.push({
@@ -27,7 +28,8 @@ function reinitialize() {
 
     for (i = 0; i < txRx.length; i++) {
         value = getStrById(txRx[i].id + '-channel-config');
-        channelDataList = value === '' ? [] : (value).split(' ');
+        enabled = !!document.getElementById(txRx[i].id + '-enabled').checked;
+        channelDataList = value === '' || !enabled ? [] : (value).split(' ');
         for (j = 0; j < channelDataList.length; j++) {
             channelData = channelDataList[j].split('-');
             txRx[i].data.push({
@@ -111,7 +113,7 @@ function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
 
     elementId = rxTx + '-frequency-input-' + channelIndex + '-' + ofdmIndex;
     newFrequency = getFloatById(elementId);
-    
+
     if (rxTx === 'tx') {
         anpl.setTxFrequency(channelIndex, ofdmIndex, newFrequency);
     } else {
@@ -126,7 +128,7 @@ function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
 
     elementId = rxTx + '-phase-correction-input-' + channelIndex + '-' + ofdmIndex;
     newFrequency = getFloatById(elementId);
-    
+
     if (rxTx === 'tx') {
         anpl.setTxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
     } else {

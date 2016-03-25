@@ -18,9 +18,9 @@ function getStrById(elementId) {
 }
 
 function addClass(elementIdOrElement, className) {
-    var 
-        element = typeof elementIdOrElement === 'string' ? 
-            document.getElementById(elementIdOrElement) : 
+    var
+        element = typeof elementIdOrElement === 'string' ?
+            document.getElementById(elementIdOrElement) :
             elementIdOrElement
     ;
 
@@ -32,9 +32,9 @@ function addClass(elementIdOrElement, className) {
 }
 
 function removeClass(elementIdOrElement, className) {
-    var 
-        element = typeof elementIdOrElement === 'string' ? 
-            document.getElementById(elementIdOrElement) : 
+    var
+        element = typeof elementIdOrElement === 'string' ?
+            document.getElementById(elementIdOrElement) :
             elementIdOrElement
     ;
 
@@ -44,7 +44,7 @@ function removeClass(elementIdOrElement, className) {
         element.className = element
             .className
             .replace(
-                new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), 
+                new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'),
                 ' '
             )
         ;
@@ -135,6 +135,15 @@ function viewType(type) {
     removeClass('view-type-medium', 'active');
     removeClass('view-type-complex', 'active');
     addClass('view-type-' + type, 'active');
+}
+
+function enabledChanged(rxTx) {
+    var
+        element = document.getElementById(rxTx + '-channel-config'),
+        enabled = !!document.getElementById(rxTx + '-enabled').checked
+    ;
+
+    element.disabled = !enabled;
 }
 
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {
@@ -301,10 +310,10 @@ function $$uiRefreshOfdmSpecific(type, isLabel, rxTx, channelIndex, ofdmIndex) {
     var elementId, element, value;
 
     elementId = (
-        rxTx + '-' + 
-        type + '-' + 
-        (isLabel ? 'label-' : 'input-') + 
-        channelIndex + '-' + 
+        rxTx + '-' +
+        type + '-' +
+        (isLabel ? 'label-' : 'input-') +
+        channelIndex + '-' +
         ofdmIndex
     );
     element = document.getElementById(elementId);
@@ -325,7 +334,7 @@ function $$uiRefreshOfdmSpecific(type, isLabel, rxTx, channelIndex, ofdmIndex) {
             }
             break;
     }
-    
+
     element[isLabel ? 'innerHTML' : 'value'] = value;
 }
 
@@ -346,5 +355,5 @@ function $$loopChannelOfdm(rxTx, callback) {
                 callback(i, j, pskSize);
             }
         }
-    }   
+    }
 }
