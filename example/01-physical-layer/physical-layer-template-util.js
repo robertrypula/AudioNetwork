@@ -174,6 +174,10 @@ function uiRefresh() {
 
     // buttons states
     $$uiRefreshButtonSpecific();
+
+    // speed update
+    $$uiRefreshSpeedSpecific('rx');
+    $$uiRefreshSpeedSpecific('tx');
 }
 
 // ---
@@ -336,6 +340,28 @@ function $$uiRefreshOfdmSpecific(type, isLabel, rxTx, channelIndex, ofdmIndex) {
     }
 
     element[isLabel ? 'innerHTML' : 'value'] = value;
+}
+
+function $$uiRefreshSpeedSpecific(rxTx) {
+    var element, i, pskSize;
+
+    if (rxTx === 'rx') {
+        for (i = 0; i < anpl.getRxChannelSize(); i++) {
+            pskSize = getIntById(rxTx + '-psk-size-' + i);
+            anpl.getRxChannelOfdmSize(i);
+            element = document.getElementById('rx-speed-' + i);
+
+            element.innerHTML = i + ', ' + pskSize + ', ' + anpl.getRxChannelOfdmSize(i);
+        }
+    } else {
+        for (i = 0; i < anpl.getTxChannelSize(); i++) {
+            pskSize = getIntById(rxTx + '-psk-size-' + i);
+            anpl.getTxChannelOfdmSize(i);
+            element = document.getElementById('tx-speed-' + i);
+
+            element.innerHTML = i + ', ' + pskSize + ', ' + anpl.getRxChannelOfdmSize(i);
+        }
+    }
 }
 
 function $$loopChannelOfdm(rxTx, callback) {
