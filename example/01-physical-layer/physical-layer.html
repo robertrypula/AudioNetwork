@@ -227,7 +227,12 @@
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="text" id="symbol-duration" value="250" />
+                        <input
+                            type="number"
+                            id="symbol-duration"
+                            value="250"
+                            onChange="uiRefresh()"
+                        />
                     </div>
                 </div>
 
@@ -238,7 +243,12 @@
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="text" id="guard-interval" value="250" />
+                        <input
+                            type="number"
+                            id="guard-interval"
+                            value="250"
+                            onChange="uiRefresh()"
+                        />
                     </div>
                 </div>
 
@@ -249,7 +259,7 @@
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="text" id="interpacket-gap" value="500" />
+                        <input type="number" id="interpacket-gap" value="500" />
                     </div>
                 </div>
 

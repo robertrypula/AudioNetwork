@@ -148,6 +148,7 @@ function enabledChanged(rxTx) {
 
 function uiRefreshOnPskSizeChange(rxTx, channelIndex) {
     $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex);
+    $$uiRefreshSpeedSpecific(rxTx);
     if (rxTx === 'tx') {
         $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex);
     }
@@ -343,23 +344,27 @@ function $$uiRefreshOfdmSpecific(type, isLabel, rxTx, channelIndex, ofdmIndex) {
 }
 
 function $$uiRefreshSpeedSpecific(rxTx) {
-    var element, i, pskSize;
+    var
+        element, i, pskSize,
+        symbolDuration = getFloatById('symbol-duration') / 1000,
+        guardInterval = getFloatById('guard-interval') / 1000,
+        symbolPerSecond = 1 / (symbolDuration + guardInterval),
+        bitPerSecond
+    ;
 
     if (rxTx === 'rx') {
         for (i = 0; i < anpl.getRxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
-            anpl.getRxChannelOfdmSize(i);
             element = document.getElementById('rx-speed-' + i);
-
-            element.innerHTML = i + ', ' + pskSize + ', ' + anpl.getRxChannelOfdmSize(i);
+            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * anpl.getRxChannelOfdmSize(i);
+            element.innerHTML = bitPerSecond;
         }
     } else {
         for (i = 0; i < anpl.getTxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
-            anpl.getTxChannelOfdmSize(i);
             element = document.getElementById('tx-speed-' + i);
-
-            element.innerHTML = i + ', ' + pskSize + ', ' + anpl.getRxChannelOfdmSize(i);
+            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * anpl.getTxChannelOfdmSize(i);
+            element.innerHTML = bitPerSecond;
         }
     }
 }

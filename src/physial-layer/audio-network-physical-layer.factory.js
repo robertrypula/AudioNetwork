@@ -56,10 +56,10 @@ var AudioNetworkPhysicalLayer = (function () {
             - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
                 + add checkbox for tx/rx config
                 + add callback to destroy
-                - add bit speed information at UI
+                + add bit speed information at UI
 
             - refactor all transmit and receive logic (move it to physical layer internals)
-                - auto gain controll
+                - auto gain control
                 - remove symbol generation from template-util
                 - symbol shouldn't have any guard interval or/and interpacket gap
 
