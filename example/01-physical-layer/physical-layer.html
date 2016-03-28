@@ -30,6 +30,66 @@
                             pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
                             deserunt mollit anim id est laborum.
                         </p>
+                        <p>
+                            If you don't want to dig into AudioNetwork internals you can use following buttons
+                            to setup some common configuration:
+
+                            <br/><br/>
+
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(1, 2, 2, 1)"
+                                >
+                                One channel (PSK-2, baud-2, OFDM-1) - 2 bit/s
+                            </button>
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(1, 4, 2, 1)"
+                                >
+                                One channel (PSK-4, baud-2, OFDM-1) - 4 bit/s
+                            </button>
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(1, 16, 2, 1)"
+                                >
+                                One channel (PSK-16, baud-2, OFDM-1) - 8 bit/s
+                            </button>
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(1, 2, 10, 8)"
+                                >
+                                One channel (PSK-2, baud-10, OFDM-8) - 80 bit/s
+                            </button>
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(1, 4, 5, 16)"
+                                >
+                                One channel (PSK-4, baud-5, OFDM-16) - 160 bit/s
+                            </button>
+                        </p>
+
+                        <p>
+                            Two channels:
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(2, 16, 2, 1)"
+                                >
+                                Two channels (PSK-16, baud-2, OFDM-1) - 8 bit/s each
+                            </button>
+                            <br/>
+                            <button
+                                class="btn btn-default"
+                                onClick="quickConfigure(2, 4, 5, 16)"
+                                >
+                                Two channels (PSK-4, baud-5, OFDM-16) - 160 bit/s each
+                            </button>
+                        </p>
+
                     </div>
                 </div>
             </div>
@@ -76,7 +136,7 @@
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
                         <input
-                            type="text"
+                            type="number"
                             id="rx-dft-time-span"
                             value="250"
                             />
@@ -497,7 +557,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-5 col-md-3">
                         <b class="label">
-                            Speed [bit/sec]
+                            Speed [bit/s]
                         </b>
                     </div>
                     <div class="col col-xs-7 col-md-6">

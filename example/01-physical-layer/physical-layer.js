@@ -6,7 +6,48 @@ function onLoad() {
     reinitialize();
 }
 
-function reinitialize() {
+function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
+    var ofdmSpacing, symbolAndGuard, config, i, element;
+
+    if (channelNumber < 1 || channelNumber > 2) {
+        throw 'Not supported quickConfiguration parameters';
+    }
+
+    symbolAndGuard = 0.5 * (1 / baud);
+    ofdmSpacing = 4 / symbolAndGuard;    // [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
+                                         // is the useful symbol duration (the receiver side window size),
+                                         // and k is a positive integer, typically equal to 1
+
+    document.getElementById('rx-dft-time-span').value = Math.round(symbolAndGuard * 1000);
+    document.getElementById('symbol-duration').value = Math.round(symbolAndGuard * 1000);
+    document.getElementById('guard-interval').value = Math.round(symbolAndGuard * 1000);
+    document.getElementById('interpacket-gap').value = Math.round(2 * symbolAndGuard * 1000);
+
+    if (channelNumber === 1) {
+        config = '1070-' + ofdmSize + '-' + ofdmSpacing;
+        document.getElementById('tx-channel-config').value = config;
+        document.getElementById('rx-channel-config').value = config;
+    } else {
+        config = '1070-' + ofdmSize + '-' + ofdmSpacing + ' ' + '2025-' + ofdmSize + '-' + ofdmSpacing;
+        document.getElementById('tx-channel-config').value = config;
+        document.getElementById('rx-channel-config').value = config;
+    }
+
+    reinitialize(function () {
+        for (i = 0; i < anpl.getRxChannelSize(); i++) {
+            element = document.getElementById('rx-psk-size-' + i);
+            element.value = pskSize;
+            element.onchange();
+        }
+        for (i = 0; i < anpl.getTxChannelSize(); i++) {
+            element = document.getElementById('tx-psk-size-' + i);
+            element.value = pskSize;
+            element.onchange();
+        }
+    });
+}
+
+function reinitialize(cb) {
     var
         txChannel = [],
         rxChannel = [],
@@ -48,6 +89,10 @@ function reinitialize() {
     destroy(function () {
         receivePacketHistory = [];
         initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
+
+        if (typeof cb === 'function') {
+            cb();
+        }
     });
 }
 

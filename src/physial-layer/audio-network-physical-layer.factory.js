@@ -53,7 +53,7 @@ var AudioNetworkPhysicalLayer = (function () {
             + use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
             + add inter-packet gap duration
 
-            - add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
+            + add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
                 + add checkbox for tx/rx config
                 + add callback to destroy
                 + add bit speed information at UI
