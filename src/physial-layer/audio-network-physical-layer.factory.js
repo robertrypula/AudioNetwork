@@ -59,9 +59,9 @@ var AudioNetworkPhysicalLayer = (function () {
                 + add bit speed information at UI
 
             - refactor all transmit and receive logic (move it to physical layer internals)
-                - auto gain control
-                - remove symbol generation from template-util
-                - symbol shouldn't have any guard interval or/and interpacket gap
+                - [RX] auto gain control
+                - [TX] remove symbol generation from template-util
+                - [TX] symbol shouldn't have any guard interval or/and interpacket gap
 
             - add auto tuning feature with ability to align phase offset
                 - ? separate class where we can pass data from rx ?

@@ -1,6 +1,10 @@
 'use strict';
 
-var anpl = null;
+var 
+    anpl = null,
+    transmitAdapter = null,
+    receiveAdapter = null
+;
 
 function onLoad() {
     reinitialize();
@@ -98,6 +102,7 @@ function reinitialize(cb) {
 
 function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan) {
     generateHtml(txChannel, rxChannel);
+
     anpl = new AudioNetworkPhysicalLayer({
         tx: {
             channel: txChannel
@@ -129,8 +134,13 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             }
         }
     });
+    transmitAdapter = new AudioNetworkTransmitAdapter(anpl);
+    receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
+    anpl.rx(function (channelIndex, carrierDetail, time) {
+        receiveAdapter.receive(channelIndex, carrierDetail, time); // for packet detection
+        receive(channelIndex, carrierDetail, time); // for real time UI update
+    });
 
-    anpl.rx(receive);
     initializeHtml();
 }
 
@@ -138,18 +148,17 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 function destroy(cb) {
     if (anpl) {
         anpl.destroy().then(function () {
+            transmitAdapter = null;
+            receiveAdapter = null;
+            anpl = null;
             document.getElementById('tx-channel-container').innerHTML = '';
             document.getElementById('rx-channel-container').innerHTML = '';
-            if (typeof cb === 'function') {
-                cb();
-            } else {
-                anpl = null;
-            }
+
         });
-    } else {
-        if (typeof cb === 'function') {
-            cb();
-        }
+    }
+
+    if (typeof cb === 'function') {
+        cb();
     }
 }
 
