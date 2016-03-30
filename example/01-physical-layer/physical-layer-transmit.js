@@ -1,8 +1,4 @@
-function transmitSymbol(channelIndex) {
-    // TODO refactor to: transmitSymbol(channelIndex, ofdmIndex, symbol);
-    symbol = 0;
-    ofdmIndex = 0;
-
+function transmitSymbol(channelIndex, ofdmIndex, symbol) {
     var 
         pskSize = getIntById('tx-psk-size-' + channelIndex),
         symbolDuration = getFloatById('symbol-duration') / 1000

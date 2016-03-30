@@ -121,7 +121,7 @@ function initializeHtml() {
 function viewType(type) {
     var query, i;
 
-    query = document.querySelectorAll('.view-type')
+    query = document.querySelectorAll('.view-type');
     for (i = 0; i < query.length; i++) {
         addClass(query[i], 'hidden');
     }
@@ -270,7 +270,7 @@ function $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex) {
 }
 
 function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
-    var i, j, k, element, pskSize, packetData, packetDataList, channelOfdmSize;
+    var ofdmIndex, symbol, element, pskSize, channelOfdmSize;
 
     if (rxTx === 'rx') {
         channelOfdmSize = anpl.getRxChannelOfdmSize(channelIndex);
@@ -279,31 +279,25 @@ function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
     }
     pskSize = getIntById(rxTx + '-psk-size-' + channelIndex);
 
-    for (i = 0; i < channelOfdmSize; i++) {
-        element = document.getElementById(rxTx + '-symbol-' + channelIndex + '-' + i);
+    for (ofdmIndex = 0; ofdmIndex < channelOfdmSize; ofdmIndex++) {
+        element = document.getElementById(rxTx + '-symbol-' + channelIndex + '-' + ofdmIndex);
         element.innerHTML = '';
-        for (j = 0; j < pskSize; j++) {
+        for (symbol = 0; symbol < pskSize; symbol++) {
             if (rxTx === 'tx') {
-                packetDataList = [];
-                for (k = 0; k < channelOfdmSize; k++) {
-                    packetDataList.push(i === k ? j : '-');
-                }
-                packetData = packetDataList.join('.');
-                // TODO refactor to: transmitSymbol(channelIndex, ofdmIndex, symbol);
                 element.innerHTML += (
                     '<a ' +
                     '    href="javascript:void(0)" ' +
-                    '    onClick="transmitSymbol(' + channelIndex + ', \'' + packetData + '\')" ' +
+                    '    onClick="transmitSymbol(' + channelIndex + ', ' + ofdmIndex + ', ' + symbol + ')" ' +
                     '    >' +
-                    '   ' + j +
+                    '   ' + symbol +
                     '</a>'
                 );
             } else {
                 element.innerHTML += (
                     '<span ' +
-                    '    id="rx-symbol-' + channelIndex + '-' + i + '-' + j + '" '+
+                    '    id="rx-symbol-' + channelIndex + '-' + ofdmIndex + '-' + symbol + '" '+
                     '    >' +
-                    '   ' + j +
+                    '   ' + symbol +
                     '</span>'
                 );
             }

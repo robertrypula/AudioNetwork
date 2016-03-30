@@ -60,7 +60,7 @@ var AudioNetworkPhysicalLayer = (function () {
 
             - refactor all transmit and receive logic (move it to physical layer internals)
                 - [RX] auto gain control
-                - [TX] remove symbol generation from template-util
+                + [TX] remove symbol generation from template-util
                 + [TX] symbol shouldn't have any guard interval or/and interpacket gap
 
             - add auto tuning feature with ability to align phase offset
