@@ -4,9 +4,9 @@ var AudioNetworkTransmitAdapter = (function () {
     _AudioNetworkTransmitAdapter.$inject = [];
 
     /**
-     * This works as an wrapper for raw API that AudioNetworkPhysicalLayter provides. 
-     * It's much easier to send data using Adapter API. In case of realy fancy sound 
-     * generation cases you can use AudioNetworkPhysicalLayter API directly.
+     * This works as an wrapper for raw API that AudioNetworkPhysicalLayer provides.
+     * It's much easier to send data using Adapter API. In case of really fancy sound
+     * generation cases you can use AudioNetworkPhysicalLayer API directly.
      * 
      */
     function _AudioNetworkTransmitAdapter() {

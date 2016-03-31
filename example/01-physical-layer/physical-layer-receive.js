@@ -18,9 +18,6 @@ function handleFirstSymbolInPacket(symbolData) {
         current
     ;
 
-    // console.log('FIRST SYMBOL ', symbolData);
-    // console.log('----------');
-
     if (syncPreamble) {
         current = anpl.getRxPhaseCorrection(0, 0);
         anpl.setRxPhaseCorrection(0, 0, current + symbolData.phase);
@@ -41,10 +38,6 @@ function getSymbolWithBestQuality(symbolDataList) {
             maxPower = symbolDataList[i].powerDecibel;
         }
     }
-
-    // console.log(symbolDataList);
-    // console.log(bestQualityIndex);
-    // console.log('-------');
 
     return symbolDataList[bestQualityIndex];
 }
