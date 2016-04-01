@@ -137,7 +137,13 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     transmitAdapter = new AudioNetworkTransmitAdapter(anpl);
     receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
     anpl.rx(function (channelIndex, carrierDetail, time) {
-        receiveAdapter.receive(channelIndex, carrierDetail, time); // for packet detection
+        var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);
+        var receiveData;
+
+        receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // for packet detection
+        element.innerHTML = receiveData.state;
+
+
         receive(channelIndex, carrierDetail, time); // for real time UI update
     });
 

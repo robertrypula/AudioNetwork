@@ -8,12 +8,22 @@ var AudioNetworkReceiveAdapter = (function () {
 
         ANRA = function (audioNetworkPhysicalLayer) {
             this.$$anpl = audioNetworkPhysicalLayer;
+            this.$$stateMachine = RxStateMachineBuilder.build();
+
+            this.$$initStateMachine();
         };
 
         ANRA.prototype.receive = function (channelIndex, carrierDetail, time) {
-            
+
+
+            return {
+                state: 'test'
+            }
         };
 
+        ANRA.prototype.$$initStateMachine = function () {
+            
+        };
 
         ANRA.prototype.destroy = function () {
             

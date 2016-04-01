@@ -32,7 +32,7 @@ function getSymbolWithBestQuality(symbolDataList) {
     }
 
     maxPower = -100;
-    for (i = 0; i < symbolDataList.length; i++)  {
+    for (i = 0; i < symbolDataList.length; i++) {
         if (symbolDataList[i].powerDecibel > maxPower) {
             bestQualityIndex = i;
             maxPower = symbolDataList[i].powerDecibel;
