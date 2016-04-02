@@ -8,17 +8,52 @@ var AudioNetworkReceiveAdapter = (function () {
 
         ANRA = function (audioNetworkPhysicalLayer) {
             this.$$anpl = audioNetworkPhysicalLayer;
-            this.$$stateMachine = RxStateMachineBuilder.build();
+            this.$$stateMachine = RxStateMachineBuilder.build(
+                this.$$handlerIdle,
+                this.$$handlerSymbol,
+                this.$$handlerSync,
+                this.$$handlerGuard
+            );
 
             this.$$symbolData = [];
             this.$$packetData = [];
         };
 
-        ANRA.prototype.receive = function (channelIndex, carrierDetail, time) {
+        ANRA.prototype.$$handlerIdle = function (time, symbolData) {
+
+        };
+
+        ANRA.prototype.$$handlerSymbol = function (time, symbolData) {
+
+        };
+
+        ANRA.prototype.$$handlerSync = function (time, symbolData) {
+
+        };
+
+        ANRA.prototype.$$handlerGuard = function (time, symbolData) {
+
+        };
+
+        ANRA.prototype.receive = function (channelIndex, carrierDetail, time, pskSize) {
+            var state, testSymbolData;
+
+            pskSize = 4;
+            testSymbolData = {
+                symbol: (
+                    carrierDetail[0].powerDecibel > -6 ?
+                    Math.round(carrierDetail[0].phase * pskSize) % pskSize :
+                    null
+                ),
+                phase: carrierDetail[0].phase,
+                powerDecibel: carrierDetail[0].powerDecibel
+            };
+
+            state = this.$$stateMachine.getState(testSymbolData, time);
 
             return {
-                state: 'test'
-            }
+                state: state + ' - ' + testSymbolData.symbol
+            };
         };
 
         return ANRA;

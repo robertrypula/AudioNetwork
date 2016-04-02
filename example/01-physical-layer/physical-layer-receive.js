@@ -200,5 +200,5 @@ function receive(channelIndex, carrierDetail, time) {
         }
     }
 
-    receiveSampler(channelIndex, sampleTestSymbol, time);
+    // receiveSampler(channelIndex, sampleTestSymbol, time);
 }
