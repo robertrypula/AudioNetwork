@@ -91,7 +91,6 @@ function reinitialize(cb) {
     notificationPerSecond = getIntById('rx-notification-per-second');
 
     destroy(function () {
-        receivePacketHistory = [];
         initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
 
         if (typeof cb === 'function') {

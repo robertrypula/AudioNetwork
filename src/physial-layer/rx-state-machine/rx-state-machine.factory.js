@@ -7,23 +7,26 @@ var RxStateMachine = (function () {
         IDLE: 'IDLE',
         SYMBOL: 'SYMBOL',
         SYNC: 'SYNC',
-        GUARD: 'GUARD'
+        GUARD: 'GUARD',
+        ERROR: 'ERROR'
     };
 
     function _RxStateMachine() {
         var RSM;
 
-        RSM = function (handlerIdle, handlerSymbol, handlerSync, handlerGuard) {
+        RSM = function (handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             this.$$stateHandler = {};
             this.$$stateHandler[_RxStateMachine.STATE.IDLE] = handlerIdle;
             this.$$stateHandler[_RxStateMachine.STATE.SYMBOL] = handlerSymbol;
             this.$$stateHandler[_RxStateMachine.STATE.SYNC] = handlerSync;
             this.$$stateHandler[_RxStateMachine.STATE.GUARD] = handlerGuard;
+            this.$$stateHandler[_RxStateMachine.STATE.ERROR] = handlerError;
             this.$$state = _RxStateMachine.STATE.IDLE;
             this.$$stateDurationTime = 0;
             this.$$stateBeginTime = null;
-            this.$$symbolStateMaxDurationTime = 1.0;         // TODO change it
-            this.$$guardStateMaxDurationTime = 1.0;         // TODO change it
+            this.$$symbolStateMaxDurationTime = null;
+            this.$$guardStateMaxDurationTime = null;
+            this.$$syncStateMaxDurationTime = null;
         };
 
         RSM.prototype.$$changeState = function (newState, time) {
@@ -35,7 +38,7 @@ var RxStateMachine = (function () {
             }
         };
 
-        RSM.prototype.$$handlerIddle = function (symbolData, time) {
+        RSM.prototype.$$handlerIdle = function (symbolData, time) {
             if (symbolData.symbol !== null) {
                 this.$$changeState(_RxStateMachine.STATE.SYMBOL, time);
                 return false;
@@ -77,6 +80,11 @@ var RxStateMachine = (function () {
 
                 // run external handler
                 this.$$stateHandler[_RxStateMachine.STATE.SYNC](this.$$stateDurationTime, symbolData);
+
+                if (this.$$stateDurationTime > this.$$syncStateMaxDurationTime) {
+                    this.$$changeState(_RxStateMachine.STATE.ERROR, time);
+                    return false;
+                }
             }
 
             return true;
@@ -91,7 +99,7 @@ var RxStateMachine = (function () {
 
                 // run external handler
                 this.$$stateHandler[_RxStateMachine.STATE.GUARD](this.$$stateDurationTime, symbolData);
-
+                
                 if (this.$$stateDurationTime > this.$$guardStateMaxDurationTime) {
                     this.$$changeState(_RxStateMachine.STATE.IDLE, time);
                     return false;
@@ -101,16 +109,50 @@ var RxStateMachine = (function () {
             return true;
         };
 
+        RSM.prototype.$$handlerError = function (symbolData, time) {
+            if (symbolData.symbol === null) {
+                this.$$changeState(_RxStateMachine.STATE.IDLE, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[_RxStateMachine.STATE.ERROR](this.$$stateDurationTime, symbolData);
+            }
+
+            return true;
+        };
+
+        RSM.prototype.setGuardStateMaxDurationTime = function (time) {
+            this.$$guardStateMaxDurationTime = time;
+        };
+
+        RSM.prototype.setSymbolStateMaxDurationTime = function (time) {
+            this.$$symbolStateMaxDurationTime = time;
+        };
+
+        RSM.prototype.setSyncStateMaxDurationTime = function (time) {
+            this.$$syncStateMaxDurationTime = time;
+        };
+
         RSM.prototype.getState = function (symbolData, time) {
             var
                 S = _RxStateMachine.STATE,
                 finished
             ;
 
+            if (
+                this.$$guardStateMaxDurationTime === null ||
+                this.$$symbolStateMaxDurationTime === null ||
+                this.$$syncStateMaxDurationTime === null
+            ) {
+                throw 'Please set all max duration times first';
+            }
+
             while (true) {
                 switch (this.$$state) {
                     case S.IDLE:
-                        finished = this.$$handlerIddle(symbolData, time);
+                        finished = this.$$handlerIdle(symbolData, time);
                         break;
                     case S.SYMBOL:
                         finished = this.$$handlerSymbol(symbolData, time);
@@ -120,6 +162,9 @@ var RxStateMachine = (function () {
                         break;
                     case S.GUARD:
                         finished = this.$$handlerGuard(symbolData, time);
+                        break;
+                    case S.ERROR:
+                        finished = this.$$handlerError(symbolData, time);
                         break;
                 }
 

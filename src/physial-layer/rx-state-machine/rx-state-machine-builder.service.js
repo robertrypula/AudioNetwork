@@ -5,12 +5,13 @@ var RxStateMachineBuilder = (function () {
 
     function _RxStateMachineBuilder() {
 
-        function build(handlerIdle, handlerSymbol, handlerSync, handlerGuard) {
+        function build(handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             return new RxStateMachine(
                 handlerIdle,
                 handlerSymbol,
                 handlerSync,
-                handlerGuard
+                handlerGuard,
+                handlerError
             );
         }
 

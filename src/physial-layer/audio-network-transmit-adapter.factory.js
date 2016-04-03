@@ -3,37 +3,44 @@ var AudioNetworkTransmitAdapter = (function () {
 
     _AudioNetworkTransmitAdapter.$inject = [];
 
+    _AudioNetworkTransmitAdapter.SYNCHRONIZATION = {
+        PSK_SIZE: 1,
+        SYMBOL: 0,
+        SYMBOL_DURATION: 8.0,
+        GUARD_INTERVAL: 0.0,
+        INTERPACKET_GAP: 1.0
+    };
+
+    _AudioNetworkTransmitAdapter.PACKET = {
+        PSK_SIZE: 4,
+        SYMBOL_DURATION: 0.25,
+        GUARD_INTERVAL: 0.25,
+        INTERPACKET_GAP: 0.5
+    };
+
+    _AudioNetworkTransmitAdapter.SYMBOL = {
+        SYNC_PREAMBLE: false,
+        SYMBOL_DURATION: _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION,
+        GUARD_INTERVAL: 0.0,
+        INTERPACKET_GAP: 0.0,
+        AMPLITUDE: undefined
+    };
+
     /**
      * This works as an wrapper for raw API that AudioNetworkPhysicalLayer provides.
      * It's much easier to send data using Adapter API. In case of really fancy sound
      * generation cases you can use AudioNetworkPhysicalLayer API directly.
-     * 
+     *
      */
     function _AudioNetworkTransmitAdapter() {
-        var 
-            ANTA,
-            SYNCHRONIZATION_PSK_SIZE = 1,
-            SYNCHRONIZATION_SYMBOL = 0,
-            SYNCHRONIZATION_SYMBOL_DURATION = 8.0,
-            SYNCHRONIZATION_GUARD_INTERVAL = 0.0,
-            SYNCHRONIZATION_INTERPACKET_GAP = 1.0,
-            DEFAULT_PACKET_PSK_SIZE = 4,
-            DEFAULT_PACKET_SYMBOL_DURATION = 0.25,
-            DEFAULT_PACKET_GUARD_INTERVAL = 0.25,
-            DEFAULT_PACKET_INTERPACKET_GAP = 0.5,
-            SYMBOL_SYNC_PREAMBLE = false,
-            SYMBOL_SYMBOL_DURATION = DEFAULT_PACKET_SYMBOL_DURATION,
-            SYMBOL_GUARD_INTERVAL = SYMBOL_SYNC_PREAMBLE ? DEFAULT_PACKET_GUARD_INTERVAL : 0.0,
-            SYMBOL_INTERPACKET_GAP = 0.0,
-            SYMBOL_AMPLITUDE = undefined
-        ;
+        var ANTA;
 
         ANTA = function (audioNetworkPhysicalLayer) {
             this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
         };
 
         ANTA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
-            var 
+            var
                 ofdmSize = this.$$audioNetworkPhysicalLayer.getTxChannelOfdmSize(channelIndex),
                 data = [],
                 i
@@ -47,14 +54,14 @@ var AudioNetworkTransmitAdapter = (function () {
             data = [ data.length === 1 ? data[0] : data ];
 
             this.packet(
-                channelIndex, 
-                data, 
-                SYMBOL_SYNC_PREAMBLE, 
-                pskSize, 
-                typeof symbolDuration === 'undefined' ? SYMBOL_SYMBOL_DURATION : symbolDuration,
-                SYMBOL_GUARD_INTERVAL, 
-                SYMBOL_INTERPACKET_GAP, 
-                SYMBOL_AMPLITUDE
+                channelIndex,
+                data,
+                _AudioNetworkTransmitAdapter.SYMBOL.SYNC_PREAMBLE,
+                pskSize,
+                typeof symbolDuration === 'undefined' ? _AudioNetworkTransmitAdapter.SYMBOL.SYMBOL_DURATION : symbolDuration,
+                _AudioNetworkTransmitAdapter.SYMBOL.GUARD_INTERVAL,
+                _AudioNetworkTransmitAdapter.SYMBOL.INTERPACKET_GAP,
+                _AudioNetworkTransmitAdapter.SYMBOL.AMPLITUDE
             );
         };
 
@@ -68,7 +75,7 @@ var AudioNetworkTransmitAdapter = (function () {
             if (typeof syncPreamble === 'undefined' || syncPreamble) {
                 syncData = [];
                 for (i = 0; i < ofdmSize; i++) {
-                    syncData.push(SYNCHRONIZATION_SYMBOL);
+                    syncData.push(_AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL);
                 }
                 syncData = syncData.length === 1 ? syncData[0] : syncData;
                 data.unshift(syncData);
@@ -86,10 +93,10 @@ var AudioNetworkTransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                typeof pskSize === 'undefined' ? DEFAULT_PACKET_PSK_SIZE : pskSize,
-                typeof symbolDuration === 'undefined' ? DEFAULT_PACKET_SYMBOL_DURATION : symbolDuration,
-                typeof guardInterval === 'undefined' ? DEFAULT_PACKET_GUARD_INTERVAL : guardInterval,
-                typeof interpacketGap === 'undefined' ? DEFAULT_PACKET_INTERPACKET_GAP : interpacketGap,
+                typeof pskSize === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.PSK_SIZE : pskSize,
+                typeof symbolDuration === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION : symbolDuration,
+                typeof guardInterval === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.GUARD_INTERVAL : guardInterval,
+                typeof interpacketGap === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.INTERPACKET_GAP : interpacketGap,
                 amplitude
             );
         };
@@ -103,7 +110,7 @@ var AudioNetworkTransmitAdapter = (function () {
             ;
 
             for (i = 0; i < ofdmSize; i++) {
-                data.push(SYNCHRONIZATION_SYMBOL);
+                data.push(_AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL);
                 amplitude.push(
                     Math.floor(1000 / ofdmSize) / 1000
                 );
@@ -113,10 +120,10 @@ var AudioNetworkTransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                SYNCHRONIZATION_PSK_SIZE,
-                SYNCHRONIZATION_SYMBOL_DURATION, 
-                SYNCHRONIZATION_GUARD_INTERVAL,
-                SYNCHRONIZATION_INTERPACKET_GAP,
+                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.PSK_SIZE,
+                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL_DURATION, 
+                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.GUARD_INTERVAL,
+                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.INTERPACKET_GAP,
                 amplitude
             );
         };
@@ -170,7 +177,7 @@ var AudioNetworkTransmitAdapter = (function () {
                 }
             }
 
-            // add interpacket gap only when data loop above acctually added something
+            // add interpacket gap only when data loop above actually added something
             if (interpacketGap > 0 && symbolList) {
                 txDataTmp = [];
                 for (j = 0; j < symbolList.length; j++) {

@@ -69,7 +69,7 @@ var AudioNetworkPhysicalLayer = (function () {
 
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
-            - move notification logic to manager
+            - move notification logic to manager (?)
             - use dedicated constellation at carrier.html
 
 
