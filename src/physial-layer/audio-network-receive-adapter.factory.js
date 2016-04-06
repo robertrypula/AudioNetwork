@@ -8,6 +8,8 @@ var AudioNetworkReceiveAdapter = (function () {
     _AudioNetworkReceiveAdapter.SYNC_STATE_MAX_DURATION_TIME = 8.0;
     _AudioNetworkReceiveAdapter.POWER_THRESHOLD = 0;            // TODO to delete later
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
+    _AudioNetworkReceiveAdapter.INITIAL_NOISE_LEVEL = -100;
+    _AudioNetworkReceiveAdapter.INITIAL_SIGNAL_LEVEL = 0;
 
     function _AudioNetworkReceiveAdapter() {
         var ANRA;
@@ -31,12 +33,13 @@ var AudioNetworkReceiveAdapter = (function () {
             this.$$syncPreamble = _anra.SYNC_PREAMBLE;
             this.$$packetReceiveHandler = null;
 
-            this.$$symbolData = [];
-            this.$$packetData = [];
             this.$$waitingForSync = [];
             this.$$averageNoiseLevel = [];
             this.$$averageSignalLevel = [];
-            this.$$initializeStoragePerChannel();
+            this.$$packetData = [];
+            this.$$symbolData = [];
+
+            this.$$initializeStorage();
         };
 
         ANRA.prototype.setSymbolDuration = function (value) {
@@ -59,14 +62,33 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.$$initializeStoragePerChannel = function () {
-            /*
-             this.$$symbolData = [];
-             this.$$packetData = [];
-             this.$$waitingForSync = true;
-             this.$$averageNoiseLevel = -100;
-             this.$$averageSignalLevel = 0;
-             */
+        ANRA.prototype.$$initializeStorage = function () {
+            var 
+                channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize(),
+                ofdmSize,
+                i, j
+            ;
+            
+            this.$$waitingForSync.length = 0;
+            this.$$averageNoiseLevel.length = 0;
+            this.$$averageSignalLevel.length = 0;
+            this.$$packetData.length = 0;
+            this.$$symbolData.length = 0;
+            
+            for (i = 0; i < channelSize; i++) {
+                this.$$waitingForSync.push(true);
+                this.$$averageNoiseLevel.push(_AudioNetworkReceiveAdapter.INITIAL_NOISE_LEVEL);
+                this.$$averageSignalLevel.push(_AudioNetworkReceiveAdapter.INITIAL_SIGNAL_LEVEL);
+                this.$$packetData.push([]);
+
+                ofdmSize = this.$$audioNetworkPhysicalLayer.getRxChannelOfdmSize(i),
+                this.$$symbolData.push([]);
+                for (j = 0; j < ofdmSize; j++) {
+                    this.$$symbolData[i].push([]);
+                }
+            }
+
+            console.log(this);
         };
 
         ANRA.prototype.$$handlerIdle = function (time, symbolData) {
@@ -76,6 +98,12 @@ var AudioNetworkReceiveAdapter = (function () {
                 }
                 this.$$packetData = [];
             }
+
+            /*
+            if (this.$$waitingForSync) {
+                this.$$averageNoiseLevel[0] = symbolData.powerDecibel;
+            }
+            */
         };
 
         ANRA.prototype.$$handlerSymbol = function (time, symbolData) {
