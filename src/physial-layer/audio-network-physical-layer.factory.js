@@ -62,9 +62,9 @@ var AudioNetworkPhysicalLayer = (function () {
                 + [TX] remove symbol generation from template-util
                 + [TX] symbol shouldn't have any guard interval or/and interpacket gap
 
-                - [RX] add setTimes* methods (maybe it's worth to add some error margin - times inside are for internal adapter use)
-                - [RX] add setSyncPreamble(true/false) method
-                - [RX] add packet receive handler packetReceived(data)
+                + [RX] add setTimes* methods (maybe it's worth to add some error margin - times inside are for internal adapter use)
+                + [RX] add setSyncPreamble(true/false) method
+                + [RX] add packet receive handler packetReceived(data)
                 - [RX] compute average noise level using queue class
                 next steps:
                     - set threshold to very low value (-100 dB) to force idle state for a while
@@ -74,14 +74,8 @@ var AudioNetworkPhysicalLayer = (function () {
                     - run sync on the TX side
                     - sync state will be detected - grab average max signal strength
                     - substract 10 decibels from max signal and enable symbol/packet collecting
-                - [RX] add support for OFDM
+                - [RX] add support for OFDM and multiple channels
                 - [RX] add method to reset receiver (again follow steps above)  [????]  - 'waitingForSync' state
-
-                        Flags/vars:
-                            - syncPreamble
-                            - waitingForSync = true/false;
-                            - averageNoiseLevel = -33;     [dB]
-                            - averageSignalLevel = -10;    [dB]
 
             - add auto tuning feature with ability to align phase offset
                 - ? separate class where we can pass data from rx ?

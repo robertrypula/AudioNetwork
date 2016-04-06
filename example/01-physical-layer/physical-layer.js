@@ -266,3 +266,24 @@ function output(type, state) {
         uiRefresh();
     }
 }
+
+function symbolDurationChange() {
+    var value = getIntById('symbol-duration');
+
+    receiveAdapter.setSymbolDuration(value);
+    uiRefresh();
+}
+
+function guardIntervalChange() {
+    var value = getIntById('guard-interval');
+
+    receiveAdapter.setGuardInverval(value);
+    uiRefresh();
+}
+
+function syncPreambleChange() {
+    var value = !!document.getElementById('sync-preamble').checked;
+
+    receiveAdapter.setSyncPreamble(value);
+    uiRefresh();
+}

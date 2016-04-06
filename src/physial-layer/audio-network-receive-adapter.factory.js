@@ -3,10 +3,11 @@ var AudioNetworkReceiveAdapter = (function () {
 
     _AudioNetworkReceiveAdapter.$inject = [];
 
-    _AudioNetworkReceiveAdapter.GUARD_STATE_MAX_DURATION_TIME = 1.0;
-    _AudioNetworkReceiveAdapter.SYMBOL_STATE_MAX_DURATION_TIME = 1.0;
+    _AudioNetworkReceiveAdapter.SYMBOL_STATE_MAX_DURATION_TIME = 0.25;
+    _AudioNetworkReceiveAdapter.GUARD_STATE_MAX_DURATION_TIME = 0.25;
     _AudioNetworkReceiveAdapter.SYNC_STATE_MAX_DURATION_TIME = 8.0;
-    _AudioNetworkReceiveAdapter.POWER_THRESHOLD = 0;
+    _AudioNetworkReceiveAdapter.POWER_THRESHOLD = 0;            // TODO to delete later
+    _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
 
     function _AudioNetworkReceiveAdapter() {
         var ANRA;
@@ -22,18 +23,57 @@ var AudioNetworkReceiveAdapter = (function () {
                 this.$$handlerGuard.bind(this),
                 this.$$handlerError.bind(this)
             );
-            this.$$stateMachine.setGuardStateMaxDurationTime(_anra.GUARD_STATE_MAX_DURATION_TIME);
             this.$$stateMachine.setSymbolStateMaxDurationTime(_anra.SYMBOL_STATE_MAX_DURATION_TIME);
+            this.$$stateMachine.setGuardStateMaxDurationTime(_anra.GUARD_STATE_MAX_DURATION_TIME);
             this.$$stateMachine.setSyncStateMaxDurationTime(_anra.SYNC_STATE_MAX_DURATION_TIME);
 
-            this.$$powerThreshold = _anra.POWER_THRESHOLD;
+            this.$$powerThreshold = _anra.POWER_THRESHOLD;         // TODO to delete later
+            this.$$syncPreamble = _anra.SYNC_PREAMBLE;
+            this.$$packetReceiveHandler = null;
+
             this.$$symbolData = [];
             this.$$packetData = [];
+            this.$$waitingForSync = [];
+            this.$$averageNoiseLevel = [];
+            this.$$averageSignalLevel = [];
+            this.$$initializeStoragePerChannel();
+        };
+
+        ANRA.prototype.setSymbolDuration = function (value) {
+            this.$$stateMachine.setSymbolStateMaxDurationTime(value);
+        };
+
+        ANRA.prototype.setGuardInverval = function (value) {
+            this.$$stateMachine.setGuardStateMaxDurationTime(value);
+        };
+
+        ANRA.prototype.setSyncPreamble = function (value) {
+            this.$$syncPreamble = !!value;
+        };
+
+        ANRA.prototype.setPacketReceiveHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$packetReceiveHandler = cb;
+            } else {
+                this.$$packetReceiveHandler = null;
+            }
+        };
+
+        ANRA.prototype.$$initializeStoragePerChannel = function () {
+            /*
+             this.$$symbolData = [];
+             this.$$packetData = [];
+             this.$$waitingForSync = true;
+             this.$$averageNoiseLevel = -100;
+             this.$$averageSignalLevel = 0;
+             */
         };
 
         ANRA.prototype.$$handlerIdle = function (time, symbolData) {
             if (this.$$packetData.length > 0) {
-                // --> trigger new packet event
+                if (this.$$packetReceiveHandler) {
+                    this.$$packetReceiveHandler(0, this.$$packetData);     // TODO change hardcoded channelIndex
+                }
                 this.$$packetData = [];
             }
         };

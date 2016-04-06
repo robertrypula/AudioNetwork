@@ -19,7 +19,7 @@ var AudioNetworkTransmitAdapter = (function () {
     };
 
     _AudioNetworkTransmitAdapter.SYMBOL = {
-        SYNC_PREAMBLE: false,
+        SYNC_PREAMBLE: false,                   // note: this is NOT default preamble value for sending packet
         SYMBOL_DURATION: _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION,
         GUARD_INTERVAL: 0.0,
         INTERPACKET_GAP: 0.0,
