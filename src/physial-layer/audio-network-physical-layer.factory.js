@@ -65,7 +65,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + [RX] add setTimes* methods (maybe it's worth to add some error margin - times inside are for internal adapter use)
                 + [RX] add setSyncPreamble(true/false) method
                 + [RX] add packet receive handler packetReceived(data)
-                - [RX] add support multiple channels
+                - [RX] add multiple channels support (introduce new class in the middle)
                 - [RX] compute average noise level (?add new state? IDLE_INIT)
                 next steps:
                     + set threshold to very low value (-100 dB) to force idle state for a while
