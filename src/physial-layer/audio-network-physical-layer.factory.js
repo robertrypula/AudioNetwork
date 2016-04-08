@@ -65,7 +65,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + [RX] add setTimes* methods (maybe it's worth to add some error margin - times inside are for internal adapter use)
                 + [RX] add setSyncPreamble(true/false) method
                 + [RX] add packet receive handler packetReceived(data)
-                - [RX] add multiple channels support (introduce new class in the middle)
+                + [RX] add multiple channels support (introduce new class in the middle)
                 - [RX] compute average noise level (?add new state? IDLE_INIT)
                 next steps:
                     + set threshold to very low value (-100 dB) to force idle state for a while
@@ -79,8 +79,8 @@ var AudioNetworkPhysicalLayer = (function () {
                 - [RX] add method to reset receiver (again follow steps above)  [????]  - 'waitingForSync' state
 
             - add auto tuning feature with ability to align phase offset
-                - ? separate class where we can pass data from rx ?
-                - ? add 'SYNCH' state to receiveSampler and detect sync signal ?
+                - put code somewhere inside rx adapter
+                - add events for frequency update and phase update to notify hosting code
 
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
