@@ -136,12 +136,12 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     transmitAdapter = new AudioNetworkTransmitAdapter(anpl);
     receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
     anpl.rx(function (channelIndex, carrierDetail, time) {
-        var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);
+        var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
+        var pskSize = getIntById('rx-psk-size-' + channelIndex);                        // TODO refactor this
         var receiveData;
 
-        receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // for packet detection
+        receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time, pskSize); // for packet detection
         element.innerHTML = receiveData.state;
-
 
         receive(channelIndex, carrierDetail, time); // for real time UI update
     });

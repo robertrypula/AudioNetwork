@@ -73,7 +73,6 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.receive = function (channelIndex, carrierDetail, time, pskSize) {
             var state, testSymbolData;
 
-            pskSize = 4;
             testSymbolData = {
                 symbol: (
                     carrierDetail[0].powerDecibel > this.$$powerThreshold ?
