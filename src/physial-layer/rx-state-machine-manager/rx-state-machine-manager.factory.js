@@ -3,6 +3,10 @@ var RxStateMachineManager = (function () {
 
     _RxStateMachineManager.$inject = [];
 
+    _RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME = 8.0;
+    _RxStateMachineManager.INITIAL_NOISE_LEVEL = -100;
+    _RxStateMachineManager.INITIAL_SIGNAL_LEVEL = 0;
+
     function _RxStateMachineManager() {
         var RSMM;
 
@@ -16,8 +20,35 @@ var RxStateMachineManager = (function () {
                 this.$$handlerGuard.bind(this),
                 this.$$handlerError.bind(this)
             );
+
+            this.$$syncPreamble = null;
+            this.$$pskSize = null;
+            this.$$waitingForSync = true;
+            this.$$averageNoiseLevel = _RxStateMachineManager.INITIAL_NOISE_LEVEL;
+            this.$$averageSignalLevel = _RxStateMachineManager.INITIAL_SIGNAL_LEVEL;
+
+            /*
+            this.$$packetData = [];
+            this.$$symbolData = [];
+            this.$$powerThreshold = _anra.POWER_THRESHOLD;         // TODO to delete later
+            */
         };
 
+        RSMM.prototype.setSymbolStateMaxDurationTime = function (value) {
+            this.$$stateMachine.setSymbolStateMaxDurationTime(value);
+        };
+
+        RSMM.prototype.setGuardStateMaxDurationTime  = function (value) {
+            this.$$stateMachine.setGuardStateMaxDurationTime(value);
+        };
+
+        RSMM.prototype.setSyncPreamble  = function (value) {
+            this.$$syncPreamble = value;
+        };
+
+        RSMM.prototype.setPskSize  = function (value) {
+            this.$$pskSize = value;
+        };
 
         RSMM.prototype.$$handlerIdle = function (time, symbolData) {
             /*
@@ -94,22 +125,16 @@ var RxStateMachineManager = (function () {
         // }
 
         RSMM.prototype.$$initializeStorage = function () {
+            /*
             var 
                 channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize(),
                 ofdmSize,
                 i, j
             ;
-            
-            this.$$waitingForSync.length = 0;
-            this.$$averageNoiseLevel.length = 0;
-            this.$$averageSignalLevel.length = 0;
             this.$$packetData.length = 0;
             this.$$symbolData.length = 0;
             
             for (i = 0; i < channelSize; i++) {
-                this.$$waitingForSync.push(true);
-                this.$$averageNoiseLevel.push(_AudioNetworkReceiveAdapter.INITIAL_NOISE_LEVEL);
-                this.$$averageSignalLevel.push(_AudioNetworkReceiveAdapter.INITIAL_SIGNAL_LEVEL);
                 this.$$packetData.push([]);
 
                 ofdmSize = this.$$audioNetworkPhysicalLayer.getRxChannelOfdmSize(i),
@@ -118,12 +143,26 @@ var RxStateMachineManager = (function () {
                     this.$$symbolData[i].push([]);
                 }
             }
-
-            console.log(this);
+            */
         };
 
-        RSMM.prototype.getState = function () {
-            return '';
+        RSMM.prototype.getState = function (carrierDetail, time) {
+            return '---';
+            /*
+            var testSymbolData;
+
+            testSymbolData = {
+                symbol: (
+                    carrierDetail[0].powerDecibel > this.$$powerThreshold ?
+                    Math.round(carrierDetail[0].phase * this.$$pskSize) % this.$$pskSize :
+                    null
+                ),
+                phase: carrierDetail[0].phase,
+                powerDecibel: carrierDetail[0].powerDecibel
+            };
+
+            return this.$$stateMachine.getState(testSymbolData, time);
+            */
         };
 
         return RSMM;

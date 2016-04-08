@@ -5,8 +5,12 @@ var RxStateMachineManagerBuilder = (function () {
 
     function _RxStateMachineManagerBuilder() {
 
-        function build(channelIndex, audioNetworkPhysicalLayer) {
-            return new RxStateMachineManager(channelIndex, audioNetworkPhysicalLayer);
+        function build(channelIndex, audioNetworkPhysicalLayer, packetReceiveHandler) {
+            return new RxStateMachineManager(
+                channelIndex,
+                audioNetworkPhysicalLayer,
+                packetReceiveHandler
+            );
         }
 
         return {

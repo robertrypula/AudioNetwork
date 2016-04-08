@@ -137,13 +137,15 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
     anpl.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
-        var pskSize = getIntById('rx-psk-size-' + channelIndex);                        // TODO refactor this
         var receiveData;
 
-        receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time, pskSize); // for packet detection
+        receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // receive (higher level)
         element.innerHTML = receiveData.state;
 
-        receive(channelIndex, carrierDetail, time); // for real time UI update
+        receive(channelIndex, carrierDetail, time); // rx (lowest level)
+    });
+    receiveAdapter.setPacketReceiveHandler(function (channelIndex, data) {
+        console.log('packet received at channelIndex ' + channelIndex, data);
     });
 
     initializeHtml();
@@ -277,7 +279,7 @@ function symbolDurationChange() {
 function guardIntervalChange() {
     var value = getIntById('guard-interval');
 
-    receiveAdapter.setGuardInverval(value);
+    receiveAdapter.setGuardInterval(value);
     uiRefresh();
 }
 
@@ -286,4 +288,11 @@ function syncPreambleChange() {
 
     receiveAdapter.setSyncPreamble(value);
     uiRefresh();
+}
+
+function pskSizeChange(channelIndex) {
+    var value = getIntById('rx-psk-size-' + channelIndex);
+
+    receiveAdapter.setPskSize(channelIndex, value);
+    uiRefreshOnPskSizeChange('rx', channelIndex);
 }

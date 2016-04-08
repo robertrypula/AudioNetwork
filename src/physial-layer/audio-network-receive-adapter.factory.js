@@ -3,63 +3,97 @@ var AudioNetworkReceiveAdapter = (function () {
 
     _AudioNetworkReceiveAdapter.$inject = [];
 
-    _AudioNetworkReceiveAdapter.SYMBOL_STATE_MAX_DURATION_TIME = 0.25;
-    _AudioNetworkReceiveAdapter.GUARD_STATE_MAX_DURATION_TIME = 0.25;
-    _AudioNetworkReceiveAdapter.SYNC_STATE_MAX_DURATION_TIME = 8.0;
-    _AudioNetworkReceiveAdapter.POWER_THRESHOLD = 0;            // TODO to delete later
+    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.25;
+    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.25;
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
-    _AudioNetworkReceiveAdapter.INITIAL_NOISE_LEVEL = -100;
-    _AudioNetworkReceiveAdapter.INITIAL_SIGNAL_LEVEL = 0;
+    _AudioNetworkReceiveAdapter.PSK_SIZE = 4;
+    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT = 10;               // how much state times could be longer
+    _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
     function _AudioNetworkReceiveAdapter() {
         var ANRA;
 
         ANRA = function (audioNetworkPhysicalLayer) {
-            var 
-                _anra = _AudioNetworkReceiveAdapter,
-                channelSize,
-                stateMachineManager,
-                i
-            ;
+            var channelIndex, channelSize, stateMachineManager;
 
             this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
-            
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize(),
             this.$$stateMachineManager = [];
-            for (i = 0; i < channelSize; i++) {
+            this.$$packetReceiveHandler = null;
+            
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (channelIndex = 0; channelIndex < channelSize; channelIndex++) {
                 stateMachineManager = RxStateMachineManagerBuilder.build(
-                    i, 
-                    this.$$audioNetworkPhysicalLayer
+                    channelIndex,
+                    this.$$audioNetworkPhysicalLayer,
+                    this.$$packetReceiveInternalHandler.bind(this)
                 );
-                // stateMachineManager.setSymbolStateMaxDurationTime(_anra.SYMBOL_STATE_MAX_DURATION_TIME);
-                // stateMachineManager.setGuardStateMaxDurationTime(_anra.GUARD_STATE_MAX_DURATION_TIME);
-                // stateMachineManager.setSyncStateMaxDurationTime(_anra.SYNC_STATE_MAX_DURATION_TIME);
-
                 this.$$stateMachineManager.push(stateMachineManager);
             }
-
-
-            this.$$powerThreshold = _anra.POWER_THRESHOLD;         // TODO to delete later
-            this.$$syncPreamble = _anra.SYNC_PREAMBLE;
-            this.$$packetReceiveHandler = null;
-
-            this.$$waitingForSync = true;
-            this.$$averageNoiseLevel = _AudioNetworkReceiveAdapter.INITIAL_NOISE_LEVEL;
-            this.$$averageSignalLevel = _AudioNetworkReceiveAdapter.INITIAL_SIGNAL_LEVEL;
-            this.$$packetData = [];
-            this.$$symbolData = [];
+            this.setSymbolDuration(_AudioNetworkReceiveAdapter.SYMBOL_DURATION);
+            this.setGuardInterval(_AudioNetworkReceiveAdapter.GUARD_INTERVAL);
+            this.setSyncPreamble(_AudioNetworkReceiveAdapter.SYNC_PREAMBLE);
+            this.setPskSize(_AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _AudioNetworkReceiveAdapter.PSK_SIZE);
         };
 
         ANRA.prototype.setSymbolDuration = function (value) {
-            // this.$$stateMachine.setSymbolStateMaxDurationTime(value);
+            var channelSize, i;
+
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
+                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                );
+            }
         };
 
-        ANRA.prototype.setGuardInverval = function (value) {
-            // this.$$stateMachine.setGuardStateMaxDurationTime(value);
+        ANRA.prototype.setGuardInterval = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
+                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                );
+            }
         };
 
         ANRA.prototype.setSyncPreamble = function (value) {
-            // this.$$syncPreamble = !!value;
+            var channelSize, i;
+
+            value = !!value;
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSyncPreamble(value);
+            }
+        };
+
+        ANRA.prototype.setPskSize = function (channelIndex, value) {
+            var channelSize, i;
+
+            if (channelIndex === _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE) {
+                channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+                for (i = 0; i < channelSize; i++) {
+                    this.$$stateMachineManager[i].setPskSize(value);
+                }
+            } else {
+                this.$$checkChannelIndexRange(channelIndex);
+                this.$$stateMachineManager[channelIndex].setPskSize(value);
+            }
+        };
+
+        ANRA.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
+
+            // TODO here we can translate ofdm-1 array into one number
+
+            if (this.$$packetReceiveHandler) {
+                this.$$packetReceiveHandler(channelIndex, data);
+            }
+        };
+
+        ANRA.prototype.$$checkChannelIndexRange = function (channelIndex) {
+            if (channelIndex < 0 || channelIndex >= this.$$audioNetworkPhysicalLayer.getRxChannelSize()) {
+                throw 'Given channelIndex is outside range: ' + channelIndex;
+            }
         };
 
         ANRA.prototype.setPacketReceiveHandler = function (cb) {
@@ -70,23 +104,15 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.receive = function (channelIndex, carrierDetail, time, pskSize) {
-            var state, testSymbolData;
+        ANRA.prototype.receive = function (channelIndex, carrierDetail, time) {
+            var state;
 
-            testSymbolData = {
-                symbol: (
-                    carrierDetail[0].powerDecibel > this.$$powerThreshold ?
-                    Math.round(carrierDetail[0].phase * pskSize) % pskSize :
-                    null
-                ),
-                phase: carrierDetail[0].phase,
-                powerDecibel: carrierDetail[0].powerDecibel
-            };
+            this.$$checkChannelIndexRange(channelIndex);
 
-            state = this.$$stateMachineManager[channelIndex].getState(testSymbolData, time);
+            state = this.$$stateMachineManager[channelIndex].getState(carrierDetail, time);
 
             return {
-                state: state + ' - ' + testSymbolData.symbol
+                state: state
             };
         };
 
