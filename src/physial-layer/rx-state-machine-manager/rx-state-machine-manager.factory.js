@@ -126,23 +126,18 @@ var RxStateMachineManager = (function () {
 
         RSMM.prototype.$$initializeStorage = function () {
             /*
-            var 
-                channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize(),
+            var
                 ofdmSize,
                 i, j
             ;
             this.$$packetData.length = 0;
             this.$$symbolData.length = 0;
-            
-            for (i = 0; i < channelSize; i++) {
-                this.$$packetData.push([]);
-
-                ofdmSize = this.$$audioNetworkPhysicalLayer.getRxChannelOfdmSize(i),
+           
+            ofdmSize = this.$$audioNetworkPhysicalLayer.getRxChannelOfdmSize(i);
+            for (j = 0; j < ofdmSize; j++) {
                 this.$$symbolData.push([]);
-                for (j = 0; j < ofdmSize; j++) {
-                    this.$$symbolData[i].push([]);
-                }
             }
+            
             */
         };
 
