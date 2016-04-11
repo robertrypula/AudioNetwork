@@ -105,14 +105,14 @@ var AudioNetworkReceiveAdapter = (function () {
         };
 
         ANRA.prototype.receive = function (channelIndex, carrierDetail, time) {
-            var state;
+            var receiveResult;
 
             this.$$checkChannelIndexRange(channelIndex);
-
-            state = this.$$stateMachineManager[channelIndex].getState(carrierDetail, time);
+            receiveResult = this.$$stateMachineManager[channelIndex].receive(carrierDetail, time);
 
             return {
-                state: state
+                state: receiveResult.state,    // TODO refactor
+                power: receiveResult.power     // TODO refactor
             };
         };
 

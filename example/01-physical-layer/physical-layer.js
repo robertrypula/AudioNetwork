@@ -140,7 +140,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         var receiveData;
 
         receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // receive (higher level)
-        element.innerHTML = receiveData.state;
+        element.innerHTML = receiveData.state + ' ' + receiveData.power;
 
         receive(channelIndex, carrierDetail, time); // rx (lowest level)
     });
