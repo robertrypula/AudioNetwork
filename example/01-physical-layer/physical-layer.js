@@ -7,7 +7,7 @@ var
 ;
 
 function onLoad() {
-    reinitialize();
+    collectSettingsAndInit();
 }
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
@@ -37,7 +37,7 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
         document.getElementById('rx-channel-config').value = config;
     }
 
-    reinitialize(function () {
+    collectSettingsAndInit(function () {
         for (i = 0; i < anpl.getRxChannelSize(); i++) {
             element = document.getElementById('rx-psk-size-' + i);
             element.value = pskSize;
@@ -51,7 +51,7 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     });
 }
 
-function reinitialize(cb) {
+function collectSettingsAndInit(cb) {
     var
         txChannel = [],
         rxChannel = [],
@@ -161,11 +161,14 @@ function destroy(cb) {
             document.getElementById('tx-channel-container').innerHTML = '';
             document.getElementById('rx-channel-container').innerHTML = '';
 
+            if (typeof cb === 'function') {
+                cb();
+            }
         });
-    }
-
-    if (typeof cb === 'function') {
-        cb();
+    } else {
+        if (typeof cb === 'function') {
+            cb();
+        }        
     }
 }
 
