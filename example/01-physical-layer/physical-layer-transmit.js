@@ -15,10 +15,9 @@ function transmitPacket(channelIndex) {
         symbolDuration = getFloatById('symbol-duration') / 1000,
         guardInterval = getFloatById('guard-interval') / 1000,
         interpacketGap = getFloatById('interpacket-gap') / 1000,
-        dataList, mute, symbol, symbolList, symbolListParsed,
+        dataList, mute, symbol, symbolList, symbolListParsed, i, j,
         data = [],
-        amplitude = [],
-        i, j
+        amplitude = []
     ;
 
     dataList = dataStr.split(' ');
