@@ -4,10 +4,11 @@ var RxStateMachineManager = (function () {
     _RxStateMachineManager.$inject = [];
 
     _RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME = 8.0;
-    _RxStateMachineManager.INITIAL_NOISE_LEVEL = -100;
-    _RxStateMachineManager.INITIAL_SIGNAL_LEVEL = 0;
     _RxStateMachineManager.INITIAL_POWER_THRESHOLD = 0;
     _RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX = 0;
+
+    _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE = 5 * 25;    // TODO, take it from config
+    _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE = 5 * 25;
 
     function _RxStateMachineManager() {
         var RSMM;
@@ -29,8 +30,10 @@ var RxStateMachineManager = (function () {
             this.$$pskSize = null;
             this.$$waitingForSync = true;
 
-            this.$$averageNoiseLevel = _RxStateMachineManager.INITIAL_NOISE_LEVEL;
-            this.$$averageSignalLevel = _RxStateMachineManager.INITIAL_SIGNAL_LEVEL;
+            this.$$averageNoiseLevel = null;
+            this.$$averageNoiseLevelHistory = [];
+            this.$$averageSignalLevel = null;
+            this.$$averageSignalLevelHistory = [];
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
 
             this.$$dataPacket = [];
@@ -111,10 +114,7 @@ var RxStateMachineManager = (function () {
         };
 
         // function handleFirstSymbolInPacket(symbolData) {
-        //     var
-        //         syncPreamble = !!document.getElementById('sync-preamble').checked,
-        //         current
-        //         ;
+        //     var current;
         //
         //     if (syncPreamble) {
         //         current = anpl.getRxPhaseCorrection(0, 0);
@@ -141,19 +141,50 @@ var RxStateMachineManager = (function () {
         // }
 
         RSMM.prototype.receive = function (carrierDetail, time) {
-            var pilotSignalPresent, pilotSignalPowerDecibel;
+            var pilotSignal, pilotSignalPresent, pilotSignalPowerDecibel;
 
-            if (this.$$waitingForSync) {
-                
-            }
+            pilotSignal = carrierDetail[_RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX];
 
             // TODO add some kind of 'schmitt trigger' logic here to cleanup noise at signal transitions
-            pilotSignalPowerDecibel = carrierDetail[_RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX].powerDecibel;
+            pilotSignalPowerDecibel = pilotSignal.powerDecibel;
+            
+
+            // TODO move this code to handlerIddleInit method (see TODO below)
+            if (this.$$averageNoiseLevel === null) {
+                this.$$averageNoiseLevelHistory.push(pilotSignalPowerDecibel);
+
+                if (this.$$averageNoiseLevelHistory.length === _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE) {
+                    this.$$averageNoiseLevel = 0;
+                    for (var i = 0; i < this.$$averageNoiseLevelHistory.length; i++) {
+                        this.$$averageNoiseLevel += this.$$averageNoiseLevelHistory[i];
+                    }
+                    this.$$averageNoiseLevel /= this.$$averageNoiseLevelHistory.length;
+
+                    this.$$powerThreshold = this.$$averageNoiseLevel + 20;
+                }
+            }
+
             pilotSignalPresent = pilotSignalPowerDecibel > this.$$powerThreshold;
 
+
+            var state;
+
+            state = this.$$stateMachine.getState(pilotSignalPresent, time);
+
+            // TODO move those states to rx-state-machine
+            //      add dedicated handlers
+            //      handler can trigger state change via return
+            if (this.$$averageNoiseLevel === null && this.$$averageSignalLevel === null) {
+                state = 'IDLE_INIT';
+            }
+
+            if (this.$$averageNoiseLevel !== null && this.$$averageSignalLevel === null) {
+                state = 'SIGNAL_INIT';
+            }
+
             return {
-                state: this.$$stateMachine.getState(pilotSignalPresent, time),
-                power: pilotSignalPowerDecibel
+                state: state,
+                power: this.$$averageNoiseLevel
             };
         };
 
