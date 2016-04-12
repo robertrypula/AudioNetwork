@@ -143,6 +143,10 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.receive = function (carrierDetail, time) {
             var pilotSignalPresent, pilotSignalPowerDecibel;
 
+            if (this.$$waitingForSync) {
+                
+            }
+
             // TODO add some kind of 'schmitt trigger' logic here to cleanup noise at signal transitions
             pilotSignalPowerDecibel = carrierDetail[_RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX].powerDecibel;
             pilotSignalPresent = pilotSignalPowerDecibel > this.$$powerThreshold;
