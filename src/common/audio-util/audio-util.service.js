@@ -26,7 +26,21 @@ var AudioUtil = (function () {
             return result;
         }
 
-         function findUnitAngle(x, y) {
+        function computeAverage(list) {
+            var i, sum;
+
+            if (!list || list.length === 0) {
+                return 0;
+            }
+            sum = 0;
+            for (i = 0; i < list.length; i++) {
+                sum += list[i];
+            }
+
+            return sum / list.length;
+        }
+
+        function findUnitAngle(x, y) {
             var length, q, angle;
 
             length = MathUtil.sqrt(x * x + y * y);
@@ -95,6 +109,7 @@ var AudioUtil = (function () {
 
         return {
             accessor: accessor,
+            computeAverage: computeAverage,
             findUnitAngle: findUnitAngle,
             unitFade: unitFade,
             queueAdd: queueAdd,
