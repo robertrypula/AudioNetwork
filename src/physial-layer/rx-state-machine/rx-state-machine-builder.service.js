@@ -5,8 +5,10 @@ var RxStateMachineBuilder = (function () {
 
     function _RxStateMachineBuilder() {
 
-        function build(handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
+        function build(handlerIdleInit, handlerSignalInit, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             return new RxStateMachine(
+                handlerIdleInit,
+                handlerSignalInit,
                 handlerIdle,
                 handlerSymbol,
                 handlerSync,

@@ -66,7 +66,6 @@ var AudioNetworkPhysicalLayer = (function () {
                 + [RX] add setSyncPreamble(true/false) method
                 + [RX] add packet receive handler packetReceived(data)
                 + [RX] add multiple channels support (introduce new class in the middle)
-                - [RX] compute average noise level (?add new state? IDLE_INIT)
                 next steps:
                     + set threshold to very low value (-100 dB) to force idle state for a while
                     - compute average noise level power at idle state
@@ -74,7 +73,7 @@ var AudioNetworkPhysicalLayer = (function () {
                     - so far do not collect symbol and packet data (wait for sync)
                     - run sync on the TX side
                     - sync state will be detected - grab average max signal strength
-                    - substract 10 decibels from max signal and enable symbol/packet collecting
+                    - subtract 10 decibels from max signal and enable symbol/packet collecting
                 - [RX] add support multiple OFDM, first ofdm index would be pilot signal
                 - [RX] add method to reset receiver (again follow steps above)  [????]  - 'waitingForSync' state
 
