@@ -107,13 +107,36 @@ var AudioUtil = (function () {
             return queueItem;
         }
 
+        function findMaxValueIndex(list, accessorString) {
+            var
+                maxValue = null,
+                index = null,
+                i, value
+            ;
+
+            if (!list) {
+                return null;
+            }
+
+            for (i = 0; i < list.length; i++) {
+                value = accessor(list[i], accessorString);
+                if (index === null || value > maxValue) {
+                    maxValue = value;
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+
         return {
             accessor: accessor,
             computeAverage: computeAverage,
             findUnitAngle: findUnitAngle,
             unitFade: unitFade,
             queueAdd: queueAdd,
-            queuePop: queuePop
+            queuePop: queuePop,
+            findMaxValueIndex: findMaxValueIndex
         };
     }
 

@@ -6,7 +6,8 @@ var RxStateMachineManager = (function () {
     _RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME = 8.0;
     _RxStateMachineManager.INITIAL_POWER_THRESHOLD = 0;
     _RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX = 0;
-    _RxStateMachineManager.INITIAL_DIFFERENCE_NOISE_SIGNAL = 10;
+    _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL = 10;
+    _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD = 3;
     _RxStateMachineManager.NO_INPUT_POWER = -99;                         // TODO, move to some common place
     _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE = 3 * 25;    // TODO, take it from config
     _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE = 3 * 25;
@@ -35,7 +36,6 @@ var RxStateMachineManager = (function () {
 
             this.$$syncPreamble = null;
             this.$$pskSize = null;
-            this.$$waitingForSync = true;
 
             this.$$averageNoiseLevel = null;
             this.$$averageNoiseLevelHistory = [];
@@ -45,7 +45,6 @@ var RxStateMachineManager = (function () {
 
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
-            this.$$initializeStorage();
         };
 
         RSMM.prototype.setSymbolStateMaxDurationTime = function (value) {
@@ -64,23 +63,11 @@ var RxStateMachineManager = (function () {
             this.$$pskSize = value;
         };
 
-        RSMM.prototype.$$initializeStorage = function () {
-            var ofdmSize, i;
-
-            this.$$dataPacket.length = 0;
-            this.$$dataSymbol.length = 0;
-            ofdmSize = this.$$audioNetworkPhysicalLayer.getRxChannelOfdmSize(this.$$channelIndex);
-            for (i = 0; i < ofdmSize; i++) {
-                this.$$dataSymbol.push([]);
-            }
-        };
-
         RSMM.prototype.$$handlerIdleInit = function (stateDurationTime) {
             this.$$averageNoiseLevelHistory.push(this.$$currentData.pilotSignal.powerDecibel);
-
             if (this.$$averageNoiseLevelHistory.length === _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE) {
                 this.$$averageNoiseLevel = AudioUtil.computeAverage(this.$$averageNoiseLevelHistory);
-                this.$$powerThreshold = this.$$averageNoiseLevel + _RxStateMachineManager.INITIAL_DIFFERENCE_NOISE_SIGNAL;
+                this.$$powerThreshold = this.$$averageNoiseLevel + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
 
                 return RxStateMachine.STATE.FIRST_SYNC_WAIT;
             }
@@ -91,48 +78,45 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerSignalInit = function (stateDurationTime) {
-            // TODO check current power - if at least one item will be below powerThreshold when trigger fatal error immediately
+            var pilotSignalPresent, powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
 
-            this.$$averageSignalLevelHistory.push(this.$$currentData.pilotSignal.powerDecibel);
+            // signal cannot be weaker that noise... :)
+            if (powerDecibel <= this.$$averageNoiseLevel) {
+                return RxStateMachine.STATE.FATAL_ERROR;
+            }
 
-            if (this.$$averageSignalLevelHistory.length === _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE) {
+            pilotSignalPresent = powerDecibel > this.$$powerThreshold;
+            if (this.$$averageSignalLevel !== null && !pilotSignalPresent) {
+                return RxStateMachine.STATE.IDLE;
+            }
+
+            if (this.$$averageSignalLevelHistory.length !== _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE) {
+                this.$$averageSignalLevelHistory.push(powerDecibel);
+            } else {
                 this.$$averageSignalLevel = AudioUtil.computeAverage(this.$$averageSignalLevelHistory);
-                
-                // TODO adjust powerThreshold to catch 'almost' max signal strenght
-                // this.$$powerThreshold = this.$$averageSignalLevel - _RxStateMachineManager.???;
-
-                if (this.$$averageSignalLevel <= this.$$averageNoiseLevel) {
-                    return RxStateMachine.STATE.FATAL_ERROR;
-                } else {
-                    return RxStateMachine.STATE.IDLE;
-                }
+                this.$$powerThreshold = this.$$averageSignalLevel - _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD;
             }
         };
 
         RSMM.prototype.$$handlerFatalError = function (stateDurationTime) {
-            
+            // nothing much here - manual state machine reset is a way to get out if this state
         };
         
         RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
-            /*
-            if (this.$$packetData.length > 0) {
+            if (this.$$dataPacket.length > 0) {
+                console.log('packet received', this.$$dataPacket);
+                /*
                 if (this.$$packetReceiveHandler) {
                     // TODO map psk: Math.round(pilotSignalCarrierDetail.phase * this.$$pskSize) % this.$$pskSize :
                     this.$$packetReceiveHandler(this.$$channelIndex, this.$$packetData);
                 }
-                this.$$packetData = [];
+                */
+                this.$$dataPacket = [];
             }
-            */
-
-            /*
-            if (this.$$waitingForSync) {
-                this.$$averageNoiseLevel[0] = symbolData.powerDecibel;
-            }
-            */
         };
 
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
-            // this.$$symbolData.push(symbolData);
+            this.$$dataSymbol.push(this.$$currentData);
         };
 
         RSMM.prototype.$$handlerSync = function (stateDurationTime) {
@@ -140,53 +124,49 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
-            var symbolWithBestQuality;
+            var bestQualityIndex;
 
-            /*
-            if (this.$$symbolData.length > 0) {
-                symbolWithBestQuality = getSymbolWithBestQuality(this.$$symbolData);
-                this.$$packetData.push(symbolWithBestQuality.symbol);
-                if (this.$$packetData.length === 1) {
-                    handleFirstSymbolInPacket(symbolWithBestQuality);
+            if (this.$$dataSymbol.length > 0) {
+                bestQualityIndex = AudioUtil.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
+                this.$$dataPacket.push(
+                    this.$$dataSymbol[bestQualityIndex].carrierDetail
+                );
+                if (this.$$isPacketSyncPreamble()) {
+                    this.$$handlePacketSyncPreamble(
+                        this.$$dataSymbol[bestQualityIndex].carrierDetail
+                    );
                 }
-                this.$$symbolData = [];
+                this.$$dataSymbol = [];
             }
-            */
         };
 
         RSMM.prototype.$$handlerError = function (stateDurationTime) {
-
+            // nothing much here - this state will automatically transit to idle when pilot signal will be gone
         };
 
-        // function handleFirstSymbolInPacket(symbolData) {
-        //     var current;
-        //
-        //     if (syncPreamble) {
-        //         current = anpl.getRxPhaseCorrection(this.$$channelIndex, 0);
-        //         anpl.setRxPhaseCorrection(this.$$channelIndex, 0, current + symbolData.phase);
-        //     }
-        // }
-        //
-        // function getSymbolWithBestQuality(symbolDataList) {
-        //     var symbol = 0, i, bestQualityIndex, maxPower;
-        //
-        //     if (symbolDataList.length === 0) {
-        //         throw 'Something went wrong at symbol decision';
-        //     }
-        //
-        //     maxPower = -100;
-        //     for (i = 0; i < symbolDataList.length; i++) {
-        //         if (symbolDataList[i].powerDecibel > maxPower) {
-        //             bestQualityIndex = i;
-        //             maxPower = symbolDataList[i].powerDecibel;
-        //         }
-        //     }
-        //
-        //     return symbolDataList[bestQualityIndex];
-        // }
+        RSMM.prototype.$$handlePacketSyncPreamble = function (carrierDetail) {
+            var current;
+
+            // TODO notify about phase correction
+            /*
+            current = anpl.getRxPhaseCorrection(this.$$channelIndex, 0);
+            anpl.setRxPhaseCorrection(this.$$channelIndex, 0, current + symbolData.phase);
+            */
+        };
+
+        RSMM.prototype.$$isPacketSyncPreamble = function () {
+            return this.$$syncPreamble && this.$$dataPacket.length === 1;
+        };
 
         RSMM.prototype.$$isInputReallyConnected = function (powerDecibel) {
-            return powerDecibel !== _RxStateMachineManager.NO_INPUT_POWER;
+            return (
+                (
+                    this.$$averageNoiseLevel !== null &&
+                    this.$$averageSignalLevel !== null
+                ) || (
+                    powerDecibel !== _RxStateMachineManager.NO_INPUT_POWER
+                )
+            );
         };
 
         RSMM.prototype.receive = function (carrierDetail, time) {
@@ -207,7 +187,10 @@ var RxStateMachineManager = (function () {
 
             return {
                 state: state,
-                power: Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel)
+                power: (
+                    Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel) + ' | ' +
+                    this.$$dataSymbol.length + ', ' + this.$$dataPacket.length
+                )
             };
         };
 
