@@ -146,8 +146,16 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         receive(channelIndex, carrierDetail, time); // rx (lowest level)
     });
     receiveAdapter.setPacketReceiveHandler(function (channelIndex, data) {
-        console.log('packet received at channelIndex ' + channelIndex, data);
+        var str, i, uiPacketHistory = document.getElementById('rx-sampling-packet-history-' + channelIndex);
+
+        str = '';
+        for (i = 0; i < data.length; i++) {
+            str += data[i].join(', ') + ' | ';
+        }
+        uiPacketHistory.innerHTML = str + '&nbsp;<br/>' + uiPacketHistory.innerHTML;
     });
+
+    anpl.outputTxDisable();
 
     initializeHtml();
 }

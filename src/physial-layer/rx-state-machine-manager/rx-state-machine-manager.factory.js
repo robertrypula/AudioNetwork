@@ -103,14 +103,16 @@ var RxStateMachineManager = (function () {
         };
         
         RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
+            var packetDataFinal;
+
             if (this.$$dataPacket.length > 0) {
                 console.log('packet received', this.$$dataPacket);
-                /*
+
                 if (this.$$packetReceiveHandler) {
-                    // TODO map psk: Math.round(pilotSignalCarrierDetail.phase * this.$$pskSize) % this.$$pskSize :
-                    this.$$packetReceiveHandler(this.$$channelIndex, this.$$packetData);
+                    packetDataFinal = this.$$preparePacket(this.$$dataPacket);
+                    this.$$packetReceiveHandler(this.$$channelIndex, packetDataFinal);
                 }
-                */
+
                 this.$$dataPacket = [];
             }
         };
@@ -145,13 +147,33 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlePacketSyncPreamble = function (carrierDetail) {
-            var current;
+            var current, i;
 
             // TODO notify about phase correction
-            /*
-            current = anpl.getRxPhaseCorrection(this.$$channelIndex, 0);
-            anpl.setRxPhaseCorrection(this.$$channelIndex, 0, current + symbolData.phase);
-            */
+            for (i = 0; i < carrierDetail.length; i++) {
+                current = anpl.getRxPhaseCorrection(this.$$channelIndex, i);
+                anpl.setRxPhaseCorrection(this.$$channelIndex, i, current + carrierDetail[i].phase);
+                console.log('Phase corrected for channel ' + this.$$channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
+            }
+        };
+
+        RSMM.prototype.$$preparePacket = function (dataPacket) {
+            var i, j, result, ofdmList, carrierDetail;
+
+            result = [];
+            for (i = 0; i < dataPacket.length; i++) {
+                carrierDetail = dataPacket[i];
+                ofdmList = [];
+                for (j = 0; j < carrierDetail.length; j++) {
+                    ofdmList.push(
+                        Math.round(carrierDetail[j].phase * this.$$pskSize) % this.$$pskSize
+                    );
+                    
+                }
+                result.push(ofdmList);
+            }
+
+            return result;
         };
 
         RSMM.prototype.$$isPacketSyncPreamble = function () {
