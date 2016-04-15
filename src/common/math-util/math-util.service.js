@@ -37,6 +37,14 @@ var MathUtil = (function () {
             return Math.log(v);
         }
 
+        function min(v) {
+            return Math.min(v);
+        }
+
+        function max(v) {
+            return Math.max(v);
+        }
+
         return {
             LN10: Math.LN10,
             HALF_PI: 0.5 * Math.PI,
@@ -49,7 +57,9 @@ var MathUtil = (function () {
             random: random,
             sin: sin,
             cos: cos,
-            log: log
+            log: log,
+            min: min,
+            max: max
         };
     }
 

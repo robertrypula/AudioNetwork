@@ -39,9 +39,14 @@ var RxStateMachineManager = (function () {
 
             this.$$averageNoiseLevel = null;
             this.$$averageNoiseLevelHistory = [];
+            this.$$averageGuardLevel = null;
+            this.$$averageGuardLevelHistory = [];
             this.$$averageSignalLevel = null;
             this.$$averageSignalLevelHistory = [];
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
+
+            this.$$powerMaxSignal = null;
+            this.$$powerMinGuard = null;
 
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
@@ -95,6 +100,7 @@ var RxStateMachineManager = (function () {
             } else {
                 this.$$averageSignalLevel = AudioUtil.computeAverage(this.$$averageSignalLevelHistory);
                 this.$$powerThreshold = this.$$averageSignalLevel - _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD;
+                this.$$averageSignalLevelHistory.length = 0;
             }
         };
 
@@ -118,6 +124,18 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
+            // update current min guard power
+            if (this.$$averageGuardLevelHistory.length > 0) {
+                this.$$powerMinGuard = MathUtil.min.apply(null, this.$$averageGuardLevelHistory);
+                this.$$averageGuardLevelHistory.length = 0;
+            }
+
+            // store signal power history
+            this.$$averageSignalLevelHistory.push(
+                this.$$currentData.pilotSignal.powerDecibel
+            );
+
+            // add current signal sample to list
             this.$$dataSymbol.push(this.$$currentData);
         };
 
@@ -128,6 +146,18 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
             var bestQualityIndex;
 
+            // update current max signal power
+            if (this.$$averageSignalLevelHistory.length > 0) {
+                this.$$powerMaxSignal = MathUtil.max.apply(null, this.$$averageSignalLevelHistory);
+                this.$$averageSignalLevelHistory.length = 0;
+            }
+
+            // store guard power history
+            this.$$averageGuardLevelHistory.push(
+                this.$$currentData.pilotSignal.powerDecibel
+            );
+
+            // find best signal sample and add to current packet
             if (this.$$dataSymbol.length > 0) {
                 bestQualityIndex = AudioUtil.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
                 this.$$dataPacket.push(
@@ -210,8 +240,9 @@ var RxStateMachineManager = (function () {
             return {
                 state: state,
                 power: (
-                    Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel) + ' | ' +
-                    this.$$dataSymbol.length + ', ' + this.$$dataPacket.length
+                    Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel) + ' <br/> ' +
+                    this.$$dataSymbol.length + ', ' + this.$$dataPacket.length + '<br/>' +
+                    'realtime: ' + this.$$powerMinGuard + ', ' + this.$$powerMaxSignal
                 )
             };
         };
