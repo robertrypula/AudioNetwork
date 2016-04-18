@@ -71,7 +71,7 @@ var ChannelTransmitManager = (function () {
                     sample += this.channelTransmit[j].getSample();
                 }
                 outputData[i] = sample;
-                outputData[i] += ((MathUtil.random() * 2) - 1) * 0.1;          // TODO, move to config
+                // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.1;          // TODO, move to config
             }
 
             timeDelta = Audio.getCurrentTime() - timeBefore;
