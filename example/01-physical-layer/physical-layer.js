@@ -136,9 +136,18 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     });
     transmitAdapter = new AudioNetworkTransmitAdapter(anpl);
     receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
+
+    var powerChartQueue0 = new Queue(400);
+    var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
+
     anpl.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
         var receiveData;
+
+        if (powerChartQueue0.isFull()) {
+            powerChartQueue0.pop()
+        }
+        powerChartQueue0.push(carrierDetail[0].powerDecibel);
 
         receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // receive (higher level)
         element.innerHTML = receiveData.state + ' ' + receiveData.power;
