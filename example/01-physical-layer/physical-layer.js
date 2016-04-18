@@ -163,8 +163,6 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         uiPacketHistory.innerHTML = str + '&nbsp;<br/>' + uiPacketHistory.innerHTML;
     });
 
-    anpl.outputTxDisable();
-
     initializeHtml();
 }
 

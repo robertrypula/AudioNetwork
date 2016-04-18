@@ -116,7 +116,7 @@ var PowerChart = (function () {
                 x = i;
                 y = -power;
 
-                ctx.fillStyle = 'lightblue';
+                ctx.fillStyle = '#738BD7';
                 ctx.fillRect(
                     x - 1,
                     2 * y - 1,
