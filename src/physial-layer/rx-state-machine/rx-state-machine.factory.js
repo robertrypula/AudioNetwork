@@ -17,12 +17,11 @@ var RxStateMachine = (function () {
             this.$$stateHandler[RSM.STATE.SYNC] = handlerSync;
             this.$$stateHandler[RSM.STATE.GUARD] = handlerGuard;
             this.$$stateHandler[RSM.STATE.ERROR] = handlerError;
-            this.$$state = RSM.STATE.IDLE_INIT;
-            this.$$stateDurationTime = 0;
-            this.$$stateBeginTime = null;
             this.$$symbolStateMaxDurationTime = null;
             this.$$guardStateMaxDurationTime = null;
             this.$$syncStateMaxDurationTime = null;
+
+            this.reset();
         };
 
         RSM.STATE = {
@@ -35,6 +34,12 @@ var RxStateMachine = (function () {
             SYNC: 'SYNC',
             GUARD: 'GUARD',
             ERROR: 'ERROR'
+        };
+
+        RSM.prototype.reset = function () {
+            this.$$state = RSM.STATE.IDLE_INIT;
+            this.$$stateDurationTime = 0;
+            this.$$stateBeginTime = null;
         };
 
         RSM.prototype.$$changeState = function (newState, time) {

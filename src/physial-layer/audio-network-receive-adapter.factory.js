@@ -35,6 +35,11 @@ var AudioNetworkReceiveAdapter = (function () {
             this.setPskSize(_AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _AudioNetworkReceiveAdapter.PSK_SIZE);
         };
 
+        ANRA.prototype.reset = function (channelIndex) {
+            this.$$checkChannelIndexRange(channelIndex);
+            return this.$$stateMachineManager[channelIndex].reset();
+        };
+
         ANRA.prototype.setSymbolDuration = function (value) {
             var channelSize, i;
 

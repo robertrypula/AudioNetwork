@@ -37,12 +37,12 @@ var MathUtil = (function () {
             return Math.log(v);
         }
 
-        function min(v) {
-            return Math.min(v);
+        function minInArray(v) {
+            return Math.min.apply(null, v);
         }
 
-        function max(v) {
-            return Math.max(v);
+        function maxInArray(v) {
+            return Math.max.apply(null, v);
         }
 
         return {
@@ -58,8 +58,8 @@ var MathUtil = (function () {
             sin: sin,
             cos: cos,
             log: log,
-            min: min,
-            max: max
+            minInArray: minInArray,
+            maxInArray: maxInArray
         };
     }
 

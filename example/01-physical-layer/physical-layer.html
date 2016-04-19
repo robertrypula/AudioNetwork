@@ -584,7 +584,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-5 col-md-3">
                         <b class="label">
-                            Synchronize receiver
+                            Send sync signal
                         </b>
                     </div>
                     <div class="col col-xs-7 col-md-6">
@@ -723,6 +723,19 @@
                     </div>
                     <div class="col col-xs-7 col-md-6">
                         <span id="rx-speed-[[ channelIndex ]]"></span>
+                    </div>
+                </div>
+
+                <div class="row margin-bottom">
+                    <div class="col col-xs-5 col-md-3">
+                        <b class="label">
+                            Reset receiver
+                        </b>
+                    </div>
+                    <div class="col col-xs-7 col-md-6">
+                        <button class="btn btn-default" onClick="receiveAdapterReset([[ channelIndex ]])">
+                            RESET
+                        </button>
                     </div>
                 </div>
 

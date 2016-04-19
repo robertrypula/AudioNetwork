@@ -32,24 +32,31 @@ var RxStateMachineManager = (function () {
             );
             this.$$stateMachine.setSyncStateMaxDurationTime(_RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME);
 
-            this.$$currentData = null;
-
             this.$$syncPreamble = null;
             this.$$pskSize = null;
 
-            this.$$averageNoiseLevel = null;
-            this.$$averageNoiseLevelHistory = [];
-            this.$$averageGuardLevel = null;
-            this.$$averageGuardLevelHistory = [];
-            this.$$averageSignalLevel = null;
-            this.$$averageSignalLevelHistory = [];
+            this.reset(true);
+        };
+
+        RSMM.prototype.reset = function (fromConstructor) {
+            this.$$maxSignalPower = null;
+            this.$$minGuardPower = null;
+            this.$$averageNoisePower = null;
+            this.$$averageSignalPower = null;
+
+            this.$$powerHistoryNoise = [];
+            this.$$powerHistoryGuard = [];
+            this.$$powerHistorySignal = [];
+
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
 
-            this.$$powerMaxSignal = null;
-            this.$$powerMinGuard = null;
-
+            this.$$currentData = null;
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
+
+            if (fromConstructor !== true) {
+                this.$$stateMachine.reset();
+            }
         };
 
         RSMM.prototype.setSymbolStateMaxDurationTime = function (value) {
@@ -69,10 +76,10 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerIdleInit = function (stateDurationTime) {
-            this.$$averageNoiseLevelHistory.push(this.$$currentData.pilotSignal.powerDecibel);
-            if (this.$$averageNoiseLevelHistory.length === _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE) {
-                this.$$averageNoiseLevel = AudioUtil.computeAverage(this.$$averageNoiseLevelHistory);
-                this.$$powerThreshold = this.$$averageNoiseLevel + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
+            this.$$powerHistoryNoise.push(this.$$currentData.pilotSignal.powerDecibel);
+            if (this.$$powerHistoryNoise.length === _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE) {
+                this.$$averageNoisePower = AudioUtil.computeAverage(this.$$powerHistoryNoise);
+                this.$$powerThreshold = this.$$averageNoisePower + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
 
                 return RxStateMachine.STATE.FIRST_SYNC_WAIT;
             }
@@ -86,21 +93,21 @@ var RxStateMachineManager = (function () {
             var pilotSignalPresent, powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
 
             // signal cannot be weaker that noise... :)
-            if (powerDecibel <= this.$$averageNoiseLevel) {
+            if (powerDecibel <= this.$$averageNoisePower) {
                 return RxStateMachine.STATE.FATAL_ERROR;
             }
 
             pilotSignalPresent = powerDecibel > this.$$powerThreshold;
-            if (this.$$averageSignalLevel !== null && !pilotSignalPresent) {
+            if (this.$$averageSignalPower !== null && !pilotSignalPresent) {
                 return RxStateMachine.STATE.IDLE;
             }
 
-            if (this.$$averageSignalLevelHistory.length !== _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE) {
-                this.$$averageSignalLevelHistory.push(powerDecibel);
+            if (this.$$powerHistorySignal.length !== _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE) {
+                this.$$powerHistorySignal.push(powerDecibel);
             } else {
-                this.$$averageSignalLevel = AudioUtil.computeAverage(this.$$averageSignalLevelHistory);
-                this.$$powerThreshold = this.$$averageSignalLevel - _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD;
-                this.$$averageSignalLevelHistory.length = 0;
+                this.$$averageSignalPower = AudioUtil.computeAverage(this.$$powerHistorySignal);
+                this.$$powerThreshold = this.$$averageSignalPower - _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD;
+                this.$$powerHistorySignal.length = 0;
             }
         };
 
@@ -125,13 +132,15 @@ var RxStateMachineManager = (function () {
 
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
             // update current min guard power
-            if (this.$$averageGuardLevelHistory.length > 0) {
-                this.$$powerMinGuard = MathUtil.min.apply(null, this.$$averageGuardLevelHistory);
-                this.$$averageGuardLevelHistory.length = 0;
+            if (this.$$powerHistoryGuard.length > 0) {
+                console.log('GUARD HISTORY' + this.$$powerHistoryGuard.join(', '));
+                this.$$minGuardPower = MathUtil.minInArray(this.$$powerHistoryGuard);
+                console.log('         MIN: ' + this.$$minGuardPower);
+                this.$$powerHistoryGuard.length = 0;
             }
 
             // store signal power history
-            this.$$averageSignalLevelHistory.push(
+            this.$$powerHistorySignal.push(
                 this.$$currentData.pilotSignal.powerDecibel
             );
 
@@ -147,13 +156,15 @@ var RxStateMachineManager = (function () {
             var bestQualityIndex;
 
             // update current max signal power
-            if (this.$$averageSignalLevelHistory.length > 0) {
-                this.$$powerMaxSignal = MathUtil.max.apply(null, this.$$averageSignalLevelHistory);
-                this.$$averageSignalLevelHistory.length = 0;
+            if (this.$$powerHistorySignal.length > 0) {
+                console.log('SIGNAL HISTORY' + this.$$powerHistorySignal.join(', '));
+                this.$$maxSignalPower = MathUtil.maxInArray(this.$$powerHistorySignal);
+                console.log('         MAX: ' + this.$$maxSignalPower);
+                this.$$powerHistorySignal.length = 0;
             }
 
             // store guard power history
-            this.$$averageGuardLevelHistory.push(
+            this.$$powerHistoryGuard.push(
                 this.$$currentData.pilotSignal.powerDecibel
             );
 
@@ -213,8 +224,8 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$isInputReallyConnected = function (powerDecibel) {
             return (
                 (
-                    this.$$averageNoiseLevel !== null &&
-                    this.$$averageSignalLevel !== null
+                    this.$$averageNoisePower !== null &&
+                    this.$$averageSignalPower !== null
                 ) || (
                     powerDecibel !== _RxStateMachineManager.NO_INPUT_POWER
                 )
@@ -240,10 +251,14 @@ var RxStateMachineManager = (function () {
             return {
                 state: state,
                 power: (
-                    Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel) + ' <br/> ' +
-                    this.$$dataSymbol.length + ', ' + this.$$dataPacket.length + '<br/>' +
-                    'minGuard: ' + Math.round(this.$$powerMinGuard * 100) / 100 + ', ' + 
-                    'maxSignal: ' + Math.round(this.$$powerMaxSignal * 100) / 100
+                    '<br/>' +
+                    'avgNoisePower: ' + Math.round(this.$$averageNoisePower * 100) / 100 + '<br/>' +
+                    'avgSignalPower: ' + Math.round(this.$$averageSignalPower * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$averageNoisePower) * 100) / 100 + ' <br/>' +
+                    'powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
+                    'minGuardPower: ' + Math.round(this.$$minGuardPower * 100) / 100 + '<br/>' +
+                    'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + '<br/>' +
+                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$minGuardPower) * 100) / 100 + ' <br/>'
                 )
             };
         };

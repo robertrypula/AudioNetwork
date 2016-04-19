@@ -187,6 +187,10 @@ function destroy(cb) {
     }
 }
 
+function receiveAdapterReset(channelIndex) {
+    receiveAdapter.reset(channelIndex);
+}
+
 function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
     var elementId, newFrequency;
 
