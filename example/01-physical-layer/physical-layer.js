@@ -129,7 +129,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
                 ),
                 width: 140,
                 height: 140,
-                historyPointSize: 25 // default: 20
+                historyPointSize: notificationPerSecond // default: 20
             }
         }
     });

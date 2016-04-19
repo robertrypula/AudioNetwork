@@ -242,7 +242,8 @@ var RxStateMachineManager = (function () {
                 power: (
                     Math.round(this.$$averageNoiseLevel) + ' ' + Math.round(this.$$averageSignalLevel) + ' <br/> ' +
                     this.$$dataSymbol.length + ', ' + this.$$dataPacket.length + '<br/>' +
-                    'realtime: ' + this.$$powerMinGuard + ', ' + this.$$powerMaxSignal
+                    'minGuard: ' + Math.round(this.$$powerMinGuard * 100) / 100 + ', ' + 
+                    'maxSignal: ' + Math.round(this.$$powerMaxSignal * 100) / 100
                 )
             };
         };
