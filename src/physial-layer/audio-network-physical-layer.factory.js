@@ -101,11 +101,15 @@ var AudioNetworkPhysicalLayer = (function () {
 
 D6 45
 
-8 subcarriers
+8 subcarriers   
 3 bit/baud (PSK-8)
-4 baud (125ms symbol, 125ms guard)
+3 baud (120ms symbol, 213.3ms guard)     14700 = 5292 + 9408  (@44100)
 =
-96 bit/sec = 12 B/sec
+72 bit/sec = 9 B/sec       ->   1,125 B/sec per subcarrier
+
+
+#####_________#####_________
+
 
 
 SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
