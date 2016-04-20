@@ -6,15 +6,15 @@ var AudioNetworkTransmitAdapter = (function () {
     _AudioNetworkTransmitAdapter.SYNCHRONIZATION = {
         PSK_SIZE: 1,
         SYMBOL: 0,
-        SYMBOL_DURATION: 8.0,
+        SYMBOL_DURATION: 3.0,
         GUARD_INTERVAL: 0.0,
-        INTERPACKET_GAP: 1.0
+        INTERPACKET_GAP: 0.5
     };
 
     _AudioNetworkTransmitAdapter.PACKET = {
         PSK_SIZE: 4,
-        SYMBOL_DURATION: 0.25,
-        GUARD_INTERVAL: 0.25,
+        SYMBOL_DURATION: 0.080,
+        GUARD_INTERVAL: 0.170,
         INTERPACKET_GAP: 0.5
     };
 

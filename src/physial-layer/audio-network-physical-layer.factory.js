@@ -75,13 +75,13 @@ var AudioNetworkPhysicalLayer = (function () {
                     + sync state will be detected - grab average max signal strength
                     + subtract 10 decibels from max signal and enable symbol/packet collecting
                 + [RX] add method to reset receiver state machine (to follow steps above again)
-                +/- integrate power chart
+                + !!!!!!!!! double check state times at receive adapter
+                    + move sync time to main adapter class
+                    + check symbol, guard times
+                    + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
                 +/- [RX] grab/clean packet data and notify packet handler
                 +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
-                - !!!!!!!!! double check state times at receive adapter
-                    - move sync time to main adapter class
-                    - check symbol, guard times
-                    - average sample sizes should be config dependent (mostly for samplesPerSecond setting)
+                - integrate power chart
 
             - add auto tuning feature with ability to align phase offset
                 - put code somewhere inside rx adapter

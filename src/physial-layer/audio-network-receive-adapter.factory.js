@@ -3,8 +3,11 @@ var AudioNetworkReceiveAdapter = (function () {
 
     _AudioNetworkReceiveAdapter.$inject = [];
 
-    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.25;
-    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.25;
+    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.080;
+    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.170;
+    _AudioNetworkReceiveAdapter.SYNC_DURATION = 3.0;
+    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_NOISE = _AudioNetworkReceiveAdapter.SYNC_DURATION;
+    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.7; // little less to finish signal collection before sync transmission ends
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
     _AudioNetworkReceiveAdapter.PSK_SIZE = 4;
     _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT = 10;               // how much state times could be longer
@@ -31,6 +34,9 @@ var AudioNetworkReceiveAdapter = (function () {
             }
             this.setSymbolDuration(_AudioNetworkReceiveAdapter.SYMBOL_DURATION);
             this.setGuardInterval(_AudioNetworkReceiveAdapter.GUARD_INTERVAL);
+            this.setSyncDuration(_AudioNetworkReceiveAdapter.SYNC_DURATION);
+            this.setSampleCollectionTimeNoise(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_NOISE);
+            this.setSampleCollectionTimeSignal(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL);
             this.setSyncPreamble(_AudioNetworkReceiveAdapter.SYNC_PREAMBLE);
             this.setPskSize(_AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _AudioNetworkReceiveAdapter.PSK_SIZE);
         };
@@ -59,6 +65,35 @@ var AudioNetworkReceiveAdapter = (function () {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
                     value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
                 );
+            }
+        };
+
+        ANRA.prototype.setSyncDuration = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
+                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                );
+            }
+        };
+
+        ANRA.prototype.setSampleCollectionTimeNoise = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSampleCollectionTimeNoise(value);
+            }
+        };
+
+        ANRA.prototype.setSampleCollectionTimeSignal = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSampleCollectionTimeSignal(value);
             }
         };
 

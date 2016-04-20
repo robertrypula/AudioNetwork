@@ -25,6 +25,7 @@ var RxStateMachine = (function () {
         };
 
         RSM.STATE = {
+            NO_INPUT: 'NO_INPUT',
             IDLE_INIT: 'IDLE_INIT',
             FIRST_SYNC_WAIT: 'FIRST_SYNC_WAIT',
             SIGNAL_INIT: 'SIGNAL_INIT',
