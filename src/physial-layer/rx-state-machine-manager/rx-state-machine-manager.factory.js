@@ -3,11 +3,11 @@ var RxStateMachineManager = (function () {
 
     _RxStateMachineManager.$inject = [];
 
-    _RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME = 8.0;
+    _RxStateMachineManager.SYNC_STATE_MAX_DURATION_TIME = 8.0 * 1.2;   // TODO refactor this!!
     _RxStateMachineManager.INITIAL_POWER_THRESHOLD = 0;
     _RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX = 0;
     _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL = 10;
-    _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD = 3;
+    _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR = 0.8;
     _RxStateMachineManager.NO_INPUT_POWER = -99;                         // TODO, move to some common place
     _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE = 3 * 25;    // TODO, take it from config
     _RxStateMachineManager.AVERAGE_SIGNAL_LEVEL_HISTORY_SIZE = 3 * 25;
@@ -40,7 +40,9 @@ var RxStateMachineManager = (function () {
 
         RSMM.prototype.reset = function (fromConstructor) {
             this.$$maxSignalPower = null;
+            this.$$maxSignalPowerSampleSize = null;
             this.$$minGuardPower = null;
+            this.$$minGuardPowerSampleSize = null;
             this.$$averageNoisePower = null;
             this.$$averageSignalPower = null;
 
@@ -79,6 +81,7 @@ var RxStateMachineManager = (function () {
             this.$$powerHistoryNoise.push(this.$$currentData.pilotSignal.powerDecibel);
             if (this.$$powerHistoryNoise.length === _RxStateMachineManager.AVERAGE_NOISE_LEVEL_HISTORY_SIZE) {
                 this.$$averageNoisePower = AudioUtil.computeAverage(this.$$powerHistoryNoise);
+                this.$$powerHistoryNoise.length = 0;
                 this.$$powerThreshold = this.$$averageNoisePower + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
 
                 return RxStateMachine.STATE.FIRST_SYNC_WAIT;
@@ -90,7 +93,11 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerSignalInit = function (stateDurationTime) {
-            var pilotSignalPresent, powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
+            var 
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                pilotSignalPresent,
+                thresholdDifferenceBetweenAverageSignalPower
+            ;
 
             // signal cannot be weaker that noise... :)
             if (powerDecibel <= this.$$averageNoisePower) {
@@ -106,8 +113,12 @@ var RxStateMachineManager = (function () {
                 this.$$powerHistorySignal.push(powerDecibel);
             } else {
                 this.$$averageSignalPower = AudioUtil.computeAverage(this.$$powerHistorySignal);
-                this.$$powerThreshold = this.$$averageSignalPower - _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_SIGNAL_AND_THRESHOLD;
                 this.$$powerHistorySignal.length = 0;
+                thresholdDifferenceBetweenAverageSignalPower = (
+                    _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR * 
+                    (this.$$averageSignalPower - this.$$averageNoisePower)
+                );
+                this.$$powerThreshold = this.$$averageSignalPower - thresholdDifferenceBetweenAverageSignalPower;
             }
         };
 
@@ -135,6 +146,7 @@ var RxStateMachineManager = (function () {
             if (this.$$powerHistoryGuard.length > 0) {
                 console.log('GUARD HISTORY' + this.$$powerHistoryGuard.join(', '));
                 this.$$minGuardPower = MathUtil.minInArray(this.$$powerHistoryGuard);
+                this.$$minGuardPowerSampleSize = this.$$powerHistoryGuard.length;
                 console.log('         MIN: ' + this.$$minGuardPower);
                 this.$$powerHistoryGuard.length = 0;
             }
@@ -159,6 +171,7 @@ var RxStateMachineManager = (function () {
             if (this.$$powerHistorySignal.length > 0) {
                 console.log('SIGNAL HISTORY' + this.$$powerHistorySignal.join(', '));
                 this.$$maxSignalPower = MathUtil.maxInArray(this.$$powerHistorySignal);
+                this.$$maxSignalPowerSampleSize = this.$$powerHistorySignal.length;
                 console.log('         MAX: ' + this.$$maxSignalPower);
                 this.$$powerHistorySignal.length = 0;
             }
@@ -256,8 +269,8 @@ var RxStateMachineManager = (function () {
                     'avgSignalPower: ' + Math.round(this.$$averageSignalPower * 100) / 100 + ' <br/>' +
                     '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$averageNoisePower) * 100) / 100 + ' <br/>' +
                     'powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
-                    'minGuardPower: ' + Math.round(this.$$minGuardPower * 100) / 100 + '<br/>' +
-                    'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + '<br/>' +
+                    'minGuardPower: ' + Math.round(this.$$minGuardPower * 100) / 100 + ' sampleSize: ' + this.$$minGuardPowerSampleSize + '<br/>' +
+                    'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + ' sampleSize: ' + this.$$maxSignalPowerSampleSize + '<br/>' +
                     '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$minGuardPower) * 100) / 100 + ' <br/>'
                 )
             };

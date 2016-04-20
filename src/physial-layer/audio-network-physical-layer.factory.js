@@ -74,18 +74,23 @@ var AudioNetworkPhysicalLayer = (function () {
                     + run sync on the TX side
                     + sync state will be detected - grab average max signal strength
                     + subtract 10 decibels from max signal and enable symbol/packet collecting
-                - integrate power chart
-                - [RX] add method to reset receiver state machine (to follow steps above again)
+                + [RX] add method to reset receiver state machine (to follow steps above again)
+                +/- integrate power chart
                 +/- [RX] grab/clean packet data and notify packet handler
                 +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
+                - !!!!!!!!! double check state times at receive adapter
+                    - move sync time to main adapter class
+                    - check symbol, guard times
+                    - average sample sizes should be config dependent (mostly for samplesPerSecond setting)
 
             - add auto tuning feature with ability to align phase offset
                 - put code somewhere inside rx adapter
                 - add events for frequency update and phase update to notify hosting code
 
             - use setTimeout instead setInverval (?)
-            - measure CPU load
+            - measure CPU load by measuring times before and after execution
 
+            - add noise when loopback is used, change name to loopback
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed
             - move notification logic to manager (?)
