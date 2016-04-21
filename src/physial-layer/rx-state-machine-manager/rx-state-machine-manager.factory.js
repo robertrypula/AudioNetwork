@@ -3,10 +3,10 @@ var RxStateMachineManager = (function () {
 
     _RxStateMachineManager.$inject = [];
 
-    _RxStateMachineManager.INITIAL_POWER_THRESHOLD = 0;
+    _RxStateMachineManager.INITIAL_POWER_THRESHOLD = 0;     // after init we need to listen to noise so this threshold should prevent catching all possible signals
     _RxStateMachineManager.OFDM_PILOT_SIGNAL_INDEX = 0;
-    _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL = 10;
-    _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR = 0.5;
+    _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL = 10;  // decibels above average noise level to be able to catch first even weak signal - it means that you should keep this value low
+    _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR = 0.3;  // 0.0 -> closer to signal, 1.0 -> closer to noise
     _RxStateMachineManager.NO_INPUT_POWER = -99;                         // TODO, move to some common place
 
     function _RxStateMachineManager() {

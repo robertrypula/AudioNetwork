@@ -81,15 +81,16 @@ var AudioNetworkPhysicalLayer = (function () {
                     + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
                 +/- [RX] grab/clean packet data and notify packet handler
                 +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
-                - integrate power chart
+                - adaptive threshold based on arriving packets
 
+            - integrate power chart, increate bar width
             - add auto tuning feature with ability to align phase offset
-                - put code somewhere inside rx adapter
-                - add events for frequency update and phase update to notify hosting code
+            - add events for frequency update and phase update to notify hosting code
 
             - use setTimeout instead setInverval (?)
             - measure CPU load by measuring times before and after execution
 
+            - move general configuration to some common service
             - add noise when loopback is used, change name to loopback
             - refactor DOM helpers (move to service)
             - do not redraw constellation if queue wasn't changed

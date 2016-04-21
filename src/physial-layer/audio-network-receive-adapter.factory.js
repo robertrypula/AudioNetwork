@@ -10,7 +10,7 @@ var AudioNetworkReceiveAdapter = (function () {
     _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.7; // little less to finish signal collection before sync transmission ends
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
     _AudioNetworkReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
-    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.0;               // how much state times could be longer
+    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.5;          // how much state times could be longer - WARNING do not exceed interpacket gap (guardInterval * factor < interpacketGap)!
     _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
     function _AudioNetworkReceiveAdapter() {
