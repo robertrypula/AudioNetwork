@@ -37,6 +37,10 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.reset = function (fromConstructor) {
+            if (typeof fromConstructor === 'undefined') {
+                fromConstructor = false;
+            }
+
             this.$$maxSignalPower = null;
             this.$$maxSignalPowerSampleSize = null;
             this.$$minGuardPower = null;
@@ -54,8 +58,8 @@ var RxStateMachineManager = (function () {
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
 
-            if (fromConstructor !== true) {
-                this.$$stateMachine.reset();
+            if (!fromConstructor) {
+                this.$$stateMachine.scheduleReset();
             }
         };
 
@@ -131,15 +135,17 @@ var RxStateMachineManager = (function () {
             if (stateDurationTime < this.$$sampleCollectionTimeSignal) {
                 this.$$powerHistorySignal.push(powerDecibel);
             } else {
-                this.$$averageSignalPower = AudioUtil.computeAverage(this.$$powerHistorySignal);
-                this.$$powerHistorySignal.length = 0;
-                thresholdDifferenceBetweenAverageSignalPower = (
-                    _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR * 
-                    (this.$$averageSignalPower - this.$$averageNoisePower)
-                );
+                if (this.$$averageSignalPower === null) {
+                    this.$$averageSignalPower = AudioUtil.computeAverage(this.$$powerHistorySignal);
+                    this.$$powerHistorySignal.length = 0;
+                    thresholdDifferenceBetweenAverageSignalPower = (
+                        _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR *
+                        (this.$$averageSignalPower - this.$$averageNoisePower)
+                    );
 
-                // put threshold somewhere (depending on unit factor) between average signal and average noise level
-                this.$$powerThreshold = this.$$averageSignalPower - thresholdDifferenceBetweenAverageSignalPower;
+                    // put threshold somewhere (depending on unit factor) between average signal and average noise level
+                    this.$$powerThreshold = this.$$averageSignalPower - thresholdDifferenceBetweenAverageSignalPower;
+                }
             }
         };
 

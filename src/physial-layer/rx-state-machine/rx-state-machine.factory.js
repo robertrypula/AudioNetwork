@@ -21,7 +21,10 @@ var RxStateMachine = (function () {
             this.$$guardStateMaxDurationTime = null;
             this.$$syncStateMaxDurationTime = null;
 
-            this.reset();
+            this.$$state = null;
+            this.$$stateDurationTime = null;
+            this.$$stateBeginTime = null;
+            this.$$resetFlag = true;
         };
 
         RSM.STATE = {
@@ -37,10 +40,8 @@ var RxStateMachine = (function () {
             ERROR: 'ERROR'
         };
 
-        RSM.prototype.reset = function () {
-            this.$$state = RSM.STATE.IDLE_INIT;
-            this.$$stateDurationTime = 0;
-            this.$$stateBeginTime = null;
+        RSM.prototype.scheduleReset = function () {
+            this.$$resetFlag = true;
         };
 
         RSM.prototype.$$changeState = function (newState, time) {
@@ -216,6 +217,11 @@ var RxStateMachine = (function () {
                 S = RSM.STATE,
                 finished
             ;
+
+            if (this.$$resetFlag) {
+                this.$$changeState(S.IDLE_INIT, time);
+                this.$$resetFlag = false;
+            }
 
             if (
                 this.$$guardStateMaxDurationTime === null ||
