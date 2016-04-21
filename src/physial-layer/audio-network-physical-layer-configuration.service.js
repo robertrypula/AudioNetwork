@@ -5,9 +5,9 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
 
     function _AudioNetworkPhysicalLayerConfiguration() {
         var INPUT = {
-            MICROPHONE: 'MICROPHONE',
-            TX: 'TX',
-            RECORDED_AUDIO: 'RECORDED_AUDIO'
+            MICROPHONE: 'MICROPHONE',                   // TODO move to some common config
+            TX: 'TX',                                   // TODO move to some common config
+            RECORDED_AUDIO: 'RECORDED_AUDIO'            // TODO move to some common config
         };
 
         function parseChannel(configuration, txRx) {

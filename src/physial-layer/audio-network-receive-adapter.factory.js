@@ -3,14 +3,14 @@ var AudioNetworkReceiveAdapter = (function () {
 
     _AudioNetworkReceiveAdapter.$inject = [];
 
-    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.080;
-    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.170;
-    _AudioNetworkReceiveAdapter.SYNC_DURATION = 3.0;
+    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.080;     // TODO move to some common config
+    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.170;      // TODO move to some common config
+    _AudioNetworkReceiveAdapter.SYNC_DURATION = 3.0;         // TODO move to some common config
     _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_NOISE = _AudioNetworkReceiveAdapter.SYNC_DURATION;
     _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.7; // little less to finish signal collection before sync transmission ends
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
-    _AudioNetworkReceiveAdapter.PSK_SIZE = 4;
-    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT = 10;               // how much state times could be longer
+    _AudioNetworkReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
+    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT = 50;               // how much state times could be longer
     _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
     function _AudioNetworkReceiveAdapter() {

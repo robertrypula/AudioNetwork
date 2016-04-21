@@ -6,21 +6,21 @@ var AudioNetworkTransmitAdapter = (function () {
     _AudioNetworkTransmitAdapter.SYNCHRONIZATION = {
         PSK_SIZE: 1,
         SYMBOL: 0,
-        SYMBOL_DURATION: 3.0,
+        SYMBOL_DURATION: 3.0,                         // TODO move to some common config
         GUARD_INTERVAL: 0.0,
-        INTERPACKET_GAP: 0.5
+        INTERPACKET_GAP: 0.5                          // TODO move to some common config
     };
 
     _AudioNetworkTransmitAdapter.PACKET = {
-        PSK_SIZE: 4,
-        SYMBOL_DURATION: 0.080,
-        GUARD_INTERVAL: 0.170,
-        INTERPACKET_GAP: 0.5
+        PSK_SIZE: 4,                                  // TODO move to some common config
+        SYMBOL_DURATION: 0.080,                       // TODO move to some common config
+        GUARD_INTERVAL: 0.170,                        // TODO move to some common config
+        INTERPACKET_GAP: 0.5                          // TODO move to some common config
     };
 
     _AudioNetworkTransmitAdapter.SYMBOL = {
         SYNC_PREAMBLE: false,                   // note: this is NOT default preamble value for sending packet
-        SYMBOL_DURATION: _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION,
+        SYMBOL_DURATION: _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION,     // TODO move to some common config
         GUARD_INTERVAL: 0.0,
         INTERPACKET_GAP: 0.0,
         AMPLITUDE: undefined
