@@ -10,7 +10,7 @@ var AudioNetworkReceiveAdapter = (function () {
     _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.7; // little less to finish signal collection before sync transmission ends
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
     _AudioNetworkReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
-    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT = 50;               // how much state times could be longer
+    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.0;               // how much state times could be longer
     _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
     function _AudioNetworkReceiveAdapter() {
@@ -52,7 +52,7 @@ var AudioNetworkReceiveAdapter = (function () {
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
-                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
@@ -63,7 +63,7 @@ var AudioNetworkReceiveAdapter = (function () {
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
-                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
@@ -74,7 +74,7 @@ var AudioNetworkReceiveAdapter = (function () {
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
-                    value * (1.0 + _AudioNetworkReceiveAdapter.TIME_TOLERANCE_PERCENT / 100)
+                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
