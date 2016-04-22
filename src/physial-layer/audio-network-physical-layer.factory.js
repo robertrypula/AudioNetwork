@@ -83,13 +83,14 @@ var AudioNetworkPhysicalLayer = (function () {
                 +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
                 - adaptive threshold based on arriving packets
 
-            - integrate power chart, increate bar width
+            - integrate power chart, increase bar width
             - add auto tuning feature with ability to align phase offset
             - add events for frequency update and phase update to notify hosting code
 
             - use setTimeout instead setInverval (?)
             - measure CPU load by measuring times before and after execution
 
+            - change name: dftTimeSpan -> dftWindowTimeSpan
             - move general configuration to some common service
             - add noise when loopback is used, change name to loopback
             - refactor DOM helpers (move to service)

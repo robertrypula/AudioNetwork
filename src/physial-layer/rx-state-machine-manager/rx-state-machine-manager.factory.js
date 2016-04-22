@@ -51,6 +51,7 @@ var RxStateMachineManager = (function () {
             this.$$powerHistoryNoise = [];
             this.$$powerHistoryGuard = [];
             this.$$powerHistorySignal = [];
+            this.$$phaseHistory = [];
 
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
 
@@ -116,19 +117,17 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$handlerSignalInit = function (stateDurationTime) {
             var 
                 powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
-                pilotSignalPresent,
                 thresholdDifferenceBetweenAverageSignalPower
             ;
+
+            // if we have all needed information and pilot signal is gone we can go to idle state
+            if (this.$$averageSignalPower !== null && !this.$$isPilotSignalPresent()) {
+                return RxStateMachine.STATE.IDLE;
+            }
 
             // signal cannot be weaker that noise... :)
             if (powerDecibel <= this.$$averageNoisePower) {
                 return RxStateMachine.STATE.FATAL_ERROR;
-            }
-
-            // if we have all needed information and pilot signal is gone we can go to idle state
-            pilotSignalPresent = powerDecibel > this.$$powerThreshold;
-            if (this.$$averageSignalPower !== null && !pilotSignalPresent) {
-                return RxStateMachine.STATE.IDLE;
             }
 
             // collect desired signal power history and later compute average signal power and power threshold
@@ -147,6 +146,9 @@ var RxStateMachineManager = (function () {
                     this.$$powerThreshold = this.$$averageSignalPower - thresholdDifferenceBetweenAverageSignalPower;
                 }
             }
+
+            // collect phase history for all ofdm subcarriers - it will be later used for fine-tune frequency offets
+            this.$$collectPhaseHistory(stateDurationTime, this.$$currentData.carrierDetail);
         };
 
         RSMM.prototype.$$handlerFatalError = function (stateDurationTime) {
@@ -156,14 +158,25 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
             var packetDataFinal;
 
+            // share collected packet with rest of the world
             if (this.$$dataPacket.length > 0) {
                 if (this.$$packetReceiveHandler) {
                     packetDataFinal = this.$$preparePacket(this.$$dataPacket);
                     this.$$packetReceiveHandler(this.$$channelIndex, packetDataFinal);
                 }
 
-                this.$$dataPacket = [];
+                this.$$dataPacket.length = 0;
             }
+
+            // try to fine-tune frequency offsets basing on phase history
+            if (this.$$phaseHistory.length > 0) {
+                this.$$handlePhaseHistory(this.$$phaseHistory);
+                this.$$phaseHistory.length = 0;
+            }
+
+            // clear last guard history because it's followed directly by idle state
+            // so technically it wasn't guard state at all
+            this.$$powerHistoryGuard.length = 0;
         };
 
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
@@ -184,7 +197,8 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerSync = function (stateDurationTime) {
-
+            // collect phase history for all ofdm subcarriers - it will be later used for fine-tune frequency offets
+            this.$$collectPhaseHistory(stateDurationTime, this.$$currentData.carrierDetail);
         };
 
         RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
@@ -221,6 +235,26 @@ var RxStateMachineManager = (function () {
             // nothing much here - this state will automatically transit to idle when pilot signal will be gone
         };
 
+        RSMM.prototype.$$collectPhaseHistory = function (stateDurationTime, carrierDetail) {
+            this.$$phaseHistory.push({
+                time: stateDurationTime,
+                phase: carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            });                                    // TODO check also powerThreshold to avoid fine-tune on null OFDMs
+        };
+
+        RSMM.prototype.$$handlePhaseHistory = function (phaseHistory) {
+            var i, str = '';
+            
+            // TODO change that temporary code
+            for (i = 0; i < phaseHistory.length; i++) {
+                str += (
+                    (Math.round(phaseHistory[i].time * 1000) / 1000) + ' ' +
+                    (Math.round(phaseHistory[i].phase * 1000) / 1000) + ' | '
+                );
+            }
+            console.log('phase history: ', str);
+        };
+
         RSMM.prototype.$$handlePacketSyncPreamble = function (carrierDetail) {
             var current, i;
 
@@ -238,7 +272,9 @@ var RxStateMachineManager = (function () {
             result = [];
             for (i = 0; i < dataPacket.length; i++) {
                 if (i === 0 && this.$$syncPreamble) {
-                    continue;           // when syncPreamble is true then first burst is only for used for phase alignment
+                    // when syncPreamble is true then first burst is used only for phase
+                    // alignment - we can simply ommit it in the final packet
+                    continue;
                 }
                 carrierDetail = dataPacket[i];
                 ofdmList = [];
@@ -246,7 +282,6 @@ var RxStateMachineManager = (function () {
                     ofdmList.push(
                         Math.round(carrierDetail[j].phase * this.$$pskSize) % this.$$pskSize
                     );
-                    
                 }
                 result.push(ofdmList);
             }
@@ -265,10 +300,13 @@ var RxStateMachineManager = (function () {
             );
         };
 
+        RSMM.prototype.$$isPilotSignalPresent = function () {
+            return this.$$currentData.pilotSignal.powerDecibel > this.$$powerThreshold;
+        };
+
         RSMM.prototype.receive = function (carrierDetail, time) {
             var
                 pilotSignal,
-                pilotSignalPresent,
                 state = RxStateMachine.STATE.NO_INPUT
             ;
 
@@ -281,8 +319,7 @@ var RxStateMachineManager = (function () {
 
             if (this.$$isInputReallyConnected(pilotSignal.powerDecibel)) {
                 // TODO add some kind of 'schmitt trigger' logic here to cleanup noise at signal transitions
-                pilotSignalPresent = pilotSignal.powerDecibel > this.$$powerThreshold;
-                state = this.$$stateMachine.getState(pilotSignalPresent, time);
+                state = this.$$stateMachine.getState(this.$$isPilotSignalPresent(), time);
             }
 
             return {
