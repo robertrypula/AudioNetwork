@@ -122,6 +122,13 @@ var AudioNetworkReceiveAdapter = (function () {
         };
 
         ANRA.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
+            var i;
+
+            for (i = 0; i < data.length; i++) {
+                if (data[i].length === 1) {
+                    data[i] = data[i][0];           // flatten data structure when only one ofdm is used in this channel
+                }
+            }
 
             // TODO here we can translate ofdm-1 array into one number
 

@@ -79,7 +79,7 @@ var AudioNetworkPhysicalLayer = (function () {
                     + move sync time to main adapter class
                     + check symbol, guard times
                     + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
-                +/- [RX] grab/clean packet data and notify packet handler
+                + [RX] grab/clean packet data and notify packet handler
                 +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
                 - adaptive threshold based on arriving packets
 

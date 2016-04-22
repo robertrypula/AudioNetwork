@@ -237,6 +237,9 @@ var RxStateMachineManager = (function () {
 
             result = [];
             for (i = 0; i < dataPacket.length; i++) {
+                if (i === 0 && this.$$syncPreamble) {
+                    continue;           // when syncPreamble is true then first burst is only for used for phase alignment
+                }
                 carrierDetail = dataPacket[i];
                 ofdmList = [];
                 for (j = 0; j < carrierDetail.length; j++) {

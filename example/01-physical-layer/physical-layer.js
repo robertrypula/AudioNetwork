@@ -156,9 +156,11 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     receiveAdapter.setPacketReceiveHandler(function (channelIndex, data) {
         var str, i, uiPacketHistory = document.getElementById('rx-sampling-packet-history-' + channelIndex);
 
+        // console.log('packet received', data);
+
         str = '';
         for (i = 0; i < data.length; i++) {
-            str += data[i].join(', ') + ' | ';
+            str += (typeof data[i] === 'number' ? data[i] : data[i].join(', ')) + ' | ';
         }
         uiPacketHistory.innerHTML = str + '&nbsp;<br/>' + uiPacketHistory.innerHTML;
     });
