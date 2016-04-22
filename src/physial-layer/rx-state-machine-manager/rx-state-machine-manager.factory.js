@@ -243,16 +243,38 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlePhaseHistory = function (phaseHistory) {
-            var i, str = '';
-            
+            var i, str = '', indexA, indexB, drift, current;
+
             // TODO change that temporary code
             for (i = 0; i < phaseHistory.length; i++) {
                 str += (
-                    (Math.round(phaseHistory[i].time * 1000) / 1000) + ' ' +
-                    (Math.round(phaseHistory[i].phase * 1000) / 1000) + ' | '
+                  (Math.round(phaseHistory[i].time * 1000) / 1000) + ' ' +
+                  (Math.round(phaseHistory[i].phase * 1000) / 1000) + ' | '
                 );
             }
-            console.log('phase history: ', str);
+
+            indexA = Math.round(0.43 * phaseHistory.length);
+            indexB = Math.round(0.57 * phaseHistory.length);
+
+            indexB = indexB >= phaseHistory.length ? phaseHistory.length - 1 : indexB;
+
+            // console.log('phase history: ', str);
+
+            if (indexA !== indexB && indexA < indexB) {
+                console.log('phase history indexA', phaseHistory[indexA].time, phaseHistory[indexA].phase);
+                console.log('phase history indexB', phaseHistory[indexB].time, phaseHistory[indexB].phase);
+                drift = -(phaseHistory[indexB].phase - phaseHistory[indexA].phase) / (phaseHistory[indexB].time - phaseHistory[indexA].time);
+
+                console.log('phase history drift', drift);
+
+                if (Math.abs(drift) > 0.005) {
+                    current = anpl.getRxFrequency(this.$$channelIndex, 0);
+                    console.log('phase history current', current);
+                    anpl.setRxFrequency(this.$$channelIndex, 0, current + drift);
+                    console.log('Frequency corrected for channel ' + this.$$channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
+                    uiRefresh();
+                }
+            }
         };
 
         RSMM.prototype.$$handlePacketSyncPreamble = function (carrierDetail) {
@@ -263,6 +285,7 @@ var RxStateMachineManager = (function () {
                 current = anpl.getRxPhaseCorrection(this.$$channelIndex, i);
                 anpl.setRxPhaseCorrection(this.$$channelIndex, i, current + carrierDetail[i].phase);
                 console.log('Phase corrected for channel ' + this.$$channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
+                uiRefresh();
             }
         };
 
