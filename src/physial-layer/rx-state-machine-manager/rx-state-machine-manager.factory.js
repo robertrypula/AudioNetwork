@@ -33,6 +33,8 @@ var RxStateMachineManager = (function () {
             this.$$syncPreamble = null;
             this.$$pskSize = null;
 
+            this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
+
             this.reset(true);
         };
 
@@ -51,7 +53,7 @@ var RxStateMachineManager = (function () {
             this.$$powerHistoryNoise = [];
             this.$$powerHistoryGuard = [];
             this.$$powerHistorySignal = [];
-            this.$$phaseHistory = [];
+            this.$$phaseOffsetCollector.clear();
 
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
 
@@ -147,8 +149,11 @@ var RxStateMachineManager = (function () {
                 }
             }
 
-            // collect phase history for all ofdm subcarriers - it will be later used for fine-tune frequency offets
-            this.$$collectPhaseHistory(stateDurationTime, this.$$currentData.carrierDetail);
+            // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
+            this.$$phaseOffsetCollector.collect({
+                stateDurationTime: stateDurationTime,
+                carrierDetail: this.$$currentData.carrierDetail
+            });
         };
 
         RSMM.prototype.$$handlerFatalError = function (stateDurationTime) {
@@ -169,10 +174,7 @@ var RxStateMachineManager = (function () {
             }
 
             // try to fine-tune frequency offsets basing on phase history
-            if (this.$$phaseHistory.length > 0) {
-                this.$$handlePhaseHistory(this.$$phaseHistory);
-                this.$$phaseHistory.length = 0;
-            }
+            this.$$handlePhaseOffsetFinalize(this.$$phaseOffsetCollector.finalize());
 
             // clear last guard history because it's followed directly by idle state
             // so technically it wasn't guard state at all
@@ -197,8 +199,11 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerSync = function (stateDurationTime) {
-            // collect phase history for all ofdm subcarriers - it will be later used for fine-tune frequency offets
-            this.$$collectPhaseHistory(stateDurationTime, this.$$currentData.carrierDetail);
+            // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
+            this.$$phaseOffsetCollector.collect({
+                stateDurationTime: stateDurationTime,
+                carrierDetail: this.$$currentData.carrierDetail
+            });
         };
 
         RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
@@ -235,45 +240,15 @@ var RxStateMachineManager = (function () {
             // nothing much here - this state will automatically transit to idle when pilot signal will be gone
         };
 
-        RSMM.prototype.$$collectPhaseHistory = function (stateDurationTime, carrierDetail) {
-            this.$$phaseHistory.push({
-                time: stateDurationTime,
-                phase: carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            });                                    // TODO check also powerThreshold to avoid fine-tune on null OFDMs
-        };
+        RSMM.prototype.$$handlePhaseOffsetFinalize = function (drift) {
+            var current;
 
-        RSMM.prototype.$$handlePhaseHistory = function (phaseHistory) {
-            var i, str = '', indexA, indexB, drift, current;
-
-            // TODO change that temporary code
-            for (i = 0; i < phaseHistory.length; i++) {
-                str += (
-                  (Math.round(phaseHistory[i].time * 1000) / 1000) + ' ' +
-                  (Math.round(phaseHistory[i].phase * 1000) / 1000) + ' | '
-                );
-            }
-
-            indexA = Math.round(0.43 * phaseHistory.length);
-            indexB = Math.round(0.57 * phaseHistory.length);
-
-            indexB = indexB >= phaseHistory.length ? phaseHistory.length - 1 : indexB;
-
-            // console.log('phase history: ', str);
-
-            if (indexA !== indexB && indexA < indexB) {
-                console.log('phase history indexA', phaseHistory[indexA].time, phaseHistory[indexA].phase);
-                console.log('phase history indexB', phaseHistory[indexB].time, phaseHistory[indexB].phase);
-                drift = -(phaseHistory[indexB].phase - phaseHistory[indexA].phase) / (phaseHistory[indexB].time - phaseHistory[indexA].time);
-
-                console.log('phase history drift', drift);
-
-                if (Math.abs(drift) > 0.005) {
-                    current = anpl.getRxFrequency(this.$$channelIndex, 0);
-                    console.log('phase history current', current);
-                    anpl.setRxFrequency(this.$$channelIndex, 0, current + drift);
-                    console.log('Frequency corrected for channel ' + this.$$channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
-                    uiRefresh();
-                }
+            if (Math.abs(drift) > 0.005) {
+                current = anpl.getRxFrequency(this.$$channelIndex, 0);
+                console.log('phase history current', current);
+                anpl.setRxFrequency(this.$$channelIndex, 0, current + drift);
+                console.log('Frequency corrected for channel ' + this.$$channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
+                uiRefresh();  // TODO call external handler and move that code outside !!!!!!!!
             }
         };
 
@@ -285,7 +260,7 @@ var RxStateMachineManager = (function () {
                 current = anpl.getRxPhaseCorrection(this.$$channelIndex, i);
                 anpl.setRxPhaseCorrection(this.$$channelIndex, i, current + carrierDetail[i].phase);
                 console.log('Phase corrected for channel ' + this.$$channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
-                uiRefresh();
+                uiRefresh();  // TODO call external handler and move that code outside !!!!!!!!
             }
         };
 
