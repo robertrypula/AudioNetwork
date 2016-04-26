@@ -14,7 +14,9 @@ var PhaseOffsetCollector = (function () {
         POC.prototype.constructor = POC;
 
         POC.prototype.$$finalize = function () {
-            var i, str = '', indexA, indexB, drift;
+            var
+                i, indexA, indexB, drift,
+                str = '';
 
             // TODO change that temporary code
             for (i = 0; i < this.$$valueList.length; i++) {
@@ -26,11 +28,7 @@ var PhaseOffsetCollector = (function () {
 
             indexA = Math.round(0.43 * this.$$valueList.length);
             indexB = Math.round(0.57 * this.$$valueList.length);
-
             indexB = indexB >= this.$$valueList.length ? this.$$valueList.length - 1 : indexB;
-
-            // console.log('phase history: ', str);
-
             drift = 0;
             if (indexA !== indexB && indexA < indexB) {
                 console.log('phase history indexA', this.$$valueList[indexA].time, this.$$valueList[indexA].phase);
@@ -46,7 +44,7 @@ var PhaseOffsetCollector = (function () {
             this.$$valueList.push({
                 time: value.stateDurationTime,
                 phase: value.carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            });                                    // TODO check also powerThreshold to avoid fine-tune on null OFDMs
+            });                                          // TODO check also powerThreshold to avoid fine-tune on null OFDMs
         };
 
         return POC;

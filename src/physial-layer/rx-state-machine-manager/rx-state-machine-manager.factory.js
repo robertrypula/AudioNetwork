@@ -328,10 +328,11 @@ var RxStateMachineManager = (function () {
                     'avgNoisePower: ' + Math.round(this.$$averageNoisePower * 100) / 100 + '<br/>' +
                     'avgSignalPower: ' + Math.round(this.$$averageSignalPower * 100) / 100 + ' <br/>' +
                     '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$averageNoisePower) * 100) / 100 + ' <br/>' +
-                    'powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
                     'minGuardPower: ' + Math.round(this.$$minGuardPower * 100) / 100 + ' sampleSize: ' + this.$$minGuardPowerSampleSize + '<br/>' +
                     'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + ' sampleSize: ' + this.$$maxSignalPowerSampleSize + '<br/>' +
-                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$minGuardPower) * 100) / 100 + ' <br/>'
+                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$minGuardPower) * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;idealPowerThreshold: ' + Math.round(0.5 * (this.$$maxSignalPower + this.$$minGuardPower) * 100) / 100 + ' <br/>'
                 )
             };
         };
