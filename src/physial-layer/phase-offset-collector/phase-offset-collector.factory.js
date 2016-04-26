@@ -18,6 +18,10 @@ var PhaseOffsetCollector = (function () {
                 i, indexA, indexB, drift,
                 str = '';
 
+            if (this.$$valueList.length === 0) {
+                return null;
+            }
+
             // TODO change that temporary code
             for (i = 0; i < this.$$valueList.length; i++) {
                 str += (

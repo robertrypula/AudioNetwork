@@ -164,20 +164,14 @@ var RxStateMachineManager = (function () {
         };
         
         RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
-            var packetDataFinal;
-
             // share collected packet with rest of the world
             if (this.$$dataPacket.length > 0) {
-                if (this.$$packetReceiveHandler) {
-                    packetDataFinal = this.$$preparePacket(this.$$dataPacket);
-                    this.$$packetReceiveHandler(this.$$channelIndex, packetDataFinal);
-                }
-
+                this.$$packetReceiveHandler(this.$$channelIndex, this.$$preparePacket(this.$$dataPacket));
                 this.$$dataPacket.length = 0;
             }
 
             // try to fine-tune frequency offsets basing on phase history
-            this.$$handlePhaseOffsetFinalize(this.$$phaseOffsetCollector.finalize());
+            this.$$frequencyUpdateHandler(this.$$channelIndex, this.$$phaseOffsetCollector.finalize());
 
             // clear last guard history because it's followed directly by idle state
             // so technically it wasn't guard state at all
@@ -231,9 +225,7 @@ var RxStateMachineManager = (function () {
                     this.$$dataSymbol[bestQualityIndex].carrierDetail
                 );
                 if (this.$$isPacketSyncPreamble()) {
-                    this.$$handlePacketSyncPreamble(
-                        this.$$dataSymbol[bestQualityIndex].carrierDetail
-                    );
+                    this.$$phaseCorrectionUpdateHandler(this.$$channelIndex, this.$$dataSymbol[bestQualityIndex].carrierDetail);
                 }
                 this.$$dataSymbol = [];
             }
@@ -241,30 +233,6 @@ var RxStateMachineManager = (function () {
 
         RSMM.prototype.$$handlerError = function (stateDurationTime) {
             // nothing much here - this state will automatically transit to idle when pilot signal will be gone
-        };
-
-        RSMM.prototype.$$handlePhaseOffsetFinalize = function (drift) {
-            var current;
-
-            if (Math.abs(drift) > 0.005) {
-                current = anpl.getRxFrequency(this.$$channelIndex, 0);
-                console.log('phase history current', current);
-                anpl.setRxFrequency(this.$$channelIndex, 0, current + drift);
-                console.log('Frequency corrected for channel ' + this.$$channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
-                uiRefresh();  // TODO call external handler and move that code outside !!!!!!!!
-            }
-        };
-
-        RSMM.prototype.$$handlePacketSyncPreamble = function (carrierDetail) {
-            var current, i;
-
-            // TODO notify about phase correction
-            for (i = 0; i < carrierDetail.length; i++) {
-                current = anpl.getRxPhaseCorrection(this.$$channelIndex, i);
-                anpl.setRxPhaseCorrection(this.$$channelIndex, i, current + carrierDetail[i].phase);
-                console.log('Phase corrected for channel ' + this.$$channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
-                uiRefresh();  // TODO call external handler and move that code outside !!!!!!!!
-            }
         };
 
         RSMM.prototype.$$preparePacket = function (dataPacket) {

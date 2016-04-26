@@ -138,16 +138,35 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, data) {
-            if (this.$$frequencyUpdateInternalHandler) {
-                this.$$frequencyUpdateInternalHandler(channelIndex, data);
+        ANRA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
+            var current;
+
+            if (drift === null) {
+                return;
+            }
+
+            if (Math.abs(drift) > 0.005) {
+                current = this.$$audioNetworkPhysicalLayer.getRxFrequency(channelIndex, 0);
+                console.log('phase history current', current);
+                this.$$audioNetworkPhysicalLayer.setRxFrequency(channelIndex, 0, current + drift);
+                console.log('Frequency corrected for channel ' + channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
+            }
+            if (this.$$frequencyUpdateHandler) {
+                this.$$frequencyUpdateHandler(channelIndex, drift);
             }  
         };
-        
 
-        ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, data) {
+        ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
+            var current, i;
+
+            for (i = 0; i < carrierDetail.length; i++) {
+                current = this.$$audioNetworkPhysicalLayer.getRxPhaseCorrection(channelIndex, i);
+                this.$$audioNetworkPhysicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);
+                console.log('Phase corrected for channel ' + channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
+            }
+
             if (this.$$phaseCorrectionUpdateHandler) {
-                this.$$phaseCorrectionUpdateHandler(channelIndex, data);
+                this.$$phaseCorrectionUpdateHandler(channelIndex, carrierDetail);
             }
         };
         
@@ -167,9 +186,9 @@ var AudioNetworkReceiveAdapter = (function () {
 
         ANRA.prototype.setFrequencyUpdateHandler = function (cb) {
             if (typeof cb === 'function') {
-                this.$$frequencyUpdateInternalHandler = cb;
+                this.$$frequencyUpdateHandler = cb;
             } else {
-                this.$$frequencyUpdateInternalHandler = null;
+                this.$$frequencyUpdateHandler = null;
             }
         };
 
