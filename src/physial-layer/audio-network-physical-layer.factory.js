@@ -58,7 +58,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 + add callback to destroy
                 + add bit speed information at UI
 
-            - refactor all transmit and receive logic (move it to physical layer internals)
+            + refactor all transmit and receive logic (move it to physical layer internals)
                 + [TX] remove symbol generation from template-util
                 + [TX] symbol shouldn't have any guard interval or/and interpacket gap
 
@@ -75,28 +75,44 @@ var AudioNetworkPhysicalLayer = (function () {
                     + sync state will be detected - grab average max signal strength
                     + subtract 10 decibels from max signal and enable symbol/packet collecting
                 + [RX] add method to reset receiver state machine (to follow steps above again)
-                + !!!!!!!!! double check state times at receive adapter
+                + [RX] double check state times at receive adapter
                     + move sync time to main adapter class
                     + check symbol, guard times
                     + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
                 + [RX] grab/clean packet data and notify packet handler
-                +/- [RX] add support multiple OFDM, first ofdm index would be pilot signal
-                - adaptive threshold based on arriving packets
+            
+            - Receive Adapter:  [8h or 12h remaining] ~ 5 evenings or 7 evenings
+                - [1.5h] add events for frequency update and phase update to notify hosting code
+                - [2.0h] refactor collecting arrays to dedicated collectors
+                - [3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
+                - [1.5h] adaptive threshold based on arriving packets
+                - OPTIONAL [4.0h] add auto tuning feature with ability to align phase offset (improove phase-offset-collector class)
 
-            - integrate power chart, increase bar width
-            - add auto tuning feature with ability to align phase offset
-            - add events for frequency update and phase update to notify hosting code
+            - Power chart:      [10.5h remaining]
+                - [4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?
+                - [3.0h] ability to show other OFDMs than pilot
+                - [1.0h] increase bar width
+                - [1.5h] mark states ranges
+                - [1.0h] show important power level (threshold, min/max, etc)
 
-            - use setTimeout instead setInverval (?)
-            - measure CPU load by measuring times before and after execution
+            - Finalization easy:
+                - fix typo: physial-layer into physical-layer
+                - remove audio-network prefix from main classes names
+                - change name: dftTimeSpan -> dftWindowTimeSpan
+                - keep view type after reinitialization
+                - move general configuration to some common service
+                - use setTimeout instead setInverval (?)
 
-            - change name: dftTimeSpan -> dftWindowTimeSpan
-            - move general configuration to some common service
-            - add noise when loopback is used, change name to loopback
-            - refactor DOM helpers (move to service)
-            - do not redraw constellation if queue wasn't changed
-            - move notification logic to manager (?)
-            - use dedicated constellation at carrier.html
+            - Finalization complex:
+                - measure CPU load by measuring times before and after execution
+                - add noise when loopback is used, change name to loopback
+                - refactor DOM helpers (move to service)
+                - do not redraw constellation if queue wasn't changed
+                - move notification logic to manager (?)
+                - introduce Dependency Injection
+
+        TODO (carrier.html)
+            - use dedicated constellation
 
 
 1  1  0  1  11
