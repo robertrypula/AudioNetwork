@@ -12,10 +12,13 @@ var RxStateMachineManager = (function () {
     function _RxStateMachineManager() {
         var RSMM;
 
-        RSMM = function (channelIndex, audioNetworkPhysicalLayer, packetReceiveHandler) {
+        RSMM = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
             this.$$channelIndex = channelIndex;
-            this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
+
             this.$$packetReceiveHandler = packetReceiveHandler;
+            this.$$frequencyUpdateHandler = frequencyUpdateHandler;
+            this.$$phaseCorrectionUpdateHandler = phaseCorrectionUpdateHandler;
+
             this.$$stateMachine = RxStateMachineBuilder.build(
                 this.$$handlerIdleInit.bind(this),
                 this.$$handlerFirstSyncWait.bind(this),

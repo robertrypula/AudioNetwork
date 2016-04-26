@@ -22,13 +22,16 @@ var AudioNetworkReceiveAdapter = (function () {
             this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
             this.$$stateMachineManager = [];
             this.$$packetReceiveHandler = null;
+            this.$$frequencyUpdateHandler = null;
+            this.$$phaseCorrectionUpdateHandler = null;
             
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (channelIndex = 0; channelIndex < channelSize; channelIndex++) {
                 stateMachineManager = RxStateMachineManagerBuilder.build(
                     channelIndex,
-                    this.$$audioNetworkPhysicalLayer,
-                    this.$$packetReceiveInternalHandler.bind(this)
+                    this.$$packetReceiveInternalHandler.bind(this),
+                    this.$$frequencyUpdateInternalHandler.bind(this),
+                    this.$$phaseCorrectionUpdateInternalHandler.bind(this)
                 );
                 this.$$stateMachineManager.push(stateMachineManager);
             }
@@ -135,6 +138,19 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
+        ANRA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, data) {
+            if (this.$$frequencyUpdateInternalHandler) {
+                this.$$frequencyUpdateInternalHandler(channelIndex, data);
+            }  
+        };
+        
+
+        ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, data) {
+            if (this.$$phaseCorrectionUpdateHandler) {
+                this.$$phaseCorrectionUpdateHandler(channelIndex, data);
+            }
+        };
+        
         ANRA.prototype.$$checkChannelIndexRange = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.$$audioNetworkPhysicalLayer.getRxChannelSize()) {
                 throw 'Given channelIndex is outside range: ' + channelIndex;
@@ -146,6 +162,22 @@ var AudioNetworkReceiveAdapter = (function () {
                 this.$$packetReceiveHandler = cb;
             } else {
                 this.$$packetReceiveHandler = null;
+            }
+        };
+
+        ANRA.prototype.setFrequencyUpdateHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$frequencyUpdateInternalHandler = cb;
+            } else {
+                this.$$frequencyUpdateInternalHandler = null;
+            }
+        };
+
+        ANRA.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$phaseCorrectionUpdateHandler = cb;
+            } else {
+                this.$$phaseCorrectionUpdateHandler = null;
             }
         };
 
