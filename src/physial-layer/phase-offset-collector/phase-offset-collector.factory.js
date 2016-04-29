@@ -22,7 +22,7 @@ var PhaseOffsetCollector = (function () {
                 return null;
             }
 
-            // TODO change that temporary code
+            // TODO rewrite this temporary code
             for (i = 0; i < this.$$valueList.length; i++) {
                 str += (
                     (Math.round(this.$$valueList[i].time * 1000) / 1000) + ' ' +
@@ -45,6 +45,7 @@ var PhaseOffsetCollector = (function () {
         };
 
         POC.prototype.collect = function (value) {
+            // TODO rewrite this temporary code
             this.$$valueList.push({
                 time: value.stateDurationTime,
                 phase: value.carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

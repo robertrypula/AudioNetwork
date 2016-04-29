@@ -145,6 +145,7 @@ var AudioNetworkReceiveAdapter = (function () {
                 return;
             }
 
+            // TODO pass drift as array
             if (Math.abs(drift) > 0.005) {
                 current = this.$$audioNetworkPhysicalLayer.getRxFrequency(channelIndex, 0);
                 console.log('phase history current', current);
@@ -159,6 +160,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
             var current, i;
 
+            // TODO pass only phase array not full carrierDetail
             for (i = 0; i < carrierDetail.length; i++) {
                 current = this.$$audioNetworkPhysicalLayer.getRxPhaseCorrection(channelIndex, i);
                 this.$$audioNetworkPhysicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);

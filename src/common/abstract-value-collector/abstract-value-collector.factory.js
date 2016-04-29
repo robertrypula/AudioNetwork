@@ -8,7 +8,8 @@ var AbstractValueCollector = (function () {
 
         AVC = function () {
             this.$$valueList = [];
-            this.$$lastFinalizedSize = null;
+            this.$$lastFinalizedSize = undefined;
+            this.$$lastFinalizedResult = undefined;
         };
 
         AVC.prototype.collect = function (value) {
@@ -21,20 +22,24 @@ var AbstractValueCollector = (function () {
 
         AVC.prototype.clear = function () {
             this.$$valueList.length = 0;
+            this.$$lastFinalizedSize = undefined;
+            this.$$lastFinalizedResult = undefined;
         };
 
         AVC.prototype.finalize = function () {
-            var finalizeResult;
-
             this.$$lastFinalizedSize = this.getSize();
-            finalizeResult = this.$$finalize();
-            this.clear();
+            this.$$lastFinalizedResult = this.$$finalize();
+            this.$$valueList.length = 0;
 
-            return finalizeResult;
+            return this.$$lastFinalizedResult;
         };
 
         AVC.prototype.getLastFinalizedSize = function () {
             return this.$$lastFinalizedSize;
+        };
+
+        AVC.prototype.getLastFinalizedResult = function () {
+            return this.$$lastFinalizedResult;
         };
 
         AVC.prototype.$$finalize = function () {
