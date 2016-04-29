@@ -7,6 +7,8 @@ var ChannelReceiveManager = (function () {
         var CRM;
 
         CRM = function (configuration, bufferSize) {
+            AbstractChannelManager.apply(this, arguments);
+
             this.channelReceive = [];
             this.scriptNode = null;
             this.analyserNode = null;  // empty analyser needs to be connected to script node
@@ -16,6 +18,9 @@ var ChannelReceiveManager = (function () {
 
             this.$$init();
         };
+
+        CRM.prototype = Object.create(AbstractChannelManager.prototype);
+        CRM.prototype.constructor = CRM;
 
         CRM.prototype.destroy = function () {
             var i, cr;
@@ -72,20 +77,6 @@ var ChannelReceiveManager = (function () {
                 sample, sampleNumberInBlock, j
             ;
 
-            // TODO remove me
-            /*
-            var blockBeginTimePrevious = 0;      // this var goes to global scope
-
-            console.log(
-                '[[RX BLOCK]] ' +
-                'beginTime = ' + (blockBeginTime) + ', ' +
-                'delta = ' + (blockBeginTime - blockBeginTimePrevious) + ', ' +
-                'samples = ' + Math.round(-(this.$$bufferSize) + (blockBeginTime - blockBeginTimePrevious) * Audio.getSampleRate())
-            );
-
-            blockBeginTimePrevious = blockBeginTime;
-            */
-
             for (sampleNumberInBlock = 0; sampleNumberInBlock < inputBuffer.length; sampleNumberInBlock++) {
                 sample = inputData[sampleNumberInBlock];
 
@@ -100,6 +91,8 @@ var ChannelReceiveManager = (function () {
 
                 this.$$sampleNumberGlobal++;
             }
+
+            this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), inputBuffer.length);
         };
 
 

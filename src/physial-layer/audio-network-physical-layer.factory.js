@@ -99,12 +99,12 @@ var AudioNetworkPhysicalLayer = (function () {
                 - fix typo: physial-layer into physical-layer
                 - remove audio-network prefix from main classes names
                 - change name: dftTimeSpan -> dftWindowTimeSpan
-                - keep view type after reinitialization
+                + keep view type after reinitialization
                 - move general configuration to some common service
                 - use setTimeout instead setInverval (?)
 
             - Finalization complex:
-                - measure CPU load by measuring times before and after execution
+                + measure CPU load by measuring times before and after execution
                 - add noise when loopback is used, change name to loopback
                 - refactor DOM helpers (move to service)
                 - do not redraw constellation if queue wasn't changed
@@ -448,6 +448,14 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 Audio.getRecordedAudioNode().disconnect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = false;
+        };
+
+        ANPL.prototype.getRxCpuLoadData = function () {
+            return this.$$channelReceiveManager.getCpuLoadData();
+        };
+
+        ANPL.prototype.getTxCpuLoadData = function () {
+            return this.$$channelTransmitManager.getCpuLoadData();
         };
 
         ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {

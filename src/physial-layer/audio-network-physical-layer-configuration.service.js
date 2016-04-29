@@ -23,10 +23,10 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
                 result.push({
                     baseFrequency: (
                         AudioUtil.accessor(txChannel[i], 'baseFrequency') ||
-                        (i % 2 === 0 ? 1070 : 2025)
+                        (i % 2 === 0 ? 1070 : 2025)                            // TODO move to some common config (frequencies)
                     ),
                     ofdmSize: AudioUtil.accessor(txChannel[i], 'ofdmSize') || 1,
-                    ofdmFrequencySpacing: AudioUtil.accessor(txChannel[i], 'ofdmFrequencySpacing') || 100
+                    ofdmFrequencySpacing: AudioUtil.accessor(txChannel[i], 'ofdmFrequencySpacing') || 100     // TODO move to some common config (default spacing basing on default symbol time)
                 });
             }
 

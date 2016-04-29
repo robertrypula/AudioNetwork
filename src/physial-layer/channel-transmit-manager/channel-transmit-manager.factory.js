@@ -7,6 +7,8 @@ var ChannelTransmitManager = (function () {
         var CTM;
 
         CTM = function (configuration, bufferSize) {
+            AbstractChannelManager.apply(this, arguments);
+
             this.channelTransmit = [];
             this.scriptNode = null;
             this.$$configuration = configuration;
@@ -14,6 +16,9 @@ var ChannelTransmitManager = (function () {
 
             this.$$init();
         };
+
+        CTM.prototype = Object.create(AbstractChannelManager.prototype);
+        CTM.prototype.constructor = CTM;
 
         CTM.prototype.destroy = function () {
             var i, ct;
@@ -61,8 +66,8 @@ var ChannelTransmitManager = (function () {
             var
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 outputData = outputBuffer.getChannelData(0),
-                timeBefore = Audio.getCurrentTime(),
-                timeDelta, sample, i, j
+                blockBeginTime = Audio.getCurrentTime(),
+                sample, i, j
             ;
 
             for (i = 0; i < outputBuffer.length; i++) {
@@ -74,9 +79,7 @@ var ChannelTransmitManager = (function () {
                 // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.001;          // TODO, move to config
             }
 
-            timeDelta = Audio.getCurrentTime() - timeBefore;
-            // console.log(Audio.getCurrentTime());
-            // console.log(timeDelta);
+            this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), outputBuffer.length);
         };
 
         return CTM;

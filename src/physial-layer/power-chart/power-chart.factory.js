@@ -102,7 +102,7 @@ var PowerChart = (function () {
             ctx.clearRect(0, 0, w, h);
 
             for (y = 0; y < h; y += 10) {
-                ctx.strokeStyle = '#EEE';
+                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
                 ctx.beginPath();
                 ctx.moveTo(0, 2 * y);
                 ctx.lineTo(w, 2 * y);
@@ -116,7 +116,7 @@ var PowerChart = (function () {
                 x = i;
                 y = -power;
 
-                ctx.fillStyle = '#738BD7';
+                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
                 ctx.fillRect(
                     x - 1,
                     2 * y - 1,

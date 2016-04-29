@@ -510,12 +510,26 @@
             </div>
         </footer>
 
+        <div id="load-indicator">
+            <div>
+                <span>RX load: </span>
+                <span id="load-rx"></span>
+                <span>%</span>
+            </div>
+            <div>
+                <span>TX load: </span>
+                <span id="load-tx"></span>
+                <span>%</span>
+            </div>
+        </div>
+
         <!-- audio network BEGIN -->
         <script src="../../src/common/math-util/math-util.service.js"></script>
         <script src="../../src/common/audio-util/audio-util.service.js"></script>
         <script src="../../src/common/queue/queue.factory.js"></script>
         <script src="../../src/common/queue/queue-builder.service.js"></script>
         <script src="../../src/common/abstract-value-collector/abstract-value-collector.factory.js"></script>
+        <script src="../../src/physial-layer/abstract-channel-manager/abstract-channel-manager.factory.js"></script>
         <script src="../../src/physial-layer/analyser-chart/analyser-chart.factory.js"></script>
         <script src="../../src/physial-layer/audio/audio.service.js"></script>
         <script src="../../src/physial-layer/constellation-diagram/constellation-diagram.factory.js"></script>

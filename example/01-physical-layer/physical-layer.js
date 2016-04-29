@@ -2,12 +2,28 @@
 
 var 
     anpl = null,
+    anplDestroyInProgress = false,
     transmitAdapter = null,
     receiveAdapter = null
 ;
 
 function onLoad() {
     collectSettingsAndInit();
+    setupCpuLoadNotification();
+}
+
+function setupCpuLoadNotification() {
+    var rxLoad, txLoad;
+
+    rxLoad = document.getElementById('load-rx');
+    txLoad = document.getElementById('load-tx');
+
+    setInterval(function () {
+        if (anpl && !anplDestroyInProgress) {
+            rxLoad.innerHTML = Math.round(anpl.getRxCpuLoadData().load * 100);
+            txLoad.innerHTML = Math.round(anpl.getTxCpuLoadData().load * 100);
+        }
+    }, 200);
 }
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
@@ -137,7 +153,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
 
     var powerChartQueue0 = new Queue(400);
-    var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
+    //var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
 
     anpl.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
@@ -177,6 +193,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 
 function destroy(cb) {
     if (anpl) {
+        anplDestroyInProgress = true;
         anpl.destroy().then(function () {
             transmitAdapter = null;
             receiveAdapter = null;
@@ -184,6 +201,7 @@ function destroy(cb) {
             document.getElementById('tx-channel-container').innerHTML = '';
             document.getElementById('rx-channel-container').innerHTML = '';
 
+            anplDestroyInProgress = false;
             if (typeof cb === 'function') {
                 cb();
             }

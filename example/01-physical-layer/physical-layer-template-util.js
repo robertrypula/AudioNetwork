@@ -5,6 +5,8 @@
     keep examples framework-free (like AngularJs) :)
 */
 
+var currentViewType = 'simple';
+
 function getFloatById(elementId) {
     return parseFloat(document.getElementById(elementId).value);
 }
@@ -115,7 +117,7 @@ function initializeHtml() {
 
     // refresh other stuff
     uiRefresh();
-    viewType('simple');
+    viewType(currentViewType);
 }
 
 function viewType(type) {
@@ -135,6 +137,8 @@ function viewType(type) {
     removeClass('view-type-medium', 'active');
     removeClass('view-type-complex', 'active');
     addClass('view-type-' + type, 'active');
+
+    currentViewType = type;
 }
 
 function enabledChanged(rxTx) {

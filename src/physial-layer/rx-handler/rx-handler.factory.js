@@ -8,7 +8,7 @@ var RxHandler = (function () {
             RH,
             RX_EXTRA_DELAY = 0.05, // [sec]
             DELAY_LOOP_RESOLUTION = 8, // [ms]
-            DECIBEL_LIMIT = 40
+            CONSTELLATION_DIAGRAM_DECIBEL_LIMIT = 40                         // TODO, move to some common place
         ;
 
         RH = function (rxConstellationDiagram, rxExternalHandler) {
@@ -75,7 +75,7 @@ var RxHandler = (function () {
                 }
 
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + DECIBEL_LIMIT) / DECIBEL_LIMIT;
+                powerNormalized = (cd.powerDecibel + CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
                 powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                 if (queue.isFull()) {
                     queue.pop();
