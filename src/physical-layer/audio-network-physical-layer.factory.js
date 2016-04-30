@@ -96,7 +96,7 @@ var AudioNetworkPhysicalLayer = (function () {
                 - [1.0h] show important power level (threshold, min/max, etc)
 
             - Finalization easy:
-                - fix typo: physial-layer into physical-layer
+                + fix typo: physial-layer into physical-layer
                 - remove audio-network prefix from main classes names
                 - change name: dftTimeSpan -> dftWindowTimeSpan
                 + keep view type after reinitialization
