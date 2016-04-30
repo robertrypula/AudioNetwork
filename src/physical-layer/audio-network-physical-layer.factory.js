@@ -83,7 +83,7 @@ var AudioNetworkPhysicalLayer = (function () {
             
             - Receive Adapter:  [8h or 12h remaining] ~ 5 evenings or 7 evenings
                 + [1.5h] add events for frequency update and phase update to notify hosting code
-                - [2.0h] refactor collecting arrays to dedicated collectors
+                - [2.0h] refactor collecting arrays to dedicated collectors (move minInArray and similar to MathUtil)
                 - [3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
                 - [1.5h] adaptive threshold based on arriving packets
                 - OPTIONAL [4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)

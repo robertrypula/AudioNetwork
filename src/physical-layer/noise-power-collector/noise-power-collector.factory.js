@@ -10,12 +10,14 @@ var NoisePowerCollector = (function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
+        NPC.EMPTY_LIST_EXCEPTION = 'Cannot finalize NoisePowerCollector without any samples collected';
+
         NPC.prototype = Object.create(AbstractValueCollector.prototype);
         NPC.prototype.constructor = NPC;
 
         NPC.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {
-                throw 'Cannot finalize NoisePowerCollector without any samples colleted';
+                throw NPC.EMPTY_LIST_EXCEPTION;
             }
 
             return AudioUtil.computeAverage(this.$$valueList);

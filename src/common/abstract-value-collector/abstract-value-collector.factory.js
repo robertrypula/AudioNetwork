@@ -12,38 +12,54 @@ var AbstractValueCollector = (function () {
             this.$$lastFinalizedResult = undefined;
         };
 
+        AVC.ABSTRACT_METHOD_CALLED_EXCEPTION = 'Abstract method called!';
+
         AVC.prototype.collect = function (value) {
             this.$$valueList.push(value);
+        };
+
+        AVC.prototype.hasAtLeastItem = function () {
+            return this.getSize() > 0;
         };
 
         AVC.prototype.getSize = function () {
             return this.$$valueList.length;
         };
 
-        AVC.prototype.clear = function () {
-            this.$$valueList.length = 0;
+        AVC.prototype.clearAll = function () {
+            this.clearList();
             this.$$lastFinalizedSize = undefined;
             this.$$lastFinalizedResult = undefined;
         };
 
-        AVC.prototype.finalize = function () {
-            this.$$lastFinalizedSize = this.getSize();
-            this.$$lastFinalizedResult = this.$$finalize();
+        AVC.prototype.clearList = function () {
             this.$$valueList.length = 0;
+        };
+
+        AVC.prototype.finalize = function () {
+            this.$$lastFinalizedResult = this.$$finalize(); // $$finalize() method may throw error BEFORE assignment
+            this.$$lastFinalizedSize = this.getSize();
+            this.clearList();
 
             return this.$$lastFinalizedResult;
         };
 
+        /**
+         * Returns list size that was used to compute last successful result from finalize method.
+         */
         AVC.prototype.getLastFinalizedSize = function () {
             return this.$$lastFinalizedSize;
         };
 
+        /**
+         * Returns last successful result from finalize method.
+         */
         AVC.prototype.getLastFinalizedResult = function () {
             return this.$$lastFinalizedResult;
         };
 
         AVC.prototype.$$finalize = function () {
-            throw 'Virtual method called!';
+            throw AVC.ABSTRACT_METHOD_CALLED_EXCEPTION;
         };
 
         return AVC;

@@ -37,6 +37,7 @@ var RxStateMachineManager = (function () {
             this.$$pskSize = null;
 
             this.$$noisePowerCollector = NoisePowerCollectorBuilder.build();
+            this.$$guardPowerCollector = GuardPowerCollectorBuilder.build();
             this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
 
             this.reset(true);
@@ -49,14 +50,12 @@ var RxStateMachineManager = (function () {
 
             this.$$maxSignalPower = null;
             this.$$maxSignalPowerSampleSize = null;
-            this.$$minGuardPower = null;
-            this.$$minGuardPowerSampleSize = null;
             this.$$averageSignalPower = null;
 
-            this.$$noisePowerCollector.clear();
-            this.$$powerHistoryGuard = [];
+            this.$$noisePowerCollector.clearAll();
+            this.$$guardPowerCollector.clearAll();
             this.$$powerHistorySignal = [];
-            this.$$phaseOffsetCollector.clear();
+            this.$$phaseOffsetCollector.clearAll();
 
             this.$$powerThreshold = _RxStateMachineManager.INITIAL_POWER_THRESHOLD;
 
@@ -103,9 +102,13 @@ var RxStateMachineManager = (function () {
             if (stateDurationTime < this.$$sampleCollectionTimeNoise) {
                 this.$$noisePowerCollector.collect(this.$$currentData.pilotSignal.powerDecibel);
             } else {
-                // put first power threshold slightly above collected noise power to detect even weak signals
-                this.$$powerThreshold = this.$$noisePowerCollector.finalize() + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
-                handlerResult = RxStateMachine.STATE.FIRST_SYNC_WAIT;
+                try {
+                    // put first power threshold slightly above collected noise power to detect even weak signals
+                    this.$$powerThreshold = this.$$noisePowerCollector.finalize() + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
+                    handlerResult = RxStateMachine.STATE.FIRST_SYNC_WAIT;
+                } catch (e) {
+                    handlerResult = RxStateMachine.STATE.FATAL_ERROR;
+                }
             }
 
             return handlerResult;
@@ -170,23 +173,20 @@ var RxStateMachineManager = (function () {
             // try to fine-tune frequency offsets basing on phase history
             this.$$frequencyUpdateHandler(this.$$channelIndex, this.$$phaseOffsetCollector.finalize());
 
-            // clear last guard history because it's followed directly by idle state
-            // so technically it wasn't guard state at all
-            this.$$powerHistoryGuard.length = 0;
+            // clear collected guard history from last 'GUARD' state because it was followed
+            // directly by IDLE state so technically it wasn't GUARD state at all
+            this.$$guardPowerCollector.clearList();
         };
 
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
-            // update current min guard power
-            if (this.$$powerHistoryGuard.length > 0) {
-                this.$$minGuardPower = MathUtil.minInArray(this.$$powerHistoryGuard);
-                this.$$minGuardPowerSampleSize = this.$$powerHistoryGuard.length;
-                this.$$powerHistoryGuard.length = 0;
+            var powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
+
+            if (this.$$guardPowerCollector.hasAtLeastItem()) {
+                this.$$guardPowerCollector.finalize();
             }
 
             // store signal power history
-            this.$$powerHistorySignal.push(
-                this.$$currentData.pilotSignal.powerDecibel
-            );
+            this.$$powerHistorySignal.push(powerDecibel);
 
             // add current signal sample to list
             this.$$dataSymbol.push(this.$$currentData);
@@ -201,7 +201,10 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
-            var bestQualityIndex;
+            var
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                bestQualityIndex
+            ;
 
             // update current max signal power
             if (this.$$powerHistorySignal.length > 0) {
@@ -210,10 +213,8 @@ var RxStateMachineManager = (function () {
                 this.$$powerHistorySignal.length = 0;
             }
 
-            // store guard power history
-            this.$$powerHistoryGuard.push(
-                this.$$currentData.pilotSignal.powerDecibel
-            );
+            // collect guard power history
+            this.$$guardPowerCollector.collect(powerDecibel);
 
             // find best signal sample and add to current packet
             if (this.$$dataSymbol.length > 0) {
@@ -285,6 +286,8 @@ var RxStateMachineManager = (function () {
                 state = this.$$stateMachine.getState(this.$$isPilotSignalPresent(), time);
             }
 
+
+
             return {
                 state: state,
                 // TODO clean that mess below, move data to some dedicated fields in return object
@@ -294,10 +297,10 @@ var RxStateMachineManager = (function () {
                     'signalPower: ' + Math.round(this.$$averageSignalPower * 100) / 100 + ' <br/>' +
                     '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$noisePowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
                     '&nbsp;&nbsp;&nbsp;powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
-                    'minGuardPower: ' + Math.round(this.$$minGuardPower * 100) / 100 + ' sampleSize: ' + this.$$minGuardPowerSampleSize + '<br/>' +
+                    'minGuardPower: ' + Math.round(this.$$guardPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$guardPowerCollector.getLastFinalizedSize() + '<br/>' +
                     'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + ' sampleSize: ' + this.$$maxSignalPowerSampleSize + '<br/>' +
-                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$minGuardPower) * 100) / 100 + ' <br/>' +
-                    '&nbsp;&nbsp;&nbsp;idealPowerThreshold: ' + Math.round(0.5 * (this.$$maxSignalPower + this.$$minGuardPower) * 100) / 100 + ' <br/>'
+                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$maxSignalPower - this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;idealPowerThreshold: ' + Math.round(0.5 * (this.$$maxSignalPower + this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>'
                 )
             };
         };
