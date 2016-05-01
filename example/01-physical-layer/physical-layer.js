@@ -27,21 +27,25 @@ function setupCpuLoadNotification() {
 }
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
-    var ofdmSpacing, symbolAndGuard, config, i, element;
+    var
+        ofdmSpacing, symbolAndGuardTime, config, i, element,
+        symbolBaudFactor = 0.32,
+        guardBaudFactor = 0.68
+    ;
 
     if (channelNumber < 1 || channelNumber > 2) {
         throw 'Not supported quickConfiguration parameters';
     }
 
-    symbolAndGuard = 0.5 * (1 / baud);
-    ofdmSpacing = 4 / symbolAndGuard;    // [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
+    symbolAndGuardTime = 1.0 / baud;
+    ofdmSpacing = 4 / symbolAndGuardTime;// [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
                                          // is the useful symbol duration (the receiver side window size),
                                          // and k is a positive integer, typically equal to 1
 
-    document.getElementById('rx-dft-time-span').value = Math.round(symbolAndGuard * 1000);
-    document.getElementById('symbol-duration').value = Math.round(symbolAndGuard * 1000);
-    document.getElementById('guard-interval').value = Math.round(symbolAndGuard * 1000);
-    document.getElementById('interpacket-gap').value = Math.round(2 * symbolAndGuard * 1000);
+    document.getElementById('rx-dft-time-span').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('symbol-duration').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('guard-interval').value = Math.round(guardBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('interpacket-gap').value = Math.round(3 * guardBaudFactor * symbolAndGuardTime * 1000);
 
     if (channelNumber === 1) {
         config = '1070-' + ofdmSize + '-' + ofdmSpacing;
@@ -214,7 +218,10 @@ function destroy(cb) {
 }
 
 function receiveAdapterReset(channelIndex) {
+    var uiPacketHistory = document.getElementById('rx-sampling-packet-history-' + channelIndex);
+
     receiveAdapter.reset(channelIndex);
+    uiPacketHistory.innerHTML = '';
 }
 
 function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {

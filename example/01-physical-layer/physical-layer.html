@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Audio network - physical layer example</title>
+        <title>Audio Network JavaScript library - physical layer example</title>
         <link rel="stylesheet" type="text/css" href="physical-layer.css">
         <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -12,7 +12,7 @@
 
         <div class="container">
 
-            <h1>Audio network - physical layer example</h1>
+            <h1>Audio Network - physical layer example</h1>
             <div class="clearfix margin-bottom">
                 <div class="row margin-bottom">
                     <div class="col col-sx-12">
@@ -21,65 +21,40 @@
                             Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">github</a>
                         </p>
                         <p>
-                            If you don't want to dig into AudioNetwork internals you can use following buttons
-                            to setup some common configuration:
+                            If you don't want to dig into Audio Network internals you can use following 'Quick Config'
+                            buttons to setup some common configurations:
 
                             <br/><br/>
 
+                            Default settings used when this page loads:<br/>
                             <button
                                 class="btn btn-default"
-                                onClick="quickConfigure(1, 2, 2, 1)"
+                                onClick="quickConfigure(1, 4, 4, 1)"
                                 >
-                                1 channel (PSK-2, baud-2, OFDM-1) - 2 bit/s
+                                PSK-4, Baud-4 - 8 bit/s
                             </button>
                             <br/>
+                            Slower but most reliable PSK transmission scheme - Binary Phase Shift Keying:<br/>
                             <button
                                 class="btn btn-default"
-                                onClick="quickConfigure(1, 4, 2, 1)"
+                                onClick="quickConfigure(1, 2, 4, 1)"
                                 >
-                                1 channel (PSK-4, baud-2, OFDM-1) - 4 bit/s
+                                PSK-2 (BPSK), Baud-4 - 4 bit/s
                             </button>
                             <br/>
+                            10 symbols PSK scheme - you can send phone numbers by directly using PSK symbols:<br/>
                             <button
                                 class="btn btn-default"
-                                onClick="quickConfigure(1, 16, 2, 1)"
+                                onClick="quickConfigure(1, 10, 4, 1)"
                                 >
-                                1 channel (PSK-16, baud-2, OFDM-1) - 8 bit/s
+                                PSK-10, Baud-4 - 4 decimalDigits/s
                             </button>
                             <br/>
-                            <button
-                                class="btn btn-default"
-                                onClick="quickConfigure(1, 2, 10, 8)"
-                                >
-                                1 channel (PSK-2, baud-10, OFDM-8) - 80 bit/s
-                            </button>
-                            <br/>
-                            <button
-                                class="btn btn-default"
-                                onClick="quickConfigure(1, 8, 5, 8)"
-                                >
-                                1 channel (PSK-8, baud-5, OFDM-8) - 120 bit/s
-                            </button>
                         </p>
 
                         <p>
-                            Two channels (speed information is per channel):
-
-                            <br/><br/>
-
-                            <button
-                                class="btn btn-default"
-                                onClick="quickConfigure(2, 16, 2, 1)"
-                                >
-                                2 channels (PSK-16, baud-2, OFDM-1) - 8 bit/s
-                            </button>
-                            <br/>
-                            <button
-                                class="btn btn-default"
-                                onClick="quickConfigure(2, 8, 5, 8)"
-                                >
-                                2 channels (PSK-8, baud-5, OFDM-8) - 120 bit/s
-                            </button>
+                            Orthogonal frequency-division multiplexing (OFDM) and multiple channel 'Quick Config'
+                            buttons are still in development/testing in future!
                         </p>
 
                     </div>
@@ -311,7 +286,7 @@
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="number" id="interpacket-gap" value="500" />
+                        <input type="number" id="interpacket-gap" value="510" />
                     </div>
                 </div>
 
@@ -751,7 +726,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-5 col-md-3">
                         <b class="label">
-                            Reset receiver
+                            RX adapter - RESET
                         </b>
                     </div>
                     <div class="col col-xs-7 col-md-6">
@@ -764,7 +739,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <b class="label">
-                            RX sampling - POWER
+                            RX adapter - POWER
                         </b>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -775,7 +750,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <b class="label">
-                            RX sampling - STATE
+                            RX adapter - STATE
                         </b>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -787,7 +762,7 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <b class="label">
-                            RX sampling - PACKET HISTORY
+                            RX adapter - PACKETS
                         </b>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
