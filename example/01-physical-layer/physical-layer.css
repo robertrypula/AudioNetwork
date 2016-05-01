@@ -253,8 +253,21 @@ p {
     margin-bottom: 15px;
 }
 
+p a {
+    color: #738BD7;
+}
+
 .right-info-label {
     padding: 8px 0 10px 0;
+}
+
+#under-dev {
+    text-align: center;
+}
+
+#under-dev, #under-dev * {
+    font-size: 18px;
+    line-height: 24px;
 }
 
 #load-indicator {
