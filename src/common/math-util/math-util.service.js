@@ -5,6 +5,10 @@ var MathUtil = (function () {
 
     function _MathUtil() {
 
+        function abs(v) {
+            return Math.abs(v);
+        }
+
         function asin(v) {
             return Math.asin(v);
         }
@@ -50,6 +54,7 @@ var MathUtil = (function () {
             HALF_PI: 0.5 * Math.PI,
             TWO_PI: 2 * Math.PI,
             PI: Math.PI,
+            abs: abs,
             floor: floor,
             asin: asin,
             sqrt: sqrt,

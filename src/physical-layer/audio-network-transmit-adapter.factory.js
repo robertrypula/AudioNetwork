@@ -85,7 +85,7 @@ var AudioNetworkTransmitAdapter = (function () {
                 amplitude = [];
                 for (i = 0; i < ofdmSize; i++) {
                     amplitude.push(
-                        Math.floor(1000 / ofdmSize) / 1000
+                        MathUtil.floor(1000 / ofdmSize) / 1000
                     );
                 }
             }
@@ -112,7 +112,7 @@ var AudioNetworkTransmitAdapter = (function () {
             for (i = 0; i < ofdmSize; i++) {
                 data.push(_AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL);
                 amplitude.push(
-                    Math.floor(1000 / ofdmSize) / 1000
+                    MathUtil.floor(1000 / ofdmSize) / 1000
                 );
             }
             data = [ data.length === 1 ? data[0] : data ];

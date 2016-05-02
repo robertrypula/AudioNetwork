@@ -58,7 +58,7 @@ var ChannelReceive = (function () {
         CR.prototype.setRxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
             this.$$checkOfdmIndex(ofdmIndex);
 
-            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - Math.floor(phaseCorrection);
+            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - MathUtil.floor(phaseCorrection);
         };
 
         CR.prototype.setFrequency = function (ofdmIndex, frequency) {

@@ -25,13 +25,13 @@ var PhaseOffsetCollector = (function () {
             // TODO rewrite this temporary code
             for (i = 0; i < this.$$valueList.length; i++) {
                 str += (
-                    (Math.round(this.$$valueList[i].time * 1000) / 1000) + ' ' +
-                    (Math.round(this.$$valueList[i].phase * 1000) / 1000) + ' | '
+                    (MathUtil.round(this.$$valueList[i].time * 1000) / 1000) + ' ' +
+                    (MathUtil.round(this.$$valueList[i].phase * 1000) / 1000) + ' | '
                 );
             }
 
-            indexA = Math.round(0.43 * this.$$valueList.length);
-            indexB = Math.round(0.57 * this.$$valueList.length);
+            indexA = MathUtil.round(0.43 * this.$$valueList.length);
+            indexB = MathUtil.round(0.57 * this.$$valueList.length);
             indexB = indexB >= this.$$valueList.length ? this.$$valueList.length - 1 : indexB;
             drift = 0;
             if (indexA !== indexB && indexA < indexB) {

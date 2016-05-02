@@ -52,7 +52,7 @@ var ChannelTransmit = (function () {
         CT.prototype.setTxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
             this.$$checkOfdmIndex(ofdmIndex);
 
-            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - Math.floor(phaseCorrection);
+            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - MathUtil.floor(phaseCorrection);
             this.carrierGenerate[ofdmIndex].setPhaseCorrection(this.carrierPhaseCorrection[ofdmIndex]);
         };
 
