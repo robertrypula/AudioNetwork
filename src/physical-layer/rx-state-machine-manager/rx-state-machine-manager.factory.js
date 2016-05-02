@@ -36,7 +36,8 @@ var RxStateMachineManager = (function () {
             this.$$syncPreamble = null;
             this.$$pskSize = null;
 
-            this.$$noisePowerCollector = NoisePowerCollectorBuilder.build();
+            this.$$averageIdlePowerCollector = AverageValueCollectorBuilder.build();
+            this.$$averageSyncPowerCollector = AverageValueCollectorBuilder.build();
             this.$$guardPowerCollector = GuardPowerCollectorBuilder.build();
             this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
 
@@ -52,7 +53,7 @@ var RxStateMachineManager = (function () {
             this.$$maxSignalPowerSampleSize = null;
             this.$$averageSignalPower = null;
 
-            this.$$noisePowerCollector.clearAll();
+            this.$$averageIdlePowerCollector.clearAll();
             this.$$guardPowerCollector.clearAll();
             this.$$powerHistorySignal = [];
             this.$$phaseOffsetCollector.clearAll();
@@ -97,14 +98,17 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerIdleInit = function (stateDurationTime) {
-            var handlerResult = null;
+            var
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                handlerResult = null
+            ;
 
             if (stateDurationTime < this.$$sampleCollectionTimeNoise) {
-                this.$$noisePowerCollector.collect(this.$$currentData.pilotSignal.powerDecibel);
+                this.$$averageIdlePowerCollector.collect(powerDecibel);
             } else {
                 try {
                     // put first power threshold slightly above collected noise power to detect even weak signals
-                    this.$$powerThreshold = this.$$noisePowerCollector.finalize() + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
+                    this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + _RxStateMachineManager.INITIAL_DIFFERENCE_BETWEEN_NOISE_AND_SIGNAL;
                     handlerResult = RxStateMachine.STATE.FIRST_SYNC_WAIT;
                 } catch (e) {
                     handlerResult = RxStateMachine.STATE.FATAL_ERROR;
@@ -130,8 +134,8 @@ var RxStateMachineManager = (function () {
                 return RxStateMachine.STATE.IDLE;
             }
 
-            // signal cannot be weaker that noise... :)
-            if (powerDecibel <= this.$$noisePowerCollector.getLastFinalizedResult()) {
+            // signal cannot be weaker that idle noise... :)
+            if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
                 return RxStateMachine.STATE.FATAL_ERROR;
             }
 
@@ -144,7 +148,7 @@ var RxStateMachineManager = (function () {
                     this.$$powerHistorySignal.length = 0;
                     thresholdDifferenceBetweenAverageSignalPower = (
                         _RxStateMachineManager.THRESHOLD_DIFFERENCE_BETWEEN_AVERAGE_SIGNAL_POWER_UNIT_FACTOR *
-                        (this.$$averageSignalPower - this.$$noisePowerCollector.getLastFinalizedResult())
+                        (this.$$averageSignalPower - this.$$averageIdlePowerCollector.getLastFinalizedResult())
                     );
 
                     // put threshold somewhere (depending on unit factor) between average signal and average noise level
@@ -293,9 +297,9 @@ var RxStateMachineManager = (function () {
                 // TODO clean that mess below, move data to some dedicated fields in return object
                 power: (
                     '<br/>' +
-                    'noisePower: ' + Math.round(this.$$noisePowerCollector.getLastFinalizedResult() * 100) / 100 + '<br/>' +
+                    'averageIdlePower: ' + Math.round(this.$$averageIdlePowerCollector.getLastFinalizedResult() * 100) / 100 + '<br/>' +
                     'signalPower: ' + Math.round(this.$$averageSignalPower * 100) / 100 + ' <br/>' +
-                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$noisePowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;delta: ' + Math.round((this.$$averageSignalPower - this.$$averageIdlePowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
                     '&nbsp;&nbsp;&nbsp;powerThreshold: ' + Math.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
                     'minGuardPower: ' + Math.round(this.$$guardPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$guardPowerCollector.getLastFinalizedSize() + '<br/>' +
                     'maxSignalPower: ' + Math.round(this.$$maxSignalPower * 100) / 100 + ' sampleSize: ' + this.$$maxSignalPowerSampleSize + '<br/>' +
