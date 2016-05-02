@@ -6,11 +6,11 @@ var AudioNetworkReceiveAdapter = (function () {
     _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.080;     // TODO move to some common config
     _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.170;      // TODO move to some common config
     _AudioNetworkReceiveAdapter.SYNC_DURATION = 3.0;         // TODO move to some common config
-    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_NOISE = _AudioNetworkReceiveAdapter.SYNC_DURATION;
-    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.7; // little less to finish signal collection before sync transmission ends
+    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = _AudioNetworkReceiveAdapter.SYNC_DURATION;
+    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
     _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
     _AudioNetworkReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
-    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.5;          // how much state times could be longer - WARNING do not exceed interpacket gap (guardInterval * factor < interpacketGap)!
+    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.5; // how much state times could be longer - WARNING do not exceed interpacket gap (guardInterval * factor < interpacketGap)!
     _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
     function _AudioNetworkReceiveAdapter() {
@@ -38,8 +38,8 @@ var AudioNetworkReceiveAdapter = (function () {
             this.setSymbolDuration(_AudioNetworkReceiveAdapter.SYMBOL_DURATION);
             this.setGuardInterval(_AudioNetworkReceiveAdapter.GUARD_INTERVAL);
             this.setSyncDuration(_AudioNetworkReceiveAdapter.SYNC_DURATION);
-            this.setSampleCollectionTimeNoise(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_NOISE);
-            this.setSampleCollectionTimeSignal(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_SIGNAL);
+            this.setSampleCollectionTimeIdleInitState(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
+            this.setSampleCollectionTimeFirstSyncState(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
             this.setSyncPreamble(_AudioNetworkReceiveAdapter.SYNC_PREAMBLE);
             this.setPskSize(_AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _AudioNetworkReceiveAdapter.PSK_SIZE);
         };
@@ -82,21 +82,21 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setSampleCollectionTimeNoise = function (value) {
+        ANRA.prototype.setSampleCollectionTimeIdleInitState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSampleCollectionTimeNoise(value);
+                this.$$stateMachineManager[i].setSampleCollectionTimeIdleInitState(value);
             }
         };
 
-        ANRA.prototype.setSampleCollectionTimeSignal = function (value) {
+        ANRA.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSampleCollectionTimeSignal(value);
+                this.$$stateMachineManager[i].setSampleCollectionTimeFirstSyncState(value);
             }
         };
 
@@ -146,7 +146,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
 
             // TODO pass drift as array
-            if (Math.abs(drift) > 0.005) {
+            if (MathUtil.abs(drift) > 0.005) {
                 current = this.$$audioNetworkPhysicalLayer.getRxFrequency(channelIndex, 0);
                 console.log('phase history current', current);
                 this.$$audioNetworkPhysicalLayer.setRxFrequency(channelIndex, 0, current + drift);
@@ -160,7 +160,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
             var current, i;
 
-            // TODO pass only phase array not full carrierDetail
+            // TODO pass only phase array not full carrierDetail object
             for (i = 0; i < carrierDetail.length; i++) {
                 current = this.$$audioNetworkPhysicalLayer.getRxPhaseCorrection(channelIndex, i);
                 this.$$audioNetworkPhysicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);

@@ -81,12 +81,19 @@ var AudioNetworkPhysicalLayer = (function () {
                     + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
                 + [RX] grab/clean packet data and notify packet handler
             
-            - Receive Adapter:  [8h or 12h remaining] ~ 5 evenings or 7 evenings
+            - Receive Adapter:  [6.5h or 12.5h remaining] ~ 5 evenings or 7 evenings
                 + [1.5h] add events for frequency update and phase update to notify hosting code
-                - [2.0h] refactor collecting arrays to dedicated collectors (move minInArray and similar to MathUtil)
+                + [2.0h] refactor 'collecting arrays' to dedicated collectors
+                - [2.0h] refactor data/packet collection to dedicates collectors classes
+                    - change SYMBOL state name to PILOT_SIGNAL
+                    - change ERROR state name to SYNC_TO_LONG
+                    - phaseOffsetCollector -> frequencyErrorCollector
+                    - introduce some phaseErrorCollector ?
                 - [3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
-                - [1.5h] adaptive threshold based on arriving packets
+                - [1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)
                 - OPTIONAL [4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)
+                - OPTIONAL [1.0h] Signal Strength like in cell phones
+                - OPTIONAL [1.0h] add new state: INTERPACKET_GAP
 
             - Power chart:      [10.5h remaining]
                 - [4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?
@@ -97,19 +104,20 @@ var AudioNetworkPhysicalLayer = (function () {
 
             - Finalization easy:
                 + fix typo: physial-layer into physical-layer
+                + keep view type after reinitialization
                 - remove audio-network prefix from main classes names
                 - change name: dftTimeSpan -> dftWindowTimeSpan
-                + keep view type after reinitialization
                 - move general configuration to some common service
                 - use setTimeout instead setInverval (?)
 
             - Finalization complex:
                 + measure CPU load by measuring times before and after execution
+                - introduce Dependency Injection
+                - prepare release version + some code minification
                 - add noise when loopback is used, change name to loopback
                 - refactor DOM helpers (move to service)
                 - do not redraw constellation if queue wasn't changed
                 - move notification logic to manager (?)
-                - introduce Dependency Injection
 
         TODO (carrier.html)
             - use dedicated constellation

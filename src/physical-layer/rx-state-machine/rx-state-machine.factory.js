@@ -6,11 +6,11 @@ var RxStateMachine = (function () {
     function _RxStateMachine() {
         var RSM;
 
-        RSM = function (handlerIdleInit, handlerFirstSyncWait, handlerSignalInit, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
+        RSM = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             this.$$stateHandler = {};
             this.$$stateHandler[RSM.STATE.IDLE_INIT] = handlerIdleInit;
             this.$$stateHandler[RSM.STATE.FIRST_SYNC_WAIT] = handlerFirstSyncWait;
-            this.$$stateHandler[RSM.STATE.SIGNAL_INIT] = handlerSignalInit;
+            this.$$stateHandler[RSM.STATE.FIRST_SYNC] = handlerFirstSync;
             this.$$stateHandler[RSM.STATE.FATAL_ERROR] = handlerFatalError;
             this.$$stateHandler[RSM.STATE.IDLE] = handlerIdle;
             this.$$stateHandler[RSM.STATE.SYMBOL] = handlerSymbol;
@@ -31,7 +31,7 @@ var RxStateMachine = (function () {
             NO_INPUT: 'NO_INPUT',
             IDLE_INIT: 'IDLE_INIT',
             FIRST_SYNC_WAIT: 'FIRST_SYNC_WAIT',
-            SIGNAL_INIT: 'SIGNAL_INIT',
+            FIRST_SYNC: 'FIRST_SYNC',
             FATAL_ERROR: 'FATAL_ERROR',
             IDLE: 'IDLE',
             SYMBOL: 'SYMBOL',
@@ -71,7 +71,7 @@ var RxStateMachine = (function () {
 
         RSM.prototype.$$handlerFirstSyncWait = function (pilotSignalPresent, time) {
             if (pilotSignalPresent) {
-                this.$$changeState(RSM.STATE.SIGNAL_INIT, time);
+                this.$$changeState(RSM.STATE.FIRST_SYNC, time);
                 return false;
             } else {
                 this.$$changeState(null, time);
@@ -83,13 +83,13 @@ var RxStateMachine = (function () {
             return true;
         };
 
-        RSM.prototype.$$handlerSignalInit = function (pilotSignalPresent, time) {
+        RSM.prototype.$$handlerFirstSync = function (pilotSignalPresent, time) {
             var newState;
 
             this.$$changeState(null, time);
 
             // run external handler
-            newState = this.$$stateHandler[RSM.STATE.SIGNAL_INIT](this.$$stateDurationTime);
+            newState = this.$$stateHandler[RSM.STATE.FIRST_SYNC](this.$$stateDurationTime);
 
             if (newState) {
                 this.$$changeState(newState, time);
@@ -239,8 +239,8 @@ var RxStateMachine = (function () {
                     case S.FIRST_SYNC_WAIT:
                         finished = this.$$handlerFirstSyncWait(pilotSignalPresent, time);
                         break;
-                    case S.SIGNAL_INIT:
-                        finished = this.$$handlerSignalInit(pilotSignalPresent, time);
+                    case S.FIRST_SYNC:
+                        finished = this.$$handlerFirstSync(pilotSignalPresent, time);
                         break;
                     case S.FATAL_ERROR:
                         finished = this.$$handlerFatalError(pilotSignalPresent, time);
