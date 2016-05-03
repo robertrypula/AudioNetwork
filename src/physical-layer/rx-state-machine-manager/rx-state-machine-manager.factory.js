@@ -108,9 +108,9 @@ var RxStateMachineManager = (function () {
                 try {
                     // put first power threshold slightly above collected noise power to detect even weak signals
                     this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + RSMM.$$_DECIBLES_ABOVE_AVERAGE_IDLE;
-                    handlerResult = RxStateMachine.STATE.FIRST_SYNC_WAIT;
+                    handlerResult = ReceiveAdapterState.FIRST_SYNC_WAIT;
                 } catch (e) {
-                    handlerResult = RxStateMachine.STATE.FATAL_ERROR;
+                    handlerResult = ReceiveAdapterState.FATAL_ERROR;
                 }
             }
 
@@ -131,7 +131,7 @@ var RxStateMachineManager = (function () {
 
             // signal cannot be weaker that idle noise... :)
             if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
-                return RxStateMachine.STATE.FATAL_ERROR;
+                return ReceiveAdapterState.FATAL_ERROR;
             }
             
             if (stateDurationTime < this.$$sampleCollectionTimeFirstSyncState) {
@@ -151,9 +151,9 @@ var RxStateMachineManager = (function () {
 
                     // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
                     this.$$powerThreshold = averageIdlePower + RSMM.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
-                    return RxStateMachine.STATE.IDLE;
+                    return ReceiveAdapterState.IDLE;
                 } catch (e) {
-                    return RxStateMachine.STATE.FATAL_ERROR;
+                    return ReceiveAdapterState.FATAL_ERROR;
                 }
             }
         };
@@ -265,7 +265,7 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.receive = function (carrierDetail, time) {
-            var state = RxStateMachine.STATE.NO_INPUT;
+            var state = ReceiveAdapterState.NO_INPUT;
 
             // grab current data, this will be available at all handlers that will be called back by $$stateMachine
             this.$$currentData = {

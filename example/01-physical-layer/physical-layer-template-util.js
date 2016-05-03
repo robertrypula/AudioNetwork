@@ -242,13 +242,13 @@ function $$uiRefreshButtonInputSpecific() {
     removeClass('rx-input-rec', 'active');
 
     switch (physicalLayer.getRxInput()) {
-        case ConfigurationParser.INPUT.MICROPHONE:
+        case PhysicalLayerInput.MICROPHONE:
             addClass('rx-input-mic', 'active');
             break;
-        case ConfigurationParser.INPUT.TX:
+        case PhysicalLayerInput.TX:
             addClass('rx-input-tx', 'active');
             break;
-        case ConfigurationParser.INPUT.RECORDED_AUDIO:
+        case PhysicalLayerInput.RECORDED_AUDIO:
             addClass('rx-input-rec', 'active');
             break;
     }

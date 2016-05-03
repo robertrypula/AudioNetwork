@@ -4,11 +4,6 @@ var ConfigurationParser = (function () {
     _ConfigurationParser.$inject = [];
 
     function _ConfigurationParser() {
-        var INPUT = {
-            MICROPHONE: 'MICROPHONE',                   // TODO move to some common config
-            TX: 'TX',                                   // TODO move to some common config
-            RECORDED_AUDIO: 'RECORDED_AUDIO'            // TODO move to some common config
-        };
 
         function parseChannel(configuration, txRx) {
             var i, txChannel, result, channelDataExists, channelListSize;
@@ -48,7 +43,7 @@ var ConfigurationParser = (function () {
                 rx: {
                     bufferSize: c && c.rx && (typeof c.rx.bufferSize !== 'undefined') ? c.rx.bufferSize : 0,
                     channel: parseChannel(c, 'rx'),
-                    input: a(c, 'rx.input') || INPUT.MICROPHONE,
+                    input: a(c, 'rx.input') || PhysicalLayerInput.MICROPHONE,
                     notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,
                     dftWindowTime: a(c, 'rx.dftWindowTime') || 0.1,
                     spectrum: {
@@ -95,7 +90,6 @@ var ConfigurationParser = (function () {
         }
 
         return {
-            INPUT: INPUT,
             parse: parse
         };
     }

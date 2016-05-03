@@ -268,13 +268,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             var node = null;
 
             switch (input) {
-                case ConfigurationParser.INPUT.MICROPHONE:
+                case PhysicalLayerInput.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case ConfigurationParser.INPUT.TX:
+                case PhysicalLayerInput.TX:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
-                case ConfigurationParser.INPUT.RECORDED_AUDIO:
+                case PhysicalLayerInput.RECORDED_AUDIO:
                     node = Audio.getRecordedAudioNode();
                     break;
             }
