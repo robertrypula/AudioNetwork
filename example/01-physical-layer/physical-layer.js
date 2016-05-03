@@ -1,8 +1,8 @@
 'use strict';
 
 var 
-    anpl = null,
-    anplDestroyInProgress = false,
+    physicalLayer = null,
+    physicalLayerDestroyInProgress = false,
     transmitAdapter = null,
     receiveAdapter = null
 ;
@@ -19,9 +19,9 @@ function setupCpuLoadNotification() {
     txLoad = document.getElementById('load-tx');
 
     setInterval(function () {
-        if (anpl && !anplDestroyInProgress) {
-            rxLoad.innerHTML = Math.round(anpl.getRxCpuLoadData().load * 100);
-            txLoad.innerHTML = Math.round(anpl.getTxCpuLoadData().load * 100);
+        if (physicalLayer && !physicalLayerDestroyInProgress) {
+            rxLoad.innerHTML = Math.round(physicalLayer.getRxCpuLoadData().load * 100);
+            txLoad.innerHTML = Math.round(physicalLayer.getTxCpuLoadData().load * 100);
         }
     }, 200);
 }
@@ -58,12 +58,12 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     }
 
     collectSettingsAndInit(function () {
-        for (i = 0; i < anpl.getRxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getRxChannelSize(); i++) {
             element = document.getElementById('rx-psk-size-' + i);
             element.value = pskSize;
             element.onchange();
         }
-        for (i = 0; i < anpl.getTxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getTxChannelSize(); i++) {
             element = document.getElementById('tx-psk-size-' + i);
             element.value = pskSize;
             element.onchange();
@@ -122,7 +122,7 @@ function collectSettingsAndInit(cb) {
 function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan) {
     generateHtml(txChannel, rxChannel);
 
-    anpl = new AudioNetworkPhysicalLayer({
+    physicalLayer = new PhysicalLayer({
         tx: {
             channel: txChannel
         },
@@ -153,13 +153,13 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             }
         }
     });
-    transmitAdapter = new AudioNetworkTransmitAdapter(anpl);
-    receiveAdapter = new AudioNetworkReceiveAdapter(anpl);
+    transmitAdapter = new AudioNetworkTransmitAdapter(physicalLayer);
+    receiveAdapter = new AudioNetworkReceiveAdapter(physicalLayer);
 
     var powerChartQueue0 = new Queue(400);
     //var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
 
-    anpl.rx(function (channelIndex, carrierDetail, time) {
+    physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
         var receiveData;
 
@@ -196,16 +196,16 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 
 
 function destroy(cb) {
-    if (anpl) {
-        anplDestroyInProgress = true;
-        anpl.destroy().then(function () {
+    if (physicalLayer) {
+        physicalLayerDestroyInProgress = true;
+        physicalLayer.destroy().then(function () {
             transmitAdapter = null;
             receiveAdapter = null;
-            anpl = null;
+            physicalLayer = null;
             document.getElementById('tx-channel-container').innerHTML = '';
             document.getElementById('rx-channel-container').innerHTML = '';
 
-            anplDestroyInProgress = false;
+            physicalLayerDestroyInProgress = false;
             if (typeof cb === 'function') {
                 cb();
             }
@@ -231,9 +231,9 @@ function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {
     newFrequency = getFloatById(elementId);
 
     if (rxTx === 'tx') {
-        anpl.setTxFrequency(channelIndex, ofdmIndex, newFrequency);
+        physicalLayer.setTxFrequency(channelIndex, ofdmIndex, newFrequency);
     } else {
-        anpl.setRxFrequency(channelIndex, ofdmIndex, newFrequency);
+        physicalLayer.setRxFrequency(channelIndex, ofdmIndex, newFrequency);
     }
 
     uiRefresh();
@@ -246,9 +246,9 @@ function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
     newFrequency = getFloatById(elementId);
 
     if (rxTx === 'tx') {
-        anpl.setTxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
+        physicalLayer.setTxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
     } else {
-        anpl.setRxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
+        physicalLayer.setRxPhaseCorrection(channelIndex, ofdmIndex, newFrequency);
     }
 
     uiRefresh();
@@ -259,13 +259,13 @@ function rxInput(type) {
 
     switch (type) {
         case 'mic':
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE);
+            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.MICROPHONE);
             break;
         case 'tx':
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.TX);
+            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.TX);
             break;
         case 'rec':
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
             break;
         default:
             refresh = false;
@@ -277,11 +277,11 @@ function rxInput(type) {
 }
 
 function loadRecordedAudio() {
-    anpl.loadRecordedAudio(
+    physicalLayer.loadRecordedAudio(
         getStrById('recorded-audio-url'),
         function () {
-            anpl.setRxInput(AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
-            anpl.outputRecordedAudioEnable();
+            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            physicalLayer.outputRecordedAudioEnable();
             uiRefresh();
         },
         function () {
@@ -296,23 +296,23 @@ function output(type, state) {
     switch (type) {
         case 'tx':
             if (state) {
-                anpl.outputTxEnable();
+                physicalLayer.outputTxEnable();
             } else {
-                anpl.outputTxDisable();
+                physicalLayer.outputTxDisable();
             }
             break;
         case 'mic':
             if (state) {
-                anpl.outputMicrophoneEnable();
+                physicalLayer.outputMicrophoneEnable();
             } else {
-                anpl.outputMicrophoneDisable();
+                physicalLayer.outputMicrophoneDisable();
             }
             break;
         case 'rec':
             if (state) {
-                anpl.outputRecordedAudioEnable();
+                physicalLayer.outputRecordedAudioEnable();
             } else {
-                anpl.outputRecordedAudioDisable();
+                physicalLayer.outputRecordedAudioDisable();
             }
             break;
         default:

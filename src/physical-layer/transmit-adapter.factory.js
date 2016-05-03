@@ -27,21 +27,21 @@ var AudioNetworkTransmitAdapter = (function () {
     };
 
     /**
-     * This works as an wrapper for raw API that AudioNetworkPhysicalLayer provides.
+     * This works as an wrapper for raw API that PhysicalLayer provides.
      * It's much easier to send data using Adapter API. In case of really fancy sound
-     * generation cases you can use AudioNetworkPhysicalLayer API directly.
+     * generation cases you can use PhysicalLayer API directly.
      *
      */
     function _AudioNetworkTransmitAdapter() {
         var ANTA;
 
-        ANTA = function (audioNetworkPhysicalLayer) {
-            this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
+        ANTA = function (physicalLayer) {
+            this.$$physicalLayer = physicalLayer;
         };
 
         ANTA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
             var
-                ofdmSize = this.$$audioNetworkPhysicalLayer.getTxChannelOfdmSize(channelIndex),
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 data = [],
                 i
             ;
@@ -67,7 +67,7 @@ var AudioNetworkTransmitAdapter = (function () {
 
         ANTA.prototype.packet = function (channelIndex, data, syncPreamble, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
             var 
-                ofdmSize = this.$$audioNetworkPhysicalLayer.getTxChannelOfdmSize(channelIndex),
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 syncData,
                 i
             ;
@@ -103,7 +103,7 @@ var AudioNetworkTransmitAdapter = (function () {
 
         ANTA.prototype.synchronization = function (channelIndex) {
             var 
-                ofdmSize = this.$$audioNetworkPhysicalLayer.getTxChannelOfdmSize(channelIndex),
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 data = [],
                 amplitude = [],
                 i
@@ -130,7 +130,7 @@ var AudioNetworkTransmitAdapter = (function () {
 
         ANTA.prototype.$$transmit = function (channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
             var
-                ofdmSize = this.$$audioNetworkPhysicalLayer.getTxChannelOfdmSize(channelIndex),
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 symbolList, symbol,
                 txData, txDataTmp,
                 mute,
@@ -190,7 +190,7 @@ var AudioNetworkTransmitAdapter = (function () {
             }
 
             for (i = 0; i < txData.length; i++) {
-                this.$$audioNetworkPhysicalLayer.tx(channelIndex, txData[i]);
+                this.$$physicalLayer.tx(channelIndex, txData[i]);
             }
         };
 

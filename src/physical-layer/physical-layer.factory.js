@@ -1,4 +1,4 @@
-var AudioNetworkPhysicalLayer = (function () {
+var PhysicalLayer = (function () {
     'use strict';
 
     /*
@@ -150,13 +150,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
     */
 
-    _AudioNetworkPhysicalLayer.$inject = [];
+    _PhysicalLayer.$inject = [];
 
-    function _AudioNetworkPhysicalLayer() {
+    function _PhysicalLayer() {
         var ANPL;
 
         ANPL = function (configuration) {
-            this.$$configuration = AudioNetworkPhysicalLayerConfiguration.parse(configuration);
+            this.$$configuration = PhysicalLayerConfiguration.parse(configuration);
             this.$$channelTransmitManager = null;
             this.$$channelReceiveManager = null;
             this.$$currentInput = null;
@@ -268,13 +268,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             var node = null;
 
             switch (input) {
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE:
+                case PhysicalLayerConfiguration.INPUT.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.TX:
+                case PhysicalLayerConfiguration.INPUT.TX:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
-                case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+                case PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
                     node = Audio.getRecordedAudioNode();
                     break;
             }
@@ -546,6 +546,6 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         return ANPL;
     }
 
-    return _AudioNetworkPhysicalLayer();        // TODO change it to dependency injection
+    return _PhysicalLayer();        // TODO change it to dependency injection
 
 })();

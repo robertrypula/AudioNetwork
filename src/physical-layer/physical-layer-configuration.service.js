@@ -1,9 +1,9 @@
-var AudioNetworkPhysicalLayerConfiguration = (function () {
+var PhysicalLayerConfiguration = (function () {
     'use strict';
 
-    _AudioNetworkPhysicalLayerConfiguration.$inject = [];
+    _PhysicalLayerConfiguration.$inject = [];
 
-    function _AudioNetworkPhysicalLayerConfiguration() {
+    function _PhysicalLayerConfiguration() {
         var INPUT = {
             MICROPHONE: 'MICROPHONE',                   // TODO move to some common config
             TX: 'TX',                                   // TODO move to some common config
@@ -100,6 +100,6 @@ var AudioNetworkPhysicalLayerConfiguration = (function () {
         };
     }
 
-    return new _AudioNetworkPhysicalLayerConfiguration();        // TODO change it to dependency injection
+    return new _PhysicalLayerConfiguration();        // TODO change it to dependency injection
 
 })();

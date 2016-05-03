@@ -73,17 +73,17 @@ function initializeHtml() {
     }
 
     // rx/tx symbol info/button
-    for (i = 0; i < anpl.getTxChannelSize(); i++) {
+    for (i = 0; i < physicalLayer.getTxChannelSize(); i++) {
         uiRefreshOnPskSizeChange('tx', i);
     }
-    for (i = 0; i < anpl.getRxChannelSize(); i++) {
+    for (i = 0; i < physicalLayer.getRxChannelSize(); i++) {
         uiRefreshOnPskSizeChange('rx', i);
     }
 
     // amplitude value setup
     $$loopChannelOfdm('tx', function (channelIndex, ofdmIndex) {
         element = document.getElementById('tx-amplitude-input-' + channelIndex + '-' + ofdmIndex);
-        element.value = Math.floor(1000 / anpl.getTxChannelOfdmSize(channelIndex)) / 1000;
+        element.value = Math.floor(1000 / physicalLayer.getTxChannelOfdmSize(channelIndex)) / 1000;
     });
 
     // conditional css setup - spectrum
@@ -162,9 +162,9 @@ function uiRefresh() {
     var fieldType, i;
 
     // general info
-    document.getElementById('sample-rate').innerHTML = anpl.getSampleRate();
-    document.getElementById('tx-buffer-size').innerHTML = anpl.getTxBufferSize();
-    document.getElementById('rx-buffer-size').innerHTML = anpl.getRxBufferSize();
+    document.getElementById('sample-rate').innerHTML = physicalLayer.getSampleRate();
+    document.getElementById('tx-buffer-size').innerHTML = physicalLayer.getTxBufferSize();
+    document.getElementById('rx-buffer-size').innerHTML = physicalLayer.getRxBufferSize();
 
     // tx/rx labels
     fieldType = ['frequency', 'phase-correction'];
@@ -211,7 +211,7 @@ function $$uiRefreshButtonSpecific() {
 }
 
 function $$uiRefreshButtonOutputSpecific() {
-    if (anpl.getOutputTxState()) {
+    if (physicalLayer.getOutputTxState()) {
         addClass('tx-output-tx-enable', 'active');
         removeClass('tx-output-tx-disable', 'active');
     } else {
@@ -219,7 +219,7 @@ function $$uiRefreshButtonOutputSpecific() {
         addClass('tx-output-tx-disable', 'active');
     }
 
-    if (anpl.getOutputMicrophoneState()) {
+    if (physicalLayer.getOutputMicrophoneState()) {
         addClass('tx-output-mic-enable', 'active');
         removeClass('tx-output-mic-disable', 'active');
     } else {
@@ -227,7 +227,7 @@ function $$uiRefreshButtonOutputSpecific() {
         addClass('tx-output-mic-disable', 'active');
     }
 
-    if (anpl.getOutputRecordedAudioState()) {
+    if (physicalLayer.getOutputRecordedAudioState()) {
         addClass('tx-output-rec-enable', 'active');
         removeClass('tx-output-rec-disable', 'active');
     } else {
@@ -241,14 +241,14 @@ function $$uiRefreshButtonInputSpecific() {
     removeClass('rx-input-tx', 'active');
     removeClass('rx-input-rec', 'active');
 
-    switch (anpl.getRxInput()) {
-        case AudioNetworkPhysicalLayerConfiguration.INPUT.MICROPHONE:
+    switch (physicalLayer.getRxInput()) {
+        case PhysicalLayerConfiguration.INPUT.MICROPHONE:
             addClass('rx-input-mic', 'active');
             break;
-        case AudioNetworkPhysicalLayerConfiguration.INPUT.TX:
+        case PhysicalLayerConfiguration.INPUT.TX:
             addClass('rx-input-tx', 'active');
             break;
-        case AudioNetworkPhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+        case PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
             addClass('rx-input-rec', 'active');
             break;
     }
@@ -259,7 +259,7 @@ function $$uiRefreshOnPskSizeChangeDataPacketSpecific(channelIndex) {
 
     pskSize = getIntById('tx-psk-size-' + channelIndex);
     element = document.getElementById('tx-packet-data-' + channelIndex);
-    channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
+    channelOfdmSize = physicalLayer.getTxChannelOfdmSize(channelIndex);
     packetDataList = [];
 
     for (i = 0; i < pskSize; i++) {
@@ -277,9 +277,9 @@ function $$uiRefreshOnPskSizeChangeSymbolSpecific(rxTx, channelIndex) {
     var ofdmIndex, symbol, element, pskSize, channelOfdmSize;
 
     if (rxTx === 'rx') {
-        channelOfdmSize = anpl.getRxChannelOfdmSize(channelIndex);
+        channelOfdmSize = physicalLayer.getRxChannelOfdmSize(channelIndex);
     } else {
-        channelOfdmSize = anpl.getTxChannelOfdmSize(channelIndex);
+        channelOfdmSize = physicalLayer.getTxChannelOfdmSize(channelIndex);
     }
     pskSize = getIntById(rxTx + '-psk-size-' + channelIndex);
 
@@ -324,16 +324,16 @@ function $$uiRefreshOfdmSpecific(type, isLabel, rxTx, channelIndex, ofdmIndex) {
     switch (type) {
         case 'frequency':
             if (rxTx === 'tx') {
-                value = anpl.getTxFrequency(channelIndex, ofdmIndex);
+                value = physicalLayer.getTxFrequency(channelIndex, ofdmIndex);
             } else {
-                value = anpl.getRxFrequency(channelIndex, ofdmIndex);
+                value = physicalLayer.getRxFrequency(channelIndex, ofdmIndex);
             }
             break;
         case 'phase-correction':
             if (rxTx === 'tx') {
-                value = anpl.getTxPhaseCorrection(channelIndex, ofdmIndex);
+                value = physicalLayer.getTxPhaseCorrection(channelIndex, ofdmIndex);
             } else {
-                value = anpl.getRxPhaseCorrection(channelIndex, ofdmIndex);
+                value = physicalLayer.getRxPhaseCorrection(channelIndex, ofdmIndex);
             }
             break;
     }
@@ -351,17 +351,17 @@ function $$uiRefreshSpeedSpecific(rxTx) {
     ;
 
     if (rxTx === 'rx') {
-        for (i = 0; i < anpl.getRxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getRxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
             element = document.getElementById('rx-speed-' + i);
-            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * anpl.getRxChannelOfdmSize(i);
+            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * physicalLayer.getRxChannelOfdmSize(i);
             element.innerHTML = bitPerSecond;
         }
     } else {
-        for (i = 0; i < anpl.getTxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getTxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
             element = document.getElementById('tx-speed-' + i);
-            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * anpl.getTxChannelOfdmSize(i);
+            bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * physicalLayer.getTxChannelOfdmSize(i);
             element.innerHTML = bitPerSecond;
         }
     }
@@ -371,16 +371,16 @@ function $$loopChannelOfdm(rxTx, callback) {
     var i, j, pskSize;
 
     if (rxTx === 'rx') {
-        for (i = 0; i < anpl.getRxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getRxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
-            for (j = 0; j < anpl.getRxChannelOfdmSize(i); j++) {
+            for (j = 0; j < physicalLayer.getRxChannelOfdmSize(i); j++) {
                 callback(i, j, pskSize);
             }
         }
     } else {
-        for (i = 0; i < anpl.getTxChannelSize(); i++) {
+        for (i = 0; i < physicalLayer.getTxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
-            for (j = 0; j < anpl.getTxChannelOfdmSize(i); j++) {
+            for (j = 0; j < physicalLayer.getTxChannelOfdmSize(i); j++) {
                 callback(i, j, pskSize);
             }
         }

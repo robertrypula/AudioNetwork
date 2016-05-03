@@ -16,16 +16,16 @@ var AudioNetworkReceiveAdapter = (function () {
     function _AudioNetworkReceiveAdapter() {
         var ANRA;
 
-        ANRA = function (audioNetworkPhysicalLayer) {
+        ANRA = function (physicalLayer) {
             var channelIndex, channelSize, stateMachineManager;
 
-            this.$$audioNetworkPhysicalLayer = audioNetworkPhysicalLayer;
+            this.$$physicalLayer = physicalLayer;
             this.$$stateMachineManager = [];
             this.$$packetReceiveHandler = null;
             this.$$frequencyUpdateHandler = null;
             this.$$phaseCorrectionUpdateHandler = null;
             
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (channelIndex = 0; channelIndex < channelSize; channelIndex++) {
                 stateMachineManager = RxStateMachineManagerBuilder.build(
                     channelIndex,
@@ -52,7 +52,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.setSymbolDuration = function (value) {
             var channelSize, i;
 
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
                     value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
@@ -63,7 +63,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.setGuardInterval = function (value) {
             var channelSize, i;
 
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
                     value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
@@ -74,7 +74,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.setSyncDuration = function (value) {
             var channelSize, i;
 
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
                     value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
@@ -85,7 +85,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.setSampleCollectionTimeIdleInitState = function (value) {
             var channelSize, i;
 
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSampleCollectionTimeIdleInitState(value);
             }
@@ -94,7 +94,7 @@ var AudioNetworkReceiveAdapter = (function () {
         ANRA.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
             var channelSize, i;
 
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSampleCollectionTimeFirstSyncState(value);
             }
@@ -104,7 +104,7 @@ var AudioNetworkReceiveAdapter = (function () {
             var channelSize, i;
 
             value = !!value;
-            channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+            channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncPreamble(value);
             }
@@ -114,7 +114,7 @@ var AudioNetworkReceiveAdapter = (function () {
             var channelSize, i;
 
             if (channelIndex === _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE) {
-                channelSize = this.$$audioNetworkPhysicalLayer.getRxChannelSize();
+                channelSize = this.$$physicalLayer.getRxChannelSize();
                 for (i = 0; i < channelSize; i++) {
                     this.$$stateMachineManager[i].setPskSize(value);
                 }
@@ -147,9 +147,9 @@ var AudioNetworkReceiveAdapter = (function () {
 
             // TODO pass drift as array
             if (MathUtil.abs(drift) > 0.005) {
-                current = this.$$audioNetworkPhysicalLayer.getRxFrequency(channelIndex, 0);
+                current = this.$$physicalLayer.getRxFrequency(channelIndex, 0);
                 console.log('phase history current', current);
-                this.$$audioNetworkPhysicalLayer.setRxFrequency(channelIndex, 0, current + drift);
+                this.$$physicalLayer.setRxFrequency(channelIndex, 0, current + drift);
                 console.log('Frequency corrected for channel ' + channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
             }
             if (this.$$frequencyUpdateHandler) {
@@ -162,8 +162,8 @@ var AudioNetworkReceiveAdapter = (function () {
 
             // TODO pass only phase array not full carrierDetail object
             for (i = 0; i < carrierDetail.length; i++) {
-                current = this.$$audioNetworkPhysicalLayer.getRxPhaseCorrection(channelIndex, i);
-                this.$$audioNetworkPhysicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);
+                current = this.$$physicalLayer.getRxPhaseCorrection(channelIndex, i);
+                this.$$physicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);
                 console.log('Phase corrected for channel ' + channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
             }
 
@@ -173,7 +173,7 @@ var AudioNetworkReceiveAdapter = (function () {
         };
         
         ANRA.prototype.$$checkChannelIndexRange = function (channelIndex) {
-            if (channelIndex < 0 || channelIndex >= this.$$audioNetworkPhysicalLayer.getRxChannelSize()) {
+            if (channelIndex < 0 || channelIndex >= this.$$physicalLayer.getRxChannelSize()) {
                 throw 'Given channelIndex is outside range: ' + channelIndex;
             }
         };
