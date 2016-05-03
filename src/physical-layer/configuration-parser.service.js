@@ -1,9 +1,9 @@
-var PhysicalLayerConfiguration = (function () {
+var ConfigurationParser = (function () {
     'use strict';
 
-    _PhysicalLayerConfiguration.$inject = [];
+    _ConfigurationParser.$inject = [];
 
-    function _PhysicalLayerConfiguration() {
+    function _ConfigurationParser() {
         var INPUT = {
             MICROPHONE: 'MICROPHONE',                   // TODO move to some common config
             TX: 'TX',                                   // TODO move to some common config
@@ -100,6 +100,6 @@ var PhysicalLayerConfiguration = (function () {
         };
     }
 
-    return new _PhysicalLayerConfiguration();        // TODO change it to dependency injection
+    return new _ConfigurationParser();        // TODO change it to dependency injection
 
 })();

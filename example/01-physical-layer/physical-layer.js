@@ -259,13 +259,13 @@ function rxInput(type) {
 
     switch (type) {
         case 'mic':
-            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.MICROPHONE);
+            physicalLayer.setRxInput(ConfigurationParser.INPUT.MICROPHONE);
             break;
         case 'tx':
-            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.TX);
+            physicalLayer.setRxInput(ConfigurationParser.INPUT.TX);
             break;
         case 'rec':
-            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            physicalLayer.setRxInput(ConfigurationParser.INPUT.RECORDED_AUDIO);
             break;
         default:
             refresh = false;
@@ -280,7 +280,7 @@ function loadRecordedAudio() {
     physicalLayer.loadRecordedAudio(
         getStrById('recorded-audio-url'),
         function () {
-            physicalLayer.setRxInput(PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO);
+            physicalLayer.setRxInput(ConfigurationParser.INPUT.RECORDED_AUDIO);
             physicalLayer.outputRecordedAudioEnable();
             uiRefresh();
         },

@@ -156,7 +156,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         var PL;
 
         PL = function (configuration) {
-            this.$$configuration = PhysicalLayerConfiguration.parse(configuration);
+            this.$$configuration = ConfigurationParser.parse(configuration);
             this.$$channelTransmitManager = null;
             this.$$channelReceiveManager = null;
             this.$$currentInput = null;
@@ -268,13 +268,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             var node = null;
 
             switch (input) {
-                case PhysicalLayerConfiguration.INPUT.MICROPHONE:
+                case ConfigurationParser.INPUT.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case PhysicalLayerConfiguration.INPUT.TX:
+                case ConfigurationParser.INPUT.TX:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
-                case PhysicalLayerConfiguration.INPUT.RECORDED_AUDIO:
+                case ConfigurationParser.INPUT.RECORDED_AUDIO:
                     node = Audio.getRecordedAudioNode();
                     break;
             }
