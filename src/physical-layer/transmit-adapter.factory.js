@@ -1,9 +1,9 @@
-var AudioNetworkTransmitAdapter = (function () {
+var TransmitAdapter = (function () {
     'use strict';
 
-    _AudioNetworkTransmitAdapter.$inject = [];
+    _TransmitAdapter.$inject = [];
 
-    _AudioNetworkTransmitAdapter.SYNCHRONIZATION = {
+    _TransmitAdapter.SYNCHRONIZATION = {
         PSK_SIZE: 1,
         SYMBOL: 0,
         SYMBOL_DURATION: 3.0,                         // TODO move to some common config
@@ -11,16 +11,16 @@ var AudioNetworkTransmitAdapter = (function () {
         INTERPACKET_GAP: 0.5                          // TODO move to some common config
     };
 
-    _AudioNetworkTransmitAdapter.PACKET = {
+    _TransmitAdapter.PACKET = {
         PSK_SIZE: 4,                                  // TODO move to some common config
         SYMBOL_DURATION: 0.080,                       // TODO move to some common config
         GUARD_INTERVAL: 0.170,                        // TODO move to some common config
         INTERPACKET_GAP: 0.5                          // TODO move to some common config
     };
 
-    _AudioNetworkTransmitAdapter.SYMBOL = {
+    _TransmitAdapter.SYMBOL = {
         SYNC_PREAMBLE: false,                   // note: this is NOT default preamble value for sending packet
-        SYMBOL_DURATION: _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION,     // TODO move to some common config
+        SYMBOL_DURATION: _TransmitAdapter.PACKET.SYMBOL_DURATION,     // TODO move to some common config
         GUARD_INTERVAL: 0.0,
         INTERPACKET_GAP: 0.0,
         AMPLITUDE: undefined
@@ -32,14 +32,14 @@ var AudioNetworkTransmitAdapter = (function () {
      * generation cases you can use PhysicalLayer API directly.
      *
      */
-    function _AudioNetworkTransmitAdapter() {
-        var ANTA;
+    function _TransmitAdapter() {
+        var TA;
 
-        ANTA = function (physicalLayer) {
+        TA = function (physicalLayer) {
             this.$$physicalLayer = physicalLayer;
         };
 
-        ANTA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
+        TA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
             var
                 ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 data = [],
@@ -56,16 +56,16 @@ var AudioNetworkTransmitAdapter = (function () {
             this.packet(
                 channelIndex,
                 data,
-                _AudioNetworkTransmitAdapter.SYMBOL.SYNC_PREAMBLE,
+                _TransmitAdapter.SYMBOL.SYNC_PREAMBLE,
                 pskSize,
-                typeof symbolDuration === 'undefined' ? _AudioNetworkTransmitAdapter.SYMBOL.SYMBOL_DURATION : symbolDuration,
-                _AudioNetworkTransmitAdapter.SYMBOL.GUARD_INTERVAL,
-                _AudioNetworkTransmitAdapter.SYMBOL.INTERPACKET_GAP,
-                _AudioNetworkTransmitAdapter.SYMBOL.AMPLITUDE
+                typeof symbolDuration === 'undefined' ? _TransmitAdapter.SYMBOL.SYMBOL_DURATION : symbolDuration,
+                _TransmitAdapter.SYMBOL.GUARD_INTERVAL,
+                _TransmitAdapter.SYMBOL.INTERPACKET_GAP,
+                _TransmitAdapter.SYMBOL.AMPLITUDE
             );
         };
 
-        ANTA.prototype.packet = function (channelIndex, data, syncPreamble, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
+        TA.prototype.packet = function (channelIndex, data, syncPreamble, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
             var 
                 ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 syncData,
@@ -75,7 +75,7 @@ var AudioNetworkTransmitAdapter = (function () {
             if (typeof syncPreamble === 'undefined' || syncPreamble) {
                 syncData = [];
                 for (i = 0; i < ofdmSize; i++) {
-                    syncData.push(_AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL);
+                    syncData.push(_TransmitAdapter.SYNCHRONIZATION.SYMBOL);
                 }
                 syncData = syncData.length === 1 ? syncData[0] : syncData;
                 data.unshift(syncData);
@@ -93,15 +93,15 @@ var AudioNetworkTransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                typeof pskSize === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.PSK_SIZE : pskSize,
-                typeof symbolDuration === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.SYMBOL_DURATION : symbolDuration,
-                typeof guardInterval === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.GUARD_INTERVAL : guardInterval,
-                typeof interpacketGap === 'undefined' ? _AudioNetworkTransmitAdapter.PACKET.INTERPACKET_GAP : interpacketGap,
+                typeof pskSize === 'undefined' ? _TransmitAdapter.PACKET.PSK_SIZE : pskSize,
+                typeof symbolDuration === 'undefined' ? _TransmitAdapter.PACKET.SYMBOL_DURATION : symbolDuration,
+                typeof guardInterval === 'undefined' ? _TransmitAdapter.PACKET.GUARD_INTERVAL : guardInterval,
+                typeof interpacketGap === 'undefined' ? _TransmitAdapter.PACKET.INTERPACKET_GAP : interpacketGap,
                 amplitude
             );
         };
 
-        ANTA.prototype.synchronization = function (channelIndex) {
+        TA.prototype.synchronization = function (channelIndex) {
             var 
                 ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 data = [],
@@ -110,7 +110,7 @@ var AudioNetworkTransmitAdapter = (function () {
             ;
 
             for (i = 0; i < ofdmSize; i++) {
-                data.push(_AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL);
+                data.push(_TransmitAdapter.SYNCHRONIZATION.SYMBOL);
                 amplitude.push(
                     MathUtil.floor(1000 / ofdmSize) / 1000
                 );
@@ -120,15 +120,15 @@ var AudioNetworkTransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.PSK_SIZE,
-                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.SYMBOL_DURATION, 
-                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.GUARD_INTERVAL,
-                _AudioNetworkTransmitAdapter.SYNCHRONIZATION.INTERPACKET_GAP,
+                _TransmitAdapter.SYNCHRONIZATION.PSK_SIZE,
+                _TransmitAdapter.SYNCHRONIZATION.SYMBOL_DURATION, 
+                _TransmitAdapter.SYNCHRONIZATION.GUARD_INTERVAL,
+                _TransmitAdapter.SYNCHRONIZATION.INTERPACKET_GAP,
                 amplitude
             );
         };
 
-        ANTA.prototype.$$transmit = function (channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
+        TA.prototype.$$transmit = function (channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
             var
                 ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
                 symbolList, symbol,
@@ -136,8 +136,6 @@ var AudioNetworkTransmitAdapter = (function () {
                 mute,
                 i, j
             ;
-
-            console.log(channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude);
 
             txData = [];
             for (i = 0; i < data.length; i++) {
@@ -194,9 +192,9 @@ var AudioNetworkTransmitAdapter = (function () {
             }
         };
 
-        return ANTA;
+        return TA;
     }
 
-    return _AudioNetworkTransmitAdapter();        // TODO change it to dependency injection
+    return _TransmitAdapter();        // TODO change it to dependency injection
 
 })();

@@ -6,8 +6,8 @@ var CarrierRecovery = (function () {
     function _CarrierRecovery() {
         var CR;
 
-        CR = function (samplePerPeriod, sizeDFT) {
-            this.$$queue = QueueBuilder.build(2 * sizeDFT);
+        CR = function (samplePerPeriod, dftWindowSize) {
+            this.$$queue = QueueBuilder.build(2 * dftWindowSize);
             this.$$queueSumReal = 0;
             this.$$queueSumImm = 0;
             this.$$referenceReal = 0;

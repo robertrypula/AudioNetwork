@@ -50,7 +50,7 @@ var PhysicalLayerConfiguration = (function () {
                     channel: parseChannel(c, 'rx'),
                     input: a(c, 'rx.input') || INPUT.MICROPHONE,
                     notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,
-                    dftTimeSpan: a(c, 'rx.dftTimeSpan') || 0.1,
+                    dftWindowTime: a(c, 'rx.dftWindowTime') || 0.1,
                     spectrum: {
                         elementId: a(c, 'rx.spectrum.elementId') || null,
                         color: {

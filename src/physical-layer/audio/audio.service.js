@@ -12,10 +12,6 @@ var Audio = (function () {
             recordedRawNode = null
         ;
 
-        function getContext() {
-            return context;
-        }
-
         function getCurrentTime() {
             return context.currentTime;
         }
@@ -169,8 +165,7 @@ var Audio = (function () {
             createOscillator: createOscillator,
             createGain: createGain,
             createScriptProcessor: createScriptProcessor,
-            createChannelMerger: createChannelMerger,
-            getContext: getContext
+            createChannelMerger: createChannelMerger
         };
     }
 

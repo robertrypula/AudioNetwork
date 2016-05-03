@@ -105,8 +105,8 @@ var PhysicalLayer = (function () {
             - Finalization easy:
                 + fix typo: physial-layer into physical-layer
                 + keep view type after reinitialization
-                - remove audio-network prefix from main classes names
-                - change name: dftTimeSpan -> dftWindowTimeSpan
+                + remove audio-network prefix from main classes names
+                + change name: dftTimeSpan -> dftWindowTimeSpan
                 - move general configuration to some common service
                 - use setTimeout instead setInverval (?)
 
@@ -153,9 +153,9 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     _PhysicalLayer.$inject = [];
 
     function _PhysicalLayer() {
-        var ANPL;
+        var PL;
 
-        ANPL = function (configuration) {
+        PL = function (configuration) {
             this.$$configuration = PhysicalLayerConfiguration.parse(configuration);
             this.$$channelTransmitManager = null;
             this.$$channelReceiveManager = null;
@@ -179,7 +179,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.setRxInput(this.$$configuration.rx.input);
         };
 
-        ANPL.prototype.$$initTx = function () {
+        PL.prototype.$$initTx = function () {
             this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
                 this.$$configuration.tx.channel,
                 this.$$configuration.tx.bufferSize
@@ -190,7 +190,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.outputRecordedAudioDisable();
         };
 
-        ANPL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
+        PL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
             var ofdmIndex, queue, constellationDiagram, elementId;
 
             queue = [];
@@ -223,9 +223,9 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             });
         };
 
-        ANPL.prototype.$$initRx = function () {
+        PL.prototype.$$initRx = function () {
             var
-                dftSize = Audio.getSampleRate() * this.$$configuration.rx.dftTimeSpan,
+                dftWindowSize = Audio.getSampleRate() * this.$$configuration.rx.dftWindowTime,
                 notifyInterval = Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond,
                 channel, i
             ;
@@ -234,7 +234,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 channel = this.$$configuration.rx.channel[i];
 
                 // attach additional fields to channel object
-                channel.dftSize = dftSize;
+                channel.dftWindowSize = dftWindowSize;
                 channel.notifyInterval = notifyInterval;
                 channel.notifyHandler = this.$$rxHandler.handle.bind(this.$$rxHandler);
 
@@ -264,7 +264,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             }
         };
 
-        ANPL.prototype.$$getTxInputNode = function (input) {
+        PL.prototype.$$getTxInputNode = function (input) {
             var node = null;
 
             switch (input) {
@@ -282,11 +282,11 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return node;
         };
 
-        ANPL.prototype.getRxInput = function () {
+        PL.prototype.getRxInput = function () {
             return this.$$currentInput;
         };
 
-        ANPL.prototype.setRxInput = function (input) {
+        PL.prototype.setRxInput = function (input) {
             var node;
 
             if (this.$$currentInput) {
@@ -302,19 +302,19 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             }
         };
 
-        ANPL.prototype.getTxBufferSize = function () {
+        PL.prototype.getTxBufferSize = function () {
             return this.$$channelTransmitManager.getBufferSize();
         };
 
-        ANPL.prototype.getRxBufferSize = function () {
+        PL.prototype.getRxBufferSize = function () {
             return this.$$channelReceiveManager.getBufferSize();
         };
 
-        ANPL.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
+        PL.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
             Audio.loadRecordedAudio(url, successCallback, errorCallback);
         };
 
-        ANPL.prototype.tx = function (channelIndex, data) {
+        PL.prototype.tx = function (channelIndex, data) {
             var
                 channelTx = this.$$channelTransmitManager.getChannel(channelIndex),
                 d, i, dataParsed = []
@@ -336,7 +336,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             channelTx.addToQueue(dataParsed);
         };
 
-        ANPL.prototype.rx = function (rxHandler) {
+        PL.prototype.rx = function (rxHandler) {
             this.$$rxExternalHandler.callback = (
                 (typeof rxHandler === 'function') ?
                 rxHandler :
@@ -344,11 +344,11 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        ANPL.prototype.getSampleRate = function () {
+        PL.prototype.getSampleRate = function () {
             return Audio.getSampleRate();
         };
 
-        ANPL.prototype.destroy = function () {
+        PL.prototype.destroy = function () {
             var i, j, promiseResolve, promise, destroyAsyncCount;
 
             destroyAsyncCount = 0;
@@ -404,69 +404,69 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return promise;
         };
 
-        ANPL.prototype.getOutputTxState = function () {
+        PL.prototype.getOutputTxState = function () {
             return this.$$outputTx;
         };
 
-        ANPL.prototype.getOutputMicrophoneState = function () {
+        PL.prototype.getOutputMicrophoneState = function () {
             return this.$$outputMicrophone;
         };
 
-        ANPL.prototype.getOutputRecordedAudioState = function () {
+        PL.prototype.getOutputRecordedAudioState = function () {
             return this.$$outputRecordedAudio;
         };
 
-        ANPL.prototype.outputTxEnable = function () {
+        PL.prototype.outputTxEnable = function () {
             if (!this.$$outputTx) {
                 this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
             }
             this.$$outputTx = true;
         };
 
-        ANPL.prototype.outputTxDisable = function () {
+        PL.prototype.outputTxDisable = function () {
             if (this.$$outputTx) {
                 this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
             }
             this.$$outputTx = false;
         };
 
-        ANPL.prototype.outputMicrophoneEnable = function () {
+        PL.prototype.outputMicrophoneEnable = function () {
             if (!this.$$outputMicrophone) {
                 Audio.getMicrophoneNode().connect(Audio.getDestination());
             }
             this.$$outputMicrophone = true;
         };
 
-        ANPL.prototype.outputMicrophoneDisable = function () {
+        PL.prototype.outputMicrophoneDisable = function () {
             if (this.$$outputMicrophone) {
                 Audio.getMicrophoneNode().disconnect(Audio.getDestination());
             }
             this.$$outputMicrophone = false;
         };
 
-        ANPL.prototype.outputRecordedAudioEnable = function () {
+        PL.prototype.outputRecordedAudioEnable = function () {
             if (!this.$$outputRecordedAudio) {
                 Audio.getRecordedAudioNode().connect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = true;
         };
 
-        ANPL.prototype.outputRecordedAudioDisable = function () {
+        PL.prototype.outputRecordedAudioDisable = function () {
             if (this.$$outputRecordedAudio) {
                 Audio.getRecordedAudioNode().disconnect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = false;
         };
 
-        ANPL.prototype.getRxCpuLoadData = function () {
+        PL.prototype.getRxCpuLoadData = function () {
             return this.$$channelReceiveManager.getCpuLoadData();
         };
 
-        ANPL.prototype.getTxCpuLoadData = function () {
+        PL.prototype.getTxCpuLoadData = function () {
             return this.$$channelTransmitManager.getCpuLoadData();
         };
 
-        ANPL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
+        PL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
@@ -474,7 +474,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        ANPL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
+        PL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
@@ -482,14 +482,14 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        ANPL.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
+        PL.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
             this.$$channelReceiveManager
                 .getChannel(channelIndex)
                 .setFrequency(ofdmIndex, frequency)
             ;
         };
 
-        ANPL.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
+        PL.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .setFrequency(ofdmIndex, frequency)
@@ -497,7 +497,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
 
-        ANPL.prototype.getRxPhaseCorrection = function (channelIndex, ofdmIndex) {
+        PL.prototype.getRxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
@@ -505,7 +505,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        ANPL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
+        PL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
@@ -513,37 +513,37 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        ANPL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+        PL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelReceiveManager
                 .getChannel(channelIndex)
                 .setRxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 
-        ANPL.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+        PL.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .setTxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 
-        ANPL.prototype.getTxChannelSize = function () {
+        PL.prototype.getTxChannelSize = function () {
             return this.$$channelTransmitManager.getChannelSize();
         };
 
-        ANPL.prototype.getRxChannelSize = function () {
+        PL.prototype.getRxChannelSize = function () {
             return this.$$channelReceiveManager.getChannelSize();
         };
 
-        ANPL.prototype.getTxChannelOfdmSize = function (channelIndex) {
+        PL.prototype.getTxChannelOfdmSize = function (channelIndex) {
             return this.$$channelTransmitManager.getChannel(channelIndex).getOfdmSize();
         };
 
-        ANPL.prototype.getRxChannelOfdmSize = function (channelIndex) {
+        PL.prototype.getRxChannelOfdmSize = function (channelIndex) {
             return this.$$channelReceiveManager.getChannel(channelIndex).getOfdmSize();
         };
 
-        return ANPL;
+        return PL;
     }
 
     return _PhysicalLayer();        // TODO change it to dependency injection

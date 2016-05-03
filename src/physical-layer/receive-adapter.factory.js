@@ -1,22 +1,22 @@
-var AudioNetworkReceiveAdapter = (function () {
+var ReceiveAdapter = (function () {
     'use strict';
 
-    _AudioNetworkReceiveAdapter.$inject = [];
+    _ReceiveAdapter.$inject = [];
 
-    _AudioNetworkReceiveAdapter.SYMBOL_DURATION = 0.080;     // TODO move to some common config
-    _AudioNetworkReceiveAdapter.GUARD_INTERVAL = 0.170;      // TODO move to some common config
-    _AudioNetworkReceiveAdapter.SYNC_DURATION = 3.0;         // TODO move to some common config
-    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = _AudioNetworkReceiveAdapter.SYNC_DURATION;
-    _AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = _AudioNetworkReceiveAdapter.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-    _AudioNetworkReceiveAdapter.SYNC_PREAMBLE = true;
-    _AudioNetworkReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
-    _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.5; // how much state times could be longer - WARNING do not exceed interpacket gap (guardInterval * factor < interpacketGap)!
-    _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
+    _ReceiveAdapter.SYMBOL_DURATION = 0.080;     // TODO move to some common config
+    _ReceiveAdapter.GUARD_INTERVAL = 0.170;      // TODO move to some common config
+    _ReceiveAdapter.SYNC_DURATION = 3.0;         // TODO move to some common config
+    _ReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = _ReceiveAdapter.SYNC_DURATION;
+    _ReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = _ReceiveAdapter.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
+    _ReceiveAdapter.SYNC_PREAMBLE = true;
+    _ReceiveAdapter.PSK_SIZE = 4;                // TODO move to some common config
+    _ReceiveAdapter.TIME_TOLERANCE_FACTOR = 2.5; // how much state times could be longer - WARNING do not exceed interpacket gap (guardInterval * factor < interpacketGap)!
+    _ReceiveAdapter.ALL_CHANNEL_PSK_SIZE = null;
 
-    function _AudioNetworkReceiveAdapter() {
-        var ANRA;
+    function _ReceiveAdapter() {
+        var RA;
 
-        ANRA = function (physicalLayer) {
+        RA = function (physicalLayer) {
             var channelIndex, channelSize, stateMachineManager;
 
             this.$$physicalLayer = physicalLayer;
@@ -35,54 +35,54 @@ var AudioNetworkReceiveAdapter = (function () {
                 );
                 this.$$stateMachineManager.push(stateMachineManager);
             }
-            this.setSymbolDuration(_AudioNetworkReceiveAdapter.SYMBOL_DURATION);
-            this.setGuardInterval(_AudioNetworkReceiveAdapter.GUARD_INTERVAL);
-            this.setSyncDuration(_AudioNetworkReceiveAdapter.SYNC_DURATION);
-            this.setSampleCollectionTimeIdleInitState(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
-            this.setSampleCollectionTimeFirstSyncState(_AudioNetworkReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
-            this.setSyncPreamble(_AudioNetworkReceiveAdapter.SYNC_PREAMBLE);
-            this.setPskSize(_AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _AudioNetworkReceiveAdapter.PSK_SIZE);
+            this.setSymbolDuration(_ReceiveAdapter.SYMBOL_DURATION);
+            this.setGuardInterval(_ReceiveAdapter.GUARD_INTERVAL);
+            this.setSyncDuration(_ReceiveAdapter.SYNC_DURATION);
+            this.setSampleCollectionTimeIdleInitState(_ReceiveAdapter.SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
+            this.setSampleCollectionTimeFirstSyncState(_ReceiveAdapter.SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
+            this.setSyncPreamble(_ReceiveAdapter.SYNC_PREAMBLE);
+            this.setPskSize(_ReceiveAdapter.ALL_CHANNEL_PSK_SIZE, _ReceiveAdapter.PSK_SIZE);
         };
 
-        ANRA.prototype.reset = function (channelIndex) {
+        RA.prototype.reset = function (channelIndex) {
             this.$$checkChannelIndexRange(channelIndex);
             return this.$$stateMachineManager[channelIndex].reset();
         };
 
-        ANRA.prototype.setSymbolDuration = function (value) {
+        RA.prototype.setSymbolDuration = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
-                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
+                    value * _ReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
 
-        ANRA.prototype.setGuardInterval = function (value) {
+        RA.prototype.setGuardInterval = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
-                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
+                    value * _ReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
 
-        ANRA.prototype.setSyncDuration = function (value) {
+        RA.prototype.setSyncDuration = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
-                    value * _AudioNetworkReceiveAdapter.TIME_TOLERANCE_FACTOR
+                    value * _ReceiveAdapter.TIME_TOLERANCE_FACTOR
                 );
             }
         };
 
-        ANRA.prototype.setSampleCollectionTimeIdleInitState = function (value) {
+        RA.prototype.setSampleCollectionTimeIdleInitState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
@@ -91,7 +91,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
+        RA.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
@@ -100,7 +100,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setSyncPreamble = function (value) {
+        RA.prototype.setSyncPreamble = function (value) {
             var channelSize, i;
 
             value = !!value;
@@ -110,10 +110,10 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setPskSize = function (channelIndex, value) {
+        RA.prototype.setPskSize = function (channelIndex, value) {
             var channelSize, i;
 
-            if (channelIndex === _AudioNetworkReceiveAdapter.ALL_CHANNEL_PSK_SIZE) {
+            if (channelIndex === _ReceiveAdapter.ALL_CHANNEL_PSK_SIZE) {
                 channelSize = this.$$physicalLayer.getRxChannelSize();
                 for (i = 0; i < channelSize; i++) {
                     this.$$stateMachineManager[i].setPskSize(value);
@@ -124,7 +124,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
+        RA.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
             var i;
 
             for (i = 0; i < data.length; i++) {
@@ -138,7 +138,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
+        RA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
             var current;
 
             if (drift === null) {
@@ -157,7 +157,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }  
         };
 
-        ANRA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
+        RA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
             var current, i;
 
             // TODO pass only phase array not full carrierDetail object
@@ -172,13 +172,13 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
         
-        ANRA.prototype.$$checkChannelIndexRange = function (channelIndex) {
+        RA.prototype.$$checkChannelIndexRange = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.$$physicalLayer.getRxChannelSize()) {
                 throw 'Given channelIndex is outside range: ' + channelIndex;
             }
         };
 
-        ANRA.prototype.setPacketReceiveHandler = function (cb) {
+        RA.prototype.setPacketReceiveHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$packetReceiveHandler = cb;
             } else {
@@ -186,7 +186,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setFrequencyUpdateHandler = function (cb) {
+        RA.prototype.setFrequencyUpdateHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$frequencyUpdateHandler = cb;
             } else {
@@ -194,7 +194,7 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
+        RA.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$phaseCorrectionUpdateHandler = cb;
             } else {
@@ -202,14 +202,14 @@ var AudioNetworkReceiveAdapter = (function () {
             }
         };
 
-        ANRA.prototype.receive = function (channelIndex, carrierDetail, time) {
+        RA.prototype.receive = function (channelIndex, carrierDetail, time) {
             this.$$checkChannelIndexRange(channelIndex);
             return this.$$stateMachineManager[channelIndex].receive(carrierDetail, time);
         };
 
-        return ANRA;
+        return RA;
     }
 
-    return _AudioNetworkReceiveAdapter();        // TODO change it to dependency injection
+    return _ReceiveAdapter();        // TODO change it to dependency injection
 
 })();

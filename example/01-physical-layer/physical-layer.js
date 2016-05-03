@@ -42,7 +42,7 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
                                          // is the useful symbol duration (the receiver side window size),
                                          // and k is a positive integer, typically equal to 1
 
-    document.getElementById('rx-dft-time-span').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('rx-dft-window-time').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
     document.getElementById('symbol-duration').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
     document.getElementById('guard-interval').value = Math.round(guardBaudFactor * symbolAndGuardTime * 1000);
     document.getElementById('interpacket-gap').value = Math.round(3 * guardBaudFactor * symbolAndGuardTime * 1000);
@@ -76,7 +76,7 @@ function collectSettingsAndInit(cb) {
         txChannel = [],
         rxChannel = [],
         txRx = [],
-        dftTimeSpan,
+        dftWindowTime,
         notificationPerSecond,
         rxSpectrumVisible, rxConstellationDiagramVisible,
         enabled,
@@ -107,11 +107,11 @@ function collectSettingsAndInit(cb) {
 
     rxSpectrumVisible = !!document.getElementById('rx-spectrum-visible').checked;
     rxConstellationDiagramVisible = !!document.getElementById('rx-constellation-diagram-visible').checked;
-    dftTimeSpan = getFloatById('rx-dft-time-span');
+    dftWindowTime = getFloatById('rx-dft-window-time');
     notificationPerSecond = getIntById('rx-notification-per-second');
 
     destroy(function () {
-        initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan);
+        initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftWindowTime);
 
         if (typeof cb === 'function') {
             cb();
@@ -119,7 +119,7 @@ function collectSettingsAndInit(cb) {
     });
 }
 
-function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftTimeSpan) {
+function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftWindowTime) {
     generateHtml(txChannel, rxChannel);
 
     physicalLayer = new PhysicalLayer({
@@ -129,7 +129,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         rx: {
             channel: rxChannel,
             notificationPerSecond: notificationPerSecond, // default: 20
-            dftTimeSpan: dftTimeSpan / 1000, // default: 0.1
+            dftWindowTime: dftWindowTime / 1000, // default: 0.1
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
                 height: 150,
@@ -153,8 +153,8 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             }
         }
     });
-    transmitAdapter = new AudioNetworkTransmitAdapter(physicalLayer);
-    receiveAdapter = new AudioNetworkReceiveAdapter(physicalLayer);
+    transmitAdapter = new TransmitAdapter(physicalLayer);
+    receiveAdapter = new ReceiveAdapter(physicalLayer);
 
     var powerChartQueue0 = new Queue(400);
     //var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);

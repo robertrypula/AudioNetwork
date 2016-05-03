@@ -23,7 +23,7 @@ var ChannelReceive = (function () {
             for (i = 0; i < configuration.ofdmSize; i++) {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
                 samplePerPeriod = Audio.getSampleRate() / frequency;
-                cr = CarrierRecoveryBuilder.build(samplePerPeriod, configuration.dftSize);
+                cr = CarrierRecoveryBuilder.build(samplePerPeriod, configuration.dftWindowSize);
                 this.carrierRecovery.push(cr);
                 this.carrierFrequency.push(frequency);
                 this.carrierPhaseCorrection.push(0);
