@@ -20,24 +20,12 @@ var Audio = (function () {
             return context.createAnalyser();
         }
 
-        function createBiquadFilter() {
-            return context.createBiquadFilter();
-        }
-
-        function createOscillator() {
-            return context.createOscillator();
-        }
-
         function createGain() {
             return context.createGain();
         }
 
         function createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels) {
             return context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
-        }
-
-        function createChannelMerger(numberOfInputs) {
-            return context.createChannelMerger(numberOfInputs);
         }
 
         function getSampleRate() {
@@ -119,7 +107,6 @@ var Audio = (function () {
              .catch(function(error) { ... })
              */
 
-
             microphoneNode = context.createGain();
             recordedNode = context.createGain();
             try {
@@ -161,11 +148,8 @@ var Audio = (function () {
             getDestination: getDestination,
             getCurrentTime: getCurrentTime,
             createAnalyser: createAnalyser,
-            createBiquadFilter: createBiquadFilter,
-            createOscillator: createOscillator,
             createGain: createGain,
-            createScriptProcessor: createScriptProcessor,
-            createChannelMerger: createChannelMerger
+            createScriptProcessor: createScriptProcessor
         };
     }
 

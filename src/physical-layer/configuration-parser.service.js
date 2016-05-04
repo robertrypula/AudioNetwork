@@ -9,7 +9,7 @@ var ConfigurationParser = (function () {
             var i, txChannel, result, channelDataExists, channelListSize;
 
             result = [];
-            txChannel = AudioUtil.accessor(configuration, txRx + '.channel');
+            txChannel = Util.accessor(configuration, txRx + '.channel');
             channelDataExists = txChannel ? true : false;
             txChannel = txChannel ? txChannel : [];
             channelListSize = txChannel.length;
@@ -17,11 +17,11 @@ var ConfigurationParser = (function () {
             for (i = 0; i < (channelDataExists ? channelListSize : 2); i++) {
                 result.push({
                     baseFrequency: (
-                        AudioUtil.accessor(txChannel[i], 'baseFrequency') ||
+                        Util.accessor(txChannel[i], 'baseFrequency') ||
                         (i % 2 === 0 ? 1070 : 2025)                            // TODO move to some common config (frequencies)
                     ),
-                    ofdmSize: AudioUtil.accessor(txChannel[i], 'ofdmSize') || 1,
-                    ofdmFrequencySpacing: AudioUtil.accessor(txChannel[i], 'ofdmFrequencySpacing') || 100     // TODO move to some common config (default spacing basing on default symbol time)
+                    ofdmSize: Util.accessor(txChannel[i], 'ofdmSize') || 1,
+                    ofdmFrequencySpacing: Util.accessor(txChannel[i], 'ofdmFrequencySpacing') || 100     // TODO move to some common config (default spacing basing on default symbol time)
                 });
             }
 
@@ -31,7 +31,7 @@ var ConfigurationParser = (function () {
         function parse(configuration) {
             var
                 c = configuration,
-                a = AudioUtil.accessor,
+                a = Util.accessor,
                 finalConfiguration
             ;
 

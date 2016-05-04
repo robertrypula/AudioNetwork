@@ -214,7 +214,7 @@ var RxStateMachineManager = (function () {
 
             // find best signal sample and add to current packet
             if (this.$$dataSymbol.length > 0) {
-                bestQualityIndex = AudioUtil.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
+                bestQualityIndex = Util.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
                 this.$$dataPacket.push(
                     this.$$dataSymbol[bestQualityIndex].carrierDetail
                 );

@@ -59,7 +59,7 @@ var CarrierRecovery = (function () {
         };
 
         CR.prototype.$$computePhase = function () {
-            this.$$phase = AudioUtil.findUnitAngle(this.$$real, this.$$imm);
+            this.$$phase = Util.findUnitAngle(this.$$real, this.$$imm);
 
             // correct phase to start from positive side of X axis counterclockwise
             this.$$phase = this.$$phase - 0.25;

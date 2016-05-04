@@ -1,9 +1,9 @@
-var AudioUtil = (function () {
+var Util = (function () {
     'use strict';
 
-    _AudioUtil.$inject = [];
+    _Util.$inject = [];
 
-    function _AudioUtil() {
+    function _Util() {
 
         function accessor(element, path) {
             var
@@ -140,6 +140,6 @@ var AudioUtil = (function () {
         };
     }
 
-    return new _AudioUtil();        // TODO change it to dependency injection
+    return new _Util();        // TODO change it to dependency injection
 
 })();

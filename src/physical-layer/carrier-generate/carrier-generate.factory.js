@@ -42,10 +42,10 @@ var CarrierGenerate = (function () {
                 fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
 
                 if (fadePositionStart >= 0 && fadePositionStart <= 1) {
-                    fadeFactor = AudioUtil.unitFade(fadePositionStart);
+                    fadeFactor = Util.unitFade(fadePositionStart);
                 } else {
                     if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
-                        fadeFactor = AudioUtil.unitFade(fadePositionEnd);
+                        fadeFactor = Util.unitFade(fadePositionEnd);
                     }
                 }
             }
@@ -63,7 +63,7 @@ var CarrierGenerate = (function () {
         CG.prototype.$$grabCurrentCarrier = function () {
             var fromQueue, isSameAsBefore;
 
-            fromQueue = AudioUtil.queuePop(this.$$queue);
+            fromQueue = Util.queuePop(this.$$queue);
             if (fromQueue) {
                 isSameAsBefore = (fromQueue === this.$$currentCarrier.data);
                 if (!isSameAsBefore) {
@@ -101,7 +101,7 @@ var CarrierGenerate = (function () {
         };
 
         CG.prototype.addToQueue = function (carrierData) {
-            AudioUtil.queueAdd(
+            Util.queueAdd(
                 this.$$queue,
                 carrierData,
                 function (queueItem, item) {

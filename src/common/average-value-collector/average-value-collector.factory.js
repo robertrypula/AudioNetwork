@@ -20,7 +20,7 @@ var AverageValueCollector = (function () {
                 throw AVC.EMPTY_LIST_EXCEPTION;
             }
 
-            return AudioUtil.computeAverage(this.$$valueList);
+            return Util.computeAverage(this.$$valueList);
         };
 
         return AVC;
