@@ -9,9 +9,9 @@ var ChannelReceiveManager = (function () {
         CRM = function (configuration, bufferSize) {
             AbstractChannelManager.apply(this, arguments);
 
-            this.channelReceive = [];
-            this.scriptNode = null;
-            this.analyserNode = null;  // empty analyser needs to be connected to script node
+            this.$$channelReceive = [];
+            this.$$scriptNode = null;
+            this.$$analyserNode = null;  // empty analyser needs to be connected to script node
             this.$$configuration = configuration;
             this.$$bufferSize = bufferSize;
             this.$$sampleNumberGlobal = 0;
@@ -22,50 +22,52 @@ var ChannelReceiveManager = (function () {
         CRM.prototype = Object.create(AbstractChannelManager.prototype);
         CRM.prototype.constructor = CRM;
 
+        CRM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
+
         CRM.prototype.destroy = function () {
             var i, cr;
 
-            for (i = 0; i < this.channelReceive.length; i++) {
-                cr = this.channelReceive[i];
+            for (i = 0; i < this.$$channelReceive.length; i++) {
+                cr = this.$$channelReceive[i];
                 cr.destroy();
             }
-            this.channelReceive.length = 0;
+            this.$$channelReceive.length = 0;
         };
 
         CRM.prototype.getInputNode = function () {
-            return this.scriptNode;
+            return this.$$scriptNode;
         };
 
         CRM.prototype.getChannelSize = function () {
-            return this.channelReceive.length;
+            return this.$$channelReceive.length;
         };
 
         CRM.prototype.getChannel = function (channelIndex) {
-            if (channelIndex < 0 || channelIndex >= this.channelReceive.length) {
-                throw 'Channel index out of range: ' + channelIndex;
+            if (channelIndex < 0 || channelIndex >= this.$$channelReceive.length) {
+                throw CRM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
             }
 
-            return this.channelReceive[channelIndex];
+            return this.$$channelReceive[channelIndex];
         };
 
         CRM.prototype.getBufferSize = function () {
-            return this.scriptNode.bufferSize;
+            return this.$$scriptNode.bufferSize;
         };
 
         CRM.prototype.$$init = function () {
             var i, cr;
 
-            this.scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
-            this.scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
+            this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
-            this.analyserNode = Audio.createAnalyser();
-            this.analyserNode.fftSize = 256;
+            this.$$analyserNode = Audio.createAnalyser();
+            this.$$analyserNode.fftSize = 256;        // TODO move to some common config
 
-            this.scriptNode.connect(this.analyserNode);
+            this.$$scriptNode.connect(this.$$analyserNode);
 
             for (i = 0; i < this.$$configuration.length; i++) {
                 cr = ChannelReceiveBuilder.build(i, this.$$configuration[i]);
-                this.channelReceive.push(cr);
+                this.$$channelReceive.push(cr);
             }
         };
 
@@ -80,8 +82,8 @@ var ChannelReceiveManager = (function () {
             for (sampleNumberInBlock = 0; sampleNumberInBlock < inputBuffer.length; sampleNumberInBlock++) {
                 sample = inputData[sampleNumberInBlock];
 
-                for (j = 0; j < this.channelReceive.length; j++) {
-                    this.channelReceive[j].handleSample(
+                for (j = 0; j < this.$$channelReceive.length; j++) {
+                    this.$$channelReceive[j].handleSample(
                         sample, 
                         this.$$sampleNumberGlobal,
                         blockBeginTime,
@@ -94,8 +96,6 @@ var ChannelReceiveManager = (function () {
 
             this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), inputBuffer.length);
         };
-
-
 
         return CRM;
     }

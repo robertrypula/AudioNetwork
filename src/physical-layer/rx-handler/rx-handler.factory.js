@@ -6,8 +6,6 @@ var RxHandler = (function () {
     function _RxHandler() {
         var
             RH,
-            RX_EXTRA_DELAY = 0.05, // [sec]
-            DELAY_LOOP_RESOLUTION = 8, // [ms]
             CONSTELLATION_DIAGRAM_DECIBEL_LIMIT = 40                         // TODO, move to some common place
         ;
 
@@ -15,8 +13,11 @@ var RxHandler = (function () {
             this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
             this.$$rxExternalHandler = rxExternalHandler;
-            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), DELAY_LOOP_RESOLUTION);
+            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), RH.$$_DELAY_LOOP_RESOLUTION);
         };
+
+        RH.$$_RX_EXTRA_DELAY = 0.05;        // [sec]
+        RH.$$_DELAY_LOOP_RESOLUTION = 8;    // [ms]
 
         RH.prototype.$$intervalHandler = function () {
             var
@@ -28,7 +29,7 @@ var RxHandler = (function () {
             for (i = 0; i < this.$$delayedData.length; i++) {
                 item = this.$$delayedData[i];
 
-                if (item.time < (currentTime - RX_EXTRA_DELAY)) {
+                if (item.time < (currentTime - RH.$$_RX_EXTRA_DELAY)) {
                     this.$$handle(
                         item.channelIndex,
                         item.carrierDetail,

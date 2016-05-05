@@ -101,7 +101,9 @@ var Util = (function () {
             queue[0][amountFieldName]--;
             queueItem = queue[0];
             if (queue[0][amountFieldName] === 0) {
-                 queue.splice(0, 1);                   // TODO check performance, maybe it's better to just keep track of used elements and delete array at the end
+                // TODO check performance, maybe it's better to just keep track
+                // of used elements and delete array at the end
+                 queue.splice(0, 1);
             }
 
             return queueItem;

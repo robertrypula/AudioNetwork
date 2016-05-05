@@ -38,7 +38,7 @@ var RxStateMachineManager = (function () {
             this.$$guardPowerCollector = GuardPowerCollectorBuilder.build();
             this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
 
-            this.reset(true);
+            this.$$resetInternal();
         };
 
         RSMM.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
@@ -46,11 +46,7 @@ var RxStateMachineManager = (function () {
         RSMM.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
         RSMM.$$_AVERAGE_POWER_UNIT_FACTOR = 0.7;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
 
-        RSMM.prototype.reset = function (fromConstructor) {
-            if (typeof fromConstructor === 'undefined') {
-                fromConstructor = false;
-            }
-
+        RSMM.prototype.$$resetInternal = function () {
             this.$$averageIdlePowerCollector.clearAll();
             this.$$averageFirstSyncPowerCollector.clearAll();
             this.$$signalPowerCollector.clearAll();
@@ -62,10 +58,11 @@ var RxStateMachineManager = (function () {
             this.$$currentData = null;
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
+        };
 
-            if (!fromConstructor) {
-                this.$$stateMachine.scheduleReset();
-            }
+        RSMM.prototype.reset = function () {
+            this.$$resetInternal();
+            this.$$stateMachine.scheduleReset();
         };
 
         RSMM.prototype.setSymbolStateMaxDurationTime = function (value) {
@@ -159,7 +156,7 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$handlerFatalError = function (stateDurationTime) {
-            // nothing much here - only way to excape from this state is to reset Receive Adapter
+            // nothing much here - only way to escape from this state is to reset Receive Adapter
         };
         
         RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
@@ -182,7 +179,7 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
             var powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
 
-            // code below stores information about quality of incomming packets in the real time
+            // code below stores information about quality of incoming packets in the real time
             this.$$signalPowerCollector.collect(powerDecibel);
             if (this.$$guardPowerCollector.hasAtLeastItem()) {
                 this.$$guardPowerCollector.finalize();
@@ -206,7 +203,7 @@ var RxStateMachineManager = (function () {
                 bestQualityIndex
             ;
 
-            // code below stores information about quality of incomming packets in the real time
+            // code below stores information about quality of incoming packets in the real time
             this.$$guardPowerCollector.collect(powerDecibel);
             if (this.$$signalPowerCollector.hasAtLeastItem()) {
                 this.$$signalPowerCollector.finalize();
@@ -236,7 +233,7 @@ var RxStateMachineManager = (function () {
             for (i = 0; i < dataPacket.length; i++) {
                 if (i === 0 && this.$$syncPreamble) {
                     // when syncPreamble is true then first burst is used only for phase
-                    // alignment - we can simply ommit it in the final packet
+                    // alignment - we can simply omit it in the final packet
                     continue;
                 }
                 carrierDetail = dataPacket[i];

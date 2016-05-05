@@ -27,6 +27,8 @@ var RxStateMachine = (function () {
             this.$$resetFlag = true;
         };
 
+        RSM.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION = 'Please set all max duration times first';
+
         RSM.prototype.scheduleReset = function () {
             this.$$resetFlag = true;
         };
@@ -215,7 +217,7 @@ var RxStateMachine = (function () {
                 this.$$symbolStateMaxDurationTime === null ||
                 this.$$syncStateMaxDurationTime === null
             ) {
-                throw 'Please set all max duration times first';
+                throw RSM.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION;
             }
 
             while (true) {

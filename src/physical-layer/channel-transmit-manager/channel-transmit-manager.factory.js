@@ -9,8 +9,8 @@ var ChannelTransmitManager = (function () {
         CTM = function (configuration, bufferSize) {
             AbstractChannelManager.apply(this, arguments);
 
-            this.channelTransmit = [];
-            this.scriptNode = null;
+            this.$$channelTransmit = [];
+            this.$$scriptNode = null;
             this.$$configuration = configuration;
             this.$$bufferSize = bufferSize;
 
@@ -20,45 +20,47 @@ var ChannelTransmitManager = (function () {
         CTM.prototype = Object.create(AbstractChannelManager.prototype);
         CTM.prototype.constructor = CTM;
 
+        CTM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
+
         CTM.prototype.destroy = function () {
             var i, ct;
 
-            for (i = 0; i < this.channelTransmit.length; i++) {
-                ct = this.channelTransmit[i];
+            for (i = 0; i < this.$$channelTransmit.length; i++) {
+                ct = this.$$channelTransmit[i];
                 ct.destroy();
             }
-            this.channelTransmit.length = 0;
+            this.$$channelTransmit.length = 0;
         };
 
         CTM.prototype.getOutputNode = function () {
-            return this.scriptNode;
+            return this.$$scriptNode;
         };
 
         CTM.prototype.getChannelSize = function () {
-            return this.channelTransmit.length;
+            return this.$$channelTransmit.length;
         };
 
         CTM.prototype.getChannel = function (channelIndex) {
-            if (channelIndex < 0 || channelIndex >= this.channelTransmit.length) {
-                throw 'Channel index out of range: ' + channelIndex;
+            if (channelIndex < 0 || channelIndex >= this.$$channelTransmit.length) {
+                throw CTM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
             }
 
-            return this.channelTransmit[channelIndex];
+            return this.$$channelTransmit[channelIndex];
         };
 
         CTM.prototype.getBufferSize = function () {
-            return this.scriptNode.bufferSize;
+            return this.$$scriptNode.bufferSize;
         };
 
         CTM.prototype.$$init = function () {
             var i, ct;
 
-            this.scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
-            this.scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
+            this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
             for (i = 0; i < this.$$configuration.length; i++) {
                 ct = ChannelTransmitBuilder.build(i, this.$$configuration[i]);
-                this.channelTransmit.push(ct);
+                this.$$channelTransmit.push(ct);
             }
         };
 
@@ -72,8 +74,8 @@ var ChannelTransmitManager = (function () {
 
             for (i = 0; i < outputBuffer.length; i++) {
                 sample = 0;
-                for (j = 0; j < this.channelTransmit.length; j++) {
-                    sample += this.channelTransmit[j].getSample();
+                for (j = 0; j < this.$$channelTransmit.length; j++) {
+                    sample += this.$$channelTransmit[j].getSample();
                 }
                 outputData[i] = sample;
                 // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.001;          // TODO, move to config

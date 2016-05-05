@@ -10,12 +10,16 @@ AudioNetwork.Injector = (function () {
         this.$$injectRepository = {};
     };
 
+    Injector.RESOLVE_RECURSION_LIMIT = 20;
+    Injector.RESOLVE_RECURSION_LIMIT_EXCEED_EXCEPTION = 'Injector - resolve recursion limit exceed';
     Injector.MULTIPLE_REGISTER_EXCEPTION = 'Injector - multiple register calls for the same name';
     Injector.UNABLE_TO_FIND_ITEM_EXCEPTION = 'Injector - unable to find factory/service for given name';
     Injector.TYPE = {
         SERVICE: 'SERVICE',
         FACTORY: 'FACTORY'
     };
+
+    Injector.$$resolveRecursionCounter = 0;
 
     Injector.prototype.$$register = function (name, item, type) {
         if (typeof this.$$injectRepository[name] === 'undefined') {
@@ -45,12 +49,12 @@ AudioNetwork.Injector = (function () {
             return findResult.resolveCache;
         }
 
+        this.$$resolveRecursionInc();
         for (i = 0; i < findResult.item.$inject.length; i++) {
             injectList.push(
               this.resolve(findResult.item.$inject[i])
             );
         }
-
         switch (findResult.type) {
             case Injector.TYPE.SERVICE:
                 findResult.resolveCache = this.$$injectDependenciesAndInstantiate(findResult, injectList);
@@ -59,8 +63,20 @@ AudioNetwork.Injector = (function () {
                 findResult.resolveCache = this.$$injectDependencies(findResult, injectList);
                 break;
         }
+        this.$$resolveRecursionDec();
 
         return findResult.resolveCache;
+    };
+
+    Injector.prototype.$$resolveRecursionInc = function () {
+        Injector.$$resolveRecursionCounter++;
+        if (Injector.$$resolveRecursionCounter >= Injector.RESOLVE_RECURSION_LIMIT) {
+            throw Injector.RESOLVE_RECURSION_LIMIT_EXCEED_EXCEPTION;
+        }
+    };
+
+    Injector.prototype.$$resolveRecursionDec = function () {
+        Injector.$$resolveRecursionCounter--;
     };
 
     Injector.prototype.$$injectDependenciesAndInstantiate = function (findResult, injectList) {
@@ -140,109 +156,86 @@ AudioNetwork.Injector = (function () {
 (function () {
     'use strict';
 
-    _MyClassOne.$inject = [];
+    _GenericCar.$inject = [];
 
-    function _MyClassOne() {
-        var MyClassOne;
+    function _GenericCar() {
+        var GenericCar;
 
-        MyClassOne = function () {
-            this.$$someVariable = 'test';
+        GenericCar = function () {
         };
 
-        MyClassOne.prototype.getSomeVariable = function () {
-            return this.$$someVariable;
+        GenericCar.prototype.getName = function () {
+            return 'Abstract car';
         };
 
-        return MyClassOne;
+        return GenericCar;
     }
 
-    // AudioNetwork.factory('MyClassOne', _MyClassOne);
-    AudioNetwork.Injector.registerFactory('MyClassOne', _MyClassOne);
+    // AudioNetwork.factory('GenericCar', _GenericCar);
+    AudioNetwork.Injector.registerFactory('GenericCar', _GenericCar);
 
 })();
 
 (function () {
     'use strict';
 
-    _MyOtherClass.$inject = [
-        'MyClassOne'
+    _RaceCar.$inject = [
+        'GenericCar'
     ];
 
-    function _MyOtherClass(MyClassOne) {
-        var MyOtherClass;
+    function _RaceCar(GenericCar) {
+        var RaceCar;
 
-        MyOtherClass = function () {
-            this.$$someVariable = 'other test';
-            this.myClassOne = new MyClassOne();
+        RaceCar = function () {
+            GenericCar.apply(this, arguments);
         };
 
-        MyOtherClass.prototype.getSomeVariable = function () {
-            return this.$$someVariable;
+        RaceCar.prototype = Object.create(GenericCar.prototype);
+        RaceCar.prototype.constructor = RaceCar;
+
+        RaceCar.prototype.getName = function () {
+            return 'Race Car';
         };
 
-        MyOtherClass.prototype.getMyClassOneSomeVariable = function () {
-            return this.myClassOne.getSomeVariable();
-        };
-
-        return MyOtherClass;
+        return RaceCar;
     }
 
-    // AudioNetwork.factory('MyOtherClass', _MyOtherClass);
-    AudioNetwork.Injector.registerFactory('MyOtherClass', _MyOtherClass);
+    // AudioNetwork.factory('RaceCar', _RaceCar);
+    AudioNetwork.Injector.registerFactory('RaceCar', _RaceCar);
 
 })();
 
 (function () {
     'use strict';
 
-    _ClassBuilder.$inject = [
-        'MyClassOne'
+    _CarBuilder.$inject = [
+        'GenericCar',
+        'RaceCar'
     ];
 
-    function _ClassBuilder(MyClassOne) {
-        /*
-         var ClassBuilder = function () {
-         };
+    function _CarBuilder(GenericCar, RaceCar) {
 
-         ClassBuilder.prototype.build = function () {
-         return new MyClassOne();
-         };
+        function buildGenericCar() {
+            return new GenericCar();
+        }
 
-         return ClassBuilder;
-         */
-
-        function build() {
-            return new MyClassOne();
+        function buildRaceCar() {
+            return new RaceCar();
         }
 
         return {
-            build: build
+            buildGenericCar: buildGenericCar,
+            buildRaceCar: buildRaceCar
         };
     }
 
-    AudioNetwork.Injector.registerService('ClassBuilder', _ClassBuilder);
+    AudioNetwork.Injector.registerService('CarBuilder', _CarBuilder);
 
 })();
 
 
-console.log('----');
-// console.log(typeof AudioNetwork.Injector.resolve('MyOtherClass').item());
+var CarBuilder = AudioNetwork.Injector.resolve('CarBuilder');
+var raceCar = CarBuilder.buildRaceCar();
 
-var MyOtherClass = AudioNetwork.Injector.resolve('MyOtherClass');
-var ClassBuilder = AudioNetwork.Injector.resolve('ClassBuilder');
-var myOtherClass = new MyOtherClass();
-
-console.log(MyOtherClass);
-console.log(typeof MyOtherClass);
-
-console.log(ClassBuilder);
-console.log(typeof ClassBuilder);
-
-console.log(myOtherClass);
-console.log(typeof myOtherClass);
-
-//var myOtherClass = new MyOtherClass();
-
-//console.log(MyOtherClass);
-//console.log(myOtherClass);
-//console.log(myOtherClass.getMyClassOneSomeVariable());
+console.log(raceCar);
+console.log(raceCar.getName());

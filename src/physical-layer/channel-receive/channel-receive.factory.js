@@ -7,15 +7,17 @@ var ChannelReceive = (function () {
         var CR;
             
         CR = function (index, configuration) {
-            this.carrierRecovery = [];
-            this.carrierFrequency = [];
-            this.carrierPhaseCorrection = [];
+            this.$$carrierRecovery = [];
+            this.$$carrierFrequency = [];
+            this.$$carrierPhaseCorrection = [];
             this.$$notifyInterval = null;
             this.$$notifyHandler = null;
             this.$$index = index;
 
             this.configure(configuration);
         };
+
+        CR.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION = 'OFDM index out of range: ';
 
         CR.prototype.configure = function (configuration) {
             var i, cr, samplePerPeriod, frequency;
@@ -24,9 +26,9 @@ var ChannelReceive = (function () {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
                 samplePerPeriod = Audio.getSampleRate() / frequency;
                 cr = CarrierRecoveryBuilder.build(samplePerPeriod, configuration.dftWindowSize);
-                this.carrierRecovery.push(cr);
-                this.carrierFrequency.push(frequency);
-                this.carrierPhaseCorrection.push(0);
+                this.$$carrierRecovery.push(cr);
+                this.$$carrierFrequency.push(frequency);
+                this.$$carrierPhaseCorrection.push(0);
             }
 
             this.$$notifyInterval = configuration.notifyInterval;
@@ -34,31 +36,31 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.$$checkOfdmIndex = function (ofdmIndex) {
-            if (ofdmIndex < 0 || ofdmIndex >= this.carrierRecovery.length) {
-                throw 'OFDM index out of range: ' + ofdmIndex;
+            if (ofdmIndex < 0 || ofdmIndex >= this.$$carrierRecovery.length) {
+                throw CR.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION + ofdmIndex;
             }
         };
 
         CR.prototype.getOfdmSize = function () {
-            return this.carrierRecovery.length;
+            return this.$$carrierRecovery.length;
         };
 
         CR.prototype.getRxPhaseCorrection = function (ofdmIndex) {
             this.$$checkOfdmIndex(ofdmIndex);
 
-            return this.carrierPhaseCorrection[ofdmIndex];
+            return this.$$carrierPhaseCorrection[ofdmIndex];
         };
 
         CR.prototype.getFrequency = function (ofdmIndex) {
             this.$$checkOfdmIndex(ofdmIndex);
 
-            return this.carrierFrequency[ofdmIndex];
+            return this.$$carrierFrequency[ofdmIndex];
         };
 
         CR.prototype.setRxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
             this.$$checkOfdmIndex(ofdmIndex);
 
-            this.carrierPhaseCorrection[ofdmIndex] = phaseCorrection - MathUtil.floor(phaseCorrection);
+            this.$$carrierPhaseCorrection[ofdmIndex] = phaseCorrection - MathUtil.floor(phaseCorrection);
         };
 
         CR.prototype.setFrequency = function (ofdmIndex, frequency) {
@@ -67,8 +69,8 @@ var ChannelReceive = (function () {
             this.$$checkOfdmIndex(ofdmIndex);
 
             samplePerPeriod = Audio.getSampleRate() / frequency;
-            this.carrierRecovery[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
-            this.carrierFrequency[ofdmIndex] = frequency;
+            this.$$carrierRecovery[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
+            this.$$carrierFrequency[ofdmIndex] = frequency;
         };
 
         CR.prototype.handleSample = function (sample, sampleNumberGlobal, blockBeginTime, sampleNumberInBlock) {
@@ -80,12 +82,12 @@ var ChannelReceive = (function () {
                 carrierDetail = [];
             }
 
-            for (i = 0; i < this.carrierRecovery.length; i++) {
-                cr = this.carrierRecovery[i];
+            for (i = 0; i < this.$$carrierRecovery.length; i++) {
+                cr = this.$$carrierRecovery[i];
                 cr.handleSample(sample);
                 if (notifyIteration) {
                     cd = cr.getCarrierDetail();
-                    cd.phase = cd.phase - this.carrierPhaseCorrection[i];
+                    cd.phase = cd.phase - this.$$carrierPhaseCorrection[i];
                     cd.phase = cd.phase - MathUtil.floor(cd.phase);
                     carrierDetail.push(cd);
                 }
@@ -103,9 +105,9 @@ var ChannelReceive = (function () {
         };
 
         CR.prototype.destroy = function () {
-            this.carrierRecovery.length = 0;
-            this.carrierFrequency.length = 0;
-            this.carrierPhaseCorrection.length = 0;
+            this.$$carrierRecovery.length = 0;
+            this.$$carrierFrequency.length = 0;
+            this.$$carrierPhaseCorrection.length = 0;
         };
 
         return CR;

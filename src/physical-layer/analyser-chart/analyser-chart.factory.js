@@ -4,10 +4,7 @@ var AnalyserChart = (function () {
     _AnalyserChart.$inject = [];
 
     function _AnalyserChart() {
-        var
-            AC,
-            AXIS_LABEL_X_ONE_ITEM_WITH = 40
-        ;
+        var AC;
         
         AC = function (parentElement, analyser, height, colorData, colorAxis) {
             this.$$parentElement = parentElement;
@@ -26,6 +23,8 @@ var AnalyserChart = (function () {
             this.$$initAnimationFrame();
             this.$$init();
         };
+
+        AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH = 40;
 
         AC.prototype.destroy = function () {
             var self = this;
@@ -195,9 +194,9 @@ var AnalyserChart = (function () {
 
         AC.prototype.$$generateAxisXForTimeDomain = function () {
             var
-              availableStep = [ 0.0005, 0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500 ],
-              resolution = Audio.getSampleRate(),  // [ pix / sec ]
-              step = AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
+              availableStep = [0.0005, 0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500],
+              resolution = Audio.getSampleRate(),  // [pix/sec]
+              step = AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               time = 0,
               left,
               i,
@@ -213,7 +212,7 @@ var AnalyserChart = (function () {
             while (time < (this.$$analyser.frequencyBinCount / Audio.getSampleRate())) {
                 left = MathUtil.round(time * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
-                  AXIS_LABEL_X_ONE_ITEM_WITH,
+                  AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
                   left,
                   MathUtil.round(time * 1000) + 'ms'
                 );
@@ -225,9 +224,9 @@ var AnalyserChart = (function () {
 
         AC.prototype.$$generateAxisXForFrequency = function () {
             var
-              availableStep = [ 50, 100, 125, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000 ],
-              resolution = this.$$analyser.fftSize / Audio.getSampleRate(),  // [ pix / Hz ]
-              step = AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
+              availableStep = [50, 100, 125, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000],
+              resolution = this.$$analyser.fftSize / Audio.getSampleRate(),  // [pix/Hz]
+              step = AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               frequency = 0,
               left,
               i,
@@ -243,7 +242,7 @@ var AnalyserChart = (function () {
             while (frequency < 0.5 * Audio.getSampleRate()) {
                 left = MathUtil.round(frequency * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
-                    AXIS_LABEL_X_ONE_ITEM_WITH,
+                    AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
                     left,
                     frequency + 'Hz'
                 );
