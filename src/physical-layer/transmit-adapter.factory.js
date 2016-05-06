@@ -4,26 +4,15 @@ var TransmitAdapter = (function () {
     _TransmitAdapter.$inject = [];
 
     _TransmitAdapter.SYNCHRONIZATION = {
-        PSK_SIZE: 1,
-        SYMBOL: 0,
-        SYMBOL_DURATION: 3.0,                         // TODO move to some common config
-        GUARD_INTERVAL: 0.0,
-        INTERPACKET_GAP: 0.5                          // TODO move to some common config
-    };
-
-    _TransmitAdapter.PACKET = {
-        PSK_SIZE: 4,                                  // TODO move to some common config
-        SYMBOL_DURATION: 0.080,                       // TODO move to some common config
-        GUARD_INTERVAL: 0.170,                        // TODO move to some common config
-        INTERPACKET_GAP: 0.5                          // TODO move to some common config
+        PSK_SIZE: 1,           // LOWEST_PSK_SIZE
+        GUARD_INTERVAL: 0.0    // ZERO_GUARD_INTERVAL
     };
 
     _TransmitAdapter.SYMBOL = {
-        SYNC_PREAMBLE: false,                   // note: this is NOT default preamble value for sending packet
-        SYMBOL_DURATION: _TransmitAdapter.PACKET.SYMBOL_DURATION,     // TODO move to some common config
-        GUARD_INTERVAL: 0.0,
-        INTERPACKET_GAP: 0.0,
-        AMPLITUDE: undefined
+        SYNC_PREAMBLE: false,  // NO_SYNC_PREAMBLE
+        GUARD_INTERVAL: 0.0,   // ZERO_GUARD_INTERVAL
+        INTERPACKET_GAP: 0.0,  // ZERO_INTERPACKET_GAP
+        AMPLITUDE: undefined   // UNDEFINED_AMPLITUDE
     };
 
     /**
@@ -38,6 +27,8 @@ var TransmitAdapter = (function () {
         TA = function (physicalLayer) {
             this.$$physicalLayer = physicalLayer;
         };
+
+        TA.$$_SYNCHRONIZATION_SYMBOL = 0;
 
         TA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
             var
@@ -58,7 +49,7 @@ var TransmitAdapter = (function () {
                 data,
                 _TransmitAdapter.SYMBOL.SYNC_PREAMBLE,
                 pskSize,
-                typeof symbolDuration === 'undefined' ? _TransmitAdapter.SYMBOL.SYMBOL_DURATION : symbolDuration,
+                typeof symbolDuration === 'undefined' ? DefaultConfig.SYMBOL_DURATION : symbolDuration,  // TODO change to: Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION);
                 _TransmitAdapter.SYMBOL.GUARD_INTERVAL,
                 _TransmitAdapter.SYMBOL.INTERPACKET_GAP,
                 _TransmitAdapter.SYMBOL.AMPLITUDE
@@ -75,7 +66,7 @@ var TransmitAdapter = (function () {
             if (typeof syncPreamble === 'undefined' || syncPreamble) {
                 syncData = [];
                 for (i = 0; i < ofdmSize; i++) {
-                    syncData.push(_TransmitAdapter.SYNCHRONIZATION.SYMBOL);
+                    syncData.push(TA.$$_SYNCHRONIZATION_SYMBOL);
                 }
                 syncData = syncData.length === 1 ? syncData[0] : syncData;
                 data.unshift(syncData);
@@ -93,10 +84,10 @@ var TransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                typeof pskSize === 'undefined' ? _TransmitAdapter.PACKET.PSK_SIZE : pskSize,
-                typeof symbolDuration === 'undefined' ? _TransmitAdapter.PACKET.SYMBOL_DURATION : symbolDuration,
-                typeof guardInterval === 'undefined' ? _TransmitAdapter.PACKET.GUARD_INTERVAL : guardInterval,
-                typeof interpacketGap === 'undefined' ? _TransmitAdapter.PACKET.INTERPACKET_GAP : interpacketGap,
+                typeof pskSize === 'undefined' ? DefaultConfig.PSK_SIZE : pskSize,
+                typeof symbolDuration === 'undefined' ? DefaultConfig.SYMBOL_DURATION : symbolDuration,
+                typeof guardInterval === 'undefined' ? DefaultConfig.GUARD_INTERVAL : guardInterval,
+                typeof interpacketGap === 'undefined' ? DefaultConfig.INTERPACKET_GAP : interpacketGap,
                 amplitude
             );
         };
@@ -110,7 +101,7 @@ var TransmitAdapter = (function () {
             ;
 
             for (i = 0; i < ofdmSize; i++) {
-                data.push(_TransmitAdapter.SYNCHRONIZATION.SYMBOL);
+                data.push(TA.$$_SYNCHRONIZATION_SYMBOL);
                 amplitude.push(
                     MathUtil.floor(1000 / ofdmSize) / 1000
                 );
@@ -121,9 +112,9 @@ var TransmitAdapter = (function () {
                 channelIndex, 
                 data, 
                 _TransmitAdapter.SYNCHRONIZATION.PSK_SIZE,
-                _TransmitAdapter.SYNCHRONIZATION.SYMBOL_DURATION, 
+                DefaultConfig.SYNC_DURATION,
                 _TransmitAdapter.SYNCHRONIZATION.GUARD_INTERVAL,
-                _TransmitAdapter.SYNCHRONIZATION.INTERPACKET_GAP,
+                DefaultConfig.INTERPACKET_GAP,
                 amplitude
             );
         };

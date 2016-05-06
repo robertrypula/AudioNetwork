@@ -23,6 +23,7 @@ var ChannelReceiveManager = (function () {
         CRM.prototype.constructor = CRM;
 
         CRM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
+        CRM.$$_LOWEST_FFT_SIZE = 256;
 
         CRM.prototype.destroy = function () {
             var i, cr;
@@ -61,7 +62,7 @@ var ChannelReceiveManager = (function () {
             this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
             this.$$analyserNode = Audio.createAnalyser();
-            this.$$analyserNode.fftSize = 256;        // TODO move to some common config
+            this.$$analyserNode.fftSize = CRM.$$_LOWEST_FFT_SIZE;
 
             this.$$scriptNode.connect(this.$$analyserNode);
 

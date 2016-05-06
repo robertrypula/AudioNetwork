@@ -28,7 +28,7 @@ function setupCpuLoadNotification() {
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     var
-        ofdmSpacing, symbolAndGuardTime, config, i, element,
+        ofdmSpacing, symbolAndGuardTime, config, i, element, symbolTime,
         symbolBaudFactor = 0.32,
         guardBaudFactor = 0.68
     ;
@@ -38,12 +38,13 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     }
 
     symbolAndGuardTime = 1.0 / baud;
-    ofdmSpacing = 4 / symbolAndGuardTime;// [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
-                                         // is the useful symbol duration (the receiver side window size),
-                                         // and k is a positive integer, typically equal to 1
+    symbolTime = symbolBaudFactor * symbolAndGuardTime;
+    ofdmSpacing = 4 / symbolTime;  // [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
+                                   // is the useful symbol duration (the receiver side window size),
+                                   // and k is a positive integer, typically equal to 1
 
-    document.getElementById('rx-dft-window-time').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
-    document.getElementById('symbol-duration').value = Math.round(symbolBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('rx-dft-window-time').value = Math.round(symbolTime * 1000);
+    document.getElementById('symbol-duration').value = Math.round(symbolTime * 1000);
     document.getElementById('guard-interval').value = Math.round(guardBaudFactor * symbolAndGuardTime * 1000);
     document.getElementById('interpacket-gap').value = Math.round(3 * guardBaudFactor * symbolAndGuardTime * 1000);
 

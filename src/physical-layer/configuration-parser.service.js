@@ -18,10 +18,10 @@ var ConfigurationParser = (function () {
                 result.push({
                     baseFrequency: (
                         Util.accessor(txChannel[i], 'baseFrequency') ||
-                        (i % 2 === 0 ? 1070 : 2025)                            // TODO move to some common config (frequencies)
+                        (i % 2 === 0 ? DefaultConfig.CHANNEL_1_FREQUENCY : DefaultConfig.CHANNEL_2_FREQUENCY)
                     ),
-                    ofdmSize: Util.accessor(txChannel[i], 'ofdmSize') || 1,
-                    ofdmFrequencySpacing: Util.accessor(txChannel[i], 'ofdmFrequencySpacing') || 100     // TODO move to some common config (default spacing basing on default symbol time)
+                    ofdmSize: Util.accessor(txChannel[i], 'ofdmSize') || DefaultConfig.OFDM_SIZE,
+                    ofdmFrequencySpacing: Util.accessor(txChannel[i], 'ofdmFrequencySpacing') || DefaultConfig.OFDM_FREQUENCY_SPACING
                 });
             }
 
@@ -43,16 +43,16 @@ var ConfigurationParser = (function () {
                 rx: {
                     bufferSize: c && c.rx && (typeof c.rx.bufferSize !== 'undefined') ? c.rx.bufferSize : 0,
                     channel: parseChannel(c, 'rx'),
-                    input: a(c, 'rx.input') || PhysicalLayerInput.MICROPHONE,
-                    notificationPerSecond: a(c, 'rx.notificationPerSecond') || 20,
-                    dftWindowTime: a(c, 'rx.dftWindowTime') || 0.1,
+                    input: a(c, 'rx.input') || DefaultConfig.RX_INPUT,
+                    notificationPerSecond: a(c, 'rx.notificationPerSecond') || DefaultConfig.RX_NOTIFICATION_PER_SECOND,
+                    dftWindowTime: a(c, 'rx.dftWindowTime') || DefaultConfig.RX_DFT_WINDOW_TIME,
                     spectrum: {
                         elementId: a(c, 'rx.spectrum.elementId') || null,
                         color: {
                             axis: a(c, 'rx.spectrum.color.axis') || '#444',
                             data: a(c, 'rx.spectrum.color.data') || '#888888'
                         },
-                        fftSize: a(c, 'rx.spectrum.fftSize') || 2048,
+                        fftSize: a(c, 'rx.spectrum.fftSize') || DefaultConfig.RX_SPECTRUM_FFT_SIZE,
                         height: a(c, 'rx.spectrum.height') || 200
                     },
                     constellationDiagram: {
@@ -79,7 +79,7 @@ var ConfigurationParser = (function () {
                             },
                             axis: a(c, 'rx.constellationDiagram.color.axis') || 'green'
                         },
-                        historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || 20,
+                        historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || DefaultConfig.RX_HISTORY_POINT_SIZE,
                         width: a(c, 'rx.constellationDiagram.width') || 200,
                         height: a(c, 'rx.constellationDiagram.height') || 200
                     }
