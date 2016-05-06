@@ -10,10 +10,10 @@ var GuardPowerCollector = (function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        GPC.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
-
         GPC.prototype = Object.create(AbstractValueCollector.prototype);
         GPC.prototype.constructor = GPC;
+
+        GPC.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
 
         GPC.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {

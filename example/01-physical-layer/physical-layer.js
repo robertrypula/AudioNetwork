@@ -121,6 +121,8 @@ function collectSettingsAndInit(cb) {
 }
 
 function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiagramVisible, notificationPerSecond, dftWindowTime) {
+    var historyPointSize = notificationPerSecond;
+
     generateHtml(txChannel, rxChannel);
 
     physicalLayer = new PhysicalLayer({
@@ -129,8 +131,8 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         },
         rx: {
             channel: rxChannel,
-            notificationPerSecond: notificationPerSecond, // default: 20
-            dftWindowTime: dftWindowTime / 1000, // default: 0.1
+            notificationPerSecond: notificationPerSecond,
+            dftWindowTime: dftWindowTime / 1000,
             spectrum: {
                 elementId: rxSpectrumVisible ? 'rx-spectrum' : null,
                 height: 150,
@@ -150,7 +152,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
                 ),
                 width: 140,
                 height: 140,
-                historyPointSize: notificationPerSecond // default: 20
+                historyPointSize: historyPointSize
             }
         }
     });

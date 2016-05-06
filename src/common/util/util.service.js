@@ -7,7 +7,7 @@ var Util = (function () {
 
         function valueOrDefault(value, defaultValue) {
             return typeof value !== 'undefined' ? value : defaultValue;
-        };
+        }
 
         function accessor(element, path) {
             var

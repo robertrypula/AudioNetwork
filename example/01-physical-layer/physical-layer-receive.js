@@ -1,34 +1,3 @@
-/*
-function receiveSampler(channelIndex, symbolData, time) {
-    var 
-        uiState = document.getElementById('rx-sampling-state-' + channelIndex),
-        uiSymbol = document.getElementById('rx-sampling-symbol-' + channelIndex),
-        uiPacket = document.getElementById('rx-sampling-packet-' + channelIndex),
-        uiPacketHistory = document.getElementById('rx-sampling-packet-history-' + channelIndex),
-        str, i
-    ;
-
-    str = '';
-    for (i = receiveSymbolData.length - 1; i >= 0; i--) {
-        str += (
-            Math.round(receiveSymbolData[i].powerDecibel) + ', ' +
-            receiveSymbolData[i].symbol + ', ' +
-            Math.round(receiveSymbolData[i].phase * 100) / 100 +
-            ' | '
-        );
-    }
-    uiSymbol.innerHTML = str + '&nbsp;';
-
-    uiPacket.innerHTML = receivePacket.join(', ') + '&nbsp;';
-
-    str = '';
-    for (i = receivePacketHistory.length - 1; i >= 0; i--) {
-        str += receivePacketHistory[i].join(', ') + '<br/>';
-    }
-    uiPacketHistory.innerHTML = str + '&nbsp;';
-}
-*/
-
 function receive(channelIndex, carrierDetail/*, time*/) {
     var
         pskSize = getIntById('rx-psk-size-' + channelIndex),

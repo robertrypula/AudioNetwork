@@ -10,10 +10,10 @@ var AverageValueCollector = (function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        AVC.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
-
         AVC.prototype = Object.create(AbstractValueCollector.prototype);
         AVC.prototype.constructor = AVC;
+
+        AVC.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
 
         AVC.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {

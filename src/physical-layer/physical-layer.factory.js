@@ -2,6 +2,9 @@ var PhysicalLayer = (function () {
     'use strict';
 
     /*
+        KNOWN ISSUES:
+            - for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
+
         TODO
             + real/imm delete
             + compute at getCarrierDetail
@@ -107,17 +110,24 @@ var PhysicalLayer = (function () {
                 + keep view type after reinitialization
                 + remove audio-network prefix from main classes names
                 + change name: dftTimeSpan -> dftWindowTimeSpan
-                - move general configuration to some common service
+                + move general configuration to some common service
+
+                - deal with NO_SIGNAL constants
+                - change input TX to LOOPBACK
+                - move templates code to dedicated files
+                - refactor DOM helpers (move to service)
+                +/- introduce Dependency Injection
                 - use setTimeout instead setInverval (?)
+                - remove Promises
 
             - Finalization complex:
                 + measure CPU load by measuring times before and after execution
-                - introduce Dependency Injection
+                - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
                 - prepare release version + some code minification
-                - add noise when loopback is used, change name to loopback
-                - refactor DOM helpers (move to service)
                 - do not redraw constellation if queue wasn't changed
                 - move notification logic to manager (?)
+                - ability to add hooks at sample generation and receive (inject some changes to signal)
+                - refactor sample handling and generation to order to easily move that code to Service Worker
 
         TODO (carrier.html)
             - use dedicated constellation
