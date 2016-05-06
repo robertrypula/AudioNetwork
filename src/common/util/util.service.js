@@ -5,6 +5,10 @@ var Util = (function () {
 
     function _Util() {
 
+        function valueOrDefault(value, defaultValue) {
+            return typeof value !== 'undefined' ? value : defaultValue;
+        };
+
         function accessor(element, path) {
             var
                 pathList = path.split('.'),
@@ -132,6 +136,7 @@ var Util = (function () {
         }
 
         return {
+            valueOrDefault: valueOrDefault,
             accessor: accessor,
             computeAverage: computeAverage,
             findUnitAngle: findUnitAngle,

@@ -3,18 +3,6 @@ var TransmitAdapter = (function () {
 
     _TransmitAdapter.$inject = [];
 
-    _TransmitAdapter.SYNCHRONIZATION = {
-        PSK_SIZE: 1,           // LOWEST_PSK_SIZE
-        GUARD_INTERVAL: 0.0    // ZERO_GUARD_INTERVAL
-    };
-
-    _TransmitAdapter.SYMBOL = {
-        SYNC_PREAMBLE: false,  // NO_SYNC_PREAMBLE
-        GUARD_INTERVAL: 0.0,   // ZERO_GUARD_INTERVAL
-        INTERPACKET_GAP: 0.0,  // ZERO_INTERPACKET_GAP
-        AMPLITUDE: undefined   // UNDEFINED_AMPLITUDE
-    };
-
     /**
      * This works as an wrapper for raw API that PhysicalLayer provides.
      * It's much easier to send data using Adapter API. In case of really fancy sound
@@ -28,7 +16,13 @@ var TransmitAdapter = (function () {
             this.$$physicalLayer = physicalLayer;
         };
 
+        TA.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION = 'Amplitude data length does not match symbol list length';
         TA.$$_SYNCHRONIZATION_SYMBOL = 0;
+        TA.$$_LOWEST_PSK_SIZE = 1;
+        TA.$$_ZERO_GUARD_INTERVAL = 0;
+        TA.$$_ZERO_INTERPACKET_GAP = 0;
+        TA.$$_NO_SYNC_PREAMBLE = false;
+        TA.$$_UNDEFINED_AMPLITUDE = undefined;
 
         TA.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
             var
@@ -38,21 +32,19 @@ var TransmitAdapter = (function () {
             ;
 
             for (i = 0; i < ofdmSize; i++) {
-                data.push(
-                    i === ofdmIndex ? symbol : null
-                );
+                data.push(i === ofdmIndex ? symbol : null);
             }
             data = [ data.length === 1 ? data[0] : data ];
 
             this.packet(
                 channelIndex,
                 data,
-                _TransmitAdapter.SYMBOL.SYNC_PREAMBLE,
+                TA.$$_NO_SYNC_PREAMBLE,
                 pskSize,
-                typeof symbolDuration === 'undefined' ? DefaultConfig.SYMBOL_DURATION : symbolDuration,  // TODO change to: Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION);
-                _TransmitAdapter.SYMBOL.GUARD_INTERVAL,
-                _TransmitAdapter.SYMBOL.INTERPACKET_GAP,
-                _TransmitAdapter.SYMBOL.AMPLITUDE
+                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
+                TA.$$_ZERO_GUARD_INTERVAL,
+                TA.$$_ZERO_INTERPACKET_GAP,
+                TA.$$_UNDEFINED_AMPLITUDE
             );
         };
 
@@ -63,7 +55,8 @@ var TransmitAdapter = (function () {
                 i
             ;
 
-            if (typeof syncPreamble === 'undefined' || syncPreamble) {
+            syncPreamble = Util.valueOrDefault(syncPreamble, DefaultConfig.SYNC_PREAMBLE);
+            if (syncPreamble) {
                 syncData = [];
                 for (i = 0; i < ofdmSize; i++) {
                     syncData.push(TA.$$_SYNCHRONIZATION_SYMBOL);
@@ -83,11 +76,11 @@ var TransmitAdapter = (function () {
 
             this.$$transmit(
                 channelIndex, 
-                data, 
-                typeof pskSize === 'undefined' ? DefaultConfig.PSK_SIZE : pskSize,
-                typeof symbolDuration === 'undefined' ? DefaultConfig.SYMBOL_DURATION : symbolDuration,
-                typeof guardInterval === 'undefined' ? DefaultConfig.GUARD_INTERVAL : guardInterval,
-                typeof interpacketGap === 'undefined' ? DefaultConfig.INTERPACKET_GAP : interpacketGap,
+                data,
+                Util.valueOrDefault(pskSize, DefaultConfig.PSK_SIZE),
+                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
+                Util.valueOrDefault(guardInterval, DefaultConfig.GUARD_INTERVAL),
+                Util.valueOrDefault(interpacketGap, DefaultConfig.INTERPACKET_GAP),
                 amplitude
             );
         };
@@ -111,9 +104,9 @@ var TransmitAdapter = (function () {
             this.$$transmit(
                 channelIndex, 
                 data, 
-                _TransmitAdapter.SYNCHRONIZATION.PSK_SIZE,
+                TA.$$_LOWEST_PSK_SIZE,
                 DefaultConfig.SYNC_DURATION,
-                _TransmitAdapter.SYNCHRONIZATION.GUARD_INTERVAL,
+                TA.$$_ZERO_GUARD_INTERVAL,
                 DefaultConfig.INTERPACKET_GAP,
                 amplitude
             );
@@ -138,7 +131,7 @@ var TransmitAdapter = (function () {
                 }
 
                 if (symbolList.length !== amplitude.length) {
-                    throw 'Amplitude data length does not match symbol list length';
+                    throw TA.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION;
                 }
 
                 txDataTmp = [];
