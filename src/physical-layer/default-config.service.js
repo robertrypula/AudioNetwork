@@ -9,7 +9,7 @@ var DefaultConfig = (function () {
             baudMultiplicativeInverse = 1 / baud,
             factorSymbol = 0.32,
             factorGuard = 0.68,
-            factorInterpacketGap = 3,
+            factorInterpacketGap = 5,
             symbolDuration = baudMultiplicativeInverse * factorSymbol,
             rxDftWindowTime = symbolDuration,
             guardInterval = baudMultiplicativeInverse * factorGuard,
@@ -17,7 +17,7 @@ var DefaultConfig = (function () {
             ofdmFrequencySpacingPositiveInteger = 2,
             ofdmFrequencySpacing = ofdmFrequencySpacingPositiveInteger / symbolDuration,
             symbolFrequency = 1 / symbolDuration,
-            symbolFrequencyFactor = 1.85,
+            symbolFrequencyFactor = 2,
             rxNotificationPerSecond = MathUtil.round(symbolFrequencyFactor * symbolFrequency),
             rxHistoryPointSize = rxNotificationPerSecond
         ;

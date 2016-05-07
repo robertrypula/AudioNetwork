@@ -21,7 +21,9 @@ var ConfigurationParser = (function () {
                         (i % 2 === 0 ? DefaultConfig.CHANNEL_1_FREQUENCY : DefaultConfig.CHANNEL_2_FREQUENCY)
                     ),
                     ofdmSize: Util.accessor(txChannel[i], 'ofdmSize') || DefaultConfig.OFDM_SIZE,
-                    ofdmFrequencySpacing: Util.accessor(txChannel[i], 'ofdmFrequencySpacing') || DefaultConfig.OFDM_FREQUENCY_SPACING
+                    ofdmFrequencySpacing: (
+                        Util.accessor(txChannel[i], 'ofdmFrequencySpacing') || DefaultConfig.OFDM_FREQUENCY_SPACING
+                    )
                 });
             }
 
@@ -79,7 +81,7 @@ var ConfigurationParser = (function () {
                             },
                             axis: a(c, 'rx.constellationDiagram.color.axis') || 'green'
                         },
-                        historyPointSize: a(c, 'rx.constellationDiagram.historyPointSize') || DefaultConfig.RX_HISTORY_POINT_SIZE,
+                        historyPointSize: MathUtil.round(a(c, 'rx.constellationDiagram.historyPointSize') || DefaultConfig.RX_HISTORY_POINT_SIZE),
                         width: a(c, 'rx.constellationDiagram.width') || 200,
                         height: a(c, 'rx.constellationDiagram.height') || 200
                     }

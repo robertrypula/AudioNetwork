@@ -3,7 +3,7 @@ var PhysicalLayer = (function () {
 
     /*
         KNOWN ISSUES:
-            - for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
+            + for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
 
         TODO
             + real/imm delete
@@ -173,12 +173,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$rxAnalyser = null;
             this.$$rxAnalyserChart = null;
             this.$$rxConstellationDiagram = [];
-            this.$$rxExternalHandler = {
-                callback: null
-            };
+
             this.$$outputTx = undefined;
             this.$$outputMicrophone = undefined;
             this.$$outputRecordedAudio = undefined;
+            this.$$rxExternalHandler = {
+                callback: null
+            };
             this.$$rxHandler = RxHandlerBuilder.build(
                 this.$$rxConstellationDiagram,
                 this.$$rxExternalHandler
@@ -235,8 +236,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
         PL.prototype.$$initRx = function () {
             var
-                dftWindowSize = Audio.getSampleRate() * this.$$configuration.rx.dftWindowTime,
-                notifyInterval = Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond,
+                dftWindowSize = MathUtil.round(Audio.getSampleRate() * this.$$configuration.rx.dftWindowTime),
+                notifyInterval = MathUtil.round(Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond),
                 channel, i
             ;
 

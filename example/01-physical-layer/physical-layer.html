@@ -43,7 +43,7 @@
                                 PSK-4 (QPSK), Baud-8 - 16 bits/s
                             </button>
                             <br/>
-                            10 symbols PSK scheme - you can send phone numbers by directly using PSK symbols:<br/>
+                            10 symbols PSK scheme and baud 4 - you can send for example phone numbers by directly using PSK symbols:<br/>
                             <button
                                 class="btn btn-default"
                                 onClick="quickConfigure(1, 10, 4, 1)"
@@ -114,7 +114,7 @@
                         <input
                             type="number"
                             id="rx-dft-window-time"
-                            value="80"
+                            value=""
                             />
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                         <input
                             type="text"
                             id="rx-notification-per-second"
-                            value="35"
+                            value=""
                             />
                     </div>
                 </div>
@@ -193,7 +193,7 @@
                         <input
                             type="text"
                             id="rx-channel-config"
-                            value="1070-1-64"
+                            value=""
                             />
                     </div>
                 </div>
@@ -225,7 +225,7 @@
                         <input
                             type="text"
                             id="tx-channel-config"
-                            value="1070-1-64"
+                            value=""
                             />
                     </div>
                 </div>
@@ -266,7 +266,7 @@
                         <input
                             type="number"
                             id="symbol-duration"
-                            value="80"
+                            value=""
                             onChange="symbolDurationChange()"
                         />
                     </div>
@@ -282,7 +282,7 @@
                         <input
                             type="number"
                             id="guard-interval"
-                            value="170"
+                            value=""
                             onChange="guardIntervalChange()"
                         />
                     </div>
@@ -295,7 +295,7 @@
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="number" id="interpacket-gap" value="510" />
+                        <input type="number" id="interpacket-gap" value="" />
                     </div>
                 </div>
 
@@ -588,7 +588,7 @@
                         <input
                             type="number"
                             id="tx-psk-size-[[ channelIndex ]]"
-                            value="4"
+                            value=""
                             onChange="uiRefreshOnPskSizeChange('tx', [[ channelIndex ]])"
                             />
                     </div>
@@ -652,7 +652,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-7">
-                            <input type="number" id="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                            <input type="number" id="tx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="" />
                             <div
                                 class="right-info-label"
                                 id="tx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"
@@ -673,7 +673,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-7">
-                            <input type="number" id="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                            <input type="number" id="tx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="" />
                             <div
                                 class="right-info-label"
                                 id="tx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"
@@ -697,7 +697,7 @@
                             <input
                                 type="number"
                                 id="tx-amplitude-input-[[ channelIndex ]]-[[ ofdmIndex ]]"
-                                value="1"
+                                value=""
                                 />
                         </div>
                     </div>
@@ -801,7 +801,7 @@
                             type="number"
                             id="rx-psk-size-[[ channelIndex ]]"
                             onChange="pskSizeChange([[ channelIndex ]])"
-                            value="4"
+                            value=""
                             />
                     </div>
                 </div>
@@ -902,7 +902,7 @@
                                     </label>
                                 </div>
                                 <div class="col col-xs-6">
-                                    <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                                    <input type="number" id="rx-frequency-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="" />
                                     <div
                                         class="right-info-label"
                                         id="rx-frequency-label-[[ channelIndex ]]-[[ ofdmIndex ]]"
@@ -923,7 +923,7 @@
                                     </label>
                                 </div>
                                 <div class="col col-xs-6">
-                                    <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" />
+                                    <input type="number" id="rx-phase-correction-input-[[ channelIndex ]]-[[ ofdmIndex ]]" value="" />
                                     <div
                                         class="right-info-label"
                                         id="rx-phase-correction-label-[[ channelIndex ]]-[[ ofdmIndex ]]"

@@ -8,7 +8,7 @@ var
 ;
 
 function onLoad() {
-    collectSettingsAndInit();
+    quickConfigure(1, 2, 4, 1);
     setupCpuLoadNotification();
 }
 

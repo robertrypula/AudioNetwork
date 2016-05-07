@@ -36,7 +36,9 @@ var ReceiveAdapter = (function () {
 
         RA.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
         RA.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-        RA.$$_TIME_TOLERANCE_FACTOR = DefaultConfig.FACTOR_INTERPACKET_GAP * 0.83; // how much state times can be longer - WARNING do not exceed interpacket gap factor
+        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.5; // how much state times can be longer
+        RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
+        RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
         RA.$$_ALL_CHANNEL = null;
 
         RA.prototype.reset = function (channelIndex) {
@@ -50,7 +52,7 @@ var ReceiveAdapter = (function () {
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_FACTOR
+                    value * RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR
                 );
             }
         };
@@ -61,7 +63,7 @@ var ReceiveAdapter = (function () {
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_FACTOR
+                    value * RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR
                 );
             }
         };
@@ -72,7 +74,7 @@ var ReceiveAdapter = (function () {
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_FACTOR
+                    value * RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR
                 );
             }
         };
