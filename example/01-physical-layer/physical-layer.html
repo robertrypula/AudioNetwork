@@ -27,28 +27,20 @@
 
                             <br/><br/>
 
-                            Default settings used when this page loads:<br/>
-                            <button
-                                class="btn btn-default"
-                                onClick="quickConfigure(1, 4, 4, 1)"
-                                >
-                                PSK-4, Baud-4 - 8 bit/s
-                            </button>
-                            <br/>
-                            Slower but most reliable PSK transmission scheme - Binary Phase Shift Keying:<br/>
+                            Default settings used when this page loads. The most reliable PSK transmission scheme - Binary Phase Shift Keying:<br/>
                             <button
                                 class="btn btn-default"
                                 onClick="quickConfigure(1, 2, 4, 1)"
                                 >
-                                PSK-2 (BPSK), Baud-4 - 4 bit/s
+                                PSK-2 (BPSK), Baud-4 - 4 bits/s
                             </button>
                             <br/>
-                            Little faster version of reliable PSK transmission scheme - Binary Phase Shift Keying:<br/>
+                            Two times faster baud rate (8) and two times more PSK symbols (PSK-4, Quadrature Phase Shift Keying):<br/>
                             <button
                                 class="btn btn-default"
-                                onClick="quickConfigure(1, 2, 8, 1)"
+                                onClick="quickConfigure(1, 4, 8, 1)"
                                 >
-                                PSK-2 (BPSK), Baud-8 - 8 bit/s
+                                PSK-4 (QPSK), Baud-8 - 16 bits/s
                             </button>
                             <br/>
                             10 symbols PSK scheme - you can send phone numbers by directly using PSK symbols:<br/>
@@ -57,6 +49,14 @@
                                 onClick="quickConfigure(1, 10, 4, 1)"
                                 >
                                 PSK-10, Baud-4 - 4 decimalDigits/s
+                            </button>
+                            <br/>
+                            Experiments with higher speeds (under testing - it may blow the app):<br/>
+                            <button
+                                    class="btn btn-default"
+                                    onClick="quickConfigure(1, 8, 16, 1)"
+                                    >
+                                PSK-8, Baud-16 - 48 bits/s
                             </button>
                             <br/>
                         </p>
@@ -508,6 +508,7 @@
 
         <!-- audio network BEGIN -->
         <script src="../../src/audio-network.js"></script>
+        <script src="../../src/common/math-util/math-util.service.js"></script>
         <script src="../../src/physical-layer/physical-layer-input.service.js"></script>
         <script src="../../src/physical-layer/default-config.service.js"></script>
         <script src="../../src/physical-layer/abstract-channel-manager/abstract-channel-manager.factory.js"></script>
@@ -535,7 +536,6 @@
         <script src="../../src/physical-layer/constellation-diagram/constellation-diagram-builder.service.js"></script>
         <script src="../../src/physical-layer/guard-power-collector/guard-power-collector.factory.js"></script>
         <script src="../../src/physical-layer/guard-power-collector/guard-power-collector-builder.service.js"></script>
-        <script src="../../src/common/math-util/math-util.service.js"></script>
         <script src="../../src/physical-layer/phase-offset-collector/phase-offset-collector.factory.js"></script>
         <script src="../../src/physical-layer/phase-offset-collector/phase-offset-collector-builder.service.js"></script>
         <script src="../../src/physical-layer/physical-layer.factory.js"></script>

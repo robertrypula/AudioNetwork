@@ -28,32 +28,31 @@ function setupCpuLoadNotification() {
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     var
-        ofdmSpacing, symbolAndGuardTime, config, i, element, symbolTime,
-        symbolBaudFactor = 0.32,
-        guardBaudFactor = 0.68
+        ofdmSpacing, baudMultiplicativeInverse, config, i, element, symbolDuration, guardInterval, symbolFrequency
     ;
 
     if (channelNumber < 1 || channelNumber > 2) {
         throw 'Not supported quickConfiguration parameters';
     }
 
-    symbolAndGuardTime = 1.0 / baud;
-    symbolTime = symbolBaudFactor * symbolAndGuardTime;
-    ofdmSpacing = 4 / symbolTime;  // [wikipedia] sub-carrier spacing is k/TU Hertz, where TU seconds
-                                   // is the useful symbol duration (the receiver side window size),
-                                   // and k is a positive integer, typically equal to 1
+    baudMultiplicativeInverse = 1.0 / baud;
+    symbolDuration = DefaultConfig.FACTOR_SYMBOL * baudMultiplicativeInverse;
+    guardInterval = DefaultConfig.FACTOR_GUARD * baudMultiplicativeInverse;
+    ofdmSpacing = DefaultConfig.OFDM_FREQUENCY_SPACING_POSITIVE_INTEGER / symbolDuration;
+    symbolFrequency = 1 / symbolDuration;
 
-    document.getElementById('rx-dft-window-time').value = Math.round(symbolTime * 1000);
-    document.getElementById('symbol-duration').value = Math.round(symbolTime * 1000);
-    document.getElementById('guard-interval').value = Math.round(guardBaudFactor * symbolAndGuardTime * 1000);
-    document.getElementById('interpacket-gap').value = Math.round(3 * guardBaudFactor * symbolAndGuardTime * 1000);
+    document.getElementById('rx-dft-window-time').value = Math.round(symbolDuration * 1000 * 10) / 10;
+    document.getElementById('rx-notification-per-second').value = Math.round(DefaultConfig.SYMBOL_FREQUENCY_FACTOR * symbolFrequency);
+    document.getElementById('symbol-duration').value = Math.round(symbolDuration * 1000 * 10) / 10;
+    document.getElementById('guard-interval').value = Math.round(guardInterval * 1000 * 10) / 10;
+    document.getElementById('interpacket-gap').value = Math.round(DefaultConfig.FACTOR_INTERPACKET_GAP * guardInterval * 1000 * 10) / 10;
 
     if (channelNumber === 1) {
-        config = '1070-' + ofdmSize + '-' + ofdmSpacing;
+        config = DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
         document.getElementById('tx-channel-config').value = config;
         document.getElementById('rx-channel-config').value = config;
     } else {
-        config = '1070-' + ofdmSize + '-' + ofdmSpacing + ' ' + '2025-' + ofdmSize + '-' + ofdmSpacing;
+        config = DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing + ' ' + DefaultConfig.CHANNEL_2_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
         document.getElementById('tx-channel-config').value = config;
         document.getElementById('rx-channel-config').value = config;
     }
