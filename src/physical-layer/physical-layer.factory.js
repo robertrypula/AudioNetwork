@@ -113,7 +113,7 @@ var PhysicalLayer = (function () {
                 + move general configuration to some common service
 
                 - deal with NO_SIGNAL constants
-                - change input TX to LOOPBACK
+                + change input TX to LOOPBACK
                 - move templates code to dedicated files
                 - refactor DOM helpers (move to service)
                 +/- introduce Dependency Injection
@@ -282,7 +282,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 case PhysicalLayerInput.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case PhysicalLayerInput.TX:
+                case PhysicalLayerInput.LOOPBACK:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
                 case PhysicalLayerInput.RECORDED_AUDIO:

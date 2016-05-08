@@ -259,26 +259,23 @@ function phaseCorrectionUpdate(rxTx, channelIndex, ofdmIndex) {
 }
 
 function rxInput(type) {
-    var refresh = true;
+    var input = null;
 
     switch (type) {
         case 'mic':
-            physicalLayer.setRxInput(PhysicalLayerInput.MICROPHONE);
-            txInput = PhysicalLayerInput.MICROPHONE;
+            input = PhysicalLayerInput.MICROPHONE;
             break;
-        case 'tx':
-            physicalLayer.setRxInput(PhysicalLayerInput.TX);
-            txInput = PhysicalLayerInput.TX;
+        case 'loopback':
+            input = PhysicalLayerInput.LOOPBACK;
             break;
         case 'rec':
-            physicalLayer.setRxInput(PhysicalLayerInput.RECORDED_AUDIO);
-            txInput = PhysicalLayerInput.RECORDED_AUDIO;
+            input = PhysicalLayerInput.RECORDED_AUDIO;
             break;
-        default:
-            refresh = false;
     }
 
-    if (refresh) {
+    if (input !== null) {
+        physicalLayer.setRxInput(input);
+        txInput = input;
         uiRefresh();
     }
 }

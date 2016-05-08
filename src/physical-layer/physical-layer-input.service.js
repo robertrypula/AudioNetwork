@@ -6,7 +6,7 @@ var PhysicalLayerInput = (function () {
     function _PhysicalLayerInput() {
         return {
             MICROPHONE: 'MICROPHONE',
-            TX: 'TX',
+            LOOPBACK: 'LOOPBACK',
             RECORDED_AUDIO: 'RECORDED_AUDIO'
         };
     }

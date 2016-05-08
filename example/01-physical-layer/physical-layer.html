@@ -110,6 +110,49 @@
                     </div>
                 </div>
 
+                <div class="row margin-bottom view-type view-type-complex">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <b class="label">
+                            Source
+                        </b>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <button
+                          id="rx-input-mic"
+                          class="btn btn-default"
+                          onClick="rxInput('mic')"
+                          >
+                            Microphone
+                        </button>
+                        <button
+                          id="rx-input-loopback"
+                          class="btn btn-default"
+                          onClick="rxInput('loopback')"
+                          >
+                            Loopback
+                        </button>
+                        <button
+                          id="rx-input-rec"
+                          class="btn btn-default"
+                          onClick="rxInput('rec')"
+                          >
+                            Recorded audio
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row margin-bottom view-type view-type-complex">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="recorded-audio-url">
+                            Recorded audio url
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
+                        <button class="btn btn-default" onClick="loadRecordedAudio()">Load</button>
+                    </div>
+                </div>
+
                 <div class="row margin-bottom view-type view-type-medium view-type-complex">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <label for="rx-dft-window-time">
@@ -339,37 +382,6 @@
                     </div>
                 </div>
 
-                <div class="row margin-bottom view-type view-type-complex">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <b class="label">
-                            Source
-                        </b>
-                    </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button
-                            id="rx-input-mic"
-                            class="btn btn-default"
-                            onClick="rxInput('mic')"
-                            >
-                            Microphone
-                        </button>
-                        <button
-                            id="rx-input-tx"
-                            class="btn btn-default"
-                            onClick="rxInput('tx')"
-                            >
-                            Tx
-                        </button>
-                        <button
-                            id="rx-input-rec"
-                            class="btn btn-default"
-                            onClick="rxInput('rec')"
-                            >
-                            Recorded audio
-                        </button>
-                    </div>
-                </div>
-
                 <div
                     id="rx-conditional-css-class-spectrum"
                     class=""
@@ -397,18 +409,6 @@
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
                         <span id="tx-buffer-size"></span>
-                    </div>
-                </div>
-
-                <div class="row margin-bottom view-type view-type-complex">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <label for="recorded-audio-url">
-                            Recorded audio url
-                        </label>
-                    </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input type="text" id="recorded-audio-url" value="http://localhost:63342/ucEmu/an.wav" />
-                        <button class="btn btn-default" onClick="loadRecordedAudio()">Load</button>
                     </div>
                 </div>
 
