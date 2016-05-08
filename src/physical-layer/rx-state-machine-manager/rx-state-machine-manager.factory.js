@@ -3,8 +3,6 @@ var RxStateMachineManager = (function () {
 
     _RxStateMachineManager.$inject = [];
 
-    _RxStateMachineManager.NO_INPUT_POWER = -99;                         // TODO, move to some common place
-
     function _RxStateMachineManager() {
         var RSMM;
 
@@ -122,8 +120,7 @@ var RxStateMachineManager = (function () {
         RSMM.prototype.$$handlerFirstSync = function (stateDurationTime) {
             var 
                 powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
-                averageFirstSyncPower, averageIdlePower, powerDifference,
-                thresholdDifferenceBetweenAverageSignalPower
+                averageFirstSyncPower, averageIdlePower, powerDifference
             ;
 
             // signal cannot be weaker that idle noise... :)
@@ -254,7 +251,7 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.$$isInputReallyConnected = function () {
-            return this.$$currentData.pilotSignal.powerDecibel !== _RxStateMachineManager.NO_INPUT_POWER;
+            return this.$$currentData.pilotSignal.powerDecibel !== DefaultConfig.MINIMUM_POWER_DECIBEL;
         };
 
         RSMM.prototype.$$isPilotSignalPresent = function () {
@@ -262,7 +259,7 @@ var RxStateMachineManager = (function () {
         };
 
         RSMM.prototype.receive = function (carrierDetail, time) {
-            var state = ReceiveAdapterState.NO_INPUT;
+            var state;
 
             // grab current data, this will be available at all handlers that will be called back by $$stateMachine
             this.$$currentData = {
@@ -271,8 +268,10 @@ var RxStateMachineManager = (function () {
             };
 
             if (this.$$isInputReallyConnected()) {
-                // TODO add some kind of 'schmitt trigger' logic here to cleanup noise at signal transitions
                 state = this.$$stateMachine.getState(this.$$isPilotSignalPresent(), time);
+            } else {
+                state = ReceiveAdapterState.NO_INPUT;
+                this.reset();
             }
 
             return {

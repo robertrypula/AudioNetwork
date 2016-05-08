@@ -13,6 +13,7 @@ var ChannelTransmitManager = (function () {
             this.$$scriptNode = null;
             this.$$configuration = configuration;
             this.$$bufferSize = bufferSize;
+            this.$$fakeNoise = false;
 
             this.$$init();
         };
@@ -64,6 +65,14 @@ var ChannelTransmitManager = (function () {
             }
         };
 
+        CTM.prototype.enableFakeNoise = function () {
+            this.$$fakeNoise = true;
+        };
+
+        CTM.prototype.disableFakeNoise = function () {
+            this.$$fakeNoise = false;
+        };
+
         CTM.prototype.onAudioProcess = function (audioProcessingEvent) {
             var
                 outputBuffer = audioProcessingEvent.outputBuffer,
@@ -77,8 +86,12 @@ var ChannelTransmitManager = (function () {
                 for (j = 0; j < this.$$channelTransmit.length; j++) {
                     sample += this.$$channelTransmit[j].getSample();
                 }
+
+                if (this.$$fakeNoise) {
+                    sample += ((MathUtil.random() * 2) - 1) * DefaultConfig.FAKE_NOISE_MAX_AMPLITUDE;
+                }
+
                 outputData[i] = sample;
-                // outputData[i] += ((MathUtil.random() * 2) - 1) * 0.001;          // TODO, move to config
             }
 
             this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), outputBuffer.length);

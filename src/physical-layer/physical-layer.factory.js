@@ -112,7 +112,7 @@ var PhysicalLayer = (function () {
                 + change name: dftTimeSpan -> dftWindowTimeSpan
                 + move general configuration to some common service
 
-                - deal with NO_SIGNAL constants
+                + refactor NO_SIGNAL state
                 + change input TX to LOOPBACK
                 + move templates code to dedicated files
                 - refactor DOM helpers (move to service)
@@ -308,6 +308,11 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             if (node) {
                 node.connect(this.$$rxAnalyser);
                 this.$$currentInput = input;
+                if (this.$$currentInput === PhysicalLayerInput.LOOPBACK) {
+                    this.$$channelTransmitManager.enableFakeNoise();
+                } else {
+                    this.$$channelTransmitManager.disableFakeNoise();
+                }
             } else {
                 this.$$currentInput = null;
             }

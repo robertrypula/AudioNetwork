@@ -36,6 +36,9 @@ var DefaultConfig = (function () {
         */
 
         return {
+            CONSTELLATION_DIAGRAM_DECIBEL_LIMIT: 40,
+            MINIMUM_POWER_DECIBEL: -99,
+            FAKE_NOISE_MAX_AMPLITUDE: 0.001,
             CHANNEL_1_FREQUENCY: 1070,
             CHANNEL_2_FREQUENCY: 2025,
             OFDM_SIZE: 1,

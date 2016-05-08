@@ -4,10 +4,7 @@ var RxHandler = (function () {
     _RxHandler.$inject = [];
 
     function _RxHandler() {
-        var
-            RH,
-            CONSTELLATION_DIAGRAM_DECIBEL_LIMIT = 40                         // TODO, move to some common place
-        ;
+        var RH;
 
         RH = function (rxConstellationDiagram, rxExternalHandler) {
             this.$$delayedData = [];
@@ -67,16 +64,16 @@ var RxHandler = (function () {
             for (i = 0; i < carrierDetail.length; i++) {
                 cd = carrierDetail[i];
                 if (cd.powerDecibel === -Infinity) {
-                    cd.powerDecibel = -99;
+                    cd.powerDecibel = DefaultConfig.MINIMUM_POWER_DECIBEL;
                 }
-                cd.powerDecibel = cd.powerDecibel < -99 ? -99 : cd.powerDecibel;
+                cd.powerDecibel = cd.powerDecibel < DefaultConfig.MINIMUM_POWER_DECIBEL ? DefaultConfig.MINIMUM_POWER_DECIBEL : cd.powerDecibel;
 
                 if (this.$$rxConstellationDiagram.length === 0) {
                     continue;
                 }
 
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
+                powerNormalized = (cd.powerDecibel + DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
                 powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
                 if (queue.isFull()) {
                     queue.pop();
