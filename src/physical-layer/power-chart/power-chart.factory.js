@@ -58,27 +58,7 @@ var PowerChart = (function () {
         };
 
         CD.prototype.$$renderTemplate = function () {
-            var tpl =
-                '<div' +
-                '    class="power-chart-container"' +
-                '    style="' +
-                '        overflow: hidden;' +
-                '        width: {{ width }}px;' +
-                '        height: {{ height }}px;' +
-                '        position: relative;' +
-                '    "' +
-                '    >' +
-                '    <canvas ' +
-                '        class="power-chart"' +
-                '        style="' +
-                '            width: {{ width }}px;' +
-                '            height: {{ height }}px;' +
-                '            position: absolute;' +
-                '        "' +
-                '        width="{{ width }}"' +
-                '        height="{{ height }}"' +
-                '        ></canvas>' +
-                '</div>';
+            var tpl = PowerChartTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
             tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());

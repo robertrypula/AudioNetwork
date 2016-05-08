@@ -60,27 +60,7 @@ var ConstellationDiagram = (function () {
         };
 
         CD.prototype.$$renderTemplate = function () {
-            var tpl =
-                '<div' +
-                '    class="constellation-diagram-container"' +
-                '    style="' +
-                '        overflow: hidden;' +
-                '        width: {{ width }}px;' +
-                '        height: {{ height }}px;' +
-                '        position: relative;' +
-                '    "' +
-                '    >' +
-                '    <canvas ' +
-                '        class="constellation-diagram"' +
-                '        style="' +
-                '            width: {{ width }}px;' +
-                '            height: {{ height }}px;' +
-                '            position: absolute;' +
-                '        "' +
-                '        width="{{ width }}"' +
-                '        height="{{ height }}"' +
-                '        ></canvas>' +
-                '</div>';
+            var tpl = ConstellationDiagramTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
             tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());

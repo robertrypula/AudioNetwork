@@ -114,7 +114,7 @@ var PhysicalLayer = (function () {
 
                 - deal with NO_SIGNAL constants
                 + change input TX to LOOPBACK
-                - move templates code to dedicated files
+                + move templates code to dedicated files
                 - refactor DOM helpers (move to service)
                 +/- introduce Dependency Injection
                 - use setTimeout instead setInverval (?)

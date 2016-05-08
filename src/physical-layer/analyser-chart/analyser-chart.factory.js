@@ -115,52 +115,7 @@ var AnalyserChart = (function () {
         };
 
         AC.prototype.$$renderTemplate = function () {
-            var tpl =
-                '<div' +
-                '    class="analyser-container"' +
-                '    style="' +
-                '        overflow: hidden;' +
-                '        width: {{ width }}px;' +
-                '        height: {{ height }}px;' +
-                '        position: relative;' +
-                '    "' +
-                '    >' +
-                '    <canvas' +
-                '        class="analyser-chart"' +
-                '        style="' +
-                '            width: {{ width }}px;' +
-                '            height: {{ height }}px;' +
-                '            position: absolute;' +
-                '        "' +
-                '        width="{{ width }}"' +
-                '        height="{{ height }}"' +
-                '        ></canvas>' +
-                '    <div' +
-                '        class="analyser-action"' +
-                '        style="' +
-                '            position: absolute;' +
-                '        "' +
-                '        >' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft256">FFT256</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft512">FFT512</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft1024">FFT1024</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft2048">FFT2048</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft4096">FFT4096</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft8192">FFT8192</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-fft16384">FFT16384</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-freq-timedomain">Freq/TimeDomain</a>' +
-                '        <a href="javascript:void(0)" class="analyser-action-freeze">Freeze</a>' +
-                '    </div>' +
-                '    <div ' +
-                '        class="analyser-axis-x" ' +
-                '        style="' +
-                '            position: absolute;' +
-                '            bottom: 0px;' +
-                '            left: 0px;' +
-                '            width: {{ width }}px;' +
-                '        "' +
-                '        ></div>' +
-                '</div>';
+            var tpl = AnalyserChartTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$analyser.frequencyBinCount).toString());
             tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
@@ -169,20 +124,7 @@ var AnalyserChart = (function () {
         };
 
         AC.prototype.$$renderTemplateAxisXLabel = function (width, left, label) {
-            var tpl =
-                '<span' +
-                '    style="' +
-                '        display: block;' +
-                '        box-sizing: border-box;' +
-                '        border-left: 1px solid {{ colorAxis }};' +
-                '        position: absolute;' +
-                '        width: {{ width }}px;' +
-                '        top: 0px;' +
-                '        left: {{ left }}px;' +
-                '        "' +
-                '    >' +
-                '    {{ label }}' +
-                '</span>';
+            var tpl = AnalyserChartTemplateAxisX.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, width);
             tpl = tpl.replace(/\{\{ left \}\}/g, left);

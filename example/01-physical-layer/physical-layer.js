@@ -161,7 +161,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     receiveAdapter = new ReceiveAdapter(physicalLayer);
 
     var powerChartQueue0 = new Queue(400);
-    //var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
+    // var powerChart0 = new PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
 
     physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
