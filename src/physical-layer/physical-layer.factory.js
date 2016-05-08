@@ -337,9 +337,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
             for (i = 0; i < data.length; i++) {
                 d = data[i];
+                if (!d.duration) {
+                    throw 'Tx - duration of all data items should be > 0';
+                }
+
                 dataParsed.push([{
                     amplitude: (typeof d.amplitude !== 'undefined') ? d.amplitude : 1,
-                    duration: MathUtil.round(Audio.getSampleRate() * (d.duration || 0.200)),
+                    duration: MathUtil.round(Audio.getSampleRate() * d.duration),
                     phase: (typeof d.phase !== 'undefined') ? d.phase : 0
                 }]);
             }

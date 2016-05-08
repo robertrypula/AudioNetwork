@@ -4,7 +4,8 @@ var
     physicalLayer = null,
     physicalLayerDestroyInProgress = false,
     transmitAdapter = null,
-    receiveAdapter = null
+    receiveAdapter = null,
+    txInput = DefaultConfig.RX_INPUT
 ;
 
 function onLoad() {
@@ -130,6 +131,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         },
         rx: {
             channel: rxChannel,
+            input: txInput,
             notificationPerSecond: notificationPerSecond,
             dftWindowTime: dftWindowTime / 1000,
             spectrum: {
@@ -262,12 +264,15 @@ function rxInput(type) {
     switch (type) {
         case 'mic':
             physicalLayer.setRxInput(PhysicalLayerInput.MICROPHONE);
+            txInput = PhysicalLayerInput.MICROPHONE;
             break;
         case 'tx':
             physicalLayer.setRxInput(PhysicalLayerInput.TX);
+            txInput = PhysicalLayerInput.TX;
             break;
         case 'rec':
             physicalLayer.setRxInput(PhysicalLayerInput.RECORDED_AUDIO);
+            txInput = PhysicalLayerInput.RECORDED_AUDIO;
             break;
         default:
             refresh = false;

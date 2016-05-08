@@ -355,14 +355,14 @@ function $$uiRefreshSpeedSpecific(rxTx) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
             element = document.getElementById('rx-speed-' + i);
             bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * physicalLayer.getRxChannelOfdmSize(i);
-            element.innerHTML = bitPerSecond;
+            element.innerHTML = Math.round(bitPerSecond * 100) / 100;
         }
     } else {
         for (i = 0; i < physicalLayer.getTxChannelSize(); i++) {
             pskSize = getIntById(rxTx + '-psk-size-' + i);
             element = document.getElementById('tx-speed-' + i);
             bitPerSecond = (pskSize - 1).toString(2).length * symbolPerSecond * physicalLayer.getTxChannelOfdmSize(i);
-            element.innerHTML = bitPerSecond;
+            element.innerHTML = Math.round(bitPerSecond * 100) / 100;
         }
     }
 }
