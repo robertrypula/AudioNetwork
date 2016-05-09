@@ -265,13 +265,13 @@ function rxInput(type) {
 
     switch (type) {
         case 'mic':
-            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.MICROPHONE;
+            input = AudioNetwork.PhysicalLayer.RxInput.MICROPHONE;
             break;
         case 'loopback':
-            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.LOOPBACK;
+            input = AudioNetwork.PhysicalLayer.RxInput.LOOPBACK;
             break;
         case 'rec':
-            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.RECORDED_AUDIO;
+            input = AudioNetwork.PhysicalLayer.RxInput.RECORDED_AUDIO;
             break;
     }
 
@@ -286,7 +286,7 @@ function loadRecordedAudio() {
     physicalLayer.loadRecordedAudio(
         getStrById('recorded-audio-url'),
         function () {
-            physicalLayer.setRxInput(AudioNetwork.PhysicalLayer.PhysicalLayerInput.RECORDED_AUDIO);
+            physicalLayer.setRxInput(AudioNetwork.PhysicalLayer.RxInput.RECORDED_AUDIO);
             physicalLayer.outputRecordedAudioEnable();
             uiRefresh();
         },

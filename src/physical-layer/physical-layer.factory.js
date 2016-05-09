@@ -118,17 +118,16 @@
                 + refactor NO_SIGNAL state
                 + change input TX to LOOPBACK
                 + move templates code to dedicated files
-                - refactor DOM helpers (move to service)
-                +/- introduce Dependency Injection
-                - use setTimeout instead setInverval (?)
+                + introduce Dependency Injection
                 - remove Promises
+                - use setTimeout instead setInverval (?)
+                - prepare release version + some code minification
 
             - Finalization complex:
                 + measure CPU load by measuring times before and after execution
                 - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
-                - prepare release version + some code minification
+                - refactor DOM helpers (move to service)
                 - do not redraw constellation if queue wasn't changed
-                - move notification logic to manager (?)
                 - ability to add hooks at sample generation and receive (inject some changes to signal)
                 - refactor sample handling and generation to order to easily move that code to Service Worker
 
@@ -167,7 +166,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         'Common.QueueBuilder',
         'Common.MathUtil',
         'PhysicalLayer.ConfigurationParser',
-        'PhysicalLayer.PhysicalLayerInput',
+        'PhysicalLayer.RxInput',
         'PhysicalLayer.RxHandlerBuilder',
         'PhysicalLayer.ChannelTransmitManagerBuilder',
         'PhysicalLayer.ChannelReceiveManagerBuilder',
@@ -180,7 +179,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         QueueBuilder,
         MathUtil,
         ConfigurationParser,
-        PhysicalLayerInput,
+        RxInput,
         RxHandlerBuilder,
         ChannelTransmitManagerBuilder,
         ChannelReceiveManagerBuilder,
@@ -304,13 +303,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             var node = null;
 
             switch (input) {
-                case PhysicalLayerInput.MICROPHONE:
+                case RxInput.MICROPHONE:
                     node = Audio.getMicrophoneNode();
                     break;
-                case PhysicalLayerInput.LOOPBACK:
+                case RxInput.LOOPBACK:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
-                case PhysicalLayerInput.RECORDED_AUDIO:
+                case RxInput.RECORDED_AUDIO:
                     node = Audio.getRecordedAudioNode();
                     break;
             }
@@ -333,7 +332,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             if (node) {
                 node.connect(this.$$rxAnalyser);
                 this.$$currentInput = input;
-                if (this.$$currentInput === PhysicalLayerInput.LOOPBACK) {
+                if (this.$$currentInput === RxInput.LOOPBACK) {
                     this.$$channelTransmitManager.enableFakeNoise();
                 } else {
                     this.$$channelTransmitManager.disableFakeNoise();

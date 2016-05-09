@@ -2,11 +2,11 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.PhysicalLayerInput', _PhysicalLayerInput);
+        .registerService('PhysicalLayer.RxInput', _RxInput);
 
-    _PhysicalLayerInput.$inject = [];
+    _RxInput.$inject = [];
 
-    function _PhysicalLayerInput() {
+    function _RxInput() {
         return {
             MICROPHONE: 'MICROPHONE',
             LOOPBACK: 'LOOPBACK',

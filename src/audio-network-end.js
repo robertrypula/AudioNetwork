@@ -4,7 +4,7 @@
 AudioNetwork.PhysicalLayer = {};
 AudioNetwork.PhysicalLayer.PhysicalLayer = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer');
 AudioNetwork.PhysicalLayer.DefaultConfig = AudioNetwork.Injector.resolve('PhysicalLayer.DefaultConfig');
-AudioNetwork.PhysicalLayer.PhysicalLayerInput = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayerInput');
+AudioNetwork.PhysicalLayer.RxInput = AudioNetwork.Injector.resolve('PhysicalLayer.RxInput');
 AudioNetwork.PhysicalLayer.TransmitAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.TransmitAdapter');
 AudioNetwork.PhysicalLayer.ReceiveAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.ReceiveAdapter');
 AudioNetwork.PhysicalLayer.PowerChart = AudioNetwork.Injector.resolve('PhysicalLayer.PowerChart');

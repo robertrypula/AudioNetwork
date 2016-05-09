@@ -5,12 +5,12 @@
         .registerService('PhysicalLayer.DefaultConfig', _DefaultConfig);
 
     _DefaultConfig.$inject = [
-        'PhysicalLayer.PhysicalLayerInput',
+        'PhysicalLayer.RxInput',
         'Common.MathUtil'
     ];
 
     function _DefaultConfig(
-        PhysicalLayerInput,
+        RxInput,
         MathUtil
     ) {
         var
@@ -55,7 +55,7 @@
             OFDM_FREQUENCY_SPACING: ofdmFrequencySpacing,
             SYMBOL_FREQUENCY: symbolFrequency,
             SYMBOL_FREQUENCY_FACTOR: symbolFrequencyFactor,
-            RX_INPUT: PhysicalLayerInput.MICROPHONE,
+            RX_INPUT: RxInput.MICROPHONE,
             RX_NOTIFICATION_PER_SECOND: rxNotificationPerSecond,
             RX_HISTORY_POINT_SIZE: rxHistoryPointSize,
             RX_DFT_WINDOW_TIME: rxDftWindowTime,
