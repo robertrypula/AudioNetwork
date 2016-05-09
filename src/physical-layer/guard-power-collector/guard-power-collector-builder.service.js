@@ -1,9 +1,16 @@
-var GuardPowerCollectorBuilder = (function () {
+(function () {
     'use strict';
 
-    _GuardPowerCollectorBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.GuardPowerCollectorBuilder', _GuardPowerCollectorBuilder);
 
-    function _GuardPowerCollectorBuilder() {
+    _GuardPowerCollectorBuilder.$inject = [
+        'PhysicalLayer.GuardPowerCollector'
+    ];
+
+    function _GuardPowerCollectorBuilder(
+        GuardPowerCollector
+    ) {
 
         function build() {
             return new GuardPowerCollector();
@@ -13,7 +20,5 @@ var GuardPowerCollectorBuilder = (function () {
             build: build
         };
     }
-
-    return new _GuardPowerCollectorBuilder();        // TODO change it to dependency injection
 
 })();

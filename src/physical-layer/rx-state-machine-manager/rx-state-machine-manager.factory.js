@@ -1,9 +1,24 @@
-var RxStateMachineManager = (function () {
+(function () {
     'use strict';
 
-    _RxStateMachineManager.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.RxStateMachineManager', _RxStateMachineManager);
 
-    function _RxStateMachineManager() {
+    _RxStateMachineManager.$inject = [
+        'Common.MathUtil',
+        'Common.Util',
+        'Common.AverageValueCollectorBuilder',
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayer.SignalPowerCollectorBuilder'
+    ];
+
+    function _RxStateMachineManager(
+        MathUtil,
+        Util,
+        AverageValueCollectorBuilder,
+        DefaultConfig,
+        SignalPowerCollectorBuilder
+    ) {
         var RSMM;
 
         RSMM = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
@@ -293,7 +308,5 @@ var RxStateMachineManager = (function () {
 
         return RSMM;
     }
-
-    return _RxStateMachineManager();        // TODO change it to dependency injection
 
 })();

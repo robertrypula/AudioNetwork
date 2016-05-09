@@ -1,9 +1,18 @@
-var SignalPowerCollector = (function () {
+(function () {
     'use strict';
 
-    _SignalPowerCollector.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.SignalPowerCollector', _SignalPowerCollector);
 
-    function _SignalPowerCollector() {
+    _SignalPowerCollector.$inject = [
+        'PhysicalLayer.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _SignalPowerCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
         var SPC;
 
         SPC = function () {
@@ -25,7 +34,5 @@ var SignalPowerCollector = (function () {
 
         return SPC;
     }
-
-    return _SignalPowerCollector();        // TODO change it to dependency injection
 
 })();

@@ -1,5 +1,8 @@
-var AbstractValueCollector = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.AbstractValueCollector', _AbstractValueCollector);
 
     _AbstractValueCollector.$inject = [];
 
@@ -64,7 +67,5 @@ var AbstractValueCollector = (function () {
 
         return AVC;
     }
-
-    return _AbstractValueCollector();        // TODO change it to dependency injection
 
 })();

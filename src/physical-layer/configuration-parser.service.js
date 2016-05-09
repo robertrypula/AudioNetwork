@@ -1,9 +1,20 @@
-var ConfigurationParser = (function () {
+(function () {
     'use strict';
 
-    _ConfigurationParser.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.ConfigurationParser', _ConfigurationParser);
 
-    function _ConfigurationParser() {
+    _ConfigurationParser.$inject = [
+        'Common.MathUtil',
+        'Common.Util',
+        'PhysicalLayer.DefaultConfig'
+    ];
+
+    function _ConfigurationParser(
+        MathUtil,
+        Util,
+        DefaultConfig
+    ) {
 
         function parseChannel(configuration, txRx) {
             var i, txChannel, result, channelDataExists, channelListSize;
@@ -95,7 +106,5 @@ var ConfigurationParser = (function () {
             parse: parse
         };
     }
-
-    return new _ConfigurationParser();        // TODO change it to dependency injection
 
 })();

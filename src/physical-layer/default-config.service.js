@@ -1,9 +1,18 @@
-var DefaultConfig = (function () {
+(function () {
     'use strict';
 
-    _DefaultConfig.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.DefaultConfig', _DefaultConfig);
 
-    function _DefaultConfig() {
+    _DefaultConfig.$inject = [
+        'PhysicalLayer.PhysicalLayerInput',
+        'Common.MathUtil'
+    ];
+
+    function _DefaultConfig(
+        PhysicalLayerInput,
+        MathUtil
+    ) {
         var
             baud = 4,
             baudMultiplicativeInverse = 1 / baud,
@@ -64,7 +73,5 @@ var DefaultConfig = (function () {
             SYNC_PREAMBLE: true
         };
     }
-
-    return new _DefaultConfig();        // TODO change it to dependency injection
 
 })();

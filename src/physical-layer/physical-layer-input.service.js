@@ -1,5 +1,8 @@
-var PhysicalLayerInput = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PhysicalLayerInput', _PhysicalLayerInput);
 
     _PhysicalLayerInput.$inject = [];
 
@@ -10,7 +13,5 @@ var PhysicalLayerInput = (function () {
             RECORDED_AUDIO: 'RECORDED_AUDIO'
         };
     }
-
-    return new _PhysicalLayerInput();        // TODO change it to dependency injection
 
 })();

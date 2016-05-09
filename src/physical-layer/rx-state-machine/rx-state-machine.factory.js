@@ -1,5 +1,8 @@
-var RxStateMachine = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.RxStateMachine', _RxStateMachine);
 
     _RxStateMachine.$inject = [];
 
@@ -260,7 +263,5 @@ var RxStateMachine = (function () {
 
         return RSM;
     }
-
-    return _RxStateMachine();        // TODO change it to dependency injection
 
 })();

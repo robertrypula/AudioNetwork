@@ -1,37 +1,38 @@
-var PowerChartTemplateMain = (function () {
-  'use strict';
+(function () {
+    'use strict';
 
-  _PowerChartTemplateMain.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
 
-  function _PowerChartTemplateMain() {
-    var html =
-      '<div' +
-      '    class="power-chart-container"' +
-      '    style="' +
-      '        overflow: hidden;' +
-      '        width: {{ width }}px;' +
-      '        height: {{ height }}px;' +
-      '        position: relative;' +
-      '    "' +
-      '    >' +
-      '    <canvas ' +
-      '        class="power-chart"' +
-      '        style="' +
-      '            width: {{ width }}px;' +
-      '            height: {{ height }}px;' +
-      '            position: absolute;' +
-      '        "' +
-      '        width="{{ width }}"' +
-      '        height="{{ height }}"' +
-      '        ></canvas>' +
-      '</div>'
-    ;
+    _PowerChartTemplateMain.$inject = [];
 
-    return {
-      html: html
-    };
-  }
+    function _PowerChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="power-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="power-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
 
-  return new _PowerChartTemplateMain();        // TODO change it to dependency injection
+        return {
+            html: html
+        };
+    }
 
 })();

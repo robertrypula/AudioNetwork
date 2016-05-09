@@ -1,9 +1,18 @@
-var PhaseOffsetCollector = (function () {
+(function () {
     'use strict';
 
-    _PhaseOffsetCollector.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.PhaseOffsetCollector', _PhaseOffsetCollector);
 
-    function _PhaseOffsetCollector() {
+    _PhaseOffsetCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _PhaseOffsetCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
         var POC;
 
         POC = function () {
@@ -54,7 +63,5 @@ var PhaseOffsetCollector = (function () {
 
         return POC;
     }
-
-    return _PhaseOffsetCollector();        // TODO change it to dependency injection
 
 })();

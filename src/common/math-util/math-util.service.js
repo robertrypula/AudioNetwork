@@ -1,5 +1,8 @@
-var MathUtil = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.MathUtil', _MathUtil);
 
     _MathUtil.$inject = [];
 
@@ -67,7 +70,5 @@ var MathUtil = (function () {
             maxInArray: maxInArray
         };
     }
-
-    return new _MathUtil();        // TODO change it to dependency injection
 
 })();

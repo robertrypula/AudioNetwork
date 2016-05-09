@@ -1,9 +1,16 @@
-var Util = (function () {
+(function () {
     'use strict';
 
-    _Util.$inject = [];
+    AudioNetwork.Injector
+        .registerService('Common.Util', _Util);
 
-    function _Util() {
+    _Util.$inject = [
+        'Common.MathUtil'
+    ];
+
+    function _Util(
+        MathUtil
+    ) {
 
         function valueOrDefault(value, defaultValue) {
             return typeof value !== 'undefined' ? value : defaultValue;
@@ -146,7 +153,5 @@ var Util = (function () {
             findMaxValueIndex: findMaxValueIndex
         };
     }
-
-    return new _Util();        // TODO change it to dependency injection
 
 })();

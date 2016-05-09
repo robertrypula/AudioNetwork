@@ -1,9 +1,16 @@
-var RxStateMachineBuilder = (function () {
+(function () {
     'use strict';
 
-    _RxStateMachineBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.RxStateMachineBuilder', _RxStateMachineBuilder);
 
-    function _RxStateMachineBuilder() {
+    _RxStateMachineBuilder.$inject = [
+        'PhysicalLayer.RxStateMachine'
+    ];
+
+    function _RxStateMachineBuilder(
+        RxStateMachine
+    ) {
 
         function build(handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             return new RxStateMachine(
@@ -23,7 +30,5 @@ var RxStateMachineBuilder = (function () {
             build: build
         };
     }
-
-    return new _RxStateMachineBuilder();        // TODO change it to dependency injection
 
 })();

@@ -1,9 +1,16 @@
-var ConstellationDiagram = (function () {
+(function () {
     'use strict';
 
-    _ConstellationDiagram.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.ConstellationDiagram', _ConstellationDiagram);
 
-    function _ConstellationDiagram() {
+    _ConstellationDiagram.$inject = [
+        'Common.MathUtil'
+    ];
+
+    function _ConstellationDiagram(
+        MathUtil
+    ) {
         var CD;
 
         CD = function (parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
@@ -158,7 +165,5 @@ var ConstellationDiagram = (function () {
 
         return CD;
     }
-
-    return _ConstellationDiagram();        // TODO change it to dependency injection
 
 })();

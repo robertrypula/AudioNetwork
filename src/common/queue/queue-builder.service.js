@@ -1,9 +1,16 @@
-var QueueBuilder = (function () {
+(function () {
     'use strict';
 
-    _QueueBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('Common.QueueBuilder', _QueueBuilder);
 
-    function _QueueBuilder() {
+    _QueueBuilder.$inject = [
+        'Common.Queue'
+    ];
+
+    function _QueueBuilder(
+        Queue
+    ) {
 
         function build(size) {
             return new Queue(size);
@@ -13,7 +20,5 @@ var QueueBuilder = (function () {
             build: build
         };
     }
-
-    return new _QueueBuilder();        // TODO change it to dependency injection
 
 })();

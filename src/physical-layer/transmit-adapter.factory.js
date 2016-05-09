@@ -1,17 +1,28 @@
-var TransmitAdapter = (function () {
+(function () {
     'use strict';
 
-    _TransmitAdapter.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.TransmitAdapter', _TransmitAdapter);
 
-    /**
-     * This works as an wrapper for raw API that PhysicalLayer provides.
-     * It's much easier to send data using Adapter API. In case of really fancy sound
-     * generation cases you can use PhysicalLayer API directly.
-     *
-     */
-    function _TransmitAdapter() {
+    _TransmitAdapter.$inject = [
+        'Common.MathUtil',
+        'Common.Util',
+        'PhysicalLayer.DefaultConfig'
+    ];
+
+    function _TransmitAdapter(
+        MathUtil,
+        Util,
+        DefaultConfig
+    ) {
         var TA;
 
+        /**
+         * This works as an wrapper for raw API that PhysicalLayer provides.
+         * It's much easier to send data using Adapter API. In case of really fancy sound
+         * generation cases you can use PhysicalLayer API directly.
+         *
+         */
         TA = function (physicalLayer) {
             this.$$physicalLayer = physicalLayer;
         };
@@ -178,7 +189,5 @@ var TransmitAdapter = (function () {
 
         return TA;
     }
-
-    return _TransmitAdapter();        // TODO change it to dependency injection
 
 })();

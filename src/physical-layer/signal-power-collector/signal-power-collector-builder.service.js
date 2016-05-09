@@ -1,9 +1,16 @@
-var SignalPowerCollectorBuilder = (function () {
+(function () {
     'use strict';
 
-    _SignalPowerCollectorBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.SignalPowerCollectorBuilder', _SignalPowerCollectorBuilder);
 
-    function _SignalPowerCollectorBuilder() {
+    _SignalPowerCollectorBuilder.$inject = [
+        'PhysicalLayer.SignalPowerCollector'
+    ];
+
+    function _SignalPowerCollectorBuilder(
+        SignalPowerCollector
+    ) {
 
         function build() {
             return new SignalPowerCollector();
@@ -13,7 +20,5 @@ var SignalPowerCollectorBuilder = (function () {
             build: build
         };
     }
-
-    return new _SignalPowerCollectorBuilder();        // TODO change it to dependency injection
 
 })();

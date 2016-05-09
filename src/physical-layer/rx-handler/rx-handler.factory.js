@@ -1,9 +1,20 @@
-var RxHandler = (function () {
+(function () {
     'use strict';
 
-    _RxHandler.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.RxHandler', _RxHandler);
 
-    function _RxHandler() {
+    _RxHandler.$inject = [
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayer.Audio',
+        'Common.MathUtil'
+    ];
+
+    function _RxHandler(
+        DefaultConfig,
+        Audio,
+        MathUtil
+    ) {
         var RH;
 
         RH = function (rxConstellationDiagram, rxExternalHandler) {
@@ -94,7 +105,5 @@ var RxHandler = (function () {
 
         return RH;
     }
-
-    return _RxHandler();        // TODO change it to dependency injection
 
 })();

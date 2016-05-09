@@ -1,9 +1,18 @@
-var GuardPowerCollector = (function () {
+(function () {
     'use strict';
 
-    _GuardPowerCollector.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.GuardPowerCollector', _GuardPowerCollector);
 
-    function _GuardPowerCollector() {
+    _GuardPowerCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _GuardPowerCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
         var GPC;
 
         GPC = function () {
@@ -25,7 +34,5 @@ var GuardPowerCollector = (function () {
 
         return GPC;
     }
-
-    return _GuardPowerCollector();        // TODO change it to dependency injection
 
 })();

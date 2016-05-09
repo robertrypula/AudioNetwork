@@ -1,9 +1,16 @@
-var PowerChartBuilder = (function () {
+(function () {
     'use strict';
 
-    _PowerChartBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartBuilder', _PowerChartBuilder);
 
-    function _PowerChartBuilder() {
+    _PowerChartBuilder.$inject = [
+        'PhysicalLayer.PowerChart'
+    ];
+
+    function _PowerChartBuilder(
+        PowerChart
+    ) {
 
         function build(parentElement, width, height) {
             return new PowerChart(parentElement, width, height);
@@ -13,7 +20,5 @@ var PowerChartBuilder = (function () {
             build: build
         };
     }
-
-    return new _PowerChartBuilder();        // TODO change it to dependency injection
 
 })();

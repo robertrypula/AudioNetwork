@@ -1,6 +1,9 @@
 var ReceiveAdapterState = (function () {
     'use strict';
 
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.ReceiveAdapterState', _ReceiveAdapterState);
+
     _ReceiveAdapterState.$inject = [];
 
     function _ReceiveAdapterState() {
@@ -17,7 +20,5 @@ var ReceiveAdapterState = (function () {
             ERROR: 'ERROR'
         };
     }
-
-    return new _ReceiveAdapterState();        // TODO change it to dependency injection
 
 })();

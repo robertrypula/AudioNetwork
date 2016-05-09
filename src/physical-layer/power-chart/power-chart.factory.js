@@ -1,9 +1,16 @@
-var PowerChart = (function () {
+(function () {
     'use strict';
 
-    _PowerChart.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
 
-    function _PowerChart() {
+    _PowerChart.$inject = [
+        'PhysicalLayer.PowerChartTemplateMain'
+    ];
+
+    function _PowerChart(
+        PowerChartTemplateMain
+    ) {
         var CD;
 
         CD = function (parentElement, width, height, queue) {
@@ -127,7 +134,5 @@ var PowerChart = (function () {
 
         return CD;
     }
-
-    return _PowerChart();        // TODO change it to dependency injection
 
 })();

@@ -1,5 +1,8 @@
-var ReceiveAdapter = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.ReceiveAdapter', _ReceiveAdapter);
 
     _ReceiveAdapter.$inject = [];
 
@@ -206,7 +209,5 @@ var ReceiveAdapter = (function () {
 
         return RA;
     }
-
-    return _ReceiveAdapter();        // TODO change it to dependency injection
 
 })();

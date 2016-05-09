@@ -1,5 +1,8 @@
-var Queue = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.Queue', _Queue);
 
     _Queue.$inject = [];
 
@@ -63,7 +66,5 @@ var Queue = (function () {
 
         return Q;
     }
-
-    return _Queue();        // TODO change it to dependency injection
 
 })();

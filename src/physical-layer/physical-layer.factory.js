@@ -1,5 +1,8 @@
-var PhysicalLayer = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.PhysicalLayer', _PhysicalLayer);
 
     /*
         KNOWN ISSUES:
@@ -160,9 +163,19 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
     */
 
-    _PhysicalLayer.$inject = [];
+    _PhysicalLayer.$inject = [
+        'Common.QueueBuilder',
+        'Common.MathUtil',
+        'PhysicalLayer.ConfigurationParser',
+        'PhysicalLayer.PhysicalLayerInput'
+    ];
 
-    function _PhysicalLayer() {
+    function _PhysicalLayer(
+        QueueBuilder,
+        MathUtil,
+        ConfigurationParser,
+        PhysicalLayerInput
+    ) {
         var PL;
 
         PL = function (configuration) {
@@ -565,7 +578,5 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
         return PL;
     }
-
-    return _PhysicalLayer();        // TODO change it to dependency injection
 
 })();

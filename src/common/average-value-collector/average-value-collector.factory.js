@@ -1,9 +1,18 @@
-var AverageValueCollector = (function () {
+(function () {
     'use strict';
 
-    _AverageValueCollector.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('Common.AverageValueCollector', _AverageValueCollector);
 
-    function _AverageValueCollector() {
+    _AverageValueCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.Util'
+    ];
+
+    function _AverageValueCollector(
+        AbstractValueCollector,
+        Util
+    ) {
         var AVC;
 
         AVC = function () {
@@ -25,7 +34,5 @@ var AverageValueCollector = (function () {
 
         return AVC;
     }
-
-    return _AverageValueCollector();        // TODO change it to dependency injection
 
 })();

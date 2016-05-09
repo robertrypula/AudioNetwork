@@ -1,9 +1,16 @@
-var RxHandlerBuilder = (function () {
+(function () {
     'use strict';
 
-    _RxHandlerBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.RxHandlerBuilder', _RxHandlerBuilder);
 
-    function _RxHandlerBuilder() {
+    _RxHandlerBuilder.$inject = [
+        'PhysicalLayer.RxHandler'
+    ];
+
+    function _RxHandlerBuilder(
+        RxHandler
+    ) {
 
         function build(rxConstellationDiagram, rxExternalHandler) {
             return new RxHandler(rxConstellationDiagram, rxExternalHandler);
@@ -13,7 +20,5 @@ var RxHandlerBuilder = (function () {
             build: build
         };
     }
-
-    return new _RxHandlerBuilder();        // TODO change it to dependency injection
 
 })();
