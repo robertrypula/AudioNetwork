@@ -5,7 +5,7 @@ var
     physicalLayerDestroyInProgress = false,
     transmitAdapter = null,
     receiveAdapter = null,
-    txInput = AudioNetwork.DefaultConfig.RX_INPUT
+    txInput = AudioNetwork.PhysicalLayer.DefaultConfig.RX_INPUT
 ;
 
 function onLoad() {
@@ -29,7 +29,9 @@ function setupCpuLoadNotification() {
 
 function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     var
-        ofdmSpacing, baudMultiplicativeInverse, config, i, element, symbolDuration, guardInterval, symbolFrequency
+        DefaultConfig = AudioNetwork.PhysicalLayer.DefaultConfig,
+        ofdmSpacing, baudMultiplicativeInverse, config, i,
+        element, symbolDuration, guardInterval, symbolFrequency
     ;
 
     if (channelNumber < 1 || channelNumber > 2) {
@@ -37,23 +39,23 @@ function quickConfigure(channelNumber, pskSize, baud, ofdmSize) {
     }
 
     baudMultiplicativeInverse = 1.0 / baud;
-    symbolDuration = AudioNetwork.DefaultConfig.FACTOR_SYMBOL * baudMultiplicativeInverse;
-    guardInterval = AudioNetwork.DefaultConfig.FACTOR_GUARD * baudMultiplicativeInverse;
-    ofdmSpacing = AudioNetwork.DefaultConfig.OFDM_FREQUENCY_SPACING_POSITIVE_INTEGER / symbolDuration;
+    symbolDuration = DefaultConfig.FACTOR_SYMBOL * baudMultiplicativeInverse;
+    guardInterval = DefaultConfig.FACTOR_GUARD * baudMultiplicativeInverse;
+    ofdmSpacing = DefaultConfig.OFDM_FREQUENCY_SPACING_POSITIVE_INTEGER / symbolDuration;
     symbolFrequency = 1 / symbolDuration;
 
     document.getElementById('rx-dft-window-time').value = Math.round(symbolDuration * 1000 * 10) / 10;
-    document.getElementById('rx-notification-per-second').value = Math.round(AudioNetwork.DefaultConfig.SYMBOL_FREQUENCY_FACTOR * symbolFrequency);
+    document.getElementById('rx-notification-per-second').value = Math.round(DefaultConfig.SYMBOL_FREQUENCY_FACTOR * symbolFrequency);
     document.getElementById('symbol-duration').value = Math.round(symbolDuration * 1000 * 10) / 10;
     document.getElementById('guard-interval').value = Math.round(guardInterval * 1000 * 10) / 10;
-    document.getElementById('interpacket-gap').value = Math.round(AudioNetwork.DefaultConfig.FACTOR_INTERPACKET_GAP * guardInterval * 1000 * 10) / 10;
+    document.getElementById('interpacket-gap').value = Math.round(DefaultConfig.FACTOR_INTERPACKET_GAP * guardInterval * 1000 * 10) / 10;
 
     if (channelNumber === 1) {
-        config = AudioNetwork.DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
+        config = DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
         document.getElementById('tx-channel-config').value = config;
         document.getElementById('rx-channel-config').value = config;
     } else {
-        config = AudioNetwork.DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing + ' ' + AudioNetwork.DefaultConfig.CHANNEL_2_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
+        config = DefaultConfig.CHANNEL_1_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing + ' ' + DefaultConfig.CHANNEL_2_FREQUENCY + '-' + ofdmSize + '-' + ofdmSpacing;
         document.getElementById('tx-channel-config').value = config;
         document.getElementById('rx-channel-config').value = config;
     }
@@ -125,7 +127,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 
     generateHtml(txChannel, rxChannel);
 
-    physicalLayer = new AudioNetwork.PhysicalLayer({
+    physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
         tx: {
             channel: txChannel
         },
@@ -157,11 +159,11 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             }
         }
     });
-    transmitAdapter = new AudioNetwork.TransmitAdapter(physicalLayer);
-    receiveAdapter = new AudioNetwork.ReceiveAdapter(physicalLayer);
+    transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer);
+    receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
 
-    var powerChartQueue0 = new AudioNetwork.Queue(400);
-    // var powerChart0 = new AudioNetwork.PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
+    var powerChartQueue0 = new AudioNetwork.Common.Queue(400);
+    // var powerChart0 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
 
     physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
@@ -263,13 +265,13 @@ function rxInput(type) {
 
     switch (type) {
         case 'mic':
-            input = AudioNetwork.PhysicalLayerInput.MICROPHONE;
+            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.MICROPHONE;
             break;
         case 'loopback':
-            input = AudioNetwork.PhysicalLayerInput.LOOPBACK;
+            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.LOOPBACK;
             break;
         case 'rec':
-            input = AudioNetwork.PhysicalLayerInput.RECORDED_AUDIO;
+            input = AudioNetwork.PhysicalLayer.PhysicalLayerInput.RECORDED_AUDIO;
             break;
     }
 
@@ -284,7 +286,7 @@ function loadRecordedAudio() {
     physicalLayer.loadRecordedAudio(
         getStrById('recorded-audio-url'),
         function () {
-            physicalLayer.setRxInput(AudioNetwork.PhysicalLayerInput.RECORDED_AUDIO);
+            physicalLayer.setRxInput(AudioNetwork.PhysicalLayer.PhysicalLayerInput.RECORDED_AUDIO);
             physicalLayer.outputRecordedAudioEnable();
             uiRefresh();
         },
