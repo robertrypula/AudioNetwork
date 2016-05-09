@@ -96,7 +96,7 @@
                     - phaseOffsetCollector -> frequencyErrorCollector
                     - introduce some phaseErrorCollector ?
                 - [3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
-                - [1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)
+                - OPTIONAL [1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)
                 - OPTIONAL [4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)
                 - OPTIONAL [1.0h] Signal Strength like in cell phones
                 - OPTIONAL [1.0h] add new state: INTERPACKET_GAP
