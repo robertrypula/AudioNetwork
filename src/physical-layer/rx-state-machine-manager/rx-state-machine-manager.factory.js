@@ -9,7 +9,11 @@
         'Common.Util',
         'Common.AverageValueCollectorBuilder',
         'PhysicalLayer.DefaultConfig',
-        'PhysicalLayer.SignalPowerCollectorBuilder'
+        'PhysicalLayer.SignalPowerCollectorBuilder',
+        'PhysicalLayer.GuardPowerCollectorBuilder',
+        'PhysicalLayer.PhaseOffsetCollectorBuilder',
+        'PhysicalLayer.RxStateMachineBuilder',
+        'PhysicalLayer.ReceiveAdapterState'
     ];
 
     function _RxStateMachineManager(
@@ -17,7 +21,11 @@
         Util,
         AverageValueCollectorBuilder,
         DefaultConfig,
-        SignalPowerCollectorBuilder
+        SignalPowerCollectorBuilder,
+        GuardPowerCollectorBuilder,
+        PhaseOffsetCollectorBuilder,
+        RxStateMachineBuilder,
+        ReceiveAdapterState
     ) {
         var RSMM;
 

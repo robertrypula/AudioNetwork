@@ -1,9 +1,16 @@
-var AbstractChannelManager = (function () {
+(function () {
     'use strict';
 
-    _AbstractChannelManager.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
 
-    function _AbstractChannelManager() {
+    _AbstractChannelManager.$inject = [
+        'PhysicalLayer.Audio'
+    ];
+
+    function _AbstractChannelManager(
+        Audio
+    ) {
         var ACM;
 
         ACM = function () {
@@ -43,7 +50,5 @@ var AbstractChannelManager = (function () {
 
         return ACM;
     }
-
-    return _AbstractChannelManager();        // TODO change it to dependency injection
 
 })();

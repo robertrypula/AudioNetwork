@@ -1,9 +1,18 @@
-var CarrierGenerate = (function () {
+(function () {
     'use strict';
 
-    _CarrierGenerate.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.CarrierGenerate', _CarrierGenerate);
 
-    function _CarrierGenerate() {
+    _CarrierGenerate.$inject = [
+        'Common.MathUtil',
+        'Common.Util'
+    ];
+
+    function _CarrierGenerate(
+        MathUtil,
+        Util
+    ) {
         var CG;
 
         CG = function (samplePerPeriod, samplePerFade) {
@@ -119,7 +128,5 @@ var CarrierGenerate = (function () {
 
         return CG;
     }
-
-    return _CarrierGenerate();        // TODO change it to dependency injection
 
 })();

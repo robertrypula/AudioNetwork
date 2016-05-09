@@ -5,11 +5,13 @@
         .registerFactory('PhysicalLayer.ConstellationDiagram', _ConstellationDiagram);
 
     _ConstellationDiagram.$inject = [
-        'Common.MathUtil'
+        'Common.MathUtil',
+        'PhysicalLayer.ConstellationDiagramTemplateMain'
     ];
 
     function _ConstellationDiagram(
-        MathUtil
+        MathUtil,
+        ConstellationDiagramTemplateMain
     ) {
         var CD;
 

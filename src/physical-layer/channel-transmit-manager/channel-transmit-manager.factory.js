@@ -1,9 +1,24 @@
-var ChannelTransmitManager = (function () {
+(function () {
     'use strict';
 
-    _ChannelTransmitManager.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.ChannelTransmitManager', _ChannelTransmitManager);
 
-    function _ChannelTransmitManager() {
+    _ChannelTransmitManager.$inject = [
+        'PhysicalLayer.AbstractChannelManager',
+        'Common.MathUtil',
+        'PhysicalLayer.Audio',
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayer.ChannelTransmitBuilder'
+    ];
+
+    function _ChannelTransmitManager(
+        AbstractChannelManager,
+        MathUtil,
+        Audio,
+        DefaultConfig,
+        ChannelTransmitBuilder
+    ) {
         var CTM;
 
         CTM = function (configuration, bufferSize) {
@@ -99,7 +114,5 @@ var ChannelTransmitManager = (function () {
 
         return CTM;
     }
-
-    return _ChannelTransmitManager();        // TODO change it to dependency injection
 
 })();

@@ -13,7 +13,7 @@ AudioNetwork.Injector = (function () {
     Injector.RESOLVE_RECURSION_LIMIT = 20;
     Injector.RESOLVE_RECURSION_LIMIT_EXCEED_EXCEPTION = 'Injector - resolve recursion limit exceed';
     Injector.MULTIPLE_REGISTER_EXCEPTION = 'Injector - multiple register calls for the same name';
-    Injector.UNABLE_TO_FIND_ITEM_EXCEPTION = 'Injector - unable to find factory/service for given name';
+    Injector.UNABLE_TO_FIND_ITEM_EXCEPTION = 'Injector - unable to find factory/service for given name: ';
     Injector.TYPE = {
         SERVICE: 'SERVICE',
         FACTORY: 'FACTORY'
@@ -139,14 +139,8 @@ AudioNetwork.Injector = (function () {
                 return this.$$injectRepository[key];
             }
         }
-        throw Injector.UNABLE_TO_FIND_ITEM_EXCEPTION;
+        throw Injector.UNABLE_TO_FIND_ITEM_EXCEPTION + name;
     };
 
     return new Injector();
 })();
-
-
-// aliases
-// AudioNetwork.PhysicalLayer = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer');
-// AudioNetwork.factory = AudioNetwork.Injector.registerFactory;
-// AudioNetwork.service = AudioNetwork.Injector.registerService;

@@ -1,9 +1,16 @@
-var AnalyserChartBuilder = (function () {
+(function () {
     'use strict';
 
-    _AnalyserChartBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.AnalyserChartBuilder', _AnalyserChartBuilder);
 
-    function _AnalyserChartBuilder() {
+    _AnalyserChartBuilder.$inject = [
+        'PhysicalLayer.AnalyserChart'
+    ];
+
+    function _AnalyserChartBuilder(
+        AnalyserChart
+    ) {
 
         function build(parentElement, analyser, height, colorData, colorAxis) {
             return new AnalyserChart(parentElement, analyser, height, colorData, colorAxis);
@@ -13,7 +20,5 @@ var AnalyserChartBuilder = (function () {
             build: build
         };
     }
-
-    return new _AnalyserChartBuilder();        // TODO change it to dependency injection
 
 })();

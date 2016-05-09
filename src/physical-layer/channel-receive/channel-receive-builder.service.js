@@ -1,9 +1,16 @@
-var ChannelReceiveBuilder = (function () {
+(function () {
     'use strict';
 
-    _ChannelReceiveBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.ChannelReceiveBuilder', _ChannelReceiveBuilder);
 
-    function _ChannelReceiveBuilder() {
+    _ChannelReceiveBuilder.$inject = [
+        'PhysicalLayer.ChannelReceive'
+    ];
+
+    function _ChannelReceiveBuilder(
+        ChannelReceive
+    ) {
 
         function build(index, configuration) {
             return new ChannelReceive(index, configuration);
@@ -13,7 +20,5 @@ var ChannelReceiveBuilder = (function () {
             build: build
         };
     }
-
-    return new _ChannelReceiveBuilder();        // TODO change it to dependency injection
 
 })();

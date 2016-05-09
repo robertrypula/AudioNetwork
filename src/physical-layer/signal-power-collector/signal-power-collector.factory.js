@@ -5,7 +5,7 @@
         .registerFactory('PhysicalLayer.SignalPowerCollector', _SignalPowerCollector);
 
     _SignalPowerCollector.$inject = [
-        'PhysicalLayer.AbstractValueCollector',
+        'Common.AbstractValueCollector',
         'Common.MathUtil'
     ];
 

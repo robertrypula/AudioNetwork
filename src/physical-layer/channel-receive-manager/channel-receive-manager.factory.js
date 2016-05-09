@@ -1,9 +1,20 @@
-var ChannelReceiveManager = (function () {
+(function () {
     'use strict';
 
-    _ChannelReceiveManager.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.ChannelReceiveManager', _ChannelReceiveManager);
 
-    function _ChannelReceiveManager() {
+    _ChannelReceiveManager.$inject = [
+        'PhysicalLayer.AbstractChannelManager',
+        'PhysicalLayer.Audio',
+        'PhysicalLayer.ChannelReceiveBuilder'
+    ];
+
+    function _ChannelReceiveManager(
+        AbstractChannelManager,
+        Audio,
+        ChannelReceiveBuilder
+    ) {
         var CRM;
 
         CRM = function (configuration, bufferSize) {
@@ -100,7 +111,5 @@ var ChannelReceiveManager = (function () {
 
         return CRM;
     }
-
-    return _ChannelReceiveManager();        // TODO change it to dependency injection
 
 })();

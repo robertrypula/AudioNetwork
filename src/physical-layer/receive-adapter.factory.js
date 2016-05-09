@@ -4,9 +4,17 @@
     AudioNetwork.Injector
         .registerFactory('PhysicalLayer.ReceiveAdapter', _ReceiveAdapter);
 
-    _ReceiveAdapter.$inject = [];
+    _ReceiveAdapter.$inject = [
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayer.RxStateMachineManagerBuilder',
+        'Common.MathUtil'
+    ];
 
-    function _ReceiveAdapter() {
+    function _ReceiveAdapter(
+        DefaultConfig,
+        RxStateMachineManagerBuilder,
+        MathUtil
+    ) {
         var RA;
 
         RA = function (physicalLayer) {

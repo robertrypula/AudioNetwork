@@ -167,14 +167,26 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         'Common.QueueBuilder',
         'Common.MathUtil',
         'PhysicalLayer.ConfigurationParser',
-        'PhysicalLayer.PhysicalLayerInput'
+        'PhysicalLayer.PhysicalLayerInput',
+        'PhysicalLayer.RxHandlerBuilder',
+        'PhysicalLayer.ChannelTransmitManagerBuilder',
+        'PhysicalLayer.ChannelReceiveManagerBuilder',
+        'PhysicalLayer.ConstellationDiagramBuilder',
+        'PhysicalLayer.AnalyserChartBuilder',
+        'PhysicalLayer.Audio'
     ];
 
     function _PhysicalLayer(
         QueueBuilder,
         MathUtil,
         ConfigurationParser,
-        PhysicalLayerInput
+        PhysicalLayerInput,
+        RxHandlerBuilder,
+        ChannelTransmitManagerBuilder,
+        ChannelReceiveManagerBuilder,
+        ConstellationDiagramBuilder,
+        AnalyserChartBuilder,
+        Audio
     ) {
         var PL;
 

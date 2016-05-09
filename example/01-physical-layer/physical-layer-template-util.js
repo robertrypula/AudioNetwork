@@ -242,13 +242,13 @@ function $$uiRefreshButtonInputSpecific() {
     removeClass('rx-input-rec', 'active');
 
     switch (physicalLayer.getRxInput()) {
-        case PhysicalLayerInput.MICROPHONE:
+        case AudioNetwork.PhysicalLayerInput.MICROPHONE:
             addClass('rx-input-mic', 'active');
             break;
-        case PhysicalLayerInput.LOOPBACK:
+        case AudioNetwork.PhysicalLayerInput.LOOPBACK:
             addClass('rx-input-loopback', 'active');
             break;
-        case PhysicalLayerInput.RECORDED_AUDIO:
+        case AudioNetwork.PhysicalLayerInput.RECORDED_AUDIO:
             addClass('rx-input-rec', 'active');
             break;
     }

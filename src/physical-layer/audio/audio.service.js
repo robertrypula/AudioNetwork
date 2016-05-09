@@ -1,5 +1,8 @@
-var Audio = (function () {
+(function () {
     'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.Audio', _Audio);
 
     _Audio.$inject = [];
 
@@ -152,7 +155,5 @@ var Audio = (function () {
             createScriptProcessor: createScriptProcessor
         };
     }
-
-    return new _Audio();        // TODO change it to dependency injection
 
 })();

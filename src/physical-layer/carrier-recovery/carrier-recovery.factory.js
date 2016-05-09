@@ -1,9 +1,20 @@
-var CarrierRecovery = (function () {
+(function () {
     'use strict';
 
-    _CarrierRecovery.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.CarrierRecovery', _CarrierRecovery);
 
-    function _CarrierRecovery() {
+    _CarrierRecovery.$inject = [
+        'Common.QueueBuilder',
+        'Common.MathUtil',
+        'Common.Util'
+    ];
+
+    function _CarrierRecovery(
+        QueueBuilder,
+        MathUtil,
+        Util
+    ) {
         var CR;
 
         CR = function (samplePerPeriod, dftWindowSize) {
@@ -94,7 +105,5 @@ var CarrierRecovery = (function () {
 
         return CR;
     }
-
-    return _CarrierRecovery();        // TODO change it to dependency injection
 
 })();

@@ -4,9 +4,13 @@
     AudioNetwork.Injector
         .registerFactory('PhysicalLayer.RxStateMachine', _RxStateMachine);
 
-    _RxStateMachine.$inject = [];
+    _RxStateMachine.$inject = [
+        'PhysicalLayer.ReceiveAdapterState'
+    ];
 
-    function _RxStateMachine() {
+    function _RxStateMachine(
+        ReceiveAdapterState
+    ) {
         var RSM;
 
         RSM = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {

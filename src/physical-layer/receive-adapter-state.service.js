@@ -1,4 +1,4 @@
-var ReceiveAdapterState = (function () {
+(function () {
     'use strict';
 
     AudioNetwork.Injector

@@ -1,9 +1,16 @@
-var CarrierGenerateBuilder = (function () {
+(function () {
     'use strict';
 
-    _CarrierGenerateBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.CarrierGenerateBuilder', _CarrierGenerateBuilder);
 
-    function _CarrierGenerateBuilder() {
+    _CarrierGenerateBuilder.$inject = [
+        'PhysicalLayer.CarrierGenerate'
+    ];
+
+    function _CarrierGenerateBuilder(
+        CarrierGenerate
+    ) {
 
         function build(samplePerPeriod) {
             return new CarrierGenerate(samplePerPeriod);
@@ -13,7 +20,5 @@ var CarrierGenerateBuilder = (function () {
             build: build
         };
     }
-
-    return new _CarrierGenerateBuilder();        // TODO change it to dependency injection
 
 })();

@@ -1,9 +1,20 @@
-var ChannelReceive = (function () {
+(function () {
     'use strict';
 
-    _ChannelReceive.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.ChannelReceive', _ChannelReceive);
 
-    function _ChannelReceive() {
+    _ChannelReceive.$inject = [
+        'PhysicalLayer.Audio',
+        'PhysicalLayer.CarrierRecoveryBuilder',
+        'Common.MathUtil'
+    ];
+
+    function _ChannelReceive(
+        Audio,
+        CarrierRecoveryBuilder,
+        MathUtil
+    ) {
         var CR;
             
         CR = function (index, configuration) {
@@ -112,7 +123,5 @@ var ChannelReceive = (function () {
 
         return CR;
     }
-
-    return _ChannelReceive();        // TODO change it to dependency injection
 
 })();

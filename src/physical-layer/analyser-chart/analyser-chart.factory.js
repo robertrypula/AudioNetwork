@@ -1,9 +1,22 @@
-var AnalyserChart = (function () {
+(function () {
     'use strict';
 
-    _AnalyserChart.$inject = [];
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.AnalyserChart', _AnalyserChart);
 
-    function _AnalyserChart() {
+    _AnalyserChart.$inject = [
+        'PhysicalLayer.AnalyserChartTemplateAxisX',
+        'PhysicalLayer.AnalyserChartTemplateMain',
+        'PhysicalLayer.Audio',
+        'Common.MathUtil'
+    ];
+
+    function _AnalyserChart(
+        AnalyserChartTemplateAxisX,
+        AnalyserChartTemplateMain,
+        Audio,
+        MathUtil
+    ) {
         var AC;
         
         AC = function (parentElement, analyser, height, colorData, colorAxis) {
@@ -252,7 +265,5 @@ var AnalyserChart = (function () {
 
         return AC;
     }
-
-    return _AnalyserChart();        // TODO change it to dependency injection
 
 })();

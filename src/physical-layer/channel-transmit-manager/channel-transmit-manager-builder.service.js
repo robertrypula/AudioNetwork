@@ -1,9 +1,16 @@
-var ChannelTransmitManagerBuilder = (function () {
+(function () {
     'use strict';
 
-    _ChannelTransmitManagerBuilder.$inject = [];
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.ChannelTransmitManagerBuilder', _ChannelTransmitManagerBuilder);
 
-    function _ChannelTransmitManagerBuilder() {
+    _ChannelTransmitManagerBuilder.$inject = [
+        'PhysicalLayer.ChannelTransmitManager'
+    ];
+
+    function _ChannelTransmitManagerBuilder(
+        ChannelTransmitManager
+    ) {
 
         function build(configuration, bufferSize) {
             return new ChannelTransmitManager(configuration, bufferSize);
@@ -13,7 +20,5 @@ var ChannelTransmitManagerBuilder = (function () {
             build: build
         };
     }
-
-    return new _ChannelTransmitManagerBuilder();        // TODO change it to dependency injection
 
 })();
