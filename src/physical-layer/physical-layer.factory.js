@@ -119,9 +119,9 @@
                 + change input TX to LOOPBACK
                 + move templates code to dedicated files
                 + introduce Dependency Injection
+                + prepare release version + some code minification
                 - remove Promises
                 - use setTimeout instead setInverval (?)
-                - prepare release version + some code minification
 
             - Finalization complex:
                 + measure CPU load by measuring times before and after execution

@@ -3,6 +3,8 @@
 // AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
 var AudioNetwork = {};
 
+AudioNetwork.Version = '1.0.0';
+
 AudioNetwork.Injector = (function () {
     var Injector;
 
