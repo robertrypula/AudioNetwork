@@ -2,7 +2,7 @@
   "name": "audio-network",
   "version": "1.0.0",
   "description": "Pure JavaScript library without any dependencies that allows you to send binary data using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers and the browser!",
-  "main": "build/audio-network.js",
+  "main": "build/audio-network-v1.0.1.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",

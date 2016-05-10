@@ -11,6 +11,7 @@ var
 function onLoad() {
     quickConfigure(1, 2, 4, 1);
     setupCpuLoadNotification();
+    document.getElementById('audio-network-version').innerHTML = 'v' + AudioNetwork.Version;
 }
 
 function setupCpuLoadNotification() {

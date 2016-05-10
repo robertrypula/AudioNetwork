@@ -16,7 +16,7 @@ gulp.task('default', function() {
             './src/audio-network-end.js'
         ])
         .pipe(debug())
-        .pipe(concat('audio-network-v1.0.0.js'))
+        .pipe(concat('audio-network-v1.0.1.js'))
         .pipe(gulp.dest(DEST))
         .pipe(uglify())
         .pipe(rename({ extname: '.min.js' }))
