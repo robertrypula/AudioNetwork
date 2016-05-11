@@ -2,7 +2,7 @@
   "name": "audio-network",
   "version": "1.0.1",
   "description": "Pure JavaScript library without any dependencies that allows you to send binary data using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers and the browser!",
-  "main": "build/audio-network-v1.0.1.js",
+  "main": "build/audio-network-v1.0.2.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -25,8 +25,14 @@
     "waves",
     "transmit",
     "receive",
-    "data",
-    "discrete fourier transform"
+    "binary data",
+    "PSK",
+    "QPSK",
+    "BPSK",
+    "OFDM",
+    "phase shift keying", 
+    "discrete fourier transform",
+    "orthogonal frequency division multiplexing"
   ],
   "author": "Robert Rypuła",
   "license": "ISC",

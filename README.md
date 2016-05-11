@@ -11,4 +11,13 @@ the browser!
 
 >This project is still under development. Documentation is also planned but... little later :)
 
+## Features
+
+AudioNetwork library uses WebAPI only for retrieving audio samples from the microphone and sending generated samples to the speakers via ScriptProcessingNode. AnalyserNode is used only to show spectrum on canvas but this is optional visual feature. Any other DSP is performed by internal AudioNetwork's classes or services. Main goal was to use PSK modulation to send/receive data. Unfortunatelly AnalyserNode's FFT output provides only amplitude information without phase. This have led to creation own implementation of Discrete Fourier Transform algorithm. List of features:
+
+- tbc...
+
+## How to use?
+At demo page you will
+
 (c) Robert Rypuła 2015-2016
