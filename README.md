@@ -5,11 +5,34 @@ Pure JavaScript library without any dependencies that allows you to send binary 
 using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers and
 the browser!
 
-[Demo](https://audio-network.rypula.pl/)
+[Demo - full features](https://audio-network.rypula.pl/)
+Demo - simple [soon]
 
 [Carrier generate and recovery tests](https://audio-network.rypula.pl/example/carrier.html)
 
 >This project is still under development. Documentation is also planned but... little later :)
+
+>Currently there is only one demo available which is using all possible features of AudioNetwork lib. In near
+>future I will add much simpler version with only few lines of code. That would be much easier to understand.
+
+## How can I test it?
+
+First of all you need to have two devices. One for sending, one for receiving data. During development for sending
+I'm using very old Galaxy S2 smartphone with Firefox. On the other side for receiving I'm using laptop with Chrome
+browser. I guess it should work with any other device with browser that supports Web Audio API.
+
+Demo is divided into two sections - Receive and Transmit (blue bar with white text). At **Receive** section you can
+check current status of ReceiveAdapter mostly in orange box. First line inside this box is current adapter state
+(capital letters value like IDLE_INIT). Other important area to look is RX adapter - PACKETS. Here we will find
+any potential packet that will arrive thought air. I wrote potential because integrity of incoming packets is not
+verified. You can find there lots of corrupted data. It's because it's not PhysicalLayer responsibility to deal with
+it. This will be implemented in some future releases of AudioNetwork inside NetworkLayer. At **Transmit** section
+it's not that much. We have only few buttons to send Sync signal, packet and individual symbols [TODO]
+
+Steps to send some data:
+1. Before you load demo page on Receiver side you need to be quiet :) It's because ReceiveAdapter needs to properly
+initialize idle state power. In other words it needs to determine average noise level around you. This process is
+2.
 
 ## How to install?
 
@@ -25,19 +48,67 @@ or
 npm install audio-network
 ```
 
-After downloading look into build directory. You will find there both minified and unminified js file with whole library. Pick one and include it into your html. For example:
+After downloading look into build directory. You will find there both minified and unminified js file with whole
+library. Pick one and include it into your html. For example:
 
 ```
 <script src="node_modules/audio-network/build/audio-network-v1.0.1.min.js"></script>
 ```
 
-When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork. It's the entry point for all components:
+When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork.
+It's the entry point for all components:
 
 ```
-var physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
+var physicalLayer, transmitAdapter, receiveAdapter;
+
+physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
     // config
-});
+}),
+transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
+receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
 ```
+
+>Under the hood AudioNetwork works on simple
+>[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8) implementation.
+>For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
+>AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
+>you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)
+
+## Features
+
+- Dependency free library
+- Unit test friendly. Build-in Dependency Injector (tests are planned in the future)
+- Multiple channel support for parallel transmission without collisions
+- OFDM (Orthogonal Frequency-Division Multiplexing) support per each channel. This helps to save bandwidth and pack
+more data into one burst.
+- [Constellation Diagram](https://en.wikipedia.org/wiki/Constellation_diagram), that helps to easily verify
+phase and amplitude of carrier frequency in the realtime.
+- [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal bases on AnalyserNode
+for Web Audio API.
+- Adapter classes
+([ReceiveAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js)
+and
+[TransmitAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js))
+that acts as easy-to-use wrappers over raw
+[PhysicalLayer](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js)
+class with lower level tx and rx methods. If you want you can also write your own adapter class and attach
+PhysicalLayer to it.
+- ReceiveAdapter internally has state machine with states listed
+[here](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js).
+The idea is to extract potential packets from raw carrier details data that rx method provides.
+- Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmitter and receiver
+frequencies are de-tuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that
+we will not be sure what symbol we are reading. Fortunately Adapter classes adds SyncPreamble (symbol with zero
+phase offset relative to reference) before each packet. ReceiveAdapter takes that SyncPreamble and restores symbol
+alignment before each packet. During packet transmission it may still rotate but at least at the beginning of the
+packet symbols are aligned at both sides - sender and receiver
+- Auto frequency correction. Similar to point above. PSK is ultra sensitive to frequency offsets so basically we need
+to fine-tune receiver to sender. This feature looks how fast constellation point rotates and corrects receiver's
+reference carrier frequency to minimize this effect.
+- Auto detection of signal and noise levels. ReceiveAdapter after reset first listens to ambient noise to set
+NoisePowerAverage (during IDLE_INIT state). Then it waits for sender for synchronization signal which is
+basically symbol zero transmitted for few seconds. During sync transmission receiver stores SignalPowerAverage
+at SIGNAL_INIT state. After those steps receiver calculates PowerThreshold and it's ready for packets from sender.
 
 ## Few more words about the project
 
@@ -73,31 +144,7 @@ very simple. We will not find there any mathematical tricks like used in FFT. If
 [CarrierRecovery](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/carrier-recovery/carrier-recovery.factory.js).
 
 There's no rose without a thorn... CarrierRecovery class code is simple but when we would like to create more of its
-instances, to have more carrier frequencies, we will reduce overall performance pretty fast. It is not good but at least it's closer to [KISS](https://en.wikipedia.org/wiki/KISS_principle) design principle ;)
-
-## Features
-
-- Dependency free library
-- Unit test friendly. Build-in Dependency Injector (tests are planned in the future)
-- Multiple channel support for parallel transmission without collisions
-- OFDM (Orthogonal Frequency-Division Multiplexing) support per each channel. This helps to save bandwidth and pack more data into one burst.
-- [Constellation Diagram](https://en.wikipedia.org/wiki/Constellation_diagram), that helps to easily verify
-phase and amplitude of carrier frequency in the realtime.
-- [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal bases on AnalyserNode
-for Web Audio API.
-- Adapter classes
-([ReceiveAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js)
-and
-[TransmitAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js))
-that acts as easy-to-use wrappers over raw
-[PhysicalLayer](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js)
-class with lower level tx and rx methods. If you want you can also write your own adapter class and attach PhysicalLayer to it. 
-- ReceiveAdapter internally has state machine with states listed [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js). The idea is to extract potential packets from raw carrier details data that rx method provides.
-- Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmiter and receiver frequencies are detuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that we will not be sure what symbol we are reading. Fortunatelly Adapter classes adds SyncPreamble (symbol with zero phase offset relative to reference) before each packet. ReceiveAdapter takes that SyncPreamble and restores symbol alignment before each packet. During packet transmission it may still rotate but at least at the begining of the packet symbols are aligned at both sides - sender and receiver
-- Auto frequency correction. Similar to point above. PSK is ultra sensitive to frequency offsets so basicaly we need to fine-tune receiver to sender. This feature looks how fast constellation point rotates and corrects receiver's reference carier frequency to minimize this effect.
-- Auto detection of signal and noise levels. ReceiveAdapter after reset first listens to ambient noise to set NoisePowerAverage (during IDLE_INIT state). Then it waits for sender for synchronization signal which is basically symbol zero transmited for few seconds. During sync transmission receiver stores SignalPowerAverage at SIGNAL_INIT state. After those steps receiver calculates PowerThreshold and it's ready for packets from sender.
-
-## How to use?
-- todo
+instances, to have more carrier frequencies, we will reduce overall performance pretty fast. It is not good but at
+least it's closer to [KISS](https://en.wikipedia.org/wiki/KISS_principle) design principle ;)
 
 (c) Robert Rypuła 2015-2016
