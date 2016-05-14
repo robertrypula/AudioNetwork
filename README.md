@@ -6,13 +6,14 @@ using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers a
 the browser!
 
 [Demo - full features](https://audio-network.rypula.pl/)
+
 Demo - simple [soon]
 
 [Carrier generate and recovery tests](https://audio-network.rypula.pl/example/carrier.html)
 
 >This project is still under development. Documentation is also planned but... little later :)
 
->Currently there is only one demo available which is using all possible features of AudioNetwork lib. In near
+>Currently there is only one demo available which is using all possible features of AudioNetwork library. In near
 >future I will add much simpler version with only few lines of code. That would be much easier to understand.
 
 ## How can I test it?
@@ -21,18 +22,43 @@ First of all you need to have two devices. One for sending, one for receiving da
 I'm using very old Galaxy S2 smartphone with Firefox. On the other side for receiving I'm using laptop with Chrome
 browser. I guess it should work with any other device with browser that supports Web Audio API.
 
-Demo is divided into two sections - Receive and Transmit (blue bar with white text). At **Receive** section you can
-check current status of ReceiveAdapter mostly in orange box. First line inside this box is current adapter state
-(capital letters value like IDLE_INIT). Other important area to look is RX adapter - PACKETS. Here we will find
-any potential packet that will arrive thought air. I wrote potential because integrity of incoming packets is not
-verified. You can find there lots of corrupted data. It's because it's not PhysicalLayer responsibility to deal with
-it. This will be implemented in some future releases of AudioNetwork inside NetworkLayer. At **Transmit** section
-it's not that much. We have only few buttons to send Sync signal, packet and individual symbols [TODO]
+Demo is divided into two sections - `Receive` and `Transmit` (blue bar with white text).
 
-Steps to send some data:
-1. Before you load demo page on Receiver side you need to be quiet :) It's because ReceiveAdapter needs to properly
-initialize idle state power. In other words it needs to determine average noise level around you. This process is
-2.
+### Receive section
+
+At `Receive` section you can check current status of `ReceiveAdapter`. The most important about adapter is its state.
+It's first line at orange box (capital letters value like `IDLE_INIT`, `FIRST_SYNC_WAIT`, etc). Other important area
+to look is `RX adapter - PACKETS`. Here you will find any potential packet that will be detected in the air. I wrote
+potential because integrity of incoming packets is not verified. You can find there lots of corrupted data. It's
+because it's not `PhysicalLayer` responsibility to deal with it. This will be implemented in some future releases of
+AudioNetwork inside `NetworkLayer`.
+
+### Transmit section
+
+At `Transmit` section there is not that much as at `Receive`. You will find there only few buttons to send
+`SYNC` signal, `PACKET` and individual symbols. Number of unique symbols is determined by `PSK symbol size`.
+At `Packet` textarea you always need to remember to put one space between each symbol but without trailing
+and leading spaces.
+
+### Enough of reading, tell me how to send something!
+
+1. [_Receiver side_] Before you load demo page you need to be quiet :) It's because `ReceiveAdapter`
+needs to properly initialize `averageIdlePower`. In other words it needs to listen to 'silence' around you when
+no signal is transited. It's indicated by `IDLE_INIT` state. If you fell that your silence wasn't good enough you
+can always use `RESET` button to start again.
+
+2. [_Receiver side_] When `averageIdlePower` collecting is complete `ReceiveAdapter` will change it's state to
+`FIRST_SYNC_WAIT`. Now it's time to grab you transmitter and read next point.
+
+3. [_Transmitter side_] Now you need to click on `SYNC` button. It will transmit 3 seconds of synchronization
+signal that will allow `ReceiveAdapter` to properly initialize `averageFirstSyncPower` and additionally fine-tune
+receive reference frequency and phase offset. When all will be done receiver will show `IDLE` state. It means that
+we are ready to send some data.
+
+4. [_Transmitter side_] Not you can click on `Send packet` button. All inside packet textarea should be visible
+on receiver's side at `RX adapter - PACKETS`. Default quick config button uses PSK-2 so you can use only symbols
+0 and 1. But it's enough to send everything. For example to send ASCII 'a' character you need to put inside
+textarea `0 1 1 0 0 0 0 1`
 
 ## How to install?
 
@@ -80,7 +106,7 @@ receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
 - Unit test friendly. Build-in Dependency Injector (tests are planned in the future)
 - Multiple channel support for parallel transmission without collisions
 - OFDM (Orthogonal Frequency-Division Multiplexing) support per each channel. This helps to save bandwidth and pack
-more data into one burst.
+more data into one burst. It's the same technique as used in many existing standards like LTE, Wi-Fi, DAB, DVB.
 - [Constellation Diagram](https://en.wikipedia.org/wiki/Constellation_diagram), that helps to easily verify
 phase and amplitude of carrier frequency in the realtime.
 - [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal bases on AnalyserNode
