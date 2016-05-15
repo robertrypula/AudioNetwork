@@ -78,7 +78,7 @@ but it's enough to send data bit by bit. For example to send ASCII `a` character
 textarea `0 1 1 0 0 0 0 1`.
 
 7. **[Receiving device - Receiver section]** - After short moment data from transmitter textarea should appear
-at `RX adapter - PACKETS`. Congratulations, you just send something thought air in you room!
+at `RX adapter - PACKETS`. Congratulations, you just send something **thought air in your room**!
 
 >If at any point you will see `FATAL_ERROR` state you need to click on `RESET` button and start all points again.
 
