@@ -100,7 +100,7 @@ After downloading look into build directory. You will find there both minified a
 library. Pick one and include it into your html. For example:
 
 ```
-<script src="node_modules/audio-network/build/audio-network-v1.0.1.min.js"></script>
+<script src="node_modules/audio-network/build/audio-network-v1.0.2.min.js"></script>
 ```
 
 When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork.
