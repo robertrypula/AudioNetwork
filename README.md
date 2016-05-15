@@ -22,43 +22,65 @@ First of all you need to have two devices. One for sending, one for receiving da
 I'm using very old Galaxy S2 smartphone with Firefox. On the other side for receiving I'm using laptop with Chrome
 browser. I guess it should work with any other device with browser that supports Web Audio API.
 
+>AudioNetwork needs raw microphone output without any filter applied. You can verify that by opening `Sound` settings
+>in your system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
+>is when your microphone has some hardware filter that you can't disable. In this case you need to throw it away and
+>buy a new one ;)
+
 Demo is divided into two sections - `Receive` and `Transmit` (blue bar with white text).
 
 ### Receive section
 
-At `Receive` section you can check current status of `ReceiveAdapter`. The most important about adapter is its state.
-It's first line at orange box (capital letters value like `IDLE_INIT`, `FIRST_SYNC_WAIT`, etc). Other important area
-to look is `RX adapter - PACKETS`. Here you will find any potential packet that will be detected in the air. I wrote
-potential because integrity of incoming packets is not verified. You can find there lots of corrupted data. It's
-because it's not `PhysicalLayer` responsibility to deal with it. This will be implemented in some future releases of
-AudioNetwork inside `NetworkLayer`.
+At `Receive` section you can check current status of `ReceiveAdapter`.
+
+>`ReceiveAdapter` is wrapper for lower level `PhysicalLayer`'s object `rx` events.
+
+The most important thing in this adapter is its state. You can find it at the top of the orange box (capital letters
+text like `IDLE_INIT`, `FIRST_SYNC_WAIT`, etc). Other important area to look is output of `RX adapter - PACKETS`.
+Here you can find any potential packet that will be found in the air. I wrote potential because integrity of
+incoming packets is not verified so some of them might be corrupted. It's because it's not `PhysicalLayer`
+responsibility to deal with it. In some future release of AudioNetwork packet verification will be added.
+This would be in next layer in the network stack - `DataLinkLayer` (like in
+[OSI](https://en.wikipedia.org/wiki/OSI_model) model).
+
+>Orange box is kind of developer debug box - it will be replaced to some nicer UX in the future...
 
 ### Transmit section
 
-At `Transmit` section there is not that much as at `Receive`. You will find there only few buttons to send
-`SYNC` signal, `PACKET` and individual symbols. Number of unique symbols is determined by `PSK symbol size`.
-At `Packet` textarea you always need to remember to put one space between each symbol but without trailing
-and leading spaces.
+At `Transmit` section there is not that much as at `Receive` section. You will find there only few buttons to send
+`SYNC` signal, `PACKET` and individual symbols (`0`, `1`, ...). Number of unique symbols is determined by
+`PSK symbol size` (you need to switch view type to `Complex` to see that). At `Packet` textarea please remember to
+always put one space between each symbol but whole text needs to be without trailing and leading spaces.
 
 ### Enough of reading, tell me how to send something!
 
-1. [_Receiver side_] Before you load demo page you need to be quiet :) It's because `ReceiveAdapter`
-needs to properly initialize `averageIdlePower`. In other words it needs to listen to 'silence' around you when
-no signal is transited. It's indicated by `IDLE_INIT` state. If you fell that your silence wasn't good enough you
-can always use `RESET` button to start again.
+1. **[Receiving device - Receiver section]** - Before you load demo page you need to be quiet :) It's because
+`ReceiveAdapter` needs to properly initialize `averageIdlePower`. In other words it needs to listen to 'silence'
+around you when no signal is transmitted. It's indicated by `IDLE_INIT` state. If you fell that your silence wasn't
+good enough you can always use `RESET` button to start again.
 
-2. [_Receiver side_] When `averageIdlePower` collecting is complete `ReceiveAdapter` will change it's state to
-`FIRST_SYNC_WAIT`. Now it's time to grab you transmitter and read next point.
+2. **[Receiving device - Receiver section]** - When `averageIdlePower` collecting is complete `ReceiveAdapter`
+will change it's state to `FIRST_SYNC_WAIT`. Now it's time to grab your transmitting device and read next point.
 
-3. [_Transmitter side_] Now you need to click on `SYNC` button. It will transmit 3 seconds of synchronization
-signal that will allow `ReceiveAdapter` to properly initialize `averageFirstSyncPower` and additionally fine-tune
-receive reference frequency and phase offset. When all will be done receiver will show `IDLE` state. It means that
-we are ready to send some data.
+3. **[Transmitting device - transmit section]** - All you need to do is to click on `SYNC` button. It will transmit
+3 seconds of synchronization signal that will allow receiver device to setup everything.
 
-4. [_Transmitter side_] Not you can click on `Send packet` button. All inside packet textarea should be visible
-on receiver's side at `RX adapter - PACKETS`. Default quick config button uses PSK-2 so you can use only symbols
-0 and 1. But it's enough to send everything. For example to send ASCII 'a' character you need to put inside
-textarea `0 1 1 0 0 0 0 1`
+4. **[Receiving device - Receiver section]** - When `SYNC` is transmitted `ReceiveAdapter` state should change to
+`FIRST_SYNC`.
+
+5. **[Receiving device - Receiver section]** - When `SYNC` transmission is over `ReceiveAdapter` state at the end
+should change to `IDLE`. It means that `ReceiveAdapter` properly initialized `averageFirstSyncPower` and
+additionally receiver reference frequency and phase offset were fine-tuned. **Now we are ready to send some data!**
+
+6. **[Transmitting device - transmit section]** - Now you can click on `Send packet` button. All data inside textarea
+should be transferred to receiving device. By default PSK-2 modulation is used so you can use only symbols `0` and `1`
+but it's enough to send data bit by bit. For example to send ASCII `a` character (0x61) you need to put inside
+textarea `0 1 1 0 0 0 0 1`.
+
+7. **[Receiving device - Receiver section]** - After short moment data from transmitter textarea should appear
+at `RX adapter - PACKETS`. Congratulations, you just send something thought air in you room!
+
+>If at any point you will see FATAL_ERROR state you need to click on `RESET` button and start all points again.
 
 ## How to install?
 
