@@ -65,7 +65,7 @@ will change it's state to `FIRST_SYNC_WAIT`. Now it's time to grab your transmit
 3. **[Transmitting device - transmit section]** - All you need to do is to click on `SYNC` button. It will transmit
 3 seconds of synchronization signal that will allow receiver device to setup everything.
 
-4. **[Receiving device - Receiver section]** - When `SYNC` is transmitted `ReceiveAdapter` state should change to
+4. **[Receiving device - Receiver section]** - When `SYNC` transmission is in progress `ReceiveAdapter` state should change to
 `FIRST_SYNC`.
 
 5. **[Receiving device - Receiver section]** - When `SYNC` transmission is over `ReceiveAdapter` state at the end
@@ -114,6 +114,7 @@ physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
 }),
 transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
 receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+// todo put whole example here
 ```
 
 >Under the hood AudioNetwork works on simple
@@ -140,23 +141,22 @@ and
 that acts as easy-to-use wrappers over raw
 [PhysicalLayer](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js)
 class with lower level tx and rx methods. If you want you can also write your own adapter class and attach
-PhysicalLayer to it.
+PhysicalLayer to it. AudioNetwork is shipped with PSK adapters but you can write any other modulation like PWM.
 - ReceiveAdapter internally has state machine with states listed
 [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js).
 The idea is to extract potential packets from raw carrier details data that rx method provides.
 - Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmitter and receiver
 frequencies are de-tuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that
-we will not be sure what symbol we are reading. Fortunately Adapter classes adds SyncPreamble (symbol with zero
-phase offset relative to reference) before each packet. ReceiveAdapter takes that SyncPreamble and restores symbol
+we will not be sure what symbol we are reading. Fortunately Adapter classes adds `SyncPreamble` (symbol with zero
+phase offset relative to reference) before each packet. ReceiveAdapter takes that `SyncPreamble` and restores symbol
 alignment before each packet. During packet transmission it may still rotate but at least at the beginning of the
 packet symbols are aligned at both sides - sender and receiver
 - Auto frequency correction. Similar to point above. PSK is ultra sensitive to frequency offsets so basically we need
 to fine-tune receiver to sender. This feature looks how fast constellation point rotates and corrects receiver's
 reference carrier frequency to minimize this effect.
-- Auto detection of signal and noise levels. ReceiveAdapter after reset first listens to ambient noise to set
-NoisePowerAverage (during IDLE_INIT state). Then it waits for sender for synchronization signal which is
-basically symbol zero transmitted for few seconds. During sync transmission receiver stores SignalPowerAverage
-at SIGNAL_INIT state. After those steps receiver calculates PowerThreshold and it's ready for packets from sender.
+- Auto detection of signal and noise levels. ReceiveAdapter after reset first listens to ambient noise to set `averageIdlePower` (during IDLE_INIT state). Then it waits for sender for synchronization signal which is
+basically symbol zero transmitted for few seconds. During sync transmission receiver stores `averageFirstSyncPower`
+at `FIRST_SYNC` state. After those steps receiver calculates `powerThreshold` and it's ready for packets from sender. All above is needed to propperly determine signal and noise power levels. Without it we will not be able to decode packet.
 
 ## Few more words about the project
 
