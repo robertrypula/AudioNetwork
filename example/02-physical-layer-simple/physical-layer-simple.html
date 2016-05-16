@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>Audio Network JavaScript library - physical layer simple example</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
     </head>
     <body onLoad="onLoad()">
 
@@ -12,7 +13,7 @@
             <div>
                 <textarea
                     id="tx-packet"
-                    style="width: 500px; height: 50px; font-family: monospace;"
+                    style="box-sizing: border-box; width: 100%; height: 50px; font-family: monospace;"
                     >0 1 1 0 0 0 0 1</textarea>
                 <br/>
                 <button onClick="sync()">Sync</button>
@@ -27,7 +28,7 @@
                 <textarea
                     id="rx-packet"
                     readonly="readonly"
-                    style="width: 500px; height: 100px; font-family: monospace;"
+                    style="box-sizing: border-box; width: 100%; width: 100%; height: 100px; font-family: monospace;"
                     ></textarea>
             </div>
             <div>

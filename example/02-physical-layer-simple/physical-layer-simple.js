@@ -5,7 +5,7 @@ function onLoad() {
 }
 
 function init() {
-    var channel = [ { baseFrequency: 4000 } ];
+    var channel = [ { baseFrequency: 800 } ];
 
     physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
         tx: { channel: channel },
