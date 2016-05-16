@@ -25,7 +25,7 @@ function init() {
         rxPacket = document.getElementById('rx-packet');
         str = '';
         for (i = 0; i < data.length; i++) {
-            str += (data[i]) + ' | ';
+            str += (data[i]) + ' ';
         }
         rxPacket.innerHTML = str + '&nbsp;\n' + rxPacket.innerHTML;
     });

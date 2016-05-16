@@ -1,20 +1,20 @@
 /*
-Copyright (c) 2015-2016, Robert Rypuła
+ Copyright (c) 2015-2016, Robert Rypuła
 
-Permission to use, copy, modify, and/or distribute this software
-for any purpose with or without fee is hereby granted, provided
-that the above copyright notice and this permission notice appear
-in all copies.
+ Permission to use, copy, modify, and/or distribute this software
+ for any purpose with or without fee is hereby granted, provided
+ that the above copyright notice and this permission notice appear
+ in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
-THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 'use strict';
 
@@ -169,78 +169,6 @@ AudioNetwork.Injector = (function () {
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('Common.AbstractValueCollector', _AbstractValueCollector);
-
-    _AbstractValueCollector.$inject = [];
-
-    function _AbstractValueCollector() {
-        var AVC;
-
-        AVC = function () {
-            this.$$valueList = [];
-            this.$$lastFinalizedSize = undefined;
-            this.$$lastFinalizedResult = undefined;
-        };
-
-        AVC.ABSTRACT_METHOD_CALLED_EXCEPTION = 'Abstract method called!';
-
-        AVC.prototype.collect = function (value) {
-            this.$$valueList.push(value);
-        };
-
-        AVC.prototype.hasAtLeastItem = function () {
-            return this.getSize() > 0;
-        };
-
-        AVC.prototype.getSize = function () {
-            return this.$$valueList.length;
-        };
-
-        AVC.prototype.clearAll = function () {
-            this.clearList();
-            this.$$lastFinalizedSize = undefined;
-            this.$$lastFinalizedResult = undefined;
-        };
-
-        AVC.prototype.clearList = function () {
-            this.$$valueList.length = 0;
-        };
-
-        AVC.prototype.finalize = function () {
-            this.$$lastFinalizedResult = this.$$finalize(); // $$finalize() method may throw error BEFORE assignment
-            this.$$lastFinalizedSize = this.getSize();
-            this.clearList();
-
-            return this.$$lastFinalizedResult;
-        };
-
-        /**
-         * Returns list size that was used to compute last successful result from finalize method.
-         */
-        AVC.prototype.getLastFinalizedSize = function () {
-            return this.$$lastFinalizedSize;
-        };
-
-        /**
-         * Returns last successful result from finalize method.
-         */
-        AVC.prototype.getLastFinalizedResult = function () {
-            return this.$$lastFinalizedResult;
-        };
-
-        AVC.prototype.$$finalize = function () {
-            throw AVC.ABSTRACT_METHOD_CALLED_EXCEPTION;
-        };
-
-        return AVC;
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
         .registerService('Common.AverageValueCollectorBuilder', _AverageValueCollectorBuilder);
 
     _AverageValueCollectorBuilder.$inject = [
@@ -305,73 +233,70 @@ AudioNetwork.Injector = (function () {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Common.MathUtil', _MathUtil);
+        .registerFactory('Common.AbstractValueCollector', _AbstractValueCollector);
 
-    _MathUtil.$inject = [];
+    _AbstractValueCollector.$inject = [];
 
-    function _MathUtil() {
+    function _AbstractValueCollector() {
+        var AVC;
 
-        function abs(v) {
-            return Math.abs(v);
-        }
-
-        function asin(v) {
-            return Math.asin(v);
-        }
-
-        function sqrt(v) {
-            return Math.sqrt(v);
-        }
-
-        function round(v) {
-            return Math.round(v);
-        }
-
-        function random() {
-            return Math.random();
-        }
-
-        function floor(v) {
-            return Math.floor(v);
-        }
-
-        function sin(v) {
-            return Math.sin(v);
-        }
-
-        function cos(v) {
-            return Math.cos(v);
-        }
-
-        function log(v) {
-            return Math.log(v);
-        }
-
-        function minInArray(v) {
-            return Math.min.apply(null, v);
-        }
-
-        function maxInArray(v) {
-            return Math.max.apply(null, v);
-        }
-
-        return {
-            LN10: Math.LN10,
-            HALF_PI: 0.5 * Math.PI,
-            TWO_PI: 2 * Math.PI,
-            PI: Math.PI,
-            abs: abs,
-            floor: floor,
-            asin: asin,
-            sqrt: sqrt,
-            round: round,
-            random: random,
-            sin: sin,
-            cos: cos,
-            log: log,
-            minInArray: minInArray,
-            maxInArray: maxInArray
+        AVC = function () {
+            this.$$valueList = [];
+            this.$$lastFinalizedSize = undefined;
+            this.$$lastFinalizedResult = undefined;
         };
+
+        AVC.ABSTRACT_METHOD_CALLED_EXCEPTION = 'Abstract method called!';
+
+        AVC.prototype.collect = function (value) {
+            this.$$valueList.push(value);
+        };
+
+        AVC.prototype.hasAtLeastItem = function () {
+            return this.getSize() > 0;
+        };
+
+        AVC.prototype.getSize = function () {
+            return this.$$valueList.length;
+        };
+
+        AVC.prototype.clearAll = function () {
+            this.clearList();
+            this.$$lastFinalizedSize = undefined;
+            this.$$lastFinalizedResult = undefined;
+        };
+
+        AVC.prototype.clearList = function () {
+            this.$$valueList.length = 0;
+        };
+
+        AVC.prototype.finalize = function () {
+            this.$$lastFinalizedResult = this.$$finalize(); // $$finalize() method may throw error BEFORE assignment
+            this.$$lastFinalizedSize = this.getSize();
+            this.clearList();
+
+            return this.$$lastFinalizedResult;
+        };
+
+        /**
+         * Returns list size that was used to compute last successful result from finalize method.
+         */
+        AVC.prototype.getLastFinalizedSize = function () {
+            return this.$$lastFinalizedSize;
+        };
+
+        /**
+         * Returns last successful result from finalize method.
+         */
+        AVC.prototype.getLastFinalizedResult = function () {
+            return this.$$lastFinalizedResult;
+        };
+
+        AVC.prototype.$$finalize = function () {
+            throw AVC.ABSTRACT_METHOD_CALLED_EXCEPTION;
+        };
+
+        return AVC;
     }
 
 })();
@@ -468,6 +393,81 @@ AudioNetwork.Injector = (function () {
         };
 
         return Q;
+    }
+
+})();
+
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.MathUtil', _MathUtil);
+
+    _MathUtil.$inject = [];
+
+    function _MathUtil() {
+
+        function abs(v) {
+            return Math.abs(v);
+        }
+
+        function asin(v) {
+            return Math.asin(v);
+        }
+
+        function sqrt(v) {
+            return Math.sqrt(v);
+        }
+
+        function round(v) {
+            return Math.round(v);
+        }
+
+        function random() {
+            return Math.random();
+        }
+
+        function floor(v) {
+            return Math.floor(v);
+        }
+
+        function sin(v) {
+            return Math.sin(v);
+        }
+
+        function cos(v) {
+            return Math.cos(v);
+        }
+
+        function log(v) {
+            return Math.log(v);
+        }
+
+        function minInArray(v) {
+            return Math.min.apply(null, v);
+        }
+
+        function maxInArray(v) {
+            return Math.max.apply(null, v);
+        }
+
+        return {
+            LN10: Math.LN10,
+            HALF_PI: 0.5 * Math.PI,
+            TWO_PI: 2 * Math.PI,
+            PI: Math.PI,
+            abs: abs,
+            floor: floor,
+            asin: asin,
+            sqrt: sqrt,
+            round: round,
+            random: random,
+            sin: sin,
+            cos: cos,
+            log: log,
+            minInArray: minInArray,
+            maxInArray: maxInArray
+        };
     }
 
 })();
@@ -812,7 +812,7 @@ AudioNetwork.Injector = (function () {
             GUARD_INTERVAL: guardInterval,
             FACTOR_INTERPACKET_GAP: factorInterpacketGap,
             INTERPACKET_GAP: interpacketGap,
-            PSK_SIZE: 4,
+            PSK_SIZE: 2,
             SYNC_PREAMBLE: true
         };
     }
@@ -1876,61 +1876,6 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
-
-    _AbstractChannelManager.$inject = [
-        'PhysicalLayer.Audio'
-    ];
-
-    function _AbstractChannelManager(
-        Audio
-    ) {
-        var ACM;
-
-        ACM = function () {
-            this.$$cpuLoadData = {
-                blockSampleSize: null,
-                blockTime: null,
-                blockRealTime: null,
-                load: null
-            };
-        };
-
-        ACM.prototype.getCpuLoadData = function () {
-            var c = this.$$cpuLoadData;
-
-            return {
-                blockSampleSize: c.blockSampleSize,
-                blockTime: c.blockTime,
-                blockRealTime: c.blockRealTime,
-                load: c.load
-            };
-        };
-
-        ACM.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
-            var 
-                c = this.$$cpuLoadData,
-                blockRealTime, 
-                blockTime;
-
-            blockRealTime = endTime - beginTime;
-            blockTime = blockSampleSize / Audio.getSampleRate();
-            
-            c.blockSampleSize = blockSampleSize;
-            c.blockTime = blockTime;
-            c.blockRealTime = blockRealTime;
-            c.load = blockRealTime / blockTime;
-        };
-
-        return ACM;
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
         .registerService('PhysicalLayer.AnalyserChartBuilder', _AnalyserChartBuilder);
 
     _AnalyserChartBuilder.$inject = [
@@ -2322,158 +2267,53 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.Audio', _Audio);
+        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
 
-    _Audio.$inject = [];
+    _AbstractChannelManager.$inject = [
+        'PhysicalLayer.Audio'
+    ];
 
-    function _Audio() {
-        var
-            context = null,
-            rawMicrophoneNode = null,
-            microphoneNode = null,
-            recordedNode = null,
-            recordedRawNode = null
-        ;
+    function _AbstractChannelManager(
+        Audio
+    ) {
+        var ACM;
 
-        function getCurrentTime() {
-            return context.currentTime;
-        }
-
-        function createAnalyser() {
-            return context.createAnalyser();
-        }
-
-        function createGain() {
-            return context.createGain();
-        }
-
-        function createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels) {
-            return context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
-        }
-
-        function getSampleRate() {
-            return context.sampleRate;
-        }
-
-        function getDestination() {
-            return context.destination;
-        }
-
-        function getMicrophoneNode() {
-            return microphoneNode;
-        }
-
-        function getRecordedAudioNode() {
-            return recordedNode;
-        }
-
-        function userMediaStreamSuccess(stream) {
-            rawMicrophoneNode = context.createMediaStreamSource(stream);
-            rawMicrophoneNode.connect(microphoneNode);
-        }
-
-        function loadRecordedAudio(url, successCallback, errorCallback) {
-            var request = new XMLHttpRequest();
-
-            request.open('GET', url, true);
-            request.responseType = 'arraybuffer';
-
-            request.onload = function() {
-                context.decodeAudioData(
-                    request.response,
-                    function(buffer) {
-                        if (recordedRawNode) {
-                            recordedRawNode.disconnect(recordedNode);
-                        }
-
-                        recordedRawNode = context.createBufferSource();
-                        recordedRawNode.buffer = buffer;
-                        recordedRawNode.connect(recordedNode);
-                        recordedRawNode.loop = true;
-                        recordedRawNode.start(0);
-
-                        if (typeof successCallback === 'function') {
-                            successCallback();
-                        }
-                    },
-                    function (e) {
-                        if (typeof errorCallback === 'function') {
-                            errorCallback(e);
-                        }
-                    }
-                );
+        ACM = function () {
+            this.$$cpuLoadData = {
+                blockSampleSize: null,
+                blockTime: null,
+                blockRealTime: null,
+                load: null
             };
-            request.send();
-        }
-
-        function init() {
-            window.AudioContext = (function () {
-                return window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
-            })();
-            navigator.getUserMedia = (
-                navigator.getUserMedia ||
-                navigator.webkitGetUserMedia ||
-                navigator.mozGetUserMedia ||
-                navigator.msGetUserMedia
-            );
-
-            try {
-                context = new window.AudioContext();
-            } catch (e) {
-                alert('Web Audio API is not supported in this browser');
-                console.log(e);
-            }
-
-            /*
-             navigator.mediaDevices.getUserMedia(constraints)
-             .then(function(mediaStream) { ... })
-             .catch(function(error) { ... })
-             */
-
-            microphoneNode = context.createGain();
-            recordedNode = context.createGain();
-            try {
-                navigator.getUserMedia(
-                    {
-                        video: false,
-                        audio: {
-                            mandatory: {
-                                // echoCancellation: false,
-                                googEchoCancellation: false, // disabling audio processing
-                                googAutoGainControl: false,
-                                googNoiseSuppression: false,
-                                googHighpassFilter: false,
-                                googTypingNoiseDetection: false
-                                //googAudioMirroring: true
-                            },
-                            optional: []
-                        }
-                    },
-                    userMediaStreamSuccess,
-                    function (e) {
-                        alert('Microphone initialization failed');
-                        console.log(e);
-                    }
-                );
-            } catch (e) {
-                alert('Microphone initialization failed');
-                console.log(e);
-            }
-        }
-
-        init();
-
-        return {
-            loadRecordedAudio: loadRecordedAudio,
-            getMicrophoneNode: getMicrophoneNode,
-            getRecordedAudioNode: getRecordedAudioNode,
-            getSampleRate: getSampleRate,
-            getDestination: getDestination,
-            getCurrentTime: getCurrentTime,
-            createAnalyser: createAnalyser,
-            createGain: createGain,
-            createScriptProcessor: createScriptProcessor
         };
+
+        ACM.prototype.getCpuLoadData = function () {
+            var c = this.$$cpuLoadData;
+
+            return {
+                blockSampleSize: c.blockSampleSize,
+                blockTime: c.blockTime,
+                blockRealTime: c.blockRealTime,
+                load: c.load
+            };
+        };
+
+        ACM.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
+            var 
+                c = this.$$cpuLoadData,
+                blockRealTime, 
+                blockTime;
+
+            blockRealTime = endTime - beginTime;
+            blockTime = blockSampleSize / Audio.getSampleRate();
+            
+            c.blockSampleSize = blockSampleSize;
+            c.blockTime = blockTime;
+            c.blockRealTime = blockRealTime;
+            c.load = blockRealTime / blockTime;
+        };
+
+        return ACM;
     }
 
 })();
@@ -2632,6 +2472,166 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         return CG;
+    }
+
+})();
+
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.Audio', _Audio);
+
+    _Audio.$inject = [];
+
+    function _Audio() {
+        var
+            context = null,
+            rawMicrophoneNode = null,
+            microphoneNode = null,
+            recordedNode = null,
+            recordedRawNode = null
+        ;
+
+        function getCurrentTime() {
+            return context.currentTime;
+        }
+
+        function createAnalyser() {
+            return context.createAnalyser();
+        }
+
+        function createGain() {
+            return context.createGain();
+        }
+
+        function createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels) {
+            return context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
+        }
+
+        function getSampleRate() {
+            return context.sampleRate;
+        }
+
+        function getDestination() {
+            return context.destination;
+        }
+
+        function getMicrophoneNode() {
+            return microphoneNode;
+        }
+
+        function getRecordedAudioNode() {
+            return recordedNode;
+        }
+
+        function userMediaStreamSuccess(stream) {
+            rawMicrophoneNode = context.createMediaStreamSource(stream);
+            rawMicrophoneNode.connect(microphoneNode);
+        }
+
+        function loadRecordedAudio(url, successCallback, errorCallback) {
+            var request = new XMLHttpRequest();
+
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
+
+            request.onload = function() {
+                context.decodeAudioData(
+                    request.response,
+                    function(buffer) {
+                        if (recordedRawNode) {
+                            recordedRawNode.disconnect(recordedNode);
+                        }
+
+                        recordedRawNode = context.createBufferSource();
+                        recordedRawNode.buffer = buffer;
+                        recordedRawNode.connect(recordedNode);
+                        recordedRawNode.loop = true;
+                        recordedRawNode.start(0);
+
+                        if (typeof successCallback === 'function') {
+                            successCallback();
+                        }
+                    },
+                    function (e) {
+                        if (typeof errorCallback === 'function') {
+                            errorCallback(e);
+                        }
+                    }
+                );
+            };
+            request.send();
+        }
+
+        function init() {
+            window.AudioContext = (function () {
+                return window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+            })();
+            navigator.getUserMedia = (
+                navigator.getUserMedia ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia
+            );
+
+            try {
+                context = new window.AudioContext();
+            } catch (e) {
+                alert('Web Audio API is not supported in this browser');
+                console.log(e);
+            }
+
+            /*
+             navigator.mediaDevices.getUserMedia(constraints)
+             .then(function(mediaStream) { ... })
+             .catch(function(error) { ... })
+             */
+
+            microphoneNode = context.createGain();
+            recordedNode = context.createGain();
+            try {
+                navigator.getUserMedia(
+                    {
+                        video: false,
+                        audio: {
+                            mandatory: {
+                                // echoCancellation: false,
+                                googEchoCancellation: false, // disabling audio processing
+                                googAutoGainControl: false,
+                                googNoiseSuppression: false,
+                                googHighpassFilter: false,
+                                googTypingNoiseDetection: false
+                                //googAudioMirroring: true
+                            },
+                            optional: []
+                        }
+                    },
+                    userMediaStreamSuccess,
+                    function (e) {
+                        alert('Microphone initialization failed');
+                        console.log(e);
+                    }
+                );
+            } catch (e) {
+                alert('Microphone initialization failed');
+                console.log(e);
+            }
+        }
+
+        init();
+
+        return {
+            loadRecordedAudio: loadRecordedAudio,
+            getMicrophoneNode: getMicrophoneNode,
+            getRecordedAudioNode: getRecordedAudioNode,
+            getSampleRate: getSampleRate,
+            getDestination: getDestination,
+            getCurrentTime: getCurrentTime,
+            createAnalyser: createAnalyser,
+            createGain: createGain,
+            createScriptProcessor: createScriptProcessor
+        };
     }
 
 })();
