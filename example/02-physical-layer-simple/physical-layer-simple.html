@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>Audio Network JavaScript library - physical layer simple example</title>
+    </head>
+    <body onLoad="onLoad()">
+
+        <div>
+            <h2>Transmit</h2>
+            <div>
+                <textarea
+                    id="tx-packet"
+                    style="width: 500px; height: 50px; font-family: monospace;"
+                    >0 1 1 0 0 0 0 1</textarea>
+                <br/>
+                <button onClick="sync()">Sync</button>
+                <button onClick="sendPacket()">Send packet</button>
+            </div>
+
+            <h2>Receive</h2>
+            <div>
+                <span>Status: </span><span id="rx-status">?</span>
+            </div>
+            <div>
+                <textarea
+                    id="rx-packet"
+                    readonly="readonly"
+                    style="width: 500px; height: 100px; font-family: monospace;"
+                    ></textarea>
+            </div>
+            <div>
+                <button onClick="reset()">Reset</button>
+            </div>
+        </div>
+
+        <script src="../../build/audio-network-v1.0.2.min.js"></script>
+        <script src="physical-layer-simple.js"></script>
+    </body>
+</html>

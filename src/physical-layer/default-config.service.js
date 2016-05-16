@@ -69,7 +69,7 @@
             GUARD_INTERVAL: guardInterval,
             FACTOR_INTERPACKET_GAP: factorInterpacketGap,
             INTERPACKET_GAP: interpacketGap,
-            PSK_SIZE: 4,
+            PSK_SIZE: 2,
             SYNC_PREAMBLE: true
         };
     }
