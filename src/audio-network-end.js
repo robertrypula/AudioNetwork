@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // create aliases in main namespace for public classes

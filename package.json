@@ -1,13 +1,15 @@
 {
   "name": "audio-network",
   "version": "1.0.2",
-  "description": "Pure JavaScript library without any dependencies that allows you to send binary data using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers and the browser!",
-  "main": "build/audio-network-v1.0.2.js",
+  "description": "Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!",
+  "main": "build/audio-network-v1.0.3rc1.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-debug": "^2.1.2",
+    "gulp-header": "^1.8.2",
+    "gulp-markdown": "^1.2.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.5.3"
   },
@@ -19,6 +21,7 @@
     "url": "git+https://github.com/robertrypula/AudioNetwork.git"
   },
   "keywords": [
+    "transmission over sound",
     "audio",
     "network",
     "sound",
@@ -35,9 +38,9 @@
     "orthogonal frequency division multiplexing"
   ],
   "author": "Robert Rypuła",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/robertrypula/AudioNetwork/issues"
   },
-  "homepage": "https://github.com/robertrypula/AudioNetwork#readme"
+  "homepage": "https://audio-network.rypula.pl"
 }

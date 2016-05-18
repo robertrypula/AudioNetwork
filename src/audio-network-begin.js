@@ -1,9 +1,10 @@
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
 var AudioNetwork = {};
 
-AudioNetwork.Version = '1.0.2';
+AudioNetwork.Version = '1.0.3rc1';
 
 AudioNetwork.Injector = (function () {
     var Injector;

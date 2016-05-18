@@ -1,15 +1,15 @@
 Audio Network
 =============
 
-Data transmission over sound waves written in JavaScript without any dependencies. All you need is just 
+Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
-[Demo - full features](https://audio-network.rypula.pl/)
+[Demo - full features](https://audio-network.rypula.pl)
 
-[Demo - simple](https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html) [in
+[Demo - simple](https://audio-network.rypula.plexample/02-physical-layer-simple/physical-layer-simple.html) [in
 development]
 
-[Carrier generate and recovery tests](https://audio-network.rypula.pl/example/carrier.html)
+[Carrier generate and recovery tests](https://audio-network.rypula.plexample/carrier.html)
 
 >This project is still under development. Documentation is also planned but... little later :)
 
@@ -100,7 +100,7 @@ After downloading look into build directory. You will find there both minified a
 library. Pick one and include it into your html. For example:
 
 ```
-<script src="node_modules/audio-network/build/audio-network-v1.0.2.min.js"></script>
+<script src="node_modules/audio-network/build/audio-network-v1.0.3.min.js"></script>
 ```
 
 When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork.

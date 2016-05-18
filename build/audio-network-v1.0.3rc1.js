@@ -1,27 +1,33 @@
 /*
- Copyright (c) 2015-2016, Robert Rypuła
+The MIT License (MIT)
 
- Permission to use, copy, modify, and/or distribute this software
- for any purpose with or without fee is hereby granted, provided
- that the above copyright notice and this permission notice appear
- in all copies.
+Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
- WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
- THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
- CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
- LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
- NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
 var AudioNetwork = {};
 
-AudioNetwork.Version = '1.0.2';
+AudioNetwork.Version = '1.0.3rc1';
 
 AudioNetwork.Injector = (function () {
     var Injector;
@@ -165,70 +171,7 @@ AudioNetwork.Injector = (function () {
     return new Injector();
 })();
 
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Common.AverageValueCollectorBuilder', _AverageValueCollectorBuilder);
-
-    _AverageValueCollectorBuilder.$inject = [
-        'Common.AverageValueCollector'
-    ];
-
-    function _AverageValueCollectorBuilder(
-        AverageValueCollector
-    ) {
-
-        function build() {
-            return new AverageValueCollector();
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('Common.AverageValueCollector', _AverageValueCollector);
-
-    _AverageValueCollector.$inject = [
-        'Common.AbstractValueCollector',
-        'Common.Util'
-    ];
-
-    function _AverageValueCollector(
-        AbstractValueCollector,
-        Util
-    ) {
-        var AVC;
-
-        AVC = function () {
-            AbstractValueCollector.apply(this, arguments);
-        };
-
-        AVC.prototype = Object.create(AbstractValueCollector.prototype);
-        AVC.prototype.constructor = AVC;
-
-        AVC.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
-
-        AVC.prototype.$$finalize = function () {
-            if (this.$$valueList.length === 0) {
-                throw AVC.EMPTY_LIST_EXCEPTION;
-            }
-
-            return Util.computeAverage(this.$$valueList);
-        };
-
-        return AVC;
-    }
-
-})();
-
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -301,22 +244,23 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Common.QueueBuilder', _QueueBuilder);
+        .registerService('Common.AverageValueCollectorBuilder', _AverageValueCollectorBuilder);
 
-    _QueueBuilder.$inject = [
-        'Common.Queue'
+    _AverageValueCollectorBuilder.$inject = [
+        'Common.AverageValueCollector'
     ];
 
-    function _QueueBuilder(
-        Queue
+    function _AverageValueCollectorBuilder(
+        AverageValueCollector
     ) {
 
-        function build(size) {
-            return new Queue(size);
+        function build() {
+            return new AverageValueCollector();
         }
 
         return {
@@ -326,77 +270,47 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('Common.Queue', _Queue);
+        .registerFactory('Common.AverageValueCollector', _AverageValueCollector);
 
-    _Queue.$inject = [];
+    _AverageValueCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.Util'
+    ];
 
-    function _Queue() {
-        var Q;
+    function _AverageValueCollector(
+        AbstractValueCollector,
+        Util
+    ) {
+        var AVC;
 
-        Q = function (sizeMax) {
-            this.$$sizeMax = sizeMax;
-            this.$$data = [];
-            this.$$positionStart = 0;
-            this.$$positionEnd = 0;
-            this.$$size = 0;
-
-            this.$$data.length = sizeMax;
+        AVC = function () {
+            AbstractValueCollector.apply(this, arguments);
         };
 
-        Q.prototype.push = function (value) {
-            if (this.$$size === this.$$sizeMax) {
-                return false;
+        AVC.prototype = Object.create(AbstractValueCollector.prototype);
+        AVC.prototype.constructor = AVC;
+
+        AVC.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
+
+        AVC.prototype.$$finalize = function () {
+            if (this.$$valueList.length === 0) {
+                throw AVC.EMPTY_LIST_EXCEPTION;
             }
 
-            this.$$data[this.$$positionEnd] = value;
-            this.$$positionEnd = (this.$$positionEnd + 1) % this.$$sizeMax;
-            this.$$size++;
-
-            return true;
+            return Util.computeAverage(this.$$valueList);
         };
 
-        Q.prototype.pop = function () {
-            var result;
-
-            if (this.$$size === 0) {
-                return null;
-            }
-            result = this.$$data[this.$$positionStart];
-            this.$$positionStart = (this.$$positionStart + 1) % this.$$sizeMax;
-            this.$$size--;
-
-            return result;
-        };
-
-        Q.prototype.getItem = function (index) {
-            if (index >= this.$$size) {
-                return null;
-            }
-
-            return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
-        };
-
-        Q.prototype.getSize = function () {
-            return this.$$size;
-        };
-
-        Q.prototype.getSizeMax = function () {
-            return this.$$sizeMax;
-        };
-
-        Q.prototype.isFull = function () {
-            return this.$$size === this.$$sizeMax;
-        };
-
-        return Q;
+        return AVC;
     }
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -472,6 +386,105 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.QueueBuilder', _QueueBuilder);
+
+    _QueueBuilder.$inject = [
+        'Common.Queue'
+    ];
+
+    function _QueueBuilder(
+        Queue
+    ) {
+
+        function build(size) {
+            return new Queue(size);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.Queue', _Queue);
+
+    _Queue.$inject = [];
+
+    function _Queue() {
+        var Q;
+
+        Q = function (sizeMax) {
+            this.$$sizeMax = sizeMax;
+            this.$$data = [];
+            this.$$positionStart = 0;
+            this.$$positionEnd = 0;
+            this.$$size = 0;
+
+            this.$$data.length = sizeMax;
+        };
+
+        Q.prototype.push = function (value) {
+            if (this.$$size === this.$$sizeMax) {
+                return false;
+            }
+
+            this.$$data[this.$$positionEnd] = value;
+            this.$$positionEnd = (this.$$positionEnd + 1) % this.$$sizeMax;
+            this.$$size++;
+
+            return true;
+        };
+
+        Q.prototype.pop = function () {
+            var result;
+
+            if (this.$$size === 0) {
+                return null;
+            }
+            result = this.$$data[this.$$positionStart];
+            this.$$positionStart = (this.$$positionStart + 1) % this.$$sizeMax;
+            this.$$size--;
+
+            return result;
+        };
+
+        Q.prototype.getItem = function (index) {
+            if (index >= this.$$size) {
+                return null;
+            }
+
+            return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
+        };
+
+        Q.prototype.getSize = function () {
+            return this.$$size;
+        };
+
+        Q.prototype.getSizeMax = function () {
+            return this.$$sizeMax;
+        };
+
+        Q.prototype.isFull = function () {
+            return this.$$size === this.$$sizeMax;
+        };
+
+        return Q;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -630,6 +643,213 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartBuilder', _PowerChartBuilder);
+
+    _PowerChartBuilder.$inject = [
+        'PhysicalLayer.PowerChart'
+    ];
+
+    function _PowerChartBuilder(
+        PowerChart
+    ) {
+
+        function build(parentElement, width, height) {
+            return new PowerChart(parentElement, width, height);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
+
+    _PowerChartTemplateMain.$inject = [];
+
+    function _PowerChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="power-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="power-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
+
+        return {
+            html: html
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
+
+    _PowerChart.$inject = [
+        'PhysicalLayer.PowerChartTemplateMain'
+    ];
+
+    function _PowerChart(
+        PowerChartTemplateMain
+    ) {
+        var CD;
+
+        CD = function (parentElement, width, height, queue) {
+            this.$$parentElement = parentElement;
+            this.$$canvas = null;
+            this.$$canvasContext = null;
+            this.$$canvasWidth = width;
+            this.$$canvasHeight = height;
+            this.$$queue = queue;
+            this.$$destroy = null;
+            
+            this.$$initAnimationFrame();
+            this.$$init();
+        };
+
+        CD.prototype.destroy = function () {
+            var self = this;
+
+            if (this.$$destroy) {
+                return this.$$destroy.promise;
+            }
+
+            self.$$destroy = {};
+            this.$$destroy.promise = new Promise(function (resolve) {
+                self.$$destroy.resolve = resolve;
+            });
+
+            return this.$$destroy.promise;
+        };
+
+        CD.prototype.$$init = function () {
+            this.$$canvasContext = null;
+            this.$$parentElement.innerHTML = this.$$renderTemplate();
+            this.$$connectTemplate();
+            this.$$initCanvasContext();
+        };
+
+        // TODO move it to dedicated service
+        CD.prototype.$$find = function (selector) {
+            var jsObject = this.$$parentElement.querySelectorAll(selector);
+
+            if (jsObject.length === 0) {
+                throw 'Cannot $$find given selector';
+            }
+
+            return jsObject[0];
+        };
+
+        CD.prototype.$$connectTemplate = function () {
+            this.$$canvas = this.$$find('.power-chart');
+            this.$$canvasContext = this.$$canvas.getContext("2d");
+        };
+
+        CD.prototype.$$renderTemplate = function () {
+            var tpl = PowerChartTemplateMain.html;
+
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
+
+            return tpl;
+        };
+
+        CD.prototype.$$updateChart = function () {
+            var
+                ctx = this.$$canvasContext,
+                q = this.$$queue,
+                w = this.$$canvasWidth,
+                h = this.$$canvasHeight,
+                power, i, x, y
+            ;
+
+            if (ctx === null) {
+                return;
+            }
+
+            ctx.clearRect(0, 0, w, h);
+
+            for (y = 0; y < h; y += 10) {
+                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
+                ctx.beginPath();
+                ctx.moveTo(0, 2 * y);
+                ctx.lineTo(w, 2 * y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            for (i = 0; i < q.getSize(); i++) {
+                power = q.getItem(i);
+
+                x = i;
+                y = -power;
+
+                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
+                ctx.fillRect(
+                    x - 1,
+                    2 * y - 1,
+                    3,
+                    3
+                );
+            }
+        };
+
+        CD.prototype.$$initCanvasContext = function () {
+            this.$$canvasContext.lineWidth = 1;
+        };
+
+        CD.prototype.$$initAnimationFrame = function () {
+            var self = this;
+
+            function drawAgain() {
+                if (self.$$destroy) {
+                    self.$$parentElement.innerHTML = '';
+                    self.$$destroy.resolve();
+                } else {
+                    self.$$updateChart();
+                    requestAnimationFrame(drawAgain);
+                }
+            }
+            requestAnimationFrame(drawAgain);
+        };
+
+        return CD;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -741,6 +961,7 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -819,142 +1040,15 @@ AudioNetwork.Injector = (function () {
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
     AudioNetwork.Injector
         .registerFactory('PhysicalLayer.PhysicalLayer', _PhysicalLayer);
 
-    /*
-        KNOWN ISSUES:
-            + for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
-
-        TODO
-            + real/imm delete
-            + compute at getCarrierDetail
-            + index passed into handler
-            + decibel power/amplitude check
-            + load wav file
-            + add getOutput* methods
-            + add outputTxEnable/outputTxDisable methods
-            + check inverse phase shift issue
-            + add script node sample to config
-            + rewrite main API
-                + move code to factory
-                + cleanup inside main service
-                + internal notifyHandler for constellation update, external for user purposes
-                + add rx method outside the factory
-                + destroy constellation
-                + ability to change frequency
-                + fix recorded file loading logic
-                + fix history point colors
-                + add ability to choose destination source
-            + move script processor node to receive manager
-            + move sin/cos to internal Math service (to give ability to quickly add lookup tables)
-            + fix layout
-            + add phase offset input to align symbol '0'
-            + add html generation as js + ofdm support
-            + change send logic (add amplitude, symbolCount, symbol to each OFDM block)
-            + change send sequence logic (use format: '5.5.2.0 1.2.4.1')
-            + add DFT time span to config
-            + internal loop for notifications
-                 + add script node block time (from audiocontext)
-                 + add sample offset time from script node block time
-            + add symbol config to rx
-            + prefill amplitude value basing on ofdm size at channel tx
-            + add symbol detection to rx
-            + move example code related to html generation to separate file with comment
-            + add buttons for symbols (TX)
-            + add squares with symbol number (RX)
-            + update sequence textarea after pskSize change
-            + rename delay-loop-handler
-            + after psk change only related tx/rx should be updated
-            + add rx/tx to channel headers
-            + change 'frame' to 'packet'
-            + add 'Send sync signal' to TX
-            + ability to hide some of the widgets: 'Easy' and 'Advanced' view
-            + fix styles
-                + add source button active class
-                + improve responsive design
-            + add margin to sections
-            + use first symbol of each packet to fine tune phase offset (add checkbox for that feature)
-            + add inter-packet gap duration
-
-            + add quick configs like: 'baud-5, ofdm-1, psk-2' or 'baud-20, ofdm-16, psk-2' or ...
-                + add checkbox for tx/rx config
-                + add callback to destroy
-                + add bit speed information at UI
-
-            + refactor all transmit and receive logic (move it to physical layer internals)
-                + [TX] remove symbol generation from template-util
-                + [TX] symbol shouldn't have any guard interval or/and interpacket gap
-
-                + [RX] add setTimes* methods (maybe it's worth to add some error margin - times inside are for internal adapter use)
-                + [RX] add setSyncPreamble(true/false) method
-                + [RX] add packet receive handler packetReceived(data)
-                + [RX] add multiple channels support (introduce new class in the middle)
-                next steps:
-                    + set threshold to very low value (-100 dB) to force idle state for a while
-                    + compute average noise level power at idle state
-                    + after noise level is set raise threshold xx dB above noise level
-                    + so far do not collect symbol and packet data (wait for sync)
-                    + run sync on the TX side
-                    + sync state will be detected - grab average max signal strength
-                    + subtract 10 decibels from max signal and enable symbol/packet collecting
-                + [RX] add method to reset receiver state machine (to follow steps above again)
-                + [RX] double check state times at receive adapter
-                    + move sync time to main adapter class
-                    + check symbol, guard times
-                    + average sample sizes should be config dependent (mostly for samplesPerSecond setting)
-                + [RX] grab/clean packet data and notify packet handler
-            
-            - Receive Adapter:  [6.5h or 12.5h remaining] ~ 5 evenings or 7 evenings
-                + [1.5h] add events for frequency update and phase update to notify hosting code
-                + [2.0h] refactor 'collecting arrays' to dedicated collectors
-                - [2.0h] refactor data/packet collection to dedicates collectors classes
-                    - change SYMBOL state name to PILOT_SIGNAL
-                    - change ERROR state name to SYNC_TO_LONG
-                    - phaseOffsetCollector -> frequencyErrorCollector
-                    - introduce some phaseErrorCollector ?
-                - [3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
-                - OPTIONAL [1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)
-                - OPTIONAL [4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)
-                - OPTIONAL [1.0h] Signal Strength like in cell phones
-                - OPTIONAL [1.0h] add new state: INTERPACKET_GAP
-
-            - Power chart:      [10.5h remaining]
-                - [4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?
-                - [3.0h] ability to show other OFDMs than pilot
-                - [1.0h] increase bar width
-                - [1.5h] mark states ranges
-                - [1.0h] show important power level (threshold, min/max, etc)
-
-            - Finalization easy:
-                + fix typo: physial-layer into physical-layer
-                + keep view type after reinitialization
-                + remove audio-network prefix from main classes names
-                + change name: dftTimeSpan -> dftWindowTimeSpan
-                + move general configuration to some common service
-
-                + refactor NO_SIGNAL state
-                + change input TX to LOOPBACK
-                + move templates code to dedicated files
-                + introduce Dependency Injection
-                + prepare release version + some code minification
-                - remove Promises
-                - use setTimeout instead setInverval (?)
-
-            - Finalization complex:
-                + measure CPU load by measuring times before and after execution
-                - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
-                - refactor DOM helpers (move to service)
-                - do not redraw constellation if queue wasn't changed
-                - ability to add hooks at sample generation and receive (inject some changes to signal)
-                - refactor sample handling and generation to order to easily move that code to Service Worker
-
-        TODO (carrier.html)
-            - use dedicated constellation
-
+/*
+TODO remove this later:
 
 1  1  0  1  11
 0  1  1  0  10
@@ -971,17 +1065,11 @@ D6 45
 =
 72 bit/sec = 9 B/sec       ->   1,125 B/sec per subcarrier
 
-
 #####_________#####_________
 
-
-
 SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
-
             1 B         1 B          1 B       0...255 B         2 B
-
-
-    */
+*/
 
     _PhysicalLayer.$inject = [
         'Common.QueueBuilder',
@@ -1413,6 +1501,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1438,6 +1527,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1660,6 +1750,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1678,6 +1769,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1872,6 +1964,63 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
+
+    _AbstractChannelManager.$inject = [
+        'PhysicalLayer.Audio'
+    ];
+
+    function _AbstractChannelManager(
+        Audio
+    ) {
+        var ACM;
+
+        ACM = function () {
+            this.$$cpuLoadData = {
+                blockSampleSize: null,
+                blockTime: null,
+                blockRealTime: null,
+                load: null
+            };
+        };
+
+        ACM.prototype.getCpuLoadData = function () {
+            var c = this.$$cpuLoadData;
+
+            return {
+                blockSampleSize: c.blockSampleSize,
+                blockTime: c.blockTime,
+                blockRealTime: c.blockRealTime,
+                load: c.load
+            };
+        };
+
+        ACM.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
+            var 
+                c = this.$$cpuLoadData,
+                blockRealTime, 
+                blockTime;
+
+            blockRealTime = endTime - beginTime;
+            blockTime = blockSampleSize / Audio.getSampleRate();
+            
+            c.blockSampleSize = blockSampleSize;
+            c.blockTime = blockTime;
+            c.blockRealTime = blockRealTime;
+            c.load = blockRealTime / blockTime;
+        };
+
+        return ACM;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1897,6 +2046,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1929,6 +2079,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -1993,6 +2144,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2263,219 +2415,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
-
-    _AbstractChannelManager.$inject = [
-        'PhysicalLayer.Audio'
-    ];
-
-    function _AbstractChannelManager(
-        Audio
-    ) {
-        var ACM;
-
-        ACM = function () {
-            this.$$cpuLoadData = {
-                blockSampleSize: null,
-                blockTime: null,
-                blockRealTime: null,
-                load: null
-            };
-        };
-
-        ACM.prototype.getCpuLoadData = function () {
-            var c = this.$$cpuLoadData;
-
-            return {
-                blockSampleSize: c.blockSampleSize,
-                blockTime: c.blockTime,
-                blockRealTime: c.blockRealTime,
-                load: c.load
-            };
-        };
-
-        ACM.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
-            var 
-                c = this.$$cpuLoadData,
-                blockRealTime, 
-                blockTime;
-
-            blockRealTime = endTime - beginTime;
-            blockTime = blockSampleSize / Audio.getSampleRate();
-            
-            c.blockSampleSize = blockSampleSize;
-            c.blockTime = blockTime;
-            c.blockRealTime = blockRealTime;
-            c.load = blockRealTime / blockTime;
-        };
-
-        return ACM;
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayer.CarrierGenerateBuilder', _CarrierGenerateBuilder);
-
-    _CarrierGenerateBuilder.$inject = [
-        'PhysicalLayer.CarrierGenerate'
-    ];
-
-    function _CarrierGenerateBuilder(
-        CarrierGenerate
-    ) {
-
-        function build(samplePerPeriod) {
-            return new CarrierGenerate(samplePerPeriod);
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.CarrierGenerate', _CarrierGenerate);
-
-    _CarrierGenerate.$inject = [
-        'Common.MathUtil',
-        'Common.Util'
-    ];
-
-    function _CarrierGenerate(
-        MathUtil,
-        Util
-    ) {
-        var CG;
-
-        CG = function (samplePerPeriod, samplePerFade) {
-            this.$$samplePerFade = samplePerFade;
-            this.$$queue = [];
-            this.$$sampleComputed = null;
-            this.$$currentCarrier = {
-                data: null,
-                sampleNumberStart: null,
-                sampleNumberEnd: null
-            };
-
-            this.$$samplePerPeriod = null;
-            this.$$omega = null;
-            this.$$sampleNumber = 0;
-            this.$$phaseCorrection = 0;
-            this.setSamplePerPeriod(samplePerPeriod);
-        };
-
-        CG.prototype.$$sampleCompute = function () {
-            var
-                currentCarrierData = this.$$currentCarrier.data,
-                fadeFactor,
-                fadePositionStart,
-                fadePositionEnd
-            ;
-
-            if (!currentCarrierData) {
-                this.$$sampleComputed = 0;
-                return;
-            }
-
-            fadeFactor = 1.0;
-            if (this.$$samplePerFade > 0) {
-                fadePositionStart = (this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart) / this.$$samplePerFade;
-                fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
-
-                if (fadePositionStart >= 0 && fadePositionStart <= 1) {
-                    fadeFactor = Util.unitFade(fadePositionStart);
-                } else {
-                    if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
-                        fadeFactor = Util.unitFade(fadePositionEnd);
-                    }
-                }
-            }
-
-            this.$$sampleComputed = (
-                fadeFactor *
-                currentCarrierData.amplitude *
-                MathUtil.sin(
-                    this.$$omega * this.$$sampleNumber
-                    - MathUtil.TWO_PI * (currentCarrierData.phase - this.$$phaseCorrection)
-                )
-            );
-        };
-
-        CG.prototype.$$grabCurrentCarrier = function () {
-            var fromQueue, isSameAsBefore;
-
-            fromQueue = Util.queuePop(this.$$queue);
-            if (fromQueue) {
-                isSameAsBefore = (fromQueue === this.$$currentCarrier.data);
-                if (!isSameAsBefore) {
-                    this.$$currentCarrier.data = fromQueue;
-                    this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
-                    this.$$currentCarrier.sampleNumberEnd = (
-                        this.$$currentCarrier.sampleNumberStart + fromQueue.duration
-                    );
-                }
-            } else {
-                this.$$currentCarrier.data = null;
-                this.$$currentCarrier.sampleNumberStart = null;
-                this.$$currentCarrier.sampleNumberEnd = null;
-            }
-        };
-
-        CG.prototype.setPhaseCorrection = function (phaseCorrection) {
-            this.$$phaseCorrection = phaseCorrection;
-        };
-
-        CG.prototype.nextSample = function () {
-            this.$$sampleNumber++;
-            this.$$sampleComputed = null;
-        };
-
-        CG.prototype.getSample = function () {
-            if (this.$$sampleComputed) {
-                return this.$$sampleComputed;
-            }
-
-            this.$$grabCurrentCarrier();
-            this.$$sampleCompute();
-
-            return this.$$sampleComputed;
-        };
-
-        CG.prototype.addToQueue = function (carrierData) {
-            Util.queueAdd(
-                this.$$queue,
-                carrierData,
-                function (queueItem, item) {
-                    queueItem.amplitude = item.amplitude;
-                    queueItem.phase = item.phase;
-                }
-            );
-        };
-
-        CG.prototype.setSamplePerPeriod = function (samplePerPeriod) {
-            this.$$samplePerPeriod = samplePerPeriod;
-            this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
-            this.$$sampleNumber = 0;
-        };
-
-        return CG;
-    }
-
-})();
-
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2636,6 +2576,167 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.CarrierGenerateBuilder', _CarrierGenerateBuilder);
+
+    _CarrierGenerateBuilder.$inject = [
+        'PhysicalLayer.CarrierGenerate'
+    ];
+
+    function _CarrierGenerateBuilder(
+        CarrierGenerate
+    ) {
+
+        function build(samplePerPeriod) {
+            return new CarrierGenerate(samplePerPeriod);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.CarrierGenerate', _CarrierGenerate);
+
+    _CarrierGenerate.$inject = [
+        'Common.MathUtil',
+        'Common.Util'
+    ];
+
+    function _CarrierGenerate(
+        MathUtil,
+        Util
+    ) {
+        var CG;
+
+        CG = function (samplePerPeriod, samplePerFade) {
+            this.$$samplePerFade = samplePerFade;
+            this.$$queue = [];
+            this.$$sampleComputed = null;
+            this.$$currentCarrier = {
+                data: null,
+                sampleNumberStart: null,
+                sampleNumberEnd: null
+            };
+
+            this.$$samplePerPeriod = null;
+            this.$$omega = null;
+            this.$$sampleNumber = 0;
+            this.$$phaseCorrection = 0;
+            this.setSamplePerPeriod(samplePerPeriod);
+        };
+
+        CG.prototype.$$sampleCompute = function () {
+            var
+                currentCarrierData = this.$$currentCarrier.data,
+                fadeFactor,
+                fadePositionStart,
+                fadePositionEnd
+            ;
+
+            if (!currentCarrierData) {
+                this.$$sampleComputed = 0;
+                return;
+            }
+
+            fadeFactor = 1.0;
+            if (this.$$samplePerFade > 0) {
+                fadePositionStart = (this.$$sampleNumber - this.$$currentCarrier.sampleNumberStart) / this.$$samplePerFade;
+                fadePositionEnd = (this.$$currentCarrier.sampleNumberEnd - this.$$sampleNumber) / this.$$samplePerFade;
+
+                if (fadePositionStart >= 0 && fadePositionStart <= 1) {
+                    fadeFactor = Util.unitFade(fadePositionStart);
+                } else {
+                    if (fadePositionEnd >= 0 && fadePositionEnd <= 1) {
+                        fadeFactor = Util.unitFade(fadePositionEnd);
+                    }
+                }
+            }
+
+            this.$$sampleComputed = (
+                fadeFactor *
+                currentCarrierData.amplitude *
+                MathUtil.sin(
+                    this.$$omega * this.$$sampleNumber
+                    - MathUtil.TWO_PI * (currentCarrierData.phase - this.$$phaseCorrection)
+                )
+            );
+        };
+
+        CG.prototype.$$grabCurrentCarrier = function () {
+            var fromQueue, isSameAsBefore;
+
+            fromQueue = Util.queuePop(this.$$queue);
+            if (fromQueue) {
+                isSameAsBefore = (fromQueue === this.$$currentCarrier.data);
+                if (!isSameAsBefore) {
+                    this.$$currentCarrier.data = fromQueue;
+                    this.$$currentCarrier.sampleNumberStart = this.$$sampleNumber;
+                    this.$$currentCarrier.sampleNumberEnd = (
+                        this.$$currentCarrier.sampleNumberStart + fromQueue.duration
+                    );
+                }
+            } else {
+                this.$$currentCarrier.data = null;
+                this.$$currentCarrier.sampleNumberStart = null;
+                this.$$currentCarrier.sampleNumberEnd = null;
+            }
+        };
+
+        CG.prototype.setPhaseCorrection = function (phaseCorrection) {
+            this.$$phaseCorrection = phaseCorrection;
+        };
+
+        CG.prototype.nextSample = function () {
+            this.$$sampleNumber++;
+            this.$$sampleComputed = null;
+        };
+
+        CG.prototype.getSample = function () {
+            if (this.$$sampleComputed) {
+                return this.$$sampleComputed;
+            }
+
+            this.$$grabCurrentCarrier();
+            this.$$sampleCompute();
+
+            return this.$$sampleComputed;
+        };
+
+        CG.prototype.addToQueue = function (carrierData) {
+            Util.queueAdd(
+                this.$$queue,
+                carrierData,
+                function (queueItem, item) {
+                    queueItem.amplitude = item.amplitude;
+                    queueItem.phase = item.phase;
+                }
+            );
+        };
+
+        CG.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            this.$$samplePerPeriod = samplePerPeriod;
+            this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
+            this.$$sampleNumber = 0;
+        };
+
+        return CG;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2661,6 +2762,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2771,6 +2873,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2796,6 +2899,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2924,6 +3028,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -2949,6 +3054,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3065,6 +3171,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3090,6 +3197,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3209,6 +3317,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3234,6 +3343,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3353,6 +3463,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3378,6 +3489,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3417,6 +3529,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3589,6 +3702,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3614,6 +3728,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3653,6 +3768,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3678,6 +3794,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3746,209 +3863,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayer.PowerChartBuilder', _PowerChartBuilder);
-
-    _PowerChartBuilder.$inject = [
-        'PhysicalLayer.PowerChart'
-    ];
-
-    function _PowerChartBuilder(
-        PowerChart
-    ) {
-
-        function build(parentElement, width, height) {
-            return new PowerChart(parentElement, width, height);
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
-
-    _PowerChartTemplateMain.$inject = [];
-
-    function _PowerChartTemplateMain() {
-        var html =
-            '<div' +
-            '    class="power-chart-container"' +
-            '    style="' +
-            '        overflow: hidden;' +
-            '        width: {{ width }}px;' +
-            '        height: {{ height }}px;' +
-            '        position: relative;' +
-            '    "' +
-            '    >' +
-            '    <canvas ' +
-            '        class="power-chart"' +
-            '        style="' +
-            '            width: {{ width }}px;' +
-            '            height: {{ height }}px;' +
-            '            position: absolute;' +
-            '        "' +
-            '        width="{{ width }}"' +
-            '        height="{{ height }}"' +
-            '        ></canvas>' +
-            '</div>'
-        ;
-
-        return {
-            html: html
-        };
-    }
-
-})();
-
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
-
-    _PowerChart.$inject = [
-        'PhysicalLayer.PowerChartTemplateMain'
-    ];
-
-    function _PowerChart(
-        PowerChartTemplateMain
-    ) {
-        var CD;
-
-        CD = function (parentElement, width, height, queue) {
-            this.$$parentElement = parentElement;
-            this.$$canvas = null;
-            this.$$canvasContext = null;
-            this.$$canvasWidth = width;
-            this.$$canvasHeight = height;
-            this.$$queue = queue;
-            this.$$destroy = null;
-            
-            this.$$initAnimationFrame();
-            this.$$init();
-        };
-
-        CD.prototype.destroy = function () {
-            var self = this;
-
-            if (this.$$destroy) {
-                return this.$$destroy.promise;
-            }
-
-            self.$$destroy = {};
-            this.$$destroy.promise = new Promise(function (resolve) {
-                self.$$destroy.resolve = resolve;
-            });
-
-            return this.$$destroy.promise;
-        };
-
-        CD.prototype.$$init = function () {
-            this.$$canvasContext = null;
-            this.$$parentElement.innerHTML = this.$$renderTemplate();
-            this.$$connectTemplate();
-            this.$$initCanvasContext();
-        };
-
-        // TODO move it to dedicated service
-        CD.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentElement.querySelectorAll(selector);
-
-            if (jsObject.length === 0) {
-                throw 'Cannot $$find given selector';
-            }
-
-            return jsObject[0];
-        };
-
-        CD.prototype.$$connectTemplate = function () {
-            this.$$canvas = this.$$find('.power-chart');
-            this.$$canvasContext = this.$$canvas.getContext("2d");
-        };
-
-        CD.prototype.$$renderTemplate = function () {
-            var tpl = PowerChartTemplateMain.html;
-
-            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
-            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
-
-            return tpl;
-        };
-
-        CD.prototype.$$updateChart = function () {
-            var
-                ctx = this.$$canvasContext,
-                q = this.$$queue,
-                w = this.$$canvasWidth,
-                h = this.$$canvasHeight,
-                power, i, x, y
-            ;
-
-            if (ctx === null) {
-                return;
-            }
-
-            ctx.clearRect(0, 0, w, h);
-
-            for (y = 0; y < h; y += 10) {
-                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
-                ctx.beginPath();
-                ctx.moveTo(0, 2 * y);
-                ctx.lineTo(w, 2 * y);
-                ctx.closePath();
-                ctx.stroke();
-            }
-
-            for (i = 0; i < q.getSize(); i++) {
-                power = q.getItem(i);
-
-                x = i;
-                y = -power;
-
-                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
-                ctx.fillRect(
-                    x - 1,
-                    2 * y - 1,
-                    3,
-                    3
-                );
-            }
-        };
-
-        CD.prototype.$$initCanvasContext = function () {
-            this.$$canvasContext.lineWidth = 1;
-        };
-
-        CD.prototype.$$initAnimationFrame = function () {
-            var self = this;
-
-            function drawAgain() {
-                if (self.$$destroy) {
-                    self.$$parentElement.innerHTML = '';
-                    self.$$destroy.resolve();
-                } else {
-                    self.$$updateChart();
-                    requestAnimationFrame(drawAgain);
-                }
-            }
-            requestAnimationFrame(drawAgain);
-        };
-
-        return CD;
-    }
-
-})();
-
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -3974,6 +3889,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4084,6 +4000,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4119,6 +4036,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4391,6 +4309,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4421,6 +4340,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4742,6 +4662,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4767,6 +4688,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
     'use strict';
 
@@ -4806,6 +4728,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
 })();
 
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // create aliases in main namespace for public classes
