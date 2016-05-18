@@ -1,9 +1,8 @@
 Audio Network
 =============
 
-Pure JavaScript library without any dependencies that allows you to send binary data
-using sound waves. No cable, no WiFi, no Bluetooth - just microphone, speakers and
-the browser!
+Data transmission over sound waves written in JavaScript without any dependencies. All you need is just 
+microphone, speakers and the browser!
 
 [Demo - full features](https://audio-network.rypula.pl/)
 
