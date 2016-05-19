@@ -27,7 +27,7 @@ function init() {
         for (i = 0; i < data.length; i++) {
             str += (data[i]) + ' ';
         }
-        rxPacket.innerHTML = str + '&nbsp;\n' + rxPacket.innerHTML;
+        rxPacket.value = str + '&nbsp;\n' + rxPacket.value;
     });
 }
 
@@ -46,7 +46,7 @@ function sendPacket() {
 
 function reset() {
     receiveAdapter.reset(0);
-    document.getElementById('rx-packet').innerHTML = '';
+    document.getElementById('rx-packet').value = '';
 }
 
 function sync() {

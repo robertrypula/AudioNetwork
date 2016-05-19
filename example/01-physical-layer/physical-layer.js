@@ -185,9 +185,9 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 
         str = '';
         for (i = 0; i < data.length; i++) {
-            str += (typeof data[i] === 'number' ? data[i] : data[i].join(', ')) + ' | ';
+            str += (typeof data[i] === 'number' ? data[i] : data[i].join('.')) + (i !== data.length - 1 ? ' ' : '');
         }
-        uiPacketHistory.innerHTML = str + '&nbsp;<br/>' + uiPacketHistory.innerHTML;
+        uiPacketHistory.value = str + '\n' + uiPacketHistory.value;
     });
     receiveAdapter.setFrequencyUpdateHandler(function (channelIndex, data) {
         console.log('freq update');
@@ -228,7 +228,7 @@ function receiveAdapterReset(channelIndex) {
     var uiPacketHistory = document.getElementById('rx-sampling-packet-history-' + channelIndex);
 
     receiveAdapter.reset(channelIndex);
-    uiPacketHistory.innerHTML = '';
+    uiPacketHistory.value = '';
 }
 
 function frequencyUpdate(rxTx, channelIndex, ofdmIndex) {

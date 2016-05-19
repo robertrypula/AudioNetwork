@@ -26,3 +26,11 @@ gulp.task('default', function() {
         .pipe(header('/*\n' + fs.readFileSync('./LICENCE', 'utf8') + '*/\n\n'))
         .pipe(gulp.dest(DEST));
 });
+
+var markdown = require('gulp-markdown');
+
+gulp.task('md', function () {
+    return gulp.src('README.md')
+        .pipe(markdown())
+        .pipe(gulp.dest(DEST));
+});

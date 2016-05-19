@@ -5,6 +5,7 @@ TODO list:
     - move common css away of example
     - move readme to index.html
     - change adapter parameter order or move all adapter initialization
+    - prepare some how to use movies and host them on YouTube
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
     + [~2.0h] refactor 'collecting arrays' to dedicated collectors
