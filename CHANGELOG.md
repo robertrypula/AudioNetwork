@@ -1,10 +1,15 @@
 ## Backlog for future releases
 
 TODO list:
+  - Current focus:
+    - move common css away of example
+    - move readme to index.html
+    - change adapter parameter order or move all adapter initialization
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
     + [~2.0h] refactor 'collecting arrays' to dedicated collectors
     - [~2.0h] refactor data/packet collection to dedicates collectors classes
+      - fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
       - change SYMBOL state name to PILOT_SIGNAL
       - change ERROR state name to SYNC_TO_LONG
       - phaseOffsetCollector -> frequencyErrorCollector
@@ -50,7 +55,7 @@ TODO list:
   + measure CPU load by measuring times before and after execution
 
 ## Finished stuff before release was even planned
-  + BUG for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
+  + BUG FIXED for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional
   + real/imm delete
   + compute at getCarrierDetail
   + index passed into handler
