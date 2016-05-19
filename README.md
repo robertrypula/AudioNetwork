@@ -6,10 +6,10 @@ microphone, speakers and the browser!
 
 [Demo - full features](https://audio-network.rypula.pl)
 
-[Demo - simple](https://audio-network.rypula.plexample/02-physical-layer-simple/physical-layer-simple.html) [in
+[Demo - simple](https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html) [in
 development]
 
-[Carrier generate and recovery tests](https://audio-network.rypula.plexample/carrier.html)
+[Carrier generate and recovery tests](https://audio-network.rypula.pl/example/carrier.html)
 
 >This project is still under development. Documentation is also planned but... little later :)
 
