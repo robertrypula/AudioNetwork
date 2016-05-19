@@ -27,7 +27,7 @@ function init() {
         for (i = 0; i < data.length; i++) {
             str += (data[i]) + ' ';
         }
-        rxPacket.value = str + '&nbsp;\n' + rxPacket.value;
+        rxPacket.value = str + '\n' + rxPacket.value;
     });
 }
 
