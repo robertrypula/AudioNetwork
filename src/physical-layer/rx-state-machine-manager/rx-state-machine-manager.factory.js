@@ -66,7 +66,7 @@
         RSMM.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
         RSMM.$$_DECIBLES_ABOVE_AVERAGE_IDLE = 10; // decibels above average idle power (ambient noise) in order to catch first, even weak, signal - it means that you should keep this value low
         RSMM.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
-        RSMM.$$_AVERAGE_POWER_UNIT_FACTOR = 0.7;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
+        RSMM.$$_AVERAGE_POWER_UNIT_FACTOR = 0.5;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
 
         RSMM.prototype.$$resetInternal = function () {
             this.$$averageIdlePowerCollector.clearAll();
