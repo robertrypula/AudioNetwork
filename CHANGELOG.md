@@ -2,9 +2,11 @@
 
 TODO list:
   - Current focus:
-    - move common css away of example
+    - refactor API
+      - change adapter parameter order or move all adapter initialization
+      - PhysicalLayer's rx method should should store all handlers functions in array (multiple)
+      - ReceiveAdapter should register own rx handler inside Adapter class
     - move readme to index.html
-    - change adapter parameter order or move all adapter initialization
     - prepare some how to use movies and host them on YouTube
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
@@ -35,6 +37,13 @@ TODO list:
     - ability to add hooks at sample generation and receive (inject some changes to signal)
     - refactor sample handling and generation to order to easily move that code to Service Worker
     - fix carrier.html example (use dedicated constellation class)
+
+## v1.0.3 (2016-??-??, dev in progress)
+  + move common css away of example
+  + simple demo added
+  + updates at README.md
+  + added CHANGELOG.md
+  + licence moved to MIT
 
 ## v1.0.2 (2016-05-16)
   + huge readme update, npm keywords update

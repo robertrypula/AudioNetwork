@@ -158,6 +158,11 @@ reference carrier frequency to minimize this effect.
 basically symbol zero transmitted for few seconds. During sync transmission receiver stores `averageFirstSyncPower`
 at `FIRST_SYNC` state. After those steps receiver calculates `powerThreshold` and it's ready for packets from sender. All above is needed to propperly determine signal and noise power levels. Without it we will not be able to decode packet.
 
+## Known limitations
+
+- Currently Guard Interval needs to be few times longer than Symbol Duration (two or tree times longer). It's
+because ReceiveAdapter, when restoring packet symbols, is 'clocked' by carrier frequency power changes.
+
 ## Few more words about the project
 
 Internally AudioNetwork library uses [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
