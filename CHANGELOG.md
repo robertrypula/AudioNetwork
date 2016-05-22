@@ -12,7 +12,6 @@ TODO list:
     + [~1.5h] add events for frequency update and phase update to notify hosting code
     + [~2.0h] refactor 'collecting arrays' to dedicated collectors
     - [~2.0h] refactor data/packet collection to dedicates collectors classes
-      - fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
       - change SYMBOL state name to PILOT_SIGNAL
       - change ERROR state name to SYNC_TO_LONG
       - phaseOffsetCollector -> frequencyErrorCollector
@@ -39,6 +38,8 @@ TODO list:
     - fix carrier.html example (use dedicated constellation class)
 
 ## v1.0.3 (2016-??-??, dev in progress)
+  + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
+  + default settings update (symbol duration vs guard interval, sync duration reduced from 3 sec to 2 sec, notification per seconds increased)
   + move common css away of example
   + simple demo added
   + updates at README.md

@@ -147,7 +147,17 @@
                 averageFirstSyncPower, averageIdlePower, powerDifference
             ;
 
-            // signal cannot be weaker that idle noise... :)
+            // TODO refactor code block order - condition below happens actually at FIRST_SYNC state end
+            if (this.$$averageFirstSyncPowerCollector.getLastFinalizedResult()) {
+                // wait until signal will drop below threshold
+                if (powerDecibel < this.$$powerThreshold) {
+                    return ReceiveAdapterState.IDLE;
+                } else {
+                    return null;
+                }
+            }
+
+            // signal cannot be weaker than previously stored average idle noise... :)
             if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
                 return ReceiveAdapterState.FATAL_ERROR;
             }
@@ -169,7 +179,6 @@
 
                     // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
                     this.$$powerThreshold = averageIdlePower + RSMM.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
-                    return ReceiveAdapterState.IDLE;
                 } catch (e) {
                     return ReceiveAdapterState.FATAL_ERROR;
                 }
