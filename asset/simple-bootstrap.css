@@ -66,10 +66,18 @@ button, textarea, input {
 }
 
 .container, footer {
+    position: relative;
+    min-height: 1px;
     padding-right: 15px;
     padding-left: 15px;
     margin-right: auto;
     margin-left: auto;
+}
+
+.container:before, .container:after, footer:before, footer:after {
+    content: " ";
+    display: table;
+    clear: both;
 }
 
 .col-xs-3 { float: left; width: 25%; }
@@ -131,6 +139,14 @@ button, textarea, input {
 
 .margin-bottom {
     margin-bottom: 10px;
+}
+
+.margin-bottom-double {
+    margin-bottom: 20px;
+}
+
+.margin-bottom-triple {
+    margin-bottom: 30px;
 }
 
 /* buttons */
@@ -221,18 +237,18 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-    font-size: 2.0em;
+    font-size: 1.6em;
     background-color: rgb(242, 101, 34);
     text-align: center;
 }
 
 h2 {
-    font-size: 1.8em;
+    font-size: 1.4em;
     background-color: #738BD7;
 }
 
 h3 {
-    font-size: 1.6em;
+    font-size: 1.2em;
     background-color: rgb(243, 243, 243);
     color: #738bd7;
     border: 1px solid #EEE;
@@ -241,14 +257,14 @@ h3 {
 
 h4 {
     color: #738bd7;
-    font-size: 1.4em;
+    font-size: 1.1em;
     padding-top: 0;
     margin-bottom: 10px;
 }
 
 h5 {
     color: #738bd7;
-        font-size: 1.2em;
+    font-size: 1.05em;
 }
 
 p {

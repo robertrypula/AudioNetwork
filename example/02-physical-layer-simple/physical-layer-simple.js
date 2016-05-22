@@ -1,11 +1,7 @@
 var physicalLayer, transmitAdapter, receiveAdapter;
 
 function onLoad() {
-    init();
-}
-
-function init() {
-    var channel = [ { baseFrequency: 800 } ];
+    var channel = [ { baseFrequency: 1070 } ];
 
     physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
         tx: { channel: channel },
@@ -16,19 +12,17 @@ function init() {
 
     physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time);
-        document.getElementById('rx-status').innerHTML = receiveData.state;
+        document.getElementById('rx-state').innerHTML = receiveData.state;
     });
 
-    receiveAdapter.setPacketReceiveHandler(function (channelIndex, data) {
-        var rxPacket, str, i;
+    receiveAdapter.setPacketReceiveHandler(packetReceiveHandler);
+}
 
-        rxPacket = document.getElementById('rx-packet');
-        str = '';
-        for (i = 0; i < data.length; i++) {
-            str += (data[i]) + ' ';
-        }
-        rxPacket.value = str + '\n' + rxPacket.value;
-    });
+function packetReceiveHandler(channelIndex, data) {
+    var rxPacket;
+
+    rxPacket = document.getElementById('rx-packet');
+    rxPacket.value = data.join(' ') + '\n' + rxPacket.value;
 }
 
 function sendPacket() {
@@ -37,7 +31,7 @@ function sendPacket() {
     data = [];
     dataList = (document.getElementById('tx-packet').value + '').split(' ');
     for (i = 0; i < dataList.length; i++) {
-        symbol = parseInt(dataList[i]);
+        symbol = parseInt(dataList[i]) % 2;
         data.push(symbol);
     }
 

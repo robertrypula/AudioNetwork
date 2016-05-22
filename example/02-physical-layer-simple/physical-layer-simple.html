@@ -14,40 +14,34 @@
 
         <div class="container">
             <h1>Audio Network - physical layer simple example</h1>
-            <div class="clearfix margin-bottom">
-                <div class="row margin-bottom">
-                    <div class="col col-xs-12">
-                        <p>
-                            Lorem ipsum
-                        </p>
-                    </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <p>
+                        Lorem ipsum
+                    </p>
                 </div>
             </div>
 
             <h2>Receive</h2>
-            <div class="clearfix margin-bottom">
-                <div class="row margin-bottom view-type view-type-complex">
-                    <div class="col col-xs-12">
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
 
-                        <span>Status: </span><span id="rx-status">?</span>
-                        <br/>
-                        <textarea id="rx-packet" style="height: 100px;" readonly="readonly"></textarea>
-                        <button class="btn btn-default" onClick="reset()">Reset</button>
+                    <span>State: </span><span id="rx-state">?</span>
+                    <br/>
+                    <textarea id="rx-packet" style="height: 100px;" readonly="readonly"></textarea>
+                    <button class="btn btn-default" onClick="reset()">Reset</button>
 
-                    </div>
                 </div>
             </div>
 
             <h2>Transmit</h2>
-            <div class="clearfix margin-bottom">
-                <div class="row margin-bottom">
-                    <div class="col col-xs-12">
+            <div class="row margin-bottom-triple">
+                <div class="col col-xs-12">
 
-                        <textarea id="tx-packet">0 1 1 0 0 0 0 1</textarea>
-                        <button class="btn btn-default" onClick="sync()">Sync</button>
-                        <button class="btn btn-default" onClick="sendPacket()">Send packet</button>
+                    <textarea id="tx-packet">0 1 1 0 0 0 0 1</textarea>
+                    <button class="btn btn-default" onClick="sync()">Sync</button>
+                    <button class="btn btn-default" onClick="sendPacket()">Send packet</button>
 
-                    </div>
                 </div>
             </div>
         </div>
