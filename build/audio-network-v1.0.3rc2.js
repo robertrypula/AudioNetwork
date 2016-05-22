@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
 var AudioNetwork = {};
 
-AudioNetwork.Version = '1.0.3rc1';
+AudioNetwork.Version = '1.0.3rc2';
 
 AudioNetwork.Injector = (function () {
     var Injector;
@@ -648,212 +648,6 @@ AudioNetwork.Injector = (function () {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.PowerChartBuilder', _PowerChartBuilder);
-
-    _PowerChartBuilder.$inject = [
-        'PhysicalLayer.PowerChart'
-    ];
-
-    function _PowerChartBuilder(
-        PowerChart
-    ) {
-
-        function build(parentElement, width, height) {
-            return new PowerChart(parentElement, width, height);
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
-
-    _PowerChartTemplateMain.$inject = [];
-
-    function _PowerChartTemplateMain() {
-        var html =
-            '<div' +
-            '    class="power-chart-container"' +
-            '    style="' +
-            '        overflow: hidden;' +
-            '        width: {{ width }}px;' +
-            '        height: {{ height }}px;' +
-            '        position: relative;' +
-            '    "' +
-            '    >' +
-            '    <canvas ' +
-            '        class="power-chart"' +
-            '        style="' +
-            '            width: {{ width }}px;' +
-            '            height: {{ height }}px;' +
-            '            position: absolute;' +
-            '        "' +
-            '        width="{{ width }}"' +
-            '        height="{{ height }}"' +
-            '        ></canvas>' +
-            '</div>'
-        ;
-
-        return {
-            html: html
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
-
-    _PowerChart.$inject = [
-        'PhysicalLayer.PowerChartTemplateMain'
-    ];
-
-    function _PowerChart(
-        PowerChartTemplateMain
-    ) {
-        var CD;
-
-        CD = function (parentElement, width, height, queue) {
-            this.$$parentElement = parentElement;
-            this.$$canvas = null;
-            this.$$canvasContext = null;
-            this.$$canvasWidth = width;
-            this.$$canvasHeight = height;
-            this.$$queue = queue;
-            this.$$destroy = null;
-            
-            this.$$initAnimationFrame();
-            this.$$init();
-        };
-
-        CD.prototype.destroy = function () {
-            var self = this;
-
-            if (this.$$destroy) {
-                return this.$$destroy.promise;
-            }
-
-            self.$$destroy = {};
-            this.$$destroy.promise = new Promise(function (resolve) {
-                self.$$destroy.resolve = resolve;
-            });
-
-            return this.$$destroy.promise;
-        };
-
-        CD.prototype.$$init = function () {
-            this.$$canvasContext = null;
-            this.$$parentElement.innerHTML = this.$$renderTemplate();
-            this.$$connectTemplate();
-            this.$$initCanvasContext();
-        };
-
-        // TODO move it to dedicated service
-        CD.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentElement.querySelectorAll(selector);
-
-            if (jsObject.length === 0) {
-                throw 'Cannot $$find given selector';
-            }
-
-            return jsObject[0];
-        };
-
-        CD.prototype.$$connectTemplate = function () {
-            this.$$canvas = this.$$find('.power-chart');
-            this.$$canvasContext = this.$$canvas.getContext("2d");
-        };
-
-        CD.prototype.$$renderTemplate = function () {
-            var tpl = PowerChartTemplateMain.html;
-
-            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
-            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
-
-            return tpl;
-        };
-
-        CD.prototype.$$updateChart = function () {
-            var
-                ctx = this.$$canvasContext,
-                q = this.$$queue,
-                w = this.$$canvasWidth,
-                h = this.$$canvasHeight,
-                power, i, x, y
-            ;
-
-            if (ctx === null) {
-                return;
-            }
-
-            ctx.clearRect(0, 0, w, h);
-
-            for (y = 0; y < h; y += 10) {
-                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
-                ctx.beginPath();
-                ctx.moveTo(0, 2 * y);
-                ctx.lineTo(w, 2 * y);
-                ctx.closePath();
-                ctx.stroke();
-            }
-
-            for (i = 0; i < q.getSize(); i++) {
-                power = q.getItem(i);
-
-                x = i;
-                y = -power;
-
-                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
-                ctx.fillRect(
-                    x - 1,
-                    2 * y - 1,
-                    3,
-                    3
-                );
-            }
-        };
-
-        CD.prototype.$$initCanvasContext = function () {
-            this.$$canvasContext.lineWidth = 1;
-        };
-
-        CD.prototype.$$initAnimationFrame = function () {
-            var self = this;
-
-            function drawAgain() {
-                if (self.$$destroy) {
-                    self.$$parentElement.innerHTML = '';
-                    self.$$destroy.resolve();
-                } else {
-                    self.$$updateChart();
-                    requestAnimationFrame(drawAgain);
-                }
-            }
-            requestAnimationFrame(drawAgain);
-        };
-
-        return CD;
-    }
-
-})();
-
-// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
         .registerService('PhysicalLayer.ConfigurationParser', _ConfigurationParser);
 
     _ConfigurationParser.$inject = [
@@ -980,8 +774,8 @@ AudioNetwork.Injector = (function () {
         var
             baud = 4,
             baudMultiplicativeInverse = 1 / baud,
-            factorSymbol = 0.32,
-            factorGuard = 0.68,
+            factorSymbol = 0.26,
+            factorGuard = 0.74,
             factorInterpacketGap = 5,
             symbolDuration = baudMultiplicativeInverse * factorSymbol,
             rxDftWindowTime = symbolDuration,
@@ -990,7 +784,7 @@ AudioNetwork.Injector = (function () {
             ofdmFrequencySpacingPositiveInteger = 2,
             ofdmFrequencySpacing = ofdmFrequencySpacingPositiveInteger / symbolDuration,
             symbolFrequency = 1 / symbolDuration,
-            symbolFrequencyFactor = 2,
+            symbolFrequencyFactor = 2.5,
             rxNotificationPerSecond = MathUtil.round(symbolFrequencyFactor * symbolFrequency),
             rxHistoryPointSize = rxNotificationPerSecond
         ;
@@ -1028,7 +822,7 @@ AudioNetwork.Injector = (function () {
             BAUD_MULTIPLICATIVE_INVERSE: baudMultiplicativeInverse,
             FACTOR_SYMBOL: factorSymbol,
             FACTOR_GUARD: factorGuard,
-            SYNC_DURATION: 3.0,
+            SYNC_DURATION: 2.0,
             SYMBOL_DURATION: symbolDuration,
             GUARD_INTERVAL: guardInterval,
             FACTOR_INTERPACKET_GAP: factorInterpacketGap,
@@ -1577,7 +1371,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
         RA.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
         RA.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.5; // how much state times can be longer
+        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
         RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
         RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
         RA.$$_ALL_CHANNEL = null;
@@ -3868,6 +3662,212 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     'use strict';
 
     AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartBuilder', _PowerChartBuilder);
+
+    _PowerChartBuilder.$inject = [
+        'PhysicalLayer.PowerChart'
+    ];
+
+    function _PowerChartBuilder(
+        PowerChart
+    ) {
+
+        function build(parentElement, width, height) {
+            return new PowerChart(parentElement, width, height);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
+
+    _PowerChartTemplateMain.$inject = [];
+
+    function _PowerChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="power-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="power-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
+
+        return {
+            html: html
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
+
+    _PowerChart.$inject = [
+        'PhysicalLayer.PowerChartTemplateMain'
+    ];
+
+    function _PowerChart(
+        PowerChartTemplateMain
+    ) {
+        var CD;
+
+        CD = function (parentElement, width, height, queue) {
+            this.$$parentElement = parentElement;
+            this.$$canvas = null;
+            this.$$canvasContext = null;
+            this.$$canvasWidth = width;
+            this.$$canvasHeight = height;
+            this.$$queue = queue;
+            this.$$destroy = null;
+            
+            this.$$initAnimationFrame();
+            this.$$init();
+        };
+
+        CD.prototype.destroy = function () {
+            var self = this;
+
+            if (this.$$destroy) {
+                return this.$$destroy.promise;
+            }
+
+            self.$$destroy = {};
+            this.$$destroy.promise = new Promise(function (resolve) {
+                self.$$destroy.resolve = resolve;
+            });
+
+            return this.$$destroy.promise;
+        };
+
+        CD.prototype.$$init = function () {
+            this.$$canvasContext = null;
+            this.$$parentElement.innerHTML = this.$$renderTemplate();
+            this.$$connectTemplate();
+            this.$$initCanvasContext();
+        };
+
+        // TODO move it to dedicated service
+        CD.prototype.$$find = function (selector) {
+            var jsObject = this.$$parentElement.querySelectorAll(selector);
+
+            if (jsObject.length === 0) {
+                throw 'Cannot $$find given selector';
+            }
+
+            return jsObject[0];
+        };
+
+        CD.prototype.$$connectTemplate = function () {
+            this.$$canvas = this.$$find('.power-chart');
+            this.$$canvasContext = this.$$canvas.getContext("2d");
+        };
+
+        CD.prototype.$$renderTemplate = function () {
+            var tpl = PowerChartTemplateMain.html;
+
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
+
+            return tpl;
+        };
+
+        CD.prototype.$$updateChart = function () {
+            var
+                ctx = this.$$canvasContext,
+                q = this.$$queue,
+                w = this.$$canvasWidth,
+                h = this.$$canvasHeight,
+                power, i, x, y
+            ;
+
+            if (ctx === null) {
+                return;
+            }
+
+            ctx.clearRect(0, 0, w, h);
+
+            for (y = 0; y < h; y += 10) {
+                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
+                ctx.beginPath();
+                ctx.moveTo(0, 2 * y);
+                ctx.lineTo(w, 2 * y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            for (i = 0; i < q.getSize(); i++) {
+                power = q.getItem(i);
+
+                x = i;
+                y = -power;
+
+                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
+                ctx.fillRect(
+                    x - 1,
+                    2 * y - 1,
+                    3,
+                    3
+                );
+            }
+        };
+
+        CD.prototype.$$initCanvasContext = function () {
+            this.$$canvasContext.lineWidth = 1;
+        };
+
+        CD.prototype.$$initAnimationFrame = function () {
+            var self = this;
+
+            function drawAgain() {
+                if (self.$$destroy) {
+                    self.$$parentElement.innerHTML = '';
+                    self.$$destroy.resolve();
+                } else {
+                    self.$$updateChart();
+                    requestAnimationFrame(drawAgain);
+                }
+            }
+            requestAnimationFrame(drawAgain);
+        };
+
+        return CD;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
         .registerService('PhysicalLayer.RxHandlerBuilder', _RxHandlerBuilder);
 
     _RxHandlerBuilder.$inject = [
@@ -4489,7 +4489,17 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 averageFirstSyncPower, averageIdlePower, powerDifference
             ;
 
-            // signal cannot be weaker that idle noise... :)
+            // TODO refactor code block order - condition below happens actually at FIRST_SYNC state end
+            if (this.$$averageFirstSyncPowerCollector.getLastFinalizedResult()) {
+                // wait until signal will drop below threshold
+                if (powerDecibel < this.$$powerThreshold) {
+                    return ReceiveAdapterState.IDLE;
+                } else {
+                    return null;
+                }
+            }
+
+            // signal cannot be weaker than previously stored average idle noise... :)
             if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
                 return ReceiveAdapterState.FATAL_ERROR;
             }
@@ -4511,7 +4521,6 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
                     // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
                     this.$$powerThreshold = averageIdlePower + RSMM.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
-                    return ReceiveAdapterState.IDLE;
                 } catch (e) {
                     return ReceiveAdapterState.FATAL_ERROR;
                 }
