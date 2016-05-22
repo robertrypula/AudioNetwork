@@ -17,8 +17,8 @@
         var
             baud = 4,
             baudMultiplicativeInverse = 1 / baud,
-            factorSymbol = 0.32,
-            factorGuard = 0.68,
+            factorSymbol = 0.26,
+            factorGuard = 0.74,
             factorInterpacketGap = 5,
             symbolDuration = baudMultiplicativeInverse * factorSymbol,
             rxDftWindowTime = symbolDuration,
@@ -27,7 +27,7 @@
             ofdmFrequencySpacingPositiveInteger = 2,
             ofdmFrequencySpacing = ofdmFrequencySpacingPositiveInteger / symbolDuration,
             symbolFrequency = 1 / symbolDuration,
-            symbolFrequencyFactor = 2,
+            symbolFrequencyFactor = 2.5,
             rxNotificationPerSecond = MathUtil.round(symbolFrequencyFactor * symbolFrequency),
             rxHistoryPointSize = rxNotificationPerSecond
         ;
@@ -65,7 +65,7 @@
             BAUD_MULTIPLICATIVE_INVERSE: baudMultiplicativeInverse,
             FACTOR_SYMBOL: factorSymbol,
             FACTOR_GUARD: factorGuard,
-            SYNC_DURATION: 3.0,
+            SYNC_DURATION: 2.0,
             SYMBOL_DURATION: symbolDuration,
             GUARD_INTERVAL: guardInterval,
             FACTOR_INTERPACKET_GAP: factorInterpacketGap,

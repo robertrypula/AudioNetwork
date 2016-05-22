@@ -48,7 +48,7 @@
 
         RA.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
         RA.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.5; // how much state times can be longer
+        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
         RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
         RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
         RA.$$_ALL_CHANNEL = null;
