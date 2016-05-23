@@ -34,3 +34,15 @@ gulp.task('md', function () {
         .pipe(markdown())
         .pipe(gulp.dest(DEST));
 });
+
+var webserver = require('gulp-webserver');
+
+gulp.task('serve', function() {
+    gulp.src('.')
+        .pipe(webserver({
+            fallback: 'index.html',
+            livereload: true,
+            directoryListing: true,
+            open: 'http://localhost:8000/index.html'
+        }));
+});
