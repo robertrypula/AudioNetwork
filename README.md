@@ -11,7 +11,7 @@ development]
 
 [Carrier generate and recovery tests](https://audio-network.rypula.pl/example/carrier.html)
 
-[![Data transmission over sound waves (AudioNetwork)](https://img.youtube.com/vi/TjjyLaXd1Ro/0.jpg)](https://www.youtube.com/watch?v=TjjyLaXd1Ro)
+[![Data transmission over sound waves (AudioNetwork)](https://audio-network.rypula.pl/asset/image/yt.png)](https://www.youtube.com/watch?v=TjjyLaXd1Ro)
 
 >This project is still under development. Documentation is also planned but... little later :)
 
