@@ -7,7 +7,7 @@ TODO list:
       - PhysicalLayer's rx method should should store all handlers functions in array (multiple)
       - ReceiveAdapter should register own rx handler inside Adapter class
     - move readme to index.html
-    - prepare some how to use movies and host them on YouTube
+
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
     + [~2.0h] refactor 'collecting arrays' to dedicated collectors
@@ -40,6 +40,7 @@ TODO list:
 ## v1.0.3 (2016-??-??, dev in progress)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
   + default settings update (symbol duration vs guard interval, sync duration reduced from 3 sec to 2 sec, notification per seconds increased)
+  + add YouTube movie with demo
   + move common css away of example
   + simple demo added
   + updates at README.md

@@ -3,10 +3,16 @@
 body, html {
     background-color: rgb(46, 49, 54);
     font-size: 16px;
-    line-height: 1.6em;
+    line-height: 1.0em;
     color: rgb(108, 114, 121);
     font-family: 'Roboto', sans-serif;
     text-decoration: none;
+}
+
+.wrapper {
+    width: 100%;
+    min-width: 320px;
+    overflow: hidden;
 }
 
 * {
@@ -149,19 +155,35 @@ button, textarea, input {
     margin-bottom: 30px;
 }
 
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
 /* buttons */
 
 .btn {
     display: inline-block;
-    padding: 0 6px;
-    height: 25px;
-    font-size: 14px;
+    padding: 0 10px;
+    height: 30px;
+    font-size: 1em;
     line-height: 1em;
     cursor: pointer;
     border-radius: 3px;
     border: none;
     outline: none;
     margin-bottom: 3px;
+}
+
+.btn:focus {
+    background-color: #BDBDBD;
 }
 
 .btn-default {
@@ -186,7 +208,7 @@ button, textarea, input {
 input[type=text], input[type=number] {
     display: inline-block;
     line-height: 1em;
-    font-size: 14px;
+    font-size: 1em;
     height: 30px;
     color: #747f8d;
     background: #fff;
@@ -206,8 +228,8 @@ input[type=text]:disabled, input[type=number]:disabled, textarea:disabled, texta
 
 textarea {
     display: inline-block;
-    line-height: 1.3em;
-    font-size: 14px;
+    line-height: 1.2em;
+    font-size: 1em;
     height: 30px;
     color: #747f8d;
     background: #fff;
@@ -269,6 +291,11 @@ h5 {
 
 p {
     margin-bottom: 15px;
+    line-height: 1.6em;
+}
+
+p.larger {
+    font-size: 1.15em;
 }
 
 b.label {
@@ -300,7 +327,7 @@ ul li, ol li {
     display: block;
     padding: 0 0 5px 30px;
     position: relative;
-
+    line-height: 1.6em;
 }
 
 ol {
@@ -333,7 +360,7 @@ blockquote {
 p code {
     padding: 0.2em 0;
     margin: 0;
-    font-size: 85%;
+    font-size: 0.85em;
     background-color: #eee;
     color: rgb(108, 114, 121);
     border-radius: 3px;
@@ -348,8 +375,8 @@ p code::before, p code::after {
 pre {
     padding: 16px;
     overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
+    font-size: 0.85em;
+    line-height: 1.2em;
     background-color: #eee;
     border-radius: 3px;
     margin-bottom: 15px;

@@ -164,7 +164,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
     receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
 
     var powerChartQueue0 = new AudioNetwork.Common.Queue(400);
-    // var powerChart0 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
+    var powerChart0 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);
 
     physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this

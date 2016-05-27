@@ -2,12 +2,6 @@
     padding: 8px 0 10px 0;
 }
 
-#under-dev {
-    text-align: center;
-    font-size: 18px;
-    line-height: 24px;
-}
-
 #load-indicator {
     padding: 3px;
     position: fixed;
@@ -30,11 +24,16 @@
     overflow-x: auto;
     margin: 10px 0 10px;
     border: 1px solid #eee;
+}
 
+#rx-spectrum .analyser-action {
+    font-size: 14px;
+    line-height: 1em;
 }
 
 #rx-spectrum .analyser-axis-x {
     font-size: 10px;
+    line-height: 1em;
 }
 
 .tx-channel-ofdm, .rx-channel-ofdm {
