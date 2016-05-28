@@ -1,12 +1,18 @@
-## Backlog for future releases
+## Roadmap
+  - 1.x.x finish all PhysicalLayer stuff (Web Audio API, raw packets)
+  - 2.x.x finish all DataLinkLayer stuff (frames with correction codes and SRC and DEST addresses)
+  - 3.x.x finish all NetworkLayer stuff (similar to IP datagrams with ability to route data somewhere)
+  - 4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)
+  - 5.x.x finalization of the project, some example applications like p2p file exchange, web server etc
+
+## Backlog for future 1.x.x releases
 
 TODO list:
   - Current focus:
     - refactor API
       - change adapter parameter order or move all adapter initialization
-      - PhysicalLayer's rx method should should store all handlers functions in array (multiple)
+      - PhysicalLayer's rx method should should store all handlers functions in array (??? is that really needed ???)
       - ReceiveAdapter should register own rx handler inside Adapter class
-    - move readme to index.html
 
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
@@ -21,13 +27,16 @@ TODO list:
     - OPTIONAL [~4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)
     - OPTIONAL [~1.0h] Signal Strength like in cell phones
     - OPTIONAL [~1.0h] add new state: INTERPACKET_GAP
+
   - Power chart: [~10.5h remaining]
     - [~4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?
     - [~3.0h] ability to show other OFDMs than pilot
     - [~1.0h] increase bar width
     - [~1.5h] mark states ranges
     - [~1.0h] show important power level (threshold, min/max, etc)
+
   - General stuff:
+    - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
     - remove Promises (code should be as less dependent as possible - callbacks are enough in this case)
     - use setTimeout instead setInverval (?)
     - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
@@ -40,8 +49,10 @@ TODO list:
 ## v1.0.3 (2016-??-??, dev in progress)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
   + default settings update (symbol duration vs guard interval, sync duration reduced from 3 sec to 2 sec, notification per seconds increased)
+  + gulp 'serve' task for serving the app locally
   + add YouTube movie with demo
   + move common css away of example
+  + readme moved to index.html, styles and pages structure refactored
   + simple demo added
   + updates at README.md
   + added CHANGELOG.md

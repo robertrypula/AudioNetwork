@@ -10,26 +10,107 @@ microphone, speakers and the browser!
 
 [Carrier generate and recovery tests](https://audio-network.rypula.pl/example/03-physical-layer-carrier/physical-layer-carrier.html)
 
+If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
+features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit
+data over sound between two laptops:
+
 [![Data transmission over sound waves (AudioNetwork)](https://audio-network.rypula.pl/asset/image/yt.png)](https://www.youtube.com/watch?v=TjjyLaXd1Ro)
 
 >This project is still under development. Documentation is also planned but... little later :)
 
 ## How can I test it?
 
-First of all you need to have two devices. One for sending, one for receiving data. During development for sending
-I'm using very old Galaxy S2 smartphone with Firefox. On the other side for receiving I'm using laptop with Chrome
-browser. I guess it should work with any other device with browser that supports Web Audio API.
+First of all you need to have two devices. One for sending, one for receiving data. It should work with any
+device with browser that supports Web Audio API (PC, Mac, tablet, smartphone).
+
+1. **[Receiver]** - Before you load demo page you need to be quiet :) Receiving device needs to listen to 'silence'
+around you when there is no signal in the air. It's indicated by `IDLE_INIT` state and it ends when `FIRST_SYNC_WAIT`
+state will come. If you fell that your silence wasn't good enough you can always use `RESET` button to start again.
+
+2. **[Transmitter]** - All you need to do is to click on `SYNC` button.
+
+3. **[Receiver]** - When `SYNC` transmission is in progress state should change to `FIRST_SYNC`. After about 2 seconds
+it should switch to `IDLE`. At this point **we are ready to send some data!**
+
+4. **[Transmitter]** - Now you can put some data to textarea and click on `Send packet` button. After short moment your
+data will appear on the receiver's side.
+
+>By default PSK-2 modulation is used so you can use only symbols `0` and `1` but it's enough to send data bit by bit.
+>For example to send ASCII `a` character (0x61) you need to put inside textarea `0 1 1 0 0 0 0 1`.
+>Please remember to always put one space between each symbol but whole text needs to be without trailing and
+>leading spaces.
+
+>If at any point you will see `FATAL_ERROR` state you need to click on `RESET` button and start all points again.
 
 >AudioNetwork needs raw microphone output without any filter applied. You can verify that by opening `Sound` settings
 >in your system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
 >is when your microphone has some hardware filter that you can't disable. In this case you need to throw it away and
 >buy a new one ;)
 
-Demo is divided into two sections - `Receive` and `Transmit` (blue bar with white text).
+## How can I play with it on my local machine?
+
+Project is available at GitHub and npm so you can just run one of the commands below:
+
+```
+git clone https://github.com/robertrypula/AudioNetwork.git
+cd AudioNetwork
+npm install
+gulp serve
+```
+
+or
+
+```
+npm install audio-network
+```
+
+In both cases at `build` directory you will find minified and unminified js file with whole library. Pick one and
+include it into your HTML file. For example:
+
+```
+<script src="node_modules/audio-network/build/audio-network-v1.0.3.min.js"></script>
+```
+
+Now you can access `AudioNetwork` object at global JavaScript scope. It's the entry point for all components:
+
+```
+var physicalLayer, transmitAdapter, receiveAdapter;
+
+physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
+    // config
+}),
+transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
+receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+```
+
+Below you can find `Demo - simple` source code:
+  - [html](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.html)
+  - [js](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.js)
+
+>To work properly `Web Audio API` requires running your HTML file via web server (http://localhost...) like Apache
+>or some Node stuff like `gulp-webserver` (I'm using it and it works great). In case of local machine normal `http`
+>connection would work. Unfortunately when you will want to go live you have to provide `https`. It's because in some
+>browsers accessing microphone is not allowed when site is not hosted over `https`. You can read more about this
+>[here](https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins)
+
+In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
+[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8) implementation.
+For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
+AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
+you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)
+
+## More about full features demo
+
+`Full feature demo` is growing with AudioNetwork library core. It's developer sandbox for all new features.
+
+Demo is divided into two sections - `Receive` and `Transmit` (blue bar with white text). You can show or hide
+stuff by clicking on `View type` buttons at `Initialize` section.
 
 ### Receive section
 
-At `Receive` section you can check current status of `ReceiveAdapter`.
+Here you can find lots of information like input spectrum, constellation diagrams, power chart.
+
+At `Receive` section you can also check current status of `ReceiveAdapter`.
 
 >`ReceiveAdapter` is wrapper for lower level `PhysicalLayer`'s object `rx` events.
 
@@ -49,77 +130,6 @@ At `Transmit` section there is not that much as at `Receive` section. You will f
 `SYNC` signal, `PACKET` and individual symbols (`0`, `1`, ...). Number of unique symbols is determined by
 `PSK symbol size` (you need to switch view type to `Complex` to see that). At `Packet` textarea please remember to
 always put one space between each symbol but whole text needs to be without trailing and leading spaces.
-
-### Enough of reading, tell me how to send something!
-
-1. **[Receiving device - Receiver section]** - Before you load demo page you need to be quiet :) It's because
-`ReceiveAdapter` needs to properly initialize `averageIdlePower`. In other words it needs to listen to 'silence'
-around you when no signal is transmitted. It's indicated by `IDLE_INIT` state. If you fell that your silence wasn't
-good enough you can always use `RESET` button to start again.
-
-2. **[Receiving device - Receiver section]** - When `averageIdlePower` collecting is complete `ReceiveAdapter`
-will change it's state to `FIRST_SYNC_WAIT`. Now it's time to grab your transmitting device and read next point.
-
-3. **[Transmitting device - transmit section]** - All you need to do is to click on `SYNC` button. It will transmit
-3 seconds of synchronization signal that will allow receiver device to setup everything.
-
-4. **[Receiving device - Receiver section]** - When `SYNC` transmission is in progress `ReceiveAdapter` state should change to
-`FIRST_SYNC`.
-
-5. **[Receiving device - Receiver section]** - When `SYNC` transmission is over `ReceiveAdapter` state at the end
-should change to `IDLE`. It means that `ReceiveAdapter` properly initialized `averageFirstSyncPower` and
-additionally receiver reference frequency and phase offset were fine-tuned. **Now we are ready to send some data!**
-
-6. **[Transmitting device - transmit section]** - Now you can click on `Send packet` button. All data inside textarea
-should be transferred to receiving device. By default PSK-2 modulation is used so you can use only symbols `0` and `1`
-but it's enough to send data bit by bit. For example to send ASCII `a` character (0x61) you need to put inside
-textarea `0 1 1 0 0 0 0 1`.
-
-7. **[Receiving device - Receiver section]** - After short moment data from transmitter textarea should appear
-at `RX adapter - PACKETS`. Congratulations, you just send something **thought air in your room**!
-
->If at any point you will see `FATAL_ERROR` state you need to click on `RESET` button and start all points again.
-
-## How to install?
-
-Project is available at GitHub and npm so you can just run one of the commands below:
-
-```
-git clone https://github.com/robertrypula/AudioNetwork.git
-```
-
-or
-
-```
-npm install audio-network
-```
-
-After downloading look into build directory. You will find there both minified and unminified js file with whole
-library. Pick one and include it into your html. For example:
-
-```
-<script src="node_modules/audio-network/build/audio-network-v1.0.3.min.js"></script>
-```
-
-When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork.
-It's the entry point for all components:
-
-```
-var physicalLayer, transmitAdapter, receiveAdapter;
-
-physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
-    // config
-}),
-transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
-receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
-// todo put whole example here
-```
-
->Under the hood AudioNetwork works on simple
->[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8) implementation.
->For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
->AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
->you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)
 
 ## Features
 

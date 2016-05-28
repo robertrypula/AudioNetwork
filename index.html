@@ -23,23 +23,84 @@ microphone, speakers and the browser!</p>
 <p><a href="https://audio-network.rypula.pl/example/01-physical-layer/physical-layer.html">Demo - full features</a></p>
 <p><a href="https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html">Demo - simple</a></p>
 <p><a href="https://audio-network.rypula.pl/example/03-physical-layer-carrier/physical-layer-carrier.html">Carrier generate and recovery tests</a></p>
+<p>If you want to try AudioNetwork by yourself I would recommend to first open <code>Demo - simple</code> because <code>Demo - full
+features</code> might be little scary for the first time. You can also watch YouTube video that shows how to transmit
+data over sound between two laptops:</p>
 <p><a href="https://www.youtube.com/watch?v=TjjyLaXd1Ro" target="_blank"><img src="https://audio-network.rypula.pl/asset/image/yt.png" alt="Data transmission over sound waves (AudioNetwork)"></a></p>
 <blockquote>
 <p>This project is still under development. Documentation is also planned but... little later :)</p>
 </blockquote>
 <h2 id="how-can-i-test-it-">How can I test it?</h2>
-<p>First of all you need to have two devices. One for sending, one for receiving data. During development for sending
-I&#39;m using very old Galaxy S2 smartphone with Firefox. On the other side for receiving I&#39;m using laptop with Chrome
-browser. I guess it should work with any other device with browser that supports Web Audio API.</p>
+<p>First of all you need to have two devices. One for sending, one for receiving data. It should work with any
+device with browser that supports Web Audio API (PC, Mac, tablet, smartphone).</p>
+<ol>
+<li><p><strong>[Receiver]</strong> - Before you load demo page you need to be quiet :) Receiving device needs to listen to &#39;silence&#39;
+around you when there is no signal in the air. It&#39;s indicated by <code>IDLE_INIT</code> state and it ends when <code>FIRST_SYNC_WAIT</code>
+state will come. If you fell that your silence wasn&#39;t good enough you can always use <code>RESET</code> button to start again.</p>
+</li>
+<li><p><strong>[Transmitter]</strong> - All you need to do is to click on <code>SYNC</code> button.</p>
+</li>
+<li><p><strong>[Receiver]</strong> - When <code>SYNC</code> transmission is in progress state should change to <code>FIRST_SYNC</code>. After about 2 seconds
+it should switch to <code>IDLE</code>. At this point <strong>we are ready to send some data!</strong></p>
+</li>
+<li><p><strong>[Transmitter]</strong> - Now you can put some data to textarea and click on <code>Send packet</code> button. After short moment your
+data will appear on the receiver&#39;s side.</p>
+</li>
+</ol>
 <blockquote>
+<p>By default PSK-2 modulation is used so you can use only symbols <code>0</code> and <code>1</code> but it&#39;s enough to send data bit by bit.
+For example to send ASCII <code>a</code> character (0x61) you need to put inside textarea <code>0 1 1 0 0 0 0 1</code>.
+Please remember to always put one space between each symbol but whole text needs to be without trailing and
+leading spaces.</p>
+<p>If at any point you will see <code>FATAL_ERROR</code> state you need to click on <code>RESET</code> button and start all points again.</p>
 <p>AudioNetwork needs raw microphone output without any filter applied. You can verify that by opening <code>Sound</code> settings
 in your system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
 is when your microphone has some hardware filter that you can&#39;t disable. In this case you need to throw it away and
 buy a new one ;)</p>
 </blockquote>
-<p>Demo is divided into two sections - <code>Receive</code> and <code>Transmit</code> (blue bar with white text).</p>
+<h2 id="how-can-i-play-with-it-on-my-local-machine-">How can I play with it on my local machine?</h2>
+<p>Project is available at GitHub and npm so you can just run one of the commands below:</p>
+<pre><code>git clone https://github.com/robertrypula/AudioNetwork.git
+cd AudioNetwork
+npm install
+gulp serve
+</code></pre><p>or</p>
+<pre><code>npm install audio-network
+</code></pre><p>In both cases at <code>build</code> directory you will find minified and unminified js file with whole library. Pick one and
+include it into your HTML file. For example:</p>
+<pre><code>&lt;script src=&quot;node_modules/audio-network/build/audio-network-v1.0.3.min.js&quot;&gt;&lt;/script&gt;
+</code></pre><p>Now you can access <code>AudioNetwork</code> object at global JavaScript scope. It&#39;s the entry point for all components:</p>
+<pre><code>var physicalLayer, transmitAdapter, receiveAdapter;
+
+physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
+// config
+}),
+transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
+receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+</code></pre><p>Below you can find <code>Demo - simple</code> source code:</p>
+<ul>
+<li><a href="https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.html" target="_blank">html</a></li>
+<li><a href="https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.js" target="_blank">js</a></li>
+</ul>
+<blockquote>
+<p>To work properly <code>Web Audio API</code> requires running your HTML file via web server (<a href="http://localhost" target="_blank">http://localhost</a>...) like Apache
+or some Node stuff like <code>gulp-webserver</code> (I&#39;m using it and it works great). In case of local machine normal <code>http</code>
+connection would work. Unfortunately when you will want to go live you have to provide <code>https</code>. It&#39;s because in some
+browsers accessing microphone is not allowed when site is not hosted over <code>https</code>. You can read more about this
+<a href="https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins" target="_blank">here</a></p>
+</blockquote>
+<p>In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8" target="_blank">Injector</a> implementation.
+For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
+AudioNetwork.Injector.resolve(&#39;PhysicalLayer.PhysicalLayer&#39;). Other public classes/services that have aliases
+you can find <a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js" target="_blank">here</a></p>
+<h2 id="more-about-full-features-demo">More about full features demo</h2>
+<p><code>Full feature demo</code> is growing with AudioNetwork library core. It&#39;s developer sandbox for all new features.</p>
+<p>Demo is divided into two sections - <code>Receive</code> and <code>Transmit</code> (blue bar with white text). You can show or hide
+stuff by clicking on <code>View type</code> buttons at <code>Initialize</code> section.</p>
 <h3 id="receive-section">Receive section</h3>
-<p>At <code>Receive</code> section you can check current status of <code>ReceiveAdapter</code>.</p>
+<p>Here you can find lots of information like input spectrum, constellation diagrams, power chart.</p>
+<p>At <code>Receive</code> section you can also check current status of <code>ReceiveAdapter</code>.</p>
 <blockquote>
 <p><code>ReceiveAdapter</code> is wrapper for lower level <code>PhysicalLayer</code>&#39;s object <code>rx</code> events.</p>
 </blockquote>
@@ -49,7 +110,7 @@ Here you can find any potential packet that will be found in the air. I wrote po
 incoming packets is not verified so some of them might be corrupted. It&#39;s because it&#39;s not <code>PhysicalLayer</code>
 responsibility to deal with it. In some future release of AudioNetwork packet verification will be added.
 This would be in next layer in the network stack - <code>DataLinkLayer</code> (like in
-<a href="https://en.wikipedia.org/wiki/OSI_model">OSI</a> model).</p>
+<a href="https://en.wikipedia.org/wiki/OSI_model" target="_blank">OSI</a> model).</p>
 <blockquote>
 <p>Orange box is kind of developer debug box - it will be replaced to some nicer UX in the future...</p>
 </blockquote>
@@ -58,63 +119,6 @@ This would be in next layer in the network stack - <code>DataLinkLayer</code> (l
 <code>SYNC</code> signal, <code>PACKET</code> and individual symbols (<code>0</code>, <code>1</code>, ...). Number of unique symbols is determined by
 <code>PSK symbol size</code> (you need to switch view type to <code>Complex</code> to see that). At <code>Packet</code> textarea please remember to
 always put one space between each symbol but whole text needs to be without trailing and leading spaces.</p>
-<h3 id="enough-of-reading-tell-me-how-to-send-something-">Enough of reading, tell me how to send something!</h3>
-<ol>
-<li><p><strong>[Receiving device - Receiver section]</strong> - Before you load demo page you need to be quiet :) It&#39;s because
-<code>ReceiveAdapter</code> needs to properly initialize <code>averageIdlePower</code>. In other words it needs to listen to &#39;silence&#39;
-around you when no signal is transmitted. It&#39;s indicated by <code>IDLE_INIT</code> state. If you fell that your silence wasn&#39;t
-good enough you can always use <code>RESET</code> button to start again.</p>
-</li>
-<li><p><strong>[Receiving device - Receiver section]</strong> - When <code>averageIdlePower</code> collecting is complete <code>ReceiveAdapter</code>
-will change it&#39;s state to <code>FIRST_SYNC_WAIT</code>. Now it&#39;s time to grab your transmitting device and read next point.</p>
-</li>
-<li><p><strong>[Transmitting device - transmit section]</strong> - All you need to do is to click on <code>SYNC</code> button. It will transmit
-3 seconds of synchronization signal that will allow receiver device to setup everything.</p>
-</li>
-<li><p><strong>[Receiving device - Receiver section]</strong> - When <code>SYNC</code> transmission is in progress <code>ReceiveAdapter</code> state should change to
-<code>FIRST_SYNC</code>.</p>
-</li>
-<li><p><strong>[Receiving device - Receiver section]</strong> - When <code>SYNC</code> transmission is over <code>ReceiveAdapter</code> state at the end
-should change to <code>IDLE</code>. It means that <code>ReceiveAdapter</code> properly initialized <code>averageFirstSyncPower</code> and
-additionally receiver reference frequency and phase offset were fine-tuned. <strong>Now we are ready to send some data!</strong></p>
-</li>
-<li><p><strong>[Transmitting device - transmit section]</strong> - Now you can click on <code>Send packet</code> button. All data inside textarea
-should be transferred to receiving device. By default PSK-2 modulation is used so you can use only symbols <code>0</code> and <code>1</code>
-but it&#39;s enough to send data bit by bit. For example to send ASCII <code>a</code> character (0x61) you need to put inside
-textarea <code>0 1 1 0 0 0 0 1</code>.</p>
-</li>
-<li><p><strong>[Receiving device - Receiver section]</strong> - After short moment data from transmitter textarea should appear
-at <code>RX adapter - PACKETS</code>. Congratulations, you just send something <strong>thought air in your room</strong>!</p>
-</li>
-</ol>
-<blockquote>
-<p>If at any point you will see <code>FATAL_ERROR</code> state you need to click on <code>RESET</code> button and start all points again.</p>
-</blockquote>
-<h2 id="how-to-install-">How to install?</h2>
-<p>Project is available at GitHub and npm so you can just run one of the commands below:</p>
-<pre><code>git clone https://github.com/robertrypula/AudioNetwork.git
-</code></pre><p>or</p>
-<pre><code>npm install audio-network
-</code></pre><p>After downloading look into build directory. You will find there both minified and unminified js file with whole
-library. Pick one and include it into your html. For example:</p>
-<pre><code>&lt;script src=&quot;node_modules/audio-network/build/audio-network-v1.0.3.min.js&quot;&gt;&lt;/script&gt;
-</code></pre><p>When you reload your page one additional object will be registered at the global JavaScript scope - AudioNetwork.
-It&#39;s the entry point for all components:</p>
-<pre><code>var physicalLayer, transmitAdapter, receiveAdapter;
-
-physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
-// config
-}),
-transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
-receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
-// todo put whole example here
-</code></pre><blockquote>
-<p>Under the hood AudioNetwork works on simple
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8">Injector</a> implementation.
-For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
-AudioNetwork.Injector.resolve(&#39;PhysicalLayer.PhysicalLayer&#39;). Other public classes/services that have aliases
-you can find <a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js">here</a></p>
-</blockquote>
 <h2 id="features">Features</h2>
 <ul>
 <li>Dependency free library</li>
@@ -122,20 +126,20 @@ you can find <a href="https://github.com/robertrypula/AudioNetwork/blob/master/s
 <li>Multiple channel support for parallel transmission without collisions</li>
 <li>OFDM (Orthogonal Frequency-Division Multiplexing) support per each channel. This helps to save bandwidth and pack
 more data into one burst. It&#39;s the same technique as used in many existing standards like LTE, Wi-Fi, DAB, DVB.</li>
-<li><a href="https://en.wikipedia.org/wiki/Constellation_diagram">Constellation Diagram</a>, that helps to easily verify
+<li><a href="https://en.wikipedia.org/wiki/Constellation_diagram" target="_blank">Constellation Diagram</a>, that helps to easily verify
 phase and amplitude of carrier frequency in the realtime.</li>
-<li><a href="https://en.wikipedia.org/wiki/Spectrum_analyzer">Spectrum Analyzer</a> of incoming signal bases on AnalyserNode
+<li><a href="https://en.wikipedia.org/wiki/Spectrum_analyzer" target="_blank">Spectrum Analyzer</a> of incoming signal bases on AnalyserNode
 for Web Audio API.</li>
 <li>Adapter classes
-(<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js">ReceiveAdapter</a>
+(<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js" target="_blank">ReceiveAdapter</a>
 and
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js">TransmitAdapter</a>)
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js" target="_blank">TransmitAdapter</a>)
 that acts as easy-to-use wrappers over raw
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js">PhysicalLayer</a>
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js" target="_blank">PhysicalLayer</a>
 class with lower level tx and rx methods. If you want you can also write your own adapter class and attach
 PhysicalLayer to it. AudioNetwork is shipped with PSK adapters but you can write any other modulation like PWM.</li>
 <li>ReceiveAdapter internally has state machine with states listed
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js">here</a>.
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js" target="_blank">here</a>.
 The idea is to extract potential packets from raw carrier details data that rx method provides.</li>
 <li>Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmitter and receiver
 frequencies are de-tuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that
@@ -156,37 +160,37 @@ at <code>FIRST_SYNC</code> state. After those steps receiver calculates <code>po
 because ReceiveAdapter, when restoring packet symbols, is &#39;clocked&#39; by carrier frequency power changes.</li>
 </ul>
 <h2 id="few-more-words-about-the-project">Few more words about the project</h2>
-<p>Internally AudioNetwork library uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a>
+<p>Internally AudioNetwork library uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a>
 for retrieving audio data from the microphone and sending audio data to the speakers. To be more precise it is using
-<a href="https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode">ScriptProcessorNode</a>. ScriptProcessorNode
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode" target="_blank">ScriptProcessorNode</a>. ScriptProcessorNode
 fires event when new portion of samples arrives (from mic) or new portion of samples is required (for speakers).
 Basically AudioNetwork library is analysing/providing raw arrays of sound samples inside audio events handlers. In
-other words all <a href="https://en.wikipedia.org/wiki/Digital_signal_processing">DSP</a> is performed by internal
+other words all <a href="https://en.wikipedia.org/wiki/Digital_signal_processing" target="_blank">DSP</a> is performed by internal
 AudioNetwork&#39;s classes or services written in pure JavaScript.</p>
 <p>Apart from ScriptProcessorNode two other Web Audio API nodes were used. First was
-<a href="https://developer.mozilla.org/en-US/docs/Web/API/GainNode">GainNode</a> for connecting other nodes together and
-the second was <a href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode">AnalyserNode</a>. AnalyserNode
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/GainNode" target="_blank">GainNode</a> for connecting other nodes together and
+the second was <a href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode" target="_blank">AnalyserNode</a>. AnalyserNode
 was used only to show some &#39;nice&#39; visual stuff to the user. We can switch between
-<a href="https://en.wikipedia.org/wiki/Time_domain">time domain</a> (to see raw samples)
-and <a href="https://en.wikipedia.org/wiki/Frequency_domain">frequency domain</a> (spectrum analyzer like on FM radio display).
+<a href="https://en.wikipedia.org/wiki/Time_domain" target="_blank">time domain</a> (to see raw samples)
+and <a href="https://en.wikipedia.org/wiki/Frequency_domain" target="_blank">frequency domain</a> (spectrum analyzer like on FM radio display).
 It&#39;s optional and not required when we want to just send or receive data.</p>
 <p>If somebody is familiar with Web Audio API one question may now come - why I didn&#39;t use
-<a href="https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode">OscillatorNode</a> for sound generation or
-AnalyzerNode&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/getFloatFrequencyData">FrequencyData</a>
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode" target="_blank">OscillatorNode</a> for sound generation or
+AnalyzerNode&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/getFloatFrequencyData" target="_blank">FrequencyData</a>
 output for detecting carrier frequencies? Well... I could, but the main goal for this project was to use
-PSK (<a href="https://en.wikipedia.org/wiki/Phase-shift_keying">Phase Shift Keying</a>) modulation to send/receive data and
+PSK (<a href="https://en.wikipedia.org/wiki/Phase-shift_keying" target="_blank">Phase Shift Keying</a>) modulation to send/receive data and
 learn a bit about modern wireless communication techniques. Those two goals even forced me to write everything
 from scratch because AnalyserNode&#39;s frequency domain data output (it is using
-<a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">FFT - Fast Fourier Transform</a>) provides only amplitude
+<a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform" target="_blank">FFT - Fast Fourier Transform</a>) provides only amplitude
 information without any phase information. It turned out that the only way to achieve PSK modulation was to implement
-own <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">Discrete Fourier Transform</a> with amplitude/phase or use
+own <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform" target="_blank">Discrete Fourier Transform</a> with amplitude/phase or use
 some DSP library. I wanted to dig into the details so I picked the first option :) Wikipedia about DFT looks
 ultra scary but in the code there is no rocket science. Basic implementation of Discrete Fourier Transform is
 very simple. We will not find there any mathematical tricks like used in FFT. If you don&#39;t believe me, check this class
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/carrier-recovery/carrier-recovery.factory.js">CarrierRecovery</a>.</p>
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/carrier-recovery/carrier-recovery.factory.js" target="_blank">CarrierRecovery</a>.</p>
 <p>There&#39;s no rose without a thorn... CarrierRecovery class code is simple but when we would like to create more of its
 instances, to have more carrier frequencies, we will reduce overall performance pretty fast. It is not good but at
-least it&#39;s closer to <a href="https://en.wikipedia.org/wiki/KISS_principle">KISS</a> design principle ;)</p>
+least it&#39;s closer to <a href="https://en.wikipedia.org/wiki/KISS_principle" target="_blank">KISS</a> design principle ;)</p>
 <h2 id="licence">Licence</h2>
 <p>The MIT License (MIT)</p>
 <p>Copyright (c) 2015-2016 Robert Rypuła - <a href="https://audio-network.rypula.pl">https://audio-network.rypula.pl</a></p>
@@ -204,6 +208,7 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
 
                 </div>
             </div>
