@@ -90,23 +90,23 @@ function drawConstellationDiagram(canvasId, bufferPhase, bufferPower) {
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = color;
-    ctx.clearRect(0, 0, 512, 512);
+    ctx.clearRect(0, 0, 256, 256);
     ctx.beginPath();
-    ctx.moveTo(0, 256);
-    ctx.lineTo(512, 256);
+    ctx.moveTo(0, 128);
+    ctx.lineTo(256, 128);
     ctx.closePath();
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(256, 0);
-    ctx.lineTo(256, 512);
+    ctx.moveTo(128, 0);
+    ctx.lineTo(128, 256);
     ctx.closePath();
     ctx.stroke();
     for (i = 0; i < bufferPhase.length; i++) {
         if (i < (100 + burstDuration) - 50 || i > (100 + burstDuration) + 50) {
             continue;
         }
-        x = 256 + 256 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
-        y = 256 - 256 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
+        x = 128 + 128 * bufferPower[i] * Math.cos(2 * Math.PI * bufferPhase[i]);
+        y = 128 - 128 * bufferPower[i] * Math.sin(2 * Math.PI * bufferPhase[i]);
         ctx.fillRect(x - 1, y - 1, 3, 3);
     }
 }

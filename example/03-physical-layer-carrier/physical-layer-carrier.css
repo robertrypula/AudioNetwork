@@ -1,0 +1,5 @@
+.big-chart {
+    overflow-x: auto;
+    margin: 10px 0 10px;
+    border: 1px solid #eee;
+}

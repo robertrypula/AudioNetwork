@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-    <title>Audio Network - data transmission over sound waves, physical layer carrier example</title>
+    <title>Audio Network - data transmission over sound waves - physical layer carrier example</title>
 
-    <meta name="Description" content="Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!">
+    <meta name="description" content="Example of restoring carrier's phase and power from raw data samples that contains couple of others frequencies.">
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="physical-layer-carrier.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,7 +17,7 @@
     <div class="wrapper">
 
         <div class="container">
-            <h1>Audio Network - physical layer carrier example</h1>
+            <h1>Audio Network - send data over sound in JavaScript</h1>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
                     <p class="text-right">
@@ -26,13 +27,20 @@
                         THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
                         Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
                     </p>
+                    <p>
+                        This example is developer's sandbox for carrier generate and recovery. I was testing here
+                        ability to restore carrier's phase and power from raw data samples that contains couple of others
+                        frequencies. This example will have more features and description in future releases.
+                    </p>
                 </div>
             </div>
 
             <h2>Sample buffer</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-                    <canvas width="5000" height="128" id="buffer-sample" style="border: 1px solid red;"></canvas>
+                    <div class="big-chart">
+                        <canvas width="5000" height="128" id="buffer-sample"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -49,27 +57,28 @@
             <h3>Power [dB]</h3>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-                    <canvas width="5000" height="128" id="buffer-power" style="border: 1px solid green;"></canvas>
+                    <div class="big-chart">
+                        <canvas width="5000" height="128" id="buffer-power"></canvas>
+                    </div>
                 </div>
             </div>
 
             <h3>Phase</h3>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-                    <canvas width="5000" height="128" id="buffer-phase" style="border: 1px solid green;"></canvas>
+                    <div class="big-chart">
+                        <canvas width="5000" height="128" id="buffer-phase"></canvas>
+                    </div>
                 </div>
             </div>
 
             <h3>Constellation</h3>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-                    <canvas width="512" height="512" id="constellation-diagram" style="border: 1px solid green;"></canvas>
-                    <div id="constellation-diagram-v2"></div>
+                    <canvas width="256" height="256" id="constellation-diagram"></canvas>
+                    <!-- <div id="constellation-diagram-v2"></div> -->
                 </div>
             </div>
-
-
-
         </div>
 
         <footer>
