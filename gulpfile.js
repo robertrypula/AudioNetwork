@@ -29,11 +29,18 @@ gulp.task('default', function() {
 
 var markdown = require('gulp-markdown');
 
-gulp.task('md', function () {
+gulp.task('md-readme', function () {
     return gulp.src('README.md')
         .pipe(markdown())
         .pipe(gulp.dest(DEST));
 });
+
+gulp.task('md-changelog', function () {
+    return gulp.src('CHANGELOG.md')
+        .pipe(markdown())
+        .pipe(gulp.dest(DEST));
+});
+
 
 var webserver = require('gulp-webserver');
 

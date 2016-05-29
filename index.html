@@ -5,7 +5,10 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
     <title>AudioNetwork - data transmission over sound waves</title>
 
+    <meta name="Description" content="Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!">
+
     <link rel="stylesheet" type="text/css" href="asset/css/simple-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="asset/css/style.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -17,12 +20,29 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-<h1 id="audio-network">Audio Network</h1>
+<h1 id="audio-network">Audio Network - send data over sound in JavaScript</h1>
+
+                    <div class="row">
+                        <div class="col col-md-8">
 <p>Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!</p>
 <p><a href="https://audio-network.rypula.pl/example/01-physical-layer/physical-layer.html">Demo - full features</a></p>
 <p><a href="https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html">Demo - simple</a></p>
 <p><a href="https://audio-network.rypula.pl/example/03-physical-layer-carrier/physical-layer-carrier.html">Carrier generate and recovery tests</a></p>
+                        </div>
+                        <div class="col col-md-4 text-right">
+                            <div class="download-area">
+                                <span>Download</span>
+                                <a href="https://audio-network.rypula.pl/build/audio-network-v1.0.3rc2.min.js" target="_blank">compressed v1.0.3rc2</a>
+                                <a href="https://audio-network.rypula.pl/build/audio-network-v1.0.3rc2.js" target="_blank">uncompressed v1.0.3rc2</a>
+                            </div>
+
+                            <div class="changelog-area">
+                                <a href="https://audio-network.rypula.pl/changelog.html">changelog</a>
+                            </div>
+                        </div>
+                    </div>
+
 <p>If you want to try AudioNetwork by yourself I would recommend to first open <code>Demo - simple</code> because <code>Demo - full
 features</code> might be little scary for the first time. You can also watch YouTube video that shows how to transmit
 data over sound between two laptops:</p>
@@ -54,7 +74,7 @@ Please remember to always put one space between each symbol but whole text needs
 leading spaces.</p>
 <p>If at any point you will see <code>FATAL_ERROR</code> state you need to click on <code>RESET</code> button and start all points again.</p>
 <p>AudioNetwork needs raw microphone output without any filter applied. You can verify that by opening <code>Sound</code> settings
-in your system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
+in your operating system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
 is when your microphone has some hardware filter that you can&#39;t disable. In this case you need to throw it away and
 buy a new one ;)</p>
 </blockquote>
@@ -128,7 +148,7 @@ always put one space between each symbol but whole text needs to be without trai
 more data into one burst. It&#39;s the same technique as used in many existing standards like LTE, Wi-Fi, DAB, DVB.</li>
 <li><a href="https://en.wikipedia.org/wiki/Constellation_diagram" target="_blank">Constellation Diagram</a>, that helps to easily verify
 phase and amplitude of carrier frequency in the realtime.</li>
-<li><a href="https://en.wikipedia.org/wiki/Spectrum_analyzer" target="_blank">Spectrum Analyzer</a> of incoming signal bases on AnalyserNode
+<li><a href="https://en.wikipedia.org/wiki/Spectrum_analyzer" target="_blank">Spectrum Analyzer</a> of incoming signal is based on AnalyserNode
 for Web Audio API.</li>
 <li>Adapter classes
 (<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js" target="_blank">ReceiveAdapter</a>

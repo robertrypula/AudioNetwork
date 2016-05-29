@@ -43,9 +43,9 @@ data will appear on the receiver's side.
 >If at any point you will see `FATAL_ERROR` state you need to click on `RESET` button and start all points again.
 
 >AudioNetwork needs raw microphone output without any filter applied. You can verify that by opening `Sound` settings
->in your system. When you enter your microphone properties you might need to un-check all filters. The worst scenario
->is when your microphone has some hardware filter that you can't disable. In this case you need to throw it away and
->buy a new one ;)
+>in your operating system. When you enter your microphone properties you might need to un-check all filters. The worst
+>scenario is when your microphone has some hardware filter that you can't disable. In this case you need to throw it
+>away and buy a new one ;)
 
 ## How can I play with it on my local machine?
 
@@ -140,7 +140,7 @@ always put one space between each symbol but whole text needs to be without trai
 more data into one burst. It's the same technique as used in many existing standards like LTE, Wi-Fi, DAB, DVB.
 - [Constellation Diagram](https://en.wikipedia.org/wiki/Constellation_diagram), that helps to easily verify
 phase and amplitude of carrier frequency in the realtime.
-- [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal bases on AnalyserNode
+- [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal is based on AnalyserNode
 for Web Audio API.
 - Adapter classes
 ([ReceiveAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js)

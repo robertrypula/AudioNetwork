@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <title>AudioNetwork - changelog</title>
+
+    <meta name="Description" content="Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!">
+
+    <link rel="stylesheet" type="text/css" href="asset/css/simple-bootstrap.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+    <div class="wrapper">
+
+        <div class="container">
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <h1>Audio Network - changelog</h1>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-12">
+                            <p class="text-right">
+                                Return to <a href="https://audio-network.rypula.pl">main page</a>
+                            </p>
+                            <p class="larger text-center">
+                                THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
+                                Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
+                            </p>
+                        </div>
+                    </div>
+                    
+<h2 id="roadmap">Roadmap</h2>
+<ul>
+<li>1.x.x finish all PhysicalLayer stuff (Web Audio API, raw packets)</li>
+<li>2.x.x finish all DataLinkLayer stuff (frames with correction codes and SRC and DEST addresses)</li>
+<li>3.x.x finish all NetworkLayer stuff (similar to IP datagrams with ability to route data somewhere)</li>
+<li>4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)</li>
+<li>5.x.x finalization of the project, some example applications like p2p file exchange, web server etc</li>
+</ul>
+<h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
+<p>TODO list:</p>
+<ul>
+<li><p>Current focus:</p>
+<ul>
+<li>refactor API<ul>
+<li>change adapter parameter order or move all adapter initialization</li>
+<li>PhysicalLayer&#39;s rx method should should store all handlers functions in array (??? is that really needed ???)</li>
+<li>ReceiveAdapter should register own rx handler inside Adapter class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Receive Adapter: [8.5h or 16.0h remaining]</p>
+<ul>
+<li>[~1.5h] add events for frequency update and phase update to notify hosting code</li>
+<li>[~2.0h] refactor &#39;collecting arrays&#39; to dedicated collectors</li>
+<li>[~2.0h] refactor data/packet collection to dedicates collectors classes<ul>
+<li>change SYMBOL state name to PILOT_SIGNAL</li>
+<li>change ERROR state name to SYNC_TO_LONG</li>
+<li>phaseOffsetCollector -&gt; frequencyErrorCollector</li>
+<li>introduce some phaseErrorCollector ?</li>
+</ul>
+</li>
+<li>[~3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal</li>
+<li>OPTIONAL [~1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)</li>
+<li>OPTIONAL [~4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)</li>
+<li>OPTIONAL [~1.0h] Signal Strength like in cell phones</li>
+<li>OPTIONAL [~1.0h] add new state: INTERPACKET_GAP</li>
+</ul>
+</li>
+<li><p>Power chart: [~10.5h remaining]</p>
+<ul>
+<li>[~4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?</li>
+<li>[~3.0h] ability to show other OFDMs than pilot</li>
+<li>[~1.0h] increase bar width</li>
+<li>[~1.5h] mark states ranges</li>
+<li>[~1.0h] show important power level (threshold, min/max, etc)</li>
+</ul>
+</li>
+<li><p>General stuff:</p>
+<ul>
+<li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
+<li>remove Promises (code should be as less dependent as possible - callbacks are enough in this case)</li>
+<li>use setTimeout instead setInverval (?)</li>
+<li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval</li>
+<li>refactor DOM helpers (move to service)</li>
+<li>do not redraw constellation if queue wasn&#39;t changed</li>
+<li>ability to add hooks at sample generation and receive (inject some changes to signal)</li>
+<li>refactor sample handling and generation to order to easily move that code to Service Worker</li>
+<li>fix carrier.html example (use dedicated constellation class)</li>
+</ul>
+</li>
+</ul>
+<h2 id="v1-0-3-2016-dev-in-progress-">v1.0.3 (2016-??-??, dev in progress)</h2>
+<ul>
+<li>fix transition from FIRST_SYNC_INIT -&gt; IDLE, currently there are some SYMBOL/GUARD states which are not right at this point</li>
+<li>default settings update (symbol duration vs guard interval, sync duration reduced from 3 sec to 2 sec, notification per seconds increased)</li>
+<li>gulp &#39;serve&#39; task for serving the app locally</li>
+<li>add YouTube movie with demo</li>
+<li>move common css away of example</li>
+<li>readme moved to index.html, styles and pages structure refactored</li>
+<li>simple demo added</li>
+<li>updates at README.md</li>
+<li>added CHANGELOG.md</li>
+<li>licence moved to MIT</li>
+</ul>
+<h2 id="v1-0-2-2016-05-16-">v1.0.2 (2016-05-16)</h2>
+<ul>
+<li>huge readme update, npm keywords update</li>
+</ul>
+<h2 id="v1-0-1-2016-05-10-">v1.0.1 (2016-05-10)</h2>
+<ul>
+<li>Carrier example bug fix. Versioning information added for main example</li>
+</ul>
+<h2 id="v1-0-0-2016-05-10-">v1.0.0 (2016-05-10)</h2>
+<ul>
+<li>fix typo: physial-layer into physical-layer</li>
+<li>keep view type after reinitialization</li>
+<li>remove audio-network prefix from main classes names</li>
+<li>change name: dftTimeSpan -&gt; dftWindowTimeSpan</li>
+<li>move general configuration to some common service</li>
+<li>refactor NO_SIGNAL state</li>
+<li>change input TX to LOOPBACK</li>
+<li>move templates code to dedicated files</li>
+<li>introduce Dependency Injection</li>
+<li>prepare release version + some code minification</li>
+<li>measure CPU load by measuring times before and after execution</li>
+</ul>
+<h2 id="finished-stuff-before-release-was-even-planned">Finished stuff before release was even planned</h2>
+<ul>
+<li>BUG FIXED for some dftWindowTime after converting it to numbers of samples CarrierRecovery queue size is fractional</li>
+<li>real/imm delete</li>
+<li>compute at getCarrierDetail</li>
+<li>index passed into handler</li>
+<li>decibel power/amplitude check</li>
+<li>load wav file</li>
+<li>add getOutput* methods</li>
+<li>add outputTxEnable/outputTxDisable methods</li>
+<li>check inverse phase shift issue</li>
+<li>add script node sample to config</li>
+<li>rewrite main API<ul>
+<li>move code to factory</li>
+<li>cleanup inside main service</li>
+<li>internal notifyHandler for constellation update, external for user purposes</li>
+<li>add rx method outside the factory</li>
+<li>destroy constellation</li>
+<li>ability to change frequency</li>
+<li>fix recorded file loading logic</li>
+<li>fix history point colors</li>
+<li>add ability to choose destination source</li>
+</ul>
+</li>
+<li>move script processor node to receive manager</li>
+<li>move sin/cos to internal Math service (to give ability to quickly add lookup tables)</li>
+<li>fix layout</li>
+<li>add phase offset input to align symbol &#39;0&#39;</li>
+<li>add html generation as js + ofdm support</li>
+<li>change send logic (add amplitude, symbolCount, symbol to each OFDM block)</li>
+<li>change send sequence logic (use format: &#39;5.5.2.0 1.2.4.1&#39;)</li>
+<li>add DFT time span to config</li>
+<li>internal loop for notifications<ul>
+<li>add script node block time (from audiocontext)</li>
+<li>add sample offset time from script node block time</li>
+</ul>
+</li>
+<li>add symbol config to rx</li>
+<li>prefill amplitude value basing on ofdm size at channel tx</li>
+<li>add symbol detection to rx</li>
+<li>move example code related to html generation to separate file with comment</li>
+<li>add buttons for symbols (TX)</li>
+<li>add squares with symbol number (RX)</li>
+<li>update sequence textarea after pskSize change</li>
+<li>rename delay-loop-handler</li>
+<li>after psk change only related tx/rx should be updated</li>
+<li>add rx/tx to channel headers</li>
+<li>change &#39;frame&#39; to &#39;packet&#39;</li>
+<li>add &#39;Send sync signal&#39; to TX</li>
+<li>ability to hide some of the widgets: &#39;Easy&#39; and &#39;Advanced&#39; view</li>
+<li>fix styles<ul>
+<li>add source button active class</li>
+<li>improve responsive design</li>
+</ul>
+</li>
+<li>add margin to sections</li>
+<li>use first symbol of each packet to fine tune phase offset (add checkbox for that feature)</li>
+<li>add inter-packet gap duration</li>
+<li>add quick configs like: &#39;baud-5, ofdm-1, psk-2&#39; or &#39;baud-20, ofdm-16, psk-2&#39; or ...<ul>
+<li>add checkbox for tx/rx config</li>
+<li>add callback to destroy</li>
+<li>add bit speed information at UI</li>
+</ul>
+</li>
+<li>refactor all transmit and receive logic (move it to physical layer internals)<ul>
+<li>[TX] remove symbol generation from template-util</li>
+<li>[TX] symbol shouldn&#39;t have any guard interval or/and interpacket gap</li>
+<li>[RX] add setTimes* methods (maybe it&#39;s worth to add some error margin - times inside are for internal adapter use)</li>
+<li>[RX] add setSyncPreamble(true/false) method</li>
+<li>[RX] add packet receive handler packetReceived(data)</li>
+<li>[RX] add multiple channels support (introduce new class in the middle)</li>
+<li>set threshold to very low value (-100 dB) to force idle state for a while</li>
+<li>compute average noise level power at idle state</li>
+<li>after noise level is set raise threshold xx dB above noise level</li>
+<li>so far do not collect symbol and packet data (wait for sync)</li>
+<li>run sync on the TX side</li>
+<li>sync state will be detected - grab average max signal strength</li>
+<li>subtract 10 decibels from max signal and enable symbol/packet collecting</li>
+<li>[RX] add method to reset receiver state machine (to follow steps above again)</li>
+<li>[RX] double check state times at receive adapter<ul>
+<li>move sync time to main adapter class</li>
+<li>check symbol, guard times</li>
+<li>average sample sizes should be config dependent (mostly for samplesPerSecond setting)</li>
+</ul>
+</li>
+<li>[RX] grab/clean packet data and notify packet handler</li>
+</ul>
+</li>
+</ul>
+
+
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="copyright">Robert Rypuła 2015-2016</div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-76662342-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+</body>
+</html>
