@@ -1,7 +1,36 @@
-.download-area span, .download-area a {
-    display: block;
+.download-area-cont {
+    text-align: center;
 }
 
-.changelog-area {
+@media (min-width: 768px) {
+    .download-area-cont {
+        text-align: right;
+    }
+}
 
+.download-area {
+    background-color: #738BD7;
+    padding: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.download-area span {
+    font-size: 2.0em;
+    line-height: 1em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.download-area a:hover {
+    text-decoration: underline;
+}
+
+.download-area a.changelog {
+    margin-top: 15px;
+}
+
+.download-area span, .download-area a {
+    display: block;
+    color: white;
 }

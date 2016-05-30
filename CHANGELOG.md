@@ -46,7 +46,7 @@ TODO list:
     - refactor sample handling and generation to order to easily move that code to Service Worker
     - fix carrier.html example (use dedicated constellation class)
 
-## v1.0.3 (2016-??-??, dev in progress)
+## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
   + default settings update (symbol duration vs guard interval, sync duration reduced from 3 sec to 2 sec, notification per seconds increased)
   + gulp 'serve' task for serving the app locally
