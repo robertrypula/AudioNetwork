@@ -57,6 +57,7 @@ TODO list:
   + updates at README.md
   + added CHANGELOG.md
   + licence moved to MIT
+  + SEO updates to whole page
 
 ## v1.0.2 (2016-05-16)
   + huge readme update, npm keywords update
