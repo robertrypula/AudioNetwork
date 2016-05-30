@@ -51,9 +51,9 @@ data over sound between two laptops:</p>
 <blockquote>
 <p>This project is still under development. Documentation is also planned but... little later :)</p>
 </blockquote>
-<h2 id="how-can-i-test-it-">How can I test it?</h2>
+<h2 id="how-can-i-test-it-">How can I transmit something over sound?</h2>
 <p>First of all you need to have two devices. One for sending, one for receiving data. It should work with any
-device with browser that supports Web Audio API (PC, Mac, tablet, smartphone).</p>
+device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API.</p>
 <ol>
 <li><p><strong>[Receiver]</strong> - Before you load demo page you need to be quiet :) Receiving device needs to listen to &#39;silence&#39;
 around you when there is no signal in the air. It&#39;s indicated by <code>IDLE_INIT</code> state and it ends when <code>FIRST_SYNC_WAIT</code>
@@ -104,7 +104,7 @@ receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
 <li><a href="https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.js" target="_blank">js</a></li>
 </ul>
 <blockquote>
-<p>To work properly <code>Web Audio API</code> requires running your HTML file via web server (<a href="http://localhost" target="_blank">http://localhost</a>...) like Apache
+<p>To work properly <code>Web Audio API</code> requires running your HTML file via web server (<code>http://localhost...</code>) like Apache
 or some Node stuff like <code>gulp-webserver</code> (I&#39;m using it and it works great). In case of local machine normal <code>http</code>
 connection would work. Unfortunately when you will want to go live you have to provide <code>https</code>. It&#39;s because in some
 browsers accessing microphone is not allowed when site is not hosted over <code>https</code>. You can read more about this

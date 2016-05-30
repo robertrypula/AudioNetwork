@@ -18,10 +18,10 @@ data over sound between two laptops:
 
 >This project is still under development. Documentation is also planned but... little later :)
 
-## How can I test it?
+## How can I transmit something over sound?
 
 First of all you need to have two devices. One for sending, one for receiving data. It should work with any
-device with browser that supports Web Audio API (PC, Mac, tablet, smartphone).
+device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API.
 
 1. **[Receiver]** - Before you load demo page you need to be quiet :) Receiving device needs to listen to 'silence'
 around you when there is no signal in the air. It's indicated by `IDLE_INIT` state and it ends when `FIRST_SYNC_WAIT`
@@ -87,7 +87,7 @@ Below you can find `Demo - simple` source code:
   - [html](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.html)
   - [js](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.js)
 
->To work properly `Web Audio API` requires running your HTML file via web server (http://localhost...) like Apache
+>To work properly `Web Audio API` requires running your HTML file via web server (`http://localhost...`) like Apache
 >or some Node stuff like `gulp-webserver` (I'm using it and it works great). In case of local machine normal `http`
 >connection would work. Unfortunately when you will want to go live you have to provide `https`. It's because in some
 >browsers accessing microphone is not allowed when site is not hosted over `https`. You can read more about this
