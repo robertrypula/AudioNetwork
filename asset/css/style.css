@@ -15,22 +15,29 @@
     margin-bottom: 20px;
 }
 
-.download-area span {
-    font-size: 2.0em;
-    line-height: 1em;
-    margin-bottom: 20px;
-    text-transform: uppercase;
+.download-area a.a-icon {
+    display: inline-block;
+}
+
+.download-area a.a-icon-github {
+    width: 47px;
+    height: 46px;
+    margin-right: 5px;
+}
+
+.download-area a.a-icon-npm {
+    width: 97px;
+    height: 46px;
+}
+
+.download-area a.a-icon img {
+    display: inline-block;
+}
+
+.download-area a {
+    color: white;
 }
 
 .download-area a:hover {
     text-decoration: underline;
-}
-
-.download-area a.changelog {
-    margin-top: 15px;
-}
-
-.download-area span, .download-area a {
-    display: block;
-    color: white;
 }

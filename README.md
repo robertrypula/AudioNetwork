@@ -47,9 +47,9 @@ data will appear on the receiver's side.
 >scenario is when your microphone has some hardware filter that you can't disable. In this case you need to throw it
 >away and buy a new one ;)
 
-## How can I play with it on my local machine?
+## How to add sound transmission to my project?
 
-Project is available at GitHub and npm so you can just run one of the commands below:
+Audio Network is available at GitHub and npm so you can just run one of the commands below:
 
 ```
 git clone https://github.com/robertrypula/AudioNetwork.git
