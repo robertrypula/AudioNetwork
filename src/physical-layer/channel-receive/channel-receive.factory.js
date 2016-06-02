@@ -16,9 +16,9 @@
         CarrierRecoveryBuilder,
         MathUtil
     ) {
-        var CR;
-            
-        CR = function (index, configuration) {
+        var ChannelReceive;
+
+        ChannelReceive = function (index, configuration) {
             this.$$carrierRecovery = [];
             this.$$carrierFrequency = [];
             this.$$carrierPhaseCorrection = [];
@@ -29,9 +29,9 @@
             this.configure(configuration);
         };
 
-        CR.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION = 'OFDM index out of range: ';
+        ChannelReceive.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION = 'OFDM index out of range: ';
 
-        CR.prototype.configure = function (configuration) {
+        ChannelReceive.prototype.configure = function (configuration) {
             var i, cr, samplePerPeriod, frequency;
 
             for (i = 0; i < configuration.ofdmSize; i++) {
@@ -47,35 +47,35 @@
             this.$$notifyHandler = configuration.notifyHandler;
         };
 
-        CR.prototype.$$checkOfdmIndex = function (ofdmIndex) {
+        ChannelReceive.prototype.$$checkOfdmIndex = function (ofdmIndex) {
             if (ofdmIndex < 0 || ofdmIndex >= this.$$carrierRecovery.length) {
-                throw CR.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION + ofdmIndex;
+                throw ChannelReceive.OFDM_INDEX_OUT_OF_RANGE_EXCEPTION + ofdmIndex;
             }
         };
 
-        CR.prototype.getOfdmSize = function () {
+        ChannelReceive.prototype.getOfdmSize = function () {
             return this.$$carrierRecovery.length;
         };
 
-        CR.prototype.getRxPhaseCorrection = function (ofdmIndex) {
+        ChannelReceive.prototype.getRxPhaseCorrection = function (ofdmIndex) {
             this.$$checkOfdmIndex(ofdmIndex);
 
             return this.$$carrierPhaseCorrection[ofdmIndex];
         };
 
-        CR.prototype.getFrequency = function (ofdmIndex) {
+        ChannelReceive.prototype.getFrequency = function (ofdmIndex) {
             this.$$checkOfdmIndex(ofdmIndex);
 
             return this.$$carrierFrequency[ofdmIndex];
         };
 
-        CR.prototype.setRxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
+        ChannelReceive.prototype.setRxPhaseCorrection = function (ofdmIndex, phaseCorrection) {
             this.$$checkOfdmIndex(ofdmIndex);
 
             this.$$carrierPhaseCorrection[ofdmIndex] = phaseCorrection - MathUtil.floor(phaseCorrection);
         };
 
-        CR.prototype.setFrequency = function (ofdmIndex, frequency) {
+        ChannelReceive.prototype.setFrequency = function (ofdmIndex, frequency) {
             var samplePerPeriod;
 
             this.$$checkOfdmIndex(ofdmIndex);
@@ -85,7 +85,7 @@
             this.$$carrierFrequency[ofdmIndex] = frequency;
         };
 
-        CR.prototype.handleSample = function (sample, sampleNumberGlobal, blockBeginTime, sampleNumberInBlock) {
+        ChannelReceive.prototype.handleSample = function (sample, sampleNumberGlobal, blockBeginTime, sampleNumberInBlock) {
             var notifyIteration, cr, cd, i, carrierDetail, sampleTimeOffsetInBlock;
 
             notifyIteration = (sampleNumberGlobal % this.$$notifyInterval === 0);
@@ -116,13 +116,13 @@
             }
         };
 
-        CR.prototype.destroy = function () {
+        ChannelReceive.prototype.destroy = function () {
             this.$$carrierRecovery.length = 0;
             this.$$carrierFrequency.length = 0;
             this.$$carrierPhaseCorrection.length = 0;
         };
 
-        return CR;
+        return ChannelReceive;
     }
 
 })();

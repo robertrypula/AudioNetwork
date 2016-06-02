@@ -28,9 +28,9 @@
         RxStateMachineBuilder,
         ReceiveAdapterState
     ) {
-        var RSMM;
+        var RxStateMachineManager;
 
-        RSMM = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
+        RxStateMachineManager = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
             this.$$channelIndex = channelIndex;
 
             this.$$packetReceiveHandler = packetReceiveHandler;
@@ -63,59 +63,59 @@
             this.$$resetInternal();
         };
 
-        RSMM.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
-        RSMM.$$_DECIBLES_ABOVE_AVERAGE_IDLE = 10; // decibels above average idle power (ambient noise) in order to catch first, even weak, signal - it means that you should keep this value low
-        RSMM.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
-        RSMM.$$_AVERAGE_POWER_UNIT_FACTOR = 0.5;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
+        RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
+        RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE = 10; // decibels above average idle power (ambient noise) in order to catch first, even weak, signal - it means that you should keep this value low
+        RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
+        RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR = 0.5;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
 
-        RSMM.prototype.$$resetInternal = function () {
+        RxStateMachineManager.prototype.$$resetInternal = function () {
             this.$$averageIdlePowerCollector.clearAll();
             this.$$averageFirstSyncPowerCollector.clearAll();
             this.$$signalPowerCollector.clearAll();
             this.$$guardPowerCollector.clearAll();
             this.$$phaseOffsetCollector.clearAll();
 
-            this.$$powerThreshold = RSMM.$$_INITIAL_POWER_THRESHOLD;
+            this.$$powerThreshold = RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD;
 
             this.$$currentData = null;
             this.$$dataPacket = [];
             this.$$dataSymbol = [];
         };
 
-        RSMM.prototype.reset = function () {
+        RxStateMachineManager.prototype.reset = function () {
             this.$$resetInternal();
             this.$$stateMachine.scheduleReset();
         };
 
-        RSMM.prototype.setSymbolStateMaxDurationTime = function (value) {
+        RxStateMachineManager.prototype.setSymbolStateMaxDurationTime = function (value) {
             this.$$stateMachine.setSymbolStateMaxDurationTime(value);
         };
 
-        RSMM.prototype.setGuardStateMaxDurationTime  = function (value) {
+        RxStateMachineManager.prototype.setGuardStateMaxDurationTime  = function (value) {
             this.$$stateMachine.setGuardStateMaxDurationTime(value);
         };
 
-        RSMM.prototype.setSyncStateMaxDurationTime = function (value) {
+        RxStateMachineManager.prototype.setSyncStateMaxDurationTime = function (value) {
             this.$$stateMachine.setSyncStateMaxDurationTime(value);
         };
 
-        RSMM.prototype.setSampleCollectionTimeIdleInitState = function (value) {
+        RxStateMachineManager.prototype.setSampleCollectionTimeIdleInitState = function (value) {
             this.$$sampleCollectionTimeIdleInitState = value;
         };
 
-        RSMM.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
+        RxStateMachineManager.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
             this.$$sampleCollectionTimeFirstSyncState = value;
         };
 
-        RSMM.prototype.setSyncPreamble  = function (value) {
+        RxStateMachineManager.prototype.setSyncPreamble  = function (value) {
             this.$$syncPreamble = value;
         };
 
-        RSMM.prototype.setPskSize  = function (value) {
+        RxStateMachineManager.prototype.setPskSize  = function (value) {
             this.$$pskSize = value;
         };
 
-        RSMM.prototype.$$handlerIdleInit = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerIdleInit = function (stateDurationTime) {
             var
                 powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
                 handlerResult = null
@@ -126,7 +126,7 @@
             } else {
                 try {
                     // put first power threshold slightly above collected noise power to detect even weak signals
-                    this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + RSMM.$$_DECIBLES_ABOVE_AVERAGE_IDLE;
+                    this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE;
                     handlerResult = ReceiveAdapterState.FIRST_SYNC_WAIT;
                 } catch (e) {
                     handlerResult = ReceiveAdapterState.FATAL_ERROR;
@@ -136,12 +136,12 @@
             return handlerResult;
         };
 
-        RSMM.prototype.$$handlerFirstSyncWait = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerFirstSyncWait = function (stateDurationTime) {
             // nothing much here - user needs to send 'Sync' signal on the other device, we can just wait...
             return null;
         };
 
-        RSMM.prototype.$$handlerFirstSync = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerFirstSync = function (stateDurationTime) {
             var 
                 powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
                 averageFirstSyncPower, averageIdlePower, powerDifference
@@ -178,18 +178,18 @@
                     powerDifference = averageFirstSyncPower - averageIdlePower;
 
                     // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
-                    this.$$powerThreshold = averageIdlePower + RSMM.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
+                    this.$$powerThreshold = averageIdlePower + RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
                 } catch (e) {
                     return ReceiveAdapterState.FATAL_ERROR;
                 }
             }
         };
 
-        RSMM.prototype.$$handlerFatalError = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerFatalError = function (stateDurationTime) {
             // nothing much here - only way to escape from this state is to reset Receive Adapter
         };
         
-        RSMM.prototype.$$handlerIdle = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerIdle = function (stateDurationTime) {
             // share collected packet with rest of the world
             if (this.$$dataPacket.length > 0) {
                 this.$$packetReceiveHandler(this.$$channelIndex, this.$$preparePacket(this.$$dataPacket));
@@ -206,7 +206,7 @@
             this.$$guardPowerCollector.clearList();
         };
 
-        RSMM.prototype.$$handlerSymbol = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerSymbol = function (stateDurationTime) {
             var powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
 
             // code below stores information about quality of incoming packets in the real time
@@ -219,7 +219,7 @@
             this.$$dataSymbol.push(this.$$currentData);
         };
 
-        RSMM.prototype.$$handlerSync = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerSync = function (stateDurationTime) {
             // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
             this.$$phaseOffsetCollector.collect({
                 stateDurationTime: stateDurationTime,
@@ -227,7 +227,7 @@
             });
         };
 
-        RSMM.prototype.$$handlerGuard = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerGuard = function (stateDurationTime) {
             var
                 powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
                 bestQualityIndex
@@ -252,11 +252,11 @@
             }
         };
 
-        RSMM.prototype.$$handlerError = function (stateDurationTime) {
+        RxStateMachineManager.prototype.$$handlerError = function (stateDurationTime) {
             // nothing much here - this state will automatically transit to idle when pilot signal will be gone
         };
 
-        RSMM.prototype.$$preparePacket = function (dataPacket) {
+        RxStateMachineManager.prototype.$$preparePacket = function (dataPacket) {
             var i, j, result, ofdmList, carrierDetail;
 
             result = [];
@@ -279,24 +279,24 @@
             return result;
         };
 
-        RSMM.prototype.$$isCurrentSymbolSyncPreamble = function () {
+        RxStateMachineManager.prototype.$$isCurrentSymbolSyncPreamble = function () {
             return this.$$syncPreamble && this.$$dataPacket.length === 1;
         };
 
-        RSMM.prototype.$$isInputReallyConnected = function () {
+        RxStateMachineManager.prototype.$$isInputReallyConnected = function () {
             return this.$$currentData.pilotSignal.powerDecibel !== DefaultConfig.MINIMUM_POWER_DECIBEL;
         };
 
-        RSMM.prototype.$$isPilotSignalPresent = function () {
+        RxStateMachineManager.prototype.$$isPilotSignalPresent = function () {
             return this.$$currentData.pilotSignal.powerDecibel > this.$$powerThreshold;
         };
 
-        RSMM.prototype.receive = function (carrierDetail, time) {
+        RxStateMachineManager.prototype.receive = function (carrierDetail, time) {
             var state;
 
             // grab current data, this will be available at all handlers that will be called back by $$stateMachine
             this.$$currentData = {
-                pilotSignal: carrierDetail[RSMM.$$_OFDM_PILOT_SIGNAL_INDEX],  // alias for pilot
+                pilotSignal: carrierDetail[RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX],  // alias for pilot
                 carrierDetail: carrierDetail
             };
 
@@ -324,7 +324,7 @@
             };
         };
 
-        return RSMM;
+        return RxStateMachineManager;
     }
 
 })();

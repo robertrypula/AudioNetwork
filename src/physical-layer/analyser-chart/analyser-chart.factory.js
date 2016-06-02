@@ -18,9 +18,9 @@
         Audio,
         MathUtil
     ) {
-        var AC;
-        
-        AC = function (parentElement, analyser, height, colorData, colorAxis) {
+        var AnalyserChart;
+
+        AnalyserChart = function (parentElement, analyser, height, colorData, colorAxis) {
             this.$$parentElement = parentElement;
             this.$$analyser = analyser;
             this.$$canvas = null;
@@ -38,9 +38,9 @@
             this.$$init();
         };
 
-        AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH = 40;
+        AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH = 40;
 
-        AC.prototype.destroy = function () {
+        AnalyserChart.prototype.destroy = function () {
             var self = this;
 
             if (this.$$destroy) {
@@ -55,7 +55,7 @@
             return this.$$destroy.promise;
         };
 
-        AC.prototype.$$init = function () {
+        AnalyserChart.prototype.$$init = function () {
             this.$$canvasContext = null;
             this.$$parentElement.innerHTML = this.$$renderTemplate();
             this.$$connectTemplate();
@@ -63,7 +63,7 @@
         };
 
         // TODO move it to dedicated service
-        AC.prototype.$$find = function (selector) {
+        AnalyserChart.prototype.$$find = function (selector) {
             var jsObject = this.$$parentElement.querySelectorAll(selector);
 
             if (jsObject.length === 0) {
@@ -73,7 +73,7 @@
             return jsObject[0];
         };
 
-        AC.prototype.$$connectTemplate = function () {
+        AnalyserChart.prototype.$$connectTemplate = function () {
             var self = this;
 
             this.$$canvas = this.$$find('.analyser-chart');
@@ -109,7 +109,7 @@
             });
         };
 
-        AC.prototype.actionFrequencyTimeDomainToggle = function () {
+        AnalyserChart.prototype.actionFrequencyTimeDomainToggle = function () {
             if (this.$$analyserMethod === 'getByteFrequencyData') {
                 this.$$analyserMethod = 'getByteTimeDomainData';
             } else {
@@ -119,16 +119,16 @@
             this.$$generateAxisX();
         };
 
-        AC.prototype.actionFreezeChart = function () {
+        AnalyserChart.prototype.actionFreezeChart = function () {
             this.$$freezeChart = !this.$$freezeChart;
         };
 
-        AC.prototype.actionChangeFFTSize = function (newFFTSize) {
+        AnalyserChart.prototype.actionChangeFFTSize = function (newFFTSize) {
             this.$$analyser.fftSize = newFFTSize;
             this.$$init();
         };
 
-        AC.prototype.$$renderTemplate = function () {
+        AnalyserChart.prototype.$$renderTemplate = function () {
             var tpl = AnalyserChartTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$analyser.frequencyBinCount).toString());
@@ -137,7 +137,7 @@
             return tpl;
         };
 
-        AC.prototype.$$renderTemplateAxisXLabel = function (width, left, label) {
+        AnalyserChart.prototype.$$renderTemplateAxisXLabel = function (width, left, label) {
             var tpl = AnalyserChartTemplateAxisX.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, width);
@@ -148,11 +148,11 @@
             return tpl;
         };
 
-        AC.prototype.$$generateAxisXForTimeDomain = function () {
+        AnalyserChart.prototype.$$generateAxisXForTimeDomain = function () {
             var
               availableStep = [0.0005, 0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500],
               resolution = Audio.getSampleRate(),  // [pix/sec]
-              step = AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
+              step = AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               time = 0,
               left,
               i,
@@ -168,7 +168,7 @@
             while (time < (this.$$analyser.frequencyBinCount / Audio.getSampleRate())) {
                 left = MathUtil.round(time * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
-                  AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
+                  AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
                   left,
                   MathUtil.round(time * 1000) + 'ms'
                 );
@@ -178,11 +178,11 @@
             return divContent;
         };
 
-        AC.prototype.$$generateAxisXForFrequency = function () {
+        AnalyserChart.prototype.$$generateAxisXForFrequency = function () {
             var
               availableStep = [50, 100, 125, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000],
               resolution = this.$$analyser.fftSize / Audio.getSampleRate(),  // [pix/Hz]
-              step = AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
+              step = AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               frequency = 0,
               left,
               i,
@@ -198,7 +198,7 @@
             while (frequency < 0.5 * Audio.getSampleRate()) {
                 left = MathUtil.round(frequency * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
-                    AC.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
+                    AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
                     left,
                     frequency + 'Hz'
                 );
@@ -208,7 +208,7 @@
             return divContent;
         };
 
-        AC.prototype.$$generateAxisX = function () {
+        AnalyserChart.prototype.$$generateAxisX = function () {
             var axisX = this.$$find('.analyser-axis-x');
 
             if (this.$$analyserMethod == 'getByteFrequencyData') {
@@ -218,7 +218,7 @@
             }
         };
 
-        AC.prototype.$$updateChart = function () {
+        AnalyserChart.prototype.$$updateChart = function () {
             var 
                 length = this.$$data.length,
                 ctx = this.$$canvasContext,
@@ -242,14 +242,14 @@
             }
         };
 
-        AC.prototype.$$initCanvasContext = function () {
+        AnalyserChart.prototype.$$initCanvasContext = function () {
             this.$$data = new Uint8Array(this.$$analyser.frequencyBinCount);
             this.$$generateAxisX();
             this.$$canvasContext.lineWidth = 1;
             this.$$canvasContext.strokeStyle = this.$$colorData;
         };
 
-        AC.prototype.$$initAnimationFrame = function () {
+        AnalyserChart.prototype.$$initAnimationFrame = function () {
             var self = this;
 
             function drawAgain() {
@@ -264,7 +264,7 @@
             requestAnimationFrame(drawAgain);
         };
 
-        return AC;
+        return AnalyserChart;
     }
 
 })();

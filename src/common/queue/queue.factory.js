@@ -8,9 +8,9 @@
     _Queue.$inject = [];
 
     function _Queue() {
-        var Q;
+        var Queue;
 
-        Q = function (sizeMax) {
+        Queue = function (sizeMax) {
             this.$$sizeMax = sizeMax;
             this.$$data = [];
             this.$$positionStart = 0;
@@ -20,7 +20,7 @@
             this.$$data.length = sizeMax;
         };
 
-        Q.prototype.push = function (value) {
+        Queue.prototype.push = function (value) {
             if (this.$$size === this.$$sizeMax) {
                 return false;
             }
@@ -32,7 +32,7 @@
             return true;
         };
 
-        Q.prototype.pop = function () {
+        Queue.prototype.pop = function () {
             var result;
 
             if (this.$$size === 0) {
@@ -45,7 +45,7 @@
             return result;
         };
 
-        Q.prototype.getItem = function (index) {
+        Queue.prototype.getItem = function (index) {
             if (index >= this.$$size) {
                 return null;
             }
@@ -53,19 +53,19 @@
             return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
         };
 
-        Q.prototype.getSize = function () {
+        Queue.prototype.getSize = function () {
             return this.$$size;
         };
 
-        Q.prototype.getSizeMax = function () {
+        Queue.prototype.getSizeMax = function () {
             return this.$$sizeMax;
         };
 
-        Q.prototype.isFull = function () {
+        Queue.prototype.isFull = function () {
             return this.$$size === this.$$sizeMax;
         };
 
-        return Q;
+        return Queue;
     }
 
 })();

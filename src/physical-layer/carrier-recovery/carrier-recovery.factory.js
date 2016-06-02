@@ -16,9 +16,9 @@
         MathUtil,
         Util
     ) {
-        var CR;
+        var CarrierRecovery;
 
-        CR = function (samplePerPeriod, dftWindowSize) {
+        CarrierRecovery = function (samplePerPeriod, dftWindowSize) {
             this.$$queue = QueueBuilder.build(2 * dftWindowSize);
             this.$$queueSumReal = 0;
             this.$$queueSumImm = 0;
@@ -36,14 +36,14 @@
             this.setSamplePerPeriod(samplePerPeriod);
         };
 
-        CR.prototype.$$computeReference = function () {
+        CarrierRecovery.prototype.$$computeReference = function () {
             var x = this.$$omega * this.$$sampleNumber;
 
             this.$$referenceReal = MathUtil.cos(x);
             this.$$referenceImm = MathUtil.sin(x);
         };
 
-        CR.prototype.$$computeAverage = function (sample) {
+        CarrierRecovery.prototype.$$computeAverage = function (sample) {
             var real, imm, n;
 
             if (this.$$queue.isFull()) {
@@ -62,7 +62,7 @@
             this.$$imm = this.$$queueSumImm / n;
         };
 
-        CR.prototype.$$computePower = function () {
+        CarrierRecovery.prototype.$$computePower = function () {
             this.$$power = MathUtil.sqrt(
                 this.$$real * this.$$real +
                 this.$$imm * this.$$imm
@@ -70,7 +70,7 @@
             this.$$powerDecibel = 10 * MathUtil.log(this.$$power) / MathUtil.LN10;
         };
 
-        CR.prototype.$$computePhase = function () {
+        CarrierRecovery.prototype.$$computePhase = function () {
             this.$$phase = Util.findUnitAngle(this.$$real, this.$$imm);
 
             // correct phase to start from positive side of X axis counterclockwise
@@ -80,14 +80,14 @@
             }
         };
 
-        CR.prototype.handleSample = function (sample) {
+        CarrierRecovery.prototype.handleSample = function (sample) {
             this.$$computeReference();
             this.$$computeAverage(sample);
 
             this.$$sampleNumber++;
         };
 
-        CR.prototype.getCarrierDetail = function () {
+        CarrierRecovery.prototype.getCarrierDetail = function () {
             this.$$computePower();
             this.$$computePhase();
 
@@ -98,13 +98,13 @@
             };
         };
 
-        CR.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+        CarrierRecovery.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
         };
 
-        return CR;
+        return CarrierRecovery;
     }
 
 })();

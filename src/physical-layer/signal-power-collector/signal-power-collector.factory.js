@@ -14,26 +14,26 @@
         AbstractValueCollector,
         MathUtil
     ) {
-        var SPC;
+        var SignalPowerCollector;
 
-        SPC = function () {
+        SignalPowerCollector = function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        SPC.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
+        SignalPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
 
-        SPC.prototype = Object.create(AbstractValueCollector.prototype);
-        SPC.prototype.constructor = SPC;
+        SignalPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        SignalPowerCollector.prototype.constructor = SignalPowerCollector;
 
-        SPC.prototype.$$finalize = function () {
+        SignalPowerCollector.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {
-                throw SPC.EMPTY_LIST_EXCEPTION;
+                throw SignalPowerCollector.EMPTY_LIST_EXCEPTION;
             }
             
             return MathUtil.maxInArray(this.$$valueList);
         };
 
-        return SPC;
+        return SignalPowerCollector;
     }
 
 })();

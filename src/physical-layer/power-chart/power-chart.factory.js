@@ -12,9 +12,9 @@
     function _PowerChart(
         PowerChartTemplateMain
     ) {
-        var CD;
+        var PowerChart;
 
-        CD = function (parentElement, width, height, queue) {
+        PowerChart = function (parentElement, width, height, queue) {
             this.$$parentElement = parentElement;
             this.$$canvas = null;
             this.$$canvasContext = null;
@@ -27,7 +27,7 @@
             this.$$init();
         };
 
-        CD.prototype.destroy = function () {
+        PowerChart.prototype.destroy = function () {
             var self = this;
 
             if (this.$$destroy) {
@@ -42,7 +42,7 @@
             return this.$$destroy.promise;
         };
 
-        CD.prototype.$$init = function () {
+        PowerChart.prototype.$$init = function () {
             this.$$canvasContext = null;
             this.$$parentElement.innerHTML = this.$$renderTemplate();
             this.$$connectTemplate();
@@ -50,7 +50,7 @@
         };
 
         // TODO move it to dedicated service
-        CD.prototype.$$find = function (selector) {
+        PowerChart.prototype.$$find = function (selector) {
             var jsObject = this.$$parentElement.querySelectorAll(selector);
 
             if (jsObject.length === 0) {
@@ -60,12 +60,12 @@
             return jsObject[0];
         };
 
-        CD.prototype.$$connectTemplate = function () {
+        PowerChart.prototype.$$connectTemplate = function () {
             this.$$canvas = this.$$find('.power-chart');
             this.$$canvasContext = this.$$canvas.getContext("2d");
         };
 
-        CD.prototype.$$renderTemplate = function () {
+        PowerChart.prototype.$$renderTemplate = function () {
             var tpl = PowerChartTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
@@ -74,7 +74,7 @@
             return tpl;
         };
 
-        CD.prototype.$$updateChart = function () {
+        PowerChart.prototype.$$updateChart = function () {
             var
                 ctx = this.$$canvasContext,
                 q = this.$$queue,
@@ -114,11 +114,11 @@
             }
         };
 
-        CD.prototype.$$initCanvasContext = function () {
+        PowerChart.prototype.$$initCanvasContext = function () {
             this.$$canvasContext.lineWidth = 1;
         };
 
-        CD.prototype.$$initAnimationFrame = function () {
+        PowerChart.prototype.$$initAnimationFrame = function () {
             var self = this;
 
             function drawAgain() {
@@ -133,7 +133,7 @@
             requestAnimationFrame(drawAgain);
         };
 
-        return CD;
+        return PowerChart;
     }
 
 })();

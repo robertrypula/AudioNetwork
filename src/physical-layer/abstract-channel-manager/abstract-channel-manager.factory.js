@@ -12,9 +12,9 @@
     function _AbstractChannelManager(
         Audio
     ) {
-        var ACM;
+        var AbstractChannelManager;
 
-        ACM = function () {
+        AbstractChannelManager = function () {
             this.$$cpuLoadData = {
                 blockSampleSize: null,
                 blockTime: null,
@@ -23,7 +23,7 @@
             };
         };
 
-        ACM.prototype.getCpuLoadData = function () {
+        AbstractChannelManager.prototype.getCpuLoadData = function () {
             var c = this.$$cpuLoadData;
 
             return {
@@ -34,7 +34,7 @@
             };
         };
 
-        ACM.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
+        AbstractChannelManager.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
             var 
                 c = this.$$cpuLoadData,
                 blockRealTime, 
@@ -49,7 +49,7 @@
             c.load = blockRealTime / blockTime;
         };
 
-        return ACM;
+        return AbstractChannelManager;
     }
 
 })();

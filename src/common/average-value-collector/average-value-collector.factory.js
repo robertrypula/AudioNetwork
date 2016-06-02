@@ -14,26 +14,26 @@
         AbstractValueCollector,
         Util
     ) {
-        var AVC;
+        var AverageValueCollector;
 
-        AVC = function () {
+        AverageValueCollector = function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        AVC.prototype = Object.create(AbstractValueCollector.prototype);
-        AVC.prototype.constructor = AVC;
+        AverageValueCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        AverageValueCollector.prototype.constructor = AverageValueCollector;
 
-        AVC.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
+        AverageValueCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize AverageValueCollector without any samples collected';
 
-        AVC.prototype.$$finalize = function () {
+        AverageValueCollector.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {
-                throw AVC.EMPTY_LIST_EXCEPTION;
+                throw AverageValueCollector.EMPTY_LIST_EXCEPTION;
             }
 
             return Util.computeAverage(this.$$valueList);
         };
 
-        return AVC;
+        return AverageValueCollector;
     }
 
 })();
