@@ -205,7 +205,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 function destroy(cb) {
     if (physicalLayer) {
         physicalLayerDestroyInProgress = true;
-        physicalLayer.destroy().then(function () {
+        physicalLayer.destroy(function () {
             transmitAdapter = null;
             receiveAdapter = null;
             physicalLayer = null;

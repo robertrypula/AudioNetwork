@@ -248,24 +248,19 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         PhysicalLayer.prototype.rx = function (rxHandler) {
-            this.$$rxExternalHandler.callback = (
-                (typeof rxHandler === 'function') ?
-                rxHandler :
-                null
-            );
+            this.$$rxExternalHandler.callback = (typeof rxHandler === 'function') ? rxHandler : null;
         };
 
         PhysicalLayer.prototype.getSampleRate = function () {
             return Audio.getSampleRate();
         };
 
-        PhysicalLayer.prototype.destroy = function () {
-            var i, j, promiseResolve, promise, destroyAsyncCount;
+        PhysicalLayer.prototype.destroy = function (callback) {
+            var i, j, destroyAsyncCount;
+
+            callback = typeof callback === 'function' ? callback : function () {};
 
             destroyAsyncCount = 0;
-            promise = new Promise(function (resolve) {
-                promiseResolve = resolve;
-            });
 
             this.setRxInput(null);
 
@@ -277,7 +272,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                     .then(function () {
                         destroyAsyncCount--;
                         if (destroyAsyncCount === 0) {
-                            promiseResolve();
+                            callback();
                         }
                     })
                 ;
@@ -293,7 +288,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                             .then(function () {
                                 destroyAsyncCount--;
                                 if (destroyAsyncCount === 0) {
-                                    promiseResolve();
+                                    callback();
                                 }
                             })
                         ;
@@ -311,8 +306,6 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$channelTransmitManager = null;
 
             this.$$rxHandler.destroy();
-
-            return promise;
         };
 
         PhysicalLayer.prototype.getOutputTxState = function () {
