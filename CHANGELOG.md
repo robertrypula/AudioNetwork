@@ -9,10 +9,16 @@
 
 TODO list:
   - Current focus:
-    - refactor API
-      - change adapter parameter order or move all adapter initialization
-      - PhysicalLayer's rx method should should store all handlers functions in array (??? is that really needed ???)
-      - ReceiveAdapter should register own rx handler inside Adapter class
+    - remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)
+    - use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
+    - refactor manager code to pass whole array to/from channel instead single sample
+      - receive-manager
+      - receive-channel
+      - receive-channel-carrier           adds phase correction, handles notify intervals
+      - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
+    - ReceiveAdapter should register own rx handler inside Adapter class
+    - change adapter parameter order or move all adapter initialization
+    - introduce handlers similar to existing setPacketReceiveHandler like: set
 
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
@@ -37,14 +43,16 @@ TODO list:
 
   - General stuff:
     - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
-    - remove Promises (code should be as less dependent as possible - callbacks are enough in this case)
-    - use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call in the future via setTimeout
     - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
     - refactor DOM helpers (move to service)
     - do not redraw constellation if queue wasn't changed
     - ability to add hooks at sample generation and receive (inject some changes to signal)
     - refactor sample handling and generation to order to easily move that code to Service Worker
     - fix carrier.html example (use dedicated constellation class)
+
+  - How it works section
+    - carrier generate and receive
+    - psk
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
