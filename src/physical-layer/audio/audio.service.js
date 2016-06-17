@@ -48,7 +48,7 @@
             return recordedNode;
         }
 
-        function userMediaStreamSuccess(stream) {
+        function $$userMediaStreamSuccess(stream) {
             rawMicrophoneNode = context.createMediaStreamSource(stream);
             rawMicrophoneNode.connect(microphoneNode);
         }
@@ -130,7 +130,7 @@
                             optional: []
                         }
                     },
-                    userMediaStreamSuccess,
+                    $$userMediaStreamSuccess,
                     function (e) {
                         alert('Microphone initialization failed');
                         console.log(e);

@@ -11,14 +11,14 @@ TODO list:
   - Current focus:
     - remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)
     - use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
+    - change adapter parameter order or move all adapter initialization
+    - introduce handlers similar to existing setPacketReceiveHandler like: set
+    - ReceiveAdapter should register own rx handler inside Adapter class
     - refactor manager code to pass whole array to/from channel instead single sample
       - receive-manager
       - receive-channel
       - receive-channel-carrier           adds phase correction, handles notify intervals
       - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
-    - ReceiveAdapter should register own rx handler inside Adapter class
-    - change adapter parameter order or move all adapter initialization
-    - introduce handlers similar to existing setPacketReceiveHandler like: set
 
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
@@ -50,9 +50,34 @@ TODO list:
     - refactor sample handling and generation to order to easily move that code to Service Worker
     - fix carrier.html example (use dedicated constellation class)
 
-  - How it works section
+  - How it works section (this will be used in the article 'Data transmission over sound waves in JavaScript / Digital Signal Processing in JavaScript from scratch')
+    - introduction
+      - sound representation in computer memory
+      - all from scratch to really understand internals of DSP
+      - how to pick proper frequency?
+    - how to record/play raw samples using Web Audio API
+      - context initialization, abstraction service from AudioNetwork library (all filters disabled)
+      - gain node
+      - show audio processing event
+      - connect all together
+    - discrete fourier transform in a nutshell
+      - much simpler than FFT but ultra slow
+      - explain frequency domain and time domain, frequency bin [IMAGE]
+      - tell about samplesPerPeriod -> a way to skip sampling frequency
+      - add couple of sine waves together [CHART separate and sum]
+      - describe algorithm, running circle  [CHART]
+      - show that we collect vectors per each sample [CHART]
+      - when input signal contains that frequency it will produce lots of vectors that points to the same direction
+      - sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave
     - carrier generate and receive
-    - psk
+      - describe simple classes from AudioNetwork's lib
+    - simple transmitter and receiver app
+      - show symbol details, zero is only pilot, one is pilot and symbol, guard internal between adjacent bits
+      - OFDM to avoid interference between carriers [just show the rule]
+      - 2 carriers (1 pilot, 1 symbol)
+      - list all files that were used
+    - summary
+      - put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
