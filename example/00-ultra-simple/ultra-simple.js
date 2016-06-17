@@ -15,7 +15,7 @@ var
     FREQUENCY_PILOT = 5000,                             // Hz
     FREQUENCY_CARRIER_0 = 5000 +     FREQUENCY_SPACING, // Hz
     FREQUENCY_CARRIER_1 = 5000 + 2 * FREQUENCY_SPACING, // Hz
-    THRESHOLD = -16;                                    // dB
+    THRESHOLD = -30;                                    // dB
     TX_SYMBOL_TIME_FACTOR = 2;
     SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME),
@@ -94,9 +94,10 @@ function notify(powerDecibelPilot, powerDecibelCarrier0, powerDecibelCarrier1) {
     var pilot = powerDecibelPilot > THRESHOLD;
 
     // TODO ultra bad code section below, remove it
-    powerDecibelPilot = powerDecibelPilot < -35 ? -35 : powerDecibelPilot;
-    powerDecibelCarrier0 = powerDecibelCarrier0 < -35 ? -35 : powerDecibelCarrier0;
-    powerDecibelCarrier1 = powerDecibelCarrier1 < -35 ? -35 : powerDecibelCarrier1;
+    var low = -75;
+    powerDecibelPilot = powerDecibelPilot < low ? low : powerDecibelPilot;
+    powerDecibelCarrier0 = powerDecibelCarrier0 < low ? low : powerDecibelCarrier0;
+    powerDecibelCarrier1 = powerDecibelCarrier1 < low ? low : powerDecibelCarrier1;
     if (powerChartQueue0.isFull()) { powerChartQueue0.pop() } powerChartQueue0.push(powerDecibelPilot);
     if (powerChartQueue1.isFull()) { powerChartQueue1.pop() } powerChartQueue1.push(powerDecibelCarrier0);
     if (powerChartQueue2.isFull()) { powerChartQueue2.pop() } powerChartQueue2.push(powerDecibelCarrier1);
