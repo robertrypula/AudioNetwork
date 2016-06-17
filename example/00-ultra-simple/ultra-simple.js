@@ -130,7 +130,7 @@ function notify(powerDecibelPilot, powerDecibelCarrier0, powerDecibelCarrier1) {
     pilotPrevious = pilot;
 }
 
-if (0) {
+if (1) {
     Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
     scriptProcessorNodeMicrophone.connect(analyserNode);
     scriptProcessorNodeSpeakers.connect(Audio.getDestination());
