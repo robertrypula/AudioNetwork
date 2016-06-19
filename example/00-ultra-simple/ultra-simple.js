@@ -4,42 +4,64 @@ var
     CarrierRecovery = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierRecovery'),
     CarrierGenerate = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierGenerate'),
 
-    // constant values
-    // 2ST + 2 * 2ST = 2ST + 4ST = 6ST
-    // 8 carriers:  3 bytes/s
-    // 8 carriers + QPSK:  6 bytes/s
+
+    //         +------+
+    //                 +------+
+    //                         +------+
+    //                                 +------+
+    //                                         +------+
+    //                                                 +------+
+    //                                                         +------+
+    //                                                                 +------+
+    // ----------------################--------------------------------################--------------------------------
+    //
+    //                         --------                                        --------
+    // ________________----^^^^        ^^^^----________________________----^^^^
 
     SYMBOL_TIME = 0.050,                                // seconds
-    FREQUENCY_SPACING = 1 / SYMBOL_TIME;                // Hz
-    NOTIFY_TIME = SYMBOL_TIME / 4,                      // seconds
-    FREQUENCY_PILOT = 5000,                             // Hz
-    FREQUENCY_CARRIER_0 = 5000 +     FREQUENCY_SPACING, // Hz
-    FREQUENCY_CARRIER_1 = 5000 + 2 * FREQUENCY_SPACING, // Hz
+    GUARD_INTERVAL = 2 * SYMBOL_TIME,
+    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,
+
+    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME;       // Hz
+    NOTIFY_TIME = 0.5 * SYMBOL_TIME,                      // seconds
+    SUB_CARRIER_SIZE = 2,
+    PILOT_FREQUENCY = 5000,                             // Hz
     THRESHOLD = -30;                                    // dB
-    TX_SYMBOL_TIME_FACTOR = 2;
-    SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
+
+    SAMPLE_PER_SYMBOL_TIME = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
+    SAMPLE_PER_GUARD_INTERVAL = Math.round(Audio.getSampleRate() * GUARD_INTERVAL),
+    SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME),
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME),
-    SAMPLE_PER_PERIOD_PILOT = Audio.getSampleRate() / FREQUENCY_PILOT,
-    SAMPLE_PER_PERIOD_CARRIER_0 = Audio.getSampleRate() / FREQUENCY_CARRIER_0,
-    SAMPLE_PER_PERIOD_CARRIER_1 = Audio.getSampleRate() / FREQUENCY_CARRIER_1,
+    SAMPLE_PER_PERIOD_PILOT = Audio.getSampleRate() / PILOT_FREQUENCY,
 
     // normals objects
-    carrierGeneratePilot = new CarrierGenerate(SAMPLE_PER_PERIOD_PILOT),
-    carrierGenerateCarrier0 = new CarrierGenerate(SAMPLE_PER_PERIOD_CARRIER_0),
-    carrierGenerateCarrier1 = new CarrierGenerate(SAMPLE_PER_PERIOD_CARRIER_1),
-    carrierRecoveryPilot = new CarrierRecovery(SAMPLE_PER_PERIOD_PILOT, SAMPLE_PER_SYMBOL),
-    carrierRecoveryCarrier0 = new CarrierRecovery(SAMPLE_PER_PERIOD_CARRIER_0, SAMPLE_PER_SYMBOL),
-    carrierRecoveryCarrier1 = new CarrierRecovery(SAMPLE_PER_PERIOD_CARRIER_1, SAMPLE_PER_SYMBOL),
     scriptProcessorNodeSpeakers = Audio.createScriptProcessor(1024, 1, 1),
     scriptProcessorNodeMicrophone = Audio.createScriptProcessor(1024, 1, 1),
+    analyserNode = Audio.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
-    analyserNode = Audio.createAnalyser();
+    carrierGeneratePilot = new CarrierGenerate(SAMPLE_PER_PERIOD_PILOT),
+    carrierRecoveryPilot = new CarrierRecovery(SAMPLE_PER_PERIOD_PILOT, SAMPLE_PER_DFT_WINDOW),
+    carrierGenerate = [],
+    carrierRecovery = [];
 
-console.log(
-    FREQUENCY_PILOT,
-    FREQUENCY_CARRIER_0,
-    FREQUENCY_CARRIER_1
-);
+
+for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+    var
+        frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING,
+        samplePerPeriod = Audio.getSampleRate() / frequency;
+
+    carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
+    carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
+}
+
+if (0) {
+    Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
+    scriptProcessorNodeMicrophone.connect(analyserNode);
+    scriptProcessorNodeSpeakers.connect(Audio.getDestination());
+} else {
+    scriptProcessorNodeSpeakers.connect(scriptProcessorNodeMicrophone);
+    scriptProcessorNodeMicrophone.connect(analyserNode);
+}
 
 scriptProcessorNodeSpeakers.onaudioprocess = function (audioProcessingEvent) {
     var outputData = audioProcessingEvent.outputBuffer.getChannelData(0);
@@ -50,11 +72,10 @@ scriptProcessorNodeSpeakers.onaudioprocess = function (audioProcessingEvent) {
         outputData[sample] += carrierGeneratePilot.getSample();
         carrierGeneratePilot.nextSample();
 
-        outputData[sample] += carrierGenerateCarrier0.getSample();
-        carrierGenerateCarrier0.nextSample();
-
-        outputData[sample] += carrierGenerateCarrier1.getSample();
-        carrierGenerateCarrier1.nextSample();
+        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+            outputData[sample] += carrierGenerate[i].getSample();
+            carrierGenerate[i].nextSample();
+        }
     }
 };
 
@@ -63,19 +84,26 @@ scriptProcessorNodeMicrophone.onaudioprocess = function (audioProcessingEvent) {
 
     for (var sample = 0; sample < inputData.length; sample++) {
         carrierRecoveryPilot.handleSample(inputData[sample]);
-        carrierRecoveryCarrier0.handleSample(inputData[sample]);
-        carrierRecoveryCarrier1.handleSample(inputData[sample]);
-        sampleGlobalCountMicrophone++;
-
-        if (sampleGlobalCountMicrophone % SAMPLE_PER_NOTIFY === 0) {
-            notify(
-                carrierRecoveryPilot.getCarrierDetail().powerDecibel,
-                carrierRecoveryCarrier0.getCarrierDetail().powerDecibel,
-                carrierRecoveryCarrier1.getCarrierDetail().powerDecibel
-            );
+        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+            carrierRecovery[i].handleSample(inputData[sample]);
         }
+        sampleGlobalCountMicrophone++;
+        notifyIfNeeded();
     }
 };
+
+function notifyIfNeeded() {
+    var powerDecibel = [];
+
+    if (sampleGlobalCountMicrophone % SAMPLE_PER_NOTIFY !== 0) {
+        return;
+    }
+
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        powerDecibel.push(carrierRecovery[i].getCarrierDetail().powerDecibel);
+    }
+    notify(carrierRecoveryPilot.getCarrierDetail().powerDecibel, powerDecibel);
+}
 
 var pilotPrevious = false;
 var symbolHistory = [];
@@ -90,23 +118,23 @@ var powerChart2 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementB
 // ----------------------------------------------
 
 
-function notify(powerDecibelPilot, powerDecibelCarrier0, powerDecibelCarrier1) {
+function notify(powerDecibelPilot, powerDecibel) {
     var pilot = powerDecibelPilot > THRESHOLD;
 
     // TODO ultra bad code section below, remove it
     var low = -75;
     powerDecibelPilot = powerDecibelPilot < low ? low : powerDecibelPilot;
-    powerDecibelCarrier0 = powerDecibelCarrier0 < low ? low : powerDecibelCarrier0;
-    powerDecibelCarrier1 = powerDecibelCarrier1 < low ? low : powerDecibelCarrier1;
+    powerDecibel[0] = powerDecibel[0] < low ? low : powerDecibel[0];
+    powerDecibel[1] = powerDecibel[1] < low ? low : powerDecibel[1];
     if (powerChartQueue0.isFull()) { powerChartQueue0.pop() } powerChartQueue0.push(powerDecibelPilot);
-    if (powerChartQueue1.isFull()) { powerChartQueue1.pop() } powerChartQueue1.push(powerDecibelCarrier0);
-    if (powerChartQueue2.isFull()) { powerChartQueue2.pop() } powerChartQueue2.push(powerDecibelCarrier1);
+    if (powerChartQueue1.isFull()) { powerChartQueue1.pop() } powerChartQueue1.push(powerDecibel[0]);
+    if (powerChartQueue2.isFull()) { powerChartQueue2.pop() } powerChartQueue2.push(powerDecibel[1]);
     // ------ end
 
     document.getElementById('powerDecibel').innerHTML = (
         Math.round(powerDecibelPilot).toString() + ' ' +
-        Math.round(powerDecibelCarrier0).toString() + ' ' +
-        Math.round(powerDecibelCarrier1).toString()
+        Math.round(powerDecibel[0]).toString() + ' ' +
+        Math.round(powerDecibel[1]).toString()
     );
 
     if (pilot && !pilotPrevious) {
@@ -115,7 +143,7 @@ function notify(powerDecibelPilot, powerDecibelCarrier0, powerDecibelCarrier1) {
 
     if (pilot) {
         symbolHistory.push(
-            (powerDecibelCarrier0 > THRESHOLD ? 2 : 0) + (powerDecibelCarrier1 > THRESHOLD ? 1 : 0)
+            (powerDecibel[0] > THRESHOLD ? 2 : 0) + (powerDecibel[1] > THRESHOLD ? 1 : 0)
         );
     }
 
@@ -131,28 +159,20 @@ function notify(powerDecibelPilot, powerDecibelCarrier0, powerDecibelCarrier1) {
     pilotPrevious = pilot;
 }
 
-if (1) {
-    Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
-    scriptProcessorNodeMicrophone.connect(analyserNode);
-    scriptProcessorNodeSpeakers.connect(Audio.getDestination());
-} else {
-    scriptProcessorNodeSpeakers.connect(scriptProcessorNodeMicrophone);
-    scriptProcessorNodeMicrophone.connect(analyserNode);
-}
-
 function send(symbol) {
     var
-        d = TX_SYMBOL_TIME_FACTOR * SAMPLE_PER_SYMBOL,
+        st = SAMPLE_PER_SYMBOL_TIME,
+        gi = SAMPLE_PER_GUARD_INTERVAL,
         carrier0 = symbol >> 1 ? 1 : 0,
         carrier1 = symbol % 2 ? 1 : 0;
 
     console.log(carrier0, carrier1);
 
-    carrierGeneratePilot.addToQueue([{ duration: d, phase: 0, amplitude: 1 }]);
-    carrierGenerateCarrier0.addToQueue([{ duration: d, phase: 0, amplitude: carrier0 }]);
-    carrierGenerateCarrier1.addToQueue([{ duration: d, phase: 0, amplitude: carrier1 }]);
+    carrierGeneratePilot.addToQueue([{ duration: st, phase: 0, amplitude: 1 }]);
+    carrierGenerate[0].addToQueue([{ duration: st, phase: 0, amplitude: 0.5 * carrier0 }]);
+    carrierGenerate[1].addToQueue([{ duration: st, phase: 0, amplitude: 0.5 * carrier1 }]);
 
-    carrierGeneratePilot.addToQueue([{ duration: 2 * d, phase: 0, amplitude: 0 }]);
-    carrierGenerateCarrier0.addToQueue([{ duration: 2 * d, phase: 0, amplitude: 0 }]);
-    carrierGenerateCarrier1.addToQueue([{ duration: 2 * d, phase: 0, amplitude: 0 }]);
+    carrierGeneratePilot.addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
+    carrierGenerate[0].addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
+    carrierGenerate[1].addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
 }
