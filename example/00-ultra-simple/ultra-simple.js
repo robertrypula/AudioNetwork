@@ -24,23 +24,23 @@ var
     // ________________,---```         ```---,_________________________,---```         ```---,_____________
 
     LOOPBACK = 1,
-    SUB_CARRIER_SIZE = 2,
+    SUB_CARRIER_SIZE = 8,
     PILOT_FREQUENCY = 5000,                         // Hz
     THRESHOLD = -30,                                    // dB
-    MINIMUM_POWER_DECIBEL = -75,                        // dB
-    POWER_CHART_WIDTH = 800,
-    POWER_CHART_HEIGHT = 2 * 80,
+    MINIMUM_POWER_DECIBEL = -99,                        // dB
+    POWER_CHART_WIDTH = 200,
+    POWER_CHART_HEIGHT = 10 * 20,
     
     SYMBOL_TIME = 1.00 * 0.08,                             // seconds
     GUARD_TIME = 2 * SYMBOL_TIME,                       // seconds
     DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                // seconds
-    NOTIFY_TIME = (1 / 8) * SYMBOL_TIME,                  // seconds
+    NOTIFY_TIME = (1 / 16) * SYMBOL_TIME,                  // seconds
     SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
     SAMPLE_PER_GUARD = Math.round(Audio.getSampleRate() * GUARD_TIME),
     SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME),
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME),
 
-    OFDM_FREQUENCY_SPACING = 4 / DFT_WINDOW_TIME,       // Hz
+    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME,       // Hz
 
     // normal variables
     scriptProcessorNodeSpeaker = Audio.createScriptProcessor(1024, 1, 1),
@@ -107,7 +107,7 @@ function initPowerChart() {
 }
 
 function init() {
-    initPowerChart();
+    // initPowerChart();
     initCarrierObject();
     initNode();
 }
@@ -164,21 +164,26 @@ function notifyIfNeeded() {
     }
     notifyHandler(
         normalizeDecibel(carrierRecoveryPilot.getCarrierDetail().powerDecibel),
-        powerDecibel);
+        powerDecibel
+    );
 }
 
 function notifyHandler(powerDecibelPilot, powerDecibel) {
-    var pilot = powerDecibelPilot > THRESHOLD;
+    var
+        pilot = powerDecibelPilot > THRESHOLD,
+        symbol;
 
-    if (powerChartPilot.queue.isFull()) {
-        powerChartPilot.queue.pop()
-    }
-    powerChartPilot.queue.push(powerDecibelPilot);
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-        if (powerChart[i].queue.isFull()) {
-            powerChart[i].queue.pop()
+    if (powerChart.length) {
+        if (powerChartPilot.queue.isFull()) {
+            powerChartPilot.queue.pop()
         }
-        powerChart[i].queue.push(powerDecibel[i]);
+        powerChartPilot.queue.push(powerDecibelPilot);
+        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+            if (powerChart[i].queue.isFull()) {
+                powerChart[i].queue.pop()
+            }
+            powerChart[i].queue.push(powerDecibel[i]);
+        }
     }
 
     document.getElementById('power-decibel-pilot').innerHTML = Math.round(powerDecibelPilot).toString();
@@ -191,9 +196,11 @@ function notifyHandler(powerDecibelPilot, powerDecibel) {
     }
 
     if (pilot) {
-        symbolHistory.push(
-            (powerDecibel[0] > THRESHOLD ? 2 : 0) + (powerDecibel[1] > THRESHOLD ? 1 : 0)
-        );
+        symbol = 0;
+        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+            symbol += powerDecibel[i] > THRESHOLD ? (1 << SUB_CARRIER_SIZE - 1 - i) : 0;
+        }
+        symbolHistory.push(symbol);
     }
 
     if (!pilot && pilotPrevious) {
