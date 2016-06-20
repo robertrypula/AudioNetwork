@@ -23,7 +23,7 @@ var
     //                        _________                                       _________
     // ________________,---```         ```---,_________________________,---```         ```---,_____________
 
-    LOOPBACK = 1,
+    LOOPBACK = 0,
     SUB_CARRIER_SIZE = 8,
     PILOT_FREQUENCY = 5000,                         // Hz
     THRESHOLD = -30,                                    // dB
@@ -31,7 +31,7 @@ var
     POWER_CHART_WIDTH = 200,
     POWER_CHART_HEIGHT = 10 * 20,
     
-    SYMBOL_TIME = 1.00 * 0.08,                             // seconds
+    SYMBOL_TIME = 2.00 * 0.08,                             // seconds
     GUARD_TIME = 2 * SYMBOL_TIME,                       // seconds
     DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                // seconds
     NOTIFY_TIME = (1 / 16) * SYMBOL_TIME,                  // seconds
@@ -106,10 +106,22 @@ function initPowerChart() {
     }
 }
 
+function initKeyboardEventGrabber() {
+    var element = document.getElementById('keyboard-event-grabber');
+
+    //element.addEventListener('keypress', function (e) { console.log(e); });
+    //element.addEventListener('keyup', function (e) { console.log(e); });
+    element.addEventListener('keydown', function (e) {
+        send(e.keyCode);
+        e.preventDefault();
+    });
+}
+
 function init() {
-    // initPowerChart();
+    initPowerChart();
     initCarrierObject();
     initNode();
+    initKeyboardEventGrabber();
 }
 
 function scriptProcessorNodeSpeakerHandler(audioProcessingEvent) {
@@ -132,6 +144,7 @@ function scriptProcessorNodeMicrophoneHandler(audioProcessingEvent) {
     var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
 
     for (var sample = 0; sample < inputData.length; sample++) {
+        // inputData[sample] += (Math.random() * 2 - 1) * 0.01;
         carrierRecoveryPilot.handleSample(inputData[sample]);
         for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
             carrierRecovery[i].handleSample(inputData[sample]);
@@ -209,7 +222,14 @@ function notifyHandler(powerDecibelPilot, powerDecibel) {
             s += symbolHistory[i] + ',';
         }
         console.log(s);
-        document.getElementById('symbol').innerHTML += symbolHistory[Math.round(symbolHistory.length / 2)] + ' ';
+
+        symbol = symbolHistory[Math.round(symbolHistory.length / 2)];
+        document.getElementById('symbol').innerHTML += symbol;
+        if (symbol >= 32 && symbol < 128) {
+            document.getElementById('symbol').innerHTML += '[' + String.fromCharCode(symbol)  + '] ';
+        } else {
+            document.getElementById('symbol').innerHTML += ' ';
+        }
     }
 
     pilotPrevious = pilot;
