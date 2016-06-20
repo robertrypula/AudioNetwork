@@ -1,3 +1,5 @@
+'use strict';
+
 var
     // import stuff from AudioNetwork lib
     Audio = AudioNetwork.Injector.resolve('PhysicalLayer.Audio'),
@@ -20,53 +22,97 @@ var
     // ----------------################--------------------------------################--------------------
     //                        _________                                       _________
     // ________________,---```         ```---,_________________________,---```         ```---,_____________
-    
-    SYMBOL_TIME = 0.500,                                // seconds
-    GUARD_INTERVAL = 2 * SYMBOL_TIME,
-    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,
 
-    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME;       // Hz
-    NOTIFY_TIME = 0.1 * SYMBOL_TIME,                   // seconds
+    LOOPBACK = 1,
     SUB_CARRIER_SIZE = 2,
-    PILOT_FREQUENCY = 5000,                             // Hz
-    THRESHOLD = -30;                                    // dB
-
-    SAMPLE_PER_SYMBOL_TIME = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
-    SAMPLE_PER_GUARD_INTERVAL = Math.round(Audio.getSampleRate() * GUARD_INTERVAL),
+    PILOT_FREQUENCY = 5000,                         // Hz
+    THRESHOLD = -30,                                    // dB
+    MINIMUM_POWER_DECIBEL = -75,                        // dB
+    POWER_CHART_WIDTH = 800,
+    POWER_CHART_HEIGHT = 2 * 80,
+    
+    SYMBOL_TIME = 1.00 * 0.08,                             // seconds
+    GUARD_TIME = 2 * SYMBOL_TIME,                       // seconds
+    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                // seconds
+    NOTIFY_TIME = (1 / 8) * SYMBOL_TIME,                  // seconds
+    SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
+    SAMPLE_PER_GUARD = Math.round(Audio.getSampleRate() * GUARD_TIME),
     SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME),
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME),
-    SAMPLE_PER_PERIOD_PILOT = Audio.getSampleRate() / PILOT_FREQUENCY,
 
-    // normals objects
-    scriptProcessorNodeSpeakers = Audio.createScriptProcessor(1024, 1, 1),
+    OFDM_FREQUENCY_SPACING = 4 / DFT_WINDOW_TIME,       // Hz
+
+    // normal variables
+    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(1024, 1, 1),
     scriptProcessorNodeMicrophone = Audio.createScriptProcessor(1024, 1, 1),
     analyserNode = Audio.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
-    carrierGeneratePilot = new CarrierGenerate(SAMPLE_PER_PERIOD_PILOT),
-    carrierRecoveryPilot = new CarrierRecovery(SAMPLE_PER_PERIOD_PILOT, SAMPLE_PER_DFT_WINDOW),
+    carrierGeneratePilot,
+    carrierRecoveryPilot,
     carrierGenerate = [],
-    carrierRecovery = [];
+    carrierRecovery = [],
+    pilotPrevious = false,
+    symbolHistory = [],
+    powerChartPilot = {},
+    powerChart = [];
 
 
-for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-    var
-        frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING,
+function initCarrierObject() {
+    var frequency, samplePerPeriod, i;
+
+    samplePerPeriod = Audio.getSampleRate() / PILOT_FREQUENCY;
+    carrierGeneratePilot = new CarrierGenerate(samplePerPeriod);
+    carrierRecoveryPilot = new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW);
+
+    for (i = 0; i < SUB_CARRIER_SIZE; i++) {
+        frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING;
         samplePerPeriod = Audio.getSampleRate() / frequency;
 
-    carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
-    carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
+        carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
+        carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
+    }
 }
 
-if (0) {
-    Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
-    scriptProcessorNodeMicrophone.connect(analyserNode);
-    scriptProcessorNodeSpeakers.connect(Audio.getDestination());
-} else {
-    scriptProcessorNodeSpeakers.connect(scriptProcessorNodeMicrophone);
-    scriptProcessorNodeMicrophone.connect(analyserNode);
+function initNode() {
+    scriptProcessorNodeSpeaker.onaudioprocess = scriptProcessorNodeSpeakerHandler;
+    scriptProcessorNodeMicrophone.onaudioprocess = scriptProcessorNodeMicrophoneHandler;
+
+    if (LOOPBACK) {
+        scriptProcessorNodeSpeaker.connect(scriptProcessorNodeMicrophone);
+        scriptProcessorNodeMicrophone.connect(analyserNode);
+    } else {
+        Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
+        scriptProcessorNodeMicrophone.connect(analyserNode);
+        scriptProcessorNodeSpeaker.connect(Audio.getDestination());
+    }
 }
 
-scriptProcessorNodeSpeakers.onaudioprocess = function (audioProcessingEvent) {
+function initPowerChart() {
+    var queue;
+
+    powerChartPilot.queue = new AudioNetwork.Common.Queue(POWER_CHART_WIDTH);
+    powerChartPilot.renderer = new AudioNetwork.PhysicalLayer.PowerChart(
+        document.getElementById('power-chart-pilot'), POWER_CHART_WIDTH, POWER_CHART_HEIGHT, powerChartPilot.queue
+    );
+
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        queue = new AudioNetwork.Common.Queue(POWER_CHART_WIDTH);
+        powerChart.push({
+            queue: queue,
+            renderer: new AudioNetwork.PhysicalLayer.PowerChart(
+                document.getElementById('power-chart-' + i), POWER_CHART_WIDTH, POWER_CHART_HEIGHT, queue
+            )
+        });
+    }
+}
+
+function init() {
+    initPowerChart();
+    initCarrierObject();
+    initNode();
+}
+
+function scriptProcessorNodeSpeakerHandler(audioProcessingEvent) {
     var outputData = audioProcessingEvent.outputBuffer.getChannelData(0);
 
     for (var sample = 0; sample < outputData.length; sample++) {
@@ -80,9 +126,9 @@ scriptProcessorNodeSpeakers.onaudioprocess = function (audioProcessingEvent) {
             carrierGenerate[i].nextSample();
         }
     }
-};
+}
 
-scriptProcessorNodeMicrophone.onaudioprocess = function (audioProcessingEvent) {
+function scriptProcessorNodeMicrophoneHandler(audioProcessingEvent) {
     var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
 
     for (var sample = 0; sample < inputData.length; sample++) {
@@ -93,7 +139,16 @@ scriptProcessorNodeMicrophone.onaudioprocess = function (audioProcessingEvent) {
         sampleGlobalCountMicrophone++;
         notifyIfNeeded();
     }
-};
+}
+
+function normalizeDecibel(value) {
+    if (value === -Infinity) {
+        value = MINIMUM_POWER_DECIBEL;
+    }
+    value = value < MINIMUM_POWER_DECIBEL ? MINIMUM_POWER_DECIBEL : value;
+
+    return value;
+}
 
 function notifyIfNeeded() {
     var powerDecibel = [];
@@ -103,42 +158,33 @@ function notifyIfNeeded() {
     }
 
     for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-        powerDecibel.push(carrierRecovery[i].getCarrierDetail().powerDecibel);
+        powerDecibel.push(
+            normalizeDecibel(carrierRecovery[i].getCarrierDetail().powerDecibel)
+        );
     }
-    notify(carrierRecoveryPilot.getCarrierDetail().powerDecibel, powerDecibel);
+    notifyHandler(
+        normalizeDecibel(carrierRecoveryPilot.getCarrierDetail().powerDecibel),
+        powerDecibel);
 }
 
-var pilotPrevious = false;
-var symbolHistory = [];
-
-// TODO ultra bad code section below, remove it
-var powerChartQueue0 = new AudioNetwork.Common.Queue(800);
-var powerChart0 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-0'), 800, 2 * 80, powerChartQueue0);
-var powerChartQueue1 = new AudioNetwork.Common.Queue(800);
-var powerChart1 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-1'), 800, 2 * 80, powerChartQueue1);
-var powerChartQueue2 = new AudioNetwork.Common.Queue(800);
-var powerChart2 = new AudioNetwork.PhysicalLayer.PowerChart(document.getElementById('rx-power-chart-2'), 800, 2 * 80, powerChartQueue2);
-// ----------------------------------------------
-
-
-function notify(powerDecibelPilot, powerDecibel) {
+function notifyHandler(powerDecibelPilot, powerDecibel) {
     var pilot = powerDecibelPilot > THRESHOLD;
 
-    // TODO ultra bad code section below, remove it
-    var low = -75;
-    powerDecibelPilot = powerDecibelPilot < low ? low : powerDecibelPilot;
-    powerDecibel[0] = powerDecibel[0] < low ? low : powerDecibel[0];
-    powerDecibel[1] = powerDecibel[1] < low ? low : powerDecibel[1];
-    if (powerChartQueue0.isFull()) { powerChartQueue0.pop() } powerChartQueue0.push(powerDecibelPilot);
-    if (powerChartQueue1.isFull()) { powerChartQueue1.pop() } powerChartQueue1.push(powerDecibel[0]);
-    if (powerChartQueue2.isFull()) { powerChartQueue2.pop() } powerChartQueue2.push(powerDecibel[1]);
-    // ------ end
+    if (powerChartPilot.queue.isFull()) {
+        powerChartPilot.queue.pop()
+    }
+    powerChartPilot.queue.push(powerDecibelPilot);
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        if (powerChart[i].queue.isFull()) {
+            powerChart[i].queue.pop()
+        }
+        powerChart[i].queue.push(powerDecibel[i]);
+    }
 
-    document.getElementById('powerDecibel').innerHTML = (
-        Math.round(powerDecibelPilot).toString() + ' ' +
-        Math.round(powerDecibel[0]).toString() + ' ' +
-        Math.round(powerDecibel[1]).toString()
-    );
+    document.getElementById('power-decibel-pilot').innerHTML = Math.round(powerDecibelPilot).toString();
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        document.getElementById('power-decibel-' + i).innerHTML = Math.round(powerDecibel[i]).toString();
+    }
 
     if (pilot && !pilotPrevious) {
         symbolHistory.length = 0;
@@ -164,18 +210,20 @@ function notify(powerDecibelPilot, powerDecibel) {
 
 function send(symbol) {
     var
-        st = SAMPLE_PER_SYMBOL_TIME,
-        gi = SAMPLE_PER_GUARD_INTERVAL,
-        carrier0 = symbol >> 1 ? 1 : 0,
-        carrier1 = symbol % 2 ? 1 : 0;
+        binary = '00000000' + (symbol >>> 0).toString(2),
+        amplitude = 1 / (1 + SUB_CARRIER_SIZE);
 
-    console.log(carrier0, carrier1);
+    carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude }]);
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        carrierGenerate[i].addToQueue([{
+            duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude * binary[binary.length - SUB_CARRIER_SIZE + i]
+        }]);
+    }
 
-    carrierGeneratePilot.addToQueue([{ duration: st, phase: 0, amplitude: 1 }]);
-    carrierGenerate[0].addToQueue([{ duration: st, phase: 0, amplitude: 0.5 * carrier0 }]);
-    carrierGenerate[1].addToQueue([{ duration: st, phase: 0, amplitude: 0.5 * carrier1 }]);
-
-    carrierGeneratePilot.addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
-    carrierGenerate[0].addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
-    carrierGenerate[1].addToQueue([{ duration: gi, phase: 0, amplitude: 0 }]);
+    carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0 }]);
+    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        carrierGenerate[i].addToQueue([{
+            duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0
+        }]);
+    }
 }

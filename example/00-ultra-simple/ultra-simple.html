@@ -13,7 +13,7 @@
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="">
+<body onLoad="init()">
     <div class="wrapper">
 
         <div class="container">
@@ -45,12 +45,15 @@
                     <button class="btn btn-default" onClick="send(2)">Send symbol 2</button>
                     <button class="btn btn-default" onClick="send(3)">Send symbol 3</button>
 
-                    <div id="powerDecibel"></div>
+                    <div id="power-decibel-pilot"></div>
+                    <div id="power-decibel-0"></div>
+                    <div id="power-decibel-1"></div>
+
                     <div id="symbol"></div>
 
-                    <div id="rx-power-chart-0" style="margin-bottom: 20px; border: 1px solid red;"></div>
-                    <div id="rx-power-chart-1" style="margin-bottom: 20px; border: 1px solid red;"></div>
-                    <div id="rx-power-chart-2" style="margin-bottom: 20px; border: 1px solid red;"></div>
+                    <div id="power-chart-pilot" style="margin-bottom: 20px; border: 1px solid red;"></div>
+                    <div id="power-chart-0" style="margin-bottom: 20px; border: 1px solid red;"></div>
+                    <div id="power-chart-1" style="margin-bottom: 20px; border: 1px solid red;"></div>
 
 
                 </div>
@@ -68,7 +71,7 @@
 
     </div>
 
-    <script src="../../build/audio-network-v1.0.3.min.js"></script>
+    <script src="../../build/audio-network-v1.0.3.js"></script>
     <script src="ultra-simple.js"></script>
 
     <script>
