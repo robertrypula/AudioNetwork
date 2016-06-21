@@ -40,31 +40,89 @@
             <h2>Blabla</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-                    <button class="btn btn-default" onClick="send(0)">Send symbol 0</button>
-                    <button class="btn btn-default" onClick="send(1)">Send symbol 1</button>
-                    <button class="btn btn-default" onClick="send(2)">Send symbol 2</button>
-                    <button class="btn btn-default" onClick="send(3)">Send symbol 3</button>
-                    <button class="btn btn-default" onClick="send(4)">Send symbol 4</button>
-                    <button class="btn btn-default" onClick="send(5)">Send symbol 5</button>
-                    <button class="btn btn-default" onClick="send(6)">Send symbol 6</button>
-                    <button class="btn btn-default" onClick="send(7)">Send symbol 7</button>
 
-                    <input id="value-to-send" value="0" />
-                    <button class="btn btn-default" onClick="send(document.getElementById('value-to-send').value)">Send</button>
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Send buttons
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <button class="btn btn-default" onClick="send(0)">Send symbol 0</button>
+                            <button class="btn btn-default" onClick="send(1)">Send symbol 1</button>
+                            <button class="btn btn-default" onClick="send(2)">Send symbol 2</button>
+                            <button class="btn btn-default" onClick="send(3)">Send symbol 3</button>
+                            <button class="btn btn-default" onClick="send(4)">Send symbol 4</button>
+                            <button class="btn btn-default" onClick="send(5)">Send symbol 5</button>
+                            <button class="btn btn-default" onClick="send(6)">Send symbol 6</button>
+                            <button class="btn btn-default" onClick="send(7)">Send symbol 7</button>
+                        </div>
+                    </div>
 
-                    <textarea id="keyboard-event-grabber"></textarea>
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Send value
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <input type="text" id="value-to-send" value="0x61" />
+                            <button class="btn btn-default" onClick="send(parseInt(document.getElementById('value-to-send').value))">Send</button>
+                        </div>
+                    </div>
 
-                    <div id="power-decibel-pilot"></div>
-                    <div id="power-decibel-0"></div>
-                    <div id="power-decibel-1"></div>
-                    <div id="power-decibel-2"></div>
-                    <div id="power-decibel-3"></div>
-                    <div id="power-decibel-4"></div>
-                    <div id="power-decibel-5"></div>
-                    <div id="power-decibel-6"></div>
-                    <div id="power-decibel-7"></div>
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Send text
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <input type="text" id="text-to-send" value="audio network" />
+                            <button class="btn btn-default" onClick="sendText(document.getElementById('text-to-send').value)">Send text</button>
+                        </div>
+                    </div>
 
-                    <div id="symbol"></div>
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Keyboard input
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <textarea id="keyboard-event-grabber"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Power
+                            </b>
+                        </div>
+                        <div class="col col-sm-6" style="font-family: monospace;">
+                            <span id="power-decibel-pilot"></span>
+                            <span id="power-decibel-0"></span>
+                            <span id="power-decibel-1"></span>
+                            <span id="power-decibel-2"></span>
+                            <span id="power-decibel-3"></span>
+                            <span id="power-decibel-4"></span>
+                            <span id="power-decibel-5"></span>
+                            <span id="power-decibel-6"></span>
+                            <span id="power-decibel-7"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Received data
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <div id="symbol" style="font-family: monospace;"></div>
+                        </div>
+                    </div>
 
                     <div id="power-chart-pilot" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
                     <div id="power-chart-0" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>

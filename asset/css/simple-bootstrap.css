@@ -102,6 +102,7 @@ button, textarea, input {
     clear: both;
 }
 
+.col-xs-2 { float: left; width: 0.16666666%; }
 .col-xs-3 { float: left; width: 25%; }
 .col-xs-4 { float: left; width: 33.333333%; }
 .col-xs-5 { float: left; width: 41.666666%; }
@@ -114,6 +115,7 @@ button, textarea, input {
     .container, footer {
         width: 750px;
     }
+    .col-sm-2 { float: left; width: 0.16666666%; }
     .col-sm-3 { float: left; width: 25%; }
     .col-sm-4 { float: left; width: 33.333333%; }
     .col-sm-5 { float: left; width: 41.666666%; }
@@ -127,6 +129,7 @@ button, textarea, input {
     .container, footer {
         width: 970px;
     }
+    .col-md-2 { float: left; width: 0.16666666%; }
     .col-md-3 { float: left; width: 25%; }
     .col-md-4 { float: left; width: 33.333333%; }
     .col-md-5 { float: left; width: 41.666666%; }
@@ -140,6 +143,7 @@ button, textarea, input {
     .container, footer {
         width: 1170px;
     }
+    .col-lg-2 { float: left; width: 0.16666666%; }
     .col-lg-3 { float: left; width: 25%; }
     .col-lg-4 { float: left; width: 33.333333%; }
     .col-lg-5 { float: left; width: 41.666666%; }

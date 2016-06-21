@@ -5,7 +5,8 @@ var
     Audio = AudioNetwork.Injector.resolve('PhysicalLayer.Audio'),
     CarrierRecovery = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierRecovery'),
     CarrierGenerate = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierGenerate'),
-
+    PowerChart = AudioNetwork.PhysicalLayer.PowerChart,
+    Queue = AudioNetwork.Common.Queue,
 
     // +--+            +--+            +--+            +--+            +--+            +--+
     //     +--+            +--+            +--+            +--+            +--+            +--+
@@ -23,28 +24,32 @@ var
     //                        _________                                       _________
     // ________________,---```         ```---,_________________________,---```         ```---,_____________
 
-    LOOPBACK = 0,
+    LOOPBACK_ACTIVE = 0,
+    WHITE_NOISE_ACTIVE = 0,
+    REFRESH_POWER_INFO_ACTIVE = 0,
+    POWER_CHART_ACTIVE = 0,
+
     SUB_CARRIER_SIZE = 8,
-    PILOT_FREQUENCY = 5000,                         // Hz
-    THRESHOLD = -30,                                    // dB
-    MINIMUM_POWER_DECIBEL = -99,                        // dB
-    POWER_CHART_WIDTH = 200,
-    POWER_CHART_HEIGHT = 10 * 20,
-    
-    SYMBOL_TIME = 2.00 * 0.08,                             // seconds
-    GUARD_TIME = 2 * SYMBOL_TIME,                       // seconds
-    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                // seconds
-    NOTIFY_TIME = (1 / 16) * SYMBOL_TIME,                  // seconds
+    PILOT_FREQUENCY = 5000,                                                       // Hz
+    POWER_CHART_WIDTH = 200,                                                      // px
+    POWER_CHART_HEIGHT = 10 * 20,                                                 // px
+    THRESHOLD = -30,                                                              // dB
+    MINIMUM_POWER_DECIBEL = -99,                                                  // dB
+
+    SYMBOL_TIME = 2.0 * 0.08,                                                     // seconds
+    GUARD_TIME = 1.5 * SYMBOL_TIME,                                               // seconds
+    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                                          // seconds
+    NOTIFY_TIME = (1 / 16) * SYMBOL_TIME,                                         // seconds
     SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
     SAMPLE_PER_GUARD = Math.round(Audio.getSampleRate() * GUARD_TIME),
     SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME),
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME),
 
-    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME,       // Hz
+    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME,                                 // Hz
 
     // normal variables
-    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(1024, 1, 1),
-    scriptProcessorNodeMicrophone = Audio.createScriptProcessor(1024, 1, 1),
+    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(4096, 1, 1),
+    scriptProcessorNodeMicrophone = Audio.createScriptProcessor(4096, 1, 1),
     analyserNode = Audio.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
     carrierGeneratePilot,
@@ -52,8 +57,8 @@ var
     carrierGenerate = [],
     carrierRecovery = [],
     pilotPrevious = false,
-    symbolHistory = [],
-    powerChartPilot = {},
+    carrierDetailHistory = [],
+    powerChartPilot,
     powerChart = [];
 
 
@@ -77,7 +82,7 @@ function initNode() {
     scriptProcessorNodeSpeaker.onaudioprocess = scriptProcessorNodeSpeakerHandler;
     scriptProcessorNodeMicrophone.onaudioprocess = scriptProcessorNodeMicrophoneHandler;
 
-    if (LOOPBACK) {
+    if (LOOPBACK_ACTIVE) {
         scriptProcessorNodeSpeaker.connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
     } else {
@@ -88,18 +93,25 @@ function initNode() {
 }
 
 function initPowerChart() {
-    var queue;
+    var queue, i;
 
-    powerChartPilot.queue = new AudioNetwork.Common.Queue(POWER_CHART_WIDTH);
-    powerChartPilot.renderer = new AudioNetwork.PhysicalLayer.PowerChart(
-        document.getElementById('power-chart-pilot'), POWER_CHART_WIDTH, POWER_CHART_HEIGHT, powerChartPilot.queue
-    );
+    if (!POWER_CHART_ACTIVE) {
+        return;
+    }
 
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-        queue = new AudioNetwork.Common.Queue(POWER_CHART_WIDTH);
+    queue = new Queue(POWER_CHART_WIDTH);
+    powerChartPilot = {
+        queue: queue,
+        renderer: new PowerChart(
+            document.getElementById('power-chart-pilot'), POWER_CHART_WIDTH, POWER_CHART_HEIGHT, queue
+        )
+    };
+
+    for (i = 0; i < SUB_CARRIER_SIZE; i++) {
+        queue = new Queue(POWER_CHART_WIDTH);
         powerChart.push({
             queue: queue,
-            renderer: new AudioNetwork.PhysicalLayer.PowerChart(
+            renderer: new PowerChart(
                 document.getElementById('power-chart-' + i), POWER_CHART_WIDTH, POWER_CHART_HEIGHT, queue
             )
         });
@@ -109,9 +121,8 @@ function initPowerChart() {
 function initKeyboardEventGrabber() {
     var element = document.getElementById('keyboard-event-grabber');
 
-    //element.addEventListener('keypress', function (e) { console.log(e); });
-    //element.addEventListener('keyup', function (e) { console.log(e); });
-    element.addEventListener('keydown', function (e) {
+    // events: keypress keyup keydown
+    element.addEventListener('keypress', function (e) {
         send(e.keyCode);
         e.preventDefault();
     });
@@ -125,15 +136,18 @@ function init() {
 }
 
 function scriptProcessorNodeSpeakerHandler(audioProcessingEvent) {
-    var outputData = audioProcessingEvent.outputBuffer.getChannelData(0);
+    var
+        outputData = audioProcessingEvent.outputBuffer.getChannelData(0),
+        sample,
+        i;
 
-    for (var sample = 0; sample < outputData.length; sample++) {
+    for (sample = 0; sample < outputData.length; sample++) {
         outputData[sample] = 0;
 
         outputData[sample] += carrierGeneratePilot.getSample();
         carrierGeneratePilot.nextSample();
 
-        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        for (i = 0; i < SUB_CARRIER_SIZE; i++) {
             outputData[sample] += carrierGenerate[i].getSample();
             carrierGenerate[i].nextSample();
         }
@@ -141,12 +155,17 @@ function scriptProcessorNodeSpeakerHandler(audioProcessingEvent) {
 }
 
 function scriptProcessorNodeMicrophoneHandler(audioProcessingEvent) {
-    var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+    var
+        inputData = audioProcessingEvent.inputBuffer.getChannelData(0),
+        sample,
+        i;
 
-    for (var sample = 0; sample < inputData.length; sample++) {
-        // inputData[sample] += (Math.random() * 2 - 1) * 0.01;
+    for (sample = 0; sample < inputData.length; sample++) {
+        if (WHITE_NOISE_ACTIVE) {
+            inputData[sample] += (Math.random() * 2 - 1) * 0.01;
+        }
         carrierRecoveryPilot.handleSample(inputData[sample]);
-        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        for (i = 0; i < SUB_CARRIER_SIZE; i++) {
             carrierRecovery[i].handleSample(inputData[sample]);
         }
         sampleGlobalCountMicrophone++;
@@ -164,72 +183,89 @@ function normalizeDecibel(value) {
 }
 
 function notifyIfNeeded() {
-    var powerDecibel = [];
+    var
+        carrierDetail = [],
+        carrierDetailTemp,
+        i;
 
     if (sampleGlobalCountMicrophone % SAMPLE_PER_NOTIFY !== 0) {
         return;
     }
 
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-        powerDecibel.push(
-            normalizeDecibel(carrierRecovery[i].getCarrierDetail().powerDecibel)
-        );
+    for (i = 0; i < SUB_CARRIER_SIZE; i++) {
+        carrierDetailTemp = carrierRecovery[i].getCarrierDetail();
+        carrierDetailTemp.powerDecibel = normalizeDecibel(carrierDetailTemp.powerDecibel);
+        carrierDetail.push(carrierDetailTemp);
     }
-    notifyHandler(
-        normalizeDecibel(carrierRecoveryPilot.getCarrierDetail().powerDecibel),
-        powerDecibel
-    );
+
+    carrierDetailTemp = carrierRecoveryPilot.getCarrierDetail();
+    carrierDetailTemp.powerDecibel = normalizeDecibel(carrierDetailTemp.powerDecibel);
+
+    notifyHandler(carrierDetailTemp, carrierDetail);
 }
 
-function notifyHandler(powerDecibelPilot, powerDecibel) {
+function notifyHandler(carrierDetailPilot, carrierDetail) {
     var
-        pilot = powerDecibelPilot > THRESHOLD,
-        symbol;
+        pilot = carrierDetailPilot.powerDecibel > THRESHOLD,
+        carrierDetailMiddle,
+        symbol,
+        phase,
+        i;
 
-    if (powerChart.length) {
+    if (POWER_CHART_ACTIVE) {
         if (powerChartPilot.queue.isFull()) {
             powerChartPilot.queue.pop()
         }
-        powerChartPilot.queue.push(powerDecibelPilot);
-        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+        powerChartPilot.queue.push(carrierDetailPilot.powerDecibel);
+        for (i = 0; i < SUB_CARRIER_SIZE; i++) {
             if (powerChart[i].queue.isFull()) {
                 powerChart[i].queue.pop()
             }
-            powerChart[i].queue.push(powerDecibel[i]);
+            powerChart[i].queue.push(carrierDetail[i].powerDecibel);
         }
     }
 
-    document.getElementById('power-decibel-pilot').innerHTML = Math.round(powerDecibelPilot).toString();
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-        document.getElementById('power-decibel-' + i).innerHTML = Math.round(powerDecibel[i]).toString();
+    if (REFRESH_POWER_INFO_ACTIVE) {
+        document.getElementById('power-decibel-pilot').innerHTML = Math.round(carrierDetailPilot.powerDecibel).toString();
+        for (i = 0; i < SUB_CARRIER_SIZE; i++) {
+            document.getElementById('power-decibel-' + i).innerHTML = Math.round(carrierDetail[i].powerDecibel).toString();
+        }
     }
 
     if (pilot && !pilotPrevious) {
-        symbolHistory.length = 0;
+        carrierDetailHistory.length = 0;
     }
 
     if (pilot) {
         symbol = 0;
-        for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
-            symbol += powerDecibel[i] > THRESHOLD ? (1 << SUB_CARRIER_SIZE - 1 - i) : 0;
+        phase = [];
+        for (i = 0; i < SUB_CARRIER_SIZE; i++) {
+            symbol += carrierDetail[i].powerDecibel > THRESHOLD ? (1 << SUB_CARRIER_SIZE - 1 - i) : 0;
+            phase.push(Math.round(carrierDetail[i].phase * 360));
         }
-        symbolHistory.push(symbol);
+        carrierDetailHistory.push({
+            symbol: symbol,
+            phase: phase
+        });
     }
 
     if (!pilot && pilotPrevious) {
+        carrierDetailMiddle = carrierDetailHistory[Math.floor(carrierDetailHistory.length / 2)];
+
+        // --- console debug ---
         var s = '';
-        for (var i = 0; i < symbolHistory.length; i++) {
-            s += symbolHistory[i] + ',';
+        for (i = 0; i < carrierDetailHistory.length; i++) {
+            s += carrierDetailHistory[i].symbol + ',';
         }
         console.log(s);
+        console.log('        ', carrierDetailMiddle.phase.join(','));
+        // ---------------------
 
-        symbol = symbolHistory[Math.round(symbolHistory.length / 2)];
-        document.getElementById('symbol').innerHTML += symbol;
-        if (symbol >= 32 && symbol < 128) {
-            document.getElementById('symbol').innerHTML += '[' + String.fromCharCode(symbol)  + '] ';
-        } else {
-            document.getElementById('symbol').innerHTML += ' ';
+        document.getElementById('symbol').innerHTML += '0x' + carrierDetailMiddle.symbol.toString(16);
+        if (carrierDetailMiddle.symbol >= 32 && carrierDetailMiddle.symbol < 128) {
+            document.getElementById('symbol').innerHTML += '[' + String.fromCharCode(carrierDetailMiddle.symbol)  + ']';
         }
+        document.getElementById('symbol').innerHTML += ' ';
     }
 
     pilotPrevious = pilot;
@@ -238,19 +274,28 @@ function notifyHandler(powerDecibelPilot, powerDecibel) {
 function send(symbol) {
     var
         binary = '00000000' + (symbol >>> 0).toString(2),
-        amplitude = 1 / (1 + SUB_CARRIER_SIZE);
+        amplitude = 1 / (1 + SUB_CARRIER_SIZE),
+        i;
 
     carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude }]);
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+    for (i = 0; i < SUB_CARRIER_SIZE; i++) {
         carrierGenerate[i].addToQueue([{
             duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude * binary[binary.length - SUB_CARRIER_SIZE + i]
         }]);
     }
 
     carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0 }]);
-    for (var i = 0; i < SUB_CARRIER_SIZE; i++) {
+    for (i = 0; i < SUB_CARRIER_SIZE; i++) {
         carrierGenerate[i].addToQueue([{
             duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0
         }]);
+    }
+}
+
+function sendText(text) {
+    var i;
+
+    for (i = 0; i < text.length; i++) {
+        send(text.charCodeAt(i));
     }
 }
