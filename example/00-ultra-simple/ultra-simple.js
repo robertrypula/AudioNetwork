@@ -27,19 +27,19 @@ var
     LOOPBACK_ACTIVE = 0,
     WHITE_NOISE_ACTIVE = 0,
     REFRESH_POWER_INFO_ACTIVE = 0,
-    POWER_CHART_ACTIVE = 0,
+    POWER_CHART_ACTIVE = 1,
 
-    SUB_CARRIER_SIZE = 6,
+    SUB_CARRIER_SIZE = 8,
     PILOT_FREQUENCY = 5000,                                                       // Hz
     POWER_CHART_WIDTH = 200,                                                      // px
     POWER_CHART_HEIGHT = 10 * 20,                                                 // px
     THRESHOLD = -30,                                                              // dB
     MINIMUM_POWER_DECIBEL = -99,                                                  // dB
 
-    SYMBOL_TIME = 4.0 * 0.08,                                                     // seconds
+    SYMBOL_TIME = 2.0 * 0.08,                                                     // seconds
     GUARD_TIME = 1.5 * SYMBOL_TIME,                                               // seconds
     DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME,                                          // seconds
-    NOTIFY_TIME = (1 / 8) * SYMBOL_TIME,                                          // seconds
+    NOTIFY_TIME = (1 / 16) * SYMBOL_TIME,                                          // seconds
     SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME),
     SAMPLE_PER_GUARD = Math.round(Audio.getSampleRate() * GUARD_TIME),
     SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME),
