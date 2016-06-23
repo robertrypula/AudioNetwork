@@ -52,8 +52,8 @@ var
     OFDM_FREQUENCY_SPACING,
 
     // normal variables
-    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(4096, 1, 1),
-    scriptProcessorNodeMicrophone = Audio.createScriptProcessor(4096, 1, 1),
+    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(1024, 1, 1),
+    scriptProcessorNodeMicrophone = Audio.createScriptProcessor(1024, 1, 1),
     analyserNode = Audio.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
     carrierGeneratePilot,
@@ -80,7 +80,7 @@ function initConfig() {
     
     SUB_CARRIER_SIZE = parseInt(document.getElementById('sub-carrier-size').value);
     PILOT_FREQUENCY = parseFloat(document.getElementById('pilot-frequency').value);    // Hz
-    POWER_CHART_WIDTH = 200;                                                           // px
+    POWER_CHART_WIDTH = 600;                                                           // px
     POWER_CHART_HEIGHT = 10 * 20;                                                      // px
     THRESHOLD = -25;                                                                   // dB
     MINIMUM_POWER_DECIBEL = -99;                                                       // dB
