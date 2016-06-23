@@ -12,9 +12,9 @@
     function _RxStateMachine(
         ReceiveAdapterState
     ) {
-        var RSM;
+        var RxStateMachine;
 
-        RSM = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
+        RxStateMachine = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
             this.$$stateHandler = {};
             this.$$stateHandler[ReceiveAdapterState.IDLE_INIT] = handlerIdleInit;
             this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC_WAIT] = handlerFirstSyncWait;
@@ -35,13 +35,13 @@
             this.$$resetFlag = true;
         };
 
-        RSM.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION = 'Please set all max duration times first';
+        RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION = 'Please set all max duration times first';
 
-        RSM.prototype.scheduleReset = function () {
+        RxStateMachine.prototype.scheduleReset = function () {
             this.$$resetFlag = true;
         };
 
-        RSM.prototype.$$changeState = function (newState, time) {
+        RxStateMachine.prototype.$$changeState = function (newState, time) {
             if (newState !== null) {
                 this.$$state = newState;
                 this.$$stateBeginTime = time;
@@ -50,7 +50,7 @@
             }
         };
 
-        RSM.prototype.$$handlerIdleInit = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerIdleInit = function (pilotSignalPresent, time) {
             var newState;
 
             this.$$changeState(null, time);
@@ -66,7 +66,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerFirstSyncWait = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerFirstSyncWait = function (pilotSignalPresent, time) {
             if (pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.FIRST_SYNC, time);
                 return false;
@@ -80,7 +80,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerFirstSync = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerFirstSync = function (pilotSignalPresent, time) {
             var newState;
 
             this.$$changeState(null, time);
@@ -96,7 +96,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerFatalError = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerFatalError = function (pilotSignalPresent, time) {
             var newState;
 
             this.$$changeState(null, time);
@@ -112,7 +112,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerIdle = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerIdle = function (pilotSignalPresent, time) {
             if (pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.SYMBOL, time);
                 return false;
@@ -126,7 +126,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerSymbol = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerSymbol = function (pilotSignalPresent, time) {
             if (!pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.GUARD, time);
                 return false;
@@ -145,7 +145,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerSync = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerSync = function (pilotSignalPresent, time) {
             if (!pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.IDLE, time);
                 return false;
@@ -164,7 +164,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerGuard = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerGuard = function (pilotSignalPresent, time) {
             if (pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.SYMBOL, time);
                 return false;
@@ -183,7 +183,7 @@
             return true;
         };
 
-        RSM.prototype.$$handlerError = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.$$handlerError = function (pilotSignalPresent, time) {
             if (!pilotSignalPresent) {
                 this.$$changeState(ReceiveAdapterState.IDLE, time);
                 return false;
@@ -197,19 +197,19 @@
             return true;
         };
 
-        RSM.prototype.setGuardStateMaxDurationTime = function (time) {
+        RxStateMachine.prototype.setGuardStateMaxDurationTime = function (time) {
             this.$$guardStateMaxDurationTime = time;
         };
 
-        RSM.prototype.setSymbolStateMaxDurationTime = function (time) {
+        RxStateMachine.prototype.setSymbolStateMaxDurationTime = function (time) {
             this.$$symbolStateMaxDurationTime = time;
         };
 
-        RSM.prototype.setSyncStateMaxDurationTime = function (time) {
+        RxStateMachine.prototype.setSyncStateMaxDurationTime = function (time) {
             this.$$syncStateMaxDurationTime = time;
         };
 
-        RSM.prototype.getState = function (pilotSignalPresent, time) {
+        RxStateMachine.prototype.getState = function (pilotSignalPresent, time) {
             var
                 S = ReceiveAdapterState,
                 finished
@@ -225,7 +225,7 @@
                 this.$$symbolStateMaxDurationTime === null ||
                 this.$$syncStateMaxDurationTime === null
             ) {
-                throw RSM.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION;
+                throw RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION;
             }
 
             while (true) {
@@ -266,7 +266,7 @@
             return this.$$state;
         };
 
-        return RSM;
+        return RxStateMachine;
     }
 
 })();

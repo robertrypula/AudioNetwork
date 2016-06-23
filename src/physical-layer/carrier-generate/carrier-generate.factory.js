@@ -14,9 +14,9 @@
         MathUtil,
         Util
     ) {
-        var CG;
+        var CarrierGenerate;
 
-        CG = function (samplePerPeriod, samplePerFade) {
+        CarrierGenerate = function (samplePerPeriod, samplePerFade) {
             this.$$samplePerFade = samplePerFade;
             this.$$queue = [];
             this.$$sampleComputed = null;
@@ -33,7 +33,7 @@
             this.setSamplePerPeriod(samplePerPeriod);
         };
 
-        CG.prototype.$$sampleCompute = function () {
+        CarrierGenerate.prototype.$$sampleCompute = function () {
             var
                 currentCarrierData = this.$$currentCarrier.data,
                 fadeFactor,
@@ -70,7 +70,7 @@
             );
         };
 
-        CG.prototype.$$grabCurrentCarrier = function () {
+        CarrierGenerate.prototype.$$grabCurrentCarrier = function () {
             var fromQueue, isSameAsBefore;
 
             fromQueue = Util.queuePop(this.$$queue);
@@ -90,16 +90,16 @@
             }
         };
 
-        CG.prototype.setPhaseCorrection = function (phaseCorrection) {
+        CarrierGenerate.prototype.setPhaseCorrection = function (phaseCorrection) {
             this.$$phaseCorrection = phaseCorrection;
         };
 
-        CG.prototype.nextSample = function () {
+        CarrierGenerate.prototype.nextSample = function () {
             this.$$sampleNumber++;
             this.$$sampleComputed = null;
         };
 
-        CG.prototype.getSample = function () {
+        CarrierGenerate.prototype.getSample = function () {
             if (this.$$sampleComputed) {
                 return this.$$sampleComputed;
             }
@@ -110,7 +110,7 @@
             return this.$$sampleComputed;
         };
 
-        CG.prototype.addToQueue = function (carrierData) {
+        CarrierGenerate.prototype.addToQueue = function (carrierData) {
             Util.queueAdd(
                 this.$$queue,
                 carrierData,
@@ -121,13 +121,13 @@
             );
         };
 
-        CG.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+        CarrierGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
         };
 
-        return CG;
+        return CarrierGenerate;
     }
 
 })();

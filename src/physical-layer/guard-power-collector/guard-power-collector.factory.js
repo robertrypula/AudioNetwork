@@ -14,26 +14,26 @@
         AbstractValueCollector,
         MathUtil
     ) {
-        var GPC;
+        var GuardPowerCollector;
 
-        GPC = function () {
+        GuardPowerCollector = function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        GPC.prototype = Object.create(AbstractValueCollector.prototype);
-        GPC.prototype.constructor = GPC;
+        GuardPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        GuardPowerCollector.prototype.constructor = GuardPowerCollector;
 
-        GPC.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
+        GuardPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
 
-        GPC.prototype.$$finalize = function () {
+        GuardPowerCollector.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {
-                throw GPC.EMPTY_LIST_EXCEPTION;
+                throw GuardPowerCollector.EMPTY_LIST_EXCEPTION;
             }
             
             return MathUtil.minInArray(this.$$valueList);
         };
 
-        return GPC;
+        return GuardPowerCollector;
     }
 
 })();

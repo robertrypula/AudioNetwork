@@ -14,9 +14,9 @@
         MathUtil,
         ConstellationDiagramTemplateMain
     ) {
-        var CD;
+        var ConstellationDiagram;
 
-        CD = function (parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
+        ConstellationDiagram = function (parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
             this.$$parentElement = parentElement;
             this.$$queue = queue;
             this.$$canvas = null;
@@ -31,7 +31,7 @@
             this.$$init();
         };
 
-        CD.prototype.destroy = function () {
+        ConstellationDiagram.prototype.destroy = function () {
             var self = this;
 
             if (this.$$destroy) {
@@ -46,7 +46,7 @@
             return this.$$destroy.promise;
         };
 
-        CD.prototype.$$init = function () {
+        ConstellationDiagram.prototype.$$init = function () {
             this.$$canvasContext = null;
             this.$$parentElement.innerHTML = this.$$renderTemplate();
             this.$$connectTemplate();
@@ -54,7 +54,7 @@
         };
 
         // TODO move it to dedicated service
-        CD.prototype.$$find = function (selector) {
+        ConstellationDiagram.prototype.$$find = function (selector) {
             var jsObject = this.$$parentElement.querySelectorAll(selector);
 
             if (jsObject.length === 0) {
@@ -64,12 +64,12 @@
             return jsObject[0];
         };
 
-        CD.prototype.$$connectTemplate = function () {
+        ConstellationDiagram.prototype.$$connectTemplate = function () {
             this.$$canvas = this.$$find('.constellation-diagram');
             this.$$canvasContext = this.$$canvas.getContext("2d");
         };
 
-        CD.prototype.$$renderTemplate = function () {
+        ConstellationDiagram.prototype.$$renderTemplate = function () {
             var tpl = ConstellationDiagramTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
@@ -78,7 +78,7 @@
             return tpl;
         };
 
-        CD.prototype.$$updateChart = function () {
+        ConstellationDiagram.prototype.$$updateChart = function () {
             var
                 chp = this.$$colorHistoryPoint,
                 ctx = this.$$canvasContext,
@@ -142,16 +142,16 @@
             }
         };
 
-        CD.prototype.$$colorInterpolate = function (start, end, unitPosition) {
+        ConstellationDiagram.prototype.$$colorInterpolate = function (start, end, unitPosition) {
             return MathUtil.round(start + ((end - start) * unitPosition));
         };
 
-        CD.prototype.$$initCanvasContext = function () {
+        ConstellationDiagram.prototype.$$initCanvasContext = function () {
             this.$$canvasContext.lineWidth = 1;
             this.$$canvasContext.strokeStyle = this.$$colorAxis;
         };
 
-        CD.prototype.$$initAnimationFrame = function () {
+        ConstellationDiagram.prototype.$$initAnimationFrame = function () {
             var self = this;
 
             function drawAgain() {
@@ -166,7 +166,7 @@
             requestAnimationFrame(drawAgain);
         };
 
-        return CD;
+        return ConstellationDiagram;
     }
 
 })();

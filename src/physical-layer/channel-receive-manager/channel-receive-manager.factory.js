@@ -16,9 +16,9 @@
         Audio,
         ChannelReceiveBuilder
     ) {
-        var CRM;
+        var ChannelReceiveManager;
 
-        CRM = function (configuration, bufferSize) {
+        ChannelReceiveManager = function (configuration, bufferSize) {
             AbstractChannelManager.apply(this, arguments);
 
             this.$$channelReceive = [];
@@ -31,13 +31,13 @@
             this.$$init();
         };
 
-        CRM.prototype = Object.create(AbstractChannelManager.prototype);
-        CRM.prototype.constructor = CRM;
+        ChannelReceiveManager.prototype = Object.create(AbstractChannelManager.prototype);
+        ChannelReceiveManager.prototype.constructor = ChannelReceiveManager;
 
-        CRM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
-        CRM.$$_LOWEST_FFT_SIZE = 256;
+        ChannelReceiveManager.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
+        ChannelReceiveManager.$$_LOWEST_FFT_SIZE = 256;
 
-        CRM.prototype.destroy = function () {
+        ChannelReceiveManager.prototype.destroy = function () {
             var i, cr;
 
             for (i = 0; i < this.$$channelReceive.length; i++) {
@@ -47,34 +47,34 @@
             this.$$channelReceive.length = 0;
         };
 
-        CRM.prototype.getInputNode = function () {
+        ChannelReceiveManager.prototype.getInputNode = function () {
             return this.$$scriptNode;
         };
 
-        CRM.prototype.getChannelSize = function () {
+        ChannelReceiveManager.prototype.getChannelSize = function () {
             return this.$$channelReceive.length;
         };
 
-        CRM.prototype.getChannel = function (channelIndex) {
+        ChannelReceiveManager.prototype.getChannel = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.$$channelReceive.length) {
-                throw CRM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
+                throw ChannelReceiveManager.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
             }
 
             return this.$$channelReceive[channelIndex];
         };
 
-        CRM.prototype.getBufferSize = function () {
+        ChannelReceiveManager.prototype.getBufferSize = function () {
             return this.$$scriptNode.bufferSize;
         };
 
-        CRM.prototype.$$init = function () {
+        ChannelReceiveManager.prototype.$$init = function () {
             var i, cr;
 
             this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
             this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
             this.$$analyserNode = Audio.createAnalyser();
-            this.$$analyserNode.fftSize = CRM.$$_LOWEST_FFT_SIZE;
+            this.$$analyserNode.fftSize = ChannelReceiveManager.$$_LOWEST_FFT_SIZE;
 
             this.$$scriptNode.connect(this.$$analyserNode);
 
@@ -84,7 +84,7 @@
             }
         };
 
-        CRM.prototype.onAudioProcess = function (audioProcessingEvent) {
+        ChannelReceiveManager.prototype.onAudioProcess = function (audioProcessingEvent) {
             var
                 inputBuffer = audioProcessingEvent.inputBuffer,
                 inputData = inputBuffer.getChannelData(0),
@@ -110,7 +110,7 @@
             this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), inputBuffer.length);
         };
 
-        return CRM;
+        return ChannelReceiveManager;
     }
 
 })();

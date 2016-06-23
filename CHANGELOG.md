@@ -43,8 +43,6 @@ TODO list:
 
   - General stuff:
     - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
-    - remove Promises (code should be as less dependent as possible - callbacks are enough in this case)
-    - use setTimeout instead setInverval (?)
     - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
     - refactor DOM helpers (move to service)
     - do not redraw constellation if queue wasn't changed

@@ -14,16 +14,16 @@
         AbstractValueCollector,
         MathUtil
     ) {
-        var POC;
+        var PhaseOffsetCollector;
 
-        POC = function () {
+        PhaseOffsetCollector = function () {
             AbstractValueCollector.apply(this, arguments);
         };
 
-        POC.prototype = Object.create(AbstractValueCollector.prototype);
-        POC.prototype.constructor = POC;
+        PhaseOffsetCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        PhaseOffsetCollector.prototype.constructor = PhaseOffsetCollector;
 
-        POC.prototype.$$finalize = function () {
+        PhaseOffsetCollector.prototype.$$finalize = function () {
             var
                 i, indexA, indexB, drift,
                 str = '';
@@ -54,7 +54,7 @@
             return drift;
         };
 
-        POC.prototype.collect = function (value) {
+        PhaseOffsetCollector.prototype.collect = function (value) {
             // TODO rewrite this temporary code
             this.$$valueList.push({
                 time: value.stateDurationTime,
@@ -62,7 +62,7 @@
             });                                          // TODO check also powerThreshold to avoid fine-tune on null OFDMs
         };
 
-        return POC;
+        return PhaseOffsetCollector;
     }
 
 })();

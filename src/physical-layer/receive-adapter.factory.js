@@ -16,9 +16,9 @@
         RxStateMachineManagerBuilder,
         MathUtil
     ) {
-        var RA;
+        var ReceiveAdapter;
 
-        RA = function (physicalLayer) {
+        ReceiveAdapter = function (physicalLayer) {
             var channelIndex, channelSize, stateMachineManager;
 
             this.$$physicalLayer = physicalLayer;
@@ -40,58 +40,58 @@
             this.setSymbolDuration(DefaultConfig.SYMBOL_DURATION);
             this.setGuardInterval(DefaultConfig.GUARD_INTERVAL);
             this.setSyncDuration(DefaultConfig.SYNC_DURATION);
-            this.setSampleCollectionTimeIdleInitState(RA.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
-            this.setSampleCollectionTimeFirstSyncState(RA.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
+            this.setSampleCollectionTimeIdleInitState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
+            this.setSampleCollectionTimeFirstSyncState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
             this.setSyncPreamble(DefaultConfig.SYNC_PREAMBLE);
-            this.setPskSize(RA.$$_ALL_CHANNEL, DefaultConfig.PSK_SIZE);
+            this.setPskSize(ReceiveAdapter.$$_ALL_CHANNEL, DefaultConfig.PSK_SIZE);
         };
 
-        RA.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
-        RA.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-        RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
-        RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
-        RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
-        RA.$$_ALL_CHANNEL = null;
+        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
+        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
+        ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
+        ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
+        ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
+        ReceiveAdapter.$$_ALL_CHANNEL = null;
 
-        RA.prototype.reset = function (channelIndex) {
+        ReceiveAdapter.prototype.reset = function (channelIndex) {
             this.$$checkChannelIndexRange(channelIndex);
             return this.$$stateMachineManager[channelIndex].reset();
         };
 
-        RA.prototype.setSymbolDuration = function (value) {
+        ReceiveAdapter.prototype.setSymbolDuration = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR
                 );
             }
         };
 
-        RA.prototype.setGuardInterval = function (value) {
+        ReceiveAdapter.prototype.setGuardInterval = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR
                 );
             }
         };
 
-        RA.prototype.setSyncDuration = function (value) {
+        ReceiveAdapter.prototype.setSyncDuration = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
             for (i = 0; i < channelSize; i++) {
                 this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
-                    value * RA.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR
                 );
             }
         };
 
-        RA.prototype.setSampleCollectionTimeIdleInitState = function (value) {
+        ReceiveAdapter.prototype.setSampleCollectionTimeIdleInitState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
@@ -100,7 +100,7 @@
             }
         };
 
-        RA.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
+        ReceiveAdapter.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
             var channelSize, i;
 
             channelSize = this.$$physicalLayer.getRxChannelSize();
@@ -109,7 +109,7 @@
             }
         };
 
-        RA.prototype.setSyncPreamble = function (value) {
+        ReceiveAdapter.prototype.setSyncPreamble = function (value) {
             var channelSize, i;
 
             value = !!value;
@@ -119,10 +119,10 @@
             }
         };
 
-        RA.prototype.setPskSize = function (channelIndex, value) {
+        ReceiveAdapter.prototype.setPskSize = function (channelIndex, value) {
             var channelSize, i;
 
-            if (channelIndex === RA.$$_ALL_CHANNEL) {
+            if (channelIndex === ReceiveAdapter.$$_ALL_CHANNEL) {
                 channelSize = this.$$physicalLayer.getRxChannelSize();
                 for (i = 0; i < channelSize; i++) {
                     this.$$stateMachineManager[i].setPskSize(value);
@@ -133,7 +133,7 @@
             }
         };
 
-        RA.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
+        ReceiveAdapter.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
             var i;
 
             for (i = 0; i < data.length; i++) {
@@ -147,7 +147,7 @@
             }
         };
 
-        RA.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
+        ReceiveAdapter.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
             var current;
 
             if (drift === null) {
@@ -166,7 +166,7 @@
             }  
         };
 
-        RA.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
+        ReceiveAdapter.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
             var current, i;
 
             // TODO pass only phase array not full carrierDetail object
@@ -181,13 +181,13 @@
             }
         };
         
-        RA.prototype.$$checkChannelIndexRange = function (channelIndex) {
+        ReceiveAdapter.prototype.$$checkChannelIndexRange = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.$$physicalLayer.getRxChannelSize()) {
                 throw 'Given channelIndex is outside range: ' + channelIndex;
             }
         };
 
-        RA.prototype.setPacketReceiveHandler = function (cb) {
+        ReceiveAdapter.prototype.setPacketReceiveHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$packetReceiveHandler = cb;
             } else {
@@ -195,7 +195,7 @@
             }
         };
 
-        RA.prototype.setFrequencyUpdateHandler = function (cb) {
+        ReceiveAdapter.prototype.setFrequencyUpdateHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$frequencyUpdateHandler = cb;
             } else {
@@ -203,7 +203,7 @@
             }
         };
 
-        RA.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
+        ReceiveAdapter.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
             if (typeof cb === 'function') {
                 this.$$phaseCorrectionUpdateHandler = cb;
             } else {
@@ -211,12 +211,12 @@
             }
         };
 
-        RA.prototype.receive = function (channelIndex, carrierDetail, time) {
+        ReceiveAdapter.prototype.receive = function (channelIndex, carrierDetail, time) {
             this.$$checkChannelIndexRange(channelIndex);
             return this.$$stateMachineManager[channelIndex].receive(carrierDetail, time);
         };
 
-        return RA;
+        return ReceiveAdapter;
     }
 
 })();

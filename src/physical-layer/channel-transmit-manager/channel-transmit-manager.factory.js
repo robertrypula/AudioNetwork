@@ -20,9 +20,9 @@
         DefaultConfig,
         ChannelTransmitBuilder
     ) {
-        var CTM;
+        var ChannelTransmitManager;
 
-        CTM = function (configuration, bufferSize) {
+        ChannelTransmitManager = function (configuration, bufferSize) {
             AbstractChannelManager.apply(this, arguments);
 
             this.$$channelTransmit = [];
@@ -34,12 +34,12 @@
             this.$$init();
         };
 
-        CTM.prototype = Object.create(AbstractChannelManager.prototype);
-        CTM.prototype.constructor = CTM;
+        ChannelTransmitManager.prototype = Object.create(AbstractChannelManager.prototype);
+        ChannelTransmitManager.prototype.constructor = ChannelTransmitManager;
 
-        CTM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
+        ChannelTransmitManager.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION = 'Channel index out of range: ';
 
-        CTM.prototype.destroy = function () {
+        ChannelTransmitManager.prototype.destroy = function () {
             var i, ct;
 
             for (i = 0; i < this.$$channelTransmit.length; i++) {
@@ -49,27 +49,27 @@
             this.$$channelTransmit.length = 0;
         };
 
-        CTM.prototype.getOutputNode = function () {
+        ChannelTransmitManager.prototype.getOutputNode = function () {
             return this.$$scriptNode;
         };
 
-        CTM.prototype.getChannelSize = function () {
+        ChannelTransmitManager.prototype.getChannelSize = function () {
             return this.$$channelTransmit.length;
         };
 
-        CTM.prototype.getChannel = function (channelIndex) {
+        ChannelTransmitManager.prototype.getChannel = function (channelIndex) {
             if (channelIndex < 0 || channelIndex >= this.$$channelTransmit.length) {
-                throw CTM.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
+                throw ChannelTransmitManager.CHANNEL_INDEX_OUT_OF_RANGE_EXCEPTION + channelIndex;
             }
 
             return this.$$channelTransmit[channelIndex];
         };
 
-        CTM.prototype.getBufferSize = function () {
+        ChannelTransmitManager.prototype.getBufferSize = function () {
             return this.$$scriptNode.bufferSize;
         };
 
-        CTM.prototype.$$init = function () {
+        ChannelTransmitManager.prototype.$$init = function () {
             var i, ct;
 
             this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
@@ -81,15 +81,15 @@
             }
         };
 
-        CTM.prototype.enableFakeNoise = function () {
+        ChannelTransmitManager.prototype.enableFakeNoise = function () {
             this.$$fakeNoise = true;
         };
 
-        CTM.prototype.disableFakeNoise = function () {
+        ChannelTransmitManager.prototype.disableFakeNoise = function () {
             this.$$fakeNoise = false;
         };
 
-        CTM.prototype.onAudioProcess = function (audioProcessingEvent) {
+        ChannelTransmitManager.prototype.onAudioProcess = function (audioProcessingEvent) {
             var
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 outputData = outputBuffer.getChannelData(0),
@@ -113,7 +113,7 @@
             this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), outputBuffer.length);
         };
 
-        return CTM;
+        return ChannelTransmitManager;
     }
 
 })();

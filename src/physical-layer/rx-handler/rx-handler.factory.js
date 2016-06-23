@@ -16,19 +16,19 @@
         Audio,
         MathUtil
     ) {
-        var RH;
+        var RxHandler;
 
-        RH = function (rxConstellationDiagram, rxExternalHandler) {
+        RxHandler = function (rxConstellationDiagram, rxExternalHandler) {
             this.$$delayedData = [];
             this.$$rxConstellationDiagram = rxConstellationDiagram;
             this.$$rxExternalHandler = rxExternalHandler;
-            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), RH.$$_DELAY_LOOP_RESOLUTION);
+            this.$$intervalId = setInterval(this.$$intervalHandler.bind(this), RxHandler.$$_DELAY_LOOP_RESOLUTION);
         };
 
-        RH.$$_RX_EXTRA_DELAY = 0.05;        // [sec]
-        RH.$$_DELAY_LOOP_RESOLUTION = 8;    // [ms]
+        RxHandler.$$_RX_EXTRA_DELAY = 0.05;        // [sec]
+        RxHandler.$$_DELAY_LOOP_RESOLUTION = 8;    // [ms]
 
-        RH.prototype.$$intervalHandler = function () {
+        RxHandler.prototype.$$intervalHandler = function () {
             var
                 currentTime = Audio.getCurrentTime(),
                 removedCount = 0,
@@ -38,7 +38,7 @@
             for (i = 0; i < this.$$delayedData.length; i++) {
                 item = this.$$delayedData[i];
 
-                if (item.time < (currentTime - RH.$$_RX_EXTRA_DELAY)) {
+                if (item.time < (currentTime - RxHandler.$$_RX_EXTRA_DELAY)) {
                     this.$$handle(
                         item.channelIndex,
                         item.carrierDetail,
@@ -62,7 +62,7 @@
             }
         };
 
-        RH.prototype.handle = function (channelIndex, carrierDetail, time) {
+        RxHandler.prototype.handle = function (channelIndex, carrierDetail, time) {
             this.$$delayedData.push({
                 channelIndex: channelIndex,
                 carrierDetail: carrierDetail,
@@ -70,7 +70,7 @@
             });
         };
 
-        RH.prototype.$$handle = function (channelIndex, carrierDetail, time) {
+        RxHandler.prototype.$$handle = function (channelIndex, carrierDetail, time) {
             var i, cd, queue, powerNormalized;
 
             for (i = 0; i < carrierDetail.length; i++) {
@@ -100,11 +100,11 @@
             }
         };
 
-        RH.prototype.destroy = function () {
+        RxHandler.prototype.destroy = function () {
             clearInterval(this.$$intervalId);
         };
 
-        return RH;
+        return RxHandler;
     }
 
 })();

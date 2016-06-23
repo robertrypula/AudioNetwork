@@ -8,39 +8,39 @@
     _AbstractValueCollector.$inject = [];
 
     function _AbstractValueCollector() {
-        var AVC;
+        var AbstractValueCollector;
 
-        AVC = function () {
+        AbstractValueCollector = function () {
             this.$$valueList = [];
             this.$$lastFinalizedSize = undefined;
             this.$$lastFinalizedResult = undefined;
         };
 
-        AVC.ABSTRACT_METHOD_CALLED_EXCEPTION = 'Abstract method called!';
+        AbstractValueCollector.ABSTRACT_METHOD_CALLED_EXCEPTION = 'Abstract method called!';
 
-        AVC.prototype.collect = function (value) {
+        AbstractValueCollector.prototype.collect = function (value) {
             this.$$valueList.push(value);
         };
 
-        AVC.prototype.hasAtLeastItem = function () {
+        AbstractValueCollector.prototype.hasAtLeastItem = function () {
             return this.getSize() > 0;
         };
 
-        AVC.prototype.getSize = function () {
+        AbstractValueCollector.prototype.getSize = function () {
             return this.$$valueList.length;
         };
 
-        AVC.prototype.clearAll = function () {
+        AbstractValueCollector.prototype.clearAll = function () {
             this.clearList();
             this.$$lastFinalizedSize = undefined;
             this.$$lastFinalizedResult = undefined;
         };
 
-        AVC.prototype.clearList = function () {
+        AbstractValueCollector.prototype.clearList = function () {
             this.$$valueList.length = 0;
         };
 
-        AVC.prototype.finalize = function () {
+        AbstractValueCollector.prototype.finalize = function () {
             this.$$lastFinalizedResult = this.$$finalize(); // $$finalize() method may throw error BEFORE assignment
             this.$$lastFinalizedSize = this.getSize();
             this.clearList();
@@ -51,22 +51,22 @@
         /**
          * Returns list size that was used to compute last successful result from finalize method.
          */
-        AVC.prototype.getLastFinalizedSize = function () {
+        AbstractValueCollector.prototype.getLastFinalizedSize = function () {
             return this.$$lastFinalizedSize;
         };
 
         /**
          * Returns last successful result from finalize method.
          */
-        AVC.prototype.getLastFinalizedResult = function () {
+        AbstractValueCollector.prototype.getLastFinalizedResult = function () {
             return this.$$lastFinalizedResult;
         };
 
-        AVC.prototype.$$finalize = function () {
-            throw AVC.ABSTRACT_METHOD_CALLED_EXCEPTION;
+        AbstractValueCollector.prototype.$$finalize = function () {
+            throw AbstractValueCollector.ABSTRACT_METHOD_CALLED_EXCEPTION;
         };
 
-        return AVC;
+        return AbstractValueCollector;
     }
 
 })();

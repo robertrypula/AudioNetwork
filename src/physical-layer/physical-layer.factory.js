@@ -54,9 +54,9 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         AnalyserChartBuilder,
         Audio
     ) {
-        var PL;
+        var PhysicalLayer;
 
-        PL = function (configuration) {
+        PhysicalLayer = function (configuration) {
             this.$$configuration = ConfigurationParser.parse(configuration);
             this.$$channelTransmitManager = null;
             this.$$channelReceiveManager = null;
@@ -81,7 +81,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.setRxInput(this.$$configuration.rx.input);
         };
 
-        PL.prototype.$$initTx = function () {
+        PhysicalLayer.prototype.$$initTx = function () {
             this.$$channelTransmitManager = ChannelTransmitManagerBuilder.build(
                 this.$$configuration.tx.channel,
                 this.$$configuration.tx.bufferSize
@@ -92,7 +92,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.outputRecordedAudioDisable();
         };
 
-        PL.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
+        PhysicalLayer.prototype.$$initConstellationDiagram = function (channelIndex, channel) {
             var ofdmIndex, queue, constellationDiagram, elementId;
 
             queue = [];
@@ -125,7 +125,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             });
         };
 
-        PL.prototype.$$initRx = function () {
+        PhysicalLayer.prototype.$$initRx = function () {
             var
                 dftWindowSize = MathUtil.round(Audio.getSampleRate() * this.$$configuration.rx.dftWindowTime),
                 notifyInterval = MathUtil.round(Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond),
@@ -166,7 +166,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             }
         };
 
-        PL.prototype.$$getTxInputNode = function (input) {
+        PhysicalLayer.prototype.$$getTxInputNode = function (input) {
             var node = null;
 
             switch (input) {
@@ -184,11 +184,11 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return node;
         };
 
-        PL.prototype.getRxInput = function () {
+        PhysicalLayer.prototype.getRxInput = function () {
             return this.$$currentInput;
         };
 
-        PL.prototype.setRxInput = function (input) {
+        PhysicalLayer.prototype.setRxInput = function (input) {
             var node;
 
             if (this.$$currentInput) {
@@ -209,19 +209,19 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             }
         };
 
-        PL.prototype.getTxBufferSize = function () {
+        PhysicalLayer.prototype.getTxBufferSize = function () {
             return this.$$channelTransmitManager.getBufferSize();
         };
 
-        PL.prototype.getRxBufferSize = function () {
+        PhysicalLayer.prototype.getRxBufferSize = function () {
             return this.$$channelReceiveManager.getBufferSize();
         };
 
-        PL.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
+        PhysicalLayer.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
             Audio.loadRecordedAudio(url, successCallback, errorCallback);
         };
 
-        PL.prototype.tx = function (channelIndex, data) {
+        PhysicalLayer.prototype.tx = function (channelIndex, data) {
             var
                 channelTx = this.$$channelTransmitManager.getChannel(channelIndex),
                 d, i, dataParsed = []
@@ -247,25 +247,20 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             channelTx.addToQueue(dataParsed);
         };
 
-        PL.prototype.rx = function (rxHandler) {
-            this.$$rxExternalHandler.callback = (
-                (typeof rxHandler === 'function') ?
-                rxHandler :
-                null
-            );
+        PhysicalLayer.prototype.rx = function (rxHandler) {
+            this.$$rxExternalHandler.callback = (typeof rxHandler === 'function') ? rxHandler : null;
         };
 
-        PL.prototype.getSampleRate = function () {
+        PhysicalLayer.prototype.getSampleRate = function () {
             return Audio.getSampleRate();
         };
 
-        PL.prototype.destroy = function () {
-            var i, j, promiseResolve, promise, destroyAsyncCount;
+        PhysicalLayer.prototype.destroy = function (callback) {
+            var i, j, destroyAsyncCount;
+
+            callback = typeof callback === 'function' ? callback : function () {};
 
             destroyAsyncCount = 0;
-            promise = new Promise(function (resolve) {
-                promiseResolve = resolve;
-            });
 
             this.setRxInput(null);
 
@@ -277,7 +272,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                     .then(function () {
                         destroyAsyncCount--;
                         if (destroyAsyncCount === 0) {
-                            promiseResolve();
+                            callback();
                         }
                     })
                 ;
@@ -293,7 +288,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                             .then(function () {
                                 destroyAsyncCount--;
                                 if (destroyAsyncCount === 0) {
-                                    promiseResolve();
+                                    callback();
                                 }
                             })
                         ;
@@ -311,73 +306,71 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$channelTransmitManager = null;
 
             this.$$rxHandler.destroy();
-
-            return promise;
         };
 
-        PL.prototype.getOutputTxState = function () {
+        PhysicalLayer.prototype.getOutputTxState = function () {
             return this.$$outputTx;
         };
 
-        PL.prototype.getOutputMicrophoneState = function () {
+        PhysicalLayer.prototype.getOutputMicrophoneState = function () {
             return this.$$outputMicrophone;
         };
 
-        PL.prototype.getOutputRecordedAudioState = function () {
+        PhysicalLayer.prototype.getOutputRecordedAudioState = function () {
             return this.$$outputRecordedAudio;
         };
 
-        PL.prototype.outputTxEnable = function () {
+        PhysicalLayer.prototype.outputTxEnable = function () {
             if (!this.$$outputTx) {
                 this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
             }
             this.$$outputTx = true;
         };
 
-        PL.prototype.outputTxDisable = function () {
+        PhysicalLayer.prototype.outputTxDisable = function () {
             if (this.$$outputTx) {
                 this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
             }
             this.$$outputTx = false;
         };
 
-        PL.prototype.outputMicrophoneEnable = function () {
+        PhysicalLayer.prototype.outputMicrophoneEnable = function () {
             if (!this.$$outputMicrophone) {
                 Audio.getMicrophoneNode().connect(Audio.getDestination());
             }
             this.$$outputMicrophone = true;
         };
 
-        PL.prototype.outputMicrophoneDisable = function () {
+        PhysicalLayer.prototype.outputMicrophoneDisable = function () {
             if (this.$$outputMicrophone) {
                 Audio.getMicrophoneNode().disconnect(Audio.getDestination());
             }
             this.$$outputMicrophone = false;
         };
 
-        PL.prototype.outputRecordedAudioEnable = function () {
+        PhysicalLayer.prototype.outputRecordedAudioEnable = function () {
             if (!this.$$outputRecordedAudio) {
                 Audio.getRecordedAudioNode().connect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = true;
         };
 
-        PL.prototype.outputRecordedAudioDisable = function () {
+        PhysicalLayer.prototype.outputRecordedAudioDisable = function () {
             if (this.$$outputRecordedAudio) {
                 Audio.getRecordedAudioNode().disconnect(Audio.getDestination());
             }
             this.$$outputRecordedAudio = false;
         };
 
-        PL.prototype.getRxCpuLoadData = function () {
+        PhysicalLayer.prototype.getRxCpuLoadData = function () {
             return this.$$channelReceiveManager.getCpuLoadData();
         };
 
-        PL.prototype.getTxCpuLoadData = function () {
+        PhysicalLayer.prototype.getTxCpuLoadData = function () {
             return this.$$channelTransmitManager.getCpuLoadData();
         };
 
-        PL.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
+        PhysicalLayer.prototype.getRxFrequency = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
@@ -385,7 +378,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        PL.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
+        PhysicalLayer.prototype.getTxFrequency = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
@@ -393,14 +386,14 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        PL.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
+        PhysicalLayer.prototype.setRxFrequency = function (channelIndex, ofdmIndex, frequency) {
             this.$$channelReceiveManager
                 .getChannel(channelIndex)
                 .setFrequency(ofdmIndex, frequency)
             ;
         };
 
-        PL.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
+        PhysicalLayer.prototype.setTxFrequency = function (channelIndex, ofdmIndex, frequency) {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .setFrequency(ofdmIndex, frequency)
@@ -408,7 +401,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
 
-        PL.prototype.getRxPhaseCorrection = function (channelIndex, ofdmIndex) {
+        PhysicalLayer.prototype.getRxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelReceiveManager
                     .getChannel(channelIndex)
@@ -416,7 +409,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        PL.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
+        PhysicalLayer.prototype.getTxPhaseCorrection = function (channelIndex, ofdmIndex) {
             return (
                 this.$$channelTransmitManager
                 .getChannel(channelIndex)
@@ -424,37 +417,37 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
-        PL.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+        PhysicalLayer.prototype.setRxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelReceiveManager
                 .getChannel(channelIndex)
                 .setRxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 
-        PL.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
+        PhysicalLayer.prototype.setTxPhaseCorrection = function (channelIndex, ofdmIndex, phaseCorrection) {
             this.$$channelTransmitManager
                 .getChannel(channelIndex)
                 .setTxPhaseCorrection(ofdmIndex, phaseCorrection)
             ;
         };
 
-        PL.prototype.getTxChannelSize = function () {
+        PhysicalLayer.prototype.getTxChannelSize = function () {
             return this.$$channelTransmitManager.getChannelSize();
         };
 
-        PL.prototype.getRxChannelSize = function () {
+        PhysicalLayer.prototype.getRxChannelSize = function () {
             return this.$$channelReceiveManager.getChannelSize();
         };
 
-        PL.prototype.getTxChannelOfdmSize = function (channelIndex) {
+        PhysicalLayer.prototype.getTxChannelOfdmSize = function (channelIndex) {
             return this.$$channelTransmitManager.getChannel(channelIndex).getOfdmSize();
         };
 
-        PL.prototype.getRxChannelOfdmSize = function (channelIndex) {
+        PhysicalLayer.prototype.getRxChannelOfdmSize = function (channelIndex) {
             return this.$$channelReceiveManager.getChannel(channelIndex).getOfdmSize();
         };
 
-        return PL;
+        return PhysicalLayer;
     }
 
 })();

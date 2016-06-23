@@ -85,7 +85,7 @@
 <ul>
 <li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
 <li>remove Promises (code should be as less dependent as possible - callbacks are enough in this case)</li>
-<li>use setTimeout instead setInverval (?)</li>
+<li>use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call in the future via setTimeout</li>
 <li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval</li>
 <li>refactor DOM helpers (move to service)</li>
 <li>do not redraw constellation if queue wasn&#39;t changed</li>
