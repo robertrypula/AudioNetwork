@@ -44,15 +44,37 @@
 <h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
 <p>TODO list:</p>
 <ul>
-<li><p>Current focus:</p>
-<ul>
-<li>refactor API<ul>
+<li>remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)</li>
+<li>move all charts to dedicated namespace &#39;visualizer&#39;</li>
+<li>move CarrierRecovery and CarrierGenerate to &#39;common&#39; namespace</li>
+<li>move audio service to separate namespace &#39;audio&#39;</li>
+<li>create new chart &#39;SampleChart&#39;, create new example when using CarrierGenerate will be demonstrated</li>
+<li>rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection</li>
+<li>start writing article</li>
+<li>fix last templates issues in ultra-simple demo, rename to some nicer name</li>
+<li>move common code of all canvas drawing to abstract class</li>
+<li>create wrapper classes for audio nodes</li>
+<li><p>create sine/cosine cache service + tests in jasmine</p>
+</li>
+<li><p>use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout</p>
+</li>
+<li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace</li>
+<li>refactor DOM helpers (move to service)</li>
 <li>change adapter parameter order or move all adapter initialization</li>
-<li>PhysicalLayer&#39;s rx method should should store all handlers functions in array (??? is that really needed ???)</li>
+<li>introduce handlers similar to existing setPacketReceiveHandler</li>
 <li>ReceiveAdapter should register own rx handler inside Adapter class</li>
+<li>move all adapter logic to dedicated namespace (???)</li>
+<li>refactor manager code to pass whole array to/from channel instead single sample<ul>
+<li>receive-manager</li>
+<li>receive-channel</li>
+<li>receive-channel-carrier           adds phase correction, handles notify intervals</li>
+<li>receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers</li>
 </ul>
 </li>
-</ul>
+<li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
+<li>do not redraw constellation if queue wasn&#39;t changed</li>
+<li>ability to add hooks at sample generation and receive (inject some changes to signal)</li>
+<li><p>fix carrier.html example (use dedicated constellation class)</p>
 </li>
 <li><p>Receive Adapter: [8.5h or 16.0h remaining]</p>
 <ul>
@@ -81,19 +103,54 @@
 <li>[~1.0h] show important power level (threshold, min/max, etc)</li>
 </ul>
 </li>
-<li><p>General stuff:</p>
+<li><p>How it works section (this will be used in the article &#39;Data transmission over sound waves in JavaScript / Digital Signal Processing in JavaScript from scratch&#39;)</p>
 <ul>
-<li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
-<li>remove Promises (code should be as less dependent as possible - callbacks are enough in this case)</li>
-<li>use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call in the future via setTimeout</li>
-<li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval</li>
-<li>refactor DOM helpers (move to service)</li>
-<li>do not redraw constellation if queue wasn&#39;t changed</li>
-<li>ability to add hooks at sample generation and receive (inject some changes to signal)</li>
-<li>refactor sample handling and generation to order to easily move that code to Service Worker</li>
-<li>fix carrier.html example (use dedicated constellation class)</li>
+<li>introduction<ul>
+<li>sound representation in computer memory</li>
+<li>all from scratch to really understand internals of DSP</li>
+<li>how to pick proper frequency?</li>
 </ul>
 </li>
+<li>how to record/play raw samples using Web Audio API<ul>
+<li>context initialization, abstraction service from AudioNetwork library (all filters disabled)</li>
+<li>gain node</li>
+<li>show audio processing event</li>
+<li>connect all together</li>
+</ul>
+</li>
+<li>discrete fourier transform in a nutshell<ul>
+<li>much simpler than FFT but ultra slow</li>
+<li>explain frequency domain and time domain, frequency bin [IMAGE]</li>
+<li>tell about samplesPerPeriod -&gt; a way to skip sampling frequency</li>
+<li>add couple of sine waves together [CHART separate and sum]</li>
+<li>describe algorithm, running circle  [CHART]</li>
+<li>show that we collect vectors per each sample [CHART]</li>
+<li>when input signal contains that frequency it will produce lots of vectors that points to the same direction</li>
+<li>sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave</li>
+</ul>
+</li>
+<li>carrier generate and receive<ul>
+<li>describe simple classes from AudioNetwork&#39;s lib</li>
+</ul>
+</li>
+<li>simple transmitter and receiver app<ul>
+<li>show symbol details, zero is only pilot, one is pilot and symbol, guard internal between adjacent bits</li>
+<li>OFDM to avoid interference between carriers [just show the rule]</li>
+<li>2 carriers (1 pilot, 1 symbol)</li>
+<li>list all files that were used</li>
+</ul>
+</li>
+<li>summary<ul>
+<li>put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="v1-0-4-2016-0-">v1.0.4 (2016-0?-??)</h2>
+<ul>
+<li>new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)</li>
+<li>expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)</li>
 </ul>
 <h2 id="v1-0-3-2016-05-30-">v1.0.3 (2016-05-30)</h2>
 <ul>

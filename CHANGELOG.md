@@ -8,17 +8,34 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - Current focus:
-    - remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)
-    - use setTimeout instead setInverval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
-    - change adapter parameter order or move all adapter initialization
-    - introduce handlers similar to existing setPacketReceiveHandler like: set
-    - ReceiveAdapter should register own rx handler inside Adapter class
-    - refactor manager code to pass whole array to/from channel instead single sample
-      - receive-manager
-      - receive-channel
-      - receive-channel-carrier           adds phase correction, handles notify intervals
-      - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
+  - remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)
+  - move all charts to dedicated namespace 'visualizer'
+  - move CarrierRecovery and CarrierGenerate to 'common' namespace
+  - move audio service to separate namespace 'audio'
+  - create new chart 'SampleChart', create new example when using CarrierGenerate will be demonstrated
+  - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
+  - start writing article
+  - fix last templates issues in ultra-simple demo, rename to some nicer name
+  - move common code of all canvas drawing to abstract class
+  - create wrapper classes for audio nodes
+  - create sine/cosine cache service + tests in jasmine
+
+  - use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
+  - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace
+  - refactor DOM helpers (move to service)
+  - change adapter parameter order or move all adapter initialization
+  - introduce handlers similar to existing setPacketReceiveHandler
+  - ReceiveAdapter should register own rx handler inside Adapter class
+  - move all adapter logic to dedicated namespace (???)
+  - refactor manager code to pass whole array to/from channel instead single sample
+    - receive-manager
+    - receive-channel
+    - receive-channel-carrier           adds phase correction, handles notify intervals
+    - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
+  - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
+  - do not redraw constellation if queue wasn't changed
+  - ability to add hooks at sample generation and receive (inject some changes to signal)
+  - fix carrier.html example (use dedicated constellation class)
 
   - Receive Adapter: [8.5h or 16.0h remaining]
     + [~1.5h] add events for frequency update and phase update to notify hosting code
@@ -40,15 +57,6 @@ TODO list:
     - [~1.0h] increase bar width
     - [~1.5h] mark states ranges
     - [~1.0h] show important power level (threshold, min/max, etc)
-
-  - General stuff:
-    - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
-    - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval
-    - refactor DOM helpers (move to service)
-    - do not redraw constellation if queue wasn't changed
-    - ability to add hooks at sample generation and receive (inject some changes to signal)
-    - refactor sample handling and generation to order to easily move that code to Service Worker
-    - fix carrier.html example (use dedicated constellation class)
 
   - How it works section (this will be used in the article 'Data transmission over sound waves in JavaScript / Digital Signal Processing in JavaScript from scratch')
     - introduction
@@ -78,6 +86,10 @@ TODO list:
       - list all files that were used
     - summary
       - put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)
+
+## v1.0.4 (2016-0?-??)
+  + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)
+  + expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
