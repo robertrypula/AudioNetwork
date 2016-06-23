@@ -68,7 +68,8 @@ var
 function initConfig() {
     var
         symbolTimeFactor = parseFloat(document.getElementById('symbol-time-factor').value),
-        notifyTimeResolution = parseInt(document.getElementById('notify-time-resolution').value);
+        notifyTimeResolution = parseInt(document.getElementById('notify-time-resolution').value),
+        ofdmSpacingFactor = parseInt(document.getElementById('ofdm-spacing-factor').value);
 
     LOOPBACK_ACTIVE = !!document.getElementById('loopback-active').checked;
     WHITE_NOISE_ACTIVE = !!document.getElementById('white-noise-active').checked;
@@ -95,7 +96,7 @@ function initConfig() {
     SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME);
     SAMPLE_PER_REAL_SYMBOL = Math.round(Audio.getSampleRate() * REAL_SYMBOL_TIME);
 
-    OFDM_FREQUENCY_SPACING = 1 / DFT_WINDOW_TIME;                                      // Hz
+    OFDM_FREQUENCY_SPACING = ofdmSpacingFactor / DFT_WINDOW_TIME;                      // Hz
 
     document.getElementById('init-button').style.display = 'none';
 }
