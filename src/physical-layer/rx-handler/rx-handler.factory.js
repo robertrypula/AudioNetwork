@@ -87,12 +87,8 @@
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
                 powerNormalized = (cd.powerDecibel + DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
                 powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                if (queue.isFull()) {
-                    queue.pop();
-                    queue.pop();
-                }
-                queue.push(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
-                queue.push(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
+                queue.pushEvenIfFull(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
+                queue.pushEvenIfFull(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
             }
 
             if (this.$$rxExternalHandler.callback) {

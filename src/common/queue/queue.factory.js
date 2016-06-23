@@ -32,6 +32,13 @@
             return true;
         };
 
+        Queue.prototype.pushEvenIfFull = function (value) {
+            if (this.isFull()) {
+                this.pop();
+            }
+            this.push(value);
+        };
+
         Queue.prototype.pop = function () {
             var result;
 

@@ -170,10 +170,7 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
         var element = document.getElementById('rx-sampling-state-v2-' + channelIndex);  // TODO refactor this
         var receiveData;
 
-        if (powerChartQueue0.isFull()) {
-            powerChartQueue0.pop()
-        }
-        powerChartQueue0.push(carrierDetail[0].powerDecibel);
+        powerChartQueue0.pushEvenIfFull(carrierDetail[0].powerDecibel);
 
         receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time); // receive (higher level)
         element.innerHTML = receiveData.state + ' ' + receiveData.power;

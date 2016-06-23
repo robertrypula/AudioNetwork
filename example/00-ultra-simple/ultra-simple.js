@@ -255,15 +255,9 @@ function refreshPowerChart(carrierDetailPilot, carrierDetail) {
         return;
     }
 
-    if (powerChartPilot.queue.isFull()) {
-        powerChartPilot.queue.pop()
-    }
-    powerChartPilot.queue.push(carrierDetailPilot.powerDecibel);
+    powerChartPilot.queue.pushEvenIfFull(carrierDetailPilot.powerDecibel);
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
-        if (powerChart[i].queue.isFull()) {
-            powerChart[i].queue.pop()
-        }
-        powerChart[i].queue.push(carrierDetail[i].powerDecibel);
+        powerChart[i].queue.pushEvenIfFull(carrierDetail[i].powerDecibel);
     }
 }
 
