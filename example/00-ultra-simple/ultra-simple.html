@@ -13,7 +13,7 @@
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="init()">
+<body>
     <div class="wrapper">
 
         <div class="container">
@@ -37,6 +37,66 @@
             </div>
             -->
 
+            <h2>Config</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <div class="row margin-bottom">
+                        <div class="col col-sm-3">
+                            <b class="label">
+                                Init
+                            </b>
+                        </div>
+                        <div class="col col-sm-6">
+                            <div class="margin-bottom">
+                                Symbol time factor
+                                <input type="text" id="symbol-time-factor" value="1" />
+                            </div>
+                            <div class="margin-bottom">
+                                Notify time resolution
+                                <input type="number" id="notify-time-resolution" value="16" />
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="loopback-active" checked="checked" />
+                                Loopback
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="white-noise-active" checked="checked" />
+                                White noise
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="power-info-active" checked="checked" />
+                                Power info
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="power-chart-active" checked="checked" />
+                                Power chart
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="web-audio-api-node-active" checked="checked" />
+                                Web audio api node
+                            </div>
+                            <div class="margin-bottom">
+                                <input type="checkbox" id="debug-symbol-history-active" />
+                                Debug symbol history
+                            </div>
+                            <div class="margin-bottom">
+                                Sub carrier size
+                                <input type="number" id="sub-carrier-size" value="8" />
+                            </div>
+                            <div class="margin-bottom">
+                                Pilot frequency
+                                <input type="text" id="pilot-frequency" value="5000" />
+                            </div>
+
+                            <button id="init-button" class="btn btn-default" onClick="init()">Init</button>
+                            <button class="btn btn-default" onClick="window.location.reload();">Reload</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             <h2>Blabla</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
@@ -44,18 +104,11 @@
                     <div class="row margin-bottom">
                         <div class="col col-sm-3">
                             <b class="label">
-                                Send buttons
+                                Benchmark
                             </b>
                         </div>
                         <div class="col col-sm-6">
-                            <button class="btn btn-default" onClick="send(0)">Send symbol 0</button>
-                            <button class="btn btn-default" onClick="send(1)">Send symbol 1</button>
-                            <button class="btn btn-default" onClick="send(2)">Send symbol 2</button>
-                            <button class="btn btn-default" onClick="send(3)">Send symbol 3</button>
-                            <button class="btn btn-default" onClick="send(4)">Send symbol 4</button>
-                            <button class="btn btn-default" onClick="send(5)">Send symbol 5</button>
-                            <button class="btn btn-default" onClick="send(6)">Send symbol 6</button>
-                            <button class="btn btn-default" onClick="send(7)">Send symbol 7</button>
+                            <button class="btn btn-default" onClick="benchmark()">Run</button>
                         </div>
                     </div>
 
