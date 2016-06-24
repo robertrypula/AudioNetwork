@@ -8,6 +8,7 @@
     _AnalyserChart.$inject = [
         'PhysicalLayer.AnalyserChartTemplateAxisX',
         'PhysicalLayer.AnalyserChartTemplateMain',
+        'Common.SimplePromiseBuilder',
         'PhysicalLayer.Audio',
         'Common.MathUtil'
     ];
@@ -15,6 +16,7 @@
     function _AnalyserChart(
         AnalyserChartTemplateAxisX,
         AnalyserChartTemplateMain,
+        SimplePromiseBuilder,
         Audio,
         MathUtil
     ) {
@@ -32,7 +34,7 @@
             this.$$data = null;
             this.$$freezeChart = false;
             this.$$analyserMethod = 'getByteFrequencyData';
-            this.$$destroy = null;
+            this.$$destroyPromise = null;
 
             this.$$initAnimationFrame();
             this.$$init();
@@ -41,18 +43,12 @@
         AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH = 40;
 
         AnalyserChart.prototype.destroy = function () {
-            var self = this;
-
-            if (this.$$destroy) {
-                return this.$$destroy.promise;
+            if (this.$$destroyPromise) {
+                return this.$$destroyPromise;
             }
+            this.$$destroyPromise = SimplePromiseBuilder.build();
 
-            self.$$destroy = {};
-            this.$$destroy.promise = new Promise(function (resolve) {
-                self.$$destroy.resolve = resolve;
-            });
-
-            return this.$$destroy.promise;
+            return this.$$destroyPromise;
         };
 
         AnalyserChart.prototype.$$init = function () {
@@ -253,9 +249,9 @@
             var self = this;
 
             function drawAgain() {
-                if (self.$$destroy) {
+                if (self.$$destroyPromise) {
                     self.$$parentElement.innerHTML = '';
-                    self.$$destroy.resolve();
+                    self.$$destroyPromise.resolve();
                 } else {
                     self.$$updateChart();
                     requestAnimationFrame(drawAgain);

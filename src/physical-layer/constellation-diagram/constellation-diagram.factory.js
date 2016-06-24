@@ -7,11 +7,13 @@
 
     _ConstellationDiagram.$inject = [
         'Common.MathUtil',
+        'Common.SimplePromiseBuilder',
         'PhysicalLayer.ConstellationDiagramTemplateMain'
     ];
 
     function _ConstellationDiagram(
         MathUtil,
+        SimplePromiseBuilder,
         ConstellationDiagramTemplateMain
     ) {
         var ConstellationDiagram;
@@ -25,25 +27,19 @@
             this.$$canvasHeight = height;
             this.$$colorAxis = colorAxis;
             this.$$colorHistoryPoint = colorHistoryPoint;
-            this.$$destroy = null;
+            this.$$destroyPromise = null;
             
             this.$$initAnimationFrame();
             this.$$init();
         };
 
         ConstellationDiagram.prototype.destroy = function () {
-            var self = this;
-
-            if (this.$$destroy) {
-                return this.$$destroy.promise;
+            if (this.$$destroyPromise) {
+                return this.$$destroyPromise;
             }
+            this.$$destroyPromise = SimplePromiseBuilder.build();
 
-            self.$$destroy = {};
-            this.$$destroy.promise = new Promise(function (resolve) {
-                self.$$destroy.resolve = resolve;
-            });
-
-            return this.$$destroy.promise;
+            return this.$$destroyPromise;
         };
 
         ConstellationDiagram.prototype.$$init = function () {
@@ -155,9 +151,9 @@
             var self = this;
 
             function drawAgain() {
-                if (self.$$destroy) {
+                if (self.$$destroyPromise) {
                     self.$$parentElement.innerHTML = '';
-                    self.$$destroy.resolve();
+                    self.$$destroyPromise.resolve();
                 } else {
                     self.$$updateChart();
                     requestAnimationFrame(drawAgain);
