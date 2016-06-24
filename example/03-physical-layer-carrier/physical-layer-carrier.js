@@ -1,6 +1,6 @@
 var
-    CarrierRecovery = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierRecovery'),
-    CarrierGenerate = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierGenerate'),
+    CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery'),
+    CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate'),
     ConstellationDiagram = AudioNetwork.Injector.resolve('Visualizer.ConstellationDiagram'),
     sampleFrequency = 44100,
     burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec

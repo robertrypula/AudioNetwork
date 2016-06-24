@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.CarrierGenerateBuilder', _CarrierGenerateBuilder);
+        .registerService('Common.CarrierGenerateBuilder', _CarrierGenerateBuilder);
 
     _CarrierGenerateBuilder.$inject = [
-        'PhysicalLayer.CarrierGenerate'
+        'Common.CarrierGenerate'
     ];
 
     function _CarrierGenerateBuilder(

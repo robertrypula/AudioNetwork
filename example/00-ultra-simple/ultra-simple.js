@@ -3,8 +3,8 @@
 var
     // import stuff from AudioNetwork lib
     Audio = AudioNetwork.PhysicalLayer.Audio,
-    CarrierRecovery = AudioNetwork.PhysicalLayer.CarrierRecovery,
-    CarrierGenerate = AudioNetwork.PhysicalLayer.CarrierGenerate,
+    CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
+    CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,
     Queue = AudioNetwork.Common.Queue,
 

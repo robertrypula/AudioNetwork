@@ -7,7 +7,7 @@
 
     _ChannelReceive.$inject = [
         'PhysicalLayer.Audio',
-        'PhysicalLayer.CarrierRecoveryBuilder',
+        'Common.CarrierRecoveryBuilder',
         'Common.MathUtil'
     ];
 

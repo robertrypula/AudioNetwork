@@ -8,8 +8,6 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - move all charts to dedicated namespace 'visualizer'
-  - move CarrierRecovery and CarrierGenerate to 'common' namespace
   - move audio service to separate namespace 'audio'
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
@@ -90,6 +88,8 @@ TODO list:
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)
   + expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)
   + introduce SimplePromise class (idea is to have code as less dependent to browser as possible in order to port it easily to other languages)
+  + move all charts to dedicated namespace 'visualizer'
+  + move CarrierRecovery and CarrierGenerate to 'common' namespace
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point

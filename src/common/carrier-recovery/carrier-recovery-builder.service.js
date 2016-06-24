@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.CarrierRecoveryBuilder', _CarrierRecoveryBuilder);
+        .registerService('Common.CarrierRecoveryBuilder', _CarrierRecoveryBuilder);
 
     _CarrierRecoveryBuilder.$inject = [
-        'PhysicalLayer.CarrierRecovery'
+        'Common.CarrierRecovery'
     ];
 
     function _CarrierRecoveryBuilder(

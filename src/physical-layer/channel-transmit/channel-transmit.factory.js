@@ -8,7 +8,7 @@
     _ChannelTransmit.$inject = [
         'Common.MathUtil',
         'PhysicalLayer.Audio',
-        'PhysicalLayer.CarrierGenerateBuilder'
+        'Common.CarrierGenerateBuilder'
     ];
 
     function _ChannelTransmit(

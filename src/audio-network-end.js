@@ -9,9 +9,11 @@ AudioNetwork.PhysicalLayer.RxInput = AudioNetwork.Injector.resolve('PhysicalLaye
 AudioNetwork.PhysicalLayer.TransmitAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.TransmitAdapter');
 AudioNetwork.PhysicalLayer.ReceiveAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.ReceiveAdapter');
 AudioNetwork.PhysicalLayer.Audio = AudioNetwork.Injector.resolve('PhysicalLayer.Audio');
-AudioNetwork.PhysicalLayer.CarrierRecovery = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierRecovery');
-AudioNetwork.PhysicalLayer.CarrierGenerate = AudioNetwork.Injector.resolve('PhysicalLayer.CarrierGenerate');
+
 AudioNetwork.Common = {};
 AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');
+AudioNetwork.Common.CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery');
+AudioNetwork.Common.CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate');
+
 AudioNetwork.Visualizer = {};
 AudioNetwork.Visualizer.PowerChart = AudioNetwork.Injector.resolve('Visualizer.PowerChart');

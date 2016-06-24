@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.CarrierGenerate', _CarrierGenerate);
+        .registerFactory('Common.CarrierGenerate', _CarrierGenerate);
 
     _CarrierGenerate.$inject = [
         'Common.MathUtil',

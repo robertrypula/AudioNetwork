@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.CarrierRecovery', _CarrierRecovery);
+        .registerFactory('Common.CarrierRecovery', _CarrierRecovery);
 
     _CarrierRecovery.$inject = [
         'Common.QueueBuilder',
