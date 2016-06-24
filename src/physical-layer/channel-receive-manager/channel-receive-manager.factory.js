@@ -13,7 +13,7 @@
 
     function _ChannelReceiveManager(
         AbstractChannelManager,
-        Audio,
+        ActiveAudioContext,
         ChannelReceiveBuilder
     ) {
         var ChannelReceiveManager;
@@ -70,10 +70,10 @@
         ChannelReceiveManager.prototype.$$init = function () {
             var i, cr;
 
-            this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.$$scriptNode = ActiveAudioContext.createScriptProcessor(this.$$bufferSize, 1, 1);
             this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
-            this.$$analyserNode = Audio.createAnalyser();
+            this.$$analyserNode = ActiveAudioContext.createAnalyser();
             this.$$analyserNode.fftSize = ChannelReceiveManager.$$_LOWEST_FFT_SIZE;
 
             this.$$scriptNode.connect(this.$$analyserNode);
@@ -88,7 +88,7 @@
             var
                 inputBuffer = audioProcessingEvent.inputBuffer,
                 inputData = inputBuffer.getChannelData(0),
-                blockBeginTime = Audio.getCurrentTime(),
+                blockBeginTime = ActiveAudioContext.getCurrentTime(),
                 sample, sampleNumberInBlock, j
             ;
 
@@ -107,7 +107,7 @@
                 this.$$sampleNumberGlobal++;
             }
 
-            this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), inputBuffer.length);
+            this.$$computeCpuLoadData(blockBeginTime, ActiveAudioContext.getCurrentTime(), inputBuffer.length);
         };
 
         return ChannelReceiveManager;

@@ -13,7 +13,7 @@
 
     function _ChannelTransmit(
         MathUtil,
-        Audio,                     // TODO remove that depencency - it's here only for sample rate
+        ActiveAudioContext,                     // TODO remove that depencency - it's here only for sample rate
         CarrierGenerateBuilder
     ) {
         var ChannelTransmit;
@@ -76,7 +76,7 @@
 
             this.$$checkOfdmIndex(ofdmIndex);
 
-            samplePerPeriod = Audio.getSampleRate() / frequency;
+            samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
             this.$$carrierGenerate[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
             this.$$carrierFrequency[ofdmIndex] = frequency;
         };
@@ -86,7 +86,7 @@
 
             for (i = 0; i < configuration.ofdmSize; i++) {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
-                samplePerPeriod = Audio.getSampleRate() / frequency;
+                samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
                 cg = CarrierGenerateBuilder.build(samplePerPeriod);
                 this.$$carrierGenerate.push(cg);
                 this.$$carrierFrequency.push(frequency);

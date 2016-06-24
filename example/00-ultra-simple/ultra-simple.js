@@ -2,7 +2,7 @@
 
 var
     // import stuff from AudioNetwork lib
-    Audio = AudioNetwork.Audio.ActiveAudioContext,
+    ActiveAudioContext = AudioNetwork.Audio.ActiveAudioContext,
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,
@@ -52,9 +52,9 @@ var
     OFDM_FREQUENCY_SPACING,
 
     // normal variables
-    scriptProcessorNodeSpeaker = Audio.createScriptProcessor(1024, 1, 1),
-    scriptProcessorNodeMicrophone = Audio.createScriptProcessor(1024, 1, 1),
-    analyserNode = Audio.createAnalyser(),
+    scriptProcessorNodeSpeaker = ActiveAudioContext.createScriptProcessor(1024, 1, 1),
+    scriptProcessorNodeMicrophone = ActiveAudioContext.createScriptProcessor(1024, 1, 1),
+    analyserNode = ActiveAudioContext.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
     carrierGeneratePilot,
     carrierRecoveryPilot,
@@ -90,11 +90,11 @@ function initConfig() {
     DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME;                                               // seconds
     NOTIFY_TIME = SYMBOL_TIME / notifyTimeResolution;                                  // seconds
     REAL_SYMBOL_TIME = SYMBOL_TIME + GUARD_TIME;                                       // seconds
-    SAMPLE_PER_SYMBOL = Math.round(Audio.getSampleRate() * SYMBOL_TIME);
-    SAMPLE_PER_GUARD = Math.round(Audio.getSampleRate() * GUARD_TIME);
-    SAMPLE_PER_DFT_WINDOW = Math.round(Audio.getSampleRate() * DFT_WINDOW_TIME);
-    SAMPLE_PER_NOTIFY = Math.round(Audio.getSampleRate() * NOTIFY_TIME);
-    SAMPLE_PER_REAL_SYMBOL = Math.round(Audio.getSampleRate() * REAL_SYMBOL_TIME);
+    SAMPLE_PER_SYMBOL = Math.round(ActiveAudioContext.getSampleRate() * SYMBOL_TIME);
+    SAMPLE_PER_GUARD = Math.round(ActiveAudioContext.getSampleRate() * GUARD_TIME);
+    SAMPLE_PER_DFT_WINDOW = Math.round(ActiveAudioContext.getSampleRate() * DFT_WINDOW_TIME);
+    SAMPLE_PER_NOTIFY = Math.round(ActiveAudioContext.getSampleRate() * NOTIFY_TIME);
+    SAMPLE_PER_REAL_SYMBOL = Math.round(ActiveAudioContext.getSampleRate() * REAL_SYMBOL_TIME);
 
     OFDM_FREQUENCY_SPACING = ofdmSpacingFactor / DFT_WINDOW_TIME;                      // Hz
 
@@ -104,13 +104,13 @@ function initConfig() {
 function initCarrierObject() {
     var frequency, samplePerPeriod, i;
 
-    samplePerPeriod = Audio.getSampleRate() / PILOT_FREQUENCY;
+    samplePerPeriod = ActiveAudioContext.getSampleRate() / PILOT_FREQUENCY;
     carrierGeneratePilot = new CarrierGenerate(samplePerPeriod);
     carrierRecoveryPilot = new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW);
 
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
         frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING;
-        samplePerPeriod = Audio.getSampleRate() / frequency;
+        samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
 
         carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
         carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
@@ -135,9 +135,9 @@ function initNode() {
         scriptProcessorNodeSpeaker.connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
     } else {
-        Audio.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
+        ActiveAudioContext.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
-        scriptProcessorNodeSpeaker.connect(Audio.getDestination());
+        scriptProcessorNodeSpeaker.connect(ActiveAudioContext.getDestination());
     }
 }
 
@@ -371,7 +371,7 @@ function benchmark() {
 
     textToSend = 'benchmark of audio network';
 
-    timeBeginWebAPI = Audio.getCurrentTime();
+    timeBeginWebAPI = ActiveAudioContext.getCurrentTime();
     timeBeginJSDate = (new Date()).getTime() / 1000;
     totalSample = SAMPLE_PER_REAL_SYMBOL * textToSend.length;
     sendText(textToSend);
@@ -379,10 +379,10 @@ function benchmark() {
     data.length = totalSample;
     speakerOutputDataHandler(data);
     microphoneInputDataHandler(data);
-    timeEndWebAPI = Audio.getCurrentTime();
+    timeEndWebAPI = ActiveAudioContext.getCurrentTime();
     timeEndJSDate = (new Date()).getTime() / 1000;
 
-    timeMax = Math.round(1000 * totalSample / Audio.getSampleRate()) / 1000;
+    timeMax = Math.round(1000 * totalSample / ActiveAudioContext.getSampleRate()) / 1000;
     timeSpentWebAPI = Math.round(1000 * (timeEndWebAPI - timeBeginWebAPI)) / 1000;
     timeSpentJSDate = Math.round(1000 * (timeEndJSDate - timeBeginJSDate)) / 1000;
 

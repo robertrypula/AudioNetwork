@@ -17,7 +17,7 @@
         AnalyserChartTemplateAxisX,
         AnalyserChartTemplateMain,
         SimplePromiseBuilder,
-        Audio,
+        ActiveAudioContext,
         MathUtil
     ) {
         var AnalyserChart;
@@ -147,7 +147,7 @@
         AnalyserChart.prototype.$$generateAxisXForTimeDomain = function () {
             var
               availableStep = [0.0005, 0.001, 0.002, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500],
-              resolution = Audio.getSampleRate(),  // [pix/sec]
+              resolution = ActiveAudioContext.getSampleRate(),  // [pix/sec]
               step = AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               time = 0,
               left,
@@ -161,7 +161,7 @@
                 }
             }
 
-            while (time < (this.$$analyser.frequencyBinCount / Audio.getSampleRate())) {
+            while (time < (this.$$analyser.frequencyBinCount / ActiveAudioContext.getSampleRate())) {
                 left = MathUtil.round(time * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
                   AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH,
@@ -177,7 +177,7 @@
         AnalyserChart.prototype.$$generateAxisXForFrequency = function () {
             var
               availableStep = [50, 100, 125, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000],
-              resolution = this.$$analyser.fftSize / Audio.getSampleRate(),  // [pix/Hz]
+              resolution = this.$$analyser.fftSize / ActiveAudioContext.getSampleRate(),  // [pix/Hz]
               step = AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH / resolution,
               frequency = 0,
               left,
@@ -191,7 +191,7 @@
                 }
             }
 
-            while (frequency < 0.5 * Audio.getSampleRate()) {
+            while (frequency < 0.5 * ActiveAudioContext.getSampleRate()) {
                 left = MathUtil.round(frequency * resolution);
                 divContent += this.$$renderTemplateAxisXLabel(
                     AnalyserChart.$$_AXIS_LABEL_X_ONE_ITEM_WITH,

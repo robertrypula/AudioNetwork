@@ -12,7 +12,7 @@
     ];
 
     function _ChannelReceive(
-        Audio,                        // TODO remove that depencency - it's here only for sample rate
+        ActiveAudioContext,                        // TODO remove that depencency - it's here only for sample rate
         CarrierRecoveryBuilder,
         MathUtil
     ) {
@@ -36,7 +36,7 @@
 
             for (i = 0; i < configuration.ofdmSize; i++) {
                 frequency = configuration.baseFrequency + i * configuration.ofdmFrequencySpacing;
-                samplePerPeriod = Audio.getSampleRate() / frequency;
+                samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
                 cr = CarrierRecoveryBuilder.build(samplePerPeriod, configuration.dftWindowSize);
                 this.$$carrierRecovery.push(cr);
                 this.$$carrierFrequency.push(frequency);
@@ -80,7 +80,7 @@
 
             this.$$checkOfdmIndex(ofdmIndex);
 
-            samplePerPeriod = Audio.getSampleRate() / frequency;
+            samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
             this.$$carrierRecovery[ofdmIndex].setSamplePerPeriod(samplePerPeriod);
             this.$$carrierFrequency[ofdmIndex] = frequency;
         };
@@ -106,7 +106,7 @@
             }
 
             if (notifyIteration) {
-                sampleTimeOffsetInBlock = sampleNumberInBlock / Audio.getSampleRate();
+                sampleTimeOffsetInBlock = sampleNumberInBlock / ActiveAudioContext.getSampleRate();
 
                 this.$$notifyHandler(
                     this.$$index, 

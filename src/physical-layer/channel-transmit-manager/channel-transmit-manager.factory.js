@@ -16,7 +16,7 @@
     function _ChannelTransmitManager(
         AbstractChannelManager,
         MathUtil,
-        Audio,
+        ActiveAudioContext,
         DefaultConfig,
         ChannelTransmitBuilder
     ) {
@@ -72,7 +72,7 @@
         ChannelTransmitManager.prototype.$$init = function () {
             var i, ct;
 
-            this.$$scriptNode = Audio.createScriptProcessor(this.$$bufferSize, 1, 1);
+            this.$$scriptNode = ActiveAudioContext.createScriptProcessor(this.$$bufferSize, 1, 1);
             this.$$scriptNode.onaudioprocess = this.onAudioProcess.bind(this);
 
             for (i = 0; i < this.$$configuration.length; i++) {
@@ -93,7 +93,7 @@
             var
                 outputBuffer = audioProcessingEvent.outputBuffer,
                 outputData = outputBuffer.getChannelData(0),
-                blockBeginTime = Audio.getCurrentTime(),
+                blockBeginTime = ActiveAudioContext.getCurrentTime(),
                 sample, i, j
             ;
 
@@ -110,7 +110,7 @@
                 outputData[i] = sample;
             }
 
-            this.$$computeCpuLoadData(blockBeginTime, Audio.getCurrentTime(), outputBuffer.length);
+            this.$$computeCpuLoadData(blockBeginTime, ActiveAudioContext.getCurrentTime(), outputBuffer.length);
         };
 
         return ChannelTransmitManager;

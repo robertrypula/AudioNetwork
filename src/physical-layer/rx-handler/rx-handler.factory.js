@@ -13,7 +13,7 @@
 
     function _RxHandler(
         DefaultConfig,
-        Audio,
+        ActiveAudioContext,
         MathUtil
     ) {
         var RxHandler;
@@ -30,7 +30,7 @@
 
         RxHandler.prototype.$$intervalHandler = function () {
             var
-                currentTime = Audio.getCurrentTime(),
+                currentTime = ActiveAudioContext.getCurrentTime(),
                 removedCount = 0,
                 item, i
             ;
@@ -92,7 +92,7 @@
             }
 
             if (this.$$rxExternalHandler.callback) {
-                this.$$rxExternalHandler.callback(channelIndex, carrierDetail, Audio.getCurrentTime());
+                this.$$rxExternalHandler.callback(channelIndex, carrierDetail, ActiveAudioContext.getCurrentTime());
             }
         };
 

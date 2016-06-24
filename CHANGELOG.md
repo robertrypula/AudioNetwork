@@ -8,7 +8,6 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - move audio service to separate namespace 'audio'
   - move current audio service logic to factory and connect it to ActiveAudioContext
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
@@ -91,6 +90,7 @@ TODO list:
   + introduce SimplePromise class (idea is to have code as less dependent to browser as possible in order to port it easily to other languages)
   + move all charts to dedicated namespace 'visualizer'
   + move CarrierRecovery and CarrierGenerate to 'common' namespace
+  + move audio service to separate namespace 'audio' and change name of the service to ActiveAudioContext
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point

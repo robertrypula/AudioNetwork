@@ -53,7 +53,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         ChannelReceiveManagerBuilder,
         ConstellationDiagramBuilder,
         AnalyserChartBuilder,
-        Audio,
+        ActiveAudioContext,
         SimplePromiseBuilder
     ) {
         var PhysicalLayer;
@@ -129,8 +129,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
         PhysicalLayer.prototype.$$initRx = function () {
             var
-                dftWindowSize = MathUtil.round(Audio.getSampleRate() * this.$$configuration.rx.dftWindowTime),
-                notifyInterval = MathUtil.round(Audio.getSampleRate() / this.$$configuration.rx.notificationPerSecond),
+                dftWindowSize = MathUtil.round(ActiveAudioContext.getSampleRate() * this.$$configuration.rx.dftWindowTime),
+                notifyInterval = MathUtil.round(ActiveAudioContext.getSampleRate() / this.$$configuration.rx.notificationPerSecond),
                 channel, i
             ;
 
@@ -151,7 +151,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 this.$$configuration.rx.bufferSize
             );
 
-            this.$$rxAnalyser = Audio.createAnalyser();
+            this.$$rxAnalyser = ActiveAudioContext.createAnalyser();
             this.$$rxAnalyser.fftSize = this.$$configuration.rx.spectrum.fftSize;
             this.$$rxAnalyser.connect(this.$$channelReceiveManager.getInputNode());
             if (this.$$configuration.rx.spectrum.elementId) {
@@ -173,13 +173,13 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
             switch (input) {
                 case RxInput.MICROPHONE:
-                    node = Audio.getMicrophoneNode();
+                    node = ActiveAudioContext.getMicrophoneNode();
                     break;
                 case RxInput.LOOPBACK:
                     node = this.$$channelTransmitManager.getOutputNode();
                     break;
                 case RxInput.RECORDED_AUDIO:
-                    node = Audio.getRecordedAudioNode();
+                    node = ActiveAudioContext.getRecordedAudioNode();
                     break;
             }
 
@@ -220,7 +220,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         PhysicalLayer.prototype.loadRecordedAudio = function (url) {
-            return Audio.loadRecordedAudio(url);
+            return ActiveAudioContext.loadRecordedAudio(url);
         };
 
         PhysicalLayer.prototype.tx = function (channelIndex, data) {
@@ -241,7 +241,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
                 dataParsed.push([{
                     amplitude: (typeof d.amplitude !== 'undefined') ? d.amplitude : 1,
-                    duration: MathUtil.round(Audio.getSampleRate() * d.duration),
+                    duration: MathUtil.round(ActiveAudioContext.getSampleRate() * d.duration),
                     phase: (typeof d.phase !== 'undefined') ? d.phase : 0
                 }]);
             }
@@ -254,7 +254,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         PhysicalLayer.prototype.getSampleRate = function () {
-            return Audio.getSampleRate();
+            return ActiveAudioContext.getSampleRate();
         };
 
         PhysicalLayer.prototype.destroy = function () {
@@ -306,42 +306,42 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
 
         PhysicalLayer.prototype.outputTxEnable = function () {
             if (!this.$$outputTx) {
-                this.$$channelTransmitManager.getOutputNode().connect(Audio.getDestination());
+                this.$$channelTransmitManager.getOutputNode().connect(ActiveAudioContext.getDestination());
             }
             this.$$outputTx = true;
         };
 
         PhysicalLayer.prototype.outputTxDisable = function () {
             if (this.$$outputTx) {
-                this.$$channelTransmitManager.getOutputNode().disconnect(Audio.getDestination());
+                this.$$channelTransmitManager.getOutputNode().disconnect(ActiveAudioContext.getDestination());
             }
             this.$$outputTx = false;
         };
 
         PhysicalLayer.prototype.outputMicrophoneEnable = function () {
             if (!this.$$outputMicrophone) {
-                Audio.getMicrophoneNode().connect(Audio.getDestination());
+                ActiveAudioContext.getMicrophoneNode().connect(ActiveAudioContext.getDestination());
             }
             this.$$outputMicrophone = true;
         };
 
         PhysicalLayer.prototype.outputMicrophoneDisable = function () {
             if (this.$$outputMicrophone) {
-                Audio.getMicrophoneNode().disconnect(Audio.getDestination());
+                ActiveAudioContext.getMicrophoneNode().disconnect(ActiveAudioContext.getDestination());
             }
             this.$$outputMicrophone = false;
         };
 
         PhysicalLayer.prototype.outputRecordedAudioEnable = function () {
             if (!this.$$outputRecordedAudio) {
-                Audio.getRecordedAudioNode().connect(Audio.getDestination());
+                ActiveAudioContext.getRecordedAudioNode().connect(ActiveAudioContext.getDestination());
             }
             this.$$outputRecordedAudio = true;
         };
 
         PhysicalLayer.prototype.outputRecordedAudioDisable = function () {
             if (this.$$outputRecordedAudio) {
-                Audio.getRecordedAudioNode().disconnect(Audio.getDestination());
+                ActiveAudioContext.getRecordedAudioNode().disconnect(ActiveAudioContext.getDestination());
             }
             this.$$outputRecordedAudio = false;
         };

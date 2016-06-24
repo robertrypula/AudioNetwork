@@ -10,7 +10,7 @@
     ];
 
     function _AbstractChannelManager(
-        Audio
+        ActiveAudioContext
     ) {
         var AbstractChannelManager;
 
@@ -41,7 +41,7 @@
                 blockTime;
 
             blockRealTime = endTime - beginTime;
-            blockTime = blockSampleSize / Audio.getSampleRate();
+            blockTime = blockSampleSize / ActiveAudioContext.getSampleRate();
             
             c.blockSampleSize = blockSampleSize;
             c.blockTime = blockTime;

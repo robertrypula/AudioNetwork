@@ -44,11 +44,8 @@
 <h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
 <p>TODO list:</p>
 <ul>
-<li>remove Promises (idea is to have code as less dependent as possible - callbacks are enough in this case)</li>
-<li>move all charts to dedicated namespace &#39;visualizer&#39;</li>
-<li>move CarrierRecovery and CarrierGenerate to &#39;common&#39; namespace</li>
-<li>move audio service to separate namespace &#39;audio&#39;</li>
-<li>create new chart &#39;SampleChart&#39;, create new example when using CarrierGenerate will be demonstrated</li>
+<li>move current audio service logic to factory and connect it to ActiveAudioContext</li>
+<li>create new chart &#39;SampleChart&#39;, create new example when CarrierGenerate will be demonstrated</li>
 <li>rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection</li>
 <li>start writing article</li>
 <li>fix last templates issues in ultra-simple demo, rename to some nicer name</li>
@@ -151,6 +148,10 @@
 <ul>
 <li>new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)</li>
 <li>expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)</li>
+<li>introduce SimplePromise class (idea is to have code as less dependent to browser as possible in order to port it easily to other languages)</li>
+<li>move all charts to dedicated namespace &#39;visualizer&#39;</li>
+<li>move CarrierRecovery and CarrierGenerate to &#39;common&#39; namespace</li>
+<li>move audio service to separate namespace &#39;audio&#39; and change name of the service to ActiveAudioContext</li>
 </ul>
 <h2 id="v1-0-3-2016-05-30-">v1.0.3 (2016-05-30)</h2>
 <ul>
