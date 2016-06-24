@@ -12,7 +12,7 @@
     ];
 
     function _ChannelReceive(
-        Audio,
+        Audio,                        // TODO remove that depencency - it's here only for sample rate
         CarrierRecoveryBuilder,
         MathUtil
     ) {

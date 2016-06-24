@@ -39,7 +39,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         'PhysicalLayer.ChannelReceiveManagerBuilder',
         'Visualizer.ConstellationDiagramBuilder',
         'Visualizer.AnalyserChartBuilder',
-        'PhysicalLayer.Audio'
+        'PhysicalLayer.Audio',
+        'Common.SimplePromiseBuilder'
     ];
 
     function _PhysicalLayer(
@@ -52,7 +53,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         ChannelReceiveManagerBuilder,
         ConstellationDiagramBuilder,
         AnalyserChartBuilder,
-        Audio
+        Audio,
+        SimplePromiseBuilder
     ) {
         var PhysicalLayer;
 
