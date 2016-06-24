@@ -9,6 +9,7 @@
 
 TODO list:
   - move audio service to separate namespace 'audio'
+  - move current audio service logic to factory and connect it to ActiveAudioContext
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
   - start writing article
