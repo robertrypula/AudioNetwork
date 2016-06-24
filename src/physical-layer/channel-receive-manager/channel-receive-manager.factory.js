@@ -7,7 +7,7 @@
 
     _ChannelReceiveManager.$inject = [
         'PhysicalLayer.AbstractChannelManager',
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'PhysicalLayer.ChannelReceiveBuilder'
     ];
 

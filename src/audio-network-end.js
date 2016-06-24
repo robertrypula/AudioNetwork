@@ -8,7 +8,9 @@ AudioNetwork.PhysicalLayer.DefaultConfig = AudioNetwork.Injector.resolve('Physic
 AudioNetwork.PhysicalLayer.RxInput = AudioNetwork.Injector.resolve('PhysicalLayer.RxInput');
 AudioNetwork.PhysicalLayer.TransmitAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.TransmitAdapter');
 AudioNetwork.PhysicalLayer.ReceiveAdapter = AudioNetwork.Injector.resolve('PhysicalLayer.ReceiveAdapter');
-AudioNetwork.PhysicalLayer.Audio = AudioNetwork.Injector.resolve('PhysicalLayer.Audio');
+
+AudioNetwork.Audio = {};
+AudioNetwork.Audio.ActiveAudioContext = AudioNetwork.Injector.resolve('Audio.ActiveAudioContext');
 
 AudioNetwork.Common = {};
 AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');

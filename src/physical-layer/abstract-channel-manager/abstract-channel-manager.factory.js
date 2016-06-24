@@ -6,7 +6,7 @@
         .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
 
     _AbstractChannelManager.$inject = [
-        'PhysicalLayer.Audio'
+        'Audio.ActiveAudioContext'
     ];
 
     function _AbstractChannelManager(

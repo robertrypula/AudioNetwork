@@ -6,7 +6,7 @@
         .registerFactory('PhysicalLayer.ChannelReceive', _ChannelReceive);
 
     _ChannelReceive.$inject = [
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'Common.CarrierRecoveryBuilder',
         'Common.MathUtil'
     ];

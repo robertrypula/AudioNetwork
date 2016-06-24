@@ -9,7 +9,7 @@
         'Visualizer.AnalyserChartTemplateAxisX',
         'Visualizer.AnalyserChartTemplateMain',
         'Common.SimplePromiseBuilder',
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'Common.MathUtil'
     ];
 

@@ -7,7 +7,7 @@
 
     _RxHandler.$inject = [
         'PhysicalLayer.DefaultConfig',
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'Common.MathUtil'
     ];
 

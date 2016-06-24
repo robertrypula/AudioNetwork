@@ -2,7 +2,7 @@
 
 var
     // import stuff from AudioNetwork lib
-    Audio = AudioNetwork.PhysicalLayer.Audio,
+    Audio = AudioNetwork.Audio.ActiveAudioContext,
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,

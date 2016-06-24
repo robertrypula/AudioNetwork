@@ -3,13 +3,13 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.Audio', _Audio);
+        .registerService('Audio.ActiveAudioContext', _ActiveAudioContext);
 
-    _Audio.$inject = [
+    _ActiveAudioContext.$inject = [
         'Common.SimplePromiseBuilder'
     ];
 
-    function _Audio(
+    function _ActiveAudioContext(
         SimplePromiseBuilder
     ) {
         var

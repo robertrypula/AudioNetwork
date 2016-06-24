@@ -39,7 +39,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         'PhysicalLayer.ChannelReceiveManagerBuilder',
         'Visualizer.ConstellationDiagramBuilder',
         'Visualizer.AnalyserChartBuilder',
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'Common.SimplePromiseBuilder'
     ];
 

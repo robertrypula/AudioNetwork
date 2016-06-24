@@ -8,7 +8,7 @@
     _ChannelTransmitManager.$inject = [
         'PhysicalLayer.AbstractChannelManager',
         'Common.MathUtil',
-        'PhysicalLayer.Audio',
+        'Audio.ActiveAudioContext',
         'PhysicalLayer.DefaultConfig',
         'PhysicalLayer.ChannelTransmitBuilder'
     ];
