@@ -3,12 +3,12 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.ConstellationDiagram', _ConstellationDiagram);
+        .registerFactory('Visualizer.ConstellationDiagram', _ConstellationDiagram);
 
     _ConstellationDiagram.$inject = [
         'Common.MathUtil',
         'Common.SimplePromiseBuilder',
-        'PhysicalLayer.ConstellationDiagramTemplateMain'
+        'Visualizer.ConstellationDiagramTemplateMain'
     ];
 
     function _ConstellationDiagram(

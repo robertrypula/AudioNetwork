@@ -3,11 +3,11 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.AnalyserChart', _AnalyserChart);
+        .registerFactory('Visualizer.AnalyserChart', _AnalyserChart);
 
     _AnalyserChart.$inject = [
-        'PhysicalLayer.AnalyserChartTemplateAxisX',
-        'PhysicalLayer.AnalyserChartTemplateMain',
+        'Visualizer.AnalyserChartTemplateAxisX',
+        'Visualizer.AnalyserChartTemplateMain',
         'Common.SimplePromiseBuilder',
         'PhysicalLayer.Audio',
         'Common.MathUtil'

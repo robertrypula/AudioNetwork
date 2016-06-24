@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.PowerChart', _PowerChart);
+        .registerFactory('Visualizer.PowerChart', _PowerChart);
 
     _PowerChart.$inject = [
-        'PhysicalLayer.PowerChartTemplateMain',
+        'Visualizer.PowerChartTemplateMain',
         'Common.SimplePromiseBuilder'
     ];
 

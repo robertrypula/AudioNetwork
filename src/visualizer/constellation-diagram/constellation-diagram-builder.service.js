@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.ConstellationDiagramBuilder', _ConstellationDiagramBuilder);
+        .registerService('Visualizer.ConstellationDiagramBuilder', _ConstellationDiagramBuilder);
 
     _ConstellationDiagramBuilder.$inject = [
-        'PhysicalLayer.ConstellationDiagram'
+        'Visualizer.ConstellationDiagram'
     ];
 
     function _ConstellationDiagramBuilder(

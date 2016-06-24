@@ -5,7 +5,7 @@ var
     Audio = AudioNetwork.PhysicalLayer.Audio,
     CarrierRecovery = AudioNetwork.PhysicalLayer.CarrierRecovery,
     CarrierGenerate = AudioNetwork.PhysicalLayer.CarrierGenerate,
-    PowerChart = AudioNetwork.PhysicalLayer.PowerChart,
+    PowerChart = AudioNetwork.Visualizer.PowerChart,
     Queue = AudioNetwork.Common.Queue,
 
     // +--+            +--+            +--+            +--+            +--+            +--+

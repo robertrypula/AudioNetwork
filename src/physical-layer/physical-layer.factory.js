@@ -37,8 +37,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         'PhysicalLayer.RxHandlerBuilder',
         'PhysicalLayer.ChannelTransmitManagerBuilder',
         'PhysicalLayer.ChannelReceiveManagerBuilder',
-        'PhysicalLayer.ConstellationDiagramBuilder',
-        'PhysicalLayer.AnalyserChartBuilder',
+        'Visualizer.ConstellationDiagramBuilder',
+        'Visualizer.AnalyserChartBuilder',
         'PhysicalLayer.Audio'
     ];
 

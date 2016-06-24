@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.PowerChartTemplateMain', _PowerChartTemplateMain);
+        .registerService('Visualizer.PowerChartTemplateMain', _PowerChartTemplateMain);
 
     _PowerChartTemplateMain.$inject = [];
 

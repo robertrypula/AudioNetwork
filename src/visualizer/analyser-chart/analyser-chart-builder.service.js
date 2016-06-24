@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.AnalyserChartBuilder', _AnalyserChartBuilder);
+        .registerService('Visualizer.AnalyserChartBuilder', _AnalyserChartBuilder);
 
     _AnalyserChartBuilder.$inject = [
-        'PhysicalLayer.AnalyserChart'
+        'Visualizer.AnalyserChart'
     ];
 
     function _AnalyserChartBuilder(

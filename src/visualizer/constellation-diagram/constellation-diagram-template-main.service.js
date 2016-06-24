@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.ConstellationDiagramTemplateMain', _ConstellationDiagramTemplateMain);
+        .registerService('Visualizer.ConstellationDiagramTemplateMain', _ConstellationDiagramTemplateMain);
 
     _ConstellationDiagramTemplateMain.$inject = [];
 

@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.AnalyserChartTemplateAxisX', _AnalyserChartTemplateAxisX);
+        .registerService('Visualizer.AnalyserChartTemplateAxisX', _AnalyserChartTemplateAxisX);
 
     _AnalyserChartTemplateAxisX.$inject = [];
 
