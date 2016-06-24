@@ -202,18 +202,20 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
 function destroy(cb) {
     if (physicalLayer) {
         physicalLayerDestroyInProgress = true;
-        physicalLayer.destroy(function () {
-            transmitAdapter = null;
-            receiveAdapter = null;
-            physicalLayer = null;
-            document.getElementById('tx-channel-container').innerHTML = '';
-            document.getElementById('rx-channel-container').innerHTML = '';
+        physicalLayer
+            .destroy()
+            .then(function () {
+                transmitAdapter = null;
+                receiveAdapter = null;
+                physicalLayer = null;
+                document.getElementById('tx-channel-container').innerHTML = '';
+                document.getElementById('rx-channel-container').innerHTML = '';
 
-            physicalLayerDestroyInProgress = false;
-            if (typeof cb === 'function') {
-                cb();
-            }
-        });
+                physicalLayerDestroyInProgress = false;
+                if (typeof cb === 'function') {
+                    cb();
+                }
+            });
     } else {
         if (typeof cb === 'function') {
             cb();
@@ -281,17 +283,16 @@ function rxInput(type) {
 }
 
 function loadRecordedAudio() {
-    physicalLayer.loadRecordedAudio(
-        getStrById('recorded-audio-url'),
-        function () {
+    physicalLayer
+        .loadRecordedAudio(getStrById('recorded-audio-url'))
+        .then(function () {
             physicalLayer.setRxInput(AudioNetwork.PhysicalLayer.RxInput.RECORDED_AUDIO);
             physicalLayer.outputRecordedAudioEnable();
             uiRefresh();
-        },
-        function () {
+        })
+        .catch(function () {
             alert('Error');
-        }
-    );
+        });
 }
 
 function output(type, state) {

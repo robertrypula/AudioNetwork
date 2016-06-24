@@ -217,8 +217,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return this.$$channelReceiveManager.getBufferSize();
         };
 
-        PhysicalLayer.prototype.loadRecordedAudio = function (url, successCallback, errorCallback) {
-            Audio.loadRecordedAudio(url, successCallback, errorCallback);
+        PhysicalLayer.prototype.loadRecordedAudio = function (url) {
+            return Audio.loadRecordedAudio(url);
         };
 
         PhysicalLayer.prototype.tx = function (channelIndex, data) {
@@ -255,43 +255,23 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return Audio.getSampleRate();
         };
 
-        PhysicalLayer.prototype.destroy = function (callback) {
-            var i, j, destroyAsyncCount;
-
-            callback = typeof callback === 'function' ? callback : function () {};
-
-            destroyAsyncCount = 0;
+        PhysicalLayer.prototype.destroy = function () {
+            var i, j, promiseList = [];
 
             this.setRxInput(null);
 
             // rx
             if (this.$$rxAnalyserChart) {
-                destroyAsyncCount++;
-                this.$$rxAnalyserChart
-                    .destroy()
-                    .then(function () {
-                        destroyAsyncCount--;
-                        if (destroyAsyncCount === 0) {
-                            callback();
-                        }
-                    })
-                ;
+                promiseList.push(this.$$rxAnalyserChart.destroy());
                 this.$$rxAnalyserChart = null;
             }
             this.$$rxAnalyser.disconnect(this.$$channelReceiveManager.getInputNode());
             if (this.$$rxConstellationDiagram) {
                 for (i = 0; i < this.$$rxConstellationDiagram.length; i++) {
                     for (j = 0; j < this.$$rxConstellationDiagram[i].constellationDiagram.length; j++) {
-                        destroyAsyncCount++;
-                        this.$$rxConstellationDiagram[i].constellationDiagram[j]
-                            .destroy()
-                            .then(function () {
-                                destroyAsyncCount--;
-                                if (destroyAsyncCount === 0) {
-                                    callback();
-                                }
-                            })
-                        ;
+                        promiseList.push(
+                            this.$$rxConstellationDiagram[i].constellationDiagram[j].destroy()
+                        );
                     }
                 }
             }
@@ -306,6 +286,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$channelTransmitManager = null;
 
             this.$$rxHandler.destroy();
+
+            return SimplePromiseBuilder.buildFromList(promiseList);
         };
 
         PhysicalLayer.prototype.getOutputTxState = function () {

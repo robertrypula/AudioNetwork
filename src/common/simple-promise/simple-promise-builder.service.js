@@ -18,22 +18,36 @@
         }
 
         function buildFromList(list) {
-            var i, promise, result;
+            var i, promise, thenCount, catchCount;
 
             promise = build();
+            thenCount = 0;
+            catchCount = 0;
             for (i = 0; i < list.length; i++) {
-                list[i].then(function () {
-                    if (false) {
-                        promise.resolve(result);
-                    }
-                });
+                list[i]
+                    .then(function () {
+                        thenCount++;
+                    })
+                    .catch(function () {
+                        catchCount++;
+                    })
+                    .finally(function () {
+                        if (thenCount + catchCount === list.length) {
+                            if (catchCount === 0) {
+                                promise.resolve();
+                            } else {
+                                promise.reject();
+                            }
+                        }
+                    });
             }
 
             return promise;
         }
 
         return {
-            build: build
+            build: build,
+            buildFromList: buildFromList
         };
     }
 

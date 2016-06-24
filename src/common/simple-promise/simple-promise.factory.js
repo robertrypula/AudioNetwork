@@ -35,11 +35,11 @@
                     break;
                 case SimplePromise.$$STATE_REJECT:
                     if (this.$$catch) {
-                        this.$$catch(value);
+                        this.$$catch(this.$$value);
                         this.$$catch = null;
                     }
                     if (this.$$finally) {
-                        this.$$finally(value);
+                        this.$$finally(this.$$value);
                         this.$$finally = null;
                     }
                     break;

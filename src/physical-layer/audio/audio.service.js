@@ -5,9 +5,13 @@
     AudioNetwork.Injector
         .registerService('PhysicalLayer.Audio', _Audio);
 
-    _Audio.$inject = [];
+    _Audio.$inject = [
+        'Common.SimplePromiseBuilder'
+    ];
 
-    function _Audio() {
+    function _Audio(
+        SimplePromiseBuilder
+    ) {
         var
             context = null,
             rawMicrophoneNode = null,
@@ -48,13 +52,10 @@
             return recordedNode;
         }
 
-        function $$userMediaStreamSuccess(stream) {
-            rawMicrophoneNode = context.createMediaStreamSource(stream);
-            rawMicrophoneNode.connect(microphoneNode);
-        }
-
-        function loadRecordedAudio(url, successCallback, errorCallback) {
-            var request = new XMLHttpRequest();
+        function loadRecordedAudio(url) {
+            var
+                request = new XMLHttpRequest(),
+                promise = SimplePromiseBuilder.build();
 
             request.open('GET', url, true);
             request.responseType = 'arraybuffer';
@@ -73,30 +74,47 @@
                         recordedRawNode.loop = true;
                         recordedRawNode.start(0);
 
-                        if (typeof successCallback === 'function') {
-                            successCallback();
-                        }
+                        promise.resolve();
                     },
                     function (e) {
-                        if (typeof errorCallback === 'function') {
-                            errorCallback(e);
-                        }
+                        promise.reject(e);
                     }
                 );
             };
             request.send();
+
+            return promise;
         }
 
-        function init() {
-            window.AudioContext = (function () {
-                return window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
-            })();
-            navigator.getUserMedia = (
+        function $$getConstraints() {
+            return {
+                video: false,
+                audio: {
+                    mandatory: {
+                        googEchoCancellation: false, // disabling audio processing
+                        googAutoGainControl: false,
+                        googNoiseSuppression: false,
+                        googHighpassFilter: false
+                    },
+                    optional: []
+                }
+            };
+        }
+
+        function $$normalizeGlobalVariable() {
+            window.AudioContext =
+                window.AudioContext ||
+                window.webkitAudioContext ||
+                window.mozAudioContext;
+            navigator.getUserMedia =
                 navigator.getUserMedia ||
                 navigator.webkitGetUserMedia ||
                 navigator.mozGetUserMedia ||
-                navigator.msGetUserMedia
-            );
+                navigator.msGetUserMedia;
+        }
+
+        function init() {
+            $$normalizeGlobalVariable();
 
             try {
                 context = new window.AudioContext();
@@ -105,32 +123,15 @@
                 console.log(e);
             }
 
-            /*
-             navigator.mediaDevices.getUserMedia(constraints)
-             .then(function(mediaStream) { ... })
-             .catch(function(error) { ... })
-             */
-
             microphoneNode = context.createGain();
             recordedNode = context.createGain();
             try {
                 navigator.getUserMedia(
-                    {
-                        video: false,
-                        audio: {
-                            mandatory: {
-                                // echoCancellation: false,
-                                googEchoCancellation: false, // disabling audio processing
-                                googAutoGainControl: false,
-                                googNoiseSuppression: false,
-                                googHighpassFilter: false,
-                                googTypingNoiseDetection: false
-                                //googAudioMirroring: true
-                            },
-                            optional: []
-                        }
+                    $$getConstraints(),
+                    function (stream) {
+                        rawMicrophoneNode = context.createMediaStreamSource(stream);
+                        rawMicrophoneNode.connect(microphoneNode);
                     },
-                    $$userMediaStreamSuccess,
                     function (e) {
                         alert('Microphone initialization failed');
                         console.log(e);
