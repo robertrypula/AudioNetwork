@@ -21,7 +21,9 @@ data over sound between two laptops:
 ## How can I transmit something over sound?
 
 First of all you need to have two devices. One for sending, one for receiving data. It should work with any
-device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API.
+device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API. Next you need to open
+[Demo - simple](https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html)
+at both devices and follow steps below:
 
 1. **[Receiver]** - Before you load demo page you need to be quiet :) Receiving device needs to listen to 'silence'
 around you when there is no signal in the air. It's indicated by `IDLE_INIT` state and it ends when `FIRST_SYNC_WAIT`
