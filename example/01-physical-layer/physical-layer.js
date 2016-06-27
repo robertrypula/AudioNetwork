@@ -160,8 +160,8 @@ function initialize(txChannel, rxChannel, rxSpectrumVisible, rxConstellationDiag
             }
         }
     });
-    transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer);
-    receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+    transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer);
+    receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLayer);
 
     var powerChartQueue0 = new AudioNetwork.Common.Queue(400);
     var powerChart0 = new AudioNetwork.Visualizer.PowerChart(document.getElementById('rx-power-chart-0'), 400, 2 * 80, powerChartQueue0);

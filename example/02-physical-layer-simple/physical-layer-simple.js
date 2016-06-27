@@ -7,8 +7,8 @@ function onLoad() {
         tx: { channel: channel },
         rx: { channel: channel }
     });
-    transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer);
-    receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+    transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer);
+    receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLayer);
 
     physicalLayer.rx(function (channelIndex, carrierDetail, time) {
         var receiveData = receiveAdapter.receive(channelIndex, carrierDetail, time);

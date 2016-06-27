@@ -8,7 +8,8 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - move current audio service logic to factory and connect it to ActiveAudioContext
+  - move current audio service logic to factory and connect it to ActiveAudioContext, figure out better name for AudioContext
+  - move adapter classes to 'physical-layer-adapter'
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
   - start writing article
@@ -16,6 +17,7 @@ TODO list:
   - move common code of all canvas drawing to abstract class
   - create wrapper classes for audio nodes
   - create sine/cosine cache service + tests in jasmine
+  - rename destroy methods to destroyAsync
 
   - use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
   - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace

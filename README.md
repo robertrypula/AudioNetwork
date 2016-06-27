@@ -79,8 +79,8 @@ var physicalLayer, transmitAdapter, receiveAdapter;
 physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
     // config
 }),
-transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
-receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer),
+receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLayer);
 ```
 
 Below you can find `Demo - simple` source code:

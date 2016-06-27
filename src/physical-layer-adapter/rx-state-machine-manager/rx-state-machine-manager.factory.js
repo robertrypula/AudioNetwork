@@ -3,18 +3,18 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.RxStateMachineManager', _RxStateMachineManager);
+        .registerFactory('PhysicalLayerAdapter.RxStateMachineManager', _RxStateMachineManager);
 
     _RxStateMachineManager.$inject = [
         'Common.MathUtil',
         'Common.Util',
         'Common.AverageValueCollectorBuilder',
         'PhysicalLayer.DefaultConfig',
-        'PhysicalLayer.SignalPowerCollectorBuilder',
-        'PhysicalLayer.GuardPowerCollectorBuilder',
-        'PhysicalLayer.PhaseOffsetCollectorBuilder',
-        'PhysicalLayer.RxStateMachineBuilder',
-        'PhysicalLayer.ReceiveAdapterState'
+        'PhysicalLayerAdapter.SignalPowerCollectorBuilder',
+        'PhysicalLayerAdapter.GuardPowerCollectorBuilder',
+        'PhysicalLayerAdapter.PhaseOffsetCollectorBuilder',
+        'PhysicalLayerAdapter.RxStateMachineBuilder',
+        'PhysicalLayerAdapter.ReceiveAdapterState'
     ];
 
     function _RxStateMachineManager(

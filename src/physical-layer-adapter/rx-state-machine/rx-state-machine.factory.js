@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.RxStateMachine', _RxStateMachine);
+        .registerFactory('PhysicalLayerAdapter.RxStateMachine', _RxStateMachine);
 
     _RxStateMachine.$inject = [
-        'PhysicalLayer.ReceiveAdapterState'
+        'PhysicalLayerAdapter.ReceiveAdapterState'
     ];
 
     function _RxStateMachine(

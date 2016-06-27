@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.GuardPowerCollector', _GuardPowerCollector);
+        .registerFactory('PhysicalLayerAdapter.GuardPowerCollector', _GuardPowerCollector);
 
     _GuardPowerCollector.$inject = [
         'Common.AbstractValueCollector',

@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.GuardPowerCollectorBuilder', _GuardPowerCollectorBuilder);
+        .registerService('PhysicalLayerAdapter.GuardPowerCollectorBuilder', _GuardPowerCollectorBuilder);
 
     _GuardPowerCollectorBuilder.$inject = [
-        'PhysicalLayer.GuardPowerCollector'
+        'PhysicalLayerAdapter.GuardPowerCollector'
     ];
 
     function _GuardPowerCollectorBuilder(

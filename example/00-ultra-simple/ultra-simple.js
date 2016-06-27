@@ -2,7 +2,7 @@
 
 var
     // import stuff from AudioNetwork lib
-    ActiveAudioContext = AudioNetwork.Audio.ActiveAudioContext,
+    _AudioContext = AudioNetwork.Audio.AudioContext,
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,
@@ -38,11 +38,11 @@ var
     THRESHOLD,
     MINIMUM_POWER_DECIBEL,
 
-    SYMBOL_TIME,
-    GUARD_TIME,
-    DFT_WINDOW_TIME,
-    NOTIFY_TIME,
-    REAL_SYMBOL_TIME,
+    SYMBOL_DURATION,
+    GUARD_DURATION,
+    DFT_WINDOW_DURATION,
+    NOTIFY_DURATION,
+    REAL_SYMBOL_DURATION,
     SAMPLE_PER_SYMBOL,
     SAMPLE_PER_GUARD,
     SAMPLE_PER_DFT_WINDOW,
@@ -52,9 +52,10 @@ var
     OFDM_FREQUENCY_SPACING,
 
     // normal variables
-    scriptProcessorNodeSpeaker = ActiveAudioContext.createScriptProcessor(1024, 1, 1),
-    scriptProcessorNodeMicrophone = ActiveAudioContext.createScriptProcessor(1024, 1, 1),
-    analyserNode = ActiveAudioContext.createAnalyser(),
+    audioContext = new _AudioContext(),
+    scriptProcessorNodeSpeaker = audioContext.createScriptProcessor(1024, 1, 1),
+    scriptProcessorNodeMicrophone = audioContext.createScriptProcessor(1024, 1, 1),
+    analyserNode = audioContext.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
     carrierGeneratePilot,
     carrierRecoveryPilot,
@@ -85,18 +86,18 @@ function initConfig() {
     THRESHOLD = -25;                                                                   // dB
     MINIMUM_POWER_DECIBEL = -99;                                                       // dB
 
-    SYMBOL_TIME = symbolTimeFactor * 0.08;                                             // seconds
-    GUARD_TIME = 1.5 * SYMBOL_TIME;                                                    // seconds
-    DFT_WINDOW_TIME = 0.5 * SYMBOL_TIME;                                               // seconds
-    NOTIFY_TIME = SYMBOL_TIME / notifyTimeResolution;                                  // seconds
-    REAL_SYMBOL_TIME = SYMBOL_TIME + GUARD_TIME;                                       // seconds
-    SAMPLE_PER_SYMBOL = Math.round(ActiveAudioContext.getSampleRate() * SYMBOL_TIME);
-    SAMPLE_PER_GUARD = Math.round(ActiveAudioContext.getSampleRate() * GUARD_TIME);
-    SAMPLE_PER_DFT_WINDOW = Math.round(ActiveAudioContext.getSampleRate() * DFT_WINDOW_TIME);
-    SAMPLE_PER_NOTIFY = Math.round(ActiveAudioContext.getSampleRate() * NOTIFY_TIME);
-    SAMPLE_PER_REAL_SYMBOL = Math.round(ActiveAudioContext.getSampleRate() * REAL_SYMBOL_TIME);
+    SYMBOL_DURATION = symbolTimeFactor * 0.08;                                         // seconds
+    GUARD_DURATION = 1.5 * SYMBOL_DURATION;                                            // seconds
+    DFT_WINDOW_DURATION = 0.5 * SYMBOL_DURATION;                                       // seconds
+    NOTIFY_DURATION = SYMBOL_DURATION / notifyTimeResolution;                          // seconds
+    REAL_SYMBOL_DURATION = SYMBOL_DURATION + GUARD_DURATION;                           // seconds
+    SAMPLE_PER_SYMBOL = Math.round(audioContext.getSampleRate() * SYMBOL_DURATION);
+    SAMPLE_PER_GUARD = Math.round(audioContext.getSampleRate() * GUARD_DURATION);
+    SAMPLE_PER_DFT_WINDOW = Math.round(audioContext.getSampleRate() * DFT_WINDOW_DURATION);
+    SAMPLE_PER_NOTIFY = Math.round(audioContext.getSampleRate() * NOTIFY_DURATION);
+    SAMPLE_PER_REAL_SYMBOL = Math.round(audioContext.getSampleRate() * REAL_SYMBOL_DURATION);
 
-    OFDM_FREQUENCY_SPACING = ofdmSpacingFactor / DFT_WINDOW_TIME;                      // Hz
+    OFDM_FREQUENCY_SPACING = ofdmSpacingFactor / DFT_WINDOW_DURATION;                  // Hz
 
     document.getElementById('init-button').style.display = 'none';
 }
@@ -104,13 +105,13 @@ function initConfig() {
 function initCarrierObject() {
     var frequency, samplePerPeriod, i;
 
-    samplePerPeriod = ActiveAudioContext.getSampleRate() / PILOT_FREQUENCY;
+    samplePerPeriod = audioContext.getSampleRate() / PILOT_FREQUENCY;
     carrierGeneratePilot = new CarrierGenerate(samplePerPeriod);
     carrierRecoveryPilot = new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW);
 
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
         frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING;
-        samplePerPeriod = ActiveAudioContext.getSampleRate() / frequency;
+        samplePerPeriod = audioContext.getSampleRate() / frequency;
 
         carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
         carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
@@ -135,9 +136,9 @@ function initNode() {
         scriptProcessorNodeSpeaker.connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
     } else {
-        ActiveAudioContext.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
+        audioContext.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
-        scriptProcessorNodeSpeaker.connect(ActiveAudioContext.getDestination());
+        scriptProcessorNodeSpeaker.connect(audioContext.getDestination());
     }
 }
 
@@ -371,7 +372,7 @@ function benchmark() {
 
     textToSend = 'benchmark of audio network';
 
-    timeBeginWebAPI = ActiveAudioContext.getCurrentTime();
+    timeBeginWebAPI = audioContext.getCurrentTime();
     timeBeginJSDate = (new Date()).getTime() / 1000;
     totalSample = SAMPLE_PER_REAL_SYMBOL * textToSend.length;
     sendText(textToSend);
@@ -379,15 +380,15 @@ function benchmark() {
     data.length = totalSample;
     speakerOutputDataHandler(data);
     microphoneInputDataHandler(data);
-    timeEndWebAPI = ActiveAudioContext.getCurrentTime();
+    timeEndWebAPI = audioContext.getCurrentTime();
     timeEndJSDate = (new Date()).getTime() / 1000;
 
-    timeMax = Math.round(1000 * totalSample / ActiveAudioContext.getSampleRate()) / 1000;
+    timeMax = Math.round(1000 * totalSample / audioContext.getSampleRate()) / 1000;
     timeSpentWebAPI = Math.round(1000 * (timeEndWebAPI - timeBeginWebAPI)) / 1000;
     timeSpentJSDate = Math.round(1000 * (timeEndJSDate - timeBeginJSDate)) / 1000;
 
     result =
-        'realSymbolSpeed: ' + (Math.round(100 / REAL_SYMBOL_TIME) / 100) + '\n' +
+        'realSymbolSpeed: ' + (Math.round(100 / REAL_SYMBOL_DURATION) / 100) + '\n' +
         'symbolToSend: ' + textToSend.length + '\n' +
         '\n' +
         'timeMax: ' + timeMax + '\n' +

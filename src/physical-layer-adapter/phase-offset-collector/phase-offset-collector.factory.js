@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.PhaseOffsetCollector', _PhaseOffsetCollector);
+        .registerFactory('PhysicalLayerAdapter.PhaseOffsetCollector', _PhaseOffsetCollector);
 
     _PhaseOffsetCollector.$inject = [
         'Common.AbstractValueCollector',

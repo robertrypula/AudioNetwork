@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.RxStateMachineManagerBuilder', _RxStateMachineManagerBuilder);
+        .registerService('PhysicalLayerAdapter.RxStateMachineManagerBuilder', _RxStateMachineManagerBuilder);
 
     _RxStateMachineManagerBuilder.$inject = [
-        'PhysicalLayer.RxStateMachineManager'
+        'PhysicalLayerAdapter.RxStateMachineManager'
     ];
 
     function _RxStateMachineManagerBuilder(

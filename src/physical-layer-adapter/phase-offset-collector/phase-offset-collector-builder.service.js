@@ -3,10 +3,10 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.PhaseOffsetCollectorBuilder', _PhaseOffsetCollectorBuilder);
+        .registerService('PhysicalLayerAdapter.PhaseOffsetCollectorBuilder', _PhaseOffsetCollectorBuilder);
 
     _PhaseOffsetCollectorBuilder.$inject = [
-        'PhysicalLayer.PhaseOffsetCollector'
+        'PhysicalLayerAdapter.PhaseOffsetCollector'
     ];
 
     function _PhaseOffsetCollectorBuilder(

@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.TransmitAdapter', _TransmitAdapter);
+        .registerFactory('PhysicalLayerAdapter.TransmitAdapter', _TransmitAdapter);
 
     _TransmitAdapter.$inject = [
         'Common.MathUtil',

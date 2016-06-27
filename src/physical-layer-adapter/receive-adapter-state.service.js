@@ -3,7 +3,7 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('PhysicalLayer.ReceiveAdapterState', _ReceiveAdapterState);
+        .registerService('PhysicalLayerAdapter.ReceiveAdapterState', _ReceiveAdapterState);
 
     _ReceiveAdapterState.$inject = [];
 

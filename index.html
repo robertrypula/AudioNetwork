@@ -102,8 +102,8 @@ include it into your HTML file. For example:</p>
 physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
 // config
 }),
-transmitAdapter = new AudioNetwork.PhysicalLayer.TransmitAdapter(physicalLayer),
-receiveAdapter = new AudioNetwork.PhysicalLayer.ReceiveAdapter(physicalLayer);
+transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer),
+receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLayer);
 </code></pre><p>Below you can find <code>Demo - simple</code> source code:</p>
 <ul>
 <li><a href="https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.html" target="_blank">html</a></li>
