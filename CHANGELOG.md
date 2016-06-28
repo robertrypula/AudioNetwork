@@ -8,8 +8,6 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - move current audio service logic to factory and connect it to ActiveAudioContext, figure out better name for AudioContext
-  - move adapter classes to 'physical-layer-adapter'
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
   - start writing article
@@ -24,8 +22,8 @@ TODO list:
   - refactor DOM helpers (move to service)
   - change adapter parameter order or move all adapter initialization
   - introduce handlers similar to existing setPacketReceiveHandler
-  - ReceiveAdapter should register own rx handler inside Adapter class
-  - move all adapter logic to dedicated namespace (???)
+  - ReceiveAdapter should register own rx handler inside Adapter class (??)
+  - change 'physical-layer' to 'physical-layer-core', 'physical-layer-adapter' to 'physical-layer' (??)
   - refactor manager code to pass whole array to/from channel instead single sample
     - receive-manager
     - receive-channel
@@ -93,6 +91,9 @@ TODO list:
   + move all charts to dedicated namespace 'visualizer'
   + move CarrierRecovery and CarrierGenerate to 'common' namespace
   + move audio service to separate namespace 'audio' and change name of the service to ActiveAudioContext
+  + move adapter classes to 'physical-layer-adapter'
+  + move current audio service logic to factory and connect it to ActiveAudioContext
+  + AudioContext class was renamed to SimpleAudioContext in order to avoid collision with real window.AudioContext
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point

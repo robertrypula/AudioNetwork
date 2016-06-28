@@ -3,18 +3,18 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('Audio.AudioContext', _AudioContext);
+        .registerFactory('Audio.SimpleAudioContext', _SimpleAudioContext);
 
-    _AudioContext.$inject = [
+    _SimpleAudioContext.$inject = [
         'Common.SimplePromiseBuilder'
     ];
 
-    function _AudioContext(
+    function _SimpleAudioContext(
         SimplePromiseBuilder
     ) {
-        var AudioContext;
+        var SimpleAudioContext;
 
-        AudioContext = function () {
+        SimpleAudioContext = function () {
             this.$$context = null;
             this.$$rawMicrophoneNode = null;
             this.$$microphoneNode = null;
@@ -23,39 +23,39 @@
             this.$$init();
         };
 
-        AudioContext.prototype.getCurrentTime = function () {
+        SimpleAudioContext.prototype.getCurrentTime = function () {
             return this.$$context.currentTime;
         };
 
-        AudioContext.prototype.createAnalyser = function () {
+        SimpleAudioContext.prototype.createAnalyser = function () {
             return this.$$context.createAnalyser();
         };
 
-        AudioContext.prototype.createGain = function () {
+        SimpleAudioContext.prototype.createGain = function () {
             return this.$$context.createGain();
         };
 
-        AudioContext.prototype.createScriptProcessor = function (bufferSize, numberOfInputChannels, numberOfOutputChannels) {
+        SimpleAudioContext.prototype.createScriptProcessor = function (bufferSize, numberOfInputChannels, numberOfOutputChannels) {
             return this.$$context.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
         };
 
-        AudioContext.prototype.getSampleRate = function () {
+        SimpleAudioContext.prototype.getSampleRate = function () {
             return this.$$context.sampleRate;
         };
 
-        AudioContext.prototype.getDestination = function () {
+        SimpleAudioContext.prototype.getDestination = function () {
             return this.$$context.destination;
         };
 
-        AudioContext.prototype.getMicrophoneNode = function () {
+        SimpleAudioContext.prototype.getMicrophoneNode = function () {
             return this.$$microphoneNode;
         };
 
-        AudioContext.prototype.getRecordedAudioNode = function () {
+        SimpleAudioContext.prototype.getRecordedAudioNode = function () {
             return this.$$recordedNode;
         };
 
-        AudioContext.prototype.loadRecordedAudio = function (url) {
+        SimpleAudioContext.prototype.loadRecordedAudio = function (url) {
             var
                 self = this,
                 request = new XMLHttpRequest(),
@@ -90,7 +90,7 @@
             return promise;
         };
 
-        AudioContext.prototype.$$getConstraints = function () {
+        SimpleAudioContext.prototype.$$getConstraints = function () {
             return {
                 video: false,
                 audio: {
@@ -105,7 +105,7 @@
             };
         };
 
-        AudioContext.prototype.$$normalizeGlobalVariable = function () {
+        SimpleAudioContext.prototype.$$normalizeGlobalVariable = function () {
             window.AudioContext =
                 window.AudioContext ||
                 window.webkitAudioContext ||
@@ -117,7 +117,7 @@
                 navigator.msGetUserMedia;
         };
 
-        AudioContext.prototype.$$init = function () {
+        SimpleAudioContext.prototype.$$init = function () {
             var self = this;
 
             this.$$normalizeGlobalVariable();
@@ -149,7 +149,7 @@
             }
         };
 
-        return AudioContext;
+        return SimpleAudioContext;
     }
 
 })();

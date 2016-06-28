@@ -6,30 +6,30 @@
         .registerService('Audio.ActiveAudioContext', _ActiveAudioContext);
 
     _ActiveAudioContext.$inject = [
-        'Audio.AudioContextBuilder'
+        'Audio.SimpleAudioContextBuilder'
     ];
 
     function _ActiveAudioContext(
-        AudioContextBuilder
+        SimpleAudioContextBuilder
     ) {
-        var audioContext = null;
+        var simpleAudioContext = null;
 
         function $$init() {
-            audioContext = AudioContextBuilder.build();
+            simpleAudioContext = SimpleAudioContextBuilder.build();
         }
 
         $$init();
 
         return {
-            loadRecordedAudio: audioContext.loadRecordedAudio.bind(audioContext),
-            getMicrophoneNode: audioContext.getMicrophoneNode.bind(audioContext),
-            getRecordedAudioNode: audioContext.getRecordedAudioNode.bind(audioContext),
-            getSampleRate: audioContext.getSampleRate.bind(audioContext),
-            getDestination: audioContext.getDestination.bind(audioContext),
-            getCurrentTime: audioContext.getCurrentTime.bind(audioContext),
-            createAnalyser: audioContext.createAnalyser.bind(audioContext),
-            createGain: audioContext.createGain.bind(audioContext),
-            createScriptProcessor: audioContext.createScriptProcessor.bind(audioContext)
+            loadRecordedAudio: simpleAudioContext.loadRecordedAudio.bind(simpleAudioContext),
+            getMicrophoneNode: simpleAudioContext.getMicrophoneNode.bind(simpleAudioContext),
+            getRecordedAudioNode: simpleAudioContext.getRecordedAudioNode.bind(simpleAudioContext),
+            getSampleRate: simpleAudioContext.getSampleRate.bind(simpleAudioContext),
+            getDestination: simpleAudioContext.getDestination.bind(simpleAudioContext),
+            getCurrentTime: simpleAudioContext.getCurrentTime.bind(simpleAudioContext),
+            createAnalyser: simpleAudioContext.createAnalyser.bind(simpleAudioContext),
+            createGain: simpleAudioContext.createGain.bind(simpleAudioContext),
+            createScriptProcessor: simpleAudioContext.createScriptProcessor.bind(simpleAudioContext)
         };
     }
 

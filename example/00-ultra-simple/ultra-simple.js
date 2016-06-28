@@ -2,7 +2,7 @@
 
 var
     // import stuff from AudioNetwork lib
-    _AudioContext = AudioNetwork.Audio.AudioContext,
+    SimpleAudioContext = AudioNetwork.Audio.SimpleAudioContext,
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,
@@ -52,10 +52,10 @@ var
     OFDM_FREQUENCY_SPACING,
 
     // normal variables
-    audioContext = new _AudioContext(),
-    scriptProcessorNodeSpeaker = audioContext.createScriptProcessor(1024, 1, 1),
-    scriptProcessorNodeMicrophone = audioContext.createScriptProcessor(1024, 1, 1),
-    analyserNode = audioContext.createAnalyser(),
+    simpleAudioContext = new SimpleAudioContext(),
+    scriptProcessorNodeSpeaker = simpleAudioContext.createScriptProcessor(1024, 1, 1),
+    scriptProcessorNodeMicrophone = simpleAudioContext.createScriptProcessor(1024, 1, 1),
+    analyserNode = simpleAudioContext.createAnalyser(),
     sampleGlobalCountMicrophone = 0,
     carrierGeneratePilot,
     carrierRecoveryPilot,
@@ -91,11 +91,11 @@ function initConfig() {
     DFT_WINDOW_DURATION = 0.5 * SYMBOL_DURATION;                                       // seconds
     NOTIFY_DURATION = SYMBOL_DURATION / notifyTimeResolution;                          // seconds
     REAL_SYMBOL_DURATION = SYMBOL_DURATION + GUARD_DURATION;                           // seconds
-    SAMPLE_PER_SYMBOL = Math.round(audioContext.getSampleRate() * SYMBOL_DURATION);
-    SAMPLE_PER_GUARD = Math.round(audioContext.getSampleRate() * GUARD_DURATION);
-    SAMPLE_PER_DFT_WINDOW = Math.round(audioContext.getSampleRate() * DFT_WINDOW_DURATION);
-    SAMPLE_PER_NOTIFY = Math.round(audioContext.getSampleRate() * NOTIFY_DURATION);
-    SAMPLE_PER_REAL_SYMBOL = Math.round(audioContext.getSampleRate() * REAL_SYMBOL_DURATION);
+    SAMPLE_PER_SYMBOL = Math.round(simpleAudioContext.getSampleRate() * SYMBOL_DURATION);
+    SAMPLE_PER_GUARD = Math.round(simpleAudioContext.getSampleRate() * GUARD_DURATION);
+    SAMPLE_PER_DFT_WINDOW = Math.round(simpleAudioContext.getSampleRate() * DFT_WINDOW_DURATION);
+    SAMPLE_PER_NOTIFY = Math.round(simpleAudioContext.getSampleRate() * NOTIFY_DURATION);
+    SAMPLE_PER_REAL_SYMBOL = Math.round(simpleAudioContext.getSampleRate() * REAL_SYMBOL_DURATION);
 
     OFDM_FREQUENCY_SPACING = ofdmSpacingFactor / DFT_WINDOW_DURATION;                  // Hz
 
@@ -105,13 +105,13 @@ function initConfig() {
 function initCarrierObject() {
     var frequency, samplePerPeriod, i;
 
-    samplePerPeriod = audioContext.getSampleRate() / PILOT_FREQUENCY;
+    samplePerPeriod = simpleAudioContext.getSampleRate() / PILOT_FREQUENCY;
     carrierGeneratePilot = new CarrierGenerate(samplePerPeriod);
     carrierRecoveryPilot = new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW);
 
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
         frequency = PILOT_FREQUENCY + (i + 1) * OFDM_FREQUENCY_SPACING;
-        samplePerPeriod = audioContext.getSampleRate() / frequency;
+        samplePerPeriod = simpleAudioContext.getSampleRate() / frequency;
 
         carrierGenerate.push(new CarrierGenerate(samplePerPeriod));
         carrierRecovery.push(new CarrierRecovery(samplePerPeriod, SAMPLE_PER_DFT_WINDOW));
@@ -136,9 +136,9 @@ function initNode() {
         scriptProcessorNodeSpeaker.connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
     } else {
-        audioContext.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
+        simpleAudioContext.getMicrophoneNode().connect(scriptProcessorNodeMicrophone);
         scriptProcessorNodeMicrophone.connect(analyserNode);
-        scriptProcessorNodeSpeaker.connect(audioContext.getDestination());
+        scriptProcessorNodeSpeaker.connect(simpleAudioContext.getDestination());
     }
 }
 
@@ -372,7 +372,7 @@ function benchmark() {
 
     textToSend = 'benchmark of audio network';
 
-    timeBeginWebAPI = audioContext.getCurrentTime();
+    timeBeginWebAPI = simpleAudioContext.getCurrentTime();
     timeBeginJSDate = (new Date()).getTime() / 1000;
     totalSample = SAMPLE_PER_REAL_SYMBOL * textToSend.length;
     sendText(textToSend);
@@ -380,10 +380,10 @@ function benchmark() {
     data.length = totalSample;
     speakerOutputDataHandler(data);
     microphoneInputDataHandler(data);
-    timeEndWebAPI = audioContext.getCurrentTime();
+    timeEndWebAPI = simpleAudioContext.getCurrentTime();
     timeEndJSDate = (new Date()).getTime() / 1000;
 
-    timeMax = Math.round(1000 * totalSample / audioContext.getSampleRate()) / 1000;
+    timeMax = Math.round(1000 * totalSample / simpleAudioContext.getSampleRate()) / 1000;
     timeSpentWebAPI = Math.round(1000 * (timeEndWebAPI - timeBeginWebAPI)) / 1000;
     timeSpentJSDate = Math.round(1000 * (timeEndJSDate - timeBeginJSDate)) / 1000;
 

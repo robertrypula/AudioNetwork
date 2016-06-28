@@ -13,7 +13,7 @@ AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter = AudioNetwork.Injector.resolve
 
 AudioNetwork.Audio = {};
 AudioNetwork.Audio.ActiveAudioContext = AudioNetwork.Injector.resolve('Audio.ActiveAudioContext');
-AudioNetwork.Audio.AudioContext = AudioNetwork.Injector.resolve('Audio.AudioContext');
+AudioNetwork.Audio.SimpleAudioContext = AudioNetwork.Injector.resolve('Audio.SimpleAudioContext');
 
 AudioNetwork.Common = {};
 AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');
