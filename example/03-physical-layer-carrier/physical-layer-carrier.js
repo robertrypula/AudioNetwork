@@ -1,7 +1,7 @@
 var
-    CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery'),
-    CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate'),
-    ConstellationDiagram = AudioNetwork.Injector.resolve('Visualizer.ConstellationDiagram'),
+    CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
+    CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
+    ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
     sampleFrequency = 44100,
     burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec
     color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
