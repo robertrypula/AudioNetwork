@@ -339,18 +339,18 @@ function send(symbol) {
         amplitude = 1 / (1 + SUB_CARRIER_SIZE),
         i;
 
-    carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude }]);
+    carrierGeneratePilot.addToQueue({ duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude });
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
-        carrierGenerate[i].addToQueue([{
+        carrierGenerate[i].addToQueue({
             duration: SAMPLE_PER_SYMBOL, phase: 0, amplitude: amplitude * binary[binary.length - SUB_CARRIER_SIZE + i]
-        }]);
+        });
     }
 
-    carrierGeneratePilot.addToQueue([{ duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0 }]);
+    carrierGeneratePilot.addToQueue({ duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0 });
     for (i = 0; i < SUB_CARRIER_SIZE; i++) {
-        carrierGenerate[i].addToQueue([{
+        carrierGenerate[i].addToQueue({
             duration: SAMPLE_PER_GUARD, phase: 0, amplitude: 0
-        }]);
+        });
     }
 }
 

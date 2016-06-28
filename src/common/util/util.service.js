@@ -83,17 +83,11 @@
             return 0.5 * (MathUtil.sin((x - 0.5) * MathUtil.PI) + 1);
         }
 
-        function queueAdd(queue, itemList, copyCallback, amountFieldName) {
-            var i, item, queueItem;
+        function queueAdd(queue, item, copyCallback, amountFieldName) {
+            var queueItem;
 
             amountFieldName = amountFieldName === undefined ? 'duration' : amountFieldName;
-
-            for (i = 0; i < itemList.length; i++) {
-                item = itemList[i];
-
-                if (item[amountFieldName] <= 0) {
-                    continue;
-                }
+            if (item[amountFieldName] > 0) {
                 queueItem = {};
                 queueItem[amountFieldName] = item[amountFieldName];
                 copyCallback(queueItem, item);

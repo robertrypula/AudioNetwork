@@ -131,7 +131,7 @@ function analyzeBufferSample(bufferSample, bufferPower, bufferPhase) {
 }
 
 function nextFrame() {
-    var i, sampleNumber, sample;
+    var i, j, dataTmp, sampleNumber, sample;
 
     carrierGenerate.length = 0;
     bufferSample.length = 0;
@@ -143,7 +143,11 @@ function nextFrame() {
         carrierGenerate.push(
             new CarrierGenerate(samplesPerPeriod[i], 50)
         );
-        carrierGenerate[i].addToQueue(data[i % 3]);
+        dataTmp = data[i % 3];
+        for (j = 0; j < dataTmp.length; j++) {
+            carrierGenerate[i].addToQueue(dataTmp[j]);
+        }
+
     }
 
     // fill sample buffer
@@ -213,9 +217,9 @@ function benchmark() {
         carrierDetail
         ;
 
-    cg.addToQueue([
+    cg.addToQueue(
         { duration: 2.4 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
-    ]);
+    );
 
     for (var i = 0; i < 2.00 * 1000 * 1000; i++) {
         sample = cg.getSample();
