@@ -118,7 +118,7 @@ browsers accessing microphone is not allowed when site is not hosted over <code>
 <a href="https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins" target="_blank">here</a></p>
 </blockquote>
 <p>In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8" target="_blank">Injector</a> implementation.
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L9" target="_blank">Injector</a> implementation.
 For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
 AudioNetwork.Injector.resolve(&#39;PhysicalLayer.PhysicalLayer&#39;). Other public classes/services that have aliases
 you can find <a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js" target="_blank">here</a></p>
@@ -159,15 +159,15 @@ phase and amplitude of carrier frequency in the realtime.</li>
 <li><a href="https://en.wikipedia.org/wiki/Spectrum_analyzer" target="_blank">Spectrum Analyzer</a> of incoming signal is based on AnalyserNode
 for Web Audio API.</li>
 <li>Adapter classes
-(<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js" target="_blank">ReceiveAdapter</a>
+(<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/receive-adapter.factory.js" target="_blank">ReceiveAdapter</a>
 and
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js" target="_blank">TransmitAdapter</a>)
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/transmit-adapter.factory.js" target="_blank">TransmitAdapter</a>)
 that acts as easy-to-use wrappers over raw
 <a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js" target="_blank">PhysicalLayer</a>
 class with lower level tx and rx methods. If you want you can also write your own adapter class and attach
 PhysicalLayer to it. AudioNetwork is shipped with PSK adapters but you can write any other modulation like PWM.</li>
 <li>ReceiveAdapter internally has state machine with states listed
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js" target="_blank">here</a>.
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/receive-adapter-state.service.js" target="_blank">here</a>.
 The idea is to extract potential packets from raw carrier details data that rx method provides.</li>
 <li>Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmitter and receiver
 frequencies are de-tuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that
@@ -215,7 +215,7 @@ own <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform" target="_
 some DSP library. I wanted to dig into the details so I picked the first option :) Wikipedia about DFT looks
 ultra scary but in the code there is no rocket science. Basic implementation of Discrete Fourier Transform is
 very simple. We will not find there any mathematical tricks like used in FFT. If you don&#39;t believe me, check this class
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/carrier-recovery/carrier-recovery.factory.js" target="_blank">CarrierRecovery</a>.</p>
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/common/carrier-recovery/carrier-recovery.factory.js" target="_blank">CarrierRecovery</a>.</p>
 <p>There&#39;s no rose without a thorn... CarrierRecovery class code is simple but when we would like to create more of its
 instances, to have more carrier frequencies, we will reduce overall performance pretty fast. It is not good but at
 least it&#39;s closer to <a href="https://en.wikipedia.org/wiki/KISS_principle" target="_blank">KISS</a> design principle ;)</p>

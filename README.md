@@ -96,7 +96,7 @@ Below you can find `Demo - simple` source code:
 >[here](https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins)
 
 In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
-[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L8) implementation.
+[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L9) implementation.
 For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
 AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
 you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)
@@ -145,15 +145,15 @@ phase and amplitude of carrier frequency in the realtime.
 - [Spectrum Analyzer](https://en.wikipedia.org/wiki/Spectrum_analyzer) of incoming signal is based on AnalyserNode
 for Web Audio API.
 - Adapter classes
-([ReceiveAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter.factory.js)
+([ReceiveAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/receive-adapter.factory.js)
 and
-[TransmitAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/transmit-adapter.factory.js))
+[TransmitAdapter](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/transmit-adapter.factory.js))
 that acts as easy-to-use wrappers over raw
 [PhysicalLayer](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/physical-layer.factory.js)
 class with lower level tx and rx methods. If you want you can also write your own adapter class and attach
 PhysicalLayer to it. AudioNetwork is shipped with PSK adapters but you can write any other modulation like PWM.
 - ReceiveAdapter internally has state machine with states listed
-[here](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/receive-adapter-state.service.js).
+[here](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer-adapter/receive-adapter-state.service.js).
 The idea is to extract potential packets from raw carrier details data that rx method provides.
 - Auto phase correction. PSK modulation is ultra sensitive to frequency offsets. Even if transmitter and receiver
 frequencies are de-tuned by 0.05 Hz it will rotate symbol at constellation diagram every 20 seconds. It means that
@@ -204,7 +204,7 @@ own [Discrete Fourier Transform](https://en.wikipedia.org/wiki/Discrete_Fourier_
 some DSP library. I wanted to dig into the details so I picked the first option :) Wikipedia about DFT looks
 ultra scary but in the code there is no rocket science. Basic implementation of Discrete Fourier Transform is
 very simple. We will not find there any mathematical tricks like used in FFT. If you don't believe me, check this class
-[CarrierRecovery](https://github.com/robertrypula/AudioNetwork/blob/master/src/physical-layer/carrier-recovery/carrier-recovery.factory.js).
+[CarrierRecovery](https://github.com/robertrypula/AudioNetwork/blob/master/src/common/carrier-recovery/carrier-recovery.factory.js).
 
 There's no rose without a thorn... CarrierRecovery class code is simple but when we would like to create more of its
 instances, to have more carrier frequencies, we will reduce overall performance pretty fast. It is not good but at
