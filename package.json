@@ -5,6 +5,7 @@
   "main": "build/audio-network-v1.0.3.js",
   "dependencies": {},
   "devDependencies": {
+    "glob": "^7.0.5",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-debug": "^2.1.2",

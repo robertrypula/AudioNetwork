@@ -11,6 +11,7 @@ var fs = require('fs');
 var DEST = 'build/';
 
 gulp.task('default', function() {
+    // var pattern = "./src/**/!(*.test).js";
     return gulp.src([
             './src/audio-network-begin.js',
             './src/common/**/*.js',
@@ -52,4 +53,21 @@ gulp.task('serve', function() {
             directoryListing: true,
             open: 'http://localhost:8000/index.html'
         }));
+});
+
+var Glob = require("glob").Glob;
+
+gulp.task('myTask', function() {
+    var pattern = "./src/**/!(audio-network-begin|audio-network-end).js";
+    var mg = new Glob(pattern, {mark: true}, function (er, matches) {
+        console.log('<script src="../../src/audio-network-begin.js"></script>');
+        for (var i = 0; i < matches.length; i++) {
+            matches[i] = matches[i]
+                .replace('./src/', '<script src="../../src/')
+                .replace('.js', '.js"></script>');
+
+            console.log(matches[i]);
+        }
+        console.log('<script src="../../src/audio-network-end.js"></script>');
+    });
 });

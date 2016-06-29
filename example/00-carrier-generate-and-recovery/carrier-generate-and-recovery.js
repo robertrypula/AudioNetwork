@@ -6,7 +6,7 @@ var
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
 
-    SAMPLE_RATE = 441,
+    SAMPLE_RATE = 0.5 * 441,
     FPS = 50,
     CHART_WIDTH = 800,
     CHART_HEIGHT = 100,

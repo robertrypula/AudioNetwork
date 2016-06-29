@@ -9,7 +9,8 @@
 
 TODO list:
   - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
-  - rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection
+  - rename example directories (000 for basic demos, 100 for physical layer demos, ...) 
+  - add htaccess redirection to renamed examples
   - start writing article
   - fix last templates issues in ultra-simple demo, rename to some nicer name
   - move common code of all canvas drawing to abstract class
