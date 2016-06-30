@@ -96,6 +96,7 @@ TODO list:
   + move current audio service logic to factory and connect it to ActiveAudioContext
   + AudioContext class was renamed to SimpleAudioContext in order to avoid collision with real window.AudioContext
   + addToQueue is now taking object as a parameter instead array of objects
+  + Jasmine unit test web runner added (currently still without tests but at least running environment was prepared)
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point

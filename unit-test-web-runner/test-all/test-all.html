@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <title>Audio Network - data transmission over sound waves - unit test web runner</title>
+
+    <meta name="description" content="">
+
+    <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="test-all.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body onLoad="onLoad()">
+    <div class="wrapper">
+
+        <div class="container">
+            <h1>Audio Network - send data over sound in JavaScript</h1>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <p class="text-right">
+                        Return to <a href="https://audio-network.rypula.pl">main page</a>
+                    </p>
+                    <p class="larger text-center">
+                        THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
+                        Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
+                    </p>
+                    <p>
+                        On this page you can run all AudioNetwork unit tests directly in your browser.
+                    </p>
+                </div>
+            </div>
+
+            <h2>Jasmine output</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <div id="unit-test-output" class="margin-bottom">
+                        <div class="larger text-center">
+                            Running unit tests...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="copyright">Robert Rypuła 2015-2016</div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- audio network BEGIN -->
+    <script src="../../src/audio-network-begin.js"></script>
+    <script src="../../src/audio/active-audio-context/active-audio-context.service.js"></script>
+    <script src="../../src/audio/simple-audio-context/simple-audio-context-builder.service.js"></script>
+    <script src="../../src/audio/simple-audio-context/simple-audio-context.factory.js"></script>
+    <script src="../../src/common/abstract-value-collector/abstract-value-collector.factory.js"></script>
+    <script src="../../src/common/average-value-collector/average-value-collector-builder.service.js"></script>
+    <script src="../../src/common/average-value-collector/average-value-collector.factory.js"></script>
+    <script src="../../src/common/carrier-generate/carrier-generate-builder.service.js"></script>
+    <script src="../../src/common/carrier-generate/carrier-generate.factory.js"></script>
+    <script src="../../src/common/carrier-recovery/carrier-recovery-builder.service.js"></script>
+    <script src="../../src/common/carrier-recovery/carrier-recovery.factory.js"></script>
+    <script src="../../src/common/math-util/math-util.service.js"></script>
+    <script src="../../src/common/queue/queue-builder.service.js"></script>
+    <script src="../../src/common/queue/queue.factory.js"></script>
+    <script src="../../src/common/simple-promise/simple-promise-builder.service.js"></script>
+    <script src="../../src/common/simple-promise/simple-promise.factory.js"></script>
+    <script src="../../src/common/util/util.service.js"></script>
+    <script src="../../src/physical-layer-adapter/guard-power-collector/guard-power-collector-builder.service.js"></script>
+    <script src="../../src/physical-layer-adapter/guard-power-collector/guard-power-collector.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/phase-offset-collector/phase-offset-collector-builder.service.js"></script>
+    <script src="../../src/physical-layer-adapter/phase-offset-collector/phase-offset-collector.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/receive-adapter-state.service.js"></script>
+    <script src="../../src/physical-layer-adapter/receive-adapter.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager-builder.service.js"></script>
+    <script src="../../src/physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/rx-state-machine/rx-state-machine-builder.service.js"></script>
+    <script src="../../src/physical-layer-adapter/rx-state-machine/rx-state-machine.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/signal-power-collector/signal-power-collector-builder.service.js"></script>
+    <script src="../../src/physical-layer-adapter/signal-power-collector/signal-power-collector.factory.js"></script>
+    <script src="../../src/physical-layer-adapter/transmit-adapter.factory.js"></script>
+    <script src="../../src/physical-layer/abstract-channel-manager/abstract-channel-manager.factory.js"></script>
+    <script src="../../src/physical-layer/channel-receive-manager/channel-receive-manager-builder.service.js"></script>
+    <script src="../../src/physical-layer/channel-receive-manager/channel-receive-manager.factory.js"></script>
+    <script src="../../src/physical-layer/channel-receive/channel-receive-builder.service.js"></script>
+    <script src="../../src/physical-layer/channel-receive/channel-receive.factory.js"></script>
+    <script src="../../src/physical-layer/channel-transmit-manager/channel-transmit-manager-builder.service.js"></script>
+    <script src="../../src/physical-layer/channel-transmit-manager/channel-transmit-manager.factory.js"></script>
+    <script src="../../src/physical-layer/channel-transmit/channel-transmit-builder.service.js"></script>
+    <script src="../../src/physical-layer/channel-transmit/channel-transmit.factory.js"></script>
+    <script src="../../src/physical-layer/configuration-parser.service.js"></script>
+    <script src="../../src/physical-layer/default-config.service.js"></script>
+    <script src="../../src/physical-layer/physical-layer.factory.js"></script>
+    <script src="../../src/physical-layer/rx-handler/rx-handler-builder.service.js"></script>
+    <script src="../../src/physical-layer/rx-handler/rx-handler.factory.js"></script>
+    <script src="../../src/physical-layer/rx-input.service.js"></script>
+    <script src="../../src/visualizer/abstract-visualizer/abstract-visualizer.factory.js"></script>
+    <script src="../../src/visualizer/analyser-chart/analyser-chart-builder.service.js"></script>
+    <script src="../../src/visualizer/analyser-chart/analyser-chart-template-axis-x.service.js"></script>
+    <script src="../../src/visualizer/analyser-chart/analyser-chart-template-main.service.js"></script>
+    <script src="../../src/visualizer/analyser-chart/analyser-chart.factory.js"></script>
+    <script src="../../src/visualizer/constellation-diagram/constellation-diagram-builder.service.js"></script>
+    <script src="../../src/visualizer/constellation-diagram/constellation-diagram-template-main.service.js"></script>
+    <script src="../../src/visualizer/constellation-diagram/constellation-diagram.factory.js"></script>
+    <script src="../../src/visualizer/power-chart/power-chart-builder.service.js"></script>
+    <script src="../../src/visualizer/power-chart/power-chart-template-main.service.js"></script>
+    <script src="../../src/visualizer/power-chart/power-chart.factory.js"></script>
+    <script src="../../src/visualizer/sample-chart/sample-chart-builder.service.js"></script>
+    <script src="../../src/visualizer/sample-chart/sample-chart-template-main.service.js"></script>
+    <script src="../../src/visualizer/sample-chart/sample-chart.factory.js"></script>
+    <script src="../../src/audio-network-end.js"></script>
+    <!-- audio network END -->
+
+    <link rel="stylesheet" type="text/css" href="../../node_modules/jasmine-core/lib/jasmine-core/jasmine.css">
+    <script src="../../node_modules/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+    <script src="../../node_modules/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+    <script src="../../node_modules/jasmine-core/lib/jasmine-core/boot.js"></script>
+
+    <!-- audio network unit test BEGIN -->
+    <script src="../../src/common/carrier-generate/carrier-generate.factory.test.js"></script>
+    <!-- audio network unit test END -->
+
+    <script src="test-all.js"></script>
+
+    <script>
+        /*
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-76662342-1', 'auto');
+        ga('send', 'pageview');
+        */
+    </script>
+
+</body>
+</html>
