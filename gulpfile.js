@@ -57,7 +57,7 @@ gulp.task('serve', function() {
 
 var Glob = require("glob").Glob;
 
-gulp.task('myTask', function() {
+gulp.task('script-tag', function() {
     var pattern = "./src/**/!(audio-network-begin|audio-network-end).js";
     var mg = new Glob(pattern, {mark: true}, function (er, matches) {
         console.log('<script src="../../src/audio-network-begin.js"></script>');
@@ -69,5 +69,18 @@ gulp.task('myTask', function() {
             console.log(matches[i]);
         }
         console.log('<script src="../../src/audio-network-end.js"></script>');
+    });
+});
+
+gulp.task('script-tag-unit-test', function() {
+    var pattern = "./src/**/*.test.js";
+    var mg = new Glob(pattern, {mark: true}, function (er, matches) {
+        for (var i = 0; i < matches.length; i++) {
+            matches[i] = matches[i]
+                .replace('./src/', '<script src="../../src/')
+                .replace('.js', '.js"></script>');
+
+            console.log(matches[i]);
+        }
     });
 });
