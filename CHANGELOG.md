@@ -8,9 +8,28 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
-  - rename example directories (000 for basic demos, 100 for physical layer demos, ...) 
+  - rename example directories (000 for basic demos, 100 for physical layer demos, ...)
+       00-..-audio-context-initialization
+       00-..-analyzer-chart
+       00-..-script-processor-node
+       00-..-sample-chart-and-queue
+       00-..-script-processor-node-with-sample-chart
+       00-..-carrier-generate-with-sample-chart
+       00-..-carrier-generate-with-sample-chart-animated
+       00-..-carrier-generate-adding-couple-of-sines
+       00-..-power-chart
+       00-..-constellation-diagram
+       00-..-carrier-recovery-dft-simple
+       00-..-carrier-recovery-dft-full
+       00-..-amplitude-modulation-transmission-simple
+       00-..-amplitude-modulation-transmission-full
+
+       01-..-physical-layer-simple
+       01-..-physical-layer-full
+
   - add htaccess redirection to renamed examples
+       Redirect 301 /oldfile.htm /newfile.htm
+  - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
   - start writing article
   - fix last templates issues in ultra-simple demo, rename to some nicer name
   - move common code of all canvas drawing to abstract class
