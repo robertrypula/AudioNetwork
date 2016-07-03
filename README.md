@@ -4,11 +4,11 @@ Audio Network
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
-[Demo - full features](https://audio-network.rypula.pl/example/01-physical-layer/physical-layer.html)
+[Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
 
-[Demo - simple](https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html)
+[Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
 
-[Carrier generate and recovery tests](https://audio-network.rypula.pl/example/03-physical-layer-carrier/physical-layer-carrier.html)
+[Carrier generate and recovery tests](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
 features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit
@@ -22,7 +22,7 @@ data over sound between two laptops:
 
 First of all you need to have two devices. One for sending, one for receiving data. It should work with any
 device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API. Next you need to open
-[Demo - simple](https://audio-network.rypula.pl/example/02-physical-layer-simple/physical-layer-simple.html)
+[Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
 at both devices and follow steps below:
 
 1. **[Receiver]** - Before you load demo page you need to be quiet :) Receiving device needs to listen to 'silence'
@@ -86,8 +86,8 @@ receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLa
 ```
 
 Below you can find `Demo - simple` source code:
-  - [html](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.html)
-  - [js](https://github.com/robertrypula/AudioNetwork/blob/master/example/02-physical-layer-simple/physical-layer-simple.js)
+  - [html](https://github.com/robertrypula/AudioNetwork/blob/master/example/01-000-physical-layer-simple/physical-layer-simple.html)
+  - [js](https://github.com/robertrypula/AudioNetwork/blob/master/example/01-000-physical-layer-simple/physical-layer-simple.js)
 
 >To work properly `Web Audio API` requires running your HTML file via web server (`http://localhost...`) like Apache
 >or some Node stuff like `gulp-webserver` (I'm using it and it works great). In case of local machine normal `http`

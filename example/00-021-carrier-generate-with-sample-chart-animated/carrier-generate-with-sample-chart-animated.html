@@ -8,7 +8,7 @@
     <meta name="description" content="">
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="amplitude-modulation-full.css">
+    <link rel="stylesheet" type="text/css" href="carrier-generate-with-sample-chart-animated.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -37,70 +37,6 @@
             </div>
             -->
 
-            <h2>Config</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Init
-                            </b>
-                        </div>
-                        <div class="col col-sm-6">
-                            <div class="margin-bottom">
-                                Symbol time factor
-                                <input type="text" id="symbol-time-factor" value="1" />
-                            </div>
-                            <div class="margin-bottom">
-                                Notify time resolution
-                                <input type="number" id="notify-time-resolution" value="16" />
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="loopback-active" checked="checked" />
-                                Loopback
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="white-noise-active" checked="checked" />
-                                White noise
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="power-info-active" checked="checked" />
-                                Power info
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="power-chart-active" checked="checked" />
-                                Power chart
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="web-audio-api-node-active" checked="checked" />
-                                Web audio api node
-                            </div>
-                            <div class="margin-bottom">
-                                <input type="checkbox" id="debug-symbol-history-active" />
-                                Debug symbol history
-                            </div>
-                            <div class="margin-bottom">
-                                Sub carrier size
-                                <input type="number" id="sub-carrier-size" value="8" />
-                            </div>
-                            <div class="margin-bottom">
-                                Pilot frequency
-                                <input type="text" id="pilot-frequency" value="5000" />
-                            </div>
-                            <div class="margin-bottom">
-                                OFDM spacing factor
-                                <input type="text" id="ofdm-spacing-factor" value="1" />
-                            </div>
-
-                            <button id="init-button" class="btn btn-default" onClick="init()">Init</button>
-                            <button class="btn btn-default" onClick="window.location.reload();">Reload</button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
             <h2>Blabla</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
@@ -108,88 +44,15 @@
                     <div class="row margin-bottom">
                         <div class="col col-sm-3">
                             <b class="label">
-                                Benchmark
+                                Test
                             </b>
                         </div>
                         <div class="col col-sm-6">
-                            <button class="btn btn-default" onClick="benchmark()">Run</button>
+                            <button class="btn btn-default" onClick="test()">Go!</button>
                         </div>
                     </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Send value
-                            </b>
-                        </div>
-                        <div class="col col-sm-6">
-                            <input type="text" id="value-to-send" value="0x61" />
-                            <button class="btn btn-default" onClick="send(parseInt(document.getElementById('value-to-send').value))">Send</button>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Send text
-                            </b>
-                        </div>
-                        <div class="col col-sm-6">
-                            <input type="text" id="text-to-send" value="audio network" />
-                            <button class="btn btn-default" onClick="sendText(document.getElementById('text-to-send').value)">Send text</button>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Keyboard input
-                            </b>
-                        </div>
-                        <div class="col col-sm-6">
-                            <textarea id="keyboard-event-grabber"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Power
-                            </b>
-                        </div>
-                        <div class="col col-sm-6" style="font-family: monospace;">
-                            <span id="power-decibel-pilot"></span>
-                            <span id="power-decibel-0"></span>
-                            <span id="power-decibel-1"></span>
-                            <span id="power-decibel-2"></span>
-                            <span id="power-decibel-3"></span>
-                            <span id="power-decibel-4"></span>
-                            <span id="power-decibel-5"></span>
-                            <span id="power-decibel-6"></span>
-                            <span id="power-decibel-7"></span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom">
-                        <div class="col col-sm-3">
-                            <b class="label">
-                                Received data
-                            </b>
-                        </div>
-                        <div class="col col-sm-6">
-                            <div id="symbol" style="font-family: monospace;"></div>
-                        </div>
-                    </div>
-
-                    <div id="power-chart-pilot" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-0" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-1" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-2" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-3" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-4" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-5" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-6" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
-                    <div id="power-chart-7" style="margin-bottom: 20px; border: 1px solid lightgray;"></div>
+                    <div id="chart"></div>
 
 
                 </div>
@@ -270,7 +133,7 @@
     <script src="../../src/audio-network-end.js"></script>
     <!-- audio network END -->
 
-    <script src="amplitude-modulation-full.js"></script>
+    <script src="carrier-generate-with-sample-chart-animated.js"></script>
 
     <script>
         /*

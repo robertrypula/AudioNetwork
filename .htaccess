@@ -1,0 +1,3 @@
+Redirect 301 /example/01-physical-layer/physical-layer.html /example/01-001-physical-layer-full/physical-layer-full.html
+Redirect 301 /example/02-physical-layer-simple/physical-layer-simple.html /example/01-000-physical-layer-simple/physical-layer-simple.html
+Redirect 301 /example/03-physical-layer-carrier/physical-layer-carrier.html /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html

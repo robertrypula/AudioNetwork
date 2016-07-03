@@ -8,29 +8,24 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - rename example directories (000 for basic demos, 100 for physical layer demos, ...)
-       00-..-audio-context-initialization
-       00-..-analyzer-chart
-       00-..-script-processor-node
-       00-..-sample-chart-and-queue
-       00-..-script-processor-node-with-sample-chart
-       00-..-carrier-generate-with-sample-chart
-       00-..-carrier-generate-with-sample-chart-animated
-       00-..-carrier-generate-adding-couple-of-sines
-       00-..-power-chart
-       00-..-constellation-diagram
-       00-..-carrier-recovery-dft-simple
-       00-..-carrier-recovery-dft-full
-       00-..-amplitude-modulation-transmission-simple
-       00-..-amplitude-modulation-transmission-full
-
-       01-..-physical-layer-simple
-       01-..-physical-layer-full
-
-  - add htaccess redirection to renamed examples
-       Redirect 301 /oldfile.htm /newfile.htm
-  - create new chart 'SampleChart', create new example when CarrierGenerate will be demonstrated
-  - start writing article
+  - create new chart 'SampleChart', create new example where CarrierGenerate will be demonstrated
+  - start writing article, below list of examples that might be needed:
+    - 00-000-audio-context-initialization
+    - 00-010-analyzer-chart
+    - 00-011-script-processor-node
+    - 00-012-sample-chart-and-queue
+    - 00-013-script-processor-node-with-sample-chart
+    - 00-020-carrier-generate-with-sample-chart
+    - 00-021-carrier-generate-with-sample-chart-animated          \example\00-00-carrier-generate-with-sample-chart-animated\carrier-generate-and-recovery.html
+    - 00-022-carrier-generate-adding-couple-of-sines
+    - 00-030-power-chart
+    - 00-031-constellation-diagram
+    - 00-040-dft-carrier-recovery-simple                          \example\03-physical-layer-carrier\physical-layer-carrier.html
+    - 00-041-dft-carrier-recovery-full
+    - 00-050-amplitude-modulation-transmission-simple
+    - 00-051-amplitude-modulation-transmission-full               \example\00-01-amplitude-modulation-full\amplitude-modulation-full.html
+    - 01-000-physical-layer-simple                                \example\02-physical-layer-simple\physical-layer-simple.html
+    - 01-001-physical-layer-full                                  \example\01-physical-layer\physical-layer.html
   - fix last templates issues in ultra-simple demo, rename to some nicer name
   - move common code of all canvas drawing to abstract class
   - create wrapper classes for audio nodes
@@ -116,6 +111,8 @@ TODO list:
   + AudioContext class was renamed to SimpleAudioContext in order to avoid collision with real window.AudioContext
   + addToQueue is now taking object as a parameter instead array of objects
   + Jasmine unit test web runner added (currently still without tests but at least running environment was prepared)
+  + rename example directories (000 for basic demos, 100 for physical layer demos, ...)
+  + add htaccess redirection to renamed examples
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
