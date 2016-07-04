@@ -32,7 +32,7 @@
                             </p>
                         </div>
                     </div>
-                    
+
 <h2 id="roadmap">Roadmap</h2>
 <ul>
 <li>1.x.x finish all PhysicalLayer stuff (Web Audio API, raw packets)</li>
@@ -44,14 +44,12 @@
 <h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
 <p>TODO list:</p>
 <ul>
-<li>move current audio service logic to factory and connect it to ActiveAudioContext</li>
-<li>create new chart &#39;SampleChart&#39;, create new example when CarrierGenerate will be demonstrated</li>
-<li>rename example directories (000 for basic demos, 100 for physical layer demos, ...) and add htaccess redirection</li>
 <li>start writing article</li>
 <li>fix last templates issues in ultra-simple demo, rename to some nicer name</li>
 <li>move common code of all canvas drawing to abstract class</li>
 <li>create wrapper classes for audio nodes</li>
-<li><p>create sine/cosine cache service + tests in jasmine</p>
+<li>create sine/cosine cache service + tests in jasmine</li>
+<li><p>rename destroy methods to destroyAsync</p>
 </li>
 <li><p>use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout</p>
 </li>
@@ -59,8 +57,8 @@
 <li>refactor DOM helpers (move to service)</li>
 <li>change adapter parameter order or move all adapter initialization</li>
 <li>introduce handlers similar to existing setPacketReceiveHandler</li>
-<li>ReceiveAdapter should register own rx handler inside Adapter class</li>
-<li>move all adapter logic to dedicated namespace (???)</li>
+<li>ReceiveAdapter should register own rx handler inside Adapter class (??)</li>
+<li>change &#39;physical-layer&#39; to &#39;physical-layer-core&#39;, &#39;physical-layer-adapter&#39; to &#39;physical-layer&#39; (??)</li>
 <li>refactor manager code to pass whole array to/from channel instead single sample<ul>
 <li>receive-manager</li>
 <li>receive-channel</li>
@@ -115,17 +113,7 @@
 <li>connect all together</li>
 </ul>
 </li>
-<li>discrete fourier transform in a nutshell<ul>
-<li>much simpler than FFT but ultra slow</li>
-<li>explain frequency domain and time domain, frequency bin [IMAGE]</li>
-<li>tell about samplesPerPeriod -&gt; a way to skip sampling frequency</li>
-<li>add couple of sine waves together [CHART separate and sum]</li>
-<li>describe algorithm, running circle  [CHART]</li>
-<li>show that we collect vectors per each sample [CHART]</li>
-<li>when input signal contains that frequency it will produce lots of vectors that points to the same direction</li>
-<li>sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave</li>
-</ul>
-</li>
+<li>discrete fourier transform in a nutshell -&gt; \page\dsp-in-javascript\discrete-fourier-transform-in-a-nutshell.md</li>
 <li>carrier generate and receive<ul>
 <li>describe simple classes from AudioNetwork&#39;s lib</li>
 </ul>
@@ -144,7 +132,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="v1-0-4-2016-0-">v1.0.4 (2016-0?-??)</h2>
+<h2 id="v1-0-4-2016-0-">v1.0.4 (2016-07-04)</h2>
 <ul>
 <li>new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)</li>
 <li>expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)</li>
@@ -152,6 +140,14 @@
 <li>move all charts to dedicated namespace &#39;visualizer&#39;</li>
 <li>move CarrierRecovery and CarrierGenerate to &#39;common&#39; namespace</li>
 <li>move audio service to separate namespace &#39;audio&#39; and change name of the service to ActiveAudioContext</li>
+<li>move adapter classes to &#39;physical-layer-adapter&#39;</li>
+<li>move current audio service logic to factory and connect it to ActiveAudioContext</li>
+<li>AudioContext class was renamed to SimpleAudioContext in order to avoid collision with real window.AudioContext</li>
+<li>addToQueue is now taking object as a parameter instead array of objects</li>
+<li>Jasmine unit test web runner added (currently still without tests but at least running environment was prepared)</li>
+<li>rename example directories (000 for basic demos, 100 for physical layer demos, ...)</li>
+<li>add htaccess redirection to renamed examples</li>
+<li>create new chart &#39;SampleChart&#39;, create new example where CarrierGenerate will be demonstrated</li>
 </ul>
 <h2 id="v1-0-3-2016-05-30-">v1.0.3 (2016-05-30)</h2>
 <ul>

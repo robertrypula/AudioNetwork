@@ -14,12 +14,11 @@ gulp.task('default', function() {
     // var pattern = "./src/**/!(*.test).js";
     return gulp.src([
             './src/audio-network-begin.js',
-            './src/common/**/*.js',
-            './src/physical-layer/**/*.js',
+            './src/**/!(audio-network-begin|audio-network-end|*.test).js',
             './src/audio-network-end.js'
         ])
         .pipe(debug())
-        .pipe(concat('audio-network-v1.0.3.js'))
+        .pipe(concat('audio-network-v1.0.4.js'))
         .pipe(header('/*\n' + fs.readFileSync('./LICENCE', 'utf8') + '*/\n\n'))
         .pipe(gulp.dest(DEST))
         .pipe(uglify())
@@ -58,7 +57,7 @@ gulp.task('serve', function() {
 var Glob = require("glob").Glob;
 
 gulp.task('script-tag', function() {
-    var pattern = "./src/**/!(audio-network-begin|audio-network-end).js";
+    var pattern = "./src/**/!(audio-network-begin|audio-network-end|*.test).js";
     var mg = new Glob(pattern, {mark: true}, function (er, matches) {
         console.log('<script src="../../src/audio-network-begin.js"></script>');
         for (var i = 0; i < matches.length; i++) {

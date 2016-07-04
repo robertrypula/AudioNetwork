@@ -2,7 +2,7 @@
   "name": "audio-network",
   "version": "1.0.3",
   "description": "Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!",
-  "main": "build/audio-network-v1.0.3.js",
+  "main": "build/audio-network-v1.0.4.js",
   "dependencies": {},
   "devDependencies": {
     "glob": "^7.0.5",

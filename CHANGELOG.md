@@ -74,7 +74,7 @@ TODO list:
     - summary
       - put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)
 
-## v1.0.4 (2016-0?-??)
+## v1.0.4 (2016-07-04)
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)
   + expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)
   + introduce SimplePromise class (idea is to have code as less dependent to browser as possible in order to port it easily to other languages)
