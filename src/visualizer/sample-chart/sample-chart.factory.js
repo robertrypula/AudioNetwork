@@ -6,127 +6,74 @@
         .registerFactory('Visualizer.SampleChart', _SampleChart);
 
     _SampleChart.$inject = [
+        'Visualizer.AbstractVisualizer',
         'Visualizer.SampleChartTemplateMain',
-        'Common.SimplePromiseBuilder'
+        'Common.Util'
     ];
 
     function _SampleChart(
+        AbstractVisualizer,
         SampleChartTemplateMain,
-        SimplePromiseBuilder
+        Util
     ) {
         var SampleChart;
 
-        SampleChart = function (parentElement, width, height, queue) {
-            this.$$parentElement = parentElement;
-            this.$$canvas = null;
-            this.$$canvasContext = null;
-            this.$$canvasWidth = width;
-            this.$$canvasHeight = height;
+        SampleChart = function (parentElement, width, height, queue, colorAxis, colorSample) {
+            AbstractVisualizer.call(this, parentElement, width, height);
+
+            if (queue.getSizeMax() !== width) {
+                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
             this.$$queue = queue;
-            this.$$destroyPromise = null;
-            
-            this.$$initAnimationFrame();
-            this.$$init();
+            this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
+            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
         };
 
-        SampleChart.prototype.destroy = function () {
-            if (this.$$destroyPromise) {
-                return this.$$destroyPromise;
-            }
-            this.$$destroyPromise = SimplePromiseBuilder.build();
+        SampleChart.prototype = Object.create(AbstractVisualizer.prototype);
+        SampleChart.prototype.constructor = SampleChart;
 
-            return this.$$destroyPromise;
-        };
-
-        SampleChart.prototype.$$init = function () {
-            this.$$canvasContext = null;
-            this.$$parentElement.innerHTML = this.$$renderTemplate();
-            this.$$connectTemplate();
-            this.$$initCanvasContext();
-        };
-
-        // TODO move it to dedicated service
-        SampleChart.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentElement.querySelectorAll(selector);
-
-            if (jsObject.length === 0) {
-                throw 'Cannot $$find given selector';
-            }
-
-            return jsObject[0];
-        };
-
-        SampleChart.prototype.$$connectTemplate = function () {
-            this.$$canvas = this.$$find('.power-chart');
-            this.$$canvasContext = this.$$canvas.getContext("2d");
-        };
+        SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
 
         SampleChart.prototype.$$renderTemplate = function () {
             var tpl = SampleChartTemplateMain.html;
 
-            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
-            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
 
             return tpl;
         };
 
-        SampleChart.prototype.$$updateChart = function () {
+        SampleChart.prototype.$$draw = function () {
             var
                 ctx = this.$$canvasContext,
                 q = this.$$queue,
-                w = this.$$canvasWidth,
-                h = this.$$canvasHeight,
-                power, i, x, y
+                w = this.$$width,
+                h = this.$$height,
+                sample, i, x, y
             ;
-
-            if (ctx === null) {
-                return;
-            }
 
             ctx.clearRect(0, 0, w, h);
 
-            for (y = 0; y < h; y += 10) {
-                ctx.strokeStyle = '#EEE';          // TODO add ability to set colors via configuration object
-                ctx.beginPath();
-                ctx.moveTo(0, 2 * y);
-                ctx.lineTo(w, 2 * y);
-                ctx.closePath();
-                ctx.stroke();
-            }
+            ctx.strokeStyle = this.$$colorAxis;
+            ctx.beginPath();
+            ctx.moveTo(0, 0.5 * h);
+            ctx.lineTo(w, 0.5 * h);
+            ctx.closePath();
+            ctx.stroke();
 
             for (i = 0; i < q.getSize(); i++) {
-                power = q.getItem(i);
+                sample = q.getItem(i);
 
                 x = i;
-                y = -power;
+                y = (0.5 - 0.5 * sample) * h;
 
-                ctx.fillStyle = '#738BD7';     // TODO add ability to set colors via configuration object
-                ctx.fillRect(
-                    x - 1,
-                    2 * y - 1,
-                    3,
-                    3
-                );
+                ctx.fillStyle = this.$$colorSample;
+                ctx.fillRect(x - 1, y - 1, 3, 3);
             }
         };
 
         SampleChart.prototype.$$initCanvasContext = function () {
             this.$$canvasContext.lineWidth = 1;
-        };
-
-        SampleChart.prototype.$$initAnimationFrame = function () {
-            var self = this;
-
-            function drawAgain() {
-                if (self.$$destroyPromise) {
-                    self.$$parentElement.innerHTML = '';
-                    self.$$destroyPromise.resolve();
-                } else {
-                    self.$$updateChart();
-                    requestAnimationFrame(drawAgain);
-                }
-            }
-            requestAnimationFrame(drawAgain);
         };
 
         return SampleChart;

@@ -6,7 +6,7 @@ var
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
 
-    SAMPLE_RATE = 0.5 * 441,
+    SAMPLE_RATE = 0.50 * 441,
     FPS = 50,
     CHART_WIDTH = 800,
     CHART_HEIGHT = 100,
@@ -23,7 +23,7 @@ function test() {
     carrierGenerate.addToQueue({
         duration: Math.round(SAMPLE_RATE * 0.5),
         phase: 0,
-        amplitude: 1
+        amplitude: 0.25
     });
 }
 
@@ -32,8 +32,7 @@ function draw() {
 
     for (i = 0; i < Math.round(SAMPLE_RATE / FPS); i++) {
         queue.pushEvenIfFull(
-            -20 + 15 * carrierGenerate.getSample()
-            //+ Math.random() * 5
+            carrierGenerate.getSample() + Math.random() * 0.05
         );
 
         carrierGenerate.nextSample();
@@ -41,4 +40,3 @@ function draw() {
 }
 
 setInterval(draw, Math.round(1000 / FPS));
-

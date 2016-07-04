@@ -19,11 +19,11 @@
         SignalPowerCollector = function () {
             AbstractValueCollector.apply(this, arguments);
         };
-
-        SignalPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
-
+        
         SignalPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
         SignalPowerCollector.prototype.constructor = SignalPowerCollector;
+
+        SignalPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
 
         SignalPowerCollector.prototype.$$finalize = function () {
             if (this.$$valueList.length === 0) {

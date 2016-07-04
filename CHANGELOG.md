@@ -113,6 +113,7 @@ TODO list:
   + Jasmine unit test web runner added (currently still without tests but at least running environment was prepared)
   + rename example directories (000 for basic demos, 100 for physical layer demos, ...)
   + add htaccess redirection to renamed examples
+  + create new chart 'SampleChart', create new example where CarrierGenerate will be demonstrated
 
 ## v1.0.3 (2016-05-30)
   + fix transition from FIRST_SYNC_INIT -> IDLE, currently there are some SYMBOL/GUARD states which are not right at this point
