@@ -8,24 +8,7 @@
 ## Backlog for future 1.x.x releases
 
 TODO list:
-  - create new chart 'SampleChart', create new example where CarrierGenerate will be demonstrated
-  - start writing article, below list of examples that might be needed:
-    - 00-000-audio-context-initialization
-    - 00-010-analyzer-chart
-    - 00-011-script-processor-node
-    - 00-012-sample-chart-and-queue
-    - 00-013-script-processor-node-with-sample-chart
-    - 00-020-carrier-generate-with-sample-chart
-    - 00-021-carrier-generate-with-sample-chart-animated          \example\00-00-carrier-generate-with-sample-chart-animated\carrier-generate-and-recovery.html
-    - 00-022-carrier-generate-adding-couple-of-sines
-    - 00-030-power-chart
-    - 00-031-constellation-diagram
-    - 00-040-dft-carrier-recovery-simple                          \example\03-physical-layer-carrier\physical-layer-carrier.html
-    - 00-041-dft-carrier-recovery-full
-    - 00-050-amplitude-modulation-transmission-simple
-    - 00-051-amplitude-modulation-transmission-full               \example\00-01-amplitude-modulation-full\amplitude-modulation-full.html
-    - 01-000-physical-layer-simple                                \example\02-physical-layer-simple\physical-layer-simple.html
-    - 01-001-physical-layer-full                                  \example\01-physical-layer\physical-layer.html
+  - start writing article
   - fix last templates issues in ultra-simple demo, rename to some nicer name
   - move common code of all canvas drawing to abstract class
   - create wrapper classes for audio nodes
@@ -80,15 +63,7 @@ TODO list:
       - gain node
       - show audio processing event
       - connect all together
-    - discrete fourier transform in a nutshell
-      - much simpler than FFT but ultra slow
-      - explain frequency domain and time domain, frequency bin [IMAGE]
-      - tell about samplesPerPeriod -> a way to skip sampling frequency
-      - add couple of sine waves together [CHART separate and sum]
-      - describe algorithm, running circle  [CHART]
-      - show that we collect vectors per each sample [CHART]
-      - when input signal contains that frequency it will produce lots of vectors that points to the same direction
-      - sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave
+    - discrete fourier transform in a nutshell -> \page\dsp-in-javascript\discrete-fourier-transform-in-a-nutshell.md
     - carrier generate and receive
       - describe simple classes from AudioNetwork's lib
     - simple transmitter and receiver app
