@@ -55,7 +55,7 @@ column on the chart is called frequency bin and tells how much [??of each freque
 80/0prw = +INF samplePerPeriod    80/1prw = 80 samplePerPeriod    80/10prw = 8 samplePerPeriod    80/40prw = 2 samplePerPeriod
 80/+INFspp = 0 periodPerWindow    80/80spp = 1 periodPerWindow    80/8spp = 10 periodPerWindow    80/2ssp = 40 periodPerWindow
 
-
+```
 function computeFrequencyBin(samplePerPeriod) {
     var i;
 
@@ -68,6 +68,7 @@ function computeFrequencyBin(samplePerPeriod) {
 
     }
 }
+```
 
 [...]
 

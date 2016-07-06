@@ -2,6 +2,98 @@ var
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
+    SampleChart = AudioNetwork.Visualizer.SampleChart,
+    Queue = AudioNetwork.Common.Queue,
+
+
+    TIME_DOMAIN_WIDTH = 1138,
+    TIME_DOMAIN_HEIGHT = 50,
+
+    sineSamplePerPeriod = [ 20, 32, 40 ],
+    sineCarrierGenerate = [],
+    sineQueue = [],
+    sineChart = [],
+    finalSignalQueue = [],
+    finalSignalChart = [];
+
+
+function initSine() {
+    var i, j, cg, q, c, spp, element;
+
+    for (i = 0; i < sineSamplePerPeriod.length; i++) {
+        spp = sineSamplePerPeriod[i];
+
+        cg = new CarrierGenerate(spp);
+        q =  new Queue(TIME_DOMAIN_WIDTH);
+        element = document.getElementById('sine-' + i);
+        c = new SampleChart(element, TIME_DOMAIN_WIDTH, TIME_DOMAIN_HEIGHT, q);
+
+        cg.addToQueue({
+            amplitude: 1 / sineSamplePerPeriod.length,
+            duration: TIME_DOMAIN_WIDTH,
+            phase: 0
+        });
+
+        for (j = 0; j < TIME_DOMAIN_WIDTH; j++) {
+            q.push(cg.getSample());
+            cg.nextSample();
+        }
+        sineCarrierGenerate.push(cg);
+        sineQueue.push(q);
+        sineChart.push(c);
+    }
+}
+
+function initFinalSignal() {
+    var i, j, finalSignal, element;
+
+    finalSignalQueue = new Queue(sineQueue[0].getSizeMax());
+    for (i = 0; i < sineQueue[0].getSizeMax(); i++) {
+        finalSignal = 0;
+        for (j = 0; j < sineQueue.length; j++) {
+            finalSignal += sineQueue[j].getItem(i);
+        }
+        finalSignalQueue.push(finalSignal);
+    }
+    element = document.getElementById('final-signal');
+    finalSignalChart = new SampleChart(element, TIME_DOMAIN_WIDTH, TIME_DOMAIN_HEIGHT, finalSignalQueue);
+}
+
+function getFrequencyBin(timeDomain, samplePerPeriod) {
+    var i, r, cos, sin, sample, result, detail;
+
+    result = {
+        real: 0,
+        imm: 0,
+        powerDecibel: 0,
+        detail: []
+    };
+    for (i = 0; i < timeDomain.length; i++) {
+        sample = timeDomain[i];
+        r = 2 * Math.PI * i / samplePerPeriod;
+        cos = Math.cos(r);
+        sin = Math.sin(r);
+
+        detail = {
+            realUnit: cos,
+            immUnit: sin,
+            realUnit: sample * cos,
+            immUnit: sample * sin
+        };
+        result.detail.push(detail);
+    }
+}
+
+function init() {
+    initSine();
+    initFinalSignal();
+}
+
+init();
+
+
+
+/*
     sampleFrequency = 44100,
     burstDuration = sampleFrequency * 0.040,  // 1764 samples per burst, 25 baud / sec
     color = 1 ? 'rgba(130, 90, 200, 1)' : 'rgba(250, 250, 250, 1)',
@@ -234,3 +326,4 @@ function benchmark() {
 }
 
 // setTimeout(benchmark, 3000);
+*/
