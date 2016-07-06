@@ -1,20 +1,33 @@
 var
-    CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
-    ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
 
 
-    TIME_DOMAIN_WIDTH = 1138,
+    TIME_DOMAIN_WIDTH = 1138 * 2,
     TIME_DOMAIN_HEIGHT = 50,
 
-    sineSamplePerPeriod = [ 20, 32, 40 ],
+    sineSamplePerPeriod = [ 30, 50, 60 ],
     sineCarrierGenerate = [],
     sineQueue = [],
     sineChart = [],
-    finalSignalQueue = [],
-    finalSignalChart = [];
+    finalSignalQueue,
+    finalSignalChart,
+
+    SAMPLE_OFFSET = 0,
+    SAMPLE_PER_WINDOW = 5 * 330,
+
+    timeDomain = [],
+
+    SAMPLE_PER_FREQUENCY_BIN_FIRST = 10,
+    SAMPLE_PER_FREQUENCY_BIN_LAST = 80,
+    FREQUENCY_BIN_SIZE = 200,
+
+    frequencyDomainQueue,
+    frequencyDomainChart,
+
+    POWER_DECIBEL_MIN = -30
+    ;
 
 
 function initSine() {
@@ -59,10 +72,36 @@ function initFinalSignal() {
     finalSignalChart = new SampleChart(element, TIME_DOMAIN_WIDTH, TIME_DOMAIN_HEIGHT, finalSignalQueue);
 }
 
+function initTimeDomain() {
+    var i;
+
+    for (i = 0; i < SAMPLE_PER_WINDOW; i++) {
+        timeDomain.push(
+            finalSignalQueue.getItem(SAMPLE_OFFSET + i)
+        );
+    }
+}
+
+function initFrequencyDomain() {
+    var binStep, i, samplePerPeriod, frequencyBin, element;
+
+    frequencyDomainQueue = new Queue(FREQUENCY_BIN_SIZE);
+    binStep = (SAMPLE_PER_FREQUENCY_BIN_LAST - SAMPLE_PER_FREQUENCY_BIN_FIRST) / (FREQUENCY_BIN_SIZE - 1);
+    for (i = 0; i < FREQUENCY_BIN_SIZE; i++) {
+        samplePerPeriod = SAMPLE_PER_FREQUENCY_BIN_FIRST + i * binStep;
+        frequencyBin = getFrequencyBin(timeDomain, samplePerPeriod);
+        frequencyDomainQueue.push(1 - (frequencyBin.powerDecibel / POWER_DECIBEL_MIN))
+    }
+
+    element = document.getElementById('frequency-domain');
+    frequencyDomainChart = new SampleChart(element, FREQUENCY_BIN_SIZE, 300, frequencyDomainQueue);
+}
+
 function getFrequencyBin(timeDomain, samplePerPeriod) {
-    var i, r, cos, sin, sample, result, detail;
+    var i, r, cos, sin, sample, result, detail, power;
 
     result = {
+        samplePerPeriod: samplePerPeriod,
         real: 0,
         imm: 0,
         powerDecibel: 0,
@@ -77,16 +116,30 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
         detail = {
             realUnit: cos,
             immUnit: sin,
-            realUnit: sample * cos,
-            immUnit: sample * sin
+            real: sample * cos,
+            imm: sample * sin
         };
+        result.real += detail.real;
+        result.imm += detail.imm;
+
         result.detail.push(detail);
     }
+
+    result.real /= timeDomain.length;
+    result.imm /= timeDomain.length;
+
+    power = Math.sqrt(result.real * result.real + result.imm * result.imm);
+    result.powerDecibel = 10 * Math.log(power) / Math.LN10;
+    result.powerDecibel = result.powerDecibel < POWER_DECIBEL_MIN ? POWER_DECIBEL_MIN : result.powerDecibel;
+
+    return result;
 }
 
 function init() {
     initSine();
     initFinalSignal();
+    initTimeDomain();
+    initFrequencyDomain();
 }
 
 init();
