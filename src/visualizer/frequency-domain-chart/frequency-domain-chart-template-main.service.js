@@ -3,14 +3,14 @@
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Visualizer.SampleChartTemplateMain', _SampleChartTemplateMain);
+        .registerService('Visualizer.FrequencyDomainChartTemplateMain', _FrequencyDomainChartTemplateMain);
 
-    _SampleChartTemplateMain.$inject = [];
+    _FrequencyDomainChartTemplateMain.$inject = [];
 
-    function _SampleChartTemplateMain() {
+    function _FrequencyDomainChartTemplateMain() {
         var html =
             '<div' +
-            '    class="sample-chart-container"' +
+            '    class="frequency-domain-chart-container"' +
             '    style="' +
             '        overflow: hidden;' +
             '        width: {{ width }}px;' +

@@ -5,9 +5,13 @@
     AudioNetwork.Injector
         .registerFactory('Common.Queue', _Queue);
 
-    _Queue.$inject = [];
+    _Queue.$inject = [
+        'Common.MathUtil'
+    ];
 
-    function _Queue() {
+    function _Queue(
+        MathUtil
+    ) {
         var Queue;
 
         Queue = function (sizeMax) {
@@ -16,8 +20,17 @@
             this.$$positionStart = 0;
             this.$$positionEnd = 0;
             this.$$size = 0;
+            this.$$hash = 0;
 
             this.$$data.length = sizeMax;
+        };
+
+        Queue.prototype.$$generateNewHash = function () {
+            this.$$hash = MathUtil.random() * 1000000;
+        };
+
+        Queue.prototype.getHash = function () {
+            return this.$$hash;
         };
 
         Queue.prototype.push = function (value) {
@@ -28,6 +41,8 @@
             this.$$data[this.$$positionEnd] = value;
             this.$$positionEnd = (this.$$positionEnd + 1) % this.$$sizeMax;
             this.$$size++;
+
+            this.$$generateNewHash();
 
             return true;
         };
@@ -48,6 +63,8 @@
             result = this.$$data[this.$$positionStart];
             this.$$positionStart = (this.$$positionStart + 1) % this.$$sizeMax;
             this.$$size--;
+
+            this.$$generateNewHash();
 
             return result;
         };

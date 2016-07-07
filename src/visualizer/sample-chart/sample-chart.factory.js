@@ -18,15 +18,21 @@
     ) {
         var SampleChart;
 
-        SampleChart = function (parentElement, width, height, queue, colorAxis, colorSample) {
+        SampleChart = function (parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
             AbstractVisualizer.call(this, parentElement, width, height);
 
-            if (queue.getSizeMax() !== width) {
-                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
-            }
             this.$$queue = queue;
+            this.$$radius = Util.valueOrDefault(radius, 1.1);
+            this.$$barWidth = Util.valueOrDefault(barWidth, 1);
+            this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
             this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
+
+            if (queue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== width) {
+                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
+
+            this.$$queueHashOnCanvas = null;
         };
 
         SampleChart.prototype = Object.create(AbstractVisualizer.prototype);
@@ -49,27 +55,48 @@
                 q = this.$$queue,
                 w = this.$$width,
                 h = this.$$height,
-                sample, i, x, y
+                sample, i, x, y, barMiddle
             ;
 
-            ctx.clearRect(0, 0, w, h);
+            if (this.$$queueHashOnCanvas === q.getHash()) {
+                return;
+            }
 
+            ctx.clearRect(0, 0, w, h);
             ctx.strokeStyle = this.$$colorAxis;
+            ctx.fillStyle = this.$$colorSample;
+
             ctx.beginPath();
             ctx.moveTo(0, 0.5 * h);
             ctx.lineTo(w, 0.5 * h);
             ctx.closePath();
             ctx.stroke();
-
+            
+            barMiddle = 0.5 * (this.$$barWidth - 1);
             for (i = 0; i < q.getSize(); i++) {
                 sample = q.getItem(i);
 
-                x = i;
+                x = i * (this.$$barWidth + this.$$barSpacingWidth);
                 y = (0.5 - 0.5 * sample) * h;
 
-                ctx.fillStyle = this.$$colorSample;
-                ctx.fillRect(x - 1, y - 1, 3, 3);
+                if (this.$$barSpacingWidth >= 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                ctx.beginPath();
+                ctx.arc(
+                    x + this.$$barSpacingWidth + barMiddle, y,
+                    this.$$radius, 0, 2 * Math.PI, false
+                );
+                ctx.fill();
+                // ctx.fillRect(x - 1, y - 1, 3, 3);
             }
+
+            this.$$queueHashOnCanvas = q.getHash();
         };
 
         SampleChart.prototype.$$initCanvasContext = function () {

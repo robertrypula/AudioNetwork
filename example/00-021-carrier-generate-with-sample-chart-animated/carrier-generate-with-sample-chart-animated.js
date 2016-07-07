@@ -6,12 +6,12 @@ var
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
 
-    SAMPLE_RATE = 0.50 * 441,
+    SAMPLE_RATE = 100,
     FPS = 50,
     CHART_WIDTH = 800,
     CHART_HEIGHT = 100,
 
-    FREQUENCY = 8,
+    FREQUENCY = 5,
     SAMPLE_PER_FREQUENCY = SAMPLE_RATE / FREQUENCY,
 
     carrierGenerate = new CarrierGenerate(SAMPLE_PER_FREQUENCY),
@@ -21,7 +21,7 @@ var
 
 function test() {
     carrierGenerate.addToQueue({
-        duration: Math.round(SAMPLE_RATE * 0.5),
+        duration: Math.round(SAMPLE_RATE * 1.0),
         phase: 0,
         amplitude: 0.25
     });
