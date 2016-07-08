@@ -3,7 +3,7 @@
 Without Discrete Fourier Transform none of the modern digital communication techniques like LTE, WiFi, DVB could
 not exist. What it actually does? It changes signal represented in time domain into frequency domain. In other
 words it is decomposing signal that varies over time into the frequencies that make it. That allows us to
-tune/pick only specific range of frequencies from full spectrum.
+tune/pick only specific range of frequencies from full spectrum.    [TODO - split audio and electromagnetic spectrum]
 Output of Discrete Fourier Transform is often showed on music player window or on radio LCD. Apart from nice looking
 bouncing bars we can also read from that output how loud each frequency range is. We can for example read without even
 listening to the song how fast is the bass beat.

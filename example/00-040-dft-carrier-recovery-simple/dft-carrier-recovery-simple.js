@@ -3,55 +3,48 @@ var
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
     Queue = AudioNetwork.Common.Queue,
+    WindowFunction = AudioNetwork.Common.WindowFunction,
 
-    bufferSize = 1138 * 4,
+    bufferSize = 1138 * 2,
 
     SAMPLE_CHART_HEIGHT = 50,
     SAMPLE_CHART_RADIUS = 1,
     SAMPLE_CHART_BAR_WIDTH = 1,
     SAMPLE_CHART_BAR_SPACING_WIDTH = 0,
 
-    FREQUENCY_BIN_CHART_HEIGHT = 200,
-    FREQUENCY_BIN_CHART_RADIUS = 2,
-    FREQUENCY_BIN_CHART_BAR_WIDTH = 7,
-    FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH = 1,
-
-    bufferSamplePerPeriod = [ 30, 50, 60 ],
+    bufferSamplePerPeriod = [ 16, 20, 28 ],
     bufferCarrierGenerate = [],
     bufferQueue = [],
     bufferChart = [],
     bufferFinalQueue,
     bufferFinalChart,
 
-    windowSampleOffset = 0,
-    windowSampleSize = Math.round(bufferSize * 1.0),
-    timeDomain = [],
+    windowSampleOffset = 200,
+    windowSampleSize = Math.round(1024),
+    timeDomainRawQueue,
+    timeDomainRawChart,
 
-/*
-Blackman–Nuttall window
+    windowFunctionQueue,
+    windowFunctionChart,
 
-a0
-- a1 * Math.cos(2 * Math.PI * n / (N - 1))
-+ a2 - Math.cos(4 * Math.PI * n / (N - 1))
-- a3 - Math.cos(6 * Math.PI * n / (N - 1))
+    timeDomainProcessedQueue,
+    timeDomainProcessedChart,
 
-a0 = 0.3635819;
-a1 = 0.4891775;
-a2 = 0.1365995;
-a3 = 0.0106411;
-*/
-
+    FREQUENCY_BIN_CHART_HEIGHT = 250,
+    FREQUENCY_BIN_CHART_RADIUS = 2,
+    FREQUENCY_BIN_CHART_BAR_WIDTH = 5,
+    FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH = 1,
+    frequencyBinSize = 160,
     frequencyBinSamplePerPeriodFirst = 10,
-    frequencyBinSamplePerPeriodLast = 80,
-    frequencyBinSize = 140,
-    frequencyDomain = [],
+    frequencyBinSamplePerPeriodLast = 50,
+    frequencyDomainQueue,
     frequencyDomainChart,
 
-    powerDecibelMin = -40;
+    powerDecibelMin = -80;
 
 
 function initBuffer() {
-    var i, j, carrierGenerate, queue, sampleChart, samplePerPeriod, element, sampleChartWidth;
+    var i, j, carrierGenerate, queue, sampleChart, samplePerPeriod, element, chartWidth;
 
     for (i = 0; i < bufferSamplePerPeriod.length; i++) {
         samplePerPeriod = bufferSamplePerPeriod[i];
@@ -59,8 +52,8 @@ function initBuffer() {
         carrierGenerate = new CarrierGenerate(samplePerPeriod);
         queue =  new Queue(bufferSize);
         element = document.getElementById('sine-' + i);
-        sampleChartWidth = bufferSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
-        sampleChart = new SampleChart(element, sampleChartWidth, SAMPLE_CHART_HEIGHT, queue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+        chartWidth = bufferSize;
+        sampleChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, queue);
 
         carrierGenerate.addToQueue({
             amplitude: 1 / bufferSamplePerPeriod.length,
@@ -79,7 +72,7 @@ function initBuffer() {
 }
 
 function initBufferFinal() {
-    var i, j, sampleSum, element, sampleChartWidth;
+    var i, j, sampleSum, element, chartWidth;
 
     bufferFinalQueue = new Queue(bufferSize);
     for (i = 0; i < bufferSize; i++) {
@@ -90,37 +83,72 @@ function initBufferFinal() {
         bufferFinalQueue.push(sampleSum);
     }
     element = document.getElementById('final-signal');
-    sampleChartWidth = bufferSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
-    bufferFinalChart = new SampleChart(element, sampleChartWidth, SAMPLE_CHART_HEIGHT, bufferFinalQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+    chartWidth = bufferSize;
+    bufferFinalChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, bufferFinalQueue);
 }
 
-function grabTimeDomainDataFromWindow() {
-    var i;
+function initTimeDomainRaw() {
+    var i, element, chartWidth;
 
+    timeDomainRawQueue = new Queue(windowSampleSize);
     for (i = 0; i < windowSampleSize; i++) {
-        timeDomain.push(
+        timeDomainRawQueue.push(
             bufferFinalQueue.getItem(windowSampleOffset + i)
         );
     }
+
+    element = document.getElementById('time-domain-samples-from-window-raw');
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainRawChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainRawQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+}
+
+function initWindowFunction() {
+    var i, element, chartWidth;
+
+    windowFunctionQueue = new Queue(windowSampleSize);
+    for (i = 0; i < windowSampleSize; i++) {
+        windowFunctionQueue.push(
+            WindowFunction.blackmanNuttall(i, windowSampleSize)
+        );
+    }
+
+    element = document.getElementById('window-function');
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    windowFunctionChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, windowFunctionQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+}
+
+function initTimeDomainProcessed() {
+    var i, element, chartWidth;
+
+    timeDomainProcessedQueue = new Queue(windowSampleSize);
+    for (i = 0; i < windowSampleSize; i++) {
+        timeDomainProcessedQueue.push(
+            windowFunctionQueue.getItem(i) * timeDomainRawQueue.getItem(i)
+        );
+    }
+
+    element = document.getElementById('time-domain-samples-from-window-processed');
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainProcessedChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
 }
 
 function computeDiscreteFourierTransform() {
     var binStep, i, samplePerPeriod, frequencyBin, element, frequencyDomainChartWidth;
 
-    frequencyDomain.length = 0;
+    frequencyDomainQueue = new Queue(frequencyBinSize);
     binStep = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / (frequencyBinSize - 1);
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodFirst + i * binStep;
-        frequencyBin = getFrequencyBin(timeDomain, samplePerPeriod);
-        frequencyDomain.push(frequencyBin.powerDecibel);
+        frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
+        frequencyDomainQueue.push(frequencyBin.powerDecibel);
     }
 
     element = document.getElementById('frequency-domain');
     frequencyDomainChartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
-    frequencyDomainChart = new FrequencyDomainChart(element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomain, powerDecibelMin, FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
+    frequencyDomainChart = new FrequencyDomainChart(element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue, powerDecibelMin, FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
 }
 
-function getFrequencyBin(timeDomain, samplePerPeriod) {
+function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     var i, r, cos, sin, sample, result, detail, power;
 
     result = {
@@ -130,8 +158,8 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
         powerDecibel: 0,
         detail: []
     };
-    for (i = 0; i < timeDomain.length; i++) {
-        sample = timeDomain[i];
+    for (i = 0; i < timeDomainQueue.getSize(); i++) {
+        sample = timeDomainQueue.getItem(i);
         r = 2 * Math.PI * i / samplePerPeriod;
         cos = Math.cos(r);
         sin = Math.sin(r);
@@ -148,8 +176,8 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
         result.detail.push(detail);
     }
 
-    result.real /= timeDomain.length;
-    result.imm /= timeDomain.length;
+    result.real /= timeDomainQueue.getSize();
+    result.imm /= timeDomainQueue.getSize();
 
     power = Math.sqrt(result.real * result.real + result.imm * result.imm);
 
@@ -162,7 +190,9 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
 function init() {
     initBuffer();
     initBufferFinal();
-    grabTimeDomainDataFromWindow();
+    initTimeDomainRaw();
+    initWindowFunction();
+    initTimeDomainProcessed();
     computeDiscreteFourierTransform();
 }
 

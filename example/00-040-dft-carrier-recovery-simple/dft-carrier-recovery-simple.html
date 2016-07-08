@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <h2>Final signal</h2>
+            <h2>Final signal - sum of all sines from above</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
                     <div class="big-chart">
@@ -62,7 +62,34 @@
                 </div>
             </div>
 
-            <h2>Frequency domain</h2>
+            <h2>Samples from final signal that fits the window</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="big-chart">
+                        <div id="time-domain-samples-from-window-raw"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Window function</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="big-chart">
+                        <div id="window-function"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Samples from the window after applying window function</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="big-chart">
+                        <div id="time-domain-samples-from-window-processed"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Frequency domain - output of Discrete Fourier Transform</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
                     <div class="big-chart">
@@ -101,6 +128,7 @@
     <script src="../../src/common/simple-promise/simple-promise-builder.service.js"></script>
     <script src="../../src/common/simple-promise/simple-promise.factory.js"></script>
     <script src="../../src/common/util/util.service.js"></script>
+    <script src="../../src/common/window-function/window-function.service.js"></script>
     <script src="../../src/physical-layer-adapter/guard-power-collector/guard-power-collector-builder.service.js"></script>
     <script src="../../src/physical-layer-adapter/guard-power-collector/guard-power-collector.factory.js"></script>
     <script src="../../src/physical-layer-adapter/phase-offset-collector/phase-offset-collector-builder.service.js"></script>

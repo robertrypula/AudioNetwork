@@ -18,10 +18,10 @@
     ) {
         var FrequencyDomainChart;
 
-        FrequencyDomainChart = function (parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+        FrequencyDomainChart = function (parentElement, width, height, frequencyDomainQueue, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
             AbstractVisualizer.call(this, parentElement, width, height);
 
-            this.$$frequencyDomain = frequencyDomain;
+            this.$$frequencyDomainQueue = frequencyDomainQueue;
             this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
             this.$$radius = Util.valueOrDefault(radius, 1.1);
             this.$$barWidth = Util.valueOrDefault(barWidth, 1);
@@ -29,7 +29,7 @@
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
             this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
 
-            if (frequencyDomain.length * (this.$$barWidth + this.$$barSpacingWidth) !== width) {
+            if (frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== width) {
                 throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
             }
 
@@ -59,7 +59,7 @@
         FrequencyDomainChart.prototype.$$draw = function () {
             var
                 ctx = this.$$canvasContext,
-                fd = this.$$frequencyDomain,
+                fdq = this.$$frequencyDomainQueue,
                 w = this.$$width,
                 h = this.$$height,
                 frequencyBinPowerDecibel, i, x, y,
@@ -85,8 +85,8 @@
             }
 
             barMiddle = 0.5 * (this.$$barWidth - 1);
-            for (i = 0; i < fd.length; i++) {
-                frequencyBinPowerDecibel = fd[i];
+            for (i = 0; i < fdq.getSize(); i++) {
+                frequencyBinPowerDecibel = fdq.getItem(i);
 
                 x = i * (this.$$barWidth + this.$$barSpacingWidth);
                 y = ((frequencyBinPowerDecibel / this.$$powerDecibelMin)) * h;
