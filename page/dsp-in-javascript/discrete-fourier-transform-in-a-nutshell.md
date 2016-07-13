@@ -34,7 +34,7 @@ simpler
     IMAGE: show few sines with different sampling>
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 16, Sine B has samplePerPeriod
-equal 20, Sine C has samplePerPeriod equal 28.
+equal 20, Sine C has samplePerPeriod equal 28. [TODO if you are curious - show frequencies of those sines at 44100 Hz] 
 
     IMAGE: 3 sines alone and summed
 
@@ -119,7 +119,7 @@ function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
     imm = 0;
     for (i = 0; i < windowSize; i++) {
         sample = timeDomain[i];
-        r = 2 * Math.PI * i / samplePerPeriod; // compute radians for 'unit vector'
+        r = 2 * Math.PI * i / samplePerPeriod; // compute radians for 'unit vector' sine/cosine
         real += Math.cos(r) * sample;          // 'sample' value alters 'unit vector' length, it could also change
         imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
     }
@@ -144,17 +144,18 @@ function blackmanNuttall(n, N) {
 Example usage:
 
 ```javascript
-var i, timeDomain, sample, windowSize, frequencyDomain;
+var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain;
 
 timeDomain = [];
 windowSize = 1024;
 // fill array with time domain samples
 for (i = 0; i < windowSize; i++) {
     sample = 0;
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 16);           // sine A with samplePerPeriod 16
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 20);           // sine B with samplePerPeriod 20
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 28);           // sine C with samplePerPeriod 28
-    timeDomain.push(sample * blackmanNuttall(i, windowSize)); // apply window function and push processed sample to array
+    sample += 0.3 * Math.sin(2 * Math.PI * i / 16);              // sine A with samplePerPeriod 16
+    sample += 0.3 * Math.sin(2 * Math.PI * i / 20);              // sine B with samplePerPeriod 20
+    sample += 0.3 * Math.sin(2 * Math.PI * i / 28);              // sine C with samplePerPeriod 28
+    sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
+    timeDomain.push(sampleProcessed);                            // push processed sample to array
 }
 frequencyDomain = computeDiscreteFourierTransform(timeDomain, 10, 50, 160);  // will give 160 powerDecibel values
                                                                              // starting from samplePerPeriod 10
@@ -201,7 +202,7 @@ entering into details let say that for best results we need to create window tha
 of each sines. In other words window width should be integer multiply of final signal period (our summed 3 sines).
 In case of our three sines (5, 8, 10) smallest common multiple is 40.
 
-    IMAGE: show periods and when sum starts from the beginning>
+    IMAGE: show periods and when sum starts from the beginning
     
 Let say we picked 2 periods of final signal. It means that we have 80 samples in our window. Those samples represents
 our signal in time domain.
