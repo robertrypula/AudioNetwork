@@ -192,10 +192,10 @@ console.log(frequencyDomain[72]);    // output: -12.637 PEAK POWER (sine C)
 console.log(frequencyDomain[73]);    // output: -12.815
 ```
 
-
-
 -----------
-DELETE THIS: (?)
+
+DELETE THIS (?) begin
+
 For simplicity and without
 entering into details let say that for best results we need to create window that takes integer number of periods
 of each sines. In other words window width should be integer multiply of final signal period (our summed 3 sines).
@@ -205,14 +205,15 @@ In case of our three sines (5, 8, 10) smallest common multiple is 40.
     
 Let say we picked 2 periods of final signal. It means that we have 80 samples in our window. Those samples represents
 our signal in time domain.
------------
 
+DELETE THIS (?) end
 
+### TODO:
 
-+ much simpler than FFT but ultra slow
-+ explain frequency domain and time domain, frequency bin [IMAGE]
-+ tell about samplesPerPeriod -> a way to skip sampling frequency
-+ add couple of sine waves together [CHART separate and sum]
++ [done] much simpler than FFT but ultra slow
++ [done] explain frequency domain and time domain, frequency bin [IMAGE]
++ [done] tell about samplesPerPeriod -> a way to skip sampling frequency
++ [done] add couple of sine waves together [CHART separate and sum]
 - describe algorithm, running circle [CHART]
 - show that we collect vectors per each sample [CHART]
 - when input signal contains that frequency it will produce lots of vectors that points to the same direction
