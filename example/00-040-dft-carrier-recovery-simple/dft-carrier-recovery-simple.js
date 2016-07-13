@@ -136,7 +136,7 @@ function computeDiscreteFourierTransform() {
     var binStep, i, samplePerPeriod, frequencyBin, element, frequencyDomainChartWidth;
 
     frequencyDomainQueue = new Queue(frequencyBinSize);
-    binStep = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / (frequencyBinSize - 1);
+    binStep = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodFirst + i * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
@@ -185,6 +185,28 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     result.powerDecibel = result.powerDecibel < powerDecibelMin ? powerDecibelMin : result.powerDecibel;
 
     return result;
+}
+
+function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
+    var windowSize, real, imm, i, sample, r, power, powerDecibel;
+
+    windowSize = timeDomain.length;            // timeDomain array length is our window size
+    real = 0;
+    imm = 0;
+    for (i = 0; i < windowSize; i++) {
+        sample = timeDomain[i];
+        r = 2 * Math.PI * i / samplePerPeriod; // compute current radians for 'unit vector'
+        real += Math.cos(r) * sample;          // 'sample' value alters 'unit vector' length, it could also change
+        imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
+    }
+    real /= windowSize;
+    imm /= windowSize;
+
+    power = Math.sqrt(real * real + imm * imm);
+    powerDecibel = 10 * Math.log(power) / Math.LN10;
+    powerDecibel = powerDecibel < -80 ? -80 : powerDecibel;     // weak values only down to -80 decibels
+
+    return powerDecibel;
 }
 
 function init() {
