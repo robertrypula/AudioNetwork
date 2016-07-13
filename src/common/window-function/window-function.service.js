@@ -14,19 +14,10 @@
     ) {
 
         function blackmanNuttall(n, N) {
-            var
-                a0 = 0.3635819,
-                a1 = 0.4891775,
-                a2 = 0.1365995,
-                a3 = 0.0106411,
-                result;
-
-            result = a0
-                - a1 * MathUtil.cos(2 * MathUtil.PI * n / (N - 1))
-                + a2 * MathUtil.cos(4 * MathUtil.PI * n / (N - 1))
-                - a3 * MathUtil.cos(6 * MathUtil.PI * n / (N - 1));
-
-            return result;
+            return 0.3635819
+                - 0.4891775 * MathUtil.cos(2 * MathUtil.PI * n / (N - 1))
+                + 0.1365995 * MathUtil.cos(4 * MathUtil.PI * n / (N - 1))
+                - 0.0106411 * MathUtil.cos(6 * MathUtil.PI * n / (N - 1));
         }
 
         return {
