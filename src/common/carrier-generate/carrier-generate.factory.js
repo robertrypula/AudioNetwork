@@ -121,10 +121,19 @@
             );
         };
 
+        CarrierGenerate.prototype.reset = function () {
+            this.$$sampleNumber = 0;
+        };
+
         CarrierGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            if (samplePerPeriod === this.$$samplePerPeriod) {
+                return false;
+            }
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
+            
+            return true;
         };
 
         return CarrierGenerate;

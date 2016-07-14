@@ -1,151 +1,234 @@
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+'use strict';
+
 var
-    CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
-    SampleChart = AudioNetwork.Visualizer.SampleChart,
+    // import stuff from AudioNetwork lib
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
-    Queue = AudioNetwork.Common.Queue,
+    CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     WindowFunction = AudioNetwork.Common.WindowFunction,
+    SampleChart = AudioNetwork.Visualizer.SampleChart,
+    Queue = AudioNetwork.Common.Queue,
 
-    bufferSize = 1138 * 2,
-
+    // default visualizers settings
     SAMPLE_CHART_HEIGHT = 50,
     SAMPLE_CHART_RADIUS = 1,
     SAMPLE_CHART_BAR_WIDTH = 1,
     SAMPLE_CHART_BAR_SPACING_WIDTH = 0,
-
-    bufferSamplePerPeriod = [ 16, 20, 28 ],
-    bufferCarrierGenerate = [],
-    bufferQueue = [],
-    bufferChart = [],
-    bufferFinalQueue,
-    bufferFinalChart,
-
-    windowSampleOffset = 200,
-    windowSampleSize = Math.round(1024),
-    timeDomainRawQueue,
-    timeDomainRawChart,
-
-    windowFunctionQueue,
-    windowFunctionChart,
-
-    timeDomainProcessedQueue,
-    timeDomainProcessedChart,
-
     FREQUENCY_BIN_CHART_HEIGHT = 250,
     FREQUENCY_BIN_CHART_RADIUS = 2,
     FREQUENCY_BIN_CHART_BAR_WIDTH = 5,
     FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH = 1,
+
+    // settings (user is able to update those values via form)
+    sineSampleSize = 1130,
+    separateSineParameter = [
+        { amplitude: 0.3, samplePerPeriod: 28, phase: 0 },
+        { amplitude: 0.3, samplePerPeriod: 20, phase: 0 },
+        { amplitude: 0.3, samplePerPeriod: 16, phase: 0 }
+    ],
+    windowSampleOffset = 0,
+    windowSampleSize = 1024,
+    windowFunctionEnabled = 1,
+    powerDecibelMin = -80,
     frequencyBinSize = 160,
     frequencyBinSamplePerPeriodFirst = 10,
     frequencyBinSamplePerPeriodLast = 50,
+
+    // helpers for sine creation
+    separateSineCarrierGenerate = [],
+
+    // data buffers
+    separateSineQueue = [],
+    summedSineQueue,
+    timeDomainRawQueue,
+    windowFunctionQueue,
+    timeDomainProcessedQueue,
     frequencyDomainQueue,
-    frequencyDomainChart,
 
-    powerDecibelMin = -80;
+    // data visualizers
+    separateSineChart = [],
+    summedSineChart,
+    timeDomainRawChart,
+    windowFunctionChart,
+    timeDomainProcessedChart,
+    frequencyDomainChart;
 
+// ----------------
 
-function initBuffer() {
-    var i, j, carrierGenerate, queue, sampleChart, samplePerPeriod, element, chartWidth;
+function separateSineInitialize() {
+    var i, carrierGenerate, queue, sampleChart, element;
 
-    for (i = 0; i < bufferSamplePerPeriod.length; i++) {
-        samplePerPeriod = bufferSamplePerPeriod[i];
+    for (i = 0; i < separateSineParameter.length; i++) {
+        carrierGenerate = new CarrierGenerate(separateSineParameter[i].samplePerPeriod);
+        queue =  new Queue(sineSampleSize);
+        element = document.getElementById('separate-sine-' + i);
+        sampleChart = new SampleChart(element, sineSampleSize, SAMPLE_CHART_HEIGHT, queue);
+        separateSineCarrierGenerate.push(carrierGenerate);
+        separateSineQueue.push(queue);
+        separateSineChart.push(sampleChart);
+    }
+}
 
-        carrierGenerate = new CarrierGenerate(samplePerPeriod);
-        queue =  new Queue(bufferSize);
-        element = document.getElementById('sine-' + i);
-        chartWidth = bufferSize;
-        sampleChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, queue);
+function separateSineUpdate() {
+    var i, j, carrierGenerate, queue, sampleChart;
 
+    for (i = 0; i < separateSineParameter.length; i++) {
+        carrierGenerate = separateSineCarrierGenerate[i];
+        queue =  separateSineQueue[i];
+        sampleChart = separateSineChart[i];
+
+        carrierGenerate.setSamplePerPeriod(separateSineParameter[i].samplePerPeriod);
+        queue.setMaxSize(sineSampleSize);
+        sampleChart.setWidth(sineSampleSize);
+
+        carrierGenerate.reset();
         carrierGenerate.addToQueue({
-            amplitude: 1 / bufferSamplePerPeriod.length,
-            duration: bufferSize,
-            phase: 0
+            amplitude: separateSineParameter[i].amplitude,
+            duration: sineSampleSize,
+            phase: separateSineParameter[i].phase / 360
         });
 
-        for (j = 0; j < bufferSize; j++) {
-            queue.push(carrierGenerate.getSample());
+        for (j = 0; j < sineSampleSize; j++) {
+            queue.pushEvenIfFull(carrierGenerate.getSample());
             carrierGenerate.nextSample();
         }
-        bufferCarrierGenerate.push(carrierGenerate);
-        bufferQueue.push(queue);
-        bufferChart.push(sampleChart);
     }
 }
 
-function initBufferFinal() {
-    var i, j, sampleSum, element, chartWidth;
+// ----------------
 
-    bufferFinalQueue = new Queue(bufferSize);
-    for (i = 0; i < bufferSize; i++) {
+function summedSineInitialize() {
+    var element;
+
+    summedSineQueue = new Queue(sineSampleSize);
+    element = document.getElementById('summed-sine');
+    summedSineChart = new SampleChart(element, sineSampleSize, SAMPLE_CHART_HEIGHT, summedSineQueue);
+}
+
+function summedSineUpdate() {
+    var i, j, sampleSum;
+
+    summedSineQueue.setMaxSize(sineSampleSize);
+    for (i = 0; i < sineSampleSize; i++) {
         sampleSum = 0;
-        for (j = 0; j < bufferQueue.length; j++) {
-            sampleSum += bufferQueue[j].getItem(i);
+        for (j = 0; j < separateSineQueue.length; j++) {
+            sampleSum += separateSineQueue[j].getItem(i);
         }
-        bufferFinalQueue.push(sampleSum);
+        summedSineQueue.pushEvenIfFull(sampleSum);
     }
-    element = document.getElementById('final-signal');
-    chartWidth = bufferSize;
-    bufferFinalChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, bufferFinalQueue);
+    summedSineChart.setWidth(sineSampleSize);
 }
 
-function initTimeDomainRaw() {
-    var i, element, chartWidth;
+// ----------------
+
+function timeDomainRawInitialize() {
+    var element, chartWidth;
 
     timeDomainRawQueue = new Queue(windowSampleSize);
-    for (i = 0; i < windowSampleSize; i++) {
-        timeDomainRawQueue.push(
-            bufferFinalQueue.getItem(windowSampleOffset + i)
-        );
-    }
-
-    element = document.getElementById('time-domain-samples-from-window-raw');
+    element = document.getElementById('time-domain-raw');
     chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
-    timeDomainRawChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainRawQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainRawChart = new SampleChart(
+        element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainRawQueue,
+        SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH
+    );
 }
 
-function initWindowFunction() {
-    var i, element, chartWidth;
+function timeDomainRawUpdate() {
+    var i, chartWidth;
+
+    timeDomainRawQueue.setMaxSize(windowSampleSize);
+    for (i = 0; i < windowSampleSize; i++) {
+        timeDomainRawQueue.pushEvenIfFull(
+            summedSineQueue.getItem(windowSampleOffset + i)
+        );
+    }
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainRawChart.setWidth(chartWidth);
+}
+
+// ----------------
+
+function windowFunctionInitialize() {
+    var element, chartWidth;
 
     windowFunctionQueue = new Queue(windowSampleSize);
-    for (i = 0; i < windowSampleSize; i++) {
-        windowFunctionQueue.push(
-            WindowFunction.blackmanNuttall(i, windowSampleSize)
-        );
-    }
-
     element = document.getElementById('window-function');
     chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
-    windowFunctionChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, windowFunctionQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+    windowFunctionChart = new SampleChart(
+        element, chartWidth, SAMPLE_CHART_HEIGHT, windowFunctionQueue,
+        SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH
+    );
 }
 
-function initTimeDomainProcessed() {
-    var i, element, chartWidth;
+function windowFunctionUpdate() {
+    var i, chartWidth;
+
+    windowFunctionQueue.setMaxSize(windowSampleSize);
+    for (i = 0; i < windowSampleSize; i++) {
+        windowFunctionQueue.pushEvenIfFull(
+            windowFunctionEnabled ? WindowFunction.blackmanNuttall(i, windowSampleSize) : 1
+        );
+    }
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    windowFunctionChart.setWidth(chartWidth);
+}
+
+// ----------------
+
+function timeDomainInitialize() {
+    var element, chartWidth;
 
     timeDomainProcessedQueue = new Queue(windowSampleSize);
+    element = document.getElementById('time-domain-processed');
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainProcessedChart = new SampleChart(
+        element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedQueue,
+        SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH
+    );
+}
+
+function timeDomainUpdate() {
+    var i, chartWidth;
+
+    timeDomainProcessedQueue.setMaxSize(windowSampleSize);
     for (i = 0; i < windowSampleSize; i++) {
-        timeDomainProcessedQueue.push(
+        timeDomainProcessedQueue.pushEvenIfFull(
             windowFunctionQueue.getItem(i) * timeDomainRawQueue.getItem(i)
         );
     }
-
-    element = document.getElementById('time-domain-samples-from-window-processed');
     chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
-    timeDomainProcessedChart = new SampleChart(element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedQueue, SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainProcessedChart.setWidth(chartWidth);
 }
 
-function computeDiscreteFourierTransform() {
-    var binStep, i, samplePerPeriod, frequencyBin, element, frequencyDomainChartWidth;
+// ----------------
+
+function discreteFourierTransformInitialize() {
+    var element, frequencyDomainChartWidth;
 
     frequencyDomainQueue = new Queue(frequencyBinSize);
+    element = document.getElementById('frequency-domain');
+    frequencyDomainChartWidth = frequencyBinSize *
+        (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
+    frequencyDomainChart = new FrequencyDomainChart(
+        element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue,
+        powerDecibelMin,
+        FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
+    );
+}
+
+function discreteFourierTransformUpdate() {
+    var binStep, i, samplePerPeriod, frequencyBin, chartWidth;
+
+    frequencyDomainQueue.setMaxSize(frequencyBinSize);
     binStep = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodFirst + i * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
-        frequencyDomainQueue.push(frequencyBin.powerDecibel);
+        frequencyDomainQueue.pushEvenIfFull(frequencyBin.powerDecibel);
     }
-
-    element = document.getElementById('frequency-domain');
-    frequencyDomainChartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
-    frequencyDomainChart = new FrequencyDomainChart(element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue, powerDecibelMin, FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
+    chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
+    frequencyDomainChart.setWidth(chartWidth);
+    frequencyDomainChart.setPowerDecibelMin(powerDecibelMin);
 }
 
 function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
@@ -156,6 +239,7 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
         real: 0,
         imm: 0,
         powerDecibel: 0,
+        phase: 0,
         detail: []
     };
     for (i = 0; i < timeDomainQueue.getSize(); i++) {
@@ -184,72 +268,106 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     result.powerDecibel = 10 * Math.log(power) / Math.LN10;
     result.powerDecibel = result.powerDecibel < powerDecibelMin ? powerDecibelMin : result.powerDecibel;
 
+    result.phase = 0;  // TODO compute phase here
+
     return result;
 }
 
-function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
-    var windowSize, real, imm, i, sample, r, power, powerDecibel;
+// ----------------
 
-    windowSize = timeDomain.length;            // timeDomain array length is our window size
-    real = 0;
-    imm = 0;
-    for (i = 0; i < windowSize; i++) {
-        sample = timeDomain[i];
-        r = 2 * Math.PI * i / samplePerPeriod; // compute current radians for 'unit vector'
-        real += Math.cos(r) * sample;          // 'sample' value alters 'unit vector' length, it could also change
-        imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
+function parseIntFromForm(elementId) {
+    return parseInt(document.getElementById(elementId).value);
+}
+
+function parseFloatFromForm(elementId) {
+    return parseFloat(document.getElementById(elementId).value);
+}
+
+function formBindingTemplateToCode() {
+    var i;
+
+    sineSampleSize = parseIntFromForm('form-sine-sample-size');
+    for (i = 0; i < separateSineParameter.length; i++) {
+        separateSineParameter[i].samplePerPeriod = parseFloatFromForm('form-sine-' + i + '-sample-per-period');
+        separateSineParameter[i].amplitude = parseFloatFromForm('form-sine-' + i + '-amplitude');
+        separateSineParameter[i].phase = parseFloatFromForm('form-sine-' + i + '-phase');
     }
-    real /= windowSize;
-    imm /= windowSize;
-
-    power = Math.sqrt(real * real + imm * imm);
-    powerDecibel = 10 * Math.log(power) / Math.LN10;
-    powerDecibel = powerDecibel < -80 ? -80 : powerDecibel;     // weak values only down to -80 decibels
-
-    return powerDecibel;
+    windowSampleOffset = parseIntFromForm('form-window-sample-offset');
+    windowSampleSize = parseIntFromForm('form-window-sample-size');
+    windowFunctionEnabled = !!document.getElementById('form-window-function-enabled').checked;
+    powerDecibelMin = parseIntFromForm('form-power-decibel-min');
+    frequencyBinSize = parseIntFromForm('form-frequency-bin-size');
+    frequencyBinSamplePerPeriodFirst = parseIntFromForm('form-frequency-bin-sample-per-period-first');
+    frequencyBinSamplePerPeriodLast = parseIntFromForm('form-frequency-bin-sample-per-period-last');
 }
 
-function init() {
-    initBuffer();
-    initBufferFinal();
-    initTimeDomainRaw();
-    initWindowFunction();
-    initTimeDomainProcessed();
-    computeDiscreteFourierTransform();
-}
+function formBindingCodeToTemplate() {
+    var i;
 
-init();
-
-
-
-/*
-
-function benchmark() {
-    console.log('GO');
-    var
-        cg = new CarrierGenerate(5, 5),
-        cr = new CarrierRecovery(5, 44100 * 0.75),
-        secondsStart = new Date().getTime(),
-        secondsEnd,
-        sample,
-        carrierDetail
-        ;
-
-    cg.addToQueue(
-        { duration: 2.4 * 1000 * 1000, amplitude: 0.5, phase: 0.0 }
-    );
-
-    for (var i = 0; i < 2.00 * 1000 * 1000; i++) {
-        sample = cg.getSample();
-        cg.nextSample();
-        cr.handleSample(sample);
-        carrierDetail = cr.getCarrierDetail();
+    document.getElementById('form-sine-sample-size').value = sineSampleSize;
+    for (i = 0; i < separateSineParameter.length; i++) {
+        document.getElementById('form-sine-' + i + '-sample-per-period').value = separateSineParameter[i].samplePerPeriod;
+        document.getElementById('form-sine-' + i + '-amplitude').value = separateSineParameter[i].amplitude;
+        document.getElementById('form-sine-' + i + '-phase').value = separateSineParameter[i].phase;
     }
-
-    secondsEnd = new Date().getTime();
-    console.log((secondsEnd - secondsStart) + ' ms');
-    document.write((secondsEnd - secondsStart) + ' ms');
+    document.getElementById('form-window-sample-offset').value = windowSampleOffset;
+    document.getElementById('form-window-sample-size').value = windowSampleSize;
+    document.getElementById('form-window-function-enabled').checked = windowFunctionEnabled ? true : false;
+    document.getElementById('form-power-decibel-min').value = powerDecibelMin;
+    document.getElementById('form-frequency-bin-size').value = frequencyBinSize;
+    document.getElementById('form-frequency-bin-sample-per-period-first').value = frequencyBinSamplePerPeriodFirst;
+    document.getElementById('form-frequency-bin-sample-per-period-last').value = frequencyBinSamplePerPeriodLast;
 }
 
-// setTimeout(benchmark, 3000);
-*/
+function formSineDataChanged() {
+    formBindingTemplateToCode();
+    separateSineUpdate();
+    summedSineUpdate();
+    timeDomainRawUpdate();
+    windowFunctionUpdate();
+    timeDomainUpdate();
+    discreteFourierTransformUpdate();
+}
+
+function formWindowDataChanged() {
+    formBindingTemplateToCode();
+    timeDomainRawUpdate();
+    windowFunctionUpdate();
+    timeDomainUpdate();
+    discreteFourierTransformUpdate();
+}
+
+function formWindowFunctionDataChanged() {
+    formBindingTemplateToCode();
+    windowFunctionUpdate();
+    timeDomainUpdate();
+    discreteFourierTransformUpdate();
+}
+
+function formFrequencyDomainDataChanged() {
+    formBindingTemplateToCode();
+    discreteFourierTransformUpdate();
+}
+
+function startApp() {
+    formBindingCodeToTemplate();
+
+    separateSineInitialize();
+    separateSineUpdate();
+
+    summedSineInitialize();
+    summedSineUpdate();
+
+    timeDomainRawInitialize();
+    timeDomainRawUpdate();
+
+    windowFunctionInitialize();
+    windowFunctionUpdate();
+
+    timeDomainInitialize();
+    timeDomainUpdate();
+
+    discreteFourierTransformInitialize();
+    discreteFourierTransformUpdate();
+}
+

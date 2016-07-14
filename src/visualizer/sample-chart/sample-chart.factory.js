@@ -40,6 +40,10 @@
 
         SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
 
+        SampleChart.prototype.setWidth = function (width) {
+            // TODO implement
+        };
+
         SampleChart.prototype.$$renderTemplate = function () {
             var tpl = SampleChartTemplateMain.html;
 

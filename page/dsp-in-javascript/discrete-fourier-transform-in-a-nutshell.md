@@ -68,6 +68,11 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 
 >Decibel goes down to negative value, -60 decibels means much weaker signal than for example -5 decibels.
 
+>All frequency charts have higher frequencies on the right side and lower frequencies on the left side. In our case
+>lower samplePerPeriod means value higher frequency because sine have less samples in a period - it's more packed 
+>so frequency is higher. To produce proper chart our frequency bins should have smaller samplePerPeriod 
+>values when going from left to right on the X axis.
+
     IMAGE: clean frequency domain chart with labels and scale
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
@@ -210,6 +215,19 @@ our signal in time domain.
 DELETE THIS (?) end
 
 ### TODO:
+
+- CODE add setWidth to chart
+- CODE add setMaxSize to queue
+- CODE update order of frequency bin
+- ARTICLE update order of bins and console.log output
+- ARTICLE update order of sine waves
+- CODE add form field, frequency bin index to explain under frequency domain chart
+- CODE add overlay that shows picked range (frequency bin, window samples)
+- CODE add last section 'Frequency bin explained' when we can pick range of samples from window
+- CODE add duplicate of processed window chart
+- CODE add overlay that shows picked range (on duplicate of processed window chart)
+- CODE add new chart that explains unit vector in a range
+- ARTICLE write examples
 
 + [done] much simpler than FFT but ultra slow
 + [done] explain frequency domain and time domain, frequency bin [IMAGE]

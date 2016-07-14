@@ -33,7 +33,7 @@
                 throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
             }
 
-            this.$$finished = false;
+            this.$$queueHashOnCanvas = null;
         };
 
         FrequencyDomainChart.prototype = Object.create(AbstractVisualizer.prototype);
@@ -41,6 +41,10 @@
 
         FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
         FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
+
+        FrequencyDomainChart.prototype.setWidth = function (width) {
+            // TODO implement
+        };
 
         FrequencyDomainChart.prototype.$$renderTemplate = function () {
             var tpl = FrequencyDomainChartTemplateMain.html;
@@ -52,8 +56,13 @@
         };
 
         FrequencyDomainChart.prototype.setPowerDecibelMin = function (powerDecibelMin) {
-            this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
-            this.$$finished = false;
+            if (this.$$powerDecibelMin === powerDecibelMin) {
+                return false;
+            }
+            this.$$powerDecibelMin = powerDecibelMin;
+            this.$$queueHashOnCanvas = null;
+
+            return true;
         };
 
         FrequencyDomainChart.prototype.$$draw = function () {
@@ -66,7 +75,7 @@
                 barMiddle
             ;
 
-            if (this.$$finished) {
+            if (this.$$queueHashOnCanvas === fdq.getHash()) {
                 return;
             }
 
@@ -112,7 +121,7 @@
                 // ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
-            this.$$finished = true;
+            this.$$queueHashOnCanvas = fdq.getHash();
         };
 
         FrequencyDomainChart.prototype.$$initCanvasContext = function () {

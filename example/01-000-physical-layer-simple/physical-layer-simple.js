@@ -1,3 +1,5 @@
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+
 var physicalLayer, transmitAdapter, receiveAdapter;
 
 function onLoad() {

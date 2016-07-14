@@ -29,6 +29,10 @@
             this.$$hash = MathUtil.random() * 1000000;
         };
 
+        Queue.prototype.setMaxSize = function (maxSize) {
+            // TODO implement
+        };
+
         Queue.prototype.getHash = function () {
             return this.$$hash;
         };
