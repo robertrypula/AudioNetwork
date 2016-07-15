@@ -15,22 +15,27 @@
         var Queue;
 
         Queue = function (sizeMax) {
-            this.$$sizeMax = sizeMax;
             this.$$data = [];
-            this.$$positionStart = 0;
-            this.$$positionEnd = 0;
-            this.$$size = 0;
-            this.$$hash = 0;
-
-            this.$$data.length = sizeMax;
+            this.$$positionStart = null;
+            this.$$positionEnd = null;
+            this.$$size = null;
+            this.$$hash = null;
+            this.$$sizeMax = null;
+            this.setSizeMax(sizeMax);
         };
 
         Queue.prototype.$$generateNewHash = function () {
             this.$$hash = MathUtil.random() * 1000000;
         };
 
-        Queue.prototype.setMaxSize = function (maxSize) {
-            // TODO implement
+        Queue.prototype.setSizeMax = function (sizeMax) {
+            this.$$positionStart = 0;
+            this.$$positionEnd = 0;
+            this.$$size = 0;
+            this.$$hash = 0;
+            this.$$sizeMax = sizeMax;
+            this.$$data.length = 0;        // drop all data
+            this.$$data.length = sizeMax;
         };
 
         Queue.prototype.getHash = function () {

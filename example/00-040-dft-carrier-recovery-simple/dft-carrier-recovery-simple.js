@@ -31,8 +31,9 @@ var
     windowFunctionEnabled = 1,
     powerDecibelMin = -80,
     frequencyBinSize = 160,
-    frequencyBinSamplePerPeriodFirst = 10,
-    frequencyBinSamplePerPeriodLast = 50,
+    frequencyBinSamplePerPeriodMax = 50,
+    frequencyBinSamplePerPeriodMin = 10,
+    frequencyBinIndexToExplain = Math.round(frequencyBinSize * 0.5),
 
     // helpers for sine creation
     separateSineCarrierGenerate = [],
@@ -78,7 +79,7 @@ function separateSineUpdate() {
         sampleChart = separateSineChart[i];
 
         carrierGenerate.setSamplePerPeriod(separateSineParameter[i].samplePerPeriod);
-        queue.setMaxSize(sineSampleSize);
+        queue.setSizeMax(sineSampleSize);
         sampleChart.setWidth(sineSampleSize);
 
         carrierGenerate.reset();
@@ -103,12 +104,16 @@ function summedSineInitialize() {
     summedSineQueue = new Queue(sineSampleSize);
     element = document.getElementById('summed-sine');
     summedSineChart = new SampleChart(element, sineSampleSize, SAMPLE_CHART_HEIGHT, summedSineQueue);
+
+    element = document.getElementById('summed-sine-visualizer-overlay');
+    element.style.height = SAMPLE_CHART_HEIGHT + 'px';
+    element.style.top = -SAMPLE_CHART_HEIGHT + 'px';
 }
 
 function summedSineUpdate() {
     var i, j, sampleSum;
 
-    summedSineQueue.setMaxSize(sineSampleSize);
+    summedSineQueue.setSizeMax(sineSampleSize);
     for (i = 0; i < sineSampleSize; i++) {
         sampleSum = 0;
         for (j = 0; j < separateSineQueue.length; j++) {
@@ -134,9 +139,9 @@ function timeDomainRawInitialize() {
 }
 
 function timeDomainRawUpdate() {
-    var i, chartWidth;
+    var i, chartWidth, element;
 
-    timeDomainRawQueue.setMaxSize(windowSampleSize);
+    timeDomainRawQueue.setSizeMax(windowSampleSize);
     for (i = 0; i < windowSampleSize; i++) {
         timeDomainRawQueue.pushEvenIfFull(
             summedSineQueue.getItem(windowSampleOffset + i)
@@ -144,6 +149,10 @@ function timeDomainRawUpdate() {
     }
     chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
     timeDomainRawChart.setWidth(chartWidth);
+
+    element = document.getElementById('summed-sine-visualizer-overlay');
+    element.style.left = windowSampleOffset + 'px';
+    element.style.width = windowSampleSize + 'px';
 }
 
 // ----------------
@@ -163,7 +172,7 @@ function windowFunctionInitialize() {
 function windowFunctionUpdate() {
     var i, chartWidth;
 
-    windowFunctionQueue.setMaxSize(windowSampleSize);
+    windowFunctionQueue.setSizeMax(windowSampleSize);
     for (i = 0; i < windowSampleSize; i++) {
         windowFunctionQueue.pushEvenIfFull(
             windowFunctionEnabled ? WindowFunction.blackmanNuttall(i, windowSampleSize) : 1
@@ -190,7 +199,7 @@ function timeDomainInitialize() {
 function timeDomainUpdate() {
     var i, chartWidth;
 
-    timeDomainProcessedQueue.setMaxSize(windowSampleSize);
+    timeDomainProcessedQueue.setSizeMax(windowSampleSize);
     for (i = 0; i < windowSampleSize; i++) {
         timeDomainProcessedQueue.pushEvenIfFull(
             windowFunctionQueue.getItem(i) * timeDomainRawQueue.getItem(i)
@@ -214,15 +223,20 @@ function discreteFourierTransformInitialize() {
         powerDecibelMin,
         FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
     );
+
+    element = document.getElementById('frequency-domain-visualizer-overlay');
+    element.style.width = (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH) + 'px';
+    element.style.height = FREQUENCY_BIN_CHART_HEIGHT + 'px';
+    element.style.top = -FREQUENCY_BIN_CHART_HEIGHT + 'px';
 }
 
 function discreteFourierTransformUpdate() {
     var binStep, i, samplePerPeriod, frequencyBin, chartWidth;
 
-    frequencyDomainQueue.setMaxSize(frequencyBinSize);
-    binStep = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / frequencyBinSize;
+    frequencyDomainQueue.setSizeMax(frequencyBinSize);
+    binStep = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
-        samplePerPeriod = frequencyBinSamplePerPeriodFirst + i * binStep;
+        samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
         frequencyDomainQueue.pushEvenIfFull(frequencyBin.powerDecibel);
     }
@@ -275,6 +289,20 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
 
 // ----------------
 
+function frequencyBinExplanationInitialize() {
+
+}
+
+function frequencyBinExplanationUpdate() {
+    var element;
+
+    element = document.getElementById('frequency-domain-visualizer-overlay');
+    element.style.left =
+        ((FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH) * frequencyBinIndexToExplain) + 'px';
+}
+
+// ----------------
+
 function parseIntFromForm(elementId) {
     return parseInt(document.getElementById(elementId).value);
 }
@@ -297,8 +325,9 @@ function formBindingTemplateToCode() {
     windowFunctionEnabled = !!document.getElementById('form-window-function-enabled').checked;
     powerDecibelMin = parseIntFromForm('form-power-decibel-min');
     frequencyBinSize = parseIntFromForm('form-frequency-bin-size');
-    frequencyBinSamplePerPeriodFirst = parseIntFromForm('form-frequency-bin-sample-per-period-first');
-    frequencyBinSamplePerPeriodLast = parseIntFromForm('form-frequency-bin-sample-per-period-last');
+    frequencyBinSamplePerPeriodMax = parseFloatFromForm('form-frequency-bin-sample-per-period-max');
+    frequencyBinSamplePerPeriodMin = parseFloatFromForm('form-frequency-bin-sample-per-period-min');
+    frequencyBinIndexToExplain = parseIntFromForm('form-frequency-bin-index-to-explain');
 }
 
 function formBindingCodeToTemplate() {
@@ -315,8 +344,9 @@ function formBindingCodeToTemplate() {
     document.getElementById('form-window-function-enabled').checked = windowFunctionEnabled ? true : false;
     document.getElementById('form-power-decibel-min').value = powerDecibelMin;
     document.getElementById('form-frequency-bin-size').value = frequencyBinSize;
-    document.getElementById('form-frequency-bin-sample-per-period-first').value = frequencyBinSamplePerPeriodFirst;
-    document.getElementById('form-frequency-bin-sample-per-period-last').value = frequencyBinSamplePerPeriodLast;
+    document.getElementById('form-frequency-bin-sample-per-period-max').value = frequencyBinSamplePerPeriodMax;
+    document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
+    document.getElementById('form-frequency-bin-index-to-explain').value = frequencyBinIndexToExplain;
 }
 
 function formSineDataChanged() {
@@ -327,6 +357,7 @@ function formSineDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    frequencyBinExplanationUpdate();
 }
 
 function formWindowDataChanged() {
@@ -335,6 +366,7 @@ function formWindowDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    frequencyBinExplanationUpdate();
 }
 
 function formWindowFunctionDataChanged() {
@@ -342,11 +374,18 @@ function formWindowFunctionDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    frequencyBinExplanationUpdate();
 }
 
 function formFrequencyDomainDataChanged() {
     formBindingTemplateToCode();
     discreteFourierTransformUpdate();
+    frequencyBinExplanationUpdate();
+}
+
+function formFrequencyBinExplanationDataChanged() {
+    formBindingTemplateToCode();
+    frequencyBinExplanationUpdate();
 }
 
 function startApp() {
@@ -369,5 +408,8 @@ function startApp() {
 
     discreteFourierTransformInitialize();
     discreteFourierTransformUpdate();
+
+    frequencyBinExplanationInitialize();
+    frequencyBinExplanationUpdate();
 }
 

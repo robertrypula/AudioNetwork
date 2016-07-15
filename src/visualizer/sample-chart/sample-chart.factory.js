@@ -28,11 +28,9 @@
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
             this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
 
-            if (queue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== width) {
-                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
-            }
+            this.$$checkWidth();
 
-            this.$$queueHashOnCanvas = null;
+            this.$$hashOnCanvas = null;
         };
 
         SampleChart.prototype = Object.create(AbstractVisualizer.prototype);
@@ -41,7 +39,22 @@
         SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
 
         SampleChart.prototype.setWidth = function (width) {
-            // TODO implement
+            var element;
+
+            this.$$width = width;
+            this.$$checkWidth();
+
+            element = this.$$find('.sample-chart-container');
+            element.style.width = width + 'px';
+            element = this.$$find('.sample-chart');
+            element.style.width = width + 'px';
+            element.setAttribute("width", width);
+        };
+
+        SampleChart.prototype.$$checkWidth = function () {
+            if (this.$$queue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
+                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
         };
 
         SampleChart.prototype.$$renderTemplate = function () {
@@ -62,7 +75,7 @@
                 sample, i, x, y, barMiddle
             ;
 
-            if (this.$$queueHashOnCanvas === q.getHash()) {
+            if (this.$$hashOnCanvas === q.getHash()) {
                 return;
             }
 
@@ -100,7 +113,7 @@
                 // ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
-            this.$$queueHashOnCanvas = q.getHash();
+            this.$$hashOnCanvas = q.getHash();
         };
 
         SampleChart.prototype.$$initCanvasContext = function () {

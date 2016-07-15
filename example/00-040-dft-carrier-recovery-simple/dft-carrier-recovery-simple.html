@@ -218,6 +218,9 @@
                 <div class="col col-xs-12">
                     <div class="big-chart">
                         <div id="summed-sine"></div>
+                        <div class="visualizer-overlay-container">
+                            <span class="visualizer-overlay" id="summed-sine-visualizer-overlay"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -335,14 +338,14 @@
             </div>
             <div class="row margin-bottom">
                 <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-sample-per-period-first" class="label-for-checkbox">
-                        Frequency bin - samplePerPeriod first
+                    <label for="form-frequency-bin-sample-per-period-max" class="label-for-checkbox">
+                        SamplePerPeriod max (lowest frequency)
                     </label>
                 </div>
                 <div class="col col-xs-6 col-sm-7 col-md-6">
                     <input
                         type="number"
-                        id="form-frequency-bin-sample-per-period-first"
+                        id="form-frequency-bin-sample-per-period-max"
                         onChange="formFrequencyDomainDataChanged()"
                         value=""
                     />
@@ -350,14 +353,14 @@
             </div>
             <div class="row margin-bottom">
                 <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-sample-per-period-last" class="label-for-checkbox">
-                        Frequency bin - samplePerPeriod last
+                    <label for="form-frequency-bin-sample-per-period-min" class="label-for-checkbox">
+                        SamplePerPeriod min (highest frequency)
                     </label>
                 </div>
                 <div class="col col-xs-6 col-sm-7 col-md-6">
                     <input
                         type="number"
-                        id="form-frequency-bin-sample-per-period-last"
+                        id="form-frequency-bin-sample-per-period-min"
                         onChange="formFrequencyDomainDataChanged()"
                         value=""
                     />
@@ -367,7 +370,25 @@
                 <div class="col col-xs-12">
                     <div class="big-chart">
                         <div id="frequency-domain"></div>
+                        <div class="visualizer-overlay-container">
+                            <span class="visualizer-overlay" id="frequency-domain-visualizer-overlay"></span>
+                        </div>
                     </div>
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <label for="form-frequency-bin-index-to-explain" class="label-for-checkbox">
+                        Frequency bin index to explain
+                    </label>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <input
+                        type="number"
+                        id="form-frequency-bin-index-to-explain"
+                        onChange="formFrequencyBinExplanationDataChanged()"
+                        value=""
+                    />
                 </div>
             </div>
 

@@ -19,7 +19,7 @@
             '    "' +
             '    >' +
             '    <canvas ' +
-            '        class="power-chart"' +
+            '        class="sample-chart"' +
             '        style="' +
             '            width: {{ width }}px;' +
             '            height: {{ height }}px;' +

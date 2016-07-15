@@ -1,5 +1,12 @@
-.big-chart {
-    overflow-x: auto;
-    margin: 10px 0 10px;
-    border: 1px solid #eee;
+.visualizer-overlay-container {
+    width: 0px;
+    height: 0px;
+    position: relative;
+}
+
+.visualizer-overlay {
+    position: absolute;
+    background-color: rgba(255, 255, 0, 0.3);
+    width: 1px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
 }

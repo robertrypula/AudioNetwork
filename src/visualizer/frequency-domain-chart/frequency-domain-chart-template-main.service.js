@@ -19,7 +19,7 @@
             '    "' +
             '    >' +
             '    <canvas ' +
-            '        class="power-chart"' +
+            '        class="frequency-domain-chart"' +
             '        style="' +
             '            width: {{ width }}px;' +
             '            height: {{ height }}px;' +

@@ -391,7 +391,6 @@ p code::before, p code::after {
     content: "\00a0";
 }
 
-
 pre {
     padding: 16px;
     overflow: auto;
@@ -400,4 +399,11 @@ pre {
     background-color: #eee;
     border-radius: 3px;
     margin-bottom: 15px;
+}
+
+.big-chart {
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 10px 0 10px;
+    border: 1px solid #eee;
 }

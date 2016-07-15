@@ -33,8 +33,8 @@ simpler
 
     IMAGE: show few sines with different sampling>
 
-Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 16, Sine B has samplePerPeriod
-equal 20, Sine C has samplePerPeriod equal 28. [TODO if you are curious - show frequencies of those sines at 44100 Hz] 
+Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
+equal 20, Sine C has samplePerPeriod equal 16. [TODO if you are curious - show frequencies of those sines at 44100 Hz] 
 
     IMAGE: 3 sines alone and summed
 
@@ -70,8 +70,8 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 
 >All frequency charts have higher frequencies on the right side and lower frequencies on the left side. In our case
 >lower samplePerPeriod means value higher frequency because sine have less samples in a period - it's more packed 
->so frequency is higher. To produce proper chart our frequency bins should have smaller samplePerPeriod 
->values when going from left to right on the X axis.
+>so frequency is higher. That is the reason why we need to put highest samplePerPeriod value on the left and end
+>with lowest samplePerPeriod on the right.
 
     IMAGE: clean frequency domain chart with labels and scale
 
@@ -88,7 +88,7 @@ In our frequency domain chart we decided to have 160 frequency bins. Window size
 means that to create complete chart we need to do 163 840 iterations (1024 * 160). For better resolutions or bigger
 window sizes this number goes up very fast. That's why this basic algorithm is ultra slow.
 
-Let's pick one bin as an example. Our sines have samplePerPeriods 16, 20 and 28. To not cheat lets take 'random'
+Let's pick one bin as an example. Our sines have samplePerPeriods 28, 20 and 16. To not cheat lets take 'random'
 samplePerPeriod for example equal to 18. This frequency should not be present in our signal window so our expectation
 is that we should get small decibel value.
 
@@ -102,13 +102,15 @@ is that we should get small decibel value.
 Below you can find simple JavaScript implementation of all that was described above.
 
 ```javascript
-function computeDiscreteFourierTransform(timeDomain, frequencyBinSamplePerPeriodFirst, frequencyBinSamplePerPeriodLast, frequencyBinSize) {
+function computeDiscreteFourierTransform(
+    timeDomain, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
+    ) {
     var frequencyDomain, step, i, samplePerPeriod, frequencyBin;
 
     frequencyDomain = [];
-    step = (frequencyBinSamplePerPeriodLast - frequencyBinSamplePerPeriodFirst) / frequencyBinSize;
+    step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
-        samplePerPeriod = frequencyBinSamplePerPeriodFirst + i * step;
+        samplePerPeriod = frequencyBinSamplePerPeriodMax - i * step;
         frequencyBinPowerDecibel = getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod);
         frequencyDomain.push(frequencyBinPowerDecibel);
     }
@@ -156,78 +158,70 @@ windowSize = 1024;
 // fill array with time domain samples
 for (i = 0; i < windowSize; i++) {
     sample = 0;
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 16);              // sine A with samplePerPeriod 16
+    sample += 0.3 * Math.sin(2 * Math.PI * i / 28);              // sine A with samplePerPeriod 28
     sample += 0.3 * Math.sin(2 * Math.PI * i / 20);              // sine B with samplePerPeriod 20
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 28);              // sine C with samplePerPeriod 28
+    sample += 0.3 * Math.sin(2 * Math.PI * i / 16);              // sine C with samplePerPeriod 16 
     sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
     timeDomain.push(sampleProcessed);                            // push processed sample to array
 }
-frequencyDomain = computeDiscreteFourierTransform(timeDomain, 10, 50, 160);  // will give 160 powerDecibel values
-                                                                             // starting from samplePerPeriod 10
-                                                                             // ending at samplePerPeriod 49.75
+frequencyDomain = computeDiscreteFourierTransform(timeDomain, 50, 10, 160);  // will give 160 powerDecibel values
+                                                                             // starting from samplePerPeriod 50
+                                                                             // ending at samplePerPeriod 10.25
                                                                              // with samplePerPeriod step of 0.25
 
-console.log(timeDomain.length);      // output: 1024 (or any other depending on windowSize)
-console.log(frequencyDomain.length); // output: 160
+console.log(timeDomain.length);      // --> 1024
+console.log(frequencyDomain.length); // --> 160
 ```
 
-You can easily convert `frequencyDomain` array index into `samplePerPeriod`. In our example indexes are separated
-by 0.25 ((50 - 10) / 160 = 0.25) and first index is showing power in decibels of 10 `samplePerPeriod` wave. We just
-need to add first bin `samplePerPeriod` value to `step` multiplied by `array index`.
-Lets look what power values we have near our three sines
+Lets look what power values we have near our three sines. We expect to see there power peaks.
 
 ```javascript
-console.log(frequencyDomain[21]);    // output: -33.334 -> powerDecibel of 15.25 samplePerPeriod wave (10 + 0.25 * 21 = 15.25)
-console.log(frequencyDomain[22]);    // output: -20.398 -> powerDecibel of 15.50 samplePerPeriod wave (10 + 0.25 * 22 = 15.50)
-console.log(frequencyDomain[23]);    // output: -14.411 -> powerDecibel of 15.75 samplePerPeriod wave (10 + 0.25 * 23 = 15.75)
-console.log(frequencyDomain[24]);    // output: -12.637 -> powerDecibel of 16.00 samplePerPeriod wave (10 + 0.25 * 24 = 16.00) PEAK POWER (sine A)
-console.log(frequencyDomain[25]);    // output: -14.302 -> powerDecibel of 16.25 samplePerPeriod wave (10 + 0.25 * 25 = 16.25)
-console.log(frequencyDomain[26]);    // output: -19.420 -> powerDecibel of 16.50 samplePerPeriod wave (10 + 0.25 * 26 = 16.50)
-console.log(frequencyDomain[27]);    // output: -28.981 -> powerDecibel of 16.75 samplePerPeriod wave (10 + 0.25 * 27 = 16.75)
-// ...
-console.log(frequencyDomain[32]);    // output: -63.552
-// ...
-console.log(frequencyDomain[39]);    // output: -13.352
-console.log(frequencyDomain[40]);    // output: -12.637 PEAK POWER (sine B)
-console.log(frequencyDomain[41]);    // output: -13.317
-// ...
-console.log(frequencyDomain[56]);    // output: -61.482
-// ...
-console.log(frequencyDomain[71]);    // output: -12.821
-console.log(frequencyDomain[72]);    // output: -12.637 PEAK POWER (sine C)
-console.log(frequencyDomain[73]);    // output: -12.815
-```
-
------------
-
-DELETE THIS (?) begin
-
-For simplicity and without
-entering into details let say that for best results we need to create window that takes integer number of periods
-of each sines. In other words window width should be integer multiply of final signal period (our summed 3 sines).
-In case of our three sines (5, 8, 10) smallest common multiple is 40.
-
-    IMAGE: show periods and when sum starts from the beginning
+/*
+    How to compute array index from samplePerPeriod and vice versa:
     
-Let say we picked 2 periods of final signal. It means that we have 80 samples in our window. Those samples represents
-our signal in time domain.
+    step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
+    index = (frequencyBinSamplePerPeriodMax - samplePerPeriod) / step
+    samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
+*/
 
-DELETE THIS (?) end
+var fd = frequencyDomain;     // alias
+
+console.log(fd[87]); // -12.81 | index: (50-28.25)/0.25 = 87 | samplePerPeriod: 50-0.25*87 = 28.25
+console.log(fd[88]); // -12.64 | index: (50-28.00)/0.25 = 88 | samplePerPeriod: 50-0.25*88 = 28.00 | SINE A
+console.log(fd[89]); // -12.82 | index: (50-27.75)/0.25 = 89 | samplePerPeriod: 50-0.25*89 = 27.75
+// ...
+console.log(fd[104]); // -61.48 | index: (50-24.00)/0.25 = 104 | samplePerPeriod: 50-0.25*104 = 24.00
+// ...
+console.log(fd[119]); // -13.32 | index: (50-20.25)/0.25 = 119 | samplePerPeriod: 50-0.25*119 = 20.25
+console.log(fd[120]); // -12.64 | index: (50-20.00)/0.25 = 120 | samplePerPeriod: 50-0.25*120 = 20.00 | SINE B
+console.log(fd[121]); // -13.35 | index: (50-19.75)/0.25 = 121 | samplePerPeriod: 50-0.25*121 = 19.75
+// ...
+console.log(fd[128]); // -63.55 | index: (50-18.00)/0.25 = 128 | samplePerPeriod: 50-0.25*128 = 18.00
+// ...
+console.log(fd[135]); // -14.30 | index: (50-16.25)/0.25 = 135 | samplePerPeriod: 50-0.25*135 = 16.25
+console.log(fd[136]); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod: 50-0.25*136 = 16.00 | SINE C
+console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
+```
 
 ### TODO:
 
-- CODE add setWidth to chart
-- CODE add setMaxSize to queue
-- CODE update order of frequency bin
-- ARTICLE update order of bins and console.log output
-- ARTICLE update order of sine waves
-- CODE add form field, frequency bin index to explain under frequency domain chart
-- CODE add overlay that shows picked range (frequency bin, window samples)
-- CODE add last section 'Frequency bin explained' when we can pick range of samples from window
+- [done] CODE add setWidth to chart
+- [done] CODE add setMaxSize to queue
+- [done] CODE update order of frequency bin
+- [done] ARTICLE update order of bins and console.log output
+- [done] ARTICLE update order of sine waves
+- [done] CODE add form field, frequency bin index to explain under frequency domain chart
+- [done] CODE add overlay that shows picked range (frequency bin, window samples)
+- CODE add constellation diagram under frequency domain chart and form field
+- ARTICLE add info about phase
+- CODE add last section 'Frequency bin explanation' when we can pick range of samples from window
 - CODE add duplicate of processed window chart
 - CODE add overlay that shows picked range (on duplicate of processed window chart)
 - CODE add new chart that explains unit vector in a range
-- ARTICLE write examples
+- ARTICLE write missing examples
+- CODE add ability to add white noise
+- CODE add ability to show/hide sections
+- CODE add animation mode
 
 + [done] much simpler than FFT but ultra slow
 + [done] explain frequency domain and time domain, frequency bin [IMAGE]

@@ -29,9 +29,7 @@
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
             this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
 
-            if (frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== width) {
-                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
-            }
+            this.$$checkWidth();
 
             this.$$queueHashOnCanvas = null;
         };
@@ -43,7 +41,22 @@
         FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
 
         FrequencyDomainChart.prototype.setWidth = function (width) {
-            // TODO implement
+            var element;
+
+            this.$$width = width;
+            this.$$checkWidth();
+
+            element = this.$$find('.frequency-domain-chart-container');
+            element.style.width = width + 'px';
+            element = this.$$find('.frequency-domain-chart');
+            element.style.width = width + 'px';
+            element.setAttribute("width", width);
+        };
+
+        FrequencyDomainChart.prototype.$$checkWidth = function () {
+            if (this.$$frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
+                throw FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
         };
 
         FrequencyDomainChart.prototype.$$renderTemplate = function () {
