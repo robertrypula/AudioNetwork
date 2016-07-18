@@ -9,6 +9,7 @@ var
     WindowFunction = AudioNetwork.Common.WindowFunction,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
+    Util = AudioNetwork.Common.Util,
 
     // default visualizers settings
     SAMPLE_CHART_HEIGHT = 50,
@@ -21,6 +22,7 @@ var
     FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH = 1,
     CONSTELLATION_DIAGRAM_WIDTH = 290,
     CONSTELLATION_DIAGRAM_HEIGHT = 290,
+    CONSTELLATION_DIAGRAM_POINT_HISTORY = 1,
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
@@ -290,7 +292,7 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     result.powerDecibel = 10 * Math.log(power) / Math.LN10;
     result.powerDecibel = result.powerDecibel < powerDecibelMin ? powerDecibelMin : result.powerDecibel;
 
-    result.phase = 0;  // TODO compute phase here
+    result.phase = Util.findUnitAngle(result.real, result.imm);
 
     return result;
 }
@@ -300,23 +302,22 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
 function constellationDiagramInitialize() {
     var element;
 
-    constellationDiagramQueue = new Queue(2);
+    constellationDiagramQueue = new Queue(CONSTELLATION_DIAGRAM_POINT_HISTORY);
     element = document.getElementById('constellation-diagram');
     constellationDiagramChart = new ConstellationDiagram(
-        element, constellationDiagramQueue,
-        CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT
+        element, CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT, constellationDiagramQueue, powerDecibelMin
     );
-    // parentElement, queue, width, height, colorAxis, colorHistoryPoint
 }
 
 function constellationDiagramUpdate() {
-    var powerNormalized, frequencyBin;
+    var frequencyBin;
 
     frequencyBin = frequencyBinQueue.getItem(frequencyBinIndexToExplain);
-    powerNormalized = (frequencyBin.powerDecibel + powerDecibelMin) / powerDecibelMin;
-    powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-    constellationDiagramQueue.pushEvenIfFull(powerNormalized * Math.cos(2 * Math.PI * frequencyBin.phase));
-    constellationDiagramQueue.pushEvenIfFull(powerNormalized * Math.sin(2 * Math.PI * frequencyBin.phase));
+    constellationDiagramQueue.pushEvenIfFull({
+        powerDecibel: frequencyBin.powerDecibel,
+        phase: 0.125//frequencyBin.phase
+    });
+    constellationDiagramChart.setPowerDecibelMin(powerDecibelMin);
 }
 
 // ----------------

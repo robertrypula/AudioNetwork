@@ -31,7 +31,7 @@
 
             this.$$checkWidth();
 
-            this.$$queueHashOnCanvas = null;
+            this.$$hashOnCanvas = null;
         };
 
         FrequencyDomainChart.prototype = Object.create(AbstractVisualizer.prototype);
@@ -73,7 +73,7 @@
                 return false;
             }
             this.$$powerDecibelMin = powerDecibelMin;
-            this.$$queueHashOnCanvas = null;
+            this.$$hashOnCanvas = null;
 
             return true;
         };
@@ -88,15 +88,13 @@
                 barMiddle
             ;
 
-            if (this.$$queueHashOnCanvas === fdq.getHash()) {
+            if (this.$$hashOnCanvas === fdq.getHash()) {
                 return;
             }
 
             ctx.clearRect(0, 0, w, h);
 
             ctx.strokeStyle = this.$$colorAxis;
-            ctx.fillStyle = this.$$colorSample;
-
             for (i = 0; i <= -this.$$powerDecibelMin; i += FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP) {
                 y = i *  h / -this.$$powerDecibelMin;
                 ctx.beginPath();
@@ -106,6 +104,7 @@
                 ctx.stroke();
             }
 
+            ctx.fillStyle = this.$$colorSample;
             barMiddle = 0.5 * (this.$$barWidth - 1);
             for (i = 0; i < fdq.getSize(); i++) {
                 frequencyBinPowerDecibel = fdq.getItem(i);
@@ -134,7 +133,7 @@
                 // ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
-            this.$$queueHashOnCanvas = fdq.getHash();
+            this.$$hashOnCanvas = fdq.getHash();
         };
 
         FrequencyDomainChart.prototype.$$initCanvasContext = function () {

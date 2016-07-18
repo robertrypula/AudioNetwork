@@ -28,7 +28,8 @@ TODO list:
     - receive-channel-carrier           adds phase correction, handles notify intervals
     - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
   - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
-  - do not redraw constellation if queue wasn't changed
+  + do not redraw constellation if queue wasn't changed
+  + clean constellation diagram constructor parameters order 
   - ability to add hooks at sample generation and receive (inject some changes to signal)
   - fix carrier.html example (use dedicated constellation class)
 

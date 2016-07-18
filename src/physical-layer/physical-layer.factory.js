@@ -32,6 +32,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     _PhysicalLayer.$inject = [
         'Common.QueueBuilder',
         'Common.MathUtil',
+        'PhysicalLayer.DefaultConfig',
         'PhysicalLayer.ConfigurationParser',
         'PhysicalLayer.RxInput',
         'PhysicalLayer.RxHandlerBuilder',
@@ -46,6 +47,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     function _PhysicalLayer(
         QueueBuilder,
         MathUtil,
+        DefaultConfig,
         ConfigurationParser,
         RxInput,
         RxHandlerBuilder,
@@ -108,14 +110,15 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 }
 
                 queue.push(
-                    QueueBuilder.build(2 * this.$$configuration.rx.constellationDiagram.historyPointSize)
+                    QueueBuilder.build(this.$$configuration.rx.constellationDiagram.historyPointSize)
                 );
                 constellationDiagram.push(
                     ConstellationDiagramBuilder.build(
                         document.getElementById(elementId),
-                        queue[queue.length - 1],
                         this.$$configuration.rx.constellationDiagram.width,
                         this.$$configuration.rx.constellationDiagram.height,
+                        queue[queue.length - 1],
+                        DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT,
                         this.$$configuration.rx.constellationDiagram.color.axis,
                         this.$$configuration.rx.constellationDiagram.color.historyPoint
                     )

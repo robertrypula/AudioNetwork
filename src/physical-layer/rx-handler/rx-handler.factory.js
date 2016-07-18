@@ -71,7 +71,7 @@
         };
 
         RxHandler.prototype.$$handle = function (channelIndex, carrierDetail, time) {
-            var i, cd, queue, powerNormalized;
+            var i, cd, queue;
 
             for (i = 0; i < carrierDetail.length; i++) {
                 cd = carrierDetail[i];
@@ -85,10 +85,10 @@
                 }
 
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
-                powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                queue.pushEvenIfFull(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
-                queue.pushEvenIfFull(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
+                queue.pushEvenIfFull({
+                    powerDecibel: cd.powerDecibel,
+                    phase: cd.phase
+                });
             }
 
             if (this.$$rxExternalHandler.callback) {

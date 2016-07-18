@@ -20,6 +20,7 @@ AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');
 AudioNetwork.Common.CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery');
 AudioNetwork.Common.CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate');
 AudioNetwork.Common.WindowFunction = AudioNetwork.Injector.resolve('Common.WindowFunction');
+AudioNetwork.Common.Util = AudioNetwork.Injector.resolve('Common.Util');
 
 AudioNetwork.Visualizer = {};
 AudioNetwork.Visualizer.AnalyserChart = AudioNetwork.Injector.resolve('Visualizer.AnalyserChart');

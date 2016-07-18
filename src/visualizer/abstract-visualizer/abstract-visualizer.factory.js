@@ -53,6 +53,7 @@
             var canvasElement = this.$$find('canvas');
 
             this.$$canvasContext = canvasElement.getContext("2d");
+            this.$$canvasContext.lineWidth = 1;
         };
 
         AbstractVisualizer.prototype.$$animationFrameHandler = function () {

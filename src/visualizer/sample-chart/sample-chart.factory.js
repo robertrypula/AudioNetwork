@@ -80,15 +80,15 @@
             }
 
             ctx.clearRect(0, 0, w, h);
+            
             ctx.strokeStyle = this.$$colorAxis;
-            ctx.fillStyle = this.$$colorSample;
-
             ctx.beginPath();
             ctx.moveTo(0, 0.5 * h);
             ctx.lineTo(w, 0.5 * h);
             ctx.closePath();
             ctx.stroke();
-            
+
+            ctx.fillStyle = this.$$colorSample;
             barMiddle = 0.5 * (this.$$barWidth - 1);
             for (i = 0; i < q.getSize(); i++) {
                 sample = q.getItem(i);

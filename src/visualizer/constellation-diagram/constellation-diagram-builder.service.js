@@ -13,8 +13,8 @@
         ConstellationDiagram
     ) {
 
-        function build(parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
-            return new ConstellationDiagram(parentElement, queue, width, height, colorAxis, colorHistoryPoint);
+        function build(parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain) {
+            return new ConstellationDiagram(parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain);
         }
 
         return {
