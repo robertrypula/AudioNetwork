@@ -110,6 +110,10 @@ button, textarea, input {
 .col-xs-7 { float: left; width: 58.333333%; }
 .col-xs-8 { float: left; width: 66.666666%; }
 .col-xs-12 { width: 100%; }
+@media (max-width: 767px) {
+    .col-hidden-at-xs { display: none !important; }
+}
+
 
 @media (min-width: 768px) {
     .container, footer {
@@ -123,6 +127,9 @@ button, textarea, input {
     .col-sm-7 { float: left; width: 58.333333%; }
     .col-sm-8 { float: left; width: 66.666666%; }
     .col-sm-12 { width: 100%; }
+}
+@media (min-width: 768px) and (max-width: 991px) {
+    .col-hidden-at-sm { display: none !important; }
 }
 
 @media (min-width: 992px) {
@@ -138,6 +145,9 @@ button, textarea, input {
     .col-md-8 { float: left; width: 66.666666%; }
     .col-md-12 { width: 100%; }
 }
+@media (min-width: 992px) and (max-width: 1199px) {
+    .col-hidden-at-md { display: none !important; }
+}
 
 @media (min-width: 1200px) {
     .container, footer {
@@ -151,6 +161,9 @@ button, textarea, input {
     .col-lg-7 { float: left; width: 58.333333%; }
     .col-lg-8 { float: left; width: 66.666666%; }
     .col-lg-12 { width: 100%; }
+}
+@media (min-width: 1200px) {
+    .col-hidden-at-lg { display: none !important; }
 }
 
 .container {

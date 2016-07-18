@@ -4,6 +4,7 @@
 var
     // import stuff from AudioNetwork lib
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
+    ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     WindowFunction = AudioNetwork.Common.WindowFunction,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
@@ -18,6 +19,8 @@ var
     FREQUENCY_BIN_CHART_RADIUS = 2,
     FREQUENCY_BIN_CHART_BAR_WIDTH = 5,
     FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH = 1,
+    CONSTELLATION_DIAGRAM_WIDTH = 290,
+    CONSTELLATION_DIAGRAM_HEIGHT = 290,
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
@@ -45,6 +48,8 @@ var
     windowFunctionQueue,
     timeDomainProcessedQueue,
     frequencyDomainQueue,
+    frequencyBinQueue,
+    constellationDiagramQueue,
 
     // data visualizers
     separateSineChart = [],
@@ -52,7 +57,8 @@ var
     timeDomainRawChart,
     windowFunctionChart,
     timeDomainProcessedChart,
-    frequencyDomainChart;
+    frequencyDomainChart,
+    constellationDiagramChart;
 
 // ----------------
 
@@ -215,6 +221,7 @@ function discreteFourierTransformInitialize() {
     var element, frequencyDomainChartWidth;
 
     frequencyDomainQueue = new Queue(frequencyBinSize);
+    frequencyBinQueue = new Queue(frequencyBinSize);
     element = document.getElementById('frequency-domain');
     frequencyDomainChartWidth = frequencyBinSize *
         (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
@@ -239,6 +246,7 @@ function discreteFourierTransformUpdate() {
         samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
         frequencyDomainQueue.pushEvenIfFull(frequencyBin.powerDecibel);
+        frequencyBinQueue.pushEvenIfFull(frequencyBin);
     }
     chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart.setWidth(chartWidth);
@@ -285,6 +293,30 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     result.phase = 0;  // TODO compute phase here
 
     return result;
+}
+
+// ----------------
+
+function constellationDiagramInitialize() {
+    var element;
+
+    constellationDiagramQueue = new Queue(2);
+    element = document.getElementById('constellation-diagram');
+    constellationDiagramChart = new ConstellationDiagram(
+        element, constellationDiagramQueue,
+        CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT
+    );
+    // parentElement, queue, width, height, colorAxis, colorHistoryPoint
+}
+
+function constellationDiagramUpdate() {
+    var powerNormalized, frequencyBin;
+
+    frequencyBin = frequencyBinQueue.getItem(frequencyBinIndexToExplain);
+    powerNormalized = (frequencyBin.powerDecibel + powerDecibelMin) / powerDecibelMin;
+    powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
+    constellationDiagramQueue.pushEvenIfFull(powerNormalized * Math.cos(2 * Math.PI * frequencyBin.phase));
+    constellationDiagramQueue.pushEvenIfFull(powerNormalized * Math.sin(2 * Math.PI * frequencyBin.phase));
 }
 
 // ----------------
@@ -357,6 +389,7 @@ function formSineDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
 }
 
@@ -366,6 +399,7 @@ function formWindowDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
 }
 
@@ -374,17 +408,20 @@ function formWindowFunctionDataChanged() {
     windowFunctionUpdate();
     timeDomainUpdate();
     discreteFourierTransformUpdate();
+    constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
 }
 
 function formFrequencyDomainDataChanged() {
     formBindingTemplateToCode();
     discreteFourierTransformUpdate();
+    constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
 }
 
 function formFrequencyBinExplanationDataChanged() {
     formBindingTemplateToCode();
+    constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
 }
 
@@ -408,6 +445,9 @@ function startApp() {
 
     discreteFourierTransformInitialize();
     discreteFourierTransformUpdate();
+
+    constellationDiagramInitialize();
+    constellationDiagramUpdate();
 
     frequencyBinExplanationInitialize();
     frequencyBinExplanationUpdate();
