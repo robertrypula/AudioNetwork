@@ -378,14 +378,14 @@
             </div>
             <div class="row margin-bottom">
                 <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-index-to-explain">
+                    <label for="form-frequency-bin-to-explain-index">
                         Frequency bin index to explain
                     </label>
                 </div>
                 <div class="col col-xs-6 col-sm-7 col-md-6">
                     <input
                         type="number"
-                        id="form-frequency-bin-index-to-explain"
+                        id="form-frequency-bin-to-explain-index"
                         onChange="formFrequencyBinExplanationDataChanged()"
                         value=""
                     />
@@ -399,6 +399,50 @@
                 </div>
                 <div class="col col-xs-12 col-sm-7 col-md-6">
                     <div id="constellation-diagram"></div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <h2>Frequency bin explanation</h2>
+            <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <label for="form-frequency-bin-to-explain-time-domain-min">
+                        Time Domain sample range begin
+                    </label>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <input
+                        type="number"
+                        id="form-frequency-bin-to-explain-time-domain-min"
+                        onChange="formFrequencyBinExplanationDataChanged()"
+                        value=""
+                    />
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <label for="form-frequency-bin-sample-per-period-max">
+                        Time Domain sample range end
+                    </label>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <input
+                        type="number"
+                        id="form-frequency-bin-to-explain-time-domain-max"
+                        onChange="formFrequencyBinExplanationDataChanged()"
+                        value=""
+                    />
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="big-chart">
+                        <div id="time-domain-processed-duplicate"></div>
+                        <div class="visualizer-overlay-container">
+                            <span class="visualizer-overlay" id="time-domain-processed-duplicate-visualizer-overlay"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

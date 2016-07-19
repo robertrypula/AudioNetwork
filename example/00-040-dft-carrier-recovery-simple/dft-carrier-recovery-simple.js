@@ -38,7 +38,9 @@ var
     frequencyBinSize = 160,
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
-    frequencyBinIndexToExplain = Math.round(frequencyBinSize * 0.5),
+    frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.5),
+    frequencyBinToExplainTimeDomainMin = Math.round(0.5 * windowSampleSize - 15),
+    frequencyBinToExplainTimeDomainMax = Math.round(0.5 * windowSampleSize + 15),
 
     // helpers for sine creation
     separateSineCarrierGenerate = [],
@@ -60,7 +62,8 @@ var
     windowFunctionChart,
     timeDomainProcessedChart,
     frequencyDomainChart,
-    constellationDiagramChart;
+    constellationDiagramChart,
+    timeDomainProcessedDuplicateChart;     // its a duplicate and its using timeDomainProcessedQueue
 
 // ----------------
 
@@ -312,7 +315,7 @@ function constellationDiagramInitialize() {
 function constellationDiagramUpdate() {
     var frequencyBin;
 
-    frequencyBin = frequencyBinQueue.getItem(frequencyBinIndexToExplain);
+    frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
     constellationDiagramQueue.pushEvenIfFull({
         powerDecibel: frequencyBin.powerDecibel,
         phase: frequencyBin.phase
@@ -323,7 +326,14 @@ function constellationDiagramUpdate() {
 // ----------------
 
 function frequencyBinExplanationInitialize() {
+    var element, chartWidth;
 
+    element = document.getElementById('time-domain-processed-duplicate');
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainProcessedDuplicateChart = new SampleChart(
+        element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedQueue,
+        SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH
+    );
 }
 
 function frequencyBinExplanationUpdate() {
@@ -331,7 +341,7 @@ function frequencyBinExplanationUpdate() {
 
     element = document.getElementById('frequency-domain-visualizer-overlay');
     element.style.left =
-        ((FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH) * frequencyBinIndexToExplain) + 'px';
+        ((FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH) * frequencyBinToExplainIndex) + 'px';
 }
 
 // ----------------
@@ -360,7 +370,9 @@ function formBindingTemplateToCode() {
     frequencyBinSize = parseIntFromForm('form-frequency-bin-size');
     frequencyBinSamplePerPeriodMax = parseFloatFromForm('form-frequency-bin-sample-per-period-max');
     frequencyBinSamplePerPeriodMin = parseFloatFromForm('form-frequency-bin-sample-per-period-min');
-    frequencyBinIndexToExplain = parseIntFromForm('form-frequency-bin-index-to-explain');
+    frequencyBinToExplainIndex = parseIntFromForm('form-frequency-bin-to-explain-index');
+    frequencyBinToExplainTimeDomainMin = parseIntFromForm('form-frequency-bin-to-explain-time-domain-min');
+    frequencyBinToExplainTimeDomainMax = parseIntFromForm('form-frequency-bin-to-explain-time-domain-max');
 }
 
 function formBindingCodeToTemplate() {
@@ -379,7 +391,9 @@ function formBindingCodeToTemplate() {
     document.getElementById('form-frequency-bin-size').value = frequencyBinSize;
     document.getElementById('form-frequency-bin-sample-per-period-max').value = frequencyBinSamplePerPeriodMax;
     document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
-    document.getElementById('form-frequency-bin-index-to-explain').value = frequencyBinIndexToExplain;
+    document.getElementById('form-frequency-bin-to-explain-index').value = frequencyBinToExplainIndex;
+    document.getElementById('form-frequency-bin-to-explain-time-domain-min').value = frequencyBinToExplainTimeDomainMin;
+    document.getElementById('form-frequency-bin-to-explain-time-domain-max').value = frequencyBinToExplainTimeDomainMax;
 }
 
 function formSineDataChanged() {
