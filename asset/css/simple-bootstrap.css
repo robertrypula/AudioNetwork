@@ -109,6 +109,7 @@ button, textarea, input {
 .col-xs-6 { float: left; width: 50%; }
 .col-xs-7 { float: left; width: 58.333333%; }
 .col-xs-8 { float: left; width: 66.666666%; }
+.col-xs-9 { float: left; width: 75%; }
 .col-xs-12 { width: 100%; }
 @media (max-width: 767px) {
     .col-hidden-at-xs { display: none !important; }
@@ -126,6 +127,7 @@ button, textarea, input {
     .col-sm-6 { float: left; width: 50%; }
     .col-sm-7 { float: left; width: 58.333333%; }
     .col-sm-8 { float: left; width: 66.666666%; }
+    .col-sm-9 { float: left; width: 75%; }
     .col-sm-12 { width: 100%; }
 }
 @media (min-width: 768px) and (max-width: 991px) {
@@ -143,6 +145,7 @@ button, textarea, input {
     .col-md-6 { float: left; width: 50%; }
     .col-md-7 { float: left; width: 58.333333%; }
     .col-md-8 { float: left; width: 66.666666%; }
+    .col-md-9 { float: left; width: 75%; }
     .col-md-12 { width: 100%; }
 }
 @media (min-width: 992px) and (max-width: 1199px) {
@@ -160,6 +163,7 @@ button, textarea, input {
     .col-lg-6 { float: left; width: 50%; }
     .col-lg-7 { float: left; width: 58.333333%; }
     .col-lg-8 { float: left; width: 66.666666%; }
+    .col-lg-9 { float: left; width: 75%; }
     .col-lg-12 { width: 100%; }
 }
 @media (min-width: 1200px) {

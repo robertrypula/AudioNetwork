@@ -10,3 +10,9 @@
     width: 1px;
     border: 1px solid rgba(0, 0, 0, 0.5);
 }
+
+.frequency-bin-iteration {
+    width: 130px;
+    min-height: 130px;
+    float: left;
+}

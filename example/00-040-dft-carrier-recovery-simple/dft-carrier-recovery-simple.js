@@ -23,6 +23,9 @@ var
     CONSTELLATION_DIAGRAM_WIDTH = 290,
     CONSTELLATION_DIAGRAM_HEIGHT = 290,
     CONSTELLATION_DIAGRAM_POINT_HISTORY = 1,
+    FREQUENCY_BIN_ITERATION_CHART_WIDTH = 130,
+    FREQUENCY_BIN_ITERATION_CHART_HEIGHT = 130,
+    FREQUENCY_BIN_ITERATION_CHART_SIZE = 25,
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
@@ -39,8 +42,7 @@ var
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
     frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.5),
-    frequencyBinToExplainTimeDomainMin = Math.round(0.5 * windowSampleSize - 15),
-    frequencyBinToExplainTimeDomainMax = Math.round(0.5 * windowSampleSize + 15),
+    frequencyBinToExplainIterationOffset = Math.round(0.5 * windowSampleSize - 15),
 
     // helpers for sine creation
     separateSineCarrierGenerate = [],
@@ -54,6 +56,8 @@ var
     frequencyDomainQueue,
     frequencyBinQueue,
     constellationDiagramQueue,
+    timeDomainProcessedDuplicateQueue,    // its a duplicate of timeDomainProcessedQueue
+    frequencyBinToExplainQueue = [],
 
     // data visualizers
     separateSineChart = [],
@@ -63,7 +67,8 @@ var
     timeDomainProcessedChart,
     frequencyDomainChart,
     constellationDiagramChart,
-    timeDomainProcessedDuplicateChart;     // its a duplicate and its using timeDomainProcessedQueue
+    timeDomainProcessedDuplicateChart,     // its a duplicate of timeDomainProcessedChart
+    frequencyBinToExplainChart = [];
 
 // ----------------
 
@@ -195,7 +200,7 @@ function windowFunctionUpdate() {
 
 // ----------------
 
-function timeDomainInitialize() {
+function timeDomainProcessedInitialize() {
     var element, chartWidth;
 
     timeDomainProcessedQueue = new Queue(windowSampleSize);
@@ -207,7 +212,7 @@ function timeDomainInitialize() {
     );
 }
 
-function timeDomainUpdate() {
+function timeDomainProcessedUpdate() {
     var i, chartWidth;
 
     timeDomainProcessedQueue.setSizeMax(windowSampleSize);
@@ -326,25 +331,87 @@ function constellationDiagramUpdate() {
 // ----------------
 
 function frequencyBinExplanationInitialize() {
-    var element, chartWidth;
+    var element, chartWidth, i, chartTemplate, chartAllTemplate, queue, chart;
 
+    // time domain duplicate
+    timeDomainProcessedDuplicateQueue = timeDomainProcessedQueue;     // exactly same data as timeDomainProcessedQueue
     element = document.getElementById('time-domain-processed-duplicate');
     chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
     timeDomainProcessedDuplicateChart = new SampleChart(
-        element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedQueue,
+        element, chartWidth, SAMPLE_CHART_HEIGHT, timeDomainProcessedDuplicateQueue,
         SAMPLE_CHART_RADIUS, SAMPLE_CHART_BAR_WIDTH, SAMPLE_CHART_BAR_SPACING_WIDTH
     );
+
+    // range marker
+    element = document.getElementById('time-domain-processed-duplicate-visualizer-overlay');
+    element.style.height = SAMPLE_CHART_HEIGHT + 'px';
+    element.style.top = -SAMPLE_CHART_HEIGHT + 'px';
+
+    // iteration charts - generate html
+    element = document.getElementById('frequency-bin-iteration-container');
+    chartTemplate = element.innerHTML;
+    chartAllTemplate = '';
+    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+        chartAllTemplate += chartTemplate.replace(/\[\[ index \]\]/g, i.toString());
+    }
+    element.innerHTML = chartAllTemplate;
+
+    // iteration charts - initialize
+    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+        queue = new Queue(2);
+        element = document.getElementById('frequency-bin-iteration-' + i);
+        chart = new ConstellationDiagram(       // TODO change it
+            element, FREQUENCY_BIN_ITERATION_CHART_WIDTH, FREQUENCY_BIN_ITERATION_CHART_HEIGHT, queue, -1
+        );
+        frequencyBinToExplainQueue.push(queue);
+        frequencyBinToExplainChart.push(chart);
+    }
 }
 
 function frequencyBinExplanationUpdate() {
-    var element;
+    var element, chartWidth, i, queue, frequencyBin, frequencyBinIteration;
 
+    // update frequency bin marker
     element = document.getElementById('frequency-domain-visualizer-overlay');
     element.style.left =
         ((FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH) * frequencyBinToExplainIndex) + 'px';
+
+    // update duplicated time domain chart
+    chartWidth = windowSampleSize * (SAMPLE_CHART_BAR_WIDTH + SAMPLE_CHART_BAR_SPACING_WIDTH);
+    timeDomainProcessedDuplicateChart.setWidth(chartWidth);
+
+    // range marker update
+    element = document.getElementById('time-domain-processed-duplicate-visualizer-overlay');
+    element.style.left = frequencyBinToExplainIterationOffset + 'px';
+    element.style.width = FREQUENCY_BIN_ITERATION_CHART_SIZE + 'px';
+
+    // iteration charts
+    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+        queue = frequencyBinToExplainQueue[i];
+        element = document.getElementById('frequency-bin-iteration-label-' + i);
+        frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
+        frequencyBinIteration = frequencyBin.detail[frequencyBinToExplainIterationOffset + i];
+        queue.pushEvenIfFull({
+            powerDecibel: (
+                Math.sqrt(frequencyBinIteration.real * frequencyBinIteration.real + frequencyBinIteration.imm * frequencyBinIteration.imm) * -1
+            ),    // TODO change it
+            phase: Util.findUnitAngle(frequencyBinIteration.real, frequencyBinIteration.imm)         // TODO change it
+        });
+        queue.pushEvenIfFull({
+            powerDecibel: 0,    // TODO change it
+            phase: Util.findUnitAngle(frequencyBinIteration.realUnit, frequencyBinIteration.immUnit)         // TODO change it
+        });
+        element.innerHTML = (frequencyBinToExplainIterationOffset + i).toString();
+    }
 }
 
 // ----------------
+
+function getSamplePerPeriodFromIndex(index) {
+    var step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
+
+    return frequencyBinSamplePerPeriodMax - step * index;
+}
 
 function parseIntFromForm(elementId) {
     return parseInt(document.getElementById(elementId).value);
@@ -354,14 +421,15 @@ function parseFloatFromForm(elementId) {
     return parseFloat(document.getElementById(elementId).value);
 }
 
-function formBindingTemplateToCode() {
-    var i;
+function dataBindingTemplateToCode() {
+    var i, ssp;
 
     sineSampleSize = parseIntFromForm('form-sine-sample-size');
     for (i = 0; i < separateSineParameter.length; i++) {
-        separateSineParameter[i].samplePerPeriod = parseFloatFromForm('form-sine-' + i + '-sample-per-period');
-        separateSineParameter[i].amplitude = parseFloatFromForm('form-sine-' + i + '-amplitude');
-        separateSineParameter[i].phase = parseFloatFromForm('form-sine-' + i + '-phase');
+        ssp = separateSineParameter[i];
+        ssp.samplePerPeriod = parseFloatFromForm('form-sine-' + i + '-sample-per-period');
+        ssp.amplitude = parseFloatFromForm('form-sine-' + i + '-amplitude');
+        ssp.phase = parseFloatFromForm('form-sine-' + i + '-phase');
     }
     windowSampleOffset = parseIntFromForm('form-window-sample-offset');
     windowSampleSize = parseIntFromForm('form-window-sample-size');
@@ -371,18 +439,18 @@ function formBindingTemplateToCode() {
     frequencyBinSamplePerPeriodMax = parseFloatFromForm('form-frequency-bin-sample-per-period-max');
     frequencyBinSamplePerPeriodMin = parseFloatFromForm('form-frequency-bin-sample-per-period-min');
     frequencyBinToExplainIndex = parseIntFromForm('form-frequency-bin-to-explain-index');
-    frequencyBinToExplainTimeDomainMin = parseIntFromForm('form-frequency-bin-to-explain-time-domain-min');
-    frequencyBinToExplainTimeDomainMax = parseIntFromForm('form-frequency-bin-to-explain-time-domain-max');
+    frequencyBinToExplainIterationOffset = parseIntFromForm('form-frequency-bin-to-explain-iteration-offset');
 }
 
-function formBindingCodeToTemplate() {
-    var i;
+function dataBindingCodeToTemplate() {
+    var i, ssp;
 
     document.getElementById('form-sine-sample-size').value = sineSampleSize;
     for (i = 0; i < separateSineParameter.length; i++) {
-        document.getElementById('form-sine-' + i + '-sample-per-period').value = separateSineParameter[i].samplePerPeriod;
-        document.getElementById('form-sine-' + i + '-amplitude').value = separateSineParameter[i].amplitude;
-        document.getElementById('form-sine-' + i + '-phase').value = separateSineParameter[i].phase;
+        ssp = separateSineParameter[i];
+        document.getElementById('form-sine-' + i + '-sample-per-period').value = ssp.samplePerPeriod;
+        document.getElementById('form-sine-' + i + '-amplitude').value = ssp.amplitude;
+        document.getElementById('form-sine-' + i + '-phase').value = ssp.phase;
     }
     document.getElementById('form-window-sample-offset').value = windowSampleOffset;
     document.getElementById('form-window-sample-size').value = windowSampleSize;
@@ -392,57 +460,75 @@ function formBindingCodeToTemplate() {
     document.getElementById('form-frequency-bin-sample-per-period-max').value = frequencyBinSamplePerPeriodMax;
     document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
     document.getElementById('form-frequency-bin-to-explain-index').value = frequencyBinToExplainIndex;
-    document.getElementById('form-frequency-bin-to-explain-time-domain-min').value = frequencyBinToExplainTimeDomainMin;
-    document.getElementById('form-frequency-bin-to-explain-time-domain-max').value = frequencyBinToExplainTimeDomainMax;
+    document.getElementById('frequency-bin-sample-per-period').innerHTML =
+        getSamplePerPeriodFromIndex(frequencyBinToExplainIndex);
+    document.getElementById('frequency-bin-power-decibel').innerHTML =
+        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).powerDecibel * 100) / 100).toString();
+    document.getElementById('frequency-bin-phase').innerHTML =
+        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360)).toString();
+    document.getElementById('form-frequency-bin-to-explain-iteration-offset').value = frequencyBinToExplainIterationOffset;
 }
 
 function formSineDataChanged() {
-    formBindingTemplateToCode();
+    dataBindingTemplateToCode();
+
     separateSineUpdate();
     summedSineUpdate();
     timeDomainRawUpdate();
     windowFunctionUpdate();
-    timeDomainUpdate();
+    timeDomainProcessedUpdate();
     discreteFourierTransformUpdate();
     constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 
 function formWindowDataChanged() {
-    formBindingTemplateToCode();
+    dataBindingTemplateToCode();
+
     timeDomainRawUpdate();
     windowFunctionUpdate();
-    timeDomainUpdate();
+    timeDomainProcessedUpdate();
     discreteFourierTransformUpdate();
     constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 
 function formWindowFunctionDataChanged() {
-    formBindingTemplateToCode();
+    dataBindingTemplateToCode();
+
     windowFunctionUpdate();
-    timeDomainUpdate();
+    timeDomainProcessedUpdate();
     discreteFourierTransformUpdate();
     constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 
 function formFrequencyDomainDataChanged() {
-    formBindingTemplateToCode();
+    dataBindingTemplateToCode();
+
     discreteFourierTransformUpdate();
     constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 
 function formFrequencyBinExplanationDataChanged() {
-    formBindingTemplateToCode();
+    dataBindingTemplateToCode();
+
     constellationDiagramUpdate();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 
 function startApp() {
-    formBindingCodeToTemplate();
-
     separateSineInitialize();
     separateSineUpdate();
 
@@ -455,8 +541,8 @@ function startApp() {
     windowFunctionInitialize();
     windowFunctionUpdate();
 
-    timeDomainInitialize();
-    timeDomainUpdate();
+    timeDomainProcessedInitialize();
+    timeDomainProcessedUpdate();
 
     discreteFourierTransformInitialize();
     discreteFourierTransformUpdate();
@@ -466,5 +552,7 @@ function startApp() {
 
     frequencyBinExplanationInitialize();
     frequencyBinExplanationUpdate();
+
+    dataBindingCodeToTemplate();
 }
 

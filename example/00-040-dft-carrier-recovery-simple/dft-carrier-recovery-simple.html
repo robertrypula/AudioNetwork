@@ -392,6 +392,36 @@
                 </div>
             </div>
             <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <b class="label">
+                        Sample per period
+                    </b>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <span id="frequency-bin-sample-per-period"></span>
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <b class="label">
+                        Power
+                    </b>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <span id="frequency-bin-power-decibel"></span> dB
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-xs-6 col-sm-5 col-md-3">
+                    <b class="label">
+                        Phase
+                    </b>
+                </div>
+                <div class="col col-xs-6 col-sm-7 col-md-6">
+                    <span id="frequency-bin-phase"></span> deg
+                </div>
+            </div>
+            <div class="row margin-bottom">
                 <div class="col col-hidden-at-xs col-sm-5 col-md-3">
                     <b class="label">
                         Constellation diagram
@@ -407,29 +437,14 @@
             <h2>Frequency bin explanation</h2>
             <div class="row margin-bottom">
                 <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-to-explain-time-domain-min">
-                        Time Domain sample range begin
+                    <label for="form-frequency-bin-to-explain-iteration-offset">
+                        Explain frequency bin starting from iteration number:
                     </label>
                 </div>
                 <div class="col col-xs-6 col-sm-7 col-md-6">
                     <input
                         type="number"
-                        id="form-frequency-bin-to-explain-time-domain-min"
-                        onChange="formFrequencyBinExplanationDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-sample-per-period-max">
-                        Time Domain sample range end
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-to-explain-time-domain-max"
+                        id="form-frequency-bin-to-explain-iteration-offset"
                         onChange="formFrequencyBinExplanationDataChanged()"
                         value=""
                     />
@@ -441,6 +456,25 @@
                         <div id="time-domain-processed-duplicate"></div>
                         <div class="visualizer-overlay-container">
                             <span class="visualizer-overlay" id="time-domain-processed-duplicate-visualizer-overlay"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row margin-bottom">
+                <div class="col col-hidden-at-xs col-sm-5 col-md-3">
+                    <b class="label">
+                        Iteration details
+                    </b>
+                </div>
+                <div class="col col-xs-12 col-sm-7 col-md-9">
+                    <div id="frequency-bin-iteration-container" class="clearfix">
+                        <div class="frequency-bin-iteration clearfix">
+                            <div class="fbi-header">
+                                Iteration #<span id="frequency-bin-iteration-label-[[ index ]]"></span>
+                            </div>
+                            <div class="fbi-chart">
+                                <div id="frequency-bin-iteration-[[ index ]]"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -41,6 +41,10 @@
         SampleChart.prototype.setWidth = function (width) {
             var element;
 
+            if (this.$$width === width) {
+                return false;
+            }
+
             this.$$width = width;
             this.$$checkWidth();
 
@@ -49,6 +53,10 @@
             element = this.$$find('.sample-chart');
             element.style.width = width + 'px';
             element.setAttribute("width", width);
+
+            this.$$hashOnCanvas = null;
+
+            return true;
         };
 
         SampleChart.prototype.$$checkWidth = function () {

@@ -214,10 +214,10 @@ console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod
 - [done] CODE add overlay that shows picked range (frequency bin, window samples)
 - [done] CODE add constellation diagram under frequency domain chart and form field
 - ARTICLE add info about phase
-- CODE add last section 'Frequency bin explanation' when we can pick range of samples from window
-- CODE add duplicate of processed window chart
-- CODE add overlay that shows picked range (on duplicate of processed window chart)
-- CODE add info about picked frequency bin
+- [done] CODE add last section 'Frequency bin explanation' when we can pick range of samples from window
+- [done] CODE add duplicate of processed window chart
+- [done] CODE add overlay that shows picked range (on duplicate of processed window chart)
+- [done] CODE add info about picked frequency bin
 - CODE add new chart that explains unit vector in a range
 - ARTICLE write missing examples
 - CODE add ability to add white noise

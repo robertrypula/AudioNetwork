@@ -201,8 +201,12 @@
 
             normalizedPowerDecibel = this.$$getNormalizedPowerDecibel(item.powerDecibel);
             item.$$cache = {
-                x: normalizedPowerDecibel === null ? 0 : (normalizedPowerDecibel * MathUtil.sin(MathUtil.TWO_PI * item.phase)),
-                y: normalizedPowerDecibel === null ? 0 : (normalizedPowerDecibel * MathUtil.cos(MathUtil.TWO_PI * item.phase)),
+                x: normalizedPowerDecibel === null
+                    ? 0
+                    : (normalizedPowerDecibel * MathUtil.sin(MathUtil.TWO_PI * item.phase)),
+                y: normalizedPowerDecibel === null
+                    ? 0
+                    : (normalizedPowerDecibel * MathUtil.cos(MathUtil.TWO_PI * item.phase)),
                 outOfRange: normalizedPowerDecibel === null ? true : false
             };
         };
