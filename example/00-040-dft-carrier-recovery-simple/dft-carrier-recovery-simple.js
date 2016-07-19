@@ -256,7 +256,7 @@ function discreteFourierTransformUpdate() {
 }
 
 function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
-    var i, r, cos, sin, sample, result, detail, power;
+    var i, r, x, y, sample, result, detail, power;
 
     result = {
         samplePerPeriod: samplePerPeriod,
@@ -269,14 +269,14 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     for (i = 0; i < timeDomainQueue.getSize(); i++) {
         sample = timeDomainQueue.getItem(i);
         r = 2 * Math.PI * i / samplePerPeriod;
-        cos = Math.cos(r);
-        sin = Math.sin(r);
+        x = Math.sin(r);
+        y = -Math.cos(r);
 
         detail = {
-            realUnit: cos,
-            immUnit: sin,
-            real: sample * cos,
-            imm: sample * sin
+            realUnit: x,
+            immUnit: y,
+            real: sample * x,
+            imm: sample * y
         };
         result.real += detail.real;
         result.imm += detail.imm;
@@ -315,7 +315,7 @@ function constellationDiagramUpdate() {
     frequencyBin = frequencyBinQueue.getItem(frequencyBinIndexToExplain);
     constellationDiagramQueue.pushEvenIfFull({
         powerDecibel: frequencyBin.powerDecibel,
-        phase: 0.125//frequencyBin.phase
+        phase: frequencyBin.phase
     });
     constellationDiagramChart.setPowerDecibelMin(powerDecibelMin);
 }
