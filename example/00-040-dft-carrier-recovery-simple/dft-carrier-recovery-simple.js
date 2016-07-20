@@ -23,9 +23,9 @@ var
     CONSTELLATION_DIAGRAM_WIDTH = 290,
     CONSTELLATION_DIAGRAM_HEIGHT = 290,
     CONSTELLATION_DIAGRAM_POINT_HISTORY = 1,
-    FREQUENCY_BIN_ITERATION_CHART_WIDTH = 130,
-    FREQUENCY_BIN_ITERATION_CHART_HEIGHT = 130,
-    FREQUENCY_BIN_ITERATION_CHART_SIZE = 25,
+    FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_WIDTH = 130,
+    FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_HEIGHT = 130,
+    FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_SIZE = 25,
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
@@ -351,17 +351,19 @@ function frequencyBinExplanationInitialize() {
     element = document.getElementById('frequency-bin-iteration-container');
     chartTemplate = element.innerHTML;
     chartAllTemplate = '';
-    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+    for (i = 0; i < FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_SIZE; i++) {
         chartAllTemplate += chartTemplate.replace(/\[\[ index \]\]/g, i.toString());
     }
     element.innerHTML = chartAllTemplate;
 
     // iteration charts - initialize
-    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+    for (i = 0; i < FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_SIZE; i++) {
         queue = new Queue(2);
         element = document.getElementById('frequency-bin-iteration-' + i);
         chart = new ConstellationDiagram(       // TODO change it
-            element, FREQUENCY_BIN_ITERATION_CHART_WIDTH, FREQUENCY_BIN_ITERATION_CHART_HEIGHT, queue, -1
+            element,
+            FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_WIDTH, FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_HEIGHT,
+            queue, -1
         );
         frequencyBinToExplainQueue.push(queue);
         frequencyBinToExplainChart.push(chart);
@@ -383,10 +385,10 @@ function frequencyBinExplanationUpdate() {
     // range marker update
     element = document.getElementById('time-domain-processed-duplicate-visualizer-overlay');
     element.style.left = frequencyBinToExplainIterationOffset + 'px';
-    element.style.width = FREQUENCY_BIN_ITERATION_CHART_SIZE + 'px';
+    element.style.width = FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_SIZE + 'px';
 
     // iteration charts
-    for (i = 0; i < FREQUENCY_BIN_ITERATION_CHART_SIZE; i++) {
+    for (i = 0; i < FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_SIZE; i++) {
         queue = frequencyBinToExplainQueue[i];
         element = document.getElementById('frequency-bin-iteration-label-' + i);
         frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
@@ -466,7 +468,8 @@ function dataBindingCodeToTemplate() {
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).powerDecibel * 100) / 100).toString();
     document.getElementById('frequency-bin-phase').innerHTML =
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360)).toString();
-    document.getElementById('form-frequency-bin-to-explain-iteration-offset').value = frequencyBinToExplainIterationOffset;
+    document.getElementById('form-frequency-bin-to-explain-iteration-offset').value =
+        frequencyBinToExplainIterationOffset;
 }
 
 function formSineDataChanged() {
