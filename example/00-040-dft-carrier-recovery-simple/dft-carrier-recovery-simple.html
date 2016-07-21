@@ -32,453 +32,514 @@
 
             <!-- ---------------- -->
 
-            <h2>Generic settings</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-sample-size">
-                        Sine Sample Size
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-sample-size"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-
-            <!-- ---------------- -->
-
-            <h2>Separate sines</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-0-sample-per-period">
-                        Sine A - sample per period
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-0-sample-per-period"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-0-amplitude">
-                        Sine A - amplitude
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-0-amplitude"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-0-phase">
-                        Sine A - phase (degrees)
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-0-phase"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="separate-sine-0"></div>
+            <h2 id="section-generic-settings" onClick="sectionToggle('generic-settings')">
+                Generic settings
+            </h2>
+            <div id="section-generic-settings-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-sample-size">
+                            Sine Sample Size
+                        </label>
                     </div>
-                </div>
-            </div>
-
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-1-sample-per-period">
-                        Sine B - sample per period
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-1-sample-per-period"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-1-amplitude">
-                        Sine B - amplitude
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-1-amplitude"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-1-phase">
-                        Sine B - phase (degrees)
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-1-phase"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="separate-sine-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-2-sample-per-period">
-                        Sine C - sample per period
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-2-sample-per-period"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-2-amplitude">
-                        Sine C - amplitude
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-2-amplitude"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-sine-2-phase">
-                        Sine C - phase (degrees)
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-sine-2-phase"
-                        onChange="formSineDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="separate-sine-2"></div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-sample-size"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <h2>Final signal - sum of all sines from above</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="summed-sine"></div>
-                        <div class="visualizer-overlay-container">
-                            <span class="visualizer-overlay" id="summed-sine-visualizer-overlay"></span>
+            <h2 id="section-separate-sines" onClick="sectionToggle('separate-sines')">
+                Separate sines
+            </h2>
+            <div id="section-separate-sines-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-0-sample-per-period">
+                            Sine A - sample per period
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-0-sample-per-period"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-0-amplitude">
+                            Sine A - amplitude
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-0-amplitude"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-0-phase">
+                            Sine A - phase (degrees)
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-0-phase"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="separate-sine-0"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-window-sample-offset">
-                        Window sample offset
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-window-sample-offset"
-                        onChange="formWindowDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-window-sample-size">
-                        Window sample size
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-window-sample-size"
-                        onChange="formWindowDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
 
-            <!-- ---------------- -->
-
-            <h2>Samples from final signal that fits the window</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="time-domain-raw"></div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-1-sample-per-period">
+                            Sine B - sample per period
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-1-sample-per-period"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
                     </div>
                 </div>
-            </div>
-
-            <!-- ---------------- -->
-
-            <h2>Window function</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-window-sample-size" class="label-for-checkbox">
-                        Window function enabled
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="checkbox"
-                        id="form-window-function-enabled"
-                        onChange="formWindowFunctionDataChanged()"
-                        value="1"
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="window-function"></div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-1-amplitude">
+                            Sine B - amplitude
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-1-amplitude"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
                     </div>
                 </div>
-            </div>
-
-            <!-- ---------------- -->
-
-            <h2>Samples from the window after applying window function</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="time-domain-processed"></div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-1-phase">
+                            Sine B - phase (degrees)
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-1-phase"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
                     </div>
                 </div>
-            </div>
-
-            <!-- ---------------- -->
-
-            <h2>Frequency domain - output of Discrete Fourier Transform</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-power-decibel-min">
-                        Minimal power in decibels
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-power-decibel-min"
-                        onChange="formFrequencyDomainDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-size">
-                        Frequency bin - size
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-size"
-                        onChange="formFrequencyDomainDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-sample-per-period-max">
-                        SamplePerPeriod max (lowest frequency)
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-sample-per-period-max"
-                        onChange="formFrequencyDomainDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-sample-per-period-min">
-                        SamplePerPeriod min (highest frequency)
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-sample-per-period-min"
-                        onChange="formFrequencyDomainDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="frequency-domain"></div>
-                        <div class="visualizer-overlay-container">
-                            <span class="visualizer-overlay" id="frequency-domain-visualizer-overlay"></span>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="separate-sine-1"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-to-explain-index">
-                        Frequency bin index to explain
-                    </label>
+
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-2-sample-per-period">
+                            Sine C - sample per period
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-2-sample-per-period"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
                 </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-to-explain-index"
-                        onChange="formFrequencyBinExplanationDataChanged()"
-                        value=""
-                    />
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-2-amplitude">
+                            Sine C - amplitude
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-2-amplitude"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
                 </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <b class="label">
-                        Sample per period
-                    </b>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-sine-2-phase">
+                            Sine C - phase (degrees)
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-sine-2-phase"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
                 </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <span id="frequency-bin-sample-per-period"></span>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="separate-sine-2"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <b class="label">
-                        Power
-                    </b>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <span id="frequency-bin-power-decibel"></span> dB
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <b class="label">
-                        Phase
-                    </b>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <span id="frequency-bin-phase"></span> deg
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-hidden-at-xs col-sm-5 col-md-3">
-                    <b class="label">
-                        Constellation diagram
-                    </b>
-                </div>
-                <div class="col col-xs-12 col-sm-7 col-md-6">
-                    <div id="constellation-diagram"></div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-white-noise-amplitude">
+                            White noise amplitude
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-white-noise-amplitude"
+                            onChange="formSineDataChanged()"
+                            value=""
+                        />
+                    </div>
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <h2>Frequency bin explanation</h2>
-            <div class="row margin-bottom">
-                <div class="col col-xs-6 col-sm-5 col-md-3">
-                    <label for="form-frequency-bin-to-explain-iteration-offset">
-                        Explain frequency bin starting from iteration number:
-                    </label>
-                </div>
-                <div class="col col-xs-6 col-sm-7 col-md-6">
-                    <input
-                        type="number"
-                        id="form-frequency-bin-to-explain-iteration-offset"
-                        onChange="formFrequencyBinExplanationDataChanged()"
-                        value=""
-                    />
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
-                    <div class="big-chart">
-                        <div id="time-domain-processed-duplicate"></div>
-                        <div class="visualizer-overlay-container">
-                            <span class="visualizer-overlay" id="time-domain-processed-duplicate-visualizer-overlay"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row margin-bottom">
-                <div class="col col-hidden-at-xs col-sm-5 col-md-3">
-                    <b class="label">
-                        Iteration details
-                    </b>
-                </div>
-                <div class="col col-xs-12 col-sm-7 col-md-9">
-                    <div id="frequency-bin-iteration-container" class="clearfix">
-                        <div class="frequency-bin-iteration clearfix">
-                            <div class="fbi-header">
-                                Iteration #<span id="frequency-bin-iteration-label-[[ index ]]"></span>
-                            </div>
-                            <div class="fbi-chart">
-                                <div id="frequency-bin-iteration-[[ index ]]"></div>
+            <h2 id="section-final-signal" onClick="sectionToggle('final-signal')">
+                Final signal - sum of all sines from above and white noise
+            </h2>
+            <div id="section-final-signal-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="summed-sine"></div>
+                            <div class="visualizer-overlay-container">
+                                <span class="visualizer-overlay" id="summed-sine-visualizer-overlay"></span>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-window-sample-offset">
+                            Window sample offset
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-window-sample-offset"
+                            onChange="formWindowDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-window-sample-size">
+                            Window sample size
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-window-sample-size"
+                            onChange="formWindowDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
             </div>
+
+            <!-- ---------------- -->
+
+            <h2 id="section-time-domain-raw" onClick="sectionToggle('time-domain-raw')">
+                Samples from final signal that fits the window
+            </h2>
+            <div id="section-time-domain-raw-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="time-domain-raw"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <h2 id="section-window-function" onClick="sectionToggle('window-function')">
+                Window function
+            </h2>
+            <div id="section-window-function-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-window-sample-size" class="label-for-checkbox">
+                            Window function enabled
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="checkbox"
+                            id="form-window-function-enabled"
+                            onChange="formWindowFunctionDataChanged()"
+                            value="1"
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="window-function"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <h2 id="section-time-domain-processed" onClick="sectionToggle('time-domain-processed')">
+                Samples from the window after applying window function
+            </h2>
+            <div id="section-time-domain-processed-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="time-domain-processed"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <h2 id="section-frequency-domain" onClick="sectionToggle('frequency-domain')">
+                Frequency domain - output of Discrete Fourier Transform
+            </h2>
+            <div id="section-frequency-domain-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-power-decibel-min">
+                            Minimal power in decibels
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-power-decibel-min"
+                            onChange="formFrequencyDomainDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-frequency-bin-size">
+                            Frequency bin - size
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-frequency-bin-size"
+                            onChange="formFrequencyDomainDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-frequency-bin-sample-per-period-max">
+                            SamplePerPeriod max (lowest frequency)
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-frequency-bin-sample-per-period-max"
+                            onChange="formFrequencyDomainDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-frequency-bin-sample-per-period-min">
+                            SamplePerPeriod min (highest frequency)
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-frequency-bin-sample-per-period-min"
+                            onChange="formFrequencyDomainDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="frequency-domain"></div>
+                            <div class="visualizer-overlay-container">
+                                <span class="visualizer-overlay" id="frequency-domain-visualizer-overlay"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-frequency-bin-to-explain-index">
+                            Frequency bin index to explain
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-frequency-bin-to-explain-index"
+                            onChange="formFrequencyBinExplanationDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <b class="label">
+                            Sample per period
+                        </b>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <span id="frequency-bin-sample-per-period"></span>
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <b class="label">
+                            Power
+                        </b>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <span id="frequency-bin-power-decibel"></span> dB
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <b class="label">
+                            Phase
+                        </b>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <span id="frequency-bin-phase"></span> deg
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-hidden-at-xs col-sm-5 col-md-3">
+                        <b class="label">
+                            Constellation diagram
+                        </b>
+                    </div>
+                    <div class="col col-xs-12 col-sm-7 col-md-6">
+                        <div id="constellation-diagram"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <h2 id="section-frequency-bin-explanation" onClick="sectionToggle('frequency-bin-explanation')">
+                Frequency bin explanation
+            </h2>
+            <div id="section-frequency-bin-explanation-content">
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="form-frequency-bin-to-explain-iteration-offset">
+                            Explain frequency bin starting from iteration number:
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="form-frequency-bin-to-explain-iteration-offset"
+                            onChange="formFrequencyBinExplanationDataChanged()"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-12">
+                        <div class="big-chart">
+                            <div id="time-domain-processed-duplicate"></div>
+                            <div class="visualizer-overlay-container">
+                                <span class="visualizer-overlay" id="time-domain-processed-duplicate-visualizer-overlay"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-hidden-at-xs col-sm-5 col-md-3">
+                        <b class="label">
+                            Data samples zoom:
+                        </b>
+                    </div>
+                    <div class="col col-xs-12 col-sm-7 col-md-6">
+                        <div class="big-chart">
+                            <div id="time-domain-processed-zoom"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-hidden-at-xs col-sm-5 col-md-3">
+                        <b class="label">
+                            Iteration details
+                        </b>
+                    </div>
+                    <div class="col col-xs-12 col-sm-7 col-md-9">
+                        <div id="frequency-bin-iteration-container" class="clearfix">
+                            <div class="frequency-bin-iteration clearfix">
+                                <div class="fbi-header">
+                                    Iteration #<span id="frequency-bin-iteration-label-[[ index ]]"></span>
+                                </div>
+                                <div class="fbi-chart">
+                                    <div id="frequency-bin-iteration-[[ index ]]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
 
         </div>
 
