@@ -16,3 +16,33 @@
     min-height: 130px;
     float: left;
 }
+
+.section-content-hidden {
+    display: none;
+}
+
+h2 {
+    cursor: pointer;
+    position: relative;
+    padding-right: 45px;
+}
+
+h2:hover {
+    opacity: 0.9;
+}
+
+h2:after {
+    font-family: Arial;
+    font-size: 20px;
+    line-height: 20px;
+    content: '\25B2';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+}
+
+h2.section-header-hidden:after {
+    content: '\25BC';
+}

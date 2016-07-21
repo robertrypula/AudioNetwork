@@ -29,9 +29,13 @@ of them.
 Before we start lets change the way we express frequency of a sine wave. Instead of using frequency value we can
 use samplePerPeriod value. This will allow us to drop frequency in our examples because it's always related to
 additional parameter - sampling frequency. At the end we are working with arrays of samples so that would make it
-simpler
+simpler.
 
     IMAGE: show few sines with different sampling>
+    
+>Using samplePerPeriod instead frequency will affect frequency domain chart horizontal axis. This conversion is 
+>not linear so our frequency bins will not be spaced by equal amount of Hertz. For needs of this article it's doesn't 
+>change much.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
 equal 20, Sine C has samplePerPeriod equal 16. [TODO if you are curious - show frequencies of those sines at 44100 Hz] 
@@ -88,6 +92,8 @@ In our frequency domain chart we decided to have 160 frequency bins. Window size
 means that to create complete chart we need to do 163 840 iterations (1024 * 160). For better resolutions or bigger
 window sizes this number goes up very fast. That's why this basic algorithm is ultra slow.
 
+### Examples
+
 Let's pick one bin as an example. Our sines have samplePerPeriods 28, 20 and 16. To not cheat lets take 'random'
 samplePerPeriod for example equal to 18. This frequency should not be present in our signal window so our expectation
 is that we should get small decibel value.
@@ -120,8 +126,32 @@ function computeDiscreteFourierTransform(
     return frequencyDomain;
 }
 
+function findUnitAngle(x, y) {
+    var length, quarter, angle;
+
+    length = Math.sqrt(x * x + y * y);
+    length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
+    quarter = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
+    switch (quarter) {
+        case 0:
+            angle = Math.asin(y / length);
+            break;
+        case 1:
+            angle = Math.asin(-x / length) + 0.5 * Math.PI;
+            break;
+        case 2:
+            angle = Math.asin(-y / length) + Math.PI;
+            break;
+        case 3:
+            angle = Math.asin(x / length) + 1.5 * Math.PI;
+            break;
+    }
+
+    return angle / (2 * Math.PI);
+}
+
 function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
-    var windowSize, real, imm, i, sample, r, power, powerDecibel;
+    var windowSize, real, imm, i, sample, r, power, powerDecibel, phase;
 
     windowSize = timeDomain.length;            // timeDomain array length is our window size
     real = 0;
@@ -138,8 +168,10 @@ function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
     power = Math.sqrt(real * real + imm * imm);                 // compute length of the vector
     powerDecibel = 10 * Math.log(power) / Math.LN10;            // convert into decibels
     powerDecibel = powerDecibel < -80 ? -80 : powerDecibel;     // limit weak values to -80 decibels
+    
+    phase = findUnitAngle(real, imm);                           // phase is angle
 
-    return powerDecibel;
+    return powerDecibel; // TODO add phase
 }
 
 function blackmanNuttall(n, N) {
@@ -220,15 +252,12 @@ console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod
 - [done] CODE add overlay that shows picked range (on duplicate of processed window chart)
 - [done] CODE add info about picked frequency bin
 - [done] CODE add ability to add white noise
-- [done 1/2] CODE add ability to show/hide sections
-- CODE add new chart that explains unit vector in a range
+- [done] CODE add ability to show/hide sections
+- [done] CODE add new chart that explains unit vector in a range
 - ARTICLE add info about phase
 - ARTICLE write missing examples
 - ARTICLE add images and finish everything
 - CODE add animation mode
-
-
-frequency = sampleRate / samplePerPeriod
 
 + [done] much simpler than FFT but ultra slow
 + [done] explain frequency domain and time domain, frequency bin [IMAGE]

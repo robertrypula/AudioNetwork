@@ -5,6 +5,7 @@ var
     // import stuff from AudioNetwork lib
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
     ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
+    ComplexPlaneChart = AudioNetwork.Visualizer.ComplexPlaneChart,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     WindowFunction = AudioNetwork.Common.WindowFunction,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
@@ -47,10 +48,13 @@ var
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
     frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.5),
-    frequencyBinToExplainIterationOffset = Math.round(0.5 * windowSampleSize - 15),
+    frequencyBinToExplainIterationOffset = Math.round(0.47 * windowSampleSize),
 
     // helpers for sine creation
     separateSineCarrierGenerate = [],
+
+    // other settings
+    sectionVisibilityState = {},
 
     // data buffers
     separateSineQueue = [],
@@ -377,12 +381,12 @@ function frequencyBinExplanationInitialize() {
 
     // iteration charts - initialize
     for (i = 0; i < FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE; i++) {
-        queue = new Queue(1);
+        queue = new Queue(2);
         element = document.getElementById('frequency-bin-iteration-' + i);
-        chart = new ConstellationDiagram(       // TODO change it
+        chart = new ComplexPlaneChart(
             element,
             FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_WIDTH, FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_HEIGHT,
-            queue, -1
+            queue, 1.1
         );
         frequencyBinToExplainQueue.push(queue);
         frequencyBinToExplainChart.push(chart);
@@ -419,9 +423,23 @@ function frequencyBinExplanationUpdate() {
         element = document.getElementById('frequency-bin-iteration-label-' + i);
         frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
         frequencyBinIteration = frequencyBin.detail[frequencyBinToExplainIterationOffset + i];
-        queue.pushEvenIfFull({ // TODO change it
-            powerDecibel: -1 + Math.abs(frequencyBinIteration.sample),
-            phase: 0//Util.findUnitAngle(frequencyBinIteration.realUnit, frequencyBinIteration.immUnit)
+        queue.pushEvenIfFull({
+            real: frequencyBinIteration.realUnit,
+            imm: frequencyBinIteration.immUnit,
+            line: false,
+            point: true,
+            pointColor: '#666',
+            pointRadius: 2.5
+        });
+        queue.pushEvenIfFull({
+            real: frequencyBinIteration.real,
+            imm: frequencyBinIteration.imm,
+            line: true,
+            lineColor: '#738BD7',
+            lineWidth: 3,
+            point: true,
+            pointColor: '#738BD7',
+            pointRadius: 2.5
         });
         element.innerHTML = (frequencyBinToExplainIterationOffset + i).toString();
     }
@@ -466,7 +484,7 @@ function dataBindingTemplateToCode() {
 }
 
 function dataBindingCodeToTemplate() {
-    var i, ssp;
+    var i, key, ssp, headerElement, contentElement, visible;
 
     document.getElementById('form-sine-sample-size').value = sineSampleSize;
     for (i = 0; i < separateSineParameter.length; i++) {
@@ -492,16 +510,32 @@ function dataBindingCodeToTemplate() {
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360)).toString();
     document.getElementById('form-frequency-bin-to-explain-iteration-offset').value =
         frequencyBinToExplainIterationOffset;
+
+    for (key in sectionVisibilityState) {
+        if (!sectionVisibilityState.hasOwnProperty(key)) {
+            continue;
+        }
+        visible = sectionVisibilityState[key];
+        headerElement = document.getElementById('section-' + key);
+        contentElement = document.getElementById('section-' + key + '-content');
+        if (visible) {
+            headerElement.className = '';
+            contentElement.className = '';
+        } else {
+            headerElement.className = 'section-header-hidden';
+            contentElement.className = 'section-content-hidden';
+        }
+    }
 }
 
 function sectionToggle(name) {
-    var headerElement, contentElement;
+    if (typeof sectionVisibilityState[name] === 'undefined') {
+        sectionVisibilityState[name] = false;
+    } else {
+        sectionVisibilityState[name] = !sectionVisibilityState[name];
+    }
 
-    headerElement = document.getElementById('section-' + name);
-    contentElement = document.getElementById('section-' + name + '-content');
-
-    console.log(headerElement, contentElement);
-    // TODO add classes
+    dataBindingCodeToTemplate();
 }
 
 function formSineDataChanged() {

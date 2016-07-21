@@ -6,14 +6,14 @@
         .registerFactory('Visualizer.ConstellationDiagram', _ConstellationDiagram);
 
     _ConstellationDiagram.$inject = [
-        'Visualizer.AbstractVisualizer',
+        'Visualizer.Abstract2DVisualizer',
         'Common.MathUtil',
         'Common.Util',
         'Visualizer.ConstellationDiagramTemplateMain'
     ];
 
     function _ConstellationDiagram(
-        AbstractVisualizer,
+        Abstract2DVisualizer,
         MathUtil,
         Util,
         ConstellationDiagramTemplateMain
@@ -21,11 +21,9 @@
         var ConstellationDiagram;
 
         ConstellationDiagram = function (parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain) {
-            AbstractVisualizer.call(this, parentElement, width, height);
+            Abstract2DVisualizer.call(this, parentElement, width, height, colorAxis, colorPowerLine);
 
             this.$$queue = queue;
-            this.$$colorAxis = Util.valueOrDefault(colorAxis, 'green');
-            this.$$colorPowerLine = Util.valueOrDefault(colorPowerLine, '#DDD');
             this.$$colorHistoryPoint = Util.valueOrDefault(
                 colorHistoryPoint,
                 {
@@ -53,7 +51,7 @@
             this.$$hashOnCanvas = null;
         };
 
-        ConstellationDiagram.prototype = Object.create(AbstractVisualizer.prototype);
+        ConstellationDiagram.prototype = Object.create(Abstract2DVisualizer.prototype);
         ConstellationDiagram.prototype.constructor = ConstellationDiagram;
 
         ConstellationDiagram.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
@@ -98,32 +96,14 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            ctx.strokeStyle = this.$$colorPowerLine;
             powerDecibel = 0;
             while (powerDecibel >= this.$$powerDecibelMin) {
                 radius = halfH * this.$$getNormalizedPowerDecibel(powerDecibel);
-                ctx.beginPath();
-                ctx.arc(
-                    halfW, halfH,
-                    radius,
-                    0, 2 * Math.PI, false
-                );
-                ctx.stroke();
+                this.$$drawCenteredCircle(radius);
                 powerDecibel -= ConstellationDiagram.$$_POWER_DECIBEL_AXIS_LINE_STEP;
             }
 
-            ctx.strokeStyle = this.$$colorAxis;
-            ctx.beginPath();
-            ctx.moveTo(0, halfH);
-            ctx.lineTo(w, halfH);
-            ctx.closePath();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(halfW, 0);
-            ctx.lineTo(halfW, h);
-            ctx.closePath();
-            ctx.stroke();
+            this.$$drawAxis();
 
             // from oldest to newest
             for (i = 0; i < q.getSize(); i++) {
@@ -182,14 +162,6 @@
             normalizedPowerDecibel = normalizedPowerDecibel < 0 ? null : normalizedPowerDecibel;
 
             return normalizedPowerDecibel;
-        };
-
-        ConstellationDiagram.prototype.$$dropXYCache = function () {
-            var i;
-
-            for (i = 0; i < this.$$queue.getSize(); i++) {
-                delete this.$$queue.getItem(i).$$cache;
-            }
         };
 
         ConstellationDiagram.prototype.$$setItemXYCache = function (item) {

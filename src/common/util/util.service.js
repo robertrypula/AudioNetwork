@@ -53,12 +53,12 @@
         }
 
         function findUnitAngle(x, y) {
-            var length, q, angle;
+            var length, quarter, angle;
 
             length = MathUtil.sqrt(x * x + y * y);
             length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
-            q = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
-            switch (q) {
+            quarter = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
+            switch (quarter) {
                 case 0:
                     angle = MathUtil.asin(y / length);
                     break;
