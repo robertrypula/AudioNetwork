@@ -159,7 +159,7 @@ function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
     for (i = 0; i < windowSize; i++) {
         sample = timeDomain[i];
         r = 2 * Math.PI * i / samplePerPeriod; // compute radians for 'unit vector' sine/cosine
-        real += Math.cos(r) * sample;          // 'sample' value alters 'unit vector' length, it could also change
+        real += -Math.cos(r) * sample;         // 'sample' value alters 'unit vector' length, it could also change
         imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
     }
     real /= windowSize;                                         // normalize final vector
