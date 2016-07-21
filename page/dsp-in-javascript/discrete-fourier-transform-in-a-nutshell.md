@@ -131,19 +131,19 @@ function findUnitAngle(x, y) {
 
     length = Math.sqrt(x * x + y * y);
     length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
-    quarter = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
+    quarter = (x >= 0) ? (y >= 0 ? 0 : 1) : (y < 0 ? 2 : 3);
     switch (quarter) {
         case 0:
-            angle = Math.asin(y / length);
+            angle = Math.asin(x / length);
             break;
         case 1:
-            angle = Math.asin(-x / length) + 0.5 * Math.PI;
+            angle = Math.asin(-y / length) + 0.5 * Math.PI;
             break;
         case 2:
-            angle = Math.asin(-y / length) + Math.PI;
+            angle = Math.asin(-x / length) + Math.PI;
             break;
         case 3:
-            angle = Math.asin(x / length) + 1.5 * Math.PI;
+            angle = Math.asin(y / length) + 1.5 * Math.PI;
             break;
     }
 
