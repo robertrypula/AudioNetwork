@@ -57,19 +57,19 @@
 
             length = MathUtil.sqrt(x * x + y * y);
             length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
-            quarter = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
+            quarter = (x >= 0) ? (y >= 0 ? 0 : 1) : (y < 0 ? 2 : 3);
             switch (quarter) {
                 case 0:
-                    angle = MathUtil.asin(y / length);
+                    angle = MathUtil.asin(x / length);
                     break;
                 case 1:
-                    angle = MathUtil.asin(-x / length) + MathUtil.HALF_PI;
+                    angle = MathUtil.asin(-y / length) + MathUtil.HALF_PI;
                     break;
                 case 2:
-                    angle = MathUtil.asin(-y / length) + MathUtil.PI;
+                    angle = MathUtil.asin(-x / length) + MathUtil.PI;
                     break;
                 case 3:
-                    angle = MathUtil.asin(x / length) + 1.5 * MathUtil.PI;
+                    angle = MathUtil.asin(y / length) + 1.5 * MathUtil.PI;
                     break;
             }
 

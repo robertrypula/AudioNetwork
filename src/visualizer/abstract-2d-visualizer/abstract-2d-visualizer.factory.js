@@ -6,11 +6,13 @@
         .registerFactory('Visualizer.Abstract2DVisualizer', _Abstract2DVisualizer);
 
     _Abstract2DVisualizer.$inject = [
-        'Visualizer.AbstractVisualizer'
+        'Visualizer.AbstractVisualizer',
+        'Common.Util'
     ];
 
     function _Abstract2DVisualizer(
-        AbstractVisualizer
+        AbstractVisualizer,
+        Util
     ) {
         var Abstract2DVisualizer;
 

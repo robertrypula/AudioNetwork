@@ -39,7 +39,7 @@
         CarrierRecovery.prototype.$$computeReference = function () {
             var x = this.$$omega * this.$$sampleNumber;
 
-            this.$$referenceReal = MathUtil.cos(x);
+            this.$$referenceReal = -MathUtil.cos(x);
             this.$$referenceImm = MathUtil.sin(x);
         };
 
@@ -72,12 +72,6 @@
 
         CarrierRecovery.prototype.$$computePhase = function () {
             this.$$phase = Util.findUnitAngle(this.$$real, this.$$imm);
-
-            // correct phase to start from positive side of X axis counterclockwise
-            this.$$phase = this.$$phase - 0.25;
-            if (this.$$phase < 0) {
-                this.$$phase += 1;
-            }
         };
 
         CarrierRecovery.prototype.handleSample = function (sample) {

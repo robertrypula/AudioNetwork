@@ -47,7 +47,7 @@ var
     frequencyBinSize = 160,
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
-    frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.5),
+    frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.85),
     frequencyBinToExplainIterationOffset = Math.round(0.47 * windowSampleSize),
 
     // helpers for sine creation
@@ -289,8 +289,8 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     for (i = 0; i < timeDomainQueue.getSize(); i++) {
         sample = timeDomainQueue.getItem(i);
         r = 2 * Math.PI * i / samplePerPeriod;
-        x = Math.sin(r);
-        y = -Math.cos(r);
+        x = -Math.cos(r);
+        y = Math.sin(r);
 
         detail = {
             realUnit: x,
