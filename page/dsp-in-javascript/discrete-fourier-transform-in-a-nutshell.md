@@ -1,3 +1,7 @@
+```
+Data transmission over sound in JavaScript - part 2 - Discrete Fourier Transform in a nutshell
+```
+
 ## Discrete Fourier Transform in a nutshell
 
 Have you ever wondered how all of modern wireless devices could work on the same time without interfering? For
@@ -38,7 +42,8 @@ simpler.
 >change much.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
-equal 20, Sine C has samplePerPeriod equal 16. [TODO if you are curious - show frequencies of those sines at 44100 Hz] 
+equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that for usual sampling 
+rate of 44100Hz it's 1575Hz, 2205Hz and 2756.25Hz respectively (frequencyInHertz = sampleRate / samplePerPeriod). 
 
     IMAGE: 3 sines alone and summed
 
@@ -65,7 +70,7 @@ our samples was changed after applying it.
 In order to create frequency domain representation we need to create second chart. Each vertical bar on the chart is
 called frequency bin and tells how much of that frequency is inside our signal from the window. Let say we want to
 check frequencies in a range between 10 and 50 samplePerPeriod. To have nice resolution lets compute 160 frequency bins.
-This means that frequency bins will be separated by 0.25 samplePerPeriod (50-10/160=0.25).
+This means that frequency bins will be separated by 0.25 samplePerPeriod (50-10/160=0.25). 
 Output of Discrete Fourier Transform gives values that varies a lot. Some bins could have value 0.1 since other
 could have 0.000001. In order to see all variety of values vertical axis is showed in decibels. 0.1 will be showed
 as -10 decibels and 0.000001 will be showed as -60 decibels.
@@ -77,6 +82,8 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 >so frequency is higher. That is the reason why we need to put highest samplePerPeriod value on the left and end
 >with lowest samplePerPeriod on the right.
 
+Again, if you are really curious about Hertz it will show frequencies between 882Hz and 4410Hz (sampling rate 44100).
+
     IMAGE: clean frequency domain chart with labels and scale
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
@@ -87,23 +94,35 @@ algorithm per each bin which goes like this:
 >we will see that it's making circles which have period equal to frequencyBin's samplePerPeriod parameter.
 >To get power of frequency bin we need to add all of those unit vectors together, divide by number of samples in a
 >window and compute length of that final vector. Additionally we can convert that length into decibels.
+>Additionally if we measure angle between final vector and positive Y axis clockwise it will be equal to phase of 
+>that sine wave.
 
 In our frequency domain chart we decided to have 160 frequency bins. Window size was set earlier to 1024 sample. It
 means that to create complete chart we need to do 163 840 iterations (1024 * 160). For better resolutions or bigger
 window sizes this number goes up very fast. That's why this basic algorithm is ultra slow.
 
-### Examples
+### Examples - 3 sines and window function enabled
 
-Let's pick one bin as an example. Our sines have samplePerPeriods 28, 20 and 16. To not cheat lets take 'random'
-samplePerPeriod for example equal to 18. This frequency should not be present in our signal window so our expectation
-is that we should get small decibel value.
+Let's pick some bin as an example because it's always better that a thousands words. Our sines have samplePerPeriods 
+28, 20 and 16. To not cheat lets take 'random' samplePerPeriod for example equal to 18. This frequency should not be 
+present in our signal window so our expectation is that we should get small decibel value.
+
+[....]
+- describe algorithm, running circle [CHART]
+- show that we collect vectors per each sample [CHART]
+- sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave
+
+>When frequency that we are examining *is not present* in the signal it will produce vectors that points to many 
+>different directions. If we would sum them together they will all cancel each other and length of the final vector
+>will be small.
 
 [....]
 
->When our frequency is present in a signal it will produce more and more vectors that points to the same direction.
->It's like with swing on the playground. Small force with proper frequency will increase the amplitude of the swing.
+>When frequency that we are examining *is present* in the signal it will produce more and more vectors that points to 
+>the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
+>amplitude of the swing.
 
-[....]
+### Examples - 1 sine only without window function
 
 ### JavaScript implementation
 
@@ -237,6 +256,27 @@ console.log(fd[136]); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod
 console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
 
+### Summary
+
+Algorithm described above can be used 
+By using algorithm above we can perform basic digital signal processing. Of course in modern wireless 
+technologies far more efficient algorithms are used like FFT. 
+
+Input signal could come for example from microphone. 
+Algorithm described above is not unused in wireless devices because
+
+- magic black box is avoided we just need to provide samples
+- like with car, you can enter it and just drive but if you additionally know how its working it's even better.
+- limitation of FFT in Web Audio API, no phase output
+- we don't need to loop through all frequency bins in the know that is the frequency of our signal
+- we can pick frequency even there is lots of noise in the background
+- say magic at the end :P
+
+If you are interested in this topic an you want to play with different DFT settings by yourself please visit 
+[AudioNetwork](https://audio-network.rypula.pl) project website:
+
+[Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html) 
+
 ### TODO:
 
 - [done] CODE add setWidth to chart
@@ -254,7 +294,7 @@ console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod
 - [done] CODE add ability to add white noise
 - [done] CODE add ability to show/hide sections
 - [done] CODE add new chart that explains unit vector in a range
-- ARTICLE add info about phase
++ [done] ARTICLE add info about phase
 - ARTICLE write missing examples
 - ARTICLE add images and finish everything
 - CODE add animation mode
@@ -263,10 +303,5 @@ console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod
 + [done] explain frequency domain and time domain, frequency bin [IMAGE]
 + [done] tell about samplesPerPeriod -> a way to skip sampling frequency
 + [done] add couple of sine waves together [CHART separate and sum]
-- describe algorithm, running circle [CHART]
-- show that we collect vectors per each sample [CHART]
-- when input signal contains that frequency it will produce lots of vectors that points to the same direction
-- sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave
-- we don't need to loop through all frequency bins in the know that is the frequency of our signal
-- say magic at the end :P
-- tell also that in the example page we can change window site to experiment with other values
++ [done] when input signal contains that frequency it will produce lots of vectors that points to the same direction
+
