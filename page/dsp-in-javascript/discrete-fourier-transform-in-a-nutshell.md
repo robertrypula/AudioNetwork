@@ -1,10 +1,20 @@
-```
-Data transmission over sound in JavaScript - part 2 - Discrete Fourier Transform in a nutshell
-```
+## Data transmission over sound in JavaScript - part 1 - Discrete Fourier Transform
 
-## Discrete Fourier Transform in a nutshell
+JavaScript is amazingly powerful
+During last years JavaScript becase
+  
+Nowadays JavaScript is 
+tell about JS and capabilities
+Web Audio API -> access to microphone and speakers
+we could go back to old times and modem (do you remember that sound?)
+the goal build system that allows to send simple data - from scratch! 
+before we start we need to understand some basics of DSP
+in next 
 
-Have you ever wondered how all of modern wireless devices could work on the same time without interfering? For
+
+### Introduction to DFT
+
+Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
 frequencies Fourier Transform will help us. But what it actually does? It changes signal represented in `time domain` 
@@ -37,9 +47,9 @@ simpler.
 
     IMAGE: show few sines with different sampling>
     
->Using samplePerPeriod instead frequency will affect frequency domain chart horizontal axis. This conversion is 
->not linear so our frequency bins will not be spaced by equal amount of Hertz. For needs of this article it's doesn't 
->change much.
+>Using samplePerPeriod instead frequency will affect horizontal axis of the frequency domain chart (you will see 
+>that later). This conversion is not linear so our frequency bins will not be spaced by equal amount of Hertz. For
+>needs of this article it's doesn't change much.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that for usual sampling 
@@ -48,9 +58,11 @@ rate of 44100Hz it's 1575Hz, 2205Hz and 2756.25Hz respectively (frequencyInHertz
     IMAGE: 3 sines alone and summed
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
-to say how many sines are summed together. So how we can extract those frequencies? First step is to collect proper
-amount of samples that we will use for later computations. This step is called windowing. Lets pick 1024 samples
-from the final signal.
+to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
+proper amount of samples that we will use for later computations. This step is called *windowing*. You can also treat 
+it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
+all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
+window size to 1024 pick this amount of samples from the final signal buffer.
 
     IMAGE: windowed raw samples
 
@@ -166,7 +178,7 @@ function findUnitAngle(x, y) {
             break;
     }
 
-    return angle / (2 * Math.PI);
+    return angle / (2 * Math.PI);   // return angle in range: <0, 1)
 }
 
 function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
@@ -190,7 +202,10 @@ function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
     
     phase = findUnitAngle(real, imm);                           // phase is angle
 
-    return powerDecibel; // TODO add phase
+    return {
+        powerDecibel: powerDecibel,
+        phase: phase
+    };
 }
 
 function blackmanNuttall(n, N) {
@@ -201,7 +216,10 @@ function blackmanNuttall(n, N) {
 }
 ```
 
-Example usage:
+Code above should be more of less clear. Those 4 functions are enough to compute Discrete Fourier Transform. 
+Magic formula at `blackmanNuttall` method was taken from Wikipedia article about 
+(Window Function)[https://en.wikipedia.org/wiki/Window_function]. Ok, let's add few sines together and try
+to compute DFT:
 
 ```javascript
 var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain;
@@ -226,54 +244,79 @@ console.log(timeDomain.length);      // --> 1024
 console.log(frequencyDomain.length); // --> 160
 ```
 
-Lets look what power values we have near our three sines. We expect to see there power peaks.
+In example above we skip *windowing* step - we directly created final signal inside a time domain window.
+Normally we would copy samples from some input buffer.
+
+Lets look what are the power values that we have near our three sines. We expect to see 3 power peaks near 
+28, 20 and 16 samplePerPeriod. 
+
+>To compute array index from samplePerPeriod and vice versa we need to use those formulas:
+>step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
+>index = (frequencyBinSamplePerPeriodMax - samplePerPeriod) / step
+>samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
 
 ```javascript
-/*
-    How to compute array index from samplePerPeriod and vice versa:
-    
-    step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
-    index = (frequencyBinSamplePerPeriodMax - samplePerPeriod) / step
-    samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
-*/
+function logPowerDecibel(index) {
+    console.log(frequencyDomain[index].powerDecibel);
+}
 
-var fd = frequencyDomain;     // alias
-
-console.log(fd[87]); // -12.81 | index: (50-28.25)/0.25 = 87 | samplePerPeriod: 50-0.25*87 = 28.25
-console.log(fd[88]); // -12.64 | index: (50-28.00)/0.25 = 88 | samplePerPeriod: 50-0.25*88 = 28.00 | SINE A
-console.log(fd[89]); // -12.82 | index: (50-27.75)/0.25 = 89 | samplePerPeriod: 50-0.25*89 = 27.75
+logPowerDecibel(87); // -12.81 | index: (50-28.25)/0.25 = 87 | samplePerPeriod: 50-0.25*87 = 28.25
+logPowerDecibel(88); // -12.64 | index: (50-28.00)/0.25 = 88 | samplePerPeriod: 50-0.25*88 = 28.00 | SINE A
+logPowerDecibel(89); // -12.82 | index: (50-27.75)/0.25 = 89 | samplePerPeriod: 50-0.25*89 = 27.75
 // ...
-console.log(fd[104]); // -61.48 | index: (50-24.00)/0.25 = 104 | samplePerPeriod: 50-0.25*104 = 24.00
+logPowerDecibel(104); // -61.48 | index: (50-24.00)/0.25 = 104 | samplePerPeriod: 50-0.25*104 = 24.00
 // ...
-console.log(fd[119]); // -13.32 | index: (50-20.25)/0.25 = 119 | samplePerPeriod: 50-0.25*119 = 20.25
-console.log(fd[120]); // -12.64 | index: (50-20.00)/0.25 = 120 | samplePerPeriod: 50-0.25*120 = 20.00 | SINE B
-console.log(fd[121]); // -13.35 | index: (50-19.75)/0.25 = 121 | samplePerPeriod: 50-0.25*121 = 19.75
+logPowerDecibel(119); // -13.32 | index: (50-20.25)/0.25 = 119 | samplePerPeriod: 50-0.25*119 = 20.25
+logPowerDecibel(120); // -12.64 | index: (50-20.00)/0.25 = 120 | samplePerPeriod: 50-0.25*120 = 20.00 | SINE B
+logPowerDecibel(121); // -13.35 | index: (50-19.75)/0.25 = 121 | samplePerPeriod: 50-0.25*121 = 19.75
 // ...
-console.log(fd[128]); // -63.55 | index: (50-18.00)/0.25 = 128 | samplePerPeriod: 50-0.25*128 = 18.00
+logPowerDecibel(128); // -63.55 | index: (50-18.00)/0.25 = 128 | samplePerPeriod: 50-0.25*128 = 18.00
 // ...
-console.log(fd[135]); // -14.30 | index: (50-16.25)/0.25 = 135 | samplePerPeriod: 50-0.25*135 = 16.25
-console.log(fd[136]); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod: 50-0.25*136 = 16.00 | SINE C
-console.log(fd[137]); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
+logPowerDecibel(135); // -14.30 | index: (50-16.25)/0.25 = 135 | samplePerPeriod: 50-0.25*135 = 16.25
+logPowerDecibel(136); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod: 50-0.25*136 = 16.00 | SINE C
+logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
+
+As we can see 
+
+```javascript
+function logPhase(index) {
+    console.log(
+        Math.round(frequencyDomain[index].phase * 360)
+    );
+}
+
+logPhase(88);  // SINE A
+logPhase(120); // SINE B
+logPhase(136); // SINE C
+```
+
 
 ### Summary
 
-Algorithm described above can be used 
-By using algorithm above we can perform basic digital signal processing. Of course in modern wireless 
-technologies far more efficient algorithms are used like FFT. 
+Algorithm described above is maybe not optimal but relatively simple comparing to for example FFT which uses some 
+mathematical tricks that are beyond the scope of this article. We can extract major frequencies that builds the 
+signal even there is a lot of random noise.
 
-Input signal could come for example from microphone. 
-Algorithm described above is not unused in wireless devices because
+Now you may ask - what can be done with such slow algorithm? The answer is that we can do pretty much especially 
+with sound. Frequency of sound waves that humans hear are between 20Hz - 20kHz. To store them properly we need to 
+use sampling rate of 44.1kHz. This number of samples per second is relatively low for modern CPUs that executes 
+instructions at rate of couple GHz. That allows us to handle audio samples in the real time even with slow algorithm. 
+As a source of samples we can just use microphone which almost all devices have. Additionally we don't have to compute 
+all frequency bins per each time domain window. We can just assume that our data is carried by some fixed frequency 
+and compute only related frequency bin. We just don't need other bins since they are not carrying our data. In case 
+of our example (160 bins on frequency domain chart) it will increase the speed 160 times.
 
-- magic black box is avoided we just need to provide samples
-- like with car, you can enter it and just drive but if you additionally know how its working it's even better.
-- limitation of FFT in Web Audio API, no phase output
-- we don't need to loop through all frequency bins in the know that is the frequency of our signal
-- we can pick frequency even there is lots of noise in the background
-- say magic at the end :P
+Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
+that are just ready to use. The answer is *for fun*! :) It's like with car, you can enter it and just drive but 
+if you additionally know how it works it's even better. There is one alternative - AnalyserNode from Web Audio API.
+It uses FFT under the hood so it's fast. But there is one disadvantage - it doesn't return phase of frequency bin. 
+Phase of the wave can be used in data transmission that is more resistant to the noise. Method described in this 
+article give us more flexibility, we are not depended to any other code and it's still simple enough to understand. 
+We can avoid black box which is doing magic and we have no idea how.
 
-If you are interested in this topic an you want to play with different DFT settings by yourself please visit 
-[AudioNetwork](https://audio-network.rypula.pl) project website:
+If you are interested in this topic an you want to play with different DFT settings by yourself please visit this 
+example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website:
 
 [Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html) 
 
