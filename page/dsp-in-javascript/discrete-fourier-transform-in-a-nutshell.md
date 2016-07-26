@@ -1,10 +1,27 @@
 ## Data transmission over sound in JavaScript - part 1 - Discrete Fourier Transform
 
-JavaScript is amazingly powerful
+Nowadays web technologies are changing very fast. Every year we could easily find something new to learn. There 
+are plenty of client side frameworks that speeds up application development. Even language by itself is changing 
+a lot because of new editions of ECMAScript. In general web technologies are cross-platform by default. We just 
+need latest web browser on the device. It doesn't matter if it is PC, Mac, smartphone - it just works. In case
+of smartphone we can make our app look even more native by using tools like Cordova. 
+It's clearly visible that JavaScript over the years has become a very powerful language.
+
+In this article we will focus on a slightly different usage of JavaScript. We will not write another example 
+application in some new framework. is capable to do other things like draw 2D/3D graphics with graphic card acceleration or 
+access hardware like WebCam, microphone, speakers via Web API. 
+
+We will not write any new 
+application in the latest framework but we will take advantage of Web API and go back to old times. Do you remember 
+that sound of modem during dial-up connection initialization? Modem were working on normal phone lines. It was because
+at 
+
+In this article we will focus on Web Audio API. 
+
 During last years JavaScript becase
+ 
   
-Nowadays JavaScript is 
-tell about JS and capabilities
+
 Web Audio API -> access to microphone and speakers
 we could go back to old times and modem (do you remember that sound?)
 the goal build system that allows to send simple data - from scratch! 
@@ -17,11 +34,14 @@ in next
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
-frequencies Fourier Transform will help us. But what it actually does? It changes signal represented in `time domain` 
-into `frequency domain`. In other words it is decomposing signal that varies over time into the frequencies
-that make it. That allows us for example to tune/pick only specific range of frequencies from full spectrum.
-In case of sound waves output of Discrete Fourier Transform is often showed on music player window or on radio
-LCD. Apart from nice looking bouncing bars we can also read from that output how loud each frequency range is.
+frequencies Fourier Transform will help us. Digging into details - when we need to deal with digital signals that were 
+sampled over time, Discrete Fourier Transform will help us. But what it actually does? It changes signal represented 
+in `time domain` into `frequency domain`. In other words it is decomposing signal that varies over time into the 
+frequencies that make it. That allows us for example to tune/pick only specific range of frequencies from full 
+spectrum. 
+
+In case of sound waves output of Discrete Fourier Transform is often showed on music player window or on 
+radio LCD. Apart from nice looking bouncing bars we can also read from that output how loud each frequency range is.
 We can for example read without even listening to the song how fast is the bass beat.
 
     IMAGE: 1 seconds of song and few ranges that overlaps
@@ -319,6 +339,8 @@ If you are interested in this topic an you want to play with different DFT setti
 example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website:
 
 [Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html) 
+
+In second part of this article we will look closer into Web Audio API.
 
 ### TODO:
 
