@@ -16,7 +16,7 @@ But there is not rose without a thorn. Infrastructure at those times was designe
 As Wikipedia says: 'In telephony, the usable voice frequency band ranges from approximately 300 Hz to 3400 Hz'.
 It means that modems needed to work with very limited bandwidth (~3kHz) over quite noisy analog channel. 
 First modem was released in 1958 and it was transmitting data with the speed of 100 bit/s. Over the years
-speed was increasing and ended up at 56 kbit/sek in late 90s.
+speed was increasing and in late 90s it ended up at 56 kbit/sek.
 
 Web Audio API allows us to generate and receive sound in JavaScript. We could use it to create application that 
 acts like a modem. Air in our room would be our noisy telephone line. Our goals is to send and receive binary data 
