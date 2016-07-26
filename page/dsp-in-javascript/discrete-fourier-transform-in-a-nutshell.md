@@ -1,40 +1,35 @@
-## Data transmission over sound in JavaScript - part 1 - Discrete Fourier Transform
+## Data transmission over sound in JavaScript from scratch - part 1 - Discrete Fourier Transform
 
-Nowadays web technologies are changing very fast. Every year we could easily find something new to learn. There 
-are plenty of client side frameworks that speeds up application development. Even language by itself is changing 
-a lot because of new editions of ECMAScript. In general web technologies are cross-platform by default. We just 
-need latest web browser on the device. It doesn't matter if it is PC, Mac, smartphone - it just works. In case
-of smartphone we can make our app look even more native by using tools like Cordova. 
-It's clearly visible that JavaScript over the years has become a very powerful language.
+JavaScript over the years has become a very powerful language. It provides many APIs to perform various useful 
+tasks. For example we can draw 2D/3D graphics (with GPU acceleration) by using WebGL or use WebWorkers 
+to improve performance of intense computations on multi core CPU. We can also access hardware like microphone 
+or speakers via Web Audio API. [Here](https://developer.mozilla.org/en-US/docs/Web/API) you can find all interfaces 
+that are just ready to use while developing web application.
 
-In this article we will focus on a slightly different usage of JavaScript. We will not write another example 
-application in some new framework. is capable to do other things like draw 2D/3D graphics with graphic card acceleration or 
-access hardware like WebCam, microphone, speakers via Web API. 
+Idea behind this article is to take advantage of Web Audio API and go back to old times. Do you remember sound 
+of modem that was trying to initialize dial-up connection? It was quite noisy and it lasted for couple 
+of seconds. After connection was initialized your data was transmitted and received via phone call. Actually 
+you could 'hear' your data by picking phone connected to the same line as modem. Why sound? Because at 
+old days lots of people already had phone line. It was just cheaper and easier to use modem and existing wiring.
 
-We will not write any new 
-application in the latest framework but we will take advantage of Web API and go back to old times. Do you remember 
-that sound of modem during dial-up connection initialization? Modem were working on normal phone lines. It was because
-at 
+But there is not rose without a thorn. Infrastructure at those times was designed to carry human voice only.
+As Wikipedia says: 'In telephony, the usable voice frequency band ranges from approximately 300 Hz to 3400 Hz'.
+It means that modems needed to work with very limited bandwidth (~3kHz) over quite noisy analog channel. 
+First modem was released in 1958 and it was transmitting data with the speed of 100 bit/s. Over the years
+speed was increasing and ended up at 56 kbit/sek in late 90s.
 
-In this article we will focus on Web Audio API. 
-
-During last years JavaScript becase
- 
-  
-
-Web Audio API -> access to microphone and speakers
-we could go back to old times and modem (do you remember that sound?)
-the goal build system that allows to send simple data - from scratch! 
-before we start we need to understand some basics of DSP
-in next 
-
+Web Audio API allows us to generate and receive sound in JavaScript. We could use it to create application that 
+acts like a modem. Air in our room would be our noisy telephone line. Our goals is to send and receive binary data 
+even there is loud in the room (white noise, music playing, conversation between people). To deal with noise 
+we need to involve some Digital Signal Processing. In order to have full picture what is going on first we 
+need to learn a bit about Discrete Fourier Transform.
 
 ### Introduction to DFT
 
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
-frequencies Fourier Transform will help us. Digging into details - when we need to deal with digital signals that were 
+frequencies Fourier Transform will help us. Digging into details - when we need to deal with digital signals that are 
 sampled over time, Discrete Fourier Transform will help us. But what it actually does? It changes signal represented 
 in `time domain` into `frequency domain`. In other words it is decomposing signal that varies over time into the 
 frequencies that make it. That allows us for example to tune/pick only specific range of frequencies from full 
@@ -322,10 +317,13 @@ Now you may ask - what can be done with such slow algorithm? The answer is that 
 with sound. Frequency of sound waves that humans hear are between 20Hz - 20kHz. To store them properly we need to 
 use sampling rate of 44.1kHz. This number of samples per second is relatively low for modern CPUs that executes 
 instructions at rate of couple GHz. That allows us to handle audio samples in the real time even with slow algorithm. 
-As a source of samples we can just use microphone which almost all devices have. Additionally we don't have to compute 
-all frequency bins per each time domain window. We can just assume that our data is carried by some fixed frequency 
-and compute only related frequency bin. We just don't need other bins since they are not carrying our data. In case 
-of our example (160 bins on frequency domain chart) it will increase the speed 160 times.
+Additionally we don't have to compute all frequency bins per each time domain window. We can just assume that our 
+data is carried by some fixed frequency and compute only related frequency bin. We just don't need other bins 
+since they are not carrying our data. In case of our example (160 bins on frequency domain chart) it will increase 
+the speed 160 times.
+
+
+In case of JavaScript As a source of samples we can just use microphone which almost all devices have.
 
 Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
 that are just ready to use. The answer is *for fun*! :) It's like with car, you can enter it and just drive but 
