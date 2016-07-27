@@ -74,7 +74,7 @@ rate of 44100Hz it's 1575Hz, 2205Hz and 2756.25Hz respectively (frequencyInHertz
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
-proper amount of samples that we will use for later computations. This step is called *windowing*. You can also treat 
+proper amount of samples that we will use for later computations. This step is called **windowing**. You can also treat 
 it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
 window size to 1024 pick this amount of samples from the final signal buffer.
@@ -109,47 +109,80 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 >so frequency is higher. That is the reason why we need to put highest samplePerPeriod value on the left and end
 >with lowest samplePerPeriod on the right.
 
-Again, if you are really curious about Hertz it will show frequencies between 882Hz and 4410Hz (sampling rate 44100).
+Again, if you are really curious about Hertz it will show frequencies between 882Hz and 4410Hz (assuming sampling 
+rate 44100).
 
     IMAGE: clean frequency domain chart with labels and scale
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
 algorithm per each bin which goes like this:
 
->To get one frequency bin data we need to iterate thought all samples in our window. At each iteration value of the
->sample is multiplied by 2 dimensional unit vector. When we would show that vector from each iteration on 2D chart
->we will see that it's making circles which have period equal to frequencyBin's samplePerPeriod parameter.
->To get power of frequency bin we need to add all of those unit vectors together, divide by number of samples in a
->window and compute length of that final vector. Additionally we can convert that length into decibels.
->Additionally if we measure angle between final vector and positive Y axis clockwise it will be equal to phase of 
->that sine wave.
+>To get **one** frequency bin data we need to iterate thought **all** samples in our window. At each iteration
+>2 dimensional unit vector is produced. It starts always at origin and length is equal to one - only direction is 
+>related to current iteration. When we would show those unit vectors on animation we will see that they are making 
+>circles (like hands on the clock) with period equal to frequencyBin's samplePerPeriod parameter.
+>At each iteration we need to multiply our unit vector by value of the sample. Since samples are between 0 and 1 
+>this operation can shorten our vector. In case of negative values it could also change it's direction by 180 degrees.
+>To get power of frequency bin we need to add all of those multiplied vectors together and divide by number of samples 
+>in a window. Length of that final vector is power of frequency bin. Additionally we can convert that length into 
+>decibels.
+
+Our 2d vectors are actually complex numbers presented on complex plane. X axis is real part and Y axis is imaginary
+part of complex number. For simplicity we could treat it as normal 2d vector. Apart from length our final vector 
+have direction. It's telling about other important property of the wave: 
+
+>If we measure angle between final vector and positive Y axis clockwise it will be equal to phase of 
+>that sine wave that we are examining.
 
 In our frequency domain chart we decided to have 160 frequency bins. Window size was set earlier to 1024 sample. It
 means that to create complete chart we need to do 163 840 iterations (1024 * 160). For better resolutions or bigger
 window sizes this number goes up very fast. That's why this basic algorithm is ultra slow.
 
-### Examples - 3 sines and window function enabled
+### Examples
 
 Let's pick some bin as an example because it's always better that a thousands words. Our sines have samplePerPeriods 
-28, 20 and 16. To not cheat lets take 'random' samplePerPeriod for example equal to 18. This frequency should not be 
-present in our signal window so our expectation is that we should get small decibel value.
+28, 20 and 16. To not cheat lets take 'random' samplePerPeriod for example equal to 18. This frequency **should not** 
+be present in our signal window so our expectation is that we should get small decibel value.
 
-[....]
-- describe algorithm, running circle [CHART]
-- show that we collect vectors per each sample [CHART]
-- sum of vectors is power of sin wave frequency that we are looking at, direction is phase of that sine wave
+We need to iterate thought all 1024 samples. Unfortunately this number is too big to show everything in details.
+Let's show only 18 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
+marker shows that range (iterations between 401 and 418):
 
->When frequency that we are examining *is not present* in the signal it will produce vectors that points to many 
+    IMAGE: part of the window  
+ 
+Next image with zoomed range and each iteration details: 
+   
+    IMAGE: zoom and vectors
+
+Dark dot is unit vector end. Blue vector is unit vector multiplied by sample value. In this frequency bin we are 
+looking for wave with samplePerPeriod equal 18. As you can see dark dot made a full circle in exactly
+18 iterations. In our window we have 1024 samples. It means that dark dot (unit vector/complex number) will do 
+~56.9 rotations around origin (1024/18). In general more rotations we have the better results we get.
+
+>When frequency that we are examining **is not present** in the signal it will produce vectors that points to many 
 >different directions. If we would sum them together they will all cancel each other and length of the final vector
 >will be small.
 
 [....]
 
->When frequency that we are examining *is present* in the signal it will produce more and more vectors that points to 
+>When frequency that we are examining **is present** in the signal it will produce more and more vectors that points to 
 >the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
 >amplitude of the swing.
 
-### Examples - 1 sine only without window function
+
+### Final Frequency Domain chart
+ 
+If 
+[....]
+- tell that chart shows just length of vectors (complex numbers).
+- it's kind of flat because it doesn't show phase of the frequency bin 
+- 
+
+Constellation diagram shows two things - power in decibels and phase of the selected frequency bin. If points are far 
+away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position of point 
+on the circle tells about phase. Value is expressed in degrees. At the top (12 o'clock) we have phase offset equal to 
+0 degrees (or 360 degrees since it's the same). Values goes clockwise so point on the right side will have ~90 
+degrees phase offset (3 o'clock).
 
 ### JavaScript implementation
 
@@ -259,7 +292,7 @@ console.log(timeDomain.length);      // --> 1024
 console.log(frequencyDomain.length); // --> 160
 ```
 
-In example above we skip *windowing* step - we directly created final signal inside a time domain window.
+In example above we skip **windowing** step - we directly created final signal inside a time domain window.
 Normally we would copy samples from some input buffer.
 
 Lets look what are the power values that we have near our three sines. We expect to see 3 power peaks near 
@@ -293,12 +326,14 @@ logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod
 ```
 
 As we can see 
+[....]
 
 ```javascript
 function logPhase(index) {
-    console.log(
-        Math.round(frequencyDomain[index].phase * 360)
-    );
+    var phaseInDegrees = Math.round(frequencyDomain[index].phase * 360);
+    
+    phaseInDegrees = phaseInDegrees % 360; // normalize  
+    console.log(phaseInDegrees);
 }
 
 logPhase(88);  // SINE A
@@ -322,11 +357,12 @@ data is carried by some fixed frequency and compute only related frequency bin. 
 since they are not carrying our data. In case of our example (160 bins on frequency domain chart) it will increase 
 the speed 160 times.
 
+[...]
 
 In case of JavaScript As a source of samples we can just use microphone which almost all devices have.
 
 Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
-that are just ready to use. The answer is *for fun*! :) It's like with car, you can enter it and just drive but 
+that are just ready to use. The answer is **for fun**! :) It's like with car, you can enter it and just drive but 
 if you additionally know how it works it's even better. There is one alternative - AnalyserNode from Web Audio API.
 It uses FFT under the hood so it's fast. But there is one disadvantage - it doesn't return phase of frequency bin. 
 Phase of the wave can be used in data transmission that is more resistant to the noise. Method described in this 
@@ -339,6 +375,19 @@ example hosted on [AudioNetwork](https://audio-network.rypula.pl) project websit
 [Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html) 
 
 In second part of this article we will look closer into Web Audio API.
+
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
 
 ### TODO:
 

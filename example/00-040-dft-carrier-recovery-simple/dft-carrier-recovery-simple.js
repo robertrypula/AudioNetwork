@@ -48,7 +48,7 @@ var
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
     frequencyBinToExplainIndex = Math.round(frequencyBinSize * 0.85),
-    frequencyBinToExplainIterationOffset = Math.round(0.47 * windowSampleSize),
+    frequencyBinToExplainIterationOffset = Math.round(0.392 * windowSampleSize),
 
     // helpers for sine creation
     separateSineCarrierGenerate = [],
