@@ -67,8 +67,8 @@ simpler.
 >needs of this article it's doesn't change much.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
-equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that for usual sampling 
-rate of 44100Hz it's 1575Hz, 2205Hz and 2756.25Hz respectively (frequencyInHertz = sampleRate / samplePerPeriod). 
+equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
+and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
     IMAGE: 3 sines alone and summed
 
@@ -77,7 +77,7 @@ to say how many sines are summed together. So how we can extract those frequenci
 proper amount of samples that we will use for later computations. This step is called **windowing**. You can also treat 
 it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
-window size to 1024 pick this amount of samples from the final signal buffer.
+window size to 1024 and pick this amount of samples from the signal buffer.
 
     IMAGE: windowed raw samples
 
@@ -123,13 +123,14 @@ algorithm per each bin which goes like this:
 >circles (like hands on the clock) with period equal to frequencyBin's samplePerPeriod parameter.
 >At each iteration we need to multiply our unit vector by value of the sample. Since samples are between 0 and 1 
 >this operation can shorten our vector. In case of negative values it could also change it's direction by 180 degrees.
->To get power of frequency bin we need to add all of those multiplied vectors together and divide by number of samples 
->in a window. Length of that final vector is power of frequency bin. Additionally we can convert that length into 
->decibels.
+>To get power value we need to add all of those multiplied vectors together and divide by number of samples 
+>in a window. Length of final vector is power of wave related to that frequency bin. Additionally we can convert 
+>that length into decibels.
 
-Our 2d vectors are actually complex numbers presented on complex plane. X axis is real part and Y axis is imaginary
-part of complex number. For simplicity we could treat it as normal 2d vector. Apart from length our final vector 
-have direction. It's telling about other important property of the wave: 
+Our 2d vectors are actually complex numbers represented on complex plane. X axis is real part and Y axis is imaginary
+part of complex number. For simplicity we could treat it as normal 2d vector. 
+
+Apart from length our final vector have direction. It's telling about other important property of the wave: 
 
 >If we measure angle between final vector and positive Y axis clockwise it will be equal to phase of 
 >that sine wave that we are examining.
@@ -140,9 +141,9 @@ window sizes this number goes up very fast. That's why this basic algorithm is u
 
 ### Examples
 
-Let's pick some bin as an example because it's always better that a thousands words. Our sines have samplePerPeriods 
-28, 20 and 16. To not cheat lets take 'random' samplePerPeriod for example equal to 18. This frequency **should not** 
-be present in our signal window so our expectation is that we should get small decibel value.
+Example is always better that a thousands words. Our sines have samplePerPeriods 28, 20 and 16. Let's take some 
+'random' samplePerPeriod for example equal 18. This frequency **should not** be present in our signal window 
+so our expectation is that we should get small decibel value.
 
 We need to iterate thought all 1024 samples. Unfortunately this number is too big to show everything in details.
 Let's show only 18 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
