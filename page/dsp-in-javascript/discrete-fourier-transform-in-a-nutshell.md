@@ -331,7 +331,7 @@ for (i = 0; i < windowSize; i++) {
     sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
     timeDomain.push(sampleProcessed);                            // push processed sample to array
 }
-frequencyDomain = computeDiscreteFourierTransform(timeDomain, 50, 10, 160);  // will give 160 powerDecibel values
+frequencyDomain = computeDiscreteFourierTransform(timeDomain, 50, 10, 160);  // will give 160 frequency bins
                                                                              // starting from samplePerPeriod 50
                                                                              // ending at samplePerPeriod 10.25
                                                                              // with samplePerPeriod step of 0.25
@@ -340,16 +340,18 @@ console.log(timeDomain.length);      // --> 1024
 console.log(frequencyDomain.length); // --> 160
 ```
 
-In example above we skip **windowing** step - we directly created final signal inside a time domain window.
+In example above **windowing** step was skip - we directly created final signal inside a time domain window.
 Normally we would copy samples from some input buffer.
 
 Lets look what are the power values that we have near our three sines. We expect to see 3 power peaks near 
-28, 20 and 16 samplePerPeriod. 
+28, 20 and 16 samplePerPeriod. First we need to know how to convert samplePerPeriod into array index. Below
+required formulas:
 
->To compute array index from samplePerPeriod and vice versa we need to use those formulas:
->step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
->index = (frequencyBinSamplePerPeriodMax - samplePerPeriod) / step
->samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
+```
+step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
+index = (frequencyBinSamplePerPeriodMax - samplePerPeriod) / step
+samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
+```
 
 ```javascript
 function logPowerDecibel(index) {
@@ -375,8 +377,8 @@ logPowerDecibel(136); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod
 logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
 
-As we can see strongest bins are exactly where they should be. In are 'between' sine waves power is very weak 
-(around -60 decibels). Let's second parameter - phase:
+As we can see strongest bins are exactly where they should be. In area between sine waves power is very weak 
+(around -60 decibels). Let's check second parameter - phase:
  
 ```javascript
 function logPhase(index) {
@@ -399,7 +401,7 @@ logPhase(120); // 180 | it's because SINE B was created like this: sample += gen
 logPhase(136); // 270 | it's because SINE C was created like this: sample += generateSineWave(16, 0.3, 270, i);
 ```
 
-Magic works as expected. Phase was restored properly. 
+Magic works as expected. Phase was also restored properly. 
 
 ### Summary
 
@@ -462,14 +464,7 @@ In second part of this article we will look closer into Web Audio API.
 - [done] CODE add ability to add white noise
 - [done] CODE add ability to show/hide sections
 - [done] CODE add new chart that explains unit vector in a range
-+ [done] ARTICLE add info about phase
-- ARTICLE write missing examples
+- [done] ARTICLE add info about phase
+- [done] ARTICLE write missing examples
 - ARTICLE add images and finish everything
 - CODE add animation mode
-
-+ [done] much simpler than FFT but ultra slow
-+ [done] explain frequency domain and time domain, frequency bin [IMAGE]
-+ [done] tell about samplesPerPeriod -> a way to skip sampling frequency
-+ [done] add couple of sine waves together [CHART separate and sum]
-+ [done] when input signal contains that frequency it will produce lots of vectors that points to the same direction
-
