@@ -29,11 +29,15 @@ need to learn a bit about Discrete Fourier Transform.
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
-frequencies Fourier Transform will help us. Digging into details - when we need to deal with digital signals that are 
+frequencies Fourier Transform will help us. To be more precise - when we need to deal with digital signals that are 
 sampled over time, Discrete Fourier Transform will help us. But what it actually does? It changes signal represented 
 in `time domain` into `frequency domain`. In other words it is decomposing signal that varies over time into the 
 frequencies that make it. That allows us for example to tune/pick only specific range of frequencies from full 
 spectrum. 
+
+It's all about frequencies. It doesn't matter if we talk about radio frequencies (around 3 kHz to 300 GHz) or sound 
+waves frequencies that human hear (20Hz - 20kHz). At both cases signal could be digitized by sampling over time so 
+principle is exactly the same.
 
 In case of sound waves output of Discrete Fourier Transform is often showed on music player window or on 
 radio LCD. Apart from nice looking bouncing bars we can also read from that output how loud each frequency range is.
@@ -102,7 +106,7 @@ Output of Discrete Fourier Transform gives values that varies a lot. Some bins c
 could have 0.000001. In order to see all variety of values vertical axis is showed in decibels. 0.1 will be showed
 as -10 decibels and 0.000001 will be showed as -60 decibels.
 
->Decibel goes down to negative value, -60 decibels means much weaker signal than for example -5 decibels.
+>Decibel goes down to negative value. -60 decibels means much weaker signal than for example -5 decibels.
 
 >All frequency charts have higher frequencies on the right side and lower frequencies on the left side. In our case
 >lower samplePerPeriod means value higher frequency because sine have less samples in a period - it's more packed 
@@ -146,44 +150,65 @@ Example is always better that a thousands words. Our sines have samplePerPeriods
 so our expectation is that we should get small decibel value.
 
 We need to iterate thought all 1024 samples. Unfortunately this number is too big to show everything in details.
-Let's show only 18 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
-marker shows that range (iterations between 401 and 418):
+Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
+marker shows that range (iterations between 401 and 424):
 
     IMAGE: part of the window  
  
-Next image with zoomed range and each iteration details: 
+Below zoomed version plus 24 iteration details: 
    
-    IMAGE: zoom and vectors
+    IMAGE: zoom and vectors for samplePerPeriod 11 + explanation (arrow that show rotation and arrows that shows how vectors are affected by sample vaue)
 
-Dark dot is unit vector end. Blue vector is unit vector multiplied by sample value. In this frequency bin we are 
-looking for wave with samplePerPeriod equal 18. As you can see dark dot made a full circle in exactly
-18 iterations. In our window we have 1024 samples. It means that dark dot (unit vector/complex number) will do 
-~56.9 rotations around origin (1024/18). In general more rotations we have the better results we get.
+Dark dot is end of unit vector that starts at origin. Line was omitted to not collide with blue vector which is more 
+important. Blue vector is unit vector multiplied by sample value. At this frequency bin we are 
+looking for wave with samplePerPeriod equal 11. As you can see dark dot made a full circle in exactly
+11 iterations. In our window we have 1024 samples. It means that dark dot (unit vector/complex number) will do 
+~93 rotations around origin (1024/11). In general more rotations we have the better results we get.
+Even by looking at two full periods it's visible that their directions are pretty much random.   
 
 >When frequency that we are examining **is not present** in the signal it will produce vectors that points to many 
 >different directions. If we would sum them together they will all cancel each other and length of the final vector
 >will be small.
 
-[....]
+Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine waves? Let's pick value 16.
+
+    IMAGE: zoom and vectors for samplePerPeriod 16
+    
+Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
+longest blue vectors seems to be pointing in the same directions. We can say that they 'picked' something from our 
+signal.       
 
 >When frequency that we are examining **is present** in the signal it will produce more and more vectors that points to 
 >the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
 >amplitude of the swing.
 
-
 ### Final Frequency Domain chart
- 
-If 
+
+After iterating thought all bins we can finally visualize frequency domain chart. As you can see our three 
+sines are clearly visible as peaks. 
+
+    IMAGE: frequency domain chart 
 [....]
 - tell that chart shows just length of vectors (complex numbers).
 - it's kind of flat because it doesn't show phase of the frequency bin 
-- 
 
 Constellation diagram shows two things - power in decibels and phase of the selected frequency bin. If points are far 
 away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position of point 
 on the circle tells about phase. Value is expressed in degrees. At the top (12 o'clock) we have phase offset equal to 
 0 degrees (or 360 degrees since it's the same). Values goes clockwise so point on the right side will have ~90 
 degrees phase offset (3 o'clock).
+
+    IMAGE: phase of sine moved by 1/3 will rotate constellation diagram point 
+    
+As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated.
+When you don't need phase information the frequency domain chart is enough.
+
+### Make some noise!
+
+What would happen if our signal would not be 
+
+[....]
+- show chart when we add some white noise 
 
 ### JavaScript implementation
 
@@ -263,24 +288,32 @@ function blackmanNuttall(n, N) {
         + 0.1365995 * Math.cos(4 * Math.PI * n / (N - 1))
         - 0.0106411 * Math.cos(6 * Math.PI * n / (N - 1));
 }
+
+function generateSineWave(samplePerPeriod, amplitude, degreesPhaseOffset, sample) {
+    var unitPhaseOffset = degreesPhaseOffset / 360;
+
+    return amplitude * Math.sin(2 * Math.PI * (sample / samplePerPeriod - unitPhaseOffset));
+}
 ```
 
-Code above should be more of less clear. Those 4 functions are enough to compute Discrete Fourier Transform. 
+Code above should be more of less clear. Those 5 functions are enough to compute Discrete Fourier Transform. 
 Magic formula at `blackmanNuttall` method was taken from Wikipedia article about 
 (Window Function)[https://en.wikipedia.org/wiki/Window_function]. Ok, let's add few sines together and try
 to compute DFT:
 
 ```javascript
-var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain;
+var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude;
 
 timeDomain = [];
 windowSize = 1024;
+whiteNoiseAmplitude = 0;
 // fill array with time domain samples
 for (i = 0; i < windowSize; i++) {
     sample = 0;
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 28);              // sine A with samplePerPeriod 28
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 20);              // sine B with samplePerPeriod 20
-    sample += 0.3 * Math.sin(2 * Math.PI * i / 16);              // sine C with samplePerPeriod 16 
+    sample += generateSineWave(28, 0.3, 0, i);     // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 0
+    sample += generateSineWave(20, 0.3, 0, i);     // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 0
+    sample += generateSineWave(16, 0.3, 0, i);     // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 0
+    sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;    // add white noise
     sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
     timeDomain.push(sampleProcessed);                            // push processed sample to array
 }
@@ -326,7 +359,9 @@ logPowerDecibel(136); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod
 logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
 
-As we can see 
+As we can see
+ 
+- tell about phase
 [....]
 
 ```javascript
@@ -342,6 +377,9 @@ logPhase(120); // SINE B
 logPhase(136); // SINE C
 ```
 
+[....]
+- add phase offset in code that generates sine waves
+- add last example with phase offset
 
 ### Summary
 
@@ -358,8 +396,9 @@ data is carried by some fixed frequency and compute only related frequency bin. 
 since they are not carrying our data. In case of our example (160 bins on frequency domain chart) it will increase 
 the speed 160 times.
 
-[...]
-
+[....]
+- add this sentence somewhere
+- remove first part of section above
 In case of JavaScript As a source of samples we can just use microphone which almost all devices have.
 
 Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
