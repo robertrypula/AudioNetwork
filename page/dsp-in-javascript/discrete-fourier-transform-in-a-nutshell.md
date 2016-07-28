@@ -51,8 +51,8 @@ using WiFi or watching TV from Terrestrial DVB transmitter FFT algorithm is runn
 unfortunately not that simple. Goal behind this article is to create relatively simple signal processing in
 JavaScript from scratch. That's why we will focus on much simpler algorithm that in general will give same result.
 There is only one disadvantage - this method is ultra slow. In JavaScript it's possible to compute only couple of
-frequency bins (vertical 'bars' on frequency domain chart) in the real time. In comparison FFT will give us thousands
-of them.
+frequency bins (vertical 'bars' on frequency domain chart) in the real time without overloading the CPU. In 
+comparison FFT will give us thousands of them.
 
 ### Basic DFT algorithm
 
@@ -188,15 +188,15 @@ clearly visible as peaks.
 
 This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
-full DFT output. Each bin also have a phase information. To show everything we can use Constellation Diagram.   
+full DFT output. Each bin also have a phase information. In this case Constellation Diagram is something that we need.   
 
->Constellation diagram shows two things - power in decibels and phase of the selected frequency bin. If point is far 
->away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position of point 
->on the circle tells about phase. At the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 degrees 
->since it's the same). Values goes clockwise so point on the far right side will have 90 degrees phase offset 
+>Constellation diagram shows two things at once - power in decibels and phase of the selected frequency bin. If point 
+>is far away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position 
+>of point on the circle tells about phase. At the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 
+>degrees since it's the same). Values goes clockwise so point on the far right side will have 90 degrees phase offset 
 >(3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
 
-If our sine doesn't have any phase offset out point on constellation diagram will be located at 12 o'clock.
+If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock.
 
     IMAGE 12: constellation diagram + frequency domain chart without phase offset + sine wave 
 
@@ -225,7 +225,7 @@ difference between peaks and background noise decreased a lot.
 
 ### JavaScript implementation
 
-Below you can find simple JavaScript implementation of all that was described above.
+Below you can find JavaScript implementation of all that was described above.
 
 ```javascript
 function computeDiscreteFourierTransform(
@@ -280,18 +280,18 @@ function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
         real += -Math.cos(r) * sample;         // 'sample' value alters 'unit vector' length, it could also change
         imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
     }
-    real /= windowSize;                                         // normalize final vector
-    imm /= windowSize;                                          // normalize final vector
+    real /= windowSize;                        // normalize final vector
+    imm /= windowSize;                         // normalize final vector
 
     power = Math.sqrt(real * real + imm * imm);                 // compute length of the vector
     powerDecibel = 10 * Math.log(power) / Math.LN10;            // convert into decibels
-    powerDecibel = powerDecibel < -80 ? -80 : powerDecibel;     // limit weak values to -80 decibels
+    powerDecibel = powerDecibel < -100 ? -100 : powerDecibel;   // limit weak values to -100 decibels
     
-    phase = findUnitAngle(real, imm);                           // phase is angle
+    phase = findUnitAngle(real, imm);          // get angle between vector and positive Y axis clockwise
 
     return {
-        powerDecibel: powerDecibel,
-        phase: phase
+        powerDecibel: powerDecibel,            
+        phase: phase                
     };
 }
 
@@ -311,8 +311,9 @@ function generateSineWave(samplePerPeriod, amplitude, degreesPhaseOffset, sample
 
 Code above should be more of less clear. Those 5 functions are enough to compute Discrete Fourier Transform. Magic 
 formula at `blackmanNuttall` method was taken from Wikipedia article about 
-(Window Function)[https://en.wikipedia.org/wiki/Window_function]. Ok, let's add few sines together and try to 
-compute DFT:
+[Window Function](https://en.wikipedia.org/wiki/Window_function). 
+
+Ok, let's add few sines together and try to compute DFT:
 
 ```javascript
 var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude;
@@ -323,9 +324,9 @@ whiteNoiseAmplitude = 0;
 // fill array with time domain samples
 for (i = 0; i < windowSize; i++) {
     sample = 0;
-    sample += generateSineWave(28, 0.3, 0, i);     // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 0
-    sample += generateSineWave(20, 0.3, 0, i);     // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 0
-    sample += generateSineWave(16, 0.3, 0, i);     // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 0
+    sample += generateSineWave(28, 0.3, 0, i); // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 0
+    sample += generateSineWave(20, 0.3, 0, i); // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 0
+    sample += generateSineWave(16, 0.3, 0, i); // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 0
     sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;    // add white noise
     sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
     timeDomain.push(sampleProcessed);                            // push processed sample to array
