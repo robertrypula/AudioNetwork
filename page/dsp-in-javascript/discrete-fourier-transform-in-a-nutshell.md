@@ -29,21 +29,20 @@ need to learn a bit about Discrete Fourier Transform.
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
-frequencies Fourier Transform will help us. To be more precise - when we need to deal with digital signals that are 
-sampled over time, Discrete Fourier Transform will help us. But what it actually does? It changes signal represented 
-in `time domain` into `frequency domain`. In other words it is decomposing signal that varies over time into the 
-frequencies that make it. That allows us for example to tune/pick only specific range of frequencies from full 
-spectrum. 
+frequencies Fourier Transform will help us. To be more precise - when we need to deal with sampled signal, Discrete 
+Fourier Transform will help us. But what it actually does? It changes signal represented in `time domain` into 
+`frequency domain`. In other words it is decomposing signal that varies over time into the frequencies that make it. 
+That allows us for example to tune/pick only specific range of frequencies from full spectrum. 
 
-It's all about frequencies. It doesn't matter if we talk about radio frequencies (around 3 kHz to 300 GHz) or sound 
-waves frequencies that human hear (20Hz - 20kHz). At both cases signal could be digitized by sampling over time so 
-principle is exactly the same.
+In general it's all about frequencies. It doesn't matter if we talk about radio frequencies (around 3 kHz to 300 GHz) 
+or sound waves frequencies that human hear (20Hz - 20kHz). At both cases signal could be digitized by sampling it 
+over time. Principle is exactly the same.
 
 In case of sound waves output of Discrete Fourier Transform is often showed on music player window or on 
 radio LCD. Apart from nice looking bouncing bars we can also read from that output how loud each frequency range is.
 We can for example read without even listening to the song how fast is the bass beat.
 
-    IMAGE: 1 seconds of song and few ranges that overlaps
+    IMAGE 1: 1 seconds of song and few ranges that overlaps
 
 ### DFT in fast and slow way
 
@@ -55,8 +54,6 @@ There is only one disadvantage - this method is ultra slow. In JavaScript it's p
 frequency bins (vertical 'bars' on frequency domain chart) in the real time. In comparison FFT will give us thousands
 of them.
 
-    IMAGE: speed comparison table?
-
 ### Basic DFT algorithm
 
 Before we start lets change the way we express frequency of a sine wave. Instead of using frequency value we can
@@ -64,7 +61,7 @@ use samplePerPeriod value. This will allow us to drop frequency in our examples 
 additional parameter - sampling frequency. At the end we are working with arrays of samples so that would make it
 simpler.
 
-    IMAGE: show few sines with different sampling>
+    IMAGE 2: show few sines with different sampling
     
 >Using samplePerPeriod instead frequency will affect horizontal axis of the frequency domain chart (you will see 
 >that later). This conversion is not linear so our frequency bins will not be spaced by equal amount of Hertz. For
@@ -74,7 +71,7 @@ Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod 
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
 and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
-    IMAGE: 3 sines alone and summed
+    IMAGE 3: 3 sines alone and summed
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
@@ -83,20 +80,20 @@ it as a animation frame because it will show frequencies of the signal in this e
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
 window size to 1024 and pick this amount of samples from the signal buffer.
 
-    IMAGE: windowed raw samples
+    IMAGE 4: windowed raw samples
 
 In next step we need to apply window function to our raw samples. The goal is to 'flatten' all samples at left
 and right part of the window and keep the middle part in a 'gentle' way. That is important because we want to decompose
 our signal to sines waves that make it. The problems is that not all frequencies that we want to see in frequency
 domain chart fits in a window in a way that we will have integer multiply of wave period.
 
-    IMAGE: show how sine waves fits the window size
+    IMAGE 5: show how sine waves fits the window size
 
 Without window function we would have 'frequency leakage' and main sines waves that makes the signal will not be
 visible well as a peaks in frequency domain chart. Image below shows how window function looks like and how
 our samples was changed after applying it.
 
-    IMAGE: window function and final samples
+    IMAGE 6: window function and final samples
 
 In order to create frequency domain representation we need to create second chart. Each vertical bar on the chart is
 called frequency bin and tells how much of that frequency is inside our signal from the window. Let say we want to
@@ -116,7 +113,7 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 Again, if you are really curious about Hertz it will show frequencies between 882Hz and 4410Hz (assuming sampling 
 rate 44100).
 
-    IMAGE: clean frequency domain chart with labels and scale
+    IMAGE 7: clean frequency domain chart with labels and scale
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
 algorithm per each bin which goes like this:
@@ -153,11 +150,11 @@ We need to iterate thought all 1024 samples. Unfortunately this number is too bi
 Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
 marker shows that range (iterations between 401 and 424):
 
-    IMAGE: part of the window  
+    IMAGE 8: part of the window  
  
 Below zoomed version plus 24 iteration details: 
    
-    IMAGE: zoom and vectors for samplePerPeriod 11 + explanation (arrow that show rotation and arrows that shows how vectors are affected by sample vaue)
+    IMAGE 9: zoom and vectors for samplePerPeriod 11 + explanation (arrow that show rotation and arrows that shows how vectors are affected by sample vaue)
 
 Dark dot is end of unit vector that starts at origin. Line was omitted to not collide with blue vector which is more 
 important. Blue vector is unit vector multiplied by sample value. At this frequency bin we are 
@@ -172,43 +169,59 @@ Even by looking at two full periods it's visible that their directions are prett
 
 Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine waves? Let's pick value 16.
 
-    IMAGE: zoom and vectors for samplePerPeriod 16
+    IMAGE 10: zoom and vectors for samplePerPeriod 16
     
 Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
 longest blue vectors seems to be pointing in the same directions. We can say that they 'picked' something from our 
 signal.       
 
->When frequency that we are examining **is present** in the signal it will produce more and more vectors that points to 
->the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
+>When frequency that we are examining **is present** in the signal it will produce more and more vectors that points 
+>to the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
 >amplitude of the swing.
 
-### Final Frequency Domain chart
+### Final Frequency Domain chart and constellation diagram
 
-After iterating thought all bins we can finally visualize frequency domain chart. As you can see our three 
-sines are clearly visible as peaks. 
+After iterating thought all bins we can finally visualize frequency domain chart. As we can see our three sines are 
+clearly visible as peaks. 
 
-    IMAGE: frequency domain chart 
-[....]
-- tell that chart shows just length of vectors (complex numbers).
-- it's kind of flat because it doesn't show phase of the frequency bin 
+    IMAGE 11: frequency domain chart 
 
-Constellation diagram shows two things - power in decibels and phase of the selected frequency bin. If points are far 
-away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position of point 
-on the circle tells about phase. Value is expressed in degrees. At the top (12 o'clock) we have phase offset equal to 
-0 degrees (or 360 degrees since it's the same). Values goes clockwise so point on the right side will have ~90 
-degrees phase offset (3 o'clock).
+This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
+bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
+full DFT output. Each bin also have a phase information. To show everything we can use Constellation Diagram.   
 
-    IMAGE: phase of sine moved by 1/3 will rotate constellation diagram point 
+>Constellation diagram shows two things - power in decibels and phase of the selected frequency bin. If point is far 
+>away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position of point 
+>on the circle tells about phase. At the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 degrees 
+>since it's the same). Values goes clockwise so point on the far right side will have 90 degrees phase offset 
+>(3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
+
+If our sine doesn't have any phase offset out point on constellation diagram will be located at 12 o'clock.
+
+    IMAGE 12: constellation diagram + frequency domain chart without phase offset + sine wave 
+
+If we would add phase offset to our sine it will rotate our point on the constellation diagram 
+
+    IMAGE 13: constellation diagram + frequency domain chart witho some phase offset + sine wave 
     
 As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated.
-When you don't need phase information the frequency domain chart is enough.
 
 ### Make some noise!
 
-What would happen if our signal would not be 
+In real world our input signal will not be that perfect. It will be for sure noisy because of echos, interferences
+or white noise. Let's check how white noise will affect our frequency domain chart. To emulate it we can just add 
+some random values to each sample before applying DFT:
 
-[....]
-- show chart when we add some white noise 
+```javascript
+whiteNoiseAmplitude = 0.3;
+// ...
+sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this could add/substract random number up to 0.3  
+```
+
+    IMAGE 14: freq chart without noise and with noise, above time domain part
+     
+As we can see our time domain data is now very noisy. When we look at frequency domain we still see peaks but 
+difference between peaks and background noise decreased a lot. 
 
 ### JavaScript implementation
 
@@ -296,10 +309,10 @@ function generateSineWave(samplePerPeriod, amplitude, degreesPhaseOffset, sample
 }
 ```
 
-Code above should be more of less clear. Those 5 functions are enough to compute Discrete Fourier Transform. 
-Magic formula at `blackmanNuttall` method was taken from Wikipedia article about 
-(Window Function)[https://en.wikipedia.org/wiki/Window_function]. Ok, let's add few sines together and try
-to compute DFT:
+Code above should be more of less clear. Those 5 functions are enough to compute Discrete Fourier Transform. Magic 
+formula at `blackmanNuttall` method was taken from Wikipedia article about 
+(Window Function)[https://en.wikipedia.org/wiki/Window_function]. Ok, let's add few sines together and try to 
+compute DFT:
 
 ```javascript
 var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude;
@@ -339,7 +352,9 @@ Lets look what are the power values that we have near our three sines. We expect
 
 ```javascript
 function logPowerDecibel(index) {
-    console.log(frequencyDomain[index].powerDecibel);
+    var powerDecibelTwoDecimalPlaces = Math.round( frequencyDomain[index].powerDecibel * 100 ) / 100;
+
+    console.log(powerDecibelTwoDecimalPlaces);
 }
 
 logPowerDecibel(87); // -12.81 | index: (50-28.25)/0.25 = 87 | samplePerPeriod: 50-0.25*87 = 28.25
@@ -359,11 +374,9 @@ logPowerDecibel(136); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod
 logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
 
-As we can see
+As we can see strongest bins are exactly where they should be. In are 'between' sine waves power is very weak 
+(around -60 decibels). Let's second parameter - phase:
  
-- tell about phase
-[....]
-
 ```javascript
 function logPhase(index) {
     var phaseInDegrees = Math.round(frequencyDomain[index].phase * 360);
@@ -372,14 +385,20 @@ function logPhase(index) {
     console.log(phaseInDegrees);
 }
 
-logPhase(88);  // SINE A
-logPhase(120); // SINE B
-logPhase(136); // SINE C
+logPhase(88);  // 0 | it's because SINE A was created like this: sample += generateSineWave(28, 0.3, 0, i);
+logPhase(120); // 0 | it's because SINE B was created like this: sample += generateSineWave(20, 0.3, 0, i);
+logPhase(136); // 0 | it's because SINE C was created like this: sample += generateSineWave(16, 0.3, 0, i);
 ```
 
-[....]
-- add phase offset in code that generates sine waves
-- add last example with phase offset
+All sines returned phase offset equal to zero. Let's check what we would get if we add some phase offset to our sines.
+
+```javascript
+logPhase(88);  // 90 | it's because SINE A was created like this: sample += generateSineWave(28, 0.3, 90, i);
+logPhase(120); // 180 | it's because SINE B was created like this: sample += generateSineWave(20, 0.3, 180, i);
+logPhase(136); // 270 | it's because SINE C was created like this: sample += generateSineWave(16, 0.3, 270, i);
+```
+
+Magic works as expected. Phase was restored properly. 
 
 ### Summary
 
@@ -387,19 +406,15 @@ Algorithm described above is maybe not optimal but relatively simple comparing t
 mathematical tricks that are beyond the scope of this article. We can extract major frequencies that builds the 
 signal even there is a lot of random noise.
 
-Now you may ask - what can be done with such slow algorithm? The answer is that we can do pretty much especially 
-with sound. Frequency of sound waves that humans hear are between 20Hz - 20kHz. To store them properly we need to 
-use sampling rate of 44.1kHz. This number of samples per second is relatively low for modern CPUs that executes 
-instructions at rate of couple GHz. That allows us to handle audio samples in the real time even with slow algorithm. 
-Additionally we don't have to compute all frequency bins per each time domain window. We can just assume that our 
-data is carried by some fixed frequency and compute only related frequency bin. We just don't need other bins 
-since they are not carrying our data. In case of our example (160 bins on frequency domain chart) it will increase 
-the speed 160 times.
+Now you may ask - can we really do something useful with such slow algorithm? The answer is yes we can. We can easily 
+improve performance by reducing number of frequency bins. We can just assume that our data is carried by some 
+fixed frequency and compute only related frequency bin. We don't need other bins since they are not carrying 
+our data. In case of our example (160 bins on frequency domain chart) it will increase the speed 160 times.
 
-[....]
-- add this sentence somewhere
-- remove first part of section above
-In case of JavaScript As a source of samples we can just use microphone which almost all devices have.
+What about JavaScript - how to get samples? We can access them via Web Audio API from microphone connected to your 
+machine. Samples are coming in chunks (1024, 2048, ...) in fixed time intervals that depends on chunk size. Similar
+thing happens when we need to play sound. We need to fill array that came in the event and it will be played by the 
+speakers.  
 
 Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
 that are just ready to use. The answer is **for fun**! :) It's like with car, you can enter it and just drive but 
