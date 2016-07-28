@@ -71,7 +71,7 @@ Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod 
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
 and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
-![3 sines alone and summed](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-alone-and-summed.png)
+![sines alone and summed](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-alone-and-summed.png)
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
@@ -184,7 +184,7 @@ signal.
 After iterating thought all bins we can finally visualize frequency domain chart. As we can see our three sines are 
 clearly visible as peaks. 
 
-    IMAGE 11: frequency domain chart 
+![frequency domain chart](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.png)
 
 This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
