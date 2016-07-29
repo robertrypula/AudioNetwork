@@ -19,11 +19,13 @@ First modem was released in 1958 and it was transmitting data with the speed of 
 speed was increasing and in late 90s it ended up at 56 kbit/sek.
 
 Web Audio API allows us to generate and receive sound in JavaScript. We could use it to create application that 
-acts like a modem. Air in our room would be our noisy telephone line. Our goal is to send and receive binary data 
-even there is loud in the room (white noise, music playing, conversation between people). What about the speed? Well, 
-it could be even 8 bit/s as long as we do it on our own from scratch. Speeds around 64 bit/s will allows to send 
-phone number or URL between two machines without using any communicator or email. We could create simple chat that 
-doesn't require any Internet connection.
+acts like a modem. Air in our room would be our noisy telephone line. Important difference is that 
+modern laptop/smartphone microphones work in wider frequency ranges (in theory 20Hz - 20kHz). It means that we have 
+much more bandwidth to work with. Our goal is to send and receive binary data even there is loud in the room (white 
+noise, music playing, conversation between people). What about the speed? Well, it could be even 8 bit/s as long 
+as we do it on our own from scratch. Speeds around 64 bit/s will allows to send in few seconds phone number or 
+URL between two machines without using any communicator or email. We could create simple chat that doesn't 
+require any Internet connection.
 
 To create such application we need to involve Digital Signal Processing. It means that first thing that is 
 worth doing is to learn a bit about Discrete Fourier Transform.

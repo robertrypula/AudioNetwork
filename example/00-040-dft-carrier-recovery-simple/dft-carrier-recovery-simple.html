@@ -446,6 +446,16 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <b class="label">
+                            Frequency
+                        </b>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <span id="frequency-bin-frequency"></span> Hz (assuming sampling rate <span class="SAMPLE_RATE"></span>)
+                    </div>
+                </div>
+                <div class="row margin-bottom">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <b class="label">
                             Power
                         </b>
                     </div>
@@ -471,12 +481,12 @@
                     </div>
                     <div class="col col-xs-12 col-sm-7 col-md-9">
                         <p>
-                            Constellation diagram shows two things - power in decibels and phase of the selected
-                            frequency bin. If points are far away from chart origin it means that signal is strong,
-                            if near origin it means that signal is weak. Position of point on the circle tells
-                            about phase. Value is expressed in degrees. At the top (12 o'clock) we have phase offset
-                            equal to 0 degrees (or 360 degrees since it's the same). Values goes clockwise so point
-                            on the right side will have ~90 degrees phase offset (3 o'clock).
+                            Constellation diagram shows two things at once - power in decibels and phase of the selected
+                            frequency bin. If point is far away from chart origin it means that signal is strong, if near
+                            origin it means that signal is weak. Position of point on the circle tells about phase. At
+                            the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 degrees since it's the
+                            same). Values goes clockwise so point on the far right side will have 90 degrees phase offset
+                            (3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
                         </p>
                         <p>
                             To test that please select frequency bin with peak power and try to manipulate phase
@@ -497,13 +507,15 @@
                     <div class="col col-xs-12">
                         <p>
                             This section explains how selected frequency bin (via 'Frequency bin index to explain' field) was
-                            computed. Only 30 iterations were presented because of performance reasons. To compute one frequency
-                            bin of course we need to loop thought <b>all iterations</b>!
+                            computed. Only <span class="FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE"></span> iterations were
+                            presented because of performance reasons. To compute one frequency bin of course we need to loop
+                            thought <b>all iterations</b>!
                         </p>
                         <p>
-                            Below you can pick which of those 30 iterations are presented. When window function is enabled
-                            then it makes much more sense to look for iteration somewhere in the middle of window. Edges
-                            are just almost zeroed so you will not find anything interesting there...
+                            Below you can pick which of those <span class="FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE"></span>
+                            iterations are presented. When window function is enabled then it makes much more sense to look
+                            for iteration somewhere in the middle of window. Edges are just almost zeroed so you will not find
+                            anything interesting there...
                         </p>
                     </div>
                 </div>

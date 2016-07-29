@@ -12,7 +12,8 @@ var
     Queue = AudioNetwork.Common.Queue,
     Util = AudioNetwork.Common.Util,
 
-    // default visualizers settings
+    // general settings
+    SAMPLE_RATE = 44100,
     SAMPLE_CHART_COMPACT_HEIGHT = 50,
     SAMPLE_CHART_COMPACT_RADIUS = 1,
     SAMPLE_CHART_COMPACT_BAR_WIDTH = 1,
@@ -30,7 +31,7 @@ var
     CONSTELLATION_DIAGRAM_POINT_HISTORY = 1,
     FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_WIDTH = 90,
     FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_HEIGHT = 90,
-    FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE = 30,
+    FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE = 32,
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
@@ -453,6 +454,12 @@ function getSamplePerPeriodFromIndex(index) {
     return frequencyBinSamplePerPeriodMax - step * index;
 }
 
+function getFrequencyFromIndex(index) {
+    var samplePerPeriod = getSamplePerPeriodFromIndex(index);
+
+    return SAMPLE_RATE / samplePerPeriod;
+}
+
 function parseIntFromForm(elementId) {
     return parseInt(document.getElementById(elementId).value);
 }
@@ -484,7 +491,7 @@ function dataBindingTemplateToCode() {
 }
 
 function dataBindingCodeToTemplate() {
-    var i, key, ssp, headerElement, contentElement, visible;
+    var i, key, ssp, elementList, headerElement, contentElement, visible;
 
     document.getElementById('form-sine-sample-size').value = sineSampleSize;
     for (i = 0; i < separateSineParameter.length; i++) {
@@ -503,13 +510,25 @@ function dataBindingCodeToTemplate() {
     document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
     document.getElementById('form-frequency-bin-to-explain-index').value = frequencyBinToExplainIndex;
     document.getElementById('frequency-bin-sample-per-period').innerHTML =
-        getSamplePerPeriodFromIndex(frequencyBinToExplainIndex);
+        (Math.round(getSamplePerPeriodFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
+    document.getElementById('frequency-bin-frequency').innerHTML =
+        (Math.round(getFrequencyFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
     document.getElementById('frequency-bin-power-decibel').innerHTML =
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).powerDecibel * 100) / 100).toString();
     document.getElementById('frequency-bin-phase').innerHTML =
-        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360)).toString();
+        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360) % 360).toString();
     document.getElementById('form-frequency-bin-to-explain-iteration-offset').value =
         frequencyBinToExplainIterationOffset;
+
+    elementList = document.querySelectorAll('.SAMPLE_RATE');
+    for (i = 0; i < elementList.length; i++) {
+        elementList[i].innerHTML = SAMPLE_RATE.toString();
+    }
+
+    elementList = document.querySelectorAll('.FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE');
+    for (i = 0; i < elementList.length; i++) {
+        elementList[i].innerHTML = FREQUENCY_BIN_TO_EXPLAIN_ITERATION_SIZE.toString();
+    }
 
     for (key in sectionVisibilityState) {
         if (!sectionVisibilityState.hasOwnProperty(key)) {

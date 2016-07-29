@@ -82,8 +82,8 @@ function initConfig() {
     
     SUB_CARRIER_SIZE = parseInt(document.getElementById('sub-carrier-size').value);
     PILOT_FREQUENCY = parseFloat(document.getElementById('pilot-frequency').value);    // Hz
-    POWER_CHART_WIDTH = 600;                                                           // px
-    POWER_CHART_HEIGHT = 10 * 20;                                                      // px
+    POWER_CHART_WIDTH = 1024;                                                           // px
+    POWER_CHART_HEIGHT = 5 * 20;                                                      // px
     THRESHOLD = -25;                                                                   // dB
     MINIMUM_POWER_DECIBEL = -99;                                                       // dB
 
