@@ -19,17 +19,21 @@ First modem was released in 1958 and it was transmitting data with the speed of 
 speed was increasing and in late 90s it ended up at 56 kbit/sek.
 
 Web Audio API allows us to generate and receive sound in JavaScript. We could use it to create application that 
-acts like a modem. Air in our room would be our noisy telephone line. Our goals is to send and receive binary data 
-even there is loud in the room (white noise, music playing, conversation between people). To deal with noise 
-we need to involve some Digital Signal Processing. In order to have full picture what is going on first we 
-need to learn a bit about Discrete Fourier Transform.
+acts like a modem. Air in our room would be our noisy telephone line. Our goal is to send and receive binary data 
+even there is loud in the room (white noise, music playing, conversation between people). What about the speed? Well, 
+it could be even 8 bit/s as long as we do it on our own from scratch. Speeds around 64 bit/s will allows to send 
+phone number or URL between two machines without using any communicator or email. We could create simple chat that 
+doesn't require any Internet connection.
+
+To create such application we need to involve Digital Signal Processing. It means that first thing that is 
+worth doing is to learn a bit about Discrete Fourier Transform.
 
 ### Introduction to DFT
 
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
 example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
-frequencies Fourier Transform will help us. To be more precise - when we need to deal with sampled signal, Discrete 
+frequencies Fourier Transform will help us. To be more precise - when we need to deal with digital signal, Discrete 
 Fourier Transform will help us. But what it actually does? It changes signal represented in `time domain` into 
 `frequency domain`. In other words it is decomposing signal that varies over time into the frequencies that make it. 
 That allows us for example to tune/pick only specific range of frequencies from full spectrum. 
@@ -38,9 +42,10 @@ In general it's all about frequencies. It doesn't matter if we talk about radio 
 or sound waves frequencies that human hear (20Hz - 20kHz). At both cases signal could be digitized by sampling it 
 over time. Principle is exactly the same.
 
-In case of sound waves output of Discrete Fourier Transform is often showed on music player window or on 
-radio LCD. Apart from nice looking bouncing bars we can also read from that output how loud each frequency range is.
-We can for example read without even listening to the song how fast is the bass beat.
+Nowadays sound is very rarely used to transmit data but there are still plenty of other DFT applications. Output of
+Discrete Fourier Transform is often showed on music player window or on radio LCD. Apart from nice looking bouncing 
+bars we can also read from that output how loud each frequency range is. We can for example read without even 
+listening to the song how fast is the bass beat.
 
     IMAGE 1: 1 seconds of song and few ranges that overlaps
 
@@ -64,8 +69,8 @@ simpler.
     IMAGE 2: show few sines with different sampling
     
 >Using samplePerPeriod instead frequency will affect horizontal axis of the frequency domain chart (you will see 
->that later). This conversion is not linear so our frequency bins will not be spaced by equal amount of Hertz. For
->needs of this article it's doesn't change much.
+>that later). This conversion is not linear so our frequency bins will not be spaced by equal amount of Hertz. 
+>They will be spaced by equal amount of samplePerPeriod instead. For needs of this article it's ok.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
@@ -110,7 +115,7 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 >so frequency is higher. That is the reason why we need to put highest samplePerPeriod value on the left and end
 >with lowest samplePerPeriod on the right.
 
-Again, if you are really curious about Hertz it will show frequencies between 882Hz and 4410Hz (assuming sampling 
+Again, if you are really curious about Hertz it will show frequencies between 882Hz and ~4302Hz (assuming sampling 
 rate 44100).
 
     IMAGE 7: clean frequency domain chart with labels and scale
@@ -196,7 +201,8 @@ full DFT output. Each bin also have a phase information. In this case Constellat
 >degrees since it's the same). Values goes clockwise so point on the far right side will have 90 degrees phase offset 
 >(3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
 
-If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock.
+If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. Yellow
+marker shows 'current' frequency bin that is showed on Constellation Diagram:
 
     IMAGE 12: constellation diagram + frequency domain chart without phase offset + sine wave 
 
@@ -403,6 +409,8 @@ logPhase(136); // 270 | it's because SINE C was created like this: sample += gen
 
 Magic works as expected. Phase was also restored properly. 
 
+Full source code you can find [here !!! TODO update url !!!!](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+
 ### Summary
 
 Algorithm described above is maybe not optimal but relatively simple comparing to for example FFT which uses some 
@@ -427,44 +435,10 @@ Phase of the wave can be used in data transmission that is more resistant to the
 article give us more flexibility, we are not depended to any other code and it's still simple enough to understand. 
 We can avoid black box which is doing magic and we have no idea how.
 
-If you are interested in this topic an you want to play with different DFT settings by yourself please visit this 
-example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website:
+If you are interested in this topic an you want to play with different DFT settings by yourself please visit DFT 
+example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website.
 
-[Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html) 
+[Discrete Fourier Transform - demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
+[Discrete Fourier Transform - source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-dft-carrier-recovery-simple)
 
 In second part of this article we will look closer into Web Audio API.
-
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-
-### TODO:
-
-- [done] CODE add setWidth to chart
-- [done] CODE add setMaxSize to queue
-- [done] CODE update order of frequency bin
-- [done] ARTICLE update order of bins and console.log output
-- [done] ARTICLE update order of sine waves
-- [done] CODE add form field, frequency bin index to explain under frequency domain chart
-- [done] CODE add overlay that shows picked range (frequency bin, window samples)
-- [done] CODE add constellation diagram under frequency domain chart and form field
-- [done] CODE add last section 'Frequency bin explanation' when we can pick range of samples from window
-- [done] CODE add duplicate of processed window chart
-- [done] CODE add overlay that shows picked range (on duplicate of processed window chart)
-- [done] CODE add info about picked frequency bin
-- [done] CODE add ability to add white noise
-- [done] CODE add ability to show/hide sections
-- [done] CODE add new chart that explains unit vector in a range
-- [done] ARTICLE add info about phase
-- [done] ARTICLE write missing examples
-- ARTICLE add images and finish everything
-- CODE add animation mode
