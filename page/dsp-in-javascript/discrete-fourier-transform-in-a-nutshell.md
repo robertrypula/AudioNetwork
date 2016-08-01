@@ -157,11 +157,11 @@ We need to iterate thought all 1024 samples. Unfortunately this number is too bi
 Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
 marker shows that range (iterations between 401 and 424):
 
-    IMAGE 8: part of the window  
+[![Part of the window for DFT details](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/08-part-of-the-window-for-dft-details.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/08-part-of-the-window-for-dft-details.png)
  
 Below zoomed version plus 24 iteration details: 
-   
-    IMAGE 9: zoom and vectors for samplePerPeriod 11 + explanation (arrow that show rotation and arrows that shows how vectors are affected by sample vaue)
+     
+[![DFT iteration details for samplePerPeriod 11](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-1.png)
 
 Dark dot is end of unit vector that starts at origin. Line was omitted to not collide with blue vector which is more 
 important. Blue vector is unit vector multiplied by sample value. At this frequency bin we are 
@@ -191,7 +191,7 @@ signal.
 After iterating thought all bins we can finally visualize frequency domain chart. As we can see our three sines are 
 clearly visible as peaks. 
 
-![frequency domain chart](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.png)
+[![Frequency domain chart](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.png)
 
 This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
@@ -206,11 +206,11 @@ full DFT output. Each bin also have a phase information. In this case Constellat
 If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. Yellow
 marker shows 'current' frequency bin that is showed on Constellation Diagram:
 
-    IMAGE 12: constellation diagram + frequency domain chart without phase offset + sine wave 
+[![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/12-constellation-diagram-sine-a-without-phase-offset.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/12-constellation-diagram-sine-a-without-phase-offset.png) 
 
 If we would add phase offset to our sine it will rotate our point on the constellation diagram 
 
-    IMAGE 13: constellation diagram + frequency domain chart witho some phase offset + sine wave 
+[![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/13-constellation-diagram-sine-a-with-phase-offset.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/13-constellation-diagram-sine-a-with-phase-offset.png) 
     
 As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated.
 
@@ -226,7 +226,7 @@ whiteNoiseAmplitude = 0.3;
 sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this could add/substract random number up to 0.3  
 ```
 
-    IMAGE 14: freq chart without noise and with noise, above time domain part
+[![Clean and noisy signal comparison](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/14-clean-and-noisy-signal-comparison.png)
      
 As we can see our time domain data is now very noisy. When we look at frequency domain we still see peaks but 
 difference between peaks and background noise decreased a lot. 
