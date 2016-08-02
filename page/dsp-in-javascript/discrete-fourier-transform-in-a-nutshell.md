@@ -74,7 +74,7 @@ Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod 
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
 and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
-![Sines that makes the signal](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.png)
+[![Sines that makes the signal](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.png)
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
