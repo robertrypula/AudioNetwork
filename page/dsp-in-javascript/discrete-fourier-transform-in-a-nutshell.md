@@ -177,7 +177,7 @@ Even by looking at two full periods it's visible that their directions are prett
 
 Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine waves? Let's pick value 16.
 
-[![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-16.png)
+[![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/10-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/10-dft-iteration-details-for-sample-per-period-16.png)
     
 Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
 longest blue vectors seems to be pointing in the same directions (12 o'clock). We can say that they 'picked' 
