@@ -69,16 +69,12 @@ additional parameter - sampling frequency. At the end we are working with arrays
 simpler.
 
     IMAGE 2: show few sines with different sampling
-    
->Using samplePerPeriod instead frequency will affect horizontal axis of the frequency domain chart (you will see 
->that later). This conversion is not linear so our frequency bins will not be spaced by equal amount of Hertz. 
->They will be spaced by equal amount of samplePerPeriod instead. For needs of this article it's ok.
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
 and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
-![sines alone and summed](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-alone-and-summed.png)
+![Sines that makes the signal](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.png)
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
@@ -87,20 +83,21 @@ it as a animation frame because it will show frequencies of the signal in this e
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
 window size to 1024 and pick this amount of samples from the signal buffer.
 
-    IMAGE 4: windowed raw samples
+[![Windowed samples from buffer](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/04-windowed-samples-from-buffer.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/04-windowed-samples-from-buffer.png)        
 
 In next step we need to apply window function to our raw samples. The goal is to 'flatten' all samples at left
 and right part of the window and keep the middle part in a 'gentle' way. That is important because we want to decompose
 our signal to sines waves that make it. The problems is that not all frequencies that we want to see in frequency
-domain chart fits in a window in a way that we will have integer multiply of wave period.
+domain chart fits in a window in a way that we will have integer multiply of wave period. In example below only
+first and last sine fits the window fully.
 
-    IMAGE 5: show how sine waves fits the window size
+[![How different sine waves fits the window](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/05-how-different-sine-waves-fits-the-window.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/05-how-different-sine-waves-fits-the-window.png)
 
-Without window function we would have 'frequency leakage' and main sines waves that makes the signal will not be
-visible well as a peaks in frequency domain chart. Image below shows how window function looks like and how
-our samples was changed after applying it.
+Without window function those 'not complete' sines would produce effect called 'frequency leakage'. In result major 
+sines waves that makes the signal will not be visible well as a peaks in frequency domain chart. Image below shows 
+how window function looks like (in the middle) and how our samples was changed after applying it.
 
-    IMAGE 6: window function and final samples
+[![Applying window function](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/06-applying-window-function.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/06-applying-window-function.png)
 
 In order to create frequency domain representation we need to create second chart. Each vertical bar on the chart is
 called frequency bin and tells how much of that frequency is inside our signal from the window. Let say we want to
@@ -120,7 +117,11 @@ as -10 decibels and 0.000001 will be showed as -60 decibels.
 Again, if you are really curious about Hertz it will show frequencies between 882Hz and ~4302Hz (assuming sampling 
 rate 44100).
 
-    IMAGE 7: clean frequency domain chart with labels and scale
+>Using samplePerPeriod instead frequency will affect horizontal axis of the frequency domain chart. This conversion 
+>is not linear so our frequency bins will not be spaced by equal amount of Hertz. They will be spaced by equal 
+>amount of samplePerPeriod instead. For needs of this article it's ok.
+
+[![Clean frequency domain chart with caption](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/07-clean-frequency-domain-chart-with-caption.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/07-clean-frequency-domain-chart-with-caption.png)
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
 algorithm per each bin which goes like this:
@@ -161,7 +162,7 @@ marker shows that range (iterations between 401 and 424):
  
 Below zoomed version plus 24 iteration details: 
      
-[![DFT iteration details for samplePerPeriod 11](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-1.png)
+[![DFT iteration details for samplePerPeriod 11](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.png)
 
 Dark dot is end of unit vector that starts at origin. Line was omitted to not collide with blue vector which is more 
 important. Blue vector is unit vector multiplied by sample value. At this frequency bin we are 
@@ -176,11 +177,11 @@ Even by looking at two full periods it's visible that their directions are prett
 
 Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine waves? Let's pick value 16.
 
-    IMAGE 10: zoom and vectors for samplePerPeriod 16
+[![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-16.png)
     
 Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
-longest blue vectors seems to be pointing in the same directions. We can say that they 'picked' something from our 
-signal.       
+longest blue vectors seems to be pointing in the same directions (12 o'clock). We can say that they 'picked' 
+something from our signal.       
 
 >When frequency that we are examining **is present** in the signal it will produce more and more vectors that points 
 >to the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
