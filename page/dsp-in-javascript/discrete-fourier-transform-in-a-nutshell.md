@@ -246,8 +246,8 @@ function computeDiscreteFourierTransform(
     step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodMax - i * step;
-        frequencyBinPowerDecibel = getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod);
-        frequencyDomain.push(frequencyBinPowerDecibel);
+        frequencyBin = getFrequencyBin(timeDomain, samplePerPeriod);
+        frequencyDomain.push(frequencyBin);
     }
 
     return frequencyDomain;
@@ -277,7 +277,7 @@ function findUnitAngle(x, y) {
     return angle / (2 * Math.PI);   // return angle in range: <0, 1)
 }
 
-function getFrequencyBinPowerDecibel(timeDomain, samplePerPeriod) {
+function getFrequencyBin(timeDomain, samplePerPeriod) {
     var windowSize, real, imm, i, sample, r, power, powerDecibel, phase;
 
     windowSize = timeDomain.length;            // timeDomain array length is our window size
@@ -325,7 +325,8 @@ formula at `blackmanNuttall` method was taken from Wikipedia article about
 Ok, let's add few sines together and try to compute DFT:
 
 ```javascript
-var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude;
+var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude,
+    frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize;
 
 timeDomain = [];
 windowSize = 1024;
@@ -340,10 +341,12 @@ for (i = 0; i < windowSize; i++) {
     sampleProcessed = sample * blackmanNuttall(i, windowSize);   // apply window function
     timeDomain.push(sampleProcessed);                            // push processed sample to array
 }
-frequencyDomain = computeDiscreteFourierTransform(timeDomain, 50, 10, 160);  // will give 160 frequency bins
-                                                                             // starting from samplePerPeriod 50
-                                                                             // ending at samplePerPeriod 10.25
-                                                                             // with samplePerPeriod step of 0.25
+frequencyBinSamplePerPeriodMax = 50;   // horizontal axis of frequency domain chart - samplePerPeriod on the left 
+frequencyBinSamplePerPeriodMin = 10;   // horizontal axis of frequency domain chart - samplePerPeriod on the right
+frequencyBinSize = 160;                // number of bins at frequency domain chart 
+frequencyDomain = computeDiscreteFourierTransform(
+    timeDomain, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
+);
 
 console.log(timeDomain.length);      // --> 1024
 console.log(frequencyDomain.length); // --> 160
@@ -364,7 +367,7 @@ samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index
 
 ```javascript
 function logPowerDecibel(index) {
-    var powerDecibelTwoDecimalPlaces = Math.round( frequencyDomain[index].powerDecibel * 100 ) / 100;
+    var powerDecibelTwoDecimalPlaces = Math.round(frequencyDomain[index].powerDecibel * 100) / 100;
 
     console.log(powerDecibelTwoDecimalPlaces);
 }
@@ -405,14 +408,24 @@ logPhase(136); // 0 | it's because SINE C was created like this: sample += gener
 All sines returned phase offset equal to zero. Let's check what we would get if we add some phase offset to our sines.
 
 ```javascript
-logPhase(88);  // 90 | it's because SINE A was created like this: sample += generateSineWave(28, 0.3, 90, i);
-logPhase(120); // 180 | it's because SINE B was created like this: sample += generateSineWave(20, 0.3, 180, i);
-logPhase(136); // 270 | it's because SINE C was created like this: sample += generateSineWave(16, 0.3, 270, i);
+// fill array with time domain samples
+for (i = 0; i < windowSize; i++) {
+    // ...
+    sample += generateSineWave(28, 0.3, 90, i); // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 90
+    sample += generateSineWave(20, 0.3, 180, i); // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 180
+    sample += generateSineWave(16, 0.3, 270, i); // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 270
+    // ...
+}
+// ...
+logPhase(88);  // 90 | sine A phase offset is now 90 degrees
+logPhase(120); // 180 | sine B phase offset is now 180 degrees
+logPhase(136); // 270 | sine C phase offset is now 270 degrees
 ```
 
-Magic works as expected. Phase was also restored properly. 
+Magic works as expected. Phase was also restored properly. Complete simple DFT implementation you can find here:
 
-Full source code you can find [here !!! TODO update url !!!!](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+- [Discrete Fourier Transform SIMPLE](https://audio-network.rypula.pl/example/00-040-discrete-fourier-transform-simple/00-040-discrete-fourier-transform-simple.html)
+- [Discrete Fourier Transform SIMPLE - source code](https://github.com/robertrypula/AudioNetwork/blob/master/example/00-040-discrete-fourier-transform-simple)
 
 ### Summary
 
@@ -432,16 +445,17 @@ speakers.
 
 Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
 that are just ready to use. The answer is **for fun**! :) It's like with car, you can enter it and just drive but 
-if you additionally know how it works it's even better. There is one alternative - AnalyserNode from Web Audio API.
+if you additionally know how it works it's even better. There is one alternative - 
+[AnalyserNode](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode) from Web Audio API.
 It uses FFT under the hood so it's fast. But there is one disadvantage - it doesn't return phase of frequency bin. 
 Phase of the wave can be used in data transmission that is more resistant to the noise. Method described in this 
 article give us more flexibility, we are not depended to any other code and it's still simple enough to understand. 
 We can avoid black box which is doing magic and we have no idea how.
 
-If you are interested in this topic an you want to play with different DFT settings by yourself please visit DFT 
-example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website.
+If you are interested in this topic an you want to play with different DFT settings by yourself please visit full 
+DFT example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website.
 
-[Discrete Fourier Transform - demo](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
-[Discrete Fourier Transform - source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-dft-carrier-recovery-simple)
+- [Discrete Fourier Transform FULL](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
+- [Discrete Fourier Transform FULL - source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-dft-carrier-recovery-simple)
 
 In second part of this article we will look closer into Web Audio API.
