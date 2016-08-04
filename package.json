@@ -36,10 +36,12 @@
     "PSK",
     "QPSK",
     "BPSK",
+    "DFT",
     "OFDM",
     "phase shift keying",
     "discrete fourier transform",
-    "orthogonal frequency division multiplexing"
+    "orthogonal frequency division multiplexing",
+    "modem"
   ],
   "author": "Robert Rypuła",
   "license": "MIT",

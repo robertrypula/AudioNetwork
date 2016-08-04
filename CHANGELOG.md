@@ -64,7 +64,7 @@ TODO list:
       - gain node
       - show audio processing event
       - connect all together
-    - discrete fourier transform in a nutshell -> \page\dsp-in-javascript\discrete-fourier-transform-in-a-nutshell.md
+    - discrete fourier transform in a nutshell -> PART 1 of article finished
     - carrier generate and receive
       - describe simple classes from AudioNetwork's lib
     - simple transmitter and receiver app

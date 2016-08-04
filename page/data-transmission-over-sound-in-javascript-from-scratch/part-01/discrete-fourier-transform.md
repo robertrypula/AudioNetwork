@@ -74,7 +74,7 @@ Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod 
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
 and 2756.25Hz respectively assuming 44100 sampling rate (frequencyInHertz = sampleRate / samplePerPeriod). 
 
-[![Sines that makes the signal](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/03-sines-that-makes-signal.png)
+[![Sines that makes the signal](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.png)
 
 By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
@@ -83,7 +83,7 @@ it as a animation frame because it will show frequencies of the signal in this e
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
 window size to 1024 and pick this amount of samples from the signal buffer.
 
-[![Windowed samples from buffer](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/04-windowed-samples-from-buffer.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/04-windowed-samples-from-buffer.png)        
+[![Windowed samples from buffer](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.png)        
 
 In next step we need to apply window function to our raw samples. The goal is to 'flatten' all samples at left
 and right part of the window and keep the middle part in a 'gentle' way. That is important because we want to decompose
@@ -91,13 +91,13 @@ our signal to sines waves that make it. The problems is that not all frequencies
 domain chart fits in a window in a way that we will have integer multiply of wave period. In example below only
 first and last sine fits the window fully.
 
-[![How different sine waves fits the window](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/05-how-different-sine-waves-fits-the-window.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/05-how-different-sine-waves-fits-the-window.png)
+[![How different sine waves fits the window](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window.png)
 
 Without window function those 'not complete' sines would produce effect called 'frequency leakage'. In result major 
 sines waves that makes the signal will not be visible well as a peaks in frequency domain chart. Image below shows 
 how window function looks like (in the middle) and how our samples was changed after applying it.
 
-[![Applying window function](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/06-applying-window-function.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/06-applying-window-function.png)
+[![Applying window function](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.png)
 
 In order to create frequency domain representation we need to create second chart. Each vertical bar on the chart is
 called frequency bin and tells how much of that frequency is inside our signal from the window. Let say we want to
@@ -121,7 +121,7 @@ rate 44100).
 >is not linear so our frequency bins will not be spaced by equal amount of Hertz. They will be spaced by equal 
 >amount of samplePerPeriod instead. For needs of this article it's ok.
 
-[![Clean frequency domain chart with caption](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/07-clean-frequency-domain-chart-with-caption.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/07-clean-frequency-domain-chart-with-caption.png)
+[![Clean frequency domain chart with caption](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/07-clean-frequency-domain-chart-with-caption.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/07-clean-frequency-domain-chart-with-caption.png)
 
 Ok, let start the most interesting part. How to actually compute Discrete Fourier Transform? We need to perform same
 algorithm per each bin which goes like this:
@@ -158,11 +158,11 @@ We need to iterate thought all 1024 samples. Unfortunately this number is too bi
 Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
 marker shows that range (iterations between 401 and 424):
 
-[![Part of the window for DFT details](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/08-part-of-the-window-for-dft-details.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/08-part-of-the-window-for-dft-details.png)
+[![Part of the window for DFT details](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/08-part-of-the-window-for-dft-details.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/08-part-of-the-window-for-dft-details.png)
  
 Below zoomed version plus 24 iteration details: 
      
-[![DFT iteration details for samplePerPeriod 11](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/09-dft-iteration-details-for-sample-per-period-11.png)
+[![DFT iteration details for samplePerPeriod 11](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/09-dft-iteration-details-for-sample-per-period-11.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/09-dft-iteration-details-for-sample-per-period-11.png)
 
 Dark dot is end of unit vector that starts at origin. Line was omitted to not collide with blue vector which is more 
 important. Blue vector is unit vector multiplied by sample value. At this frequency bin we are 
@@ -177,7 +177,7 @@ Even by looking at two full periods it's visible that their directions are prett
 
 Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine waves? Let's pick value 16.
 
-[![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/10-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/10-dft-iteration-details-for-sample-per-period-16.png)
+[![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/10-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/10-dft-iteration-details-for-sample-per-period-16.png)
     
 Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
 longest blue vectors seems to be pointing in the same directions (12 o'clock). We can say that they 'picked' 
@@ -192,7 +192,7 @@ something from our signal.
 After iterating thought all bins we can finally visualize frequency domain chart. As we can see our three sines are 
 clearly visible as peaks. 
 
-[![Frequency domain chart](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/11-frequency-domain-chart.png)
+[![Frequency domain chart](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/11-frequency-domain-chart.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/11-frequency-domain-chart.png)
 
 This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
@@ -207,11 +207,11 @@ full DFT output. Each bin also have a phase information. In this case Constellat
 If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. Yellow
 marker shows 'current' frequency bin that is showed on Constellation Diagram:
 
-[![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/12-constellation-diagram-sine-a-without-phase-offset.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/12-constellation-diagram-sine-a-without-phase-offset.png) 
+[![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.png) 
 
 If we would add phase offset to our sine it will rotate our point on the constellation diagram 
 
-[![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/13-constellation-diagram-sine-a-with-phase-offset.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/13-constellation-diagram-sine-a-with-phase-offset.png) 
+[![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.png) 
     
 As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated.
 
@@ -227,7 +227,7 @@ whiteNoiseAmplitude = 0.3;
 sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this could add/substract random number up to 0.3  
 ```
 
-[![Clean and noisy signal comparison](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/asset/image/page/dsp-in-javascript/14-clean-and-noisy-signal-comparison.png)
+[![Clean and noisy signal comparison](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.png)
      
 As we can see our time domain data is now very noisy. When we look at frequency domain we still see peaks but 
 difference between peaks and background noise decreased a lot. 
@@ -424,7 +424,7 @@ logPhase(136); // 270 | sine C phase offset is now 270 degrees
 
 Magic works as expected. Phase was also restored properly. Complete simple DFT implementation you can find here:
 
-- [Discrete Fourier Transform SIMPLE](https://audio-network.rypula.pl/example/00-040-discrete-fourier-transform-simple/00-040-discrete-fourier-transform-simple.html)
+- [Discrete Fourier Transform SIMPLE](https://audio-network.rypula.pl/example/00-040-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html)
 - [Discrete Fourier Transform SIMPLE - source code](https://github.com/robertrypula/AudioNetwork/blob/master/example/00-040-discrete-fourier-transform-simple)
 
 ### Summary
@@ -455,7 +455,7 @@ We can avoid black box which is doing magic and we have no idea how.
 If you are interested in this topic an you want to play with different DFT settings by yourself please visit full 
 DFT example hosted on [AudioNetwork](https://audio-network.rypula.pl) project website.
 
-- [Discrete Fourier Transform FULL](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
-- [Discrete Fourier Transform FULL - source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-dft-carrier-recovery-simple)
+- [Discrete Fourier Transform FULL](https://audio-network.rypula.pl/example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html)
+- [Discrete Fourier Transform FULL - source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-041-discrete-fourier-transform-full)
 
 In second part of this article we will look closer into Web Audio API.

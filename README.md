@@ -4,11 +4,11 @@ Audio Network
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
-[Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
-
 [Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
 
-[Carrier generate and recovery tests](https://audio-network.rypula.pl/example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html)
+[Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
+
+[Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html)
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
 features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit

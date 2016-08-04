@@ -4,14 +4,14 @@
 - 00-012-sample-chart-and-queue
 - 00-013-script-processor-node-with-sample-chart
 - 00-020-carrier-generate-with-sample-chart
-- 00-021-carrier-generate-with-sample-chart-animated          \example\00-00-carrier-generate-with-sample-chart-animated\carrier-generate-and-recovery.html
+- 00-021-carrier-generate-with-sample-chart-animated          ready
 - 00-022-carrier-generate-adding-couple-of-sines
 - 00-030-power-chart
 - 00-031-constellation-diagram
 - 00-032-complex-plane
-- 00-040-dft-carrier-recovery-simple                          \example\03-physical-layer-carrier\physical-layer-carrier.html
-- 00-041-dft-carrier-recovery-full
+- 00-040-discrete-fourier-transform-simple                    ready
+- 00-041-discrete-fourier-transform-full                      ready
 - 00-050-amplitude-modulation-transmission-simple
-- 00-051-amplitude-modulation-transmission-full               \example\00-01-amplitude-modulation-full\amplitude-modulation-full.html
-- 01-000-physical-layer-simple                                \example\02-physical-layer-simple\physical-layer-simple.html
-- 01-001-physical-layer-full                                  \example\01-physical-layer\physical-layer.html
+- 00-051-amplitude-modulation-transmission-full               ready
+- 01-000-physical-layer-simple                                ready
+- 01-001-physical-layer-full                                  ready
