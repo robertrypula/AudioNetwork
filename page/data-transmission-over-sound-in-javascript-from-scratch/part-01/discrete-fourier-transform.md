@@ -68,7 +68,7 @@ use samplePerPeriod value. This will allow us to drop frequency in our examples 
 additional parameter - sampling frequency. At the end we are working with arrays of samples so that would make it
 simpler.
 
-    IMAGE 2: show few sines with different sampling
+![Two ways to express sine wave](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/02-two-ways-to-express-sine-wave.min.png)
 
 Let say we have signal that is made of 3 sine waves. Sine A has samplePerPeriod equal 28, Sine B has samplePerPeriod
 equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how much Hertz is that it's 1575Hz, 2205Hz 
