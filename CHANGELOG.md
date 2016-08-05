@@ -54,26 +54,10 @@ TODO list:
     - [~1.5h] mark states ranges
     - [~1.0h] show important power level (threshold, min/max, etc)
 
-  - How it works section (this will be used in the article 'Data transmission over sound waves in JavaScript / Digital Signal Processing in JavaScript from scratch')
-    - introduction
-      - sound representation in computer memory
-      - all from scratch to really understand internals of DSP
-      - how to pick proper frequency?
-    - how to record/play raw samples using Web Audio API
-      - context initialization, abstraction service from AudioNetwork library (all filters disabled)
-      - gain node
-      - show audio processing event
-      - connect all together
-    - discrete fourier transform in a nutshell -> PART 1 of article finished
-    - carrier generate and receive
-      - describe simple classes from AudioNetwork's lib
-    - simple transmitter and receiver app
-      - show symbol details, zero is only pilot, one is pilot and symbol, guard internal between adjacent bits
-      - OFDM to avoid interference between carriers [just show the rule]
-      - 2 carriers (1 pilot, 1 symbol)
-      - list all files that were used
-    - summary
-      - put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)
+  - Article 'Data transmission over sound in JavaScript from scratch'
+    - PART 1 - discrete fourier transform
+    - PART 2 - Web Audio API
+    - PART 3 - data transmitter and receiver application
 
 ## v1.0.4 (2016-07-04)
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)

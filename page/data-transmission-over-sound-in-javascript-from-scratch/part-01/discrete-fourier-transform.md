@@ -40,9 +40,9 @@ Fourier Transform will help us. But what it actually does? It changes signal rep
 `frequency domain`. In other words it is decomposing signal that varies over time into the frequencies that make it. 
 That allows us for example to tune/pick only specific range of frequencies from full spectrum. 
 
-In general it's all about frequencies. It doesn't matter if we talk about radio frequencies (around 3 kHz to 300 GHz) 
-or sound waves frequencies that human hear (20Hz - 20kHz). At both cases signal could be digitized by sampling it 
-over time. Principle is exactly the same.
+Wait a minute... we supposed to talk about sound! You're right but in general it's all about frequencies. It doesn't 
+matter if we talk about radio frequencies (around 3 kHz to 300 GHz) or sound waves frequencies that human hear 
+(20Hz - 20kHz). At both cases signal could be digitized by sampling it over time. Principle is exactly the same.
 
 Nowadays sound is very rarely used to transmit data but there are still plenty of other DFT applications. Output of
 Discrete Fourier Transform is often showed on music player window or on radio LCD. Apart from nice looking bouncing 
@@ -56,7 +56,7 @@ listening to the song how fast is the bass beat.
 Currently the fastest algorithm for doing that is FFT - Fast Fourier Transform. If you are chatting on your smartphone,
 using WiFi or watching TV from Terrestrial DVB transmitter FFT algorithm is running all the time. It's very fast but
 unfortunately not that simple. Goal behind this article is to create relatively simple signal processing in
-JavaScript from scratch. That's why we will focus on much simpler algorithm that in general will give same result.
+JavaScript **from scratch**. That's why we will focus on much simpler algorithm that in general will give same result.
 There is only one disadvantage - this method is ultra slow. In JavaScript it's possible to compute only couple of
 frequency bins (vertical 'bars' on frequency domain chart) in the real time without overloading the CPU. In 
 comparison FFT will give us thousands of them.
@@ -80,8 +80,9 @@ By looking at output signal it's really hard to say what are the frequencies tha
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
 proper amount of samples that we will use for later computations. This step is called **windowing**. You can also treat 
 it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
-all samples from the buffer at once. We need to split it into pieces and transform one by one. Ok, lets set our 
-window size to 1024 and pick this amount of samples from the signal buffer.
+all samples from the buffer at once. We need to split it into pieces and transform one by one. Often adjacent windows 
+overlaps to not lose any part of the signal. Ok, lets set our window size to 1024 and pick this amount of samples 
+from the signal buffer.
 
 [![Windowed samples from buffer](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.png)        
 
@@ -98,6 +99,8 @@ sines waves that makes the signal will not be visible well as a peaks in frequen
 how window function looks like (in the middle) and how our samples was changed after applying it.
 
 [![Applying window function](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.png)
+
+Now all sines starts and ends in a gentle way.
 
 In order to create frequency domain representation we need to create second chart. Each vertical bar on the chart is
 called frequency bin and tells how much of that frequency is inside our signal from the window. Let say we want to
@@ -152,11 +155,11 @@ window sizes this number goes up very fast. That's why this basic algorithm is u
 
 Example is always better that a thousands words. Our sines have samplePerPeriods 28, 20 and 16. Let's take some 
 'random' samplePerPeriod for example equal 18. This frequency **should not** be present in our signal window 
-so our expectation is that we should get small decibel value.
+so our expectation is that we should get low decibel value.
 
 We need to iterate thought all 1024 samples. Unfortunately this number is too big to show everything in details.
-Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Yellow 
-marker shows that range (iterations between 401 and 424):
+Let's show only 24 iterations from the middle of the window because there samples have highest amplitudes. Of course
+under the hood we will compute all 1024 samples. Yellow marker shows that range (iterations between 401 and 424):
 
 [![Part of the window for DFT details](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/08-part-of-the-window-for-dft-details.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/08-part-of-the-window-for-dft-details.png)
  
@@ -179,9 +182,9 @@ Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine w
 
 [![DFT iteration details for samplePerPeriod 16](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/10-dft-iteration-details-for-sample-per-period-16.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/10-dft-iteration-details-for-sample-per-period-16.png)
     
-Now our unit vector (dark dot) is making full circle in 16 iterations. Lets look again at two full periods. Now 
-longest blue vectors seems to be pointing in the same directions (12 o'clock). We can say that they 'picked' 
-something from our signal.       
+Now our unit vector (dark dot) is making full circle in 16 iterations. Inside our window we would have 64 full 
+rotations (1024/16). Lets look again at two full periods. Now longest blue vectors seems to be pointing in the 
+same directions (up or as you wish 12 o'clock). We can say that they 'picked' something from our signal.       
 
 >When frequency that we are examining **is present** in the signal it will produce more and more vectors that points 
 >to the same direction. It's like with swing on the playground. Small force with proper frequency will increase the 
@@ -198,14 +201,15 @@ This chart in most cases is enough. As we saw before in examples it shows length
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
 full DFT output. Each bin also have a phase information. In this case Constellation Diagram is something that we need.   
 
->Constellation diagram shows two things at once - power in decibels and phase of the selected frequency bin. If point 
->is far away from chart origin it means that signal is strong, if near origin it means that signal is weak. Position 
->of point on the circle tells about phase. At the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 
->degrees since it's the same). Values goes clockwise so point on the far right side will have 90 degrees phase offset 
->(3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
+>Constellation diagram shows two things at once - power in decibels and phase but only for **selected frequency bin**.
+>If point is far away from chart origin it means that signal is strong, if near origin it means that signal is weak. 
+>Position of point on the circle tells about phase. At the top (12 o'clock) we have phase offset equal to 0 degrees 
+>(or 360 degrees since it's the same). Values goes clockwise so point on the far right side will have 90 degrees 
+>phase offset (3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
 
-If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. Yellow
-marker shows 'current' frequency bin that is showed on Constellation Diagram:
+If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. What's 
+that points? ~~It's the end of normalized vector that was produced by summing all vectors from all 
+iterations~~. Yellow marker shows 'current' frequency bin that is showed on Constellation Diagram:
 
 [![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.png) 
 
@@ -213,7 +217,8 @@ If we would add phase offset to our sine it will rotate our point on the constel
 
 [![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.png) 
     
-As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated.
+As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated
+because in this case majority of vectors pointed to little different direction.
 
 ### Make some noise!
 
@@ -224,7 +229,7 @@ some random values to each sample before applying DFT:
 ```javascript
 whiteNoiseAmplitude = 0.3;
 // ...
-sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this could add/substract random number up to 0.3  
+sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this will add/substract random number up to 0.3  
 ```
 
 [![Clean and noisy signal comparison](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.png)

@@ -68,6 +68,7 @@
 </li>
 <li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
 <li>do not redraw constellation if queue wasn&#39;t changed</li>
+<li>clean constellation diagram constructor parameters order </li>
 <li>ability to add hooks at sample generation and receive (inject some changes to signal)</li>
 <li><p>fix carrier.html example (use dedicated constellation class)</p>
 </li>
@@ -98,41 +99,15 @@
 <li>[~1.0h] show important power level (threshold, min/max, etc)</li>
 </ul>
 </li>
-<li><p>How it works section (this will be used in the article &#39;Data transmission over sound waves in JavaScript / Digital Signal Processing in JavaScript from scratch&#39;)</p>
+<li><p>Article &#39;Data transmission over sound in JavaScript from scratch&#39;</p>
 <ul>
-<li>introduction<ul>
-<li>sound representation in computer memory</li>
-<li>all from scratch to really understand internals of DSP</li>
-<li>how to pick proper frequency?</li>
-</ul>
-</li>
-<li>how to record/play raw samples using Web Audio API<ul>
-<li>context initialization, abstraction service from AudioNetwork library (all filters disabled)</li>
-<li>gain node</li>
-<li>show audio processing event</li>
-<li>connect all together</li>
-</ul>
-</li>
-<li>discrete fourier transform in a nutshell -&gt; PART 1 of article finished</li>
-<li>carrier generate and receive<ul>
-<li>describe simple classes from AudioNetwork&#39;s lib</li>
-</ul>
-</li>
-<li>simple transmitter and receiver app<ul>
-<li>show symbol details, zero is only pilot, one is pilot and symbol, guard internal between adjacent bits</li>
-<li>OFDM to avoid interference between carriers [just show the rule]</li>
-<li>2 carriers (1 pilot, 1 symbol)</li>
-<li>list all files that were used</li>
-</ul>
-</li>
-<li>summary<ul>
-<li>put a link to AudioNetwork lib (it uses little different packet structure based on carrier phase - PSK modulation)</li>
+<li>PART 1 - discrete fourier transform</li>
+<li>PART 2 - Web Audio API</li>
+<li>PART 3 - data transmitter and receiver application</li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-<h2 id="v1-0-4-2016-0-">v1.0.4 (2016-07-04)</h2>
+<h2 id="v1-0-4-2016-07-04-">v1.0.4 (2016-07-04)</h2>
 <ul>
 <li>new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)</li>
 <li>expand class names - this allows easier debug in dev tools (for example CTM is now ChannelTransmitManager)</li>
