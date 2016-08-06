@@ -49,7 +49,7 @@ Discrete Fourier Transform is often showed on music player window or on radio LC
 bars we can also read from that output how loud each frequency range is. We can for example read without even 
 listening to the song how fast is the bass beat.
 
-[![Song and equalizer bars](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.png)
+[![Song and equalizer bars](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.png)  
 *Figure 1 - Song and equalizer bars*
 
 ### DFT in fast and slow way
