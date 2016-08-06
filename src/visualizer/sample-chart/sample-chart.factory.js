@@ -18,7 +18,7 @@
     ) {
         var SampleChart;
 
-        SampleChart = function (parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+        SampleChart = function (parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar) {
             AbstractVisualizer.call(this, parentElement, width, height);
 
             this.$$queue = queue;
@@ -26,7 +26,10 @@
             this.$$barWidth = Util.valueOrDefault(barWidth, 1);
             this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
-            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
+            this.$$colorSample = Util.valueOrDefault(colorSample, 'rgba(115, 139, 215, 1.0');
+            this.$$colorBar = Util.valueOrDefault(colorBar, 'rgba(115, 139, 215, 0.9)');
+
+            this.$$sampleBackgroundActive = false;
 
             this.$$checkWidth();
 
@@ -59,6 +62,17 @@
             return true;
         };
 
+        SampleChart.prototype.enableSampleBackground = function () {
+            if (this.$$sampleBackgroundActive) {
+                return false;
+            }
+
+            this.$$sampleBackgroundActive = true;
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
         SampleChart.prototype.$$checkWidth = function () {
             if (this.$$queue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
                 throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
@@ -80,6 +94,7 @@
                 q = this.$$queue,
                 w = this.$$width,
                 h = this.$$height,
+                hHalf = this.$$height * 0.5,
                 sample, i, x, y, barMiddle
             ;
 
@@ -88,15 +103,15 @@
             }
 
             ctx.clearRect(0, 0, w, h);
-            
+
+            // draw horizontal axis
             ctx.strokeStyle = this.$$colorAxis;
             ctx.beginPath();
-            ctx.moveTo(0, 0.5 * h);
-            ctx.lineTo(w, 0.5 * h);
+            ctx.moveTo(0, hHalf);
+            ctx.lineTo(w, hHalf);
             ctx.closePath();
             ctx.stroke();
 
-            ctx.fillStyle = this.$$colorSample;
             barMiddle = 0.5 * (this.$$barWidth - 1);
             for (i = 0; i < q.getSize(); i++) {
                 sample = q.getItem(i);
@@ -104,21 +119,52 @@
                 x = i * (this.$$barWidth + this.$$barSpacingWidth);
                 y = (0.5 - 0.5 * sample) * h;
 
-                if (this.$$barSpacingWidth >= 1) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, h);
-                    ctx.closePath();
-                    ctx.stroke();
+                if (this.$$barSpacingWidth > 0) {
+                    // draw bar spacing
+                    if (this.$$barSpacingWidth === 1) {
+                        ctx.strokeStyle = this.$$colorAxis;
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, h);
+                        ctx.closePath();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = this.$$colorAxis;
+                        ctx.fillRect(
+                            x, 0,
+                            this.$$barSpacingWidth, h
+                        );
+                    }
                 }
 
+                if (this.$$sampleBackgroundActive) {
+                    // draw sample-origin background
+                    if (this.$$barWidth === 1) {
+                        ctx.strokeStyle = this.$$colorBar;
+                        ctx.beginPath();
+                        ctx.moveTo(x + this.$$barSpacingWidth, hHalf);
+                        ctx.lineTo(x + this.$$barSpacingWidth, y);
+                        ctx.closePath();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = this.$$colorBar;
+                        ctx.fillRect(
+                            x + this.$$barSpacingWidth,
+                            hHalf < y ? hHalf : y,
+                            this.$$barWidth,
+                            hHalf < y ? (y - hHalf) : (hHalf - y)
+                        );
+                    }
+                }
+
+                // draw sample circle
+                ctx.fillStyle = this.$$colorSample;
                 ctx.beginPath();
                 ctx.arc(
                     x + this.$$barSpacingWidth + barMiddle, y,
                     this.$$radius, 0, 2 * Math.PI, false
                 );
                 ctx.fill();
-                // ctx.fillRect(x - 1, y - 1, 3, 3);
             }
 
             this.$$hashOnCanvas = q.getHash();

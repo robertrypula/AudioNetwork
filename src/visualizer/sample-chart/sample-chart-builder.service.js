@@ -13,8 +13,8 @@
         SampleChart
     ) {
 
-        function build(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
-            return new SampleChart(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample);
+        function build(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar) {
+            return new SampleChart(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar);
         }
 
         return {
