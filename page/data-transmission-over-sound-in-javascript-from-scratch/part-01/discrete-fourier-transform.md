@@ -431,9 +431,9 @@ All sines returned phase offset equal to zero. Let's check what we would get if 
 // fill array with time domain samples
 for (i = 0; i < windowSize; i++) {
     // ...
-    sample += generateSineWave(28, 0.3, 90, i); // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 90
-    sample += generateSineWave(20, 0.3, 180, i); // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 180
-    sample += generateSineWave(16, 0.3, 270, i); // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 270
+    sample += generateSineWave(28, 0.3, 90, i); // sine A: samplePerPeriod 28, degreesPhaseOffset 90
+    sample += generateSineWave(20, 0.3, 180, i); // sine B: samplePerPeriod 20, degreesPhaseOffset 180
+    sample += generateSineWave(16, 0.3, 270, i); // sine C: samplePerPeriod 16, degreesPhaseOffset 270
     // ...
 }
 // ...
