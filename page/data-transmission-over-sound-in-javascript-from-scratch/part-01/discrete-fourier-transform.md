@@ -224,12 +224,12 @@ Constellation Diagram is something that we need.
 If our sine doesn't have any phase offset our point on constellation diagram will be located at 12 o'clock. Yellow 
 marker shows 'current' frequency bin that is showed on Constellation Diagram (Figure 12).
 
-[![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset.png)   
+[![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset-v2.png)   
 *Figure 12 - Constellation Diagram - Sine A without phase offset*
 
 If we would add phase offset to our sine it will rotate our point on the constellation diagram (Figure 13). 
 
-[![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset.png)   
+[![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset-v2.png)   
 *Figure 13 - Constellation Diagram - Sine A with phase offset*
     
 As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated
