@@ -49,7 +49,7 @@ Discrete Fourier Transform is often showed on music player window or on radio LC
 bars we can also read from that output how loud each frequency range is. We can for example read without even 
 listening to the song how fast is the bass beat (Figure 1).
 
-[![Song and equalizer bars](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars.png)  
+[![Song and equalizer bars](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/01-song-and-equalizer-bars-v2.png)  
 *Figure 1 - Song and equalizer bars*
 
 ### DFT in fast and slow way
@@ -97,7 +97,7 @@ our signal to sines waves that make it. The problems is that not all frequencies
 domain chart fits in a window in a way that we will have integer multiply of wave period. In the Figure 5 only last 
 sine fits the window fully.
 
-[![How different sine waves fits the window](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window.png)  
+[![How different sine waves fits the window](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.png)  
 *Figure 5 - How different sine waves fits the window*
 
 Without window function those 'not complete' sines would produce effect called 'frequency leakage'. In result major 
@@ -212,7 +212,8 @@ our three sines are clearly visible as peaks.
 
 This chart in most cases is enough. As we saw before in examples it shows length of the 2d vectors computed at each 
 bin (or as you wish absolute value of the complex number) but we need to remember that this is 'flattened' version of
-full DFT output. Each bin also have a phase information. In this case Constellation Diagram is something that we need.   
+full DFT output. Each bin also have a phase information that came from sum of all related vectors. In this case 
+Constellation Diagram is something that we need.   
 
 >Constellation diagram shows two things at once - power in decibels and phase but only for **selected frequency bin**.
 >If point is far away from chart origin it means that signal is strong, if near origin it means that signal is weak. 
@@ -409,7 +410,7 @@ logPowerDecibel(136); // -12.64 | index: (50-16.00)/0.25 = 136 | samplePerPeriod
 logPowerDecibel(137); // -14.41 | index: (50-15.75)/0.25 = 137 | samplePerPeriod: 50-0.25*137 = 15.75
 ```
 
-As we can see strongest bins are exactly where they should be. In area between sine waves power is very weak 
+As we can see strongest bins are exactly where they should be. In contrast area between sine waves power is very weak 
 (around -60 decibels). Let's check second parameter - phase:
  
 ```javascript
