@@ -264,6 +264,7 @@ function discreteFourierTransformUpdate() {
     var binStep, i, samplePerPeriod, frequencyBin, chartWidth;
 
     frequencyDomainQueue.setSizeMax(frequencyBinSize);
+    frequencyBinQueue.setSizeMax(frequencyBinSize);
     binStep = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;

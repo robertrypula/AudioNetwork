@@ -64,8 +64,8 @@ comparison FFT will give us thousands of them.
 
 ### Basic DFT algorithm
 
-Before we start lets change the way we express frequency of a sine wave. Instead of using frequency value we can
-use samplePerPeriod value. This will allow us to drop frequency in our examples because it's always related to
+Before we start lets change the way we express frequency of a sine wave. Instead of using `frequency` value we can
+use `samplePerPeriod` value. This will allow us to drop frequency in our examples because it's always related to
 additional parameter - sampling frequency. At the end we are working with arrays of samples so that would make it
 simpler (Figure 2).
 
@@ -80,7 +80,7 @@ sampling rate (Figure 3).
 [![Sines that makes the signal](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.png)  
 *Figure 3 - Sines that makes the signal*
 
-By looking at output signal it's really hard to say what are the frequencies that made that signal. It's even hard
+By looking at resulting signal it's really hard to say what are the frequencies that made it. It's even hard
 to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
 proper amount of samples that we will use for later computations. This step is called **windowing**. You can also treat 
 it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
@@ -95,7 +95,7 @@ In next step we need to apply window function to our raw samples. The goal is to
 and right part of the window and keep the middle part in a 'gentle' way. That is important because we want to decompose
 our signal to sines waves that make it. The problems is that not all frequencies that we want to see in frequency
 domain chart fits in a window in a way that we will have integer multiply of wave period. In the Figure 5 only last 
-sine fits the window fully.
+sine fits perfectly.
 
 [![How different sine waves fits the window](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.png)  
 *Figure 5 - How different sine waves fits the window*
@@ -114,13 +114,14 @@ the chart is called frequency bin and tells how much of that frequency is inside
 we want to check frequencies in a range between 10 and 50 samplePerPeriod. To have nice resolution lets compute 160 
 frequency bins. This means that frequency bins will be separated by 0.25 samplePerPeriod (50-10/160=0.25). 
 Output of Discrete Fourier Transform gives values that varies a lot. Some bins could have value 0.1 since other
-could have 0.000001. In order to see all variety of values vertical axis is showed in decibels. 0.1 will be showed
-as -10 decibels and 0.000001 will be showed as -60 decibels.
+could have 0.000001. In order to see all variety of values vertical axis is showed in 
+[decibels](https://en.wikipedia.org/wiki/Decibel). 0.1 will be showed as -10 decibels and 0.000001 will be showed 
+as -60 decibels.
 
 >Decibel goes down to negative value. -60 decibels means much weaker signal than for example -5 decibels.
 
 >All frequency charts have higher frequencies on the right side and lower frequencies on the left side. In our case
->lower samplePerPeriod means value higher frequency because sine have less samples in a period - it's more packed 
+>lower samplePerPeriod value means higher frequency because sine have less samples in a period - it's more packed 
 >so frequency is higher. That is the reason why we need to put highest samplePerPeriod value on the left and end
 >with lowest samplePerPeriod on the right.
 
@@ -144,7 +145,7 @@ algorithm per each bin which goes like this:
 >At each iteration we need to multiply our unit vector by value of the sample. Since samples are between 0 and 1 
 >this operation can shorten our vector. In case of negative values it could also change it's direction by 180 degrees.
 >To get power value we need to add all of those multiplied vectors together and divide by number of samples 
->in a window. Length of final vector is power of wave related to that frequency bin. Additionally we can convert 
+>in a window. Length of final vector is power of wave related to that frequency bin. At the end we need to convert 
 >that length into decibels.
 
 Our 2d vectors are actually complex numbers represented on complex plane. X axis is real part and Y axis is imaginary
@@ -227,18 +228,18 @@ marker shows 'current' frequency bin that is showed on Constellation Diagram (Fi
 [![Constellation Diagram - Sine A without phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/12-constellation-diagram-sine-a-without-phase-offset-v2.png)   
 *Figure 12 - Constellation Diagram - Sine A without phase offset*
 
-If we would add phase offset to our sine it will rotate our point on the constellation diagram (Figure 13). 
+If we would add phase offset to our sine A it will rotate our point on the constellation diagram (Figure 13). 
 
 [![Constellation Diagram - Sine A with phase offset](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/13-constellation-diagram-sine-a-with-phase-offset-v2.png)   
 *Figure 13 - Constellation Diagram - Sine A with phase offset*
     
-As you can see power doesn't change much when we changed phase. Only point on the constellation diagram was rotated
-because in this case majority of vectors pointed to little different direction.
+As you can see power doesn't change much when we changed phase. Only point on the constellation diagram related to 
+sine A was rotated because in this case majority of vectors pointed to little different direction.
 
 ### Make some noise!
 
-In real world our input signal will not be that perfect. It will be for sure noisy because of echos, interferences
-or white noise. Let's check how white noise will affect our frequency domain chart (Figure 14). To emulate it we can 
+In real world our input signal will not be that perfect. It could be noisy because of echos, other people 
+talking etc. Let's check simplest type of noise called 'white noise' (Figure 14). To emulate it we need to 
 just add some random values to each sample before applying DFT:
 
 ```javascript
@@ -250,8 +251,8 @@ sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this will add/sub
 [![Clean and noisy signal comparison](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.png)  
 *Figure 14 - Clean and noisy signal comparison*     
      
-As we can see our time domain data is now very noisy. When we look at frequency domain we still see peaks but 
-difference between peaks and background noise decreased a lot. 
+As we can see our time domain data is now quite noisy. When we look at frequency domain we still see peaks but 
+difference between peaks and background noise decreased a lot.
 
 ### JavaScript implementation
 
@@ -377,8 +378,8 @@ In example above **windowing** step was skip - we directly created final signal 
 Normally we would copy samples from some input buffer.
 
 Lets look what are the power values that we have near our three sines. We expect to see 3 power peaks near 
-28, 20 and 16 samplePerPeriod. First we need to know how to convert samplePerPeriod into array index. Below
-required formulas:
+28, 20 and 16 samplePerPeriod. In order to convert array index into samplePerPeriod value and vice versa we need to 
+use those formulas:
 
 ```
 step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize
@@ -464,7 +465,7 @@ machine. Samples are coming in chunks (1024, 2048, ...) in fixed time intervals 
 thing happens when we need to play sound. We need to fill array that came in the event and it will be played by the 
 speakers.  
 
-Other question may come - why we need to write everything from scratch? There should be plenty of DSP libraries 
+Other question may come - why do we need to write everything from scratch? There should be plenty of DSP libraries 
 that are just ready to use. The answer is **for fun**! :) It's like with car, you can enter it and just drive but 
 if you additionally know how it works it's even better. There is one alternative - 
 [AnalyserNode](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode) from Web Audio API.
