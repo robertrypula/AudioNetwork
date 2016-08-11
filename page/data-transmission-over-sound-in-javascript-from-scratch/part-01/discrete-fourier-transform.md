@@ -16,7 +16,7 @@ But there is not rose without a thorn. Infrastructure at those times was designe
 As Wikipedia says: 'In telephony, the usable voice frequency band ranges from approximately 300 Hz to 3400 Hz'.
 It means that modems needed to work with very limited bandwidth (~3kHz) over quite noisy analog channel. 
 First modem was released in 1958 and it was transmitting data with the speed of 100 bit/s. Over the years
-speed was increasing and in late 90s it ended up at 56 kbit/sek.
+speed was increasing and in late 90s it ended up at 56 kbit/s.
 
 Web Audio API allows us to generate and receive sound in JavaScript. We could use it to create application that 
 acts like a modem. Air in our room would be our noisy telephone line. Important difference is that 
@@ -33,7 +33,7 @@ worth doing is to learn a bit about Discrete Fourier Transform.
 ### Introduction to DFT
 
 Have you ever wondered how all of modern wireless digital devices could work on the same time without interfering? For
-example we could use WiFi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
+example we could use Wi-Fi network (2.4GHz), LTE mobile phone (2100 MHz) and watch DVB-T TV (~500MHz) in parallel.
 One of the answer is that they use different frequencies of electromagnetic waves. When we need to deal with
 frequencies Fourier Transform will help us. To be more precise - when we need to deal with digital signal, Discrete 
 Fourier Transform will help us. But what it actually does? It changes signal represented in `time domain` into 
@@ -55,7 +55,7 @@ listening to the song how fast is the bass beat (Figure 1).
 ### DFT in fast and slow way
 
 Currently the fastest algorithm is called FFT - Fast Fourier Transform. If you are chatting on your smartphone,
-using WiFi or watching TV from Terrestrial DVB transmitter FFT algorithm is running all the time. It's very fast but
+using Wi-Fi or watching TV from Terrestrial DVB transmitter FFT algorithm is running all the time. It's very fast but
 unfortunately not that simple. Goal behind this article is to create relatively simple signal processing in
 JavaScript **from scratch**. That's why we will focus on much simpler algorithm that in general will give same result.
 There is only one disadvantage - this method is ultra slow. In JavaScript it's possible to compute only couple of
@@ -77,15 +77,15 @@ equal 20, Sine C has samplePerPeriod equal 16. If you are really curious how muc
 `frequencyInHertz = sampleRate / samplePerPeriod`. It's 1575Hz, 2205Hz and 2756.25Hz respectively assuming 44100 
 sampling rate (Figure 3). 
 
-[![Sines that makes the signal](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sines-that-makes-signal.png)  
-*Figure 3 - Sines that makes the signal*
+[![Sins that makes the signal](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sins-that-makes-signal.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/03-sins-that-makes-signal.png)  
+*Figure 3 - Sins that makes the signal*
 
 By looking at resulting signal it's really hard to say what are the frequencies that made it. It's even hard
-to say how many sines are summed together. So how we can extract those frequencies? In first step we need to collect 
+to say how many sins are summed together. So how we can extract those frequencies? In first step we need to collect 
 proper amount of samples that we will use for later computations. This step is called **windowing**. You can also treat 
 it as a animation frame because it will show frequencies of the signal in this exact moment. We cannot compute DFT on 
 all samples from the buffer at once. We need to split it into pieces and transform one by one. Often adjacent windows 
-overlaps to not lose any part of the signal. Ok, lets set our window size to 1024 and pick this amount of samples 
+overlaps to not lose any part of the signal. Ok, let's set our window size to 1024 and pick this amount of samples 
 from the signal buffer (Figure 4).
 
 [![Windowed samples from buffer](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/04-windowed-samples-from-buffer.png)  
@@ -93,21 +93,21 @@ from the signal buffer (Figure 4).
 
 In next step we need to apply window function to our raw samples. The goal is to 'flatten' all samples at left
 and right part of the window and keep the middle part in a 'gentle' way. That is important because we want to decompose
-our signal to sines waves that make it. The problems is that not all frequencies that we want to see in frequency
+our signal to sins waves that make it. The problems is that not all frequencies that we want to see in frequency
 domain chart fits in a window in a way that we will have integer multiply of wave period. In the Figure 5 only last 
 sine fits perfectly.
 
 [![How different sine waves fits the window](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/05-how-different-sine-waves-fits-the-window-v2.png)  
 *Figure 5 - How different sine waves fits the window*
 
-Without window function those 'not complete' sines would produce effect called 'frequency leakage'. In result major 
-sines waves that makes the signal will not be visible well as a peaks in frequency domain chart. Figure 6 shows 
+Without window function those 'not complete' sins would produce effect called 'frequency leakage'. In result major 
+sins waves that makes the signal will not be visible well as a peaks in frequency domain chart. Figure 6 shows 
 how window function looks like (in the middle) and how our samples was changed after applying it.
 
 [![Applying window function](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/06-applying-window-function.png)  
 *Figure 6 - Applying window function*
 
-Now all sines starts and ends in a gentle way.
+Now all sins starts and ends in a gentle way.
 
 In order to create frequency domain representation we need to create second chart (Figure 7). Each vertical bar on 
 the chart is called frequency bin and tells how much of that frequency is inside our signal from the window. Let say 
@@ -143,7 +143,7 @@ algorithm per each bin which goes like this:
 >related to current iteration. When we would show those unit vectors on animation we will see that they are making 
 >circles (like hands on the clock) with period equal to frequencyBin's samplePerPeriod parameter.
 >At each iteration we need to multiply our unit vector by value of the sample. Since samples are between 0 and 1 
->this operation can shorten our vector. In case of negative values it could also change it's direction by 180 degrees.
+>this operation can shorten our vector. In case of negative values it could also change its direction by 180 degrees.
 >To get power value we need to add all of those multiplied vectors together and divide by number of samples 
 >in a window. Length of final vector is power of wave related to that frequency bin. At the end we need to convert 
 >that length into decibels.
@@ -162,8 +162,8 @@ window sizes this number goes up very fast. That's why this basic algorithm is u
 
 ### Examples
 
-Example is always better that a thousands words. Our sines have samplePerPeriods 28, 20 and 16. Let's take some 
-'random' samplePerPeriod for example equal 18. This frequency **should not** be present in our signal window 
+Example is always better that a thousand words. Our sins have samplePerPeriod values equal to 28, 20 and 16. Let's 
+take some 'random' samplePerPeriod for example equal 18. This frequency **should not** be present in our signal window 
 so our expectation is that we should get low decibel value.
 
 We need to iterate thought all 1024 samples. Unfortunately this number is too big to show everything in details.
@@ -196,7 +196,7 @@ Ok, but what happen if we pick samplePerPeriod value equal to one of ours sine w
 *Figure 10 - DFT iteration details for samplePerPeriod 16*    
     
 Now our unit vector (dark dot) is making full circle in 16 iterations. Inside our window we would have 64 full 
-rotations (1024/16). Lets look again at two full periods. Now longest blue vectors seems to be pointing in the 
+rotations (1024/16). Let's look again at two full periods. Now longest blue vectors seems to be pointing to the 
 same directions (up or as you wish 12 o'clock). We can say that they 'picked' something from our signal.       
 
 >When frequency that we are examining **is present** in the signal it will produce more and more vectors that points 
@@ -206,7 +206,7 @@ same directions (up or as you wish 12 o'clock). We can say that they 'picked' so
 ### Final Frequency Domain chart and constellation diagram
 
 After iterating thought all bins we can finally visualize frequency domain chart. In the Figure 11 we can see that 
-our three sines are clearly visible as peaks. 
+our three sins are clearly visible as peaks. 
 
 [![Frequency domain chart](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/11-frequency-domain-chart.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/11-frequency-domain-chart.png)  
 *Figure 11 - Frequency domain chart*
@@ -238,14 +238,14 @@ sine A was rotated because in this case majority of vectors pointed to little di
 
 ### Make some noise!
 
-In real world our input signal will not be that perfect. It could be noisy because of echos, other people 
+In real world our input signal will not be that perfect. It could be noisy because of echoes, other people 
 talking etc. Let's check simplest type of noise called 'white noise' (Figure 14). To emulate it we need to 
 just add some random values to each sample before applying DFT:
 
 ```javascript
 whiteNoiseAmplitude = 0.3;
 // ...
-sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this will add/substract random number up to 0.3  
+sample += (-1 + 2 * Math.random()) * whiteNoiseAmplitude;   // this will add/subtract random number up to 0.3  
 ```
 
 [![Clean and noisy signal comparison](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.min.png)](https://audio-network.rypula.pl/page/data-transmission-over-sound-in-javascript-from-scratch/part-01/image/14-clean-and-noisy-signal-comparison.png)  
@@ -344,7 +344,7 @@ Code above should be more of less clear. Those 5 functions are enough to compute
 formula at `blackmanNuttall` method was taken from Wikipedia article about 
 [Window Function](https://en.wikipedia.org/wiki/Window_function). 
 
-Ok, let's add few sines together and try to compute DFT:
+Ok, let's add few sins together and try to compute DFT:
 
 ```javascript
 var i, timeDomain, sample, sampleProcessed, windowSize, frequencyDomain, whiteNoiseAmplitude,
@@ -377,7 +377,7 @@ console.log(frequencyDomain.length); // --> 160
 In example above **windowing** step was skip - we directly created final signal inside a time domain window.
 Normally we would copy samples from some input buffer.
 
-Lets look what are the power values that we have near our three sines. We expect to see 3 power peaks near 
+Let's look what are the power values that we have near our three sins. We expect to see 3 power peaks near 
 28, 20 and 16 samplePerPeriod. In order to convert array index into samplePerPeriod value and vice versa we need to 
 use those formulas:
 
@@ -427,7 +427,7 @@ logPhase(120); // 0 | it's because SINE B was created like this: sample += gener
 logPhase(136); // 0 | it's because SINE C was created like this: sample += generateSineWave(16, 0.3, 0, i);
 ```
 
-All sines returned phase offset equal to zero. Let's check what we would get if we add some phase offset to our sines.
+All sins returned phase offset equal to zero. Let's check what we would get if we add some phase offset to our sins.
 
 ```javascript
 // fill array with time domain samples
