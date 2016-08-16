@@ -5,59 +5,57 @@
   - 4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)
   - 5.x.x finalization of the project, some example applications like p2p file exchange, web server etc
 
+---
+
 ## Backlog for future 1.x.x releases
 
-TODO list:
-  - start writing article
-  - fix last templates issues in ultra-simple demo, rename to some nicer name
-  - move common code of all canvas drawing to abstract class
-  - create wrapper classes for audio nodes
-  - create sine/cosine cache service + tests in jasmine
-  - rename destroy methods to destroyAsync
+### Current:
 
-  - use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout
-  - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace
-  - refactor DOM helpers (move to service)
-  - change adapter parameter order or move all adapter initialization
-  - introduce handlers similar to existing setPacketReceiveHandler
-  - ReceiveAdapter should register own rx handler inside Adapter class (??)
-  - change 'physical-layer' to 'physical-layer-core', 'physical-layer-adapter' to 'physical-layer' (??)
+  - rename Queue to Buffer
+  - POWER CHART, refactor to follow 'abstract class' approach 
+  - POWER CHART, show important power level (threshold, min/max, etc)
+  - POWER CHART, configurable bar width and color
+  - ANALYZER CHART, refactor to follow 'abstract class' approach
+  - change adapter parameter order (channelIndex shouldn't be first parameter)
+  - fix last templates issues in amplitude-modulation-transmission-full
+
+### Core code refactor
+
+  - core should not work as proxy for methods from other classes
+  - visualizers should be separated 
+  - ability to change all settings in the runtime
+  - promise approach instead of callback functions
+  - remove setInterval, schedule function call for the future via setTimeout  
   - refactor manager code to pass whole array to/from channel instead single sample
     - receive-manager
     - receive-channel
     - receive-channel-carrier           adds phase correction, handles notify intervals
     - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
-  - CHECK THIS: filter constellation points to show only strongest symbol samples used in packet
-  + do not redraw constellation if queue wasn't changed
-  + clean constellation diagram constructor parameters order 
-  - ability to add hooks at sample generation and receive (inject some changes to signal)
-  - fix carrier.html example (use dedicated constellation class)
+  
+### Nice but not important code refactor
+  - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace
+  - refactor DOM helpers (move to service)
+  - create wrapper classes for audio nodes
+  - create sine/cosine cache service + tests in jasmine
+  - rename destroy methods to destroyAsync
 
-  - Receive Adapter: [8.5h or 16.0h remaining]
-    + [~1.5h] add events for frequency update and phase update to notify hosting code
-    + [~2.0h] refactor 'collecting arrays' to dedicated collectors
-    - [~2.0h] refactor data/packet collection to dedicates collectors classes
-      - change SYMBOL state name to PILOT_SIGNAL
-      - change ERROR state name to SYNC_TO_LONG
-      - phaseOffsetCollector -> frequencyErrorCollector
-      - introduce some phaseErrorCollector ?
-    - [~3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal
-    - OPTIONAL [~1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)
-    - OPTIONAL [~4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)
-    - OPTIONAL [~1.0h] Signal Strength like in cell phones
-    - OPTIONAL [~1.0h] add new state: INTERPACKET_GAP
+### Receive Adapter
 
-  - Power chart: [~10.5h remaining]
-    - [~4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?
-    - [~3.0h] ability to show other OFDMs than pilot
-    - [~1.0h] increase bar width
-    - [~1.5h] mark states ranges
-    - [~1.0h] show important power level (threshold, min/max, etc)
+  - rename ERROR to SYNC_TO_LONG and SYMBOL to PILOT_SIGNAL
+  - rename phaseOffsetCollector to frequencyErrorCollector
+  - introduce some phaseErrorCollector (?)
+  - add new state: INTERPACKET_GAP
+   
+---
 
-  - Article 'Data transmission over sound in JavaScript from scratch'
-    - PART 1 - discrete fourier transform
-    - PART 2 - Web Audio API
-    - PART 3 - data transmitter and receiver application
+## v1.1.0 (2016-0x-xx)
+  + Constellation diagram: do not redraw constellation if queue wasn't changed
+  + Constellation diagram: queue elements approach changed (only one item per constellation point now)
+  + ActiveAudioContext abstraction
+  + carrierGenerate and carrierRecovery fixes
+  + WindowFunction service with blackmanNuttall method
+  + Visualizer abstract classes (Abstract2DVisualizer, AbstractVisualizer)
+  + Visualizer code refactor
 
 ## v1.0.4 (2016-07-04)
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)
