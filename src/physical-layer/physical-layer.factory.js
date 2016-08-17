@@ -4,31 +4,7 @@
 
     AudioNetwork.Injector
         .registerFactory('PhysicalLayer.PhysicalLayer', _PhysicalLayer);
-
-/*
-TODO remove this later:
-
-1  1  0  1  11
-0  1  1  0  10
-0  1  0  0  01
-0  1  0  1  10
-
-01 11 01 10
-
-D6 45
-
-8 subcarriers   
-3 bit/baud (PSK-8)
-3 baud (120ms symbol, 213.3ms guard)     14700 = 5292 + 9408  (@44100)
-=
-72 bit/sec = 9 B/sec       ->   1,125 B/sec per subcarrier
-
-#####_________#####_________
-
-SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
-            1 B         1 B          1 B       0...255 B         2 B
-*/
-
+    
     _PhysicalLayer.$inject = [
         'Common.QueueBuilder',
         'Common.MathUtil',
