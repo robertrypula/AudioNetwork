@@ -21,16 +21,37 @@
 
 ### Core code refactor
 
+  - add AudioNetworkBootConfig = { developerMode: true, createAlias: true, scriptBaseUrl: 'http://localhost' }
   - core should not work as proxy for methods from other classes
   - visualizers should be separated 
   - ability to change all settings in the runtime
   - promise approach instead of callback functions
-  - remove setInterval, schedule function call for the future via setTimeout  
+  - remove setInterval, schedule function call for the future via setTimeout (at manager level, not core object level)
   - refactor manager code to pass whole array to/from channel instead single sample
-    - receive-manager
-    - receive-channel
-    - receive-channel-carrier           adds phase correction, handles notify intervals
-    - receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers
+    - receive-manager                      holds audio process event and logic that triggers receive events in proper moments
+    - receive-channel                      
+    - receive-channel-subcarrier           adds phase correction, handles notify intervals
+    
+```
+receive-channel-subcarrier
+  - contains receiveWorker object with methods:
+    - receiveWorker.handleSampleBlock(sampleBlock, detailIndexList).then(function )
+    - receiveWorker.setSamplePerPeriod(samplePerPeriod).then(function )
+    - receiveWorker.setSamplePerDftWindow(samplePerDftWindow).then(function )
+
+receive-worker.builder will decide to go with:
+
+[A]
+receive-multicore-worker           init new Worker, communication between 
+receive-multicore-worker-thread    short script that wraps receive-worker with postMessage
+
+[B]
+receive-worker
+  - holds carrierRecovery object
+  - handles carrierDetailIndexList and promises
+   
+    
+```
   
 ### Nice but not important code refactor
   - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace
