@@ -13,8 +13,8 @@
         CarrierRecovery
     ) {
 
-        function build(samplePerPeriod, dftWindowSize) {
-            return new CarrierRecovery(samplePerPeriod, dftWindowSize);
+        function build(samplePerPeriod, samplePerDftWindow) {
+            return new CarrierRecovery(samplePerPeriod, samplePerDftWindow);
         }
 
         return {

@@ -8,88 +8,73 @@
     _CarrierRecovery.$inject = [
         'Common.QueueBuilder',
         'Common.MathUtil',
-        'Common.Util'
+        'Common.Util',
+        'Common.ComplexBuilder'
     ];
 
     function _CarrierRecovery(
         QueueBuilder,
         MathUtil,
-        Util
+        Util,
+        ComplexBuilder
     ) {
         var CarrierRecovery;
 
-        CarrierRecovery = function (samplePerPeriod, dftWindowSize) {
-            this.$$queue = QueueBuilder.build(2 * dftWindowSize);
-            this.$$queueSumReal = 0;
-            this.$$queueSumImm = 0;
-            this.$$referenceReal = 0;
-            this.$$referenceImm = 0;
-            this.$$real = 0;
-            this.$$imm = 0;
-            this.$$power = 0;
-            this.$$powerDecibel = 0;
-            this.$$phase = 0;
+        CarrierRecovery = function (samplePerPeriod, samplePerDftWindow) {
+            this.$$samplePerDftWindow = undefined;
+            this.$$complexQueue = undefined;
+            this.$$complexQueueSum = undefined;
+            this.setSamplePerDftWindow(samplePerDftWindow);
 
-            this.$$samplePerPeriod = null;
-            this.$$omega = null;
-            this.$$sampleNumber = 0;
+            this.$$samplePerPeriod = undefined;
+            this.$$omega = undefined;
+            this.$$sampleNumber = undefined;
             this.setSamplePerPeriod(samplePerPeriod);
         };
 
-        CarrierRecovery.prototype.$$computeReference = function () {
-            var x = this.$$omega * this.$$sampleNumber;
+        CarrierRecovery.prototype.$$getUnitComplex = function () {
+            var r = this.$$omega * this.$$sampleNumber;
 
-            this.$$referenceReal = -MathUtil.cos(x);
-            this.$$referenceImm = MathUtil.sin(x);
-        };
-
-        CarrierRecovery.prototype.$$computeAverage = function (sample) {
-            var real, imm, n;
-
-            if (this.$$queue.isFull()) {
-                this.$$queueSumReal -= this.$$queue.pop();
-                this.$$queueSumImm -= this.$$queue.pop();
-            }
-            real = this.$$referenceReal * sample;
-            imm = this.$$referenceImm * sample;
-            this.$$queue.push(real);
-            this.$$queue.push(imm);
-            this.$$queueSumReal += real;
-            this.$$queueSumImm += imm;
-
-            n = this.$$queue.getSize() >>> 1;
-            this.$$real = this.$$queueSumReal / n;
-            this.$$imm = this.$$queueSumImm / n;
-        };
-
-        CarrierRecovery.prototype.$$computePower = function () {
-            this.$$power = MathUtil.sqrt(
-                this.$$real * this.$$real +
-                this.$$imm * this.$$imm
+            return ComplexBuilder.build(
+                -MathUtil.cos(r),
+                MathUtil.sin(r)
             );
-            this.$$powerDecibel = 10 * MathUtil.log(this.$$power) / MathUtil.LN10;
-        };
-
-        CarrierRecovery.prototype.$$computePhase = function () {
-            this.$$phase = Util.findUnitAngle(this.$$real, this.$$imm);
         };
 
         CarrierRecovery.prototype.handleSample = function (sample) {
-            this.$$computeReference();
-            this.$$computeAverage(sample);
+            var oldComplex, newComplex;
 
+            if (this.$$complexQueue.isFull()) {
+                oldComplex = this.$$complexQueue.pop();
+                this.$$complexQueueSum.sub(oldComplex);
+            }
+            newComplex = this.$$getUnitComplex();
+            newComplex.mulScalar(sample);
+            this.$$complexQueue.push(newComplex);
+            this.$$complexQueueSum.add(newComplex);
             this.$$sampleNumber++;
         };
 
         CarrierRecovery.prototype.getCarrierDetail = function () {
-            this.$$computePower();
-            this.$$computePhase();
+            var complex = ComplexBuilder.copy(this.$$complexQueueSum);
+
+            complex.divScalar(this.$$complexQueue.getSize());
 
             return {
-                phase: this.$$phase,
-                power: this.$$power,
-                powerDecibel: this.$$powerDecibel
+                phase: complex.findUnitAngle(),
+                powerDecibel: Util.convertToDecibel(complex.getAbsoluteValue())
             };
+        };
+
+        CarrierRecovery.prototype.setSamplePerDftWindow = function (samplePerDftWindow) {
+            if (samplePerDftWindow === this.$$samplePerDftWindow) {
+                return false;
+            }
+            this.$$samplePerDftWindow = samplePerDftWindow;
+            this.$$complexQueue = QueueBuilder.build(samplePerDftWindow);
+            this.$$complexQueueSum = ComplexBuilder.build(0, 0);
+
+            return true;
         };
 
         CarrierRecovery.prototype.setSamplePerPeriod = function (samplePerPeriod) {

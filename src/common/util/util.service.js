@@ -52,6 +52,10 @@
             return sum / list.length;
         }
 
+        function convertToDecibel(value) {
+            return 10 * MathUtil.log(value) / MathUtil.LN10;
+        }
+
         function findUnitAngle(x, y) {
             var length, quarter, angle;
 
@@ -141,6 +145,7 @@
             valueOrDefault: valueOrDefault,
             accessor: accessor,
             computeAverage: computeAverage,
+            convertToDecibel: convertToDecibel,
             findUnitAngle: findUnitAngle,
             unitFade: unitFade,
             queueAdd: queueAdd,
