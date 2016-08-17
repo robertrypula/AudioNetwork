@@ -1,7 +1,9 @@
 var
-    ReceiveCarrierRecovery = AudioNetwork.Injector.resolve('PhysicalLayerCore.ReceiveCarrierRecovery'),
-    receiveCarrierRecovery;
+    ReceiveMulticoreWorker = AudioNetwork.Injector.resolve('PhysicalLayerCore.ReceiveMulticoreWorker'),
+    receiveMulticoreWorker;
 
-function onLoad() {
-    receiveCarrierRecovery = new ReceiveCarrierRecovery();
+function onClick() {
+    receiveMulticoreWorker = new ReceiveMulticoreWorker();
 }
+
+setTimeout(onClick, 2000);

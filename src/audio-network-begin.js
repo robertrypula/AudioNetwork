@@ -6,6 +6,18 @@ var AudioNetwork = {};
 
 AudioNetwork.Version = '1.0.4';
 
+// AudioNetwork.isNode = typeof module !== 'undefined' && module.exports;    // running under node.js? - http://stackoverflow.com/questions/4224606
+/*
+AudioNetwork.isWebWorker = ??
+ function testEnv() {
+ if (window.document === undefined) {
+    postMessage("I'm fairly confident I'm a webworker");
+ } else {
+    console.log("I'm fairly confident I'm in the renderer thread");
+ }
+ }
+ */
+
 AudioNetwork.Injector = (function () {
     var Injector;
 
@@ -147,3 +159,79 @@ AudioNetwork.Injector = (function () {
 
     return new Injector();
 })();
+
+AudioNetwork.scriptList = [
+    'audio-network-begin.js',
+    'audio/active-audio-context/active-audio-context.service.js',
+    'audio/simple-audio-context/simple-audio-context-builder.service.js',
+    'audio/simple-audio-context/simple-audio-context.factory.js',
+    'common/abstract-value-collector/abstract-value-collector.factory.js',
+    'common/average-value-collector/average-value-collector-builder.service.js',
+    'common/average-value-collector/average-value-collector.factory.js',
+    'common/carrier-generate/carrier-generate-builder.service.js',
+    'common/carrier-generate/carrier-generate.factory.js',
+    'common/carrier-recovery/carrier-recovery-builder.service.js',
+    'common/carrier-recovery/carrier-recovery.factory.js',
+    'common/complex/complex-builder.service.js',
+    'common/complex/complex.factory.js',
+    'common/math-util/math-util.service.js',
+    'common/queue/queue-builder.service.js',
+    'common/queue/queue.factory.js',
+    'common/simple-promise/simple-promise-builder.service.js',
+    'common/simple-promise/simple-promise.factory.js',
+    'common/util/util.service.js',
+    'common/window-function/window-function.service.js',
+    'physical-layer-adapter/guard-power-collector/guard-power-collector-builder.service.js',
+    'physical-layer-adapter/guard-power-collector/guard-power-collector.factory.js',
+    'physical-layer-adapter/phase-offset-collector/phase-offset-collector-builder.service.js',
+    'physical-layer-adapter/phase-offset-collector/phase-offset-collector.factory.js',
+    'physical-layer-adapter/receive-adapter-state.service.js',
+    'physical-layer-adapter/receive-adapter.factory.js',
+    'physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager-builder.service.js',
+    'physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager.factory.js',
+    'physical-layer-adapter/rx-state-machine/rx-state-machine-builder.service.js',
+    'physical-layer-adapter/rx-state-machine/rx-state-machine.factory.js',
+    'physical-layer-adapter/signal-power-collector/signal-power-collector-builder.service.js',
+    'physical-layer-adapter/signal-power-collector/signal-power-collector.factory.js',
+    'physical-layer-adapter/transmit-adapter.factory.js',
+    'physical-layer-core/receive-multicore-worker/receive-multicore-worker-thread.service.js',
+    'physical-layer-core/receive-multicore-worker/receive-multicore-worker.factory.js',
+    'physical-layer-core/receive-worker/receive-worker.factory.js',
+    'physical-layer/abstract-channel-manager/abstract-channel-manager.factory.js',
+    'physical-layer/channel-receive-manager/channel-receive-manager-builder.service.js',
+    'physical-layer/channel-receive-manager/channel-receive-manager.factory.js',
+    'physical-layer/channel-receive/channel-receive-builder.service.js',
+    'physical-layer/channel-receive/channel-receive.factory.js',
+    'physical-layer/channel-transmit-manager/channel-transmit-manager-builder.service.js',
+    'physical-layer/channel-transmit-manager/channel-transmit-manager.factory.js',
+    'physical-layer/channel-transmit/channel-transmit-builder.service.js',
+    'physical-layer/channel-transmit/channel-transmit.factory.js',
+    'physical-layer/configuration-parser.service.js',
+    'physical-layer/default-config.service.js',
+    'physical-layer/physical-layer.factory.js',
+    'physical-layer/rx-handler/rx-handler-builder.service.js',
+    'physical-layer/rx-handler/rx-handler.factory.js',
+    'physical-layer/rx-input.service.js',
+    'visualizer/abstract-2d-visualizer/abstract-2d-visualizer.factory.js',
+    'visualizer/abstract-visualizer/abstract-visualizer.factory.js',
+    'visualizer/analyser-chart/analyser-chart-builder.service.js',
+    'visualizer/analyser-chart/analyser-chart-template-axis-x.service.js',
+    'visualizer/analyser-chart/analyser-chart-template-main.service.js',
+    'visualizer/analyser-chart/analyser-chart.factory.js',
+    'visualizer/complex-plane-chart/complex-plane-chart-builder.service.js',
+    'visualizer/complex-plane-chart/complex-plane-chart-template-main.service.js',
+    'visualizer/complex-plane-chart/complex-plane-chart.factory.js',
+    'visualizer/constellation-diagram/constellation-diagram-builder.service.js',
+    'visualizer/constellation-diagram/constellation-diagram-template-main.service.js',
+    'visualizer/constellation-diagram/constellation-diagram.factory.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart-builder.service.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart-template-main.service.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart.factory.js',
+    'visualizer/power-chart/power-chart-builder.service.js',
+    'visualizer/power-chart/power-chart-template-main.service.js',
+    'visualizer/power-chart/power-chart.factory.js',
+    'visualizer/sample-chart/sample-chart-builder.service.js',
+    'visualizer/sample-chart/sample-chart-template-main.service.js',
+    'visualizer/sample-chart/sample-chart.factory.js',
+    'audio-network-end.js'
+];
