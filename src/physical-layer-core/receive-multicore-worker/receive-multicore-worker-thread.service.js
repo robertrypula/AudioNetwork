@@ -31,7 +31,7 @@
         }
 
         function getJavaScriptCode() {
-            var i, js, scriptList;
+            var i, js = '', scriptList;
 
             switch (AudioNetwork.bootConfig.multicoreState) {
                 case AudioNetwork.MULTICORE_STATE.ENABLED_USE_DEV_SCRIPT:
@@ -42,21 +42,24 @@
                     break;
             }
 
-            js = '';
-            js += 'self.importScripts(' + '\n' + scriptList.join('') + ');' + '\n';
-            js +=  '\n';
-            js += 'var MathUtil = AudioNetwork.Injector.resolve("Common.MathUtil");' + '\n';
-            js += 'var ReceiveWorker = AudioNetwork.Injector.resolve("PhysicalLayerCore.ReceiveWorker");' + '\n';
-            js +=  '\n';
-            js +=  'eval("console.log(\'test eval\');")' + '\n';
-            js +=  '\n';
-            js += 'self.onmessage = function(event) {' + '\n';
-            js += '    var result = 0;' + '\n';
-            js += '    for (var i = 0; i < 2 * 9000111; i++) {' + '\n';
-            js += '        result += MathUtil.sin(i);' + '\n';
-            js += '    }' + '\n';
-            js += '    postMessage(event.data + \' \' + result);' + '\n';
-            js += '}';
+            js += 'self.importScripts(                                                                         ' + '\n';
+            js += scriptList.join('');
+            js += ');                                                                                          ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += 'var MathUtil = AudioNetwork.Injector.resolve("Common.MathUtil");                            ' + '\n';
+            js += 'var ReceiveWorker = AudioNetwork.Injector.resolve("PhysicalLayerCore.ReceiveWorker");       ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += 'eval("console.log(\'eval inside thread test\');")                                           ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += 'self.onmessage = function(event) {                                                          ' + '\n';
+            js += '    var result = 0;                                                                         ' + '\n';
+            js += '    for (var i = 0; i < 2 * 9000111; i++) {                                                 ' + '\n';
+            js += '        result += MathUtil.sin(i);                                                          ' + '\n';
+            js += '    }                                                                                       ' + '\n';
+            js += '    postMessage(event.data + \' \' + result);                                               ' + '\n';
+            js += '}                                                                                           ' + '\n';
+            js += 'postMessage(\'ready\');                                                                     ' + '\n';
+            js += '                                                                                            ' + '\n';
 
             return js;
         }

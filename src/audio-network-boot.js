@@ -241,6 +241,8 @@ AudioNetwork.devScriptList = [
     'common/queue/queue.factory.js',
     'common/simple-promise/simple-promise-builder.service.js',
     'common/simple-promise/simple-promise.factory.js',
+    'common/stopwatch/stopwatch-builder.service.js',
+    'common/stopwatch/stopwatch.factory.js',
     'common/util/util.service.js',
     'common/window-function/window-function.service.js',
     'physical-layer-adapter/guard-power-collector/guard-power-collector-builder.service.js',
