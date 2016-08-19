@@ -70,13 +70,19 @@ receive-worker
 ---
 
 ## v1.1.0 (2016-0x-xx)
+  + Dynamic dev files loading
+  + Boot config added 
+  + Env variables added (isBrowser, isNode, isWebWorker)
+  + NodeJs export added - you can now use AudioNetwork in NodeJs applications! 
+  + ActiveAudioContext abstraction
+  + CarrierGenerate and CarrierRecovery refactor
   + Constellation diagram: do not redraw constellation if queue wasn't changed
   + Constellation diagram: queue elements approach changed (only one item per constellation point now)
-  + ActiveAudioContext abstraction
-  + carrierGenerate and carrierRecovery fixes
   + WindowFunction service with blackmanNuttall method
   + Visualizer abstract classes (Abstract2DVisualizer, AbstractVisualizer)
   + Visualizer code refactor
+  + rename audio-network-begin to audio-network-boot
+  + WebWorker basic functionality added + Core refactor (?????)
 
 ## v1.0.4 (2016-07-04)
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)

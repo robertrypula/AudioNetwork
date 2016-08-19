@@ -24,10 +24,49 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-// AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
-var AudioNetwork = {};
+var
+    AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
+    AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.Version = '1.0.4';
+AudioNetwork.version = '1.1.0rc1';
+
+// conditions from: http://stackoverflow.com/a/33697246
+AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;
+AudioNetwork.isWebWorker = !AudioNetwork.isNode && typeof WorkerGlobalScope !== 'undefined' && typeof importScripts == 'function' && navigator instanceof WorkerNavigator;
+AudioNetwork.isBrowser = !AudioNetwork.isNode && !AudioNetwork.isWebWorker && typeof navigator !== 'undefined' && typeof document !== 'undefined';
+
+/*
+console.log(AudioNetwork.isNode);
+console.log(AudioNetwork.isWebWorker);
+console.log(AudioNetwork.isBrowser);
+*/
+
+AudioNetwork.MULTICORE_STATE = {
+    DISABLED: 'DISABLED',
+    ENABLED_USE_PROD_SCRIPT: 'ENABLED_USE_PROD_SCRIPT',
+    ENABLED_USE_DEV_SCRIPT: 'ENABLED_USE_DEV_SCRIPT'
+};
+
+AudioNetwork.bootConfig = {
+    devScriptBaseUrl: typeof AudioNetworkBootConfig.devScriptBaseUrl === 'string'
+        ? AudioNetworkBootConfig.devScriptBaseUrl
+        : (AudioNetwork.isBrowser ? window.location.origin + '/src/' : ''),
+    prodScriptBaseUrl: typeof AudioNetworkBootConfig.prodScriptBaseUrl === 'string'
+        ? AudioNetworkBootConfig.prodScriptBaseUrl
+        : (AudioNetwork.isBrowser ? window.location.origin + '/build/' : ''),
+    prodScriptName: typeof AudioNetworkBootConfig.prodScriptName === 'string'
+        ? AudioNetworkBootConfig.prodScriptName
+        : 'audio-network-v' + AudioNetwork.version + '.min.js',
+    devScriptLoad: typeof AudioNetworkBootConfig.devScriptLoad !== 'undefined'
+        ? !!AudioNetworkBootConfig.devScriptLoad
+        : false,
+    createAlias: typeof AudioNetworkBootConfig.createAlias !== 'undefined'
+        ? !!AudioNetworkBootConfig.createAlias
+        : (AudioNetwork.isBrowser ? true : false),
+    multicoreState: Object.keys(AudioNetwork.MULTICORE_STATE).indexOf(AudioNetworkBootConfig.multicoreState) !== -1
+        ? AudioNetworkBootConfig.multicoreState
+        : AudioNetwork.MULTICORE_STATE.DISABLED
+};
 
 AudioNetwork.Injector = (function () {
     var Injector;
@@ -168,8 +207,124 @@ AudioNetwork.Injector = (function () {
         throw Injector.UNABLE_TO_FIND_ITEM_EXCEPTION + name;
     };
 
-    return new Injector();
+    return new Injector(); // instantiate service
 })();
+
+AudioNetwork.DynamicScriptLoader = (function () {
+    var DynamicScriptLoader;
+
+    DynamicScriptLoader = function () {
+    };
+
+    DynamicScriptLoader.prototype.loadList = function (urlList, startingIndex) {
+        var i;
+
+        if (typeof startingIndex === 'undefined') {
+            startingIndex = 0;
+        }
+
+        for (i = startingIndex; i < urlList.length; i++) {
+            this.loadOne(urlList[i]);
+        }
+    };
+
+    DynamicScriptLoader.prototype.loadOne = function (url) {
+        /*
+        var
+            anRoot = document.getElementById('an-root'),
+            scriptTag = document.createElement('script'),
+            whereToAppend = anRoot ? anRoot : document.body;
+
+        scriptTag.src = AudioNetwork.bootConfig.devScriptBaseUrl + url;
+        whereToAppend.appendChild(scriptTag);
+        */
+        // block page loading - this is the best approach so far... :)
+        document.write('<script src="' + AudioNetwork.bootConfig.devScriptBaseUrl + url + '"></script>')
+    };
+
+    return new DynamicScriptLoader(); // instantiate service
+})();
+
+AudioNetwork.devScriptList = [
+    'audio-network-boot.js',
+    'audio/active-audio-context/active-audio-context.service.js',
+    'audio/simple-audio-context/simple-audio-context-builder.service.js',
+    'audio/simple-audio-context/simple-audio-context.factory.js',
+    'common/abstract-value-collector/abstract-value-collector.factory.js',
+    'common/average-value-collector/average-value-collector-builder.service.js',
+    'common/average-value-collector/average-value-collector.factory.js',
+    'common/carrier-generate/carrier-generate-builder.service.js',
+    'common/carrier-generate/carrier-generate.factory.js',
+    'common/carrier-recovery/carrier-recovery-builder.service.js',
+    'common/carrier-recovery/carrier-recovery.factory.js',
+    'common/complex/complex-builder.service.js',
+    'common/complex/complex.factory.js',
+    'common/math-util/math-util.service.js',
+    'common/queue/queue-builder.service.js',
+    'common/queue/queue.factory.js',
+    'common/simple-promise/simple-promise-builder.service.js',
+    'common/simple-promise/simple-promise.factory.js',
+    'common/util/util.service.js',
+    'common/window-function/window-function.service.js',
+    'physical-layer-adapter/guard-power-collector/guard-power-collector-builder.service.js',
+    'physical-layer-adapter/guard-power-collector/guard-power-collector.factory.js',
+    'physical-layer-adapter/phase-offset-collector/phase-offset-collector-builder.service.js',
+    'physical-layer-adapter/phase-offset-collector/phase-offset-collector.factory.js',
+    'physical-layer-adapter/receive-adapter-state.service.js',
+    'physical-layer-adapter/receive-adapter.factory.js',
+    'physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager-builder.service.js',
+    'physical-layer-adapter/rx-state-machine-manager/rx-state-machine-manager.factory.js',
+    'physical-layer-adapter/rx-state-machine/rx-state-machine-builder.service.js',
+    'physical-layer-adapter/rx-state-machine/rx-state-machine.factory.js',
+    'physical-layer-adapter/signal-power-collector/signal-power-collector-builder.service.js',
+    'physical-layer-adapter/signal-power-collector/signal-power-collector.factory.js',
+    'physical-layer-adapter/transmit-adapter.factory.js',
+    'physical-layer-core/receive-multicore-worker/receive-multicore-worker-thread.service.js',
+    'physical-layer-core/receive-multicore-worker/receive-multicore-worker.factory.js',
+    'physical-layer-core/receive-worker/receive-worker.factory.js',
+    'physical-layer/abstract-channel-manager/abstract-channel-manager.factory.js',
+    'physical-layer/channel-receive-manager/channel-receive-manager-builder.service.js',
+    'physical-layer/channel-receive-manager/channel-receive-manager.factory.js',
+    'physical-layer/channel-receive/channel-receive-builder.service.js',
+    'physical-layer/channel-receive/channel-receive.factory.js',
+    'physical-layer/channel-transmit-manager/channel-transmit-manager-builder.service.js',
+    'physical-layer/channel-transmit-manager/channel-transmit-manager.factory.js',
+    'physical-layer/channel-transmit/channel-transmit-builder.service.js',
+    'physical-layer/channel-transmit/channel-transmit.factory.js',
+    'physical-layer/configuration-parser.service.js',
+    'physical-layer/default-config.service.js',
+    'physical-layer/physical-layer.factory.js',
+    'physical-layer/rx-handler/rx-handler-builder.service.js',
+    'physical-layer/rx-handler/rx-handler.factory.js',
+    'physical-layer/rx-input.service.js',
+    'visualizer/abstract-2d-visualizer/abstract-2d-visualizer.factory.js',
+    'visualizer/abstract-visualizer/abstract-visualizer.factory.js',
+    'visualizer/analyser-chart/analyser-chart-builder.service.js',
+    'visualizer/analyser-chart/analyser-chart-template-axis-x.service.js',
+    'visualizer/analyser-chart/analyser-chart-template-main.service.js',
+    'visualizer/analyser-chart/analyser-chart.factory.js',
+    'visualizer/complex-plane-chart/complex-plane-chart-builder.service.js',
+    'visualizer/complex-plane-chart/complex-plane-chart-template-main.service.js',
+    'visualizer/complex-plane-chart/complex-plane-chart.factory.js',
+    'visualizer/constellation-diagram/constellation-diagram-builder.service.js',
+    'visualizer/constellation-diagram/constellation-diagram-template-main.service.js',
+    'visualizer/constellation-diagram/constellation-diagram.factory.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart-builder.service.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart-template-main.service.js',
+    'visualizer/frequency-domain-chart/frequency-domain-chart.factory.js',
+    'visualizer/power-chart/power-chart-builder.service.js',
+    'visualizer/power-chart/power-chart-template-main.service.js',
+    'visualizer/power-chart/power-chart.factory.js',
+    'visualizer/sample-chart/sample-chart-builder.service.js',
+    'visualizer/sample-chart/sample-chart-template-main.service.js',
+    'visualizer/sample-chart/sample-chart.factory.js',
+    'audio-network-end.js'
+];
+
+if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
+    // start from index 1 because audio-network-boot.js was already loaded
+    AudioNetwork.DynamicScriptLoader.loadList(AudioNetwork.devScriptList, 1);
+}
 
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 (function () {
@@ -331,7 +486,7 @@ AudioNetwork.Injector = (function () {
         */
 
         return {
-            CONSTELLATION_DIAGRAM_DECIBEL_LIMIT: 40,
+            CONSTELLATION_DIAGRAM_DECIBEL_LIMIT: -40,
             MINIMUM_POWER_DECIBEL: -99,
             FAKE_NOISE_MAX_AMPLITUDE: 0.001,
             CHANNEL_1_FREQUENCY: 1070,
@@ -368,34 +523,11 @@ AudioNetwork.Injector = (function () {
 
     AudioNetwork.Injector
         .registerFactory('PhysicalLayer.PhysicalLayer', _PhysicalLayer);
-
-/*
-TODO remove this later:
-
-1  1  0  1  11
-0  1  1  0  10
-0  1  0  0  01
-0  1  0  1  10
-
-01 11 01 10
-
-D6 45
-
-8 subcarriers   
-3 bit/baud (PSK-8)
-3 baud (120ms symbol, 213.3ms guard)     14700 = 5292 + 9408  (@44100)
-=
-72 bit/sec = 9 B/sec       ->   1,125 B/sec per subcarrier
-
-#####_________#####_________
-
-SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes] | ECC
-            1 B         1 B          1 B       0...255 B         2 B
-*/
-
+    
     _PhysicalLayer.$inject = [
         'Common.QueueBuilder',
         'Common.MathUtil',
+        'PhysicalLayer.DefaultConfig',
         'PhysicalLayer.ConfigurationParser',
         'PhysicalLayer.RxInput',
         'PhysicalLayer.RxHandlerBuilder',
@@ -410,6 +542,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     function _PhysicalLayer(
         QueueBuilder,
         MathUtil,
+        DefaultConfig,
         ConfigurationParser,
         RxInput,
         RxHandlerBuilder,
@@ -472,14 +605,15 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 }
 
                 queue.push(
-                    QueueBuilder.build(2 * this.$$configuration.rx.constellationDiagram.historyPointSize)
+                    QueueBuilder.build(this.$$configuration.rx.constellationDiagram.historyPointSize)
                 );
                 constellationDiagram.push(
                     ConstellationDiagramBuilder.build(
                         document.getElementById(elementId),
-                        queue[queue.length - 1],
                         this.$$configuration.rx.constellationDiagram.width,
                         this.$$configuration.rx.constellationDiagram.height,
+                        queue[queue.length - 1],
+                        DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT,
                         this.$$configuration.rx.constellationDiagram.color.axis,
                         this.$$configuration.rx.constellationDiagram.color.historyPoint
                     )
@@ -1770,10 +1904,19 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             );
         };
 
+        CarrierGenerate.prototype.reset = function () {
+            this.$$sampleNumber = 0;
+        };
+
         CarrierGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            if (samplePerPeriod === this.$$samplePerPeriod) {
+                return false;
+            }
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
+            
+            return true;
         };
 
         return CarrierGenerate;
@@ -1796,8 +1939,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         CarrierRecovery
     ) {
 
-        function build(samplePerPeriod, dftWindowSize) {
-            return new CarrierRecovery(samplePerPeriod, dftWindowSize);
+        function build(samplePerPeriod, samplePerDftWindow) {
+            return new CarrierRecovery(samplePerPeriod, samplePerDftWindow);
         }
 
         return {
@@ -1817,103 +1960,177 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     _CarrierRecovery.$inject = [
         'Common.QueueBuilder',
         'Common.MathUtil',
-        'Common.Util'
+        'Common.Util',
+        'Common.ComplexBuilder'
     ];
 
     function _CarrierRecovery(
         QueueBuilder,
         MathUtil,
-        Util
+        Util,
+        ComplexBuilder
     ) {
         var CarrierRecovery;
 
-        CarrierRecovery = function (samplePerPeriod, dftWindowSize) {
-            this.$$queue = QueueBuilder.build(2 * dftWindowSize);
-            this.$$queueSumReal = 0;
-            this.$$queueSumImm = 0;
-            this.$$referenceReal = 0;
-            this.$$referenceImm = 0;
-            this.$$real = 0;
-            this.$$imm = 0;
-            this.$$power = 0;
-            this.$$powerDecibel = 0;
-            this.$$phase = 0;
+        CarrierRecovery = function (samplePerPeriod, samplePerDftWindow) {
+            this.$$samplePerDftWindow = undefined;
+            this.$$complexQueue = undefined;
+            this.$$complexQueueSum = undefined;
+            this.setSamplePerDftWindow(samplePerDftWindow);
 
-            this.$$samplePerPeriod = null;
-            this.$$omega = null;
-            this.$$sampleNumber = 0;
+            this.$$samplePerPeriod = undefined;
+            this.$$omega = undefined;
+            this.$$sampleNumber = undefined;
             this.setSamplePerPeriod(samplePerPeriod);
         };
 
-        CarrierRecovery.prototype.$$computeReference = function () {
-            var x = this.$$omega * this.$$sampleNumber;
+        CarrierRecovery.prototype.$$getUnitComplex = function () {
+            var r = this.$$omega * this.$$sampleNumber;
 
-            this.$$referenceReal = MathUtil.cos(x);
-            this.$$referenceImm = MathUtil.sin(x);
-        };
-
-        CarrierRecovery.prototype.$$computeAverage = function (sample) {
-            var real, imm, n;
-
-            if (this.$$queue.isFull()) {
-                this.$$queueSumReal -= this.$$queue.pop();
-                this.$$queueSumImm -= this.$$queue.pop();
-            }
-            real = this.$$referenceReal * sample;
-            imm = this.$$referenceImm * sample;
-            this.$$queue.push(real);
-            this.$$queue.push(imm);
-            this.$$queueSumReal += real;
-            this.$$queueSumImm += imm;
-
-            n = this.$$queue.getSize() >>> 1;
-            this.$$real = this.$$queueSumReal / n;
-            this.$$imm = this.$$queueSumImm / n;
-        };
-
-        CarrierRecovery.prototype.$$computePower = function () {
-            this.$$power = MathUtil.sqrt(
-                this.$$real * this.$$real +
-                this.$$imm * this.$$imm
+            return ComplexBuilder.build(
+                -MathUtil.cos(r),
+                MathUtil.sin(r)
             );
-            this.$$powerDecibel = 10 * MathUtil.log(this.$$power) / MathUtil.LN10;
-        };
-
-        CarrierRecovery.prototype.$$computePhase = function () {
-            this.$$phase = Util.findUnitAngle(this.$$real, this.$$imm);
-
-            // correct phase to start from positive side of X axis counterclockwise
-            this.$$phase = this.$$phase - 0.25;
-            if (this.$$phase < 0) {
-                this.$$phase += 1;
-            }
         };
 
         CarrierRecovery.prototype.handleSample = function (sample) {
-            this.$$computeReference();
-            this.$$computeAverage(sample);
+            var oldComplex, newComplex;
 
+            if (this.$$complexQueue.isFull()) {
+                oldComplex = this.$$complexQueue.pop();
+                this.$$complexQueueSum.sub(oldComplex);
+            }
+            newComplex = this.$$getUnitComplex();
+            newComplex.mulScalar(sample);
+            this.$$complexQueue.push(newComplex);
+            this.$$complexQueueSum.add(newComplex);
             this.$$sampleNumber++;
         };
 
         CarrierRecovery.prototype.getCarrierDetail = function () {
-            this.$$computePower();
-            this.$$computePhase();
+            var complex = ComplexBuilder.copy(this.$$complexQueueSum);
+
+            complex.divScalar(this.$$complexQueue.getSize());
 
             return {
-                phase: this.$$phase,
-                power: this.$$power,
-                powerDecibel: this.$$powerDecibel
+                phase: complex.findUnitAngle(),
+                powerDecibel: Util.convertToDecibel(complex.getAbsoluteValue())
             };
         };
 
+        CarrierRecovery.prototype.setSamplePerDftWindow = function (samplePerDftWindow) {
+            if (samplePerDftWindow === this.$$samplePerDftWindow) {
+                return false;
+            }
+            this.$$samplePerDftWindow = samplePerDftWindow;
+            this.$$complexQueue = QueueBuilder.build(samplePerDftWindow);
+            this.$$complexQueueSum = ComplexBuilder.build(0, 0);
+
+            return true;
+        };
+
         CarrierRecovery.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+            if (samplePerPeriod === this.$$samplePerPeriod) {
+                return false;
+            }
             this.$$samplePerPeriod = samplePerPeriod;
             this.$$omega = MathUtil.TWO_PI / this.$$samplePerPeriod;  // revolutions per sample
             this.$$sampleNumber = 0;
+
+            return true;
         };
 
         return CarrierRecovery;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.ComplexBuilder', _ComplexBuilder);
+
+    _ComplexBuilder.$inject = [
+        'Common.Complex'
+    ];
+
+    function _ComplexBuilder(
+        Complex
+    ) {
+
+        function build(real, imm) {
+            return new Complex(real, imm);
+        }
+
+        function copy(complex) {
+            return new Complex(complex.real, complex.imm);
+        }
+
+        return {
+            build: build,
+            copy: copy
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.Complex', _Complex);
+
+    _Complex.$inject = [
+        'Common.Util',
+        'Common.MathUtil'
+    ];
+
+    function _Complex(
+        Util,
+        MathUtil
+    ) {
+        var Complex;
+
+        Complex = function (real, imm) {
+            this.real = real;
+            this.imm = imm;
+        };
+
+        Complex.prototype.add = function (complex) {
+            this.real += complex.real;
+            this.imm += complex.imm;
+        };
+
+        Complex.prototype.sub = function (complex) {
+            this.real -= complex.real;
+            this.imm -= complex.imm;
+        };
+
+        Complex.prototype.mulScalar = function (n) {
+            this.real *= n;
+            this.imm *= n;
+        };
+
+        Complex.prototype.divScalar = function (n) {
+            this.real /= n;
+            this.imm /= n;
+        };
+
+        Complex.prototype.getAbsoluteValue = function () {
+            return MathUtil.sqrt(
+                this.real * this.real +
+                this.imm * this.imm
+            );
+        };
+
+        Complex.prototype.findUnitAngle = function () {
+            return Util.findUnitAngle(this.real, this.imm);
+        };
+
+        return Complex;
     }
 
 })();
@@ -2027,19 +2244,41 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     AudioNetwork.Injector
         .registerFactory('Common.Queue', _Queue);
 
-    _Queue.$inject = [];
+    _Queue.$inject = [
+        'Common.MathUtil'
+    ];
 
-    function _Queue() {
+    function _Queue(
+        MathUtil
+    ) {
         var Queue;
 
         Queue = function (sizeMax) {
-            this.$$sizeMax = sizeMax;
             this.$$data = [];
+            this.$$positionStart = null;
+            this.$$positionEnd = null;
+            this.$$size = null;
+            this.$$hash = null;
+            this.$$sizeMax = null;
+            this.setSizeMax(sizeMax);
+        };
+
+        Queue.prototype.$$generateNewHash = function () {
+            this.$$hash = MathUtil.random() * 1000000;
+        };
+
+        Queue.prototype.setSizeMax = function (sizeMax) {
             this.$$positionStart = 0;
             this.$$positionEnd = 0;
             this.$$size = 0;
-
+            this.$$hash = 0;
+            this.$$sizeMax = sizeMax;
+            this.$$data.length = 0;        // drop all data
             this.$$data.length = sizeMax;
+        };
+
+        Queue.prototype.getHash = function () {
+            return this.$$hash;
         };
 
         Queue.prototype.push = function (value) {
@@ -2050,6 +2289,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             this.$$data[this.$$positionEnd] = value;
             this.$$positionEnd = (this.$$positionEnd + 1) % this.$$sizeMax;
             this.$$size++;
+
+            this.$$generateNewHash();
 
             return true;
         };
@@ -2070,6 +2311,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             result = this.$$data[this.$$positionStart];
             this.$$positionStart = (this.$$positionStart + 1) % this.$$sizeMax;
             this.$$size--;
+
+            this.$$generateNewHash();
 
             return result;
         };
@@ -2305,24 +2548,28 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             return sum / list.length;
         }
 
+        function convertToDecibel(value) {
+            return 10 * MathUtil.log(value) / MathUtil.LN10;
+        }
+
         function findUnitAngle(x, y) {
-            var length, q, angle;
+            var length, quarter, angle;
 
             length = MathUtil.sqrt(x * x + y * y);
             length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
-            q = (y >= 0) ? (x >= 0 ? 0 : 1) : (x < 0 ? 2 : 3);
-            switch (q) {
+            quarter = (x >= 0) ? (y >= 0 ? 0 : 1) : (y < 0 ? 2 : 3);
+            switch (quarter) {
                 case 0:
-                    angle = MathUtil.asin(y / length);
+                    angle = MathUtil.asin(x / length);
                     break;
                 case 1:
-                    angle = MathUtil.asin(-x / length) + MathUtil.HALF_PI;
+                    angle = MathUtil.asin(-y / length) + MathUtil.HALF_PI;
                     break;
                 case 2:
-                    angle = MathUtil.asin(-y / length) + MathUtil.PI;
+                    angle = MathUtil.asin(-x / length) + MathUtil.PI;
                     break;
                 case 3:
-                    angle = MathUtil.asin(x / length) + 1.5 * MathUtil.PI;
+                    angle = MathUtil.asin(y / length) + 1.5 * MathUtil.PI;
                     break;
             }
 
@@ -2394,11 +2641,41 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             valueOrDefault: valueOrDefault,
             accessor: accessor,
             computeAverage: computeAverage,
+            convertToDecibel: convertToDecibel,
             findUnitAngle: findUnitAngle,
             unitFade: unitFade,
             queueAdd: queueAdd,
             queuePop: queuePop,
             findMaxValueIndex: findMaxValueIndex
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.WindowFunction', _WindowFunction);
+
+    _WindowFunction.$inject = [
+        'Common.MathUtil'
+    ];
+
+    function _WindowFunction(
+        MathUtil
+    ) {
+
+        function blackmanNuttall(n, N) {
+            return 0.3635819
+                - 0.4891775 * MathUtil.cos(2 * MathUtil.PI * n / (N - 1))
+                + 0.1365995 * MathUtil.cos(4 * MathUtil.PI * n / (N - 1))
+                - 0.0106411 * MathUtil.cos(6 * MathUtil.PI * n / (N - 1));
+        }
+
+        return {
+            blackmanNuttall: blackmanNuttall
         };
     }
 
@@ -3149,7 +3426,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         };
 
         RxHandler.prototype.$$handle = function (channelIndex, carrierDetail, time) {
-            var i, cd, queue, powerNormalized;
+            var i, cd, queue;
 
             for (i = 0; i < carrierDetail.length; i++) {
                 cd = carrierDetail[i];
@@ -3163,10 +3440,10 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 }
 
                 queue = this.$$rxConstellationDiagram[channelIndex].queue[i];
-                powerNormalized = (cd.powerDecibel + DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT) / DefaultConfig.CONSTELLATION_DIAGRAM_DECIBEL_LIMIT;
-                powerNormalized = powerNormalized < 0 ? 0 : powerNormalized;
-                queue.pushEvenIfFull(powerNormalized * MathUtil.cos(MathUtil.TWO_PI * cd.phase));
-                queue.pushEvenIfFull(powerNormalized * MathUtil.sin(MathUtil.TWO_PI * cd.phase));
+                queue.pushEvenIfFull({
+                    powerDecibel: cd.powerDecibel,
+                    phase: cd.phase
+                });
             }
 
             if (this.$$rxExternalHandler.callback) {
@@ -4086,6 +4363,227 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     'use strict';
 
     AudioNetwork.Injector
+        .registerService('PhysicalLayerCore.ReceiveMulticoreWorkerThread', _ReceiveMulticoreWorkerThread);
+
+    _ReceiveMulticoreWorkerThread.$inject = [];
+
+    function _ReceiveMulticoreWorkerThread() {
+
+        function $$getFormattedDevScriptList() {
+            var i, src, isLast, scriptList = [];
+
+            for (i = 0; i < AudioNetwork.devScriptList.length; i++) {
+                src = AudioNetwork.bootConfig.devScriptBaseUrl + AudioNetwork.devScriptList[i];
+                isLast = i === AudioNetwork.devScriptList.length - 1;
+                scriptList.push('    \'' + src + '\'' + (isLast ? '' : ',') + '\n');
+            }
+
+            return scriptList;
+        }
+
+        function $$getFormattedProdScriptList() {
+            var src, scriptList = [];
+
+            src = AudioNetwork.bootConfig.prodScriptBaseUrl + AudioNetwork.bootConfig.prodScriptName;
+            scriptList.push('    \'' + src + '\'' + '\n');
+
+            return scriptList;
+        }
+
+        function getJavaScriptCode() {
+            var i, js, scriptList;
+
+            switch (AudioNetwork.bootConfig.multicoreState) {
+                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_DEV_SCRIPT:
+                    scriptList = $$getFormattedDevScriptList();
+                    break;
+                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_PROD_SCRIPT:
+                    scriptList = $$getFormattedProdScriptList();
+                    break;
+            }
+
+            js = '';
+            js += 'self.importScripts(' + '\n' + scriptList.join('') + ');' + '\n';
+            js +=  '\n';
+            js += 'var MathUtil = AudioNetwork.Injector.resolve("Common.MathUtil");' + '\n';
+            js += 'var ReceiveWorker = AudioNetwork.Injector.resolve("PhysicalLayerCore.ReceiveWorker");' + '\n';
+            js +=  '\n';
+            js +=  'eval("console.log(\'test eval\');")' + '\n';
+            js +=  '\n';
+            js += 'self.onmessage = function(event) {' + '\n';
+            js += '    var result = 0;' + '\n';
+            js += '    for (var i = 0; i < 2 * 9000111; i++) {' + '\n';
+            js += '        result += MathUtil.sin(i);' + '\n';
+            js += '    }' + '\n';
+            js += '    postMessage(event.data + \' \' + result);' + '\n';
+            js += '}';
+
+            return js;
+        }
+
+        return {
+            getJavaScriptCode: getJavaScriptCode
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerCore.ReceiveMulticoreWorker', _ReceiveMulticoreWorker);
+
+    _ReceiveMulticoreWorker.$inject = [
+        'PhysicalLayerCore.ReceiveMulticoreWorkerThread'
+    ];
+
+    function _ReceiveMulticoreWorker(
+        ReceiveMulticoreWorkerThread
+    ) {
+        var ReceiveMulticoreWorker;
+
+        ReceiveMulticoreWorker = function () {
+            if (AudioNetwork.bootConfig.multicoreState === AudioNetwork.MULTICORE_STATE.DISABLED) {
+                throw ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION;
+            }
+
+            var js = ReceiveMulticoreWorkerThread.getJavaScriptCode();
+            var blob = new Blob(
+                [ js ],
+                { type: 'application/javascript' }
+            );
+
+            this.$$worker = new Worker(URL.createObjectURL(blob));
+            this.$$worker.onmessage = this.onMessage.bind(this);
+
+            console.log('before post');
+            this.$$worker.postMessage("Hello, I just send you message");
+            console.log('after post');
+        };
+
+        ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION = 'Multicore support is not enabled';
+
+        ReceiveMulticoreWorker.prototype.onMessage = function(oEvent) {
+            console.log("Worker finished: " + oEvent.data);
+            this.$$worker.terminate();
+        };
+
+        return ReceiveMulticoreWorker;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerCore.ReceiveWorker', _ReceiveWorker);
+
+    _ReceiveWorker.$inject = [
+        'Common.CarrierRecoveryBuilder'
+    ];
+
+    function _ReceiveWorker(
+        CarrierRecoveryBuilder
+    ) {
+        var ReceiveWorker;
+
+        ReceiveWorker = function () {
+            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 1024);
+        };
+
+        return ReceiveWorker;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Visualizer.Abstract2DVisualizer', _Abstract2DVisualizer);
+
+    _Abstract2DVisualizer.$inject = [
+        'Visualizer.AbstractVisualizer',
+        'Common.Util'
+    ];
+
+    function _Abstract2DVisualizer(
+        AbstractVisualizer,
+        Util
+    ) {
+        var Abstract2DVisualizer;
+
+        Abstract2DVisualizer = function (parentElement, width, height, colorAxis, colorCenteredCircle) {
+            AbstractVisualizer.call(this, parentElement, width, height);
+
+            this.$$colorAxis = Util.valueOrDefault(colorAxis, 'green');
+            this.$$colorCenteredCircle = Util.valueOrDefault(colorCenteredCircle, '#DDD');
+        };
+
+        Abstract2DVisualizer.prototype = Object.create(AbstractVisualizer.prototype);
+        Abstract2DVisualizer.prototype.constructor = Abstract2DVisualizer;
+
+        Abstract2DVisualizer.prototype.$$drawCenteredCircle = function (radius) {
+            var
+                ctx = this.$$canvasContext,
+                halfW = 0.5 * this.$$width,
+                halfH = 0.5 * this.$$height;
+
+            ctx.strokeStyle = this.$$colorCenteredCircle;
+            ctx.beginPath();
+            ctx.arc(
+                halfW, halfH,
+                radius,
+                0, 2 * Math.PI, false
+            );
+            ctx.stroke();
+        };
+
+        Abstract2DVisualizer.prototype.$$drawAxis = function () {
+            var
+                ctx = this.$$canvasContext,
+                w = this.$$width,
+                h = this.$$height,
+                halfW = 0.5 * w,
+                halfH = 0.5 * h;
+
+            ctx.strokeStyle = this.$$colorAxis;
+            ctx.beginPath();
+            ctx.moveTo(0, halfH);
+            ctx.lineTo(w, halfH);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(halfW, 0);
+            ctx.lineTo(halfW, h);
+            ctx.closePath();
+            ctx.stroke();
+        };
+
+        Abstract2DVisualizer.prototype.$$dropXYCache = function () {
+            var i;
+
+            for (i = 0; i < this.$$queue.getSize(); i++) {
+                delete this.$$queue.getItem(i).$$cache;
+            }
+        };
+
+        return Abstract2DVisualizer;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
         .registerFactory('Visualizer.AbstractVisualizer', _AbstractVisualizer);
 
     _AbstractVisualizer.$inject = [
@@ -4136,6 +4634,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             var canvasElement = this.$$find('canvas');
 
             this.$$canvasContext = canvasElement.getContext("2d");
+            this.$$canvasContext.lineWidth = 1;
         };
 
         AbstractVisualizer.prototype.$$animationFrameHandler = function () {
@@ -4559,6 +5058,205 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     'use strict';
 
     AudioNetwork.Injector
+        .registerService('Visualizer.ComplexPlaneChartBuilder', _ComplexPlaneChartBuilder);
+
+    _ComplexPlaneChartBuilder.$inject = [
+        'Visualizer.ComplexPlaneChart'
+    ];
+
+    function _ComplexPlaneChartBuilder(
+        ComplexPlaneChart
+    ) {
+
+        function build(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
+            return new ComplexPlaneChart(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Visualizer.ComplexPlaneChartTemplateMain', _ComplexPlaneChartTemplateMain);
+
+    _ComplexPlaneChartTemplateMain.$inject = [];
+
+    function _ComplexPlaneChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="complex-plane-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="complex-plane-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
+
+        return {
+            html: html
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Visualizer.ComplexPlaneChart', _ComplexPlaneChart);
+
+    _ComplexPlaneChart.$inject = [
+        'Visualizer.Abstract2DVisualizer',
+        'Common.Util',
+        'Visualizer.ComplexPlaneChartTemplateMain'
+    ];
+
+    function _ComplexPlaneChart(
+        Abstract2DVisualizer,
+        Util,
+        ComplexPlaneChartTemplateMain
+    ) {
+        var ComplexPlaneChart;
+
+        ComplexPlaneChart = function (parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
+            Abstract2DVisualizer.call(this, parentElement, width, height, colorAxis, colorPowerLine);
+
+            this.$$queue = queue;
+            this.$$maxValue = Util.valueOrDefault(maxValue, 1);
+
+            this.$$hashOnCanvas = null;
+        };
+
+        ComplexPlaneChart.prototype = Object.create(Abstract2DVisualizer.prototype);
+        ComplexPlaneChart.prototype.constructor = ComplexPlaneChart;
+
+        ComplexPlaneChart.$$_VALUE_CIRCLE_STEP = 1;
+        
+        ComplexPlaneChart.prototype.setMaxValue = function (maxValue) {
+            if (this.$$maxValue === maxValue) {
+                return false;
+            }
+            this.$$maxValue = maxValue;
+            this.$$hashOnCanvas = null;
+            this.$$dropXYCache();
+
+            return true;
+        };
+
+        ComplexPlaneChart.prototype.$$renderTemplate = function () {
+            var tpl = ComplexPlaneChartTemplateMain.html;
+
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
+
+            return tpl;
+        };
+
+        ComplexPlaneChart.prototype.$$draw = function () {
+            var
+                ctx = this.$$canvasContext,
+                w = this.$$width,
+                h = this.$$height,
+                halfW = 0.5 * w,
+                halfH = 0.5 * h,
+                q = this.$$queue,
+                item,
+                valueCircle,
+                radius, x, y, i,
+                lineWidth
+            ;
+
+            if (this.$$hashOnCanvas === q.getHash()) {
+                return;
+            }
+
+            ctx.clearRect(0, 0, w, h);
+
+            valueCircle = 0;
+            while (valueCircle <= this.$$maxValue) {
+                radius = halfH * this.$$getNormalizedValue(valueCircle);
+                this.$$drawCenteredCircle(radius);
+                valueCircle += ComplexPlaneChart.$$_VALUE_CIRCLE_STEP;
+            }
+
+            this.$$drawAxis();
+
+            lineWidth = ctx.lineWidth;
+            for (i = 0; i < q.getSize(); i++) {
+                item = q.getItem(i);
+                this.$$setItemXYCache(item);
+
+                x = halfW + halfW * item.$$cache.x;
+                y = halfH - halfH * item.$$cache.y;
+
+                if (item.point) {
+                    ctx.fillStyle = item.pointColor;
+                    ctx.beginPath();
+                    ctx.arc(x, y, item.pointRadius, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                }
+
+                if (item.line) {
+                    ctx.lineWidth = item.lineWidth;
+                    ctx.strokeStyle = item.lineColor;
+                    ctx.beginPath();
+                    ctx.moveTo(halfW, halfH);
+                    ctx.lineTo(x, y);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            }
+            ctx.lineWidth = lineWidth;
+
+            this.$$hashOnCanvas = q.getHash();
+        };
+
+        ComplexPlaneChart.prototype.$$setItemXYCache = function (item) {
+            if (item.$$cache) {
+                return;
+            }
+
+            item.$$cache = {
+                x: this.$$getNormalizedValue(item.real),
+                y: this.$$getNormalizedValue(item.imm)
+            };
+        };
+
+        ComplexPlaneChart.prototype.$$getNormalizedValue = function (value) {
+            return value / this.$$maxValue;
+        };
+
+        return ComplexPlaneChart;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
         .registerService('Visualizer.ConstellationDiagramBuilder', _ConstellationDiagramBuilder);
 
     _ConstellationDiagramBuilder.$inject = [
@@ -4569,8 +5267,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         ConstellationDiagram
     ) {
 
-        function build(parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
-            return new ConstellationDiagram(parentElement, queue, width, height, colorAxis, colorHistoryPoint);
+        function build(parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain) {
+            return new ConstellationDiagram(parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain);
         }
 
         return {
@@ -4628,113 +5326,118 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         .registerFactory('Visualizer.ConstellationDiagram', _ConstellationDiagram);
 
     _ConstellationDiagram.$inject = [
+        'Visualizer.Abstract2DVisualizer',
         'Common.MathUtil',
-        'Common.SimplePromiseBuilder',
+        'Common.Util',
         'Visualizer.ConstellationDiagramTemplateMain'
     ];
 
     function _ConstellationDiagram(
+        Abstract2DVisualizer,
         MathUtil,
-        SimplePromiseBuilder,
+        Util,
         ConstellationDiagramTemplateMain
     ) {
         var ConstellationDiagram;
 
-        ConstellationDiagram = function (parentElement, queue, width, height, colorAxis, colorHistoryPoint) {
-            this.$$parentElement = parentElement;
+        ConstellationDiagram = function (parentElement, width, height, queue, powerDecibelMin, colorAxis, colorHistoryPoint, colorPowerLine, radius, radiusMain) {
+            Abstract2DVisualizer.call(this, parentElement, width, height, colorAxis, colorPowerLine);
+
             this.$$queue = queue;
-            this.$$canvas = null;
-            this.$$canvasContext = null;
-            this.$$canvasWidth = width;
-            this.$$canvasHeight = height;
-            this.$$colorAxis = colorAxis;
-            this.$$colorHistoryPoint = colorHistoryPoint;
-            this.$$destroyPromise = null;
-            
-            this.$$initAnimationFrame();
-            this.$$init();
+            this.$$colorHistoryPoint = Util.valueOrDefault(
+                colorHistoryPoint,
+                {
+                    red: {
+                        newest: 0,
+                        tailNewest: 100,
+                        tailOldest: 180
+                    },
+                    green: {
+                        newest: 0,
+                        tailNewest: 100,
+                        tailOldest: 200
+                    },
+                    blue: {
+                        newest: 0,
+                        tailNewest: 100,
+                        tailOldest: 150
+                    }
+                }
+            );
+            this.$$radius = Util.valueOrDefault(radius, 2);
+            this.$$radiusMain = Util.valueOrDefault(radiusMain, 3);
+            this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
+
+            this.$$hashOnCanvas = null;
         };
 
-        ConstellationDiagram.prototype.destroy = function () {
-            if (this.$$destroyPromise) {
-                return this.$$destroyPromise;
+        ConstellationDiagram.prototype = Object.create(Abstract2DVisualizer.prototype);
+        ConstellationDiagram.prototype.constructor = ConstellationDiagram;
+
+        ConstellationDiagram.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
+        
+        ConstellationDiagram.prototype.setPowerDecibelMin = function (powerDecibelMin) {
+            if (this.$$powerDecibelMin === powerDecibelMin) {
+                return false;
             }
-            this.$$destroyPromise = SimplePromiseBuilder.build();
+            this.$$powerDecibelMin = powerDecibelMin;
+            this.$$hashOnCanvas = null;
+            this.$$dropXYCache();
 
-            return this.$$destroyPromise;
-        };
-
-        ConstellationDiagram.prototype.$$init = function () {
-            this.$$canvasContext = null;
-            this.$$parentElement.innerHTML = this.$$renderTemplate();
-            this.$$connectTemplate();
-            this.$$initCanvasContext();
-        };
-
-        // TODO move it to dedicated service
-        ConstellationDiagram.prototype.$$find = function (selector) {
-            var jsObject = this.$$parentElement.querySelectorAll(selector);
-
-            if (jsObject.length === 0) {
-                throw 'Cannot $$find given selector';
-            }
-
-            return jsObject[0];
-        };
-
-        ConstellationDiagram.prototype.$$connectTemplate = function () {
-            this.$$canvas = this.$$find('.constellation-diagram');
-            this.$$canvasContext = this.$$canvas.getContext("2d");
+            return true;
         };
 
         ConstellationDiagram.prototype.$$renderTemplate = function () {
             var tpl = ConstellationDiagramTemplateMain.html;
 
-            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$canvasWidth).toString());
-            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$canvasHeight).toString());
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
 
             return tpl;
         };
 
-        ConstellationDiagram.prototype.$$updateChart = function () {
+        ConstellationDiagram.prototype.$$draw = function () {
             var
                 chp = this.$$colorHistoryPoint,
                 ctx = this.$$canvasContext,
-                w = this.$$canvasWidth,
-                h = this.$$canvasHeight,
-                halfW = 0.5 * this.$$canvasWidth,
-                halfH = 0.5 * this.$$canvasHeight,
+                w = this.$$width,
+                h = this.$$height,
+                halfW = 0.5 * w,
+                halfH = 0.5 * h,
                 q = this.$$queue,
-                halfQSize,
-                tailUnitPosition, color, x, y, i, isNewest
+                item,
+                powerDecibel,
+                tailUnitPosition, color, radius, x, y, i, isNewest
             ;
 
-            if (ctx === null) {
+            if (this.$$hashOnCanvas === q.getHash()) {
                 return;
             }
 
             ctx.clearRect(0, 0, w, h);
 
-            ctx.beginPath();
-            ctx.moveTo(0, halfH);
-            ctx.lineTo(w, halfH);
-            ctx.closePath();
-            ctx.stroke();
+            powerDecibel = 0;
+            while (powerDecibel >= this.$$powerDecibelMin) {
+                radius = halfH * this.$$getNormalizedPowerDecibel(powerDecibel);
+                this.$$drawCenteredCircle(radius);
+                powerDecibel -= ConstellationDiagram.$$_POWER_DECIBEL_AXIS_LINE_STEP;
+            }
 
-            ctx.beginPath();
-            ctx.moveTo(halfW, 0);
-            ctx.lineTo(halfW, h);
-            ctx.closePath();
-            ctx.stroke();
-
-            halfQSize = 0.5 * q.getSize();
+            this.$$drawAxis();
 
             // from oldest to newest
-            for (i = 0; i < halfQSize; i++) {
-                x = halfW + halfW * q.getItem(2 * i);
-                y = halfH - halfH * q.getItem(2 * i + 1);
-                tailUnitPosition = 1 - (i / (halfQSize - 2));
-                isNewest = (i === halfQSize - 1);
+            for (i = 0; i < q.getSize(); i++) {
+                item = q.getItem(i);
+                this.$$setItemXYCache(item);
+
+                //if (item.$$cache.outOfRange) {
+                //    continue;
+                //}
+
+                x = halfW + halfW * item.$$cache.x;
+                y = halfH - halfH * item.$$cache.y;
+                tailUnitPosition = 1 - (i / (q.getSize() - 2));
+                isNewest = (i === q.getSize() - 1);
 
                 if (isNewest) {
                     color = (
@@ -4751,40 +5454,281 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 }
 
                 ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(
+                    x, y,
+                    isNewest ? this.$$radiusMain : this.$$radius,
+                    0, 2 * Math.PI, false
+                );
+                ctx.fill();
+                /*
                 ctx.fillRect(
                     x - (isNewest ? 2 : 1),
                     y - (isNewest ? 2 : 1),
                     (isNewest ? 5 : 3),
                     (isNewest ? 5 : 3)
                 );
+                */
             }
+
+            this.$$hashOnCanvas = q.getHash();
+        };
+
+        ConstellationDiagram.prototype.$$getNormalizedPowerDecibel = function (powerDecibel) {
+            var normalizedPowerDecibel;
+
+            normalizedPowerDecibel = powerDecibel / this.$$powerDecibelMin;
+            normalizedPowerDecibel = 1 - normalizedPowerDecibel;
+            normalizedPowerDecibel = normalizedPowerDecibel < 0 ? null : normalizedPowerDecibel;
+
+            return normalizedPowerDecibel;
+        };
+
+        ConstellationDiagram.prototype.$$setItemXYCache = function (item) {
+            var normalizedPowerDecibel;
+
+            if (item.$$cache) {
+                return;
+            }
+
+            normalizedPowerDecibel = this.$$getNormalizedPowerDecibel(item.powerDecibel);
+            item.$$cache = {
+                x: normalizedPowerDecibel === null
+                    ? 0
+                    : (normalizedPowerDecibel * MathUtil.sin(MathUtil.TWO_PI * item.phase)),
+                y: normalizedPowerDecibel === null
+                    ? 0
+                    : (normalizedPowerDecibel * MathUtil.cos(MathUtil.TWO_PI * item.phase)),
+                outOfRange: normalizedPowerDecibel === null ? true : false
+            };
         };
 
         ConstellationDiagram.prototype.$$colorInterpolate = function (start, end, unitPosition) {
             return MathUtil.round(start + ((end - start) * unitPosition));
         };
 
-        ConstellationDiagram.prototype.$$initCanvasContext = function () {
-            this.$$canvasContext.lineWidth = 1;
-            this.$$canvasContext.strokeStyle = this.$$colorAxis;
-        };
-
-        ConstellationDiagram.prototype.$$initAnimationFrame = function () {
-            var self = this;
-
-            function drawAgain() {
-                if (self.$$destroyPromise) {
-                    self.$$parentElement.innerHTML = '';
-                    self.$$destroyPromise.resolve();
-                } else {
-                    self.$$updateChart();
-                    requestAnimationFrame(drawAgain);
-                }
-            }
-            requestAnimationFrame(drawAgain);
-        };
-
         return ConstellationDiagram;
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Visualizer.FrequencyDomainChartBuilder', _FrequencyDomainChartBuilder);
+
+    _FrequencyDomainChartBuilder.$inject = [
+        'Visualizer.FrequencyDomainChart'
+    ];
+
+    function _FrequencyDomainChartBuilder(
+        FrequencyDomainChart
+    ) {
+
+        function build(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+            return new FrequencyDomainChart(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Visualizer.FrequencyDomainChartTemplateMain', _FrequencyDomainChartTemplateMain);
+
+    _FrequencyDomainChartTemplateMain.$inject = [];
+
+    function _FrequencyDomainChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="frequency-domain-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="frequency-domain-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
+
+        return {
+            html: html
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Visualizer.FrequencyDomainChart', _FrequencyDomainChart);
+
+    _FrequencyDomainChart.$inject = [
+        'Visualizer.AbstractVisualizer',
+        'Visualizer.FrequencyDomainChartTemplateMain',
+        'Common.Util'
+    ];
+
+    function _FrequencyDomainChart(
+        AbstractVisualizer,
+        FrequencyDomainChartTemplateMain,
+        Util
+    ) {
+        var FrequencyDomainChart;
+
+        FrequencyDomainChart = function (parentElement, width, height, frequencyDomainQueue, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+            AbstractVisualizer.call(this, parentElement, width, height);
+
+            this.$$frequencyDomainQueue = frequencyDomainQueue;
+            this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
+            this.$$radius = Util.valueOrDefault(radius, 1.1);
+            this.$$barWidth = Util.valueOrDefault(barWidth, 1);
+            this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
+            this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
+            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
+
+            this.$$checkWidth();
+
+            this.$$hashOnCanvas = null;
+        };
+
+        FrequencyDomainChart.prototype = Object.create(AbstractVisualizer.prototype);
+        FrequencyDomainChart.prototype.constructor = FrequencyDomainChart;
+
+        FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
+        FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
+
+        FrequencyDomainChart.prototype.setWidth = function (width) {
+            var element;
+
+            if (this.$$width === width) {
+                return false;
+            }
+
+            this.$$width = width;
+            this.$$checkWidth();
+
+            element = this.$$find('.frequency-domain-chart-container');
+            element.style.width = width + 'px';
+            element = this.$$find('.frequency-domain-chart');
+            element.style.width = width + 'px';
+            element.setAttribute("width", width);
+
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        FrequencyDomainChart.prototype.$$checkWidth = function () {
+            if (this.$$frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
+                throw FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
+        };
+
+        FrequencyDomainChart.prototype.$$renderTemplate = function () {
+            var tpl = FrequencyDomainChartTemplateMain.html;
+
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
+
+            return tpl;
+        };
+
+        FrequencyDomainChart.prototype.setPowerDecibelMin = function (powerDecibelMin) {
+            if (this.$$powerDecibelMin === powerDecibelMin) {
+                return false;
+            }
+            this.$$powerDecibelMin = powerDecibelMin;
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        FrequencyDomainChart.prototype.$$draw = function () {
+            var
+                ctx = this.$$canvasContext,
+                fdq = this.$$frequencyDomainQueue,
+                w = this.$$width,
+                h = this.$$height,
+                frequencyBinPowerDecibel, i, x, y,
+                barMiddle
+            ;
+
+            if (this.$$hashOnCanvas === fdq.getHash()) {
+                return;
+            }
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.strokeStyle = this.$$colorAxis;
+            for (i = 0; i <= -this.$$powerDecibelMin; i += FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP) {
+                y = i *  h / -this.$$powerDecibelMin;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = this.$$colorSample;
+            barMiddle = 0.5 * (this.$$barWidth - 1);
+            for (i = 0; i < fdq.getSize(); i++) {
+                frequencyBinPowerDecibel = fdq.getItem(i);
+
+                x = i * (this.$$barWidth + this.$$barSpacingWidth);
+                y = ((frequencyBinPowerDecibel / this.$$powerDecibelMin)) * h;
+
+                if (this.$$barSpacingWidth >= 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                if (y >= h) {
+                    continue;
+                }
+
+                ctx.beginPath();
+                ctx.arc(
+                    x + this.$$barSpacingWidth + barMiddle, y,
+                    this.$$radius, 0, 2 * Math.PI, false
+                );
+                ctx.fill();
+                // ctx.fillRect(x - 1, y - 1, 3, 3);
+            }
+
+            this.$$hashOnCanvas = fdq.getHash();
+        };
+
+        FrequencyDomainChart.prototype.$$initCanvasContext = function () {
+            this.$$canvasContext.lineWidth = 1;
+        };
+
+        return FrequencyDomainChart;
     }
 
 })();
@@ -5006,8 +5950,8 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
         SampleChart
     ) {
 
-        function build(parentElement, width, height) {
-            return new SampleChart(parentElement, width, height);
+        function build(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar) {
+            return new SampleChart(parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar);
         }
 
         return {
@@ -5029,7 +5973,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     function _SampleChartTemplateMain() {
         var html =
             '<div' +
-            '    class="power-chart-container"' +
+            '    class="sample-chart-container"' +
             '    style="' +
             '        overflow: hidden;' +
             '        width: {{ width }}px;' +
@@ -5038,7 +5982,7 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
             '    "' +
             '    >' +
             '    <canvas ' +
-            '        class="power-chart"' +
+            '        class="sample-chart"' +
             '        style="' +
             '            width: {{ width }}px;' +
             '            height: {{ height }}px;' +
@@ -5077,21 +6021,66 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     ) {
         var SampleChart;
 
-        SampleChart = function (parentElement, width, height, queue, colorAxis, colorSample) {
+        SampleChart = function (parentElement, width, height, queue, radius, barWidth, barSpacingWidth, colorAxis, colorSample, colorBar) {
             AbstractVisualizer.call(this, parentElement, width, height);
 
-            if (queue.getSizeMax() !== width) {
-                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
-            }
             this.$$queue = queue;
+            this.$$radius = Util.valueOrDefault(radius, 1.1);
+            this.$$barWidth = Util.valueOrDefault(barWidth, 1);
+            this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
             this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
-            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
+            this.$$colorSample = Util.valueOrDefault(colorSample, 'rgba(115, 139, 215, 1.0');
+            this.$$colorBar = Util.valueOrDefault(colorBar, 'rgba(115, 139, 215, 0.9)');
+
+            this.$$sampleBackgroundActive = false;
+
+            this.$$checkWidth();
+
+            this.$$hashOnCanvas = null;
         };
 
         SampleChart.prototype = Object.create(AbstractVisualizer.prototype);
         SampleChart.prototype.constructor = SampleChart;
 
         SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
+
+        SampleChart.prototype.setWidth = function (width) {
+            var element;
+
+            if (this.$$width === width) {
+                return false;
+            }
+
+            this.$$width = width;
+            this.$$checkWidth();
+
+            element = this.$$find('.sample-chart-container');
+            element.style.width = width + 'px';
+            element = this.$$find('.sample-chart');
+            element.style.width = width + 'px';
+            element.setAttribute("width", width);
+
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        SampleChart.prototype.enableSampleBackground = function () {
+            if (this.$$sampleBackgroundActive) {
+                return false;
+            }
+
+            this.$$sampleBackgroundActive = true;
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        SampleChart.prototype.$$checkWidth = function () {
+            if (this.$$queue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
+                throw SampleChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
+        };
 
         SampleChart.prototype.$$renderTemplate = function () {
             var tpl = SampleChartTemplateMain.html;
@@ -5108,27 +6097,80 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
                 q = this.$$queue,
                 w = this.$$width,
                 h = this.$$height,
-                sample, i, x, y
+                hHalf = this.$$height * 0.5,
+                sample, i, x, y, barMiddle
             ;
+
+            if (this.$$hashOnCanvas === q.getHash()) {
+                return;
+            }
 
             ctx.clearRect(0, 0, w, h);
 
+            // draw horizontal axis
             ctx.strokeStyle = this.$$colorAxis;
             ctx.beginPath();
-            ctx.moveTo(0, 0.5 * h);
-            ctx.lineTo(w, 0.5 * h);
+            ctx.moveTo(0, hHalf);
+            ctx.lineTo(w, hHalf);
             ctx.closePath();
             ctx.stroke();
 
+            barMiddle = 0.5 * (this.$$barWidth - 1);
             for (i = 0; i < q.getSize(); i++) {
                 sample = q.getItem(i);
 
-                x = i;
+                x = i * (this.$$barWidth + this.$$barSpacingWidth);
                 y = (0.5 - 0.5 * sample) * h;
 
+                if (this.$$barSpacingWidth > 0) {
+                    // draw bar spacing
+                    if (this.$$barSpacingWidth === 1) {
+                        ctx.strokeStyle = this.$$colorAxis;
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, h);
+                        ctx.closePath();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = this.$$colorAxis;
+                        ctx.fillRect(
+                            x, 0,
+                            this.$$barSpacingWidth, h
+                        );
+                    }
+                }
+
+                if (this.$$sampleBackgroundActive) {
+                    // draw sample-origin background
+                    if (this.$$barWidth === 1) {
+                        ctx.strokeStyle = this.$$colorBar;
+                        ctx.beginPath();
+                        ctx.moveTo(x + this.$$barSpacingWidth, hHalf);
+                        ctx.lineTo(x + this.$$barSpacingWidth, y);
+                        ctx.closePath();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = this.$$colorBar;
+                        ctx.fillRect(
+                            x + this.$$barSpacingWidth,
+                            hHalf < y ? hHalf : y,
+                            this.$$barWidth,
+                            hHalf < y ? (y - hHalf) : (hHalf - y)
+                        );
+                    }
+                }
+
+                // draw sample circle
                 ctx.fillStyle = this.$$colorSample;
-                ctx.fillRect(x - 1, y - 1, 3, 3);
+                ctx.beginPath();
+                ctx.arc(
+                    x + this.$$barSpacingWidth + barMiddle, y,
+                    this.$$radius, 0, 2 * Math.PI, false
+                );
+                ctx.fill();
             }
+
+            this.$$hashOnCanvas = q.getHash();
         };
 
         SampleChart.prototype.$$initCanvasContext = function () {
@@ -5139,31 +6181,41 @@ SYNC_ZERO | ADDR_SRC | ADDR_DEST | LENGTH | data .... data | SHA1[first 2 bytes]
     }
 
 })();
-
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-// create aliases in main namespace for public classes
-AudioNetwork.PhysicalLayer = {};
-AudioNetwork.PhysicalLayer.PhysicalLayer = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer');
-AudioNetwork.PhysicalLayer.DefaultConfig = AudioNetwork.Injector.resolve('PhysicalLayer.DefaultConfig');
-AudioNetwork.PhysicalLayer.RxInput = AudioNetwork.Injector.resolve('PhysicalLayer.RxInput');
+if (AudioNetwork.bootConfig.createAlias) {
+    // create aliases for easier access
 
-AudioNetwork.PhysicalLayerAdapter = {};
-AudioNetwork.PhysicalLayerAdapter.TransmitAdapter = AudioNetwork.Injector.resolve('PhysicalLayerAdapter.TransmitAdapter');
-AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter = AudioNetwork.Injector.resolve('PhysicalLayerAdapter.ReceiveAdapter');
+    AudioNetwork.PhysicalLayer = {};
+    AudioNetwork.PhysicalLayer.PhysicalLayer = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer');
+    AudioNetwork.PhysicalLayer.DefaultConfig = AudioNetwork.Injector.resolve('PhysicalLayer.DefaultConfig');
+    AudioNetwork.PhysicalLayer.RxInput = AudioNetwork.Injector.resolve('PhysicalLayer.RxInput');
 
-AudioNetwork.Audio = {};
-AudioNetwork.Audio.ActiveAudioContext = AudioNetwork.Injector.resolve('Audio.ActiveAudioContext');
-AudioNetwork.Audio.SimpleAudioContext = AudioNetwork.Injector.resolve('Audio.SimpleAudioContext');
+    AudioNetwork.PhysicalLayerAdapter = {};
+    AudioNetwork.PhysicalLayerAdapter.TransmitAdapter = AudioNetwork.Injector.resolve('PhysicalLayerAdapter.TransmitAdapter');
+    AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter = AudioNetwork.Injector.resolve('PhysicalLayerAdapter.ReceiveAdapter');
 
-AudioNetwork.Common = {};
-AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');
-AudioNetwork.Common.CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery');
-AudioNetwork.Common.CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate');
+    AudioNetwork.Audio = {};
+    AudioNetwork.Audio.ActiveAudioContext = AudioNetwork.Injector.resolve('Audio.ActiveAudioContext');
+    AudioNetwork.Audio.SimpleAudioContext = AudioNetwork.Injector.resolve('Audio.SimpleAudioContext');
 
-AudioNetwork.Visualizer = {};
-AudioNetwork.Visualizer.AnalyserChart = AudioNetwork.Injector.resolve('Visualizer.AnalyserChart');
-AudioNetwork.Visualizer.ConstellationDiagram = AudioNetwork.Injector.resolve('Visualizer.ConstellationDiagram');
-AudioNetwork.Visualizer.PowerChart = AudioNetwork.Injector.resolve('Visualizer.PowerChart');
-AudioNetwork.Visualizer.SampleChart = AudioNetwork.Injector.resolve('Visualizer.SampleChart');
+    AudioNetwork.Common = {};
+    AudioNetwork.Common.Queue = AudioNetwork.Injector.resolve('Common.Queue');
+    AudioNetwork.Common.CarrierRecovery = AudioNetwork.Injector.resolve('Common.CarrierRecovery');
+    AudioNetwork.Common.CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate');
+    AudioNetwork.Common.WindowFunction = AudioNetwork.Injector.resolve('Common.WindowFunction');
+    AudioNetwork.Common.Util = AudioNetwork.Injector.resolve('Common.Util');
+
+    AudioNetwork.Visualizer = {};
+    AudioNetwork.Visualizer.AnalyserChart = AudioNetwork.Injector.resolve('Visualizer.AnalyserChart');
+    AudioNetwork.Visualizer.ConstellationDiagram = AudioNetwork.Injector.resolve('Visualizer.ConstellationDiagram');
+    AudioNetwork.Visualizer.PowerChart = AudioNetwork.Injector.resolve('Visualizer.PowerChart');
+    AudioNetwork.Visualizer.SampleChart = AudioNetwork.Injector.resolve('Visualizer.SampleChart');
+    AudioNetwork.Visualizer.FrequencyDomainChart = AudioNetwork.Injector.resolve('Visualizer.FrequencyDomainChart');
+    AudioNetwork.Visualizer.ComplexPlaneChart = AudioNetwork.Injector.resolve('Visualizer.ComplexPlaneChart');
+}
+
+if (AudioNetwork.isNode) {
+    module.exports = AudioNetwork;
+}
