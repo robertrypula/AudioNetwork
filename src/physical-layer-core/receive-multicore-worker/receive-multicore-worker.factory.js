@@ -7,47 +7,76 @@
 
     _ReceiveMulticoreWorker.$inject = [
         'PhysicalLayerCore.ReceiveMulticoreWorkerThread',
-        'Common.StopwatchBuilder'
+        'Common.SimplePromiseBuilder'
     ];
 
     function _ReceiveMulticoreWorker(
         ReceiveMulticoreWorkerThread,
-        StopwatchBuilder
+        SimplePromiseBuilder
     ) {
         var ReceiveMulticoreWorker;
 
         ReceiveMulticoreWorker = function () {
+            var threadCode, blob;
+
             if (AudioNetwork.bootConfig.multicoreState === AudioNetwork.MULTICORE_STATE.DISABLED) {
                 throw ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION;
             }
 
-            this.$$stopwatch = StopwatchBuilder.build();
-            var js = ReceiveMulticoreWorkerThread.getJavaScriptCode();
-            var blob = new Blob(
-                [ js ],
+            threadCode = ReceiveMulticoreWorkerThread.getJavaScriptCode();
+            blob = new Blob(
+                [ threadCode ],
                 { type: 'application/javascript' }
             );
 
             this.$$worker = new Worker(URL.createObjectURL(blob));
-            this.$$worker.onmessage = this.onMessage.bind(this);
+            this.$$worker.onmessage = this.$$onMessage.bind(this);
+
+            this.$$promiseComputeCrazySineSum = undefined;
         };
 
         ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION = 'Multicore support is not enabled';
+        ReceiveMulticoreWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION = 'Previous promise not resolved yet';
 
-        ReceiveMulticoreWorker.prototype.onMessage = function(oEvent) {
-            var m = oEvent.data;
+        ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM = 'ACTION_COMPUTE_CRAZY_SINE_SUM';
+        ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM_SUCCESS = 'ACTION_COMPUTE_CRAZY_SINE_SUM_SUCCESS';
+        ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM_FAIL = 'ACTION_COMPUTE_CRAZY_SINE_SUM_FAIL';
 
-            if (m === 'ready') {
-                console.log(':: thread started ::');
-                this.$$stopwatch.start();
-                this.$$worker.postMessage("some crazy sine sum");
-            } else {
-                console.log(":: thread stopped ::");
-                console.log("Thread message: " + oEvent.data);
-                console.log("Thread time: " + this.$$stopwatch.stop().getDuration(true) + ' seconds');
+        ReceiveMulticoreWorker.prototype.destroy = function() {
+            if (this.$$worker) {
                 this.$$worker.terminate();
+                this.$$worker = undefined;
             }
+        };
 
+        ReceiveMulticoreWorker.prototype.$$onMessage = function(event) {
+            var
+                data = event.data,
+                action = data.length > 0 ? data[0] : null,
+                result = data.length > 1 ? data[1] : null;
+
+            switch (action) {
+                case ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM_SUCCESS:
+                    this.$$promiseComputeCrazySineSum.resolve(result);
+                    this.$$promiseComputeCrazySineSum = undefined;
+                    break;
+                case ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM_FAIL:
+                    this.$$promiseComputeCrazySineSum.reject();
+                    this.$$promiseComputeCrazySineSum = undefined;
+                    break;
+            }
+        };
+
+        ReceiveMulticoreWorker.prototype.computeCrazySineSum = function () {
+            if (this.$$promiseComputeCrazySineSum) {
+                throw ReceiveWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION;
+            }
+            this.$$promiseComputeCrazySineSum = SimplePromiseBuilder.build();
+            this.$$worker.postMessage([
+                ReceiveMulticoreWorker.ACTION_COMPUTE_CRAZY_SINE_SUM
+            ]);
+
+            return this.$$promiseComputeCrazySineSum;
         };
 
         return ReceiveMulticoreWorker;
