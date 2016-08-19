@@ -48,7 +48,7 @@ gulp.task('serve', function() {
     gulp.src('.')
         .pipe(webserver({
             fallback: 'index.html',
-            livereload: true,
+            // livereload: true,
             directoryListing: true,
             open: 'http://localhost:8000/index.html'
         }));
@@ -56,18 +56,18 @@ gulp.task('serve', function() {
 
 var Glob = require("glob").Glob;
 
-gulp.task('script-tag', function() {
+gulp.task('script-list', function() {
     var pattern = "./src/**/!(audio-network-boot|audio-network-end|*.test).js";
     var mg = new Glob(pattern, {mark: true}, function (er, matches) {
-        console.log('<script src="../../src/audio-network-boot.js"></script>');
+        console.log('\'audio-network-boot.js\',');
         for (var i = 0; i < matches.length; i++) {
             matches[i] = matches[i]
-                .replace('./src/', '<script src="../../src/')
-                .replace('.js', '.js"></script>');
+                .replace('./src/', '\'')
+                .replace('.js', '.js\',');
 
             console.log(matches[i]);
         }
-        console.log('<script src="../../src/audio-network-end.js"></script>');
+        console.log('\'audio-network-end.js\'');
     });
 });
 

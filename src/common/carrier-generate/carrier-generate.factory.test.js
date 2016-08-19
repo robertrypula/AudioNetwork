@@ -3,5 +3,8 @@
 describe('common.carrier-generate', function () {
     'use strict';
 
+    it('should work', function () {
+        expect(true).toBe(true);
+    })
 
 });

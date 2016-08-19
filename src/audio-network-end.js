@@ -1,8 +1,8 @@
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-if (typeof AudioNetworkBlockAliasCreation === 'undefined') {
-    // create aliases in main namespace for public classes
+if (AudioNetwork.bootConfig.createAlias) {
+    // create aliases for easier access
 
     AudioNetwork.PhysicalLayer = {};
     AudioNetwork.PhysicalLayer.PhysicalLayer = AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer');
@@ -31,4 +31,8 @@ if (typeof AudioNetworkBlockAliasCreation === 'undefined') {
     AudioNetwork.Visualizer.SampleChart = AudioNetwork.Injector.resolve('Visualizer.SampleChart');
     AudioNetwork.Visualizer.FrequencyDomainChart = AudioNetwork.Injector.resolve('Visualizer.FrequencyDomainChart');
     AudioNetwork.Visualizer.ComplexPlaneChart = AudioNetwork.Injector.resolve('Visualizer.ComplexPlaneChart');
+}
+
+if (AudioNetwork.isNode) {
+    module.exports = AudioNetwork;
 }

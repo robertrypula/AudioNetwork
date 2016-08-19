@@ -1,22 +1,49 @@
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-// AudioNetwork namespace - this is the only variable that is visible to the global JavaScript scope
-var AudioNetwork = {};
+var
+    AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
+    AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.Version = '1.0.4';
+AudioNetwork.version = '1.0.4';
 
-// AudioNetwork.isNode = typeof module !== 'undefined' && module.exports;    // running under node.js? - http://stackoverflow.com/questions/4224606
+// conditions from: http://stackoverflow.com/a/33697246
+AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;
+AudioNetwork.isWebWorker = !AudioNetwork.isNode && typeof WorkerGlobalScope !== 'undefined' && typeof importScripts == 'function' && navigator instanceof WorkerNavigator;
+AudioNetwork.isBrowser = !AudioNetwork.isNode && !AudioNetwork.isWebWorker && typeof navigator !== 'undefined' && typeof document !== 'undefined';
+
 /*
-AudioNetwork.isWebWorker = ??
- function testEnv() {
- if (window.document === undefined) {
-    postMessage("I'm fairly confident I'm a webworker");
- } else {
-    console.log("I'm fairly confident I'm in the renderer thread");
- }
- }
- */
+console.log(AudioNetwork.isNode);
+console.log(AudioNetwork.isWebWorker);
+console.log(AudioNetwork.isBrowser);
+*/
+
+AudioNetwork.MULTICORE_STATE = {
+    DISABLED: 'DISABLED',
+    ENABLED_USE_PROD_SCRIPT: 'ENABLED_USE_PROD_SCRIPT',
+    ENABLED_USE_DEV_SCRIPT: 'ENABLED_USE_DEV_SCRIPT'
+};
+
+AudioNetwork.bootConfig = {
+    devScriptBaseUrl: typeof AudioNetworkBootConfig.devScriptBaseUrl === 'string'
+        ? AudioNetworkBootConfig.devScriptBaseUrl
+        : (AudioNetwork.isBrowser ? window.location.origin + '/src/' : ''),
+    prodScriptBaseUrl: typeof AudioNetworkBootConfig.prodScriptBaseUrl === 'string'
+        ? AudioNetworkBootConfig.prodScriptBaseUrl
+        : (AudioNetwork.isBrowser ? window.location.origin + '/build/' : ''),
+    prodScriptName: typeof AudioNetworkBootConfig.prodScriptName === 'string'
+        ? AudioNetworkBootConfig.prodScriptName
+        : 'audio-network-v' + AudioNetwork.version + '.js',
+    devScriptLoad: typeof AudioNetworkBootConfig.devScriptLoad !== 'undefined'
+        ? !!AudioNetworkBootConfig.devScriptLoad
+        : false,
+    createAlias: typeof AudioNetworkBootConfig.createAlias !== 'undefined'
+        ? !!AudioNetworkBootConfig.createAlias
+        : (AudioNetwork.isBrowser ? true : false),
+    multicoreState: Object.keys(AudioNetwork.MULTICORE_STATE).indexOf(AudioNetworkBootConfig.multicoreState) !== -1
+        ? AudioNetworkBootConfig.multicoreState
+        : AudioNetwork.MULTICORE_STATE.DISABLED
+};
 
 AudioNetwork.Injector = (function () {
     var Injector;
@@ -157,10 +184,45 @@ AudioNetwork.Injector = (function () {
         throw Injector.UNABLE_TO_FIND_ITEM_EXCEPTION + name;
     };
 
-    return new Injector();
+    return new Injector(); // instantiate service
 })();
 
-AudioNetwork.scriptList = [
+AudioNetwork.DynamicScriptLoader = (function () {
+    var DynamicScriptLoader;
+
+    DynamicScriptLoader = function () {
+    };
+
+    DynamicScriptLoader.prototype.loadList = function (urlList, startingIndex) {
+        var i;
+
+        if (typeof startingIndex === 'undefined') {
+            startingIndex = 0;
+        }
+
+        for (i = startingIndex; i < urlList.length; i++) {
+            this.loadOne(urlList[i]);
+        }
+    };
+
+    DynamicScriptLoader.prototype.loadOne = function (url) {
+        /*
+        var
+            anRoot = document.getElementById('an-root'),
+            scriptTag = document.createElement('script'),
+            whereToAppend = anRoot ? anRoot : document.body;
+
+        scriptTag.src = AudioNetwork.bootConfig.devScriptBaseUrl + url;
+        whereToAppend.appendChild(scriptTag);
+        */
+        // block page loading - this is the best approach so far... :)
+        document.write('<script src="' + AudioNetwork.bootConfig.devScriptBaseUrl + url + '"></script>')
+    };
+
+    return new DynamicScriptLoader(); // instantiate service
+})();
+
+AudioNetwork.devScriptList = [
     'audio-network-boot.js',
     'audio/active-audio-context/active-audio-context.service.js',
     'audio/simple-audio-context/simple-audio-context-builder.service.js',
@@ -235,3 +297,8 @@ AudioNetwork.scriptList = [
     'visualizer/sample-chart/sample-chart.factory.js',
     'audio-network-end.js'
 ];
+
+if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
+    // start from index 1 because audio-network-boot.js was already loaded
+    AudioNetwork.DynamicScriptLoader.loadList(AudioNetwork.devScriptList, 1);
+}

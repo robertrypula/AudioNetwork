@@ -6,4 +6,7 @@ function onClick() {
     receiveMulticoreWorker = new ReceiveMulticoreWorker();
 }
 
-setTimeout(onClick, 2000);
+setTimeout(function () {
+    document.write('TEST');
+    setTimeout(onClick, 0);
+}, 2000);
