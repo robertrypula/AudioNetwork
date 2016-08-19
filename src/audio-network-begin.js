@@ -161,7 +161,7 @@ AudioNetwork.Injector = (function () {
 })();
 
 AudioNetwork.scriptList = [
-    'audio-network-begin.js',
+    'audio-network-boot.js',
     'audio/active-audio-context/active-audio-context.service.js',
     'audio/simple-audio-context/simple-audio-context-builder.service.js',
     'audio/simple-audio-context/simple-audio-context.factory.js',

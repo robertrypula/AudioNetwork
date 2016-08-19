@@ -13,8 +13,8 @@ var DEST = 'build/';
 gulp.task('default', function() {
     // var pattern = "./src/**/!(*.test).js";
     return gulp.src([
-            './src/audio-network-begin.js',
-            './src/**/!(audio-network-begin|audio-network-end|*.test).js',
+            './src/audio-network-boot.js',
+            './src/**/!(audio-network-boot|audio-network-end|*.test).js',
             './src/audio-network-end.js'
         ])
         .pipe(debug())
@@ -57,9 +57,9 @@ gulp.task('serve', function() {
 var Glob = require("glob").Glob;
 
 gulp.task('script-tag', function() {
-    var pattern = "./src/**/!(audio-network-begin|audio-network-end|*.test).js";
+    var pattern = "./src/**/!(audio-network-boot|audio-network-end|*.test).js";
     var mg = new Glob(pattern, {mark: true}, function (er, matches) {
-        console.log('<script src="../../src/audio-network-begin.js"></script>');
+        console.log('<script src="../../src/audio-network-boot.js"></script>');
         for (var i = 0; i < matches.length; i++) {
             matches[i] = matches[i]
                 .replace('./src/', '<script src="../../src/')

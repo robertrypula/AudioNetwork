@@ -96,7 +96,7 @@ Below you can find `Demo - simple` source code:
 >[here](https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins)
 
 In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
-[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L9) implementation.
+[Injector](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-boot.js#L9) implementation.
 For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
 AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
 you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)

@@ -118,7 +118,7 @@ browsers accessing microphone is not allowed when site is not hosted over <code>
 <a href="https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins" target="_blank">here</a></p>
 </blockquote>
 <p>In case you are curious about long namespaces: Under the hood AudioNetwork works on simple
-<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-begin.js#L9" target="_blank">Injector</a> implementation.
+<a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-boot.js#L9" target="_blank">Injector</a> implementation.
 For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
 AudioNetwork.Injector.resolve(&#39;PhysicalLayer.PhysicalLayer&#39;). Other public classes/services that have aliases
 you can find <a href="https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js" target="_blank">here</a></p>
