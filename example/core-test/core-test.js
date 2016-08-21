@@ -16,27 +16,28 @@ var
     SIZE = 4;
 
 function log(s) {
-  var element = document.getElementById('log');
+    var element = document.getElementById('log');
 
-  element.innerHTML += s + '\n';
+    console.log(s);
+    element.innerHTML += s + '\n';
 }
 
 function compare() {
-  var ratio  = sSingleTotal.getDuration() / sMultiTotal.getDuration();
+    var ratio = sSingleTotal.getDuration() / sMultiTotal.getDuration();
 
-  log('ratio ' + ratio);
+    log('ratio ' + ratio);
 }
 
 function run() {
     var i;
 
     for (i = 0; i < SIZE; i++) {
-      rwMulti.push(new ReceiveMulticoreWorker());
-      rwSingle.push(new ReceiveWorker());
-      sMulti.push(new Stopwatch());
-      sSingle.push(new Stopwatch());
-      sMultiTotal = new Stopwatch();
-      sSingleTotal = new Stopwatch();
+        rwMulti.push(new ReceiveMulticoreWorker());
+        rwSingle.push(new ReceiveWorker());
+        sMulti.push(new Stopwatch());
+        sSingle.push(new Stopwatch());
+        sMultiTotal = new Stopwatch();
+        sSingleTotal = new Stopwatch();
     }
 
     // single
