@@ -29,17 +29,6 @@ function compare() {
 }
 
 function run() {
-    var i;
-
-    for (i = 0; i < SIZE; i++) {
-        rwMulti.push(new ReceiveMulticoreWorker());
-        rwSingle.push(new ReceiveWorker());
-        sMulti.push(new Stopwatch());
-        sSingle.push(new Stopwatch());
-        sMultiTotal = new Stopwatch();
-        sSingleTotal = new Stopwatch();
-    }
-
     // single
     log(':: single thread START ::');
     sSingleTotal.start();
@@ -78,7 +67,35 @@ function run() {
     }
 }
 
+function init() {
+    var i, threadReadyPromiseList, sw, trp;
+
+    threadReadyPromiseList = []
+    for (i = 0; i < SIZE; i++) {
+        rwMulti.push(new ReceiveMulticoreWorker());
+        rwSingle.push(new ReceiveWorker());
+        sMulti.push(new Stopwatch());
+        sSingle.push(new Stopwatch());
+        sMultiTotal = new Stopwatch();
+        sSingleTotal = new Stopwatch();
+
+        threadReadyPromiseList.push(rwMulti[i].getThreadReadyPromise());
+    }
+
+    sw = new Stopwatch();
+    trp = SimplePromiseBuilder.buildFromList(threadReadyPromiseList);
+    log('Waiting for all threads...');
+    sw.start();
+    trp.then(function () {
+        log(
+            'All threads ready in ' +
+            sw.stop().getDuration(true) + 'sec'
+        );
+        run();
+    });
+}
+
 setTimeout(function () {
     document.write('<pre id="log"></pre>');
-    setTimeout(run, 0);
+    setTimeout(init, 0);
 }, 2000);
