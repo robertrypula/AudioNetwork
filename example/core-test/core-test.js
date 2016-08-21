@@ -29,16 +29,20 @@ function compare() {
 }
 
 function run() {
+    var i;
+
     // single
     log(':: single thread START ::');
     sSingleTotal.start();
     for (i = 0; i < SIZE; i++) {
         rwSingleStarted++;
         log('  started so far: ' + rwSingleStarted);
-        rwSingle[i].computeCrazySineSum()
-            .then(function (result) {
+        rwSingle[i].computeCrazySineSum(i)
+            .then(function (data) {
                 rwSingleFinished++;
                 log('  finished so far: ' + rwSingleFinished);
+                log('  --> key: ' + data.key);
+                log('  --> result: ' + data.result);
                 if (rwSingleFinished === SIZE) {
                     log(':: single thread END ::');
                     log('Duration: ' + sSingleTotal.stop().getDuration(true) + ' sec');
@@ -53,10 +57,12 @@ function run() {
     for (i = 0; i < SIZE; i++) {
         rwMultiStarted++;
         log('  started so far: ' + rwMultiStarted);
-        rwMulti[i].computeCrazySineSum()
-            .then(function (result) {
+        rwMulti[i].computeCrazySineSum(i)
+            .then(function (data) {
                 rwMultiFinished++;
                 log('  finished so far: ' + rwMultiFinished);
+                log('  --> key: ' + data.key);
+                log('  --> result: ' + data.result);
                 if (rwMultiFinished === SIZE) {
                     log(':: multi thread END ::');
                     log('Duration: ' + sMultiTotal.stop().getDuration(true) + ' sec');
@@ -72,14 +78,14 @@ function init() {
 
     threadReadyPromiseList = []
     for (i = 0; i < SIZE; i++) {
-        rwMulti.push(new ReceiveMulticoreWorker());
-        rwSingle.push(new ReceiveWorker());
+        rwMulti.push(new ReceiveMulticoreWorker(i));
+        rwSingle.push(new ReceiveWorker(i));
         sMulti.push(new Stopwatch());
         sSingle.push(new Stopwatch());
         sMultiTotal = new Stopwatch();
         sSingleTotal = new Stopwatch();
 
-        threadReadyPromiseList.push(rwMulti[i].getThreadReadyPromise());
+        threadReadyPromiseList.push(rwMulti[i].getInitialization());
     }
 
     sw = new Stopwatch();

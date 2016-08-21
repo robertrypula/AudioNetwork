@@ -55,11 +55,12 @@
             js += 'self.onmessage = function(event) {                                                          ' + '\n';
             js += '    var                                                                                     ' + '\n';
             js += '        data = event.data,                                                                  ' + '\n';
-            js += '        message = data.length > 0 ? data[0] : null;                                         ' + '\n';
+            js += '        message = data.length > 0 ? data[0] : null,                                         ' + '\n';
+            js += '        param = data.length > 0 ? data[1] : null;                                           ' + '\n';
             js += '                                                                                            ' + '\n';
             js += '    switch (message) {                                                                      ' + '\n';
             js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
-            js += '            receiveWorker.computeCrazySineSum()                                             ' + '\n';
+            js += '            receiveWorker.computeCrazySineSum(param)                                        ' + '\n';
             js += '                .then(function (result) {                                                   ' + '\n';
             js += '                    self.postMessage([                                                      ' + '\n';
             js += '                        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS,              ' + '\n';
@@ -76,7 +77,7 @@
             js += '}                                                                                           ' + '\n';
             js += '                                                                                            ' + '\n';
             js += 'self.postMessage([                                                                          ' + '\n';
-            js += '    ReceiveMulticoreWorker.THREAD_READY                                                     ' + '\n';
+            js += '    ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                                           ' + '\n';
             js += ']);                                                                                         ' + '\n';
             js += '                                                                                            ' + '\n';
 
