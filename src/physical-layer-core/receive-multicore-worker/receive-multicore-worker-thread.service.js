@@ -31,7 +31,7 @@
         }
 
         function getJavaScriptCode() {
-            var i, js = '', scriptList;
+            var js = '', scriptList;
 
             switch (AudioNetwork.bootConfig.multicoreState) {
                 case AudioNetwork.MULTICORE_STATE.ENABLED_USE_DEV_SCRIPT:
@@ -46,39 +46,51 @@
             js += scriptList.join('');
             js += ');                                                                                          ' + '\n';
             js += '                                                                                            ' + '\n';
-            js += 'var ReceiveWorker = AudioNetwork.Injector.resolve("PhysicalLayerCore.ReceiveWorker");       ' + '\n';
-            js += 'var ReceiveMulticoreWorker = AudioNetwork.Injector.resolve("PhysicalLayerCore.ReceiveMulticoreWorker");       ' + '\n';
-            js += 'var receiveWorker = new ReceiveWorker();                                                    ' + '\n';
+            js += 'var                                                                                         ' + '\n';
+            js += '    iAlias = AudioNetwork.Injector,                                                         ' + '\n';
+            js += '    ReceiveWorker = iAlias.resolve("PhysicalLayerCore.ReceiveWorker"),                      ' + '\n';
+            js += '    ReceiveMulticoreWorker = iAlias.resolve("PhysicalLayerCore.ReceiveMulticoreWorker"),    ' + '\n';
+            js += '    receiveWorker = undefined;                                                              ' + '\n';
             js += '                                                                                            ' + '\n';
             js += '// eval("console.log(\'eval inside thread test\');")                                        ' + '\n';
             js += '                                                                                            ' + '\n';
             js += 'self.onmessage = function(event) {                                                          ' + '\n';
             js += '    var                                                                                     ' + '\n';
             js += '        data = event.data,                                                                  ' + '\n';
-            js += '        message = data.length > 0 ? data[0] : null,                                         ' + '\n';
-            js += '        param = data.length > 0 ? data[1] : null;                                           ' + '\n';
+            js += '        messageIndex = data.length > 0 ? data[0] : null,                                    ' + '\n';
+            js += '        param = data.length > 0 ? data[1] : null,                                           ' + '\n';
+            js += '        promise;                                                                            ' + '\n';
             js += '                                                                                            ' + '\n';
-            js += '    switch (message) {                                                                      ' + '\n';
-            js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
-            js += '            receiveWorker.computeCrazySineSum(param)                                        ' + '\n';
-            js += '                .then(function (result) {                                                   ' + '\n';
-            js += '                    self.postMessage([                                                      ' + '\n';
-            js += '                        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS,              ' + '\n';
-            js += '                        result                                                              ' + '\n';
-            js += '                    ]);                                                                     ' + '\n';
-            js += '                })                                                                          ' + '\n';
-            js += '                .catch(function () {                                                        ' + '\n';
-            js += '                    self.postMessage([                                                      ' + '\n';
-            js += '                        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_FAIL                  ' + '\n';
-            js += '                    ]);                                                                     ' + '\n';
-            js += '                });                                                                         ' + '\n';
+            js += '    switch (messageIndex) {                                                                 ' + '\n';
+            js += '        case ReceiveMulticoreWorker.INITIALIZATION:                                         ' + '\n';
+            js += '            receiveWorker = new ReceiveWorker(param);                                       ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                               ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
             js += '            break;                                                                          ' + '\n';
-            js += '   }                                                                                        ' + '\n';
-            js += '}                                                                                           ' + '\n';
+            js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
+            js += '            promise = receiveWorker.computeCrazySineSum(param);                             ' + '\n';
+            js += '            break;                                                                          ' + '\n';
+            js += '    }                                                                                       ' + '\n';
             js += '                                                                                            ' + '\n';
-            js += 'self.postMessage([                                                                          ' + '\n';
-            js += '    ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                                           ' + '\n';
-            js += ']);                                                                                         ' + '\n';
+            js += '    if (!promise) {                                                                         ' + '\n';
+            js += '        return;                                                                             ' + '\n';
+            js += '    }                                                                                       ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += '    promise                                                                                 ' + '\n';
+            js += '        .then(function (result) {                                                           ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS,         ' + '\n';
+            js += '                result                                                                      ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
+            js += '        })                                                                                  ' + '\n';
+            js += '        .catch(function () {                                                                ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL,            ' + '\n';
+            js += '                result                                                                      ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
+            js += '        });                                                                                 ' + '\n';
+            js += '}                                                                                           ' + '\n';
             js += '                                                                                            ' + '\n';
 
             return js;

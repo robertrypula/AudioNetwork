@@ -41,8 +41,8 @@ function run() {
             .then(function (data) {
                 rwSingleFinished++;
                 log('  finished so far: ' + rwSingleFinished);
-                log('  --> key: ' + data.key);
-                log('  --> result: ' + data.result);
+                log('      --> key: ' + data.key);
+                log('      --> result: ' + data.result);
                 if (rwSingleFinished === SIZE) {
                     log(':: single thread END ::');
                     log('Duration: ' + sSingleTotal.stop().getDuration(true) + ' sec');
@@ -61,8 +61,8 @@ function run() {
             .then(function (data) {
                 rwMultiFinished++;
                 log('  finished so far: ' + rwMultiFinished);
-                log('  --> key: ' + data.key);
-                log('  --> result: ' + data.result);
+                log('      --> key: ' + data.key);
+                log('      --> result: ' + data.result);
                 if (rwMultiFinished === SIZE) {
                     log(':: multi thread END ::');
                     log('Duration: ' + sMultiTotal.stop().getDuration(true) + ' sec');
@@ -76,7 +76,7 @@ function run() {
 function init() {
     var i, threadReadyPromiseList, sw, trp;
 
-    threadReadyPromiseList = []
+    threadReadyPromiseList = [];
     for (i = 0; i < SIZE; i++) {
         rwMulti.push(new ReceiveMulticoreWorker(i));
         rwSingle.push(new ReceiveWorker(i));
@@ -84,7 +84,7 @@ function init() {
         sSingle.push(new Stopwatch());
         sMultiTotal = new Stopwatch();
         sSingleTotal = new Stopwatch();
-
+        
         threadReadyPromiseList.push(rwMulti[i].getInitialization());
     }
 

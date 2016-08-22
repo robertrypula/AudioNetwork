@@ -18,11 +18,12 @@
     ) {
         var ReceiveWorker;
 
-        ReceiveWorker = function () {
-            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 1024);
+        ReceiveWorker = function (key) {
+            this.$$key = key;
+            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 4096);
         };
 
-        ReceiveWorker.prototype.computeCrazySineSum = function () {
+        ReceiveWorker.prototype.computeCrazySineSum = function (addValue) {
             var
                 promise = SimplePromiseBuilder.build(),
                 result = 0;
@@ -30,7 +31,11 @@
             for (var i = 0; i < 9000111; i++) {
                 result += MathUtil.sin(i);
             }
-            promise.resolve(result);
+            result = addValue + MathUtil.abs(result);
+            promise.resolve({
+                key: this.$$key,
+                result: result
+            });
 
             return promise;
         };
