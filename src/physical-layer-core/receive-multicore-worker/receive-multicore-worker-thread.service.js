@@ -68,6 +68,9 @@
             js += '                ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                               ' + '\n';
             js += '            ]);                                                                             ' + '\n';
             js += '            break;                                                                          ' + '\n';
+            js += '        case ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK:                                    ' + '\n';
+            js += '            promise = receiveWorker.handleSampleBlock(param);                               ' + '\n';
+            js += '            break;                                                                          ' + '\n';
             js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
             js += '            promise = receiveWorker.computeCrazySineSum(param);                             ' + '\n';
             js += '            break;                                                                          ' + '\n';

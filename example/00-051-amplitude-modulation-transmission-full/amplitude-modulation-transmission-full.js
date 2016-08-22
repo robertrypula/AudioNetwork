@@ -220,9 +220,6 @@ function microphoneInputDataHandler(inputData) {
 }
 
 function normalizeDecibel(value) {
-    if (value === -Infinity) {
-        value = MINIMUM_POWER_DECIBEL;
-    }
     value = value < MINIMUM_POWER_DECIBEL ? MINIMUM_POWER_DECIBEL : value;
 
     return value;

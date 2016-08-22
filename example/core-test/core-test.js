@@ -13,7 +13,9 @@ var
     sSingle = [],
     sSingleTotal,
     sMultiTotal,
-    SIZE = 4;
+    SIZE = 4,
+    BUFFER_SIZE = 256 * 1024,
+    buffer = [];
 
 function log(s) {
     var element = document.getElementById('log');
@@ -37,12 +39,13 @@ function run() {
     for (i = 0; i < SIZE; i++) {
         rwSingleStarted++;
         log('  started so far: ' + rwSingleStarted);
-        rwSingle[i].computeCrazySineSum(i)
+        rwSingle[i]
+            .handleSampleBlock(buffer)
             .then(function (data) {
                 rwSingleFinished++;
                 log('  finished so far: ' + rwSingleFinished);
                 log('      --> key: ' + data.key);
-                log('      --> result: ' + data.result);
+                log('      --> result: ' + data.result.powerDecibel + ' ' + data.result.phase);
                 if (rwSingleFinished === SIZE) {
                     log(':: single thread END ::');
                     log('Duration: ' + sSingleTotal.stop().getDuration(true) + ' sec');
@@ -57,12 +60,13 @@ function run() {
     for (i = 0; i < SIZE; i++) {
         rwMultiStarted++;
         log('  started so far: ' + rwMultiStarted);
-        rwMulti[i].computeCrazySineSum(i)
+        rwMulti[i]
+            .handleSampleBlock(buffer)
             .then(function (data) {
                 rwMultiFinished++;
                 log('  finished so far: ' + rwMultiFinished);
                 log('      --> key: ' + data.key);
-                log('      --> result: ' + data.result);
+                log('      --> result: ' + data.result.powerDecibel + ' ' + data.result.phase);
                 if (rwMultiFinished === SIZE) {
                     log(':: multi thread END ::');
                     log('Duration: ' + sMultiTotal.stop().getDuration(true) + ' sec');
@@ -87,6 +91,11 @@ function init() {
         
         threadReadyPromiseList.push(rwMulti[i].getInitialization());
     }
+
+    for (i = 0; i < BUFFER_SIZE; i++) {
+        buffer.push(Math.sin(2 * Math.PI * (i / 16 - 0.25) ));
+    }
+
 
     sw = new Stopwatch();
     trp = SimplePromiseBuilder.buildFromList(threadReadyPromiseList);

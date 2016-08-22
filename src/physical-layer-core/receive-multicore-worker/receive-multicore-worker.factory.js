@@ -46,11 +46,14 @@
         ReceiveMulticoreWorker.INITIALIZATION = 0;
         ReceiveMulticoreWorker.INITIALIZATION_SUCCESS = 1;
         ReceiveMulticoreWorker.INITIALIZATION_FAIL = 2;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM = 3;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS = 4;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_FAIL = 5;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK = 3;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_SUCCESS = 4;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_FAIL = 5;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM = 6;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS = 7;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_FAIL = 8;
 
-        ReceiveMulticoreWorker.MESSAGE_TOTAL = 6;
+        ReceiveMulticoreWorker.MESSAGE_TOTAL = 9;
         ReceiveMulticoreWorker.MESSAGE_INDEX_SPACING = 3;
         ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS = 1;
         ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL = 2;
@@ -101,11 +104,15 @@
                 value
             ]);
 
-            return this.$$promise[ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM];
+            return this.$$promise[messageIndex];
         };
 
         ReceiveMulticoreWorker.prototype.computeCrazySineSum = function (value) {
             return this.$$sendToThread(ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM, value);
+        };
+
+        ReceiveMulticoreWorker.prototype.handleSampleBlock = function (value) {
+            return this.$$sendToThread(ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK, value);
         };
 
         return ReceiveMulticoreWorker;
