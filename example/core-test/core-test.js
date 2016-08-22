@@ -13,8 +13,8 @@ var
     sSingle = [],
     sSingleTotal,
     sMultiTotal,
-    SIZE = 4,
-    BUFFER_SIZE = 256 * 1024,
+    SIZE = 8,
+    BUFFER_SIZE = 1,//256 * 1024,
     buffer = [];
 
 function log(s) {
@@ -77,8 +77,58 @@ function run() {
     }
 }
 
+function copyTest() {
+    var i, arrayBuffer, arrayFloat, size, sw;
+
+    var arrayFloatCopy_1;
+    var arrayFloatCopy_2;
+
+    sw = new Stopwatch();
+
+    sw.start();
+    size = 8 * 1024 * 1024;
+    arrayBuffer = new ArrayBuffer(4 * size);
+    arrayFloat = new Float32Array(arrayBuffer);
+    for (i = 0; i < size; i++) {
+        arrayFloat[i] = Math.sin(2 * Math.PI * (i / 16 - 0.25)) + Math.random();
+    }
+    log('Array generated in: ' + sw.stop().getDuration(true) + ' seconds');
+
+    sw.reset().start();
+    arrayFloatCopy_1 = new Float32Array(size);
+    for (i = 0; i < size; i++) {
+        arrayFloatCopy_1[i] = arrayFloat[i];
+    }
+    log('[NORMAL] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
+
+    sw.reset().start();
+    arrayFloatCopy_2 = new Float32Array(copy(arrayBuffer));
+    log('[BUFFER] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
+
+    var match = true;
+    sw.reset().start();
+    for (i = 0; i < size; i++) {
+        if (arrayFloat[i] !== arrayFloatCopy_1[i] || arrayFloat[i] !== arrayFloatCopy_2[i]) {
+            match = false;
+            break;
+        }
+    }
+    log('Verified in: ' + sw.stop().getDuration(true) + ' seconds. Arrays are ' + (match ? 'SAME' : 'DIFFERENT'));
+    log('');
+}
+
+function copy(src)  {
+    var dst = new ArrayBuffer(src.byteLength);
+
+    new Uint8Array(dst).set(new Uint8Array(src));
+
+    return dst;
+}
+
 function init() {
     var i, threadReadyPromiseList, sw, trp;
+
+    copyTest();
 
     threadReadyPromiseList = [];
     for (i = 0; i < SIZE; i++) {
@@ -91,6 +141,11 @@ function init() {
         
         threadReadyPromiseList.push(rwMulti[i].getInitialization());
     }
+
+    /*
+     http://stackoverflow.com/questions/10100798
+
+     */
 
     for (i = 0; i < BUFFER_SIZE; i++) {
         buffer.push(Math.sin(2 * Math.PI * (i / 16 - 0.25) ));

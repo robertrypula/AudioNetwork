@@ -20,7 +20,7 @@
 
         ReceiveWorker = function (key) {
             this.$$key = key;
-            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 256 * 1024);
+            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 16 * 1024);
         };
 
         ReceiveWorker.prototype.computeCrazySineSum = function (addValue) {
@@ -46,8 +46,10 @@
                 result,
                 i;
 
-            for (i = 0; i < sampleBlock.length; i++) {
-                this.$$carrierRecovery.handleSample(sampleBlock[i]);
+            for (i = 0; i < 16 * 1024; i++) {
+                this.$$carrierRecovery.handleSample(
+                    Math.sin(2 * Math.PI * (i / 16 - 0.25))
+                );
             }
             result = this.$$carrierRecovery.getCarrierDetail();
 
