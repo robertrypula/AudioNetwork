@@ -228,6 +228,7 @@ AudioNetwork.devScriptList = [
     'audio/simple-audio-context/simple-audio-context-builder.service.js',
     'audio/simple-audio-context/simple-audio-context.factory.js',
     'common/abstract-value-collector/abstract-value-collector.factory.js',
+    'common/abstract-worker/abstract-worker.factory.js',
     'common/average-value-collector/average-value-collector-builder.service.js',
     'common/average-value-collector/average-value-collector.factory.js',
     'common/carrier-generate/carrier-generate-builder.service.js',

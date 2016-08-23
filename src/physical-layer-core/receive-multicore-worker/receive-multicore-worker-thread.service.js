@@ -60,7 +60,7 @@
             js += '        messageIndex = data.length > 0 ? data[0] : null,                                    ' + '\n';
             js += '        param = data.length > 0 ? data[1] : null,                                           ' + '\n';
             js += '        promise;                                                                            ' + '\n';
-            js += '                                                                                            ' + '\n';
+            js += '      console.log("thread", messageIndex);                                                                                      ' + '\n';
             js += '    switch (messageIndex) {                                                                 ' + '\n';
             js += '        case ReceiveMulticoreWorker.INITIALIZATION:                                         ' + '\n';
             js += '            receiveWorker = new ReceiveWorker(param);                                       ' + '\n';

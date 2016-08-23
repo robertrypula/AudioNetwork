@@ -3,6 +3,7 @@ var
     ReceiveWorker = AudioNetwork.Injector.resolve('PhysicalLayerCore.ReceiveWorker'),
     Stopwatch = AudioNetwork.Injector.resolve('Common.Stopwatch'),
     SimplePromiseBuilder = AudioNetwork.Injector.resolve('Common.SimplePromiseBuilder'),
+    Util = AudioNetwork.Injector.resolve('Common.Util'),
     rwMulti = [],
     rwMultiStarted = 0,
     rwMultiFinished = 0,
@@ -78,7 +79,7 @@ function run() {
 }
 
 function copyTest() {
-    var i, arrayBuffer, arrayFloat, size, sw;
+    var i, arrayFloat, size, sw;
 
     var arrayFloatCopy_1;
     var arrayFloatCopy_2;
@@ -87,8 +88,7 @@ function copyTest() {
 
     sw.start();
     size = 8 * 1024 * 1024;
-    arrayBuffer = new ArrayBuffer(4 * size);
-    arrayFloat = new Float32Array(arrayBuffer);
+    arrayFloat = new Float32Array(size);
     for (i = 0; i < size; i++) {
         arrayFloat[i] = Math.sin(2 * Math.PI * (i / 16 - 0.25)) + Math.random();
     }
@@ -102,7 +102,7 @@ function copyTest() {
     log('[NORMAL] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
 
     sw.reset().start();
-    arrayFloatCopy_2 = new Float32Array(copy(arrayBuffer));
+    arrayFloatCopy_2 = Util.fastCopyFloat32Array(arrayFloat);
     log('[BUFFER] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
 
     var match = true;
@@ -115,14 +115,6 @@ function copyTest() {
     }
     log('Verified in: ' + sw.stop().getDuration(true) + ' seconds. Arrays are ' + (match ? 'SAME' : 'DIFFERENT'));
     log('');
-}
-
-function copy(src)  {
-    var dst = new ArrayBuffer(src.byteLength);
-
-    new Uint8Array(dst).set(new Uint8Array(src));
-
-    return dst;
 }
 
 function init() {

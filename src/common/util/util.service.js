@@ -17,6 +17,18 @@
             return typeof value !== 'undefined' ? value : defaultValue;
         }
 
+        function fastCopyFloat32Array(src) {
+            return new Float32Array(copyArrayBuffer(src.buffer));
+        }
+
+        function copyArrayBuffer(src)  {
+            var dst = new ArrayBuffer(src.byteLength);
+
+            new Uint8Array(dst).set(new Uint8Array(src));
+
+            return dst;
+        }
+
         function accessor(element, path) {
             var
                 pathList = path.split('.'),
@@ -143,6 +155,8 @@
 
         return {
             valueOrDefault: valueOrDefault,
+            fastCopyFloat32Array: fastCopyFloat32Array,
+            copyArrayBuffer: copyArrayBuffer,
             accessor: accessor,
             computeAverage: computeAverage,
             convertToDecibel: convertToDecibel,
