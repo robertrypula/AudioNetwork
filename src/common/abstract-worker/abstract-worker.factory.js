@@ -84,15 +84,23 @@
             }
         };
 
-        AbstractWorker.prototype.$$sendToThread = function (messageIndex, value) {
+        AbstractWorker.prototype.$$getTransferList = function (value) {
+            return (value && value.buffer instanceof ArrayBuffer) ? [value.buffer] : [];
+        };
+
+        AbstractWorker.prototype.$$sendToThread = function (messageIndex, value, transfer) {
             if (this.$$promise[messageIndex]) {
                 throw ReceiveWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION;
             }
             this.$$promise[messageIndex] = SimplePromiseBuilder.build();
-            this.$$worker.postMessage([
-                messageIndex,
-                value
-            ]);
+
+            this.$$worker.postMessage(
+                [
+                    messageIndex,
+                    value
+                ],
+                transfer ? this.$$getTransferList(value) : []
+            );
 
             return this.$$promise[messageIndex];
         };

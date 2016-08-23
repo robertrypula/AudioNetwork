@@ -48,7 +48,7 @@
         };
 
         ReceiveMulticoreWorker.prototype.handleSampleBlock = function (value) {
-            return this.$$sendToThread(ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK, value);
+            return this.$$sendToThread(ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK, value, true);
         };
 
         return ReceiveMulticoreWorker;

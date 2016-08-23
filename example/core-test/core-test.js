@@ -11,12 +11,12 @@ var
     rwSingleFinished = 0,
     rwMulti = [],
     sMultiTotal,
-    rwMultiStarted = 0,
-    rwMultiFinished = 0,
+    rwMultiStarted,
+    rwMultiFinished,
 
     THREAD_SIZE = 2,
-    BUFFER_SIZE = 1,//256 * 1024,
-    buffer = [];
+    BUFFER_SIZE = 1024 * 1024,
+    buffer = new Float32Array(BUFFER_SIZE);
 
 function log(s) {
     var
@@ -34,11 +34,13 @@ function compare() {
 }
 
 function run() {
-    var i;
+    var i, bufferCopy;
 
     // single
     log(':: single thread START ::');
-    sSingleTotal.start();
+    sSingleTotal.reset().start();
+    rwSingleStarted = 0;
+    rwSingleFinished = 0;
     for (i = 0; i < THREAD_SIZE; i++) {
         rwSingleStarted++;
         log('  started so far: ' + rwSingleStarted);
@@ -59,12 +61,16 @@ function run() {
 
     // multi
     log(':: multi thread START ::');
-    sMultiTotal.start();
+    sMultiTotal.reset().start();
+    rwMultiStarted = 0;
+    rwMultiFinished = 0;
     for (i = 0; i < THREAD_SIZE; i++) {
         rwMultiStarted++;
         log('  started so far: ' + rwMultiStarted);
+        bufferCopy = Util.fastCopyFloat32Array(buffer);
+        console.log('-------------------------- before', bufferCopy.length);
         rwMulti[i]
-            .handleSampleBlock(buffer)
+            .handleSampleBlock(bufferCopy)
             .then(function (data) {
                 rwMultiFinished++;
                 log('  finished so far: ' + rwMultiFinished);
@@ -77,6 +83,7 @@ function run() {
                     compare();
                 }
             });
+        console.log('-------------------------- after', bufferCopy.length);
     }
 }
 
@@ -84,7 +91,7 @@ function init() {
     var i, threadReadyPromiseList, sw;
 
     for (i = 0; i < BUFFER_SIZE; i++) {
-        buffer.push(Math.sin(2 * Math.PI * (i / 16 - 0.25) ));
+        buffer[i] = Math.sin(2 * Math.PI * (i / 16 - 0.25) );
     }
 
     threadReadyPromiseList = [];
