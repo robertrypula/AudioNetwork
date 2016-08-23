@@ -22,6 +22,7 @@
         }
 
         function copyArrayBuffer(src)  {
+            // http://stackoverflow.com/questions/10100798
             var dst = new ArrayBuffer(src.byteLength);
 
             new Uint8Array(dst).set(new Uint8Array(src));

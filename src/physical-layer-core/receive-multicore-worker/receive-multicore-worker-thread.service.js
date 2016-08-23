@@ -48,6 +48,7 @@
             js += '                                                                                            ' + '\n';
             js += 'var                                                                                         ' + '\n';
             js += '    iAlias = AudioNetwork.Injector,                                                         ' + '\n';
+            js += '    AbstractWorker = iAlias.resolve("Common.AbstractWorker"),                               ' + '\n';
             js += '    ReceiveWorker = iAlias.resolve("PhysicalLayerCore.ReceiveWorker"),                      ' + '\n';
             js += '    ReceiveMulticoreWorker = iAlias.resolve("PhysicalLayerCore.ReceiveMulticoreWorker"),    ' + '\n';
             js += '    receiveWorker = undefined;                                                              ' + '\n';
@@ -62,10 +63,10 @@
             js += '        promise;                                                                            ' + '\n';
             js += '      console.log("thread", messageIndex);                                                                                      ' + '\n';
             js += '    switch (messageIndex) {                                                                 ' + '\n';
-            js += '        case ReceiveMulticoreWorker.INITIALIZATION:                                         ' + '\n';
+            js += '        case AbstractWorker.INITIALIZATION:                                                 ' + '\n';
             js += '            receiveWorker = new ReceiveWorker(param);                                       ' + '\n';
             js += '            self.postMessage([                                                              ' + '\n';
-            js += '                ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                               ' + '\n';
+            js += '                AbstractWorker.INITIALIZATION_SUCCESS                                       ' + '\n';
             js += '            ]);                                                                             ' + '\n';
             js += '            break;                                                                          ' + '\n';
             js += '        case ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK:                                    ' + '\n';
@@ -83,13 +84,13 @@
             js += '    promise                                                                                 ' + '\n';
             js += '        .then(function (result) {                                                           ' + '\n';
             js += '            self.postMessage([                                                              ' + '\n';
-            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS,         ' + '\n';
+            js += '                messageIndex + AbstractWorker.MESSAGE_INDEX_OFFSET_SUCCESS,                 ' + '\n';
             js += '                result                                                                      ' + '\n';
             js += '            ]);                                                                             ' + '\n';
             js += '        })                                                                                  ' + '\n';
             js += '        .catch(function () {                                                                ' + '\n';
             js += '            self.postMessage([                                                              ' + '\n';
-            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL,            ' + '\n';
+            js += '                messageIndex + AbstractWorker.MESSAGE_INDEX_OFFSET_FAIL,                    ' + '\n';
             js += '                result                                                                      ' + '\n';
             js += '            ]);                                                                             ' + '\n';
             js += '        });                                                                                 ' + '\n';

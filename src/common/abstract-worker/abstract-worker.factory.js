@@ -29,9 +29,6 @@
 
             this.$$worker = new Worker(objectUrl);
             this.$$worker.onmessage = this.$$onMessage.bind(this);
-
-            this.$$promise.length = 3;
-            this.$$sendToThread(AbstractWorker.INITIALIZATION, this.$$key);
         };
 
         AbstractWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION = 'Multicore support is not enabled';
@@ -69,8 +66,6 @@
                 result = data.length > 1 ? data[1] : null,
                 promise,
                 i;
-
-            console.log(event);
 
             for (i = 0; i < this.$$promise.length; i++) {
                 promise = this.$$promise[i];

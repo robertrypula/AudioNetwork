@@ -4,25 +4,27 @@ var
     Stopwatch = AudioNetwork.Injector.resolve('Common.Stopwatch'),
     SimplePromiseBuilder = AudioNetwork.Injector.resolve('Common.SimplePromiseBuilder'),
     Util = AudioNetwork.Injector.resolve('Common.Util'),
-    rwMulti = [],
-    rwMultiStarted = 0,
-    rwMultiFinished = 0,
+
     rwSingle = [],
+    sSingleTotal,
     rwSingleStarted = 0,
     rwSingleFinished = 0,
-    sMulti = [],
-    sSingle = [],
-    sSingleTotal,
+    rwMulti = [],
     sMultiTotal,
-    SIZE = 8,
+    rwMultiStarted = 0,
+    rwMultiFinished = 0,
+
+    THREAD_SIZE = 2,
     BUFFER_SIZE = 1,//256 * 1024,
     buffer = [];
 
 function log(s) {
-    var element = document.getElementById('log');
+    var
+        element = document.getElementById('log'),
+        args = Array.prototype.slice.call(arguments);
 
-    console.log(s);
-    element.innerHTML += s + '\n';
+    console.log.apply(this, args);
+    element.innerHTML += args.join(' ') + '\n';
 }
 
 function compare() {
@@ -37,7 +39,7 @@ function run() {
     // single
     log(':: single thread START ::');
     sSingleTotal.start();
-    for (i = 0; i < SIZE; i++) {
+    for (i = 0; i < THREAD_SIZE; i++) {
         rwSingleStarted++;
         log('  started so far: ' + rwSingleStarted);
         rwSingle[i]
@@ -46,8 +48,8 @@ function run() {
                 rwSingleFinished++;
                 log('  finished so far: ' + rwSingleFinished);
                 log('      --> key: ' + data.key);
-                log('      --> result: ' + data.result.powerDecibel + ' ' + data.result.phase);
-                if (rwSingleFinished === SIZE) {
+                log('      --> result: ', data.result);
+                if (rwSingleFinished === THREAD_SIZE) {
                     log(':: single thread END ::');
                     log('Duration: ' + sSingleTotal.stop().getDuration(true) + ' sec');
                     log('---');
@@ -58,7 +60,7 @@ function run() {
     // multi
     log(':: multi thread START ::');
     sMultiTotal.start();
-    for (i = 0; i < SIZE; i++) {
+    for (i = 0; i < THREAD_SIZE; i++) {
         rwMultiStarted++;
         log('  started so far: ' + rwMultiStarted);
         rwMulti[i]
@@ -67,8 +69,8 @@ function run() {
                 rwMultiFinished++;
                 log('  finished so far: ' + rwMultiFinished);
                 log('      --> key: ' + data.key);
-                log('      --> result: ' + data.result.powerDecibel + ' ' + data.result.phase);
-                if (rwMultiFinished === SIZE) {
+                log('      --> result: ', data.result);
+                if (rwMultiFinished === THREAD_SIZE) {
                     log(':: multi thread END ::');
                     log('Duration: ' + sMultiTotal.stop().getDuration(true) + ' sec');
                     log('---');
@@ -78,83 +80,31 @@ function run() {
     }
 }
 
-function copyTest() {
-    var i, arrayFloat, size, sw;
-
-    var arrayFloatCopy_1;
-    var arrayFloatCopy_2;
-
-    sw = new Stopwatch();
-
-    sw.start();
-    size = 8 * 1024 * 1024;
-    arrayFloat = new Float32Array(size);
-    for (i = 0; i < size; i++) {
-        arrayFloat[i] = Math.sin(2 * Math.PI * (i / 16 - 0.25)) + Math.random();
-    }
-    log('Array generated in: ' + sw.stop().getDuration(true) + ' seconds');
-
-    sw.reset().start();
-    arrayFloatCopy_1 = new Float32Array(size);
-    for (i = 0; i < size; i++) {
-        arrayFloatCopy_1[i] = arrayFloat[i];
-    }
-    log('[NORMAL] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
-
-    sw.reset().start();
-    arrayFloatCopy_2 = Util.fastCopyFloat32Array(arrayFloat);
-    log('[BUFFER] Array copied in: ' + sw.stop().getDuration(true) + ' seconds');
-
-    var match = true;
-    sw.reset().start();
-    for (i = 0; i < size; i++) {
-        if (arrayFloat[i] !== arrayFloatCopy_1[i] || arrayFloat[i] !== arrayFloatCopy_2[i]) {
-            match = false;
-            break;
-        }
-    }
-    log('Verified in: ' + sw.stop().getDuration(true) + ' seconds. Arrays are ' + (match ? 'SAME' : 'DIFFERENT'));
-    log('');
-}
-
 function init() {
-    var i, threadReadyPromiseList, sw, trp;
-
-    copyTest();
-
-    threadReadyPromiseList = [];
-    for (i = 0; i < SIZE; i++) {
-        rwMulti.push(new ReceiveMulticoreWorker(i));
-        rwSingle.push(new ReceiveWorker(i));
-        sMulti.push(new Stopwatch());
-        sSingle.push(new Stopwatch());
-        sMultiTotal = new Stopwatch();
-        sSingleTotal = new Stopwatch();
-        
-        threadReadyPromiseList.push(rwMulti[i].getInitialization());
-    }
-
-    /*
-     http://stackoverflow.com/questions/10100798
-
-     */
+    var i, threadReadyPromiseList, sw;
 
     for (i = 0; i < BUFFER_SIZE; i++) {
         buffer.push(Math.sin(2 * Math.PI * (i / 16 - 0.25) ));
     }
 
+    threadReadyPromiseList = [];
+    for (i = 0; i < THREAD_SIZE; i++) {
+        rwSingle.push(new ReceiveWorker(i));
+        sSingleTotal = new Stopwatch();
+        rwMulti.push(new ReceiveMulticoreWorker(i));
+        sMultiTotal = new Stopwatch();
+        threadReadyPromiseList.push(rwMulti[i].getInitialization());
+    }
 
     sw = new Stopwatch();
-    trp = SimplePromiseBuilder.buildFromList(threadReadyPromiseList);
     log('Waiting for all threads...');
     sw.start();
-    trp.then(function () {
-        log(
-            'All threads ready in ' +
-            sw.stop().getDuration(true) + 'sec'
-        );
-        run();
-    });
+    SimplePromiseBuilder
+        .buildFromList(threadReadyPromiseList)
+        .then(function () {
+            log('All threads ready in ' + sw.stop().getDuration(true) + 'sec');
+            run();
+        });
 }
 
 setTimeout(function () {

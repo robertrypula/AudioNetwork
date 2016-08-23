@@ -20,10 +20,10 @@
             if (AudioNetwork.bootConfig.multicoreState === AudioNetwork.MULTICORE_STATE.DISABLED) {
                 throw ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION;
             }
-
             AbstractWorker.call(this, key);
+
             this.$$promise.length = ReceiveMulticoreWorker.MESSAGE_TOTAL;
-            this.$$sendToThread(ReceiveMulticoreWorker.INITIALIZATION, this.$$key);
+            this.$$sendToThread(AbstractWorker.INITIALIZATION, this.$$key);
         };
 
         ReceiveMulticoreWorker.prototype = Object.create(AbstractWorker.prototype);
