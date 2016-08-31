@@ -2,3 +2,8 @@ Redirect 301 /example/01-physical-layer/physical-layer.html /example/01-001-phys
 Redirect 301 /example/02-physical-layer-simple/physical-layer-simple.html /example/01-000-physical-layer-simple/physical-layer-simple.html
 Redirect 301 /example/03-physical-layer-carrier/physical-layer-carrier.html /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
 Redirect 301 /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+
+Redirect 301 /dft-simple /example/00-040-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
+Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-discrete-fourier-transform-simple
+Redirect 301 /dft-full /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-041-discrete-fourier-transform-full
