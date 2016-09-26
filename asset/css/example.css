@@ -1,0 +1,16 @@
+.fb-like-cont {
+    height: 0px;
+    width: 0px;
+    position: relative;
+}
+
+.fb-like-cont a, .fb-like-cont img {
+    display: block;
+    width: 26px;
+    height: 26px;
+}
+
+.fb-like-cont a {
+    position: absolute;
+    opacity: 0.7;
+}
