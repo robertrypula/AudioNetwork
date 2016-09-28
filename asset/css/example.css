@@ -10,6 +10,10 @@
     height: 26px;
 }
 
+.fb-like-cont div.fb-like {
+    left: 30px;
+}
+
 .fb-like-cont a {
     position: absolute;
     opacity: 0.7;
