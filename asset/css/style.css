@@ -38,6 +38,11 @@
     opacity: 0.7;
 }
 
+.download-area div.fb-like {
+    display: inline-block;
+    margin-top: 10px;
+}
+
 .download-area a.a-icon img {
     display: inline-block;
 }
