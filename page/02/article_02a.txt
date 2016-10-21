@@ -1,0 +1,10 @@
+W poprzedniej czesci artykulu skupilismy sie na podstawach 
+teoretycznych cyfrowego przetwarzania sygnalow. Poznalismy 
+zagadnuenie dyskretnej tranformaty fouriera z puntku widzenia 
+programisty. Do realizacji prostej wymiany danych dziewiekiem 
+w JavaScript powtrxevujemy jednak czegos wiecej. W tej czesci 
+postaramy sie przyvlizyc techniki modulacji cyfrowej oraz 
+mozliwosci jakie oferuje nam Web Audio API. Polaczenie tych 
+wszystkich zagadnien umozliwi nam stworzenie prostej aplikacji 
+realizujacej transmisje danych binarnych miedzy dwoma komputerami.
+
