@@ -5,8 +5,6 @@
   - 4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)
   - 5.x.x finalization of the project, some example applications like p2p file exchange, web server etc
 
----
-
 ## Backlog for future 1.x.x releases
 
 ### Current:
@@ -67,9 +65,7 @@ receive-worker
   - introduce some phaseErrorCollector (?)
   - add new state: INTERPACKET_GAP
    
----
-
-## v1.1.0 (2017-0x-xx)
+## v1.1.0 (2017-0x-xx) [not yet released]
   + Dynamic dev files loading
   + Boot config added 
   + Env variables added (isBrowser, isNode, isWebWorker)
