@@ -56,71 +56,80 @@
 <li>4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)</li>
 <li>5.x.x finalization of the project, some example applications like p2p file exchange, web server etc</li>
 </ul>
+<hr>
 <h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
-<p>TODO list:</p>
+<h3 id="current-">Current:</h3>
 <ul>
-<li>start writing article</li>
-<li>fix last templates issues in ultra-simple demo, rename to some nicer name</li>
-<li>move common code of all canvas drawing to abstract class</li>
-<li>create wrapper classes for audio nodes</li>
-<li>create sine/cosine cache service + tests in jasmine</li>
-<li><p>rename destroy methods to destroyAsync</p>
+<li>rename Queue to Buffer</li>
+<li>POWER CHART, refactor to follow &#39;abstract class&#39; approach </li>
+<li>POWER CHART, show important power level (threshold, min/max, etc)</li>
+<li>POWER CHART, configurable bar width and color</li>
+<li>ANALYZER CHART, refactor to follow &#39;abstract class&#39; approach</li>
+<li>change adapter parameter order (channelIndex shouldn&#39;t be first parameter)</li>
+<li>fix last templates issues in amplitude-modulation-transmission-full</li>
+</ul>
+<h3 id="core-code-refactor">Core code refactor</h3>
+<ul>
+<li>add AudioNetworkBootConfig = { developerMode: true, createAlias: true, scriptBaseUrl: &#39;<a href="http://localhost">http://localhost</a>&#39; }</li>
+<li>core should not work as proxy for methods from other classes</li>
+<li>visualizers should be separated </li>
+<li>ability to change all settings in the runtime</li>
+<li>promise approach instead of callback functions</li>
+<li>remove setInterval, schedule function call for the future via setTimeout (at manager level, not core object level)</li>
+<li>refactor manager code to pass whole array to/from channel instead single sample<ul>
+<li>receive-manager                      holds audio process event and logic that triggers receive events in proper moments</li>
+<li>receive-channel                      </li>
+<li>receive-channel-subcarrier           adds phase correction, handles notify intervals</li>
+</ul>
 </li>
-<li><p>use setTimeout instead setInterval UPDATE: remove checking in a loop, just schedule function call for the future via setTimeout</p>
-</li>
+</ul>
+<pre><code>receive-channel-subcarrier
+- contains receiveWorker object with methods:
+- receiveWorker.handleSampleBlock(sampleBlock, detailIndexList).then(function )
+- receiveWorker.setSamplePerPeriod(samplePerPeriod).then(function )
+- receiveWorker.setSamplePerDftWindow(samplePerDftWindow).then(function )
+
+receive-worker.builder will decide to go with:
+
+[A]
+receive-multicore-worker           init new Worker, communication between
+receive-multicore-worker-thread    short script that wraps receive-worker with postMessage
+
+[B]
+receive-worker
+- holds carrierRecovery object
+- handles carrierDetailIndexList and promises
+</code></pre><h3 id="nice-but-not-important-code-refactor">Nice but not important code refactor</h3>
+<ul>
 <li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace</li>
 <li>refactor DOM helpers (move to service)</li>
-<li>change adapter parameter order or move all adapter initialization</li>
-<li>introduce handlers similar to existing setPacketReceiveHandler</li>
-<li>ReceiveAdapter should register own rx handler inside Adapter class (??)</li>
-<li>change &#39;physical-layer&#39; to &#39;physical-layer-core&#39;, &#39;physical-layer-adapter&#39; to &#39;physical-layer&#39; (??)</li>
-<li>refactor manager code to pass whole array to/from channel instead single sample<ul>
-<li>receive-manager</li>
-<li>receive-channel</li>
-<li>receive-channel-carrier           adds phase correction, handles notify intervals</li>
-<li>receive-carrier-recovery-worker   just handles block of samples and computes carrier details for given sample numbers</li>
+<li>create wrapper classes for audio nodes</li>
+<li>create sine/cosine cache service + tests in jasmine</li>
+<li>rename destroy methods to destroyAsync</li>
 </ul>
-</li>
-<li>CHECK THIS: filter constellation points to show only strongest symbol samples used in packet</li>
-<li>do not redraw constellation if queue wasn&#39;t changed</li>
-<li>clean constellation diagram constructor parameters order </li>
-<li>ability to add hooks at sample generation and receive (inject some changes to signal)</li>
-<li><p>fix carrier.html example (use dedicated constellation class)</p>
-</li>
-<li><p>Receive Adapter: [8.5h or 16.0h remaining]</p>
+<h3 id="receive-adapter">Receive Adapter</h3>
 <ul>
-<li>[~1.5h] add events for frequency update and phase update to notify hosting code</li>
-<li>[~2.0h] refactor &#39;collecting arrays&#39; to dedicated collectors</li>
-<li>[~2.0h] refactor data/packet collection to dedicates collectors classes<ul>
-<li>change SYMBOL state name to PILOT_SIGNAL</li>
-<li>change ERROR state name to SYNC_TO_LONG</li>
-<li>phaseOffsetCollector -&gt; frequencyErrorCollector</li>
-<li>introduce some phaseErrorCollector ?</li>
+<li>rename ERROR to SYNC_TO_LONG and SYMBOL to PILOT_SIGNAL</li>
+<li>rename phaseOffsetCollector to frequencyErrorCollector</li>
+<li>introduce some phaseErrorCollector (?)</li>
+<li>add new state: INTERPACKET_GAP</li>
 </ul>
-</li>
-<li>[~3.0h] test and fix multiple OFDM support, first ofdm index would be pilot signal</li>
-<li>OPTIONAL [~1.5h] adaptive threshold based on arriving packets (add history to Signal/Guard Collectors based on Queue class)</li>
-<li>OPTIONAL [~4.0h] add auto tuning feature with ability to align phase offset (improve phase-offset-collector class)</li>
-<li>OPTIONAL [~1.0h] Signal Strength like in cell phones</li>
-<li>OPTIONAL [~1.0h] add new state: INTERPACKET_GAP</li>
-</ul>
-</li>
-<li><p>Power chart: [~10.5h remaining]</p>
+<hr>
+<h2 id="v1-1-0-2017-0x-xx-">v1.1.0 (2017-0x-xx)</h2>
 <ul>
-<li>[~4.0h] integrate with rest of the code (pass configuration to receive adapter constructor), config: elementId, colors, ...?</li>
-<li>[~3.0h] ability to show other OFDMs than pilot</li>
-<li>[~1.0h] increase bar width</li>
-<li>[~1.5h] mark states ranges</li>
-<li>[~1.0h] show important power level (threshold, min/max, etc)</li>
-</ul>
-</li>
-<li><p>Article &#39;Data transmission over sound in JavaScript from scratch&#39;</p>
-<ul>
-<li>PART 1 - discrete fourier transform</li>
-<li>PART 2 - Web Audio API</li>
-<li>PART 3 - data transmitter and receiver application</li>
-</ul>
-</li>
+<li>Dynamic dev files loading</li>
+<li>Boot config added </li>
+<li>Env variables added (isBrowser, isNode, isWebWorker)</li>
+<li>NodeJs export added - you can now use AudioNetwork in NodeJs applications! </li>
+<li>ActiveAudioContext abstraction</li>
+<li>CarrierGenerate and CarrierRecovery refactor</li>
+<li>Constellation diagram: do not redraw constellation if queue wasn&#39;t changed</li>
+<li>Constellation diagram: queue elements approach changed (only one item per constellation point now)</li>
+<li>WindowFunction service with blackmanNuttall method</li>
+<li>Visualizer abstract classes (Abstract2DVisualizer, AbstractVisualizer)</li>
+<li>Visualizer code refactor</li>
+<li>rename audio-network-begin to audio-network-boot</li>
+<li>WebWorker basic functionality added + Core refactor (?????)</li>
 </ul>
 <h2 id="v1-0-4-2016-07-04-">v1.0.4 (2016-07-04)</h2>
 <ul>

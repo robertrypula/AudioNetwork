@@ -69,7 +69,7 @@ receive-worker
    
 ---
 
-## v1.1.0 (2016-0x-xx)
+## v1.1.0 (2017-0x-xx)
   + Dynamic dev files loading
   + Boot config added 
   + Env variables added (isBrowser, isNode, isWebWorker)
