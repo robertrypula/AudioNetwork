@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="audio-context-initialization.css">
+    <link rel="stylesheet" type="text/css" href="analyzer-node.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -53,15 +53,20 @@
             <!-- ---------------- -->
 
             <div class="row margin-bottom">
-                <div class="col col-xs-12" id="test">
+                <div class="col col-xs-12">
 
+                    <h2>Time domain</h2>
+                    <canvas id="canvas-time-domain-data"></canvas>
+
+                    <h2>Frequency domain</h2>
+                    <canvas id="canvas-frequency-data"></canvas>
 
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-000-audio-context-initialization/audio-context-initialization.html" data-numposts="5"></div>
+            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-001-analyzer-node/analyzer-node.html" data-numposts="5"></div>
 
         </div>
 
@@ -75,7 +80,8 @@
 
     </div>
 
-    <script src="audio-context-initialization.js"></script>
+    <script src="analyzer-node.js"></script>
+    <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--
     <script>

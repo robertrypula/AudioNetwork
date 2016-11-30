@@ -1,0 +1,70 @@
+.piano-key-octave {
+    width: 100%;
+    max-width: 400px;
+    height: 150px;
+    position: relative;
+    /*opacity: 0.02;*/
+}
+.piano-key-octave a {
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+    width: 12.5%;
+    height: 100%;
+    border: 1px solid lightgray;
+    top: 0px;
+    text-decoration: none;
+    background-color: white;
+}
+
+.piano-key-octave a span {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    font-family: Arial;
+    font-size: 10px;
+    height: 1em;
+    line-height: 1em;;
+    text-align: center;
+    color: black;
+}
+
+.piano-key-octave a.key-index-0 { left: 0.000%; } /* C  white */
+.piano-key-octave a.key-index-1 { left: 8.500%; } /* C# black */
+.piano-key-octave a.key-index-2 { left: 12.50%; } /* D  white */
+.piano-key-octave a.key-index-3 { left: 21.00%; } /* D# black */
+.piano-key-octave a.key-index-4 { left: 25.00%; } /* E  white */
+.piano-key-octave a.key-index-5 { left: 37.50%; } /* F  white */
+.piano-key-octave a.key-index-6 { left: 46.00%; } /* F# black */
+.piano-key-octave a.key-index-7 { left: 50.00%; } /* G  white */
+.piano-key-octave a.key-index-8 { left: 58.50%; } /* G# black */
+.piano-key-octave a.key-index-9 { left: 62.50%; } /* A  white */
+.piano-key-octave a.key-index-10 { left: 71.0%; } /* A# black */
+.piano-key-octave a.key-index-11 { left: 75.0%; } /* B  white */
+.piano-key-octave a.key-index-12 { left: 87.5%; } /* C  white - next octave */
+
+.piano-key-octave a.key-index-1,
+.piano-key-octave a.key-index-3,
+.piano-key-octave a.key-index-6,
+.piano-key-octave a.key-index-8,
+.piano-key-octave a.key-index-10 {
+    width: 8%;
+    border: none;
+    background-color: black;
+    height: 65%;
+    z-index: 2;
+}
+
+.piano-key-octave a.key-index-1 span,
+.piano-key-octave a.key-index-3 span,
+.piano-key-octave a.key-index-6 span,
+.piano-key-octave a.key-index-8 span,
+.piano-key-octave a.key-index-10 span {
+    color: white;
+}
+
+.piano-key-octave a.active {
+    background-color: lightgreen;
+}
