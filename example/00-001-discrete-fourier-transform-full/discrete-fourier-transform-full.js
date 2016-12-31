@@ -35,16 +35,73 @@ var
 
     // settings (user is able to update those values via form)
     sineSampleSize = 1130,
+
+    /*
+    // square START
+    _amp = 0.8,
+    _phase = 60,
+    _spp = 120,
     separateSineParameter = [
-        { amplitude: 0.3, samplePerPeriod: 28, phase: 0 },
-        { amplitude: 0.3, samplePerPeriod: 20, phase: 0 },
-        { amplitude: 0.3, samplePerPeriod: 16, phase: 0 }
+        { amplitude: _amp/1, samplePerPeriod: _spp/1, phase: 1 * _phase },
+        { amplitude: 0.0/2, samplePerPeriod: _spp/2, phase: 2 * _phase },
+        { amplitude: _amp/3, samplePerPeriod: _spp/3, phase: 3 * _phase },
+        { amplitude: 0.0/4, samplePerPeriod: _spp/4, phase: 4 * _phase },
+        { amplitude: _amp/5, samplePerPeriod: _spp/5, phase: 5 * _phase },
+        { amplitude: 0.0/6, samplePerPeriod: _spp/6, phase: 6 * _phase },
+        { amplitude: _amp/7, samplePerPeriod: _spp/7, phase: 7 * _phase },
+        { amplitude: 0.0/8, samplePerPeriod: _spp/8, phase: 8 * _phase },
+        { amplitude: _amp/9, samplePerPeriod: _spp/9, phase: 9 * _phase },
+        { amplitude: 0.0/10, samplePerPeriod: _spp/10, phase: 10 * _phase },
+        { amplitude: _amp/11, samplePerPeriod: _spp/11, phase: 11 * _phase }
     ],
+    // square END
+    */
+
+    /*
+    // sawtooth START
+    _amp = 2 * 0.8 / Math.PI,
+    _phase = 0,
+    _spp = 120,
+    separateSineParameter = [
+        { amplitude: _amp * Math.pow(-1, 1) / 1, samplePerPeriod: _spp/1, phase: 1 * _phase },
+        { amplitude: _amp * Math.pow(-1, 2) / 2, samplePerPeriod: _spp/2, phase: 2 * _phase },
+        { amplitude: _amp * Math.pow(-1, 3) / 3, samplePerPeriod: _spp/3, phase: 3 * _phase },
+        { amplitude: _amp * Math.pow(-1, 4) / 4, samplePerPeriod: _spp/4, phase: 4 * _phase },
+        { amplitude: _amp * Math.pow(-1, 5) / 5, samplePerPeriod: _spp/5, phase: 5 * _phase },
+        { amplitude: _amp * Math.pow(-1, 6) / 6, samplePerPeriod: _spp/6, phase: 6 * _phase },
+        { amplitude: _amp * Math.pow(-1, 7) / 7, samplePerPeriod: _spp/7, phase: 7 * _phase },
+        { amplitude: _amp * Math.pow(-1, 8) / 8, samplePerPeriod: _spp/8, phase: 8 * _phase },
+        { amplitude: _amp * Math.pow(-1, 9) / 9, samplePerPeriod: _spp/9, phase: 9 * _phase },
+        { amplitude: _amp * Math.pow(-1, 10) / 10, samplePerPeriod: _spp/10, phase: 10 * _phase },
+        { amplitude: _amp * Math.pow(-1, 11) / 11, samplePerPeriod: _spp/11, phase: 11 * _phase }
+    ],
+    // sawtooth END
+    */
+
+    // triangle START
+    _amp = 8 / (Math.PI * Math.PI),
+    _phase = 0,
+    _spp = 120,
+    separateSineParameter = [
+        { amplitude: _amp * Math.pow(-1, 0) / Math.pow(2 * 0 + 1, 2), samplePerPeriod: _spp/1, phase: 1 * _phase },
+        { amplitude: 0, samplePerPeriod: _spp/2, phase: 2 * _phase },
+        { amplitude: _amp * Math.pow(-1, 1) / Math.pow(2 * 1 + 1, 2), samplePerPeriod: _spp/3, phase: 3 * _phase },
+        { amplitude: 0, samplePerPeriod: _spp/4, phase: 4 * _phase },
+        { amplitude: _amp * Math.pow(-1, 2) / Math.pow(2 * 2 + 1, 2), samplePerPeriod: _spp/5, phase: 5 * _phase },
+        { amplitude: 0, samplePerPeriod: _spp/6, phase: 6 * _phase },
+        { amplitude: _amp * Math.pow(-1, 3) / Math.pow(2 * 3 + 1, 2), samplePerPeriod: _spp/7, phase: 7 * _phase },
+        { amplitude: 0, samplePerPeriod: _spp/8, phase: 8 * _phase },
+        { amplitude: _amp * Math.pow(-1, 4) / Math.pow(2 * 4 + 1, 2), samplePerPeriod: _spp/9, phase: 9 * _phase },
+        { amplitude: 0, samplePerPeriod: _spp/10, phase: 10 * _phase },
+        { amplitude: _amp * Math.pow(-1, 5) / Math.pow(2 * 5 + 1, 2), samplePerPeriod: _spp/11, phase: 11 * _phase }
+    ],
+    // triangle END
+
     whiteNoiseAmplitude = 0,
     windowSampleOffset = 0,
     windowSampleSize = 1024,
     windowFunctionEnabled = 1,
-    powerDecibelMin = -80,
+    amplitudeDecibelMin = -80,
     frequencyBinSize = 160,
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,
@@ -250,7 +307,7 @@ function discreteFourierTransformInitialize() {
         (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart = new FrequencyDomainChart(
         element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue,
-        powerDecibelMin,
+        amplitudeDecibelMin,
         FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
     );
 
@@ -269,28 +326,28 @@ function discreteFourierTransformUpdate() {
     for (i = 0; i < frequencyBinSize; i++) {
         samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
-        frequencyDomainQueue.pushEvenIfFull(frequencyBin.powerDecibel);
+        frequencyDomainQueue.pushEvenIfFull(frequencyBin.amplitudeDecibel);
         frequencyBinQueue.pushEvenIfFull(frequencyBin);
     }
     chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart.setWidth(chartWidth);
-    frequencyDomainChart.setPowerDecibelMin(powerDecibelMin);
+    frequencyDomainChart.setPowerDecibelMin(amplitudeDecibelMin);       // TODO change to amplitude !!!!!!
 }
 
 function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
-    var i, r, x, y, sample, result, detail, power;
+    var i, r, x, y, sample, result, detail, amplitude;
 
     result = {
         samplePerPeriod: samplePerPeriod,
         real: 0,
         imm: 0,
-        powerDecibel: 0,
+        amplitudeDecibel: 0,
         phase: 0,
         detail: []
     };
     for (i = 0; i < timeDomainQueue.getSize(); i++) {
         sample = timeDomainQueue.getItem(i);
-        r = 2 * Math.PI * i / samplePerPeriod;
+        r = 2 * Math.PI * (i + windowSampleOffset) / samplePerPeriod;   // TODO check it (windowSampleOffset) !!!!!!!!!
         x = -Math.cos(r);
         y = Math.sin(r);
 
@@ -310,10 +367,10 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
     result.real /= timeDomainQueue.getSize();
     result.imm /= timeDomainQueue.getSize();
 
-    power = Math.sqrt(result.real * result.real + result.imm * result.imm);
+    amplitude = Math.sqrt(result.real * result.real + result.imm * result.imm);
 
-    result.powerDecibel = 10 * Math.log(power) / Math.LN10;
-    result.powerDecibel = result.powerDecibel < powerDecibelMin ? powerDecibelMin : result.powerDecibel;
+    result.amplitudeDecibel = 10 * Math.log(amplitude) / Math.LN10;
+    result.amplitudeDecibel = result.amplitudeDecibel < amplitudeDecibelMin ? amplitudeDecibelMin : result.amplitudeDecibel;
 
     result.phase = Util.findUnitAngle(result.real, result.imm);
 
@@ -328,7 +385,7 @@ function constellationDiagramInitialize() {
     constellationDiagramQueue = new Queue(CONSTELLATION_DIAGRAM_POINT_HISTORY);
     element = document.getElementById('constellation-diagram');
     constellationDiagramChart = new ConstellationDiagram(
-        element, CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT, constellationDiagramQueue, powerDecibelMin
+        element, CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT, constellationDiagramQueue, amplitudeDecibelMin
     );
 }
 
@@ -337,10 +394,10 @@ function constellationDiagramUpdate() {
 
     frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
     constellationDiagramQueue.pushEvenIfFull({
-        powerDecibel: frequencyBin.powerDecibel,
+        powerDecibel: frequencyBin.amplitudeDecibel,          // TODO change to amplitude !!!!!
         phase: frequencyBin.phase
     });
-    constellationDiagramChart.setPowerDecibelMin(powerDecibelMin);
+    constellationDiagramChart.setPowerDecibelMin(amplitudeDecibelMin);   // TODO change to amplitude !!!!!
 }
 
 // ----------------
@@ -483,7 +540,7 @@ function dataBindingTemplateToCode() {
     windowSampleOffset = parseIntFromForm('form-window-sample-offset');
     windowSampleSize = parseIntFromForm('form-window-sample-size');
     windowFunctionEnabled = !!document.getElementById('form-window-function-enabled').checked;
-    powerDecibelMin = parseIntFromForm('form-power-decibel-min');
+    amplitudeDecibelMin = parseIntFromForm('form-amplitude-decibel-min');
     frequencyBinSize = parseIntFromForm('form-frequency-bin-size');
     frequencyBinSamplePerPeriodMax = parseFloatFromForm('form-frequency-bin-sample-per-period-max');
     frequencyBinSamplePerPeriodMin = parseFloatFromForm('form-frequency-bin-sample-per-period-min');
@@ -505,7 +562,7 @@ function dataBindingCodeToTemplate() {
     document.getElementById('form-window-sample-offset').value = windowSampleOffset;
     document.getElementById('form-window-sample-size').value = windowSampleSize;
     document.getElementById('form-window-function-enabled').checked = windowFunctionEnabled ? true : false;
-    document.getElementById('form-power-decibel-min').value = powerDecibelMin;
+    document.getElementById('form-amplitude-decibel-min').value = amplitudeDecibelMin;
     document.getElementById('form-frequency-bin-size').value = frequencyBinSize;
     document.getElementById('form-frequency-bin-sample-per-period-max').value = frequencyBinSamplePerPeriodMax;
     document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
@@ -514,8 +571,8 @@ function dataBindingCodeToTemplate() {
         (Math.round(getSamplePerPeriodFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
     document.getElementById('frequency-bin-frequency').innerHTML =
         (Math.round(getFrequencyFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
-    document.getElementById('frequency-bin-power-decibel').innerHTML =
-        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).powerDecibel * 100) / 100).toString();
+    document.getElementById('frequency-bin-amplitude-decibel').innerHTML =
+        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).amplitudeDecibel * 100) / 100).toString();
     document.getElementById('frequency-bin-phase').innerHTML =
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360) % 360).toString();
     document.getElementById('form-frequency-bin-to-explain-iteration-offset').value =

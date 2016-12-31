@@ -3,33 +3,53 @@
 
 var
     LIMIT_CANVAS_WIDTH = true,
-    FFT_SIZE = 2 * 1024,         // powers of 2 in range: 32, 32768
+    FFT_SIZE = 1 * 1024,         // powers of 2 in range: 32, 32768
+    BUFFER_SIZE = 1 * 1024,
     CANVAS_WIDTH_TIME_DOMAIN = FFT_SIZE,
+    CANVAS_WIDTH_TIME_DOMAIN_RAW_SAMPLE = BUFFER_SIZE,
     CANVAS_WIDTH_FREQUENCY = FFT_SIZE * 0.5,
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -100,
-    audioContext,
-    microphone,
-    microphoneVirtual,
-    analyzer,
+    audioMonoIO,
     animationFrameFirstCall = true,
+    domGaugeRaw,
+    domGaugeAnalyser,
+    ctxTimeDomainDataRawSample,
     ctxTimeDomainData,
-    ctxFrequencyData;
+    ctxFrequencyData,
+    timeDomainSynchronize;
 
 function init() {
+    domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
+    domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
+
+    ctxTimeDomainDataRawSample = getConfiguredCanvasContext('canvas-time-domain-data-raw-sample', CANVAS_WIDTH_TIME_DOMAIN_RAW_SAMPLE, CANVAS_HEIGHT);
     ctxTimeDomainData = getConfiguredCanvasContext('canvas-time-domain-data', CANVAS_WIDTH_TIME_DOMAIN, CANVAS_HEIGHT);
     ctxFrequencyData = getConfiguredCanvasContext('canvas-frequency-data', CANVAS_WIDTH_FREQUENCY, CANVAS_HEIGHT);
 
-    audioContext = new AudioContext();
-    microphoneVirtual = audioContext.createGain();
-    analyzer = audioContext.createAnalyser();
-    analyzer.smoothingTimeConstant = 0;
-    analyzer.fftSize = FFT_SIZE;
-    connectMicrophoneTo(microphoneVirtual);
-    microphoneVirtual.connect(analyzer);
+    audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
 
-    animationFrame();
+    audioMonoIO.setSampleInHandler(function (dataIn) {
+        domGaugeRaw.style.width = (dataIn[getIndexOfMax(dataIn, true)] * 100) + '%';
+        drawTimeDomainData(ctxTimeDomainDataRawSample, dataIn);
+    });
+
+    animationFrameLoop();
+}
+
+function getIndexOfMax(data, useAbsValue) {
+    var i, maxIndex, max, value;
+
+    for (i = 0; i < data.length; i++) {
+        value = useAbsValue ? Math.abs(data[i]) : data[i];
+        if (i === 0 || value > max) {
+            max = value;
+            maxIndex = i;
+        }
+    }
+
+    return maxIndex;
 }
 
 function getConfiguredCanvasContext(elementId, width, height) {
@@ -45,40 +65,20 @@ function getConfiguredCanvasContext(elementId, width, height) {
     return ctx;
 }
 
-function connectMicrophoneTo(node) {
-    var constraints, audioConfig;
-
-    audioConfig = {
-        googEchoCancellation: false, // disabling audio processing
-        googAutoGainControl: false,
-        googNoiseSuppression: false,
-        googHighpassFilter: false
-    };
-    constraints = {
-        video: false,
-        audio: {
-            mandatory: audioConfig,
-            optional: []
-        }
-    };
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then(function (stream) {
-            microphone = audioContext.createMediaStreamSource(stream);
-            microphone.connect(node);
-        });
-}
-
-function animationFrame() {
+function animationFrameLoop() {
     if (!animationFrameFirstCall) {
         draw();
     } else {
         animationFrameFirstCall = false;
     }
-    requestAnimationFrame(animationFrame);
+    requestAnimationFrame(animationFrameLoop);
 }
 
 function draw() {
-    drawTimeDomainData(ctxTimeDomainData);
+    var timeDomain = audioMonoIO.getTimeDomainData();
+
+    domGaugeAnalyser.style.width = (timeDomain[getIndexOfMax(timeDomain, true)] * 100) + '%';
+    drawTimeDomainData(ctxTimeDomainData, timeDomain);
     drawFrequencyDomainData(ctxFrequencyData)
 }
 
@@ -94,14 +94,12 @@ function drawLine(ctx, x1, y1, x2, y2) {
     ctx.stroke();
 }
 
-function drawTimeDomainData(ctx) {
-    var data, limit, hMid, x, y1, y2;
+function drawTimeDomainData(ctx, data) {
+    var limit, hMid, x, y1, y2;
 
     clear(ctx);
 
     hMid = Math.floor(0.5 * CANVAS_HEIGHT);
-    data = new Float32Array(analyzer.fftSize);
-    analyzer.getFloatTimeDomainData(data);
 
     limit = Math.min(MAX_WIDTH, data.length);
     for (x = 0; x < limit - 1; x++) {
@@ -117,8 +115,7 @@ function drawFrequencyDomainData(ctx) {
     clear(ctx);
 
     hMaxPix = CANVAS_HEIGHT - 1;
-    data = new Float32Array(analyzer.frequencyBinCount);
-    analyzer.getFloatFrequencyData(data);
+    data = audioMonoIO.getFrequencyData();
 
     limit = Math.min(MAX_WIDTH, data.length);
     for (x = 0; x < limit - 1; x++) {

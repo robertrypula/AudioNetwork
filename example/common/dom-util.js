@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// TODO move to class
+
 function getValue(selector, parseAs) {
     var element, resultRaw, result;
 
@@ -41,12 +43,16 @@ function setValue(selector, value) {
     }
 }
 
-function html(selector, html) {
+function html(selector, html, append) {
     var element, i;
 
     element = document.querySelectorAll(selector);
     for (i = 0; i < element.length; i++) {
-        element[i].innerHTML = html;
+        if (append) {
+            element[i].innerHTML += html;
+        } else {
+            element[i].innerHTML = html;
+        }
     }
 }
 

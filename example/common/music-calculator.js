@@ -18,7 +18,7 @@ MusicCalculator.OCTAVE_HOLDING_A4 = 4;
 MusicCalculator.OCTAVE_MAX = 10;
 MusicCalculator.NOTE_NAME_LIST = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-MusicCalculator.prototype.convertFrequencyToSemitoneNumber = function (frequency) {
+MusicCalculator.prototype.getSemitoneNumber = function (frequency) {
     var logBase2, semitoneNumber;
 
     if (frequency <= 0) {
@@ -35,7 +35,7 @@ MusicCalculator.prototype.convertFrequencyToSemitoneNumber = function (frequency
     return semitoneNumber;
 };
 
-MusicCalculator.prototype.convertSemitoneNumberToFrequency = function (semitoneNumber) {
+MusicCalculator.prototype.getFrequency = function (semitoneNumber) {
     var semitoneNumberA4based, exponent;
 
     this.$$checkSemitoneNumberRange(semitoneNumber);
@@ -46,7 +46,7 @@ MusicCalculator.prototype.convertSemitoneNumberToFrequency = function (semitoneN
     return this.$$a4Frequency * Math.pow(2, exponent);
 };
 
-MusicCalculator.prototype.convertSemitoneNumberToNoteName = function (semitoneNumber) {
+MusicCalculator.prototype.getNoteName = function (semitoneNumber) {
     var semitoneNumberC0Based, octaveNumber, semitoneIndexInOctave;
 
     this.$$checkSemitoneNumberRange(semitoneNumber);

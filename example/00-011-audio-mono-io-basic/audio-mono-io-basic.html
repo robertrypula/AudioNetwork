@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="audio-context-initialization.css">
+    <link rel="stylesheet" type="text/css" href="audio-mono-io-basic.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -53,15 +53,28 @@
             <!-- ---------------- -->
 
             <div class="row margin-bottom">
-                <div class="col col-xs-12" id="test">
+                <div class="col col-xs-12">
+                    Peak Frequyency
+                    <span id="peak-frequency"></span>
 
-
+                    <br/>
+                    Raw sample
+                    <div class="gauge-container">
+                        <div id="max-absolute-amplitude-gauge-rawsample" class="gauge"></div>
+                    </div>
+                    <br/>
+                    AnalyserNode
+                    <div class="gauge-container">
+                        <div id="max-absolute-amplitude-gauge-analysernode" class="gauge"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-000-audio-context-initialization/audio-context-initialization.html" data-numposts="5"></div>
+            <script>
+                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+            </script>
 
         </div>
 
@@ -75,7 +88,9 @@
 
     </div>
 
-    <script src="audio-context-initialization.js"></script>
+    <script src="../common/audio-mono-io.js"></script>
+    <script src="audio-mono-io-basic.js"></script>
+    <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--
     <script>

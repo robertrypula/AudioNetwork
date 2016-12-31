@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="analyzer-node.css">
+    <link rel="stylesheet" type="text/css" href="harmonics-and-phase.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -55,18 +55,40 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    <h2>Time domain</h2>
-                    <canvas id="canvas-time-domain-data"></canvas>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('sine')">Sine</button>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('triangle')">Triangle</button>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('square')">Square</button>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('sawtooth')">Sawtooth</button>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('piano')">Piano</button>
+                    <button class="btn btn-default" onClick="harmonicAmplitudeChange('violin')">Violin</button>
 
-                    <h2>Frequency domain</h2>
-                    <canvas id="canvas-frequency-data"></canvas>
+                    <input type="number" value="473.75" onChange="frequencyChange(parseFloat(this.value))" />
+
+                    <button class="btn btn-default" onClick="volumeChange(1.00)">100%</button>
+                    <button class="btn btn-default" onClick="volumeChange(0.75)">75%</button>
+                    <button class="btn btn-default" onClick="volumeChange(0.50)">50%</button>
+                    <button class="btn btn-default" onClick="volumeChange(0.25)">25%</button>
+
+                    <button class="btn btn-default" onClick="frequencyChange(500)">500 Hz</button>
+                    <button class="btn btn-default" onClick="frequencyChange(1000)">1000 Hz</button>
+                    <button class="btn btn-default" onClick="frequencyChange(1500)">1500 Hz</button>
+                    <button class="btn btn-default" onClick="frequencyChange(2000)">2000 Hz</button>
+
+                    <button class="btn btn-default" onClick="phaseChange(0.00)">Phase offset + 0.00</button>
+                    <button class="btn btn-default" onClick="phaseChange(0.25)">Phase offset + 0.25</button>
+                    <button class="btn btn-default" onClick="phaseChange(0.50)">Phase offset + 0.50</button>
+                    <button class="btn btn-default" onClick="phaseChange(0.75)">Phase offset + 0.75</button>
+
+                    TODO wykresy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-001-analyzer-node/analyzer-node.html" data-numposts="5"></div>
+            <script>
+                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+            </script>
 
         </div>
 
@@ -80,7 +102,8 @@
 
     </div>
 
-    <script src="analyzer-node.js"></script>
+    <script src="../common/audio-mono-io.js"></script>
+    <script src="harmonics-and-phase.js"></script>
     <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--

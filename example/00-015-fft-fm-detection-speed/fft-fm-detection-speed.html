@@ -8,13 +8,13 @@
     <meta name="description" content="">
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
-    <!--<link rel="stylesheet" type="text/css" href="../../asset/css/example.css">-->
-    <link rel="stylesheet" type="text/css" href="piano.css">
+    <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
+    <link rel="stylesheet" type="text/css" href="fft-fm-detection-speed.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="init()">
+<body onLoad="">
     <!--
     <div id="fb-root"></div>
     <script>(function(d, s, id) {
@@ -53,74 +53,101 @@
             <!-- ---------------- -->
 
             <div class="row margin-bottom">
-                <div class="col col-xs-12" id="test">
+                <div class="col col-xs-12">
 
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="tx-frequency">
-                                TX frequency
+                            <label for="fft-size">
+                                FFT size
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="tx-frequency" value="0" class="" />
+                            <input type="number" id="fft-size" value="2048" class="" />
                         </div>
                     </div>
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="tx-phase">
-                                TX phase
+                            <label for="rx-timestep">
+                                RX time step [ms]
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="tx-phase" value="0" />
+                            <input type="number" id="rx-timestep" value="46" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="tx-timestep">
+                                TX time step [ms]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input type="number" id="tx-timestep" value="46" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="tx-timestep">
+                                TX data
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input type="text" id="tx-data" value="-50 -40 -30 -20 -10 0 10 20 30 40 50" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="carrier-frequency">
+                                Carrier frequency
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input type="number" id="carrier-frequency" value="2000" />
                         </div>
                     </div>
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="updatePhaseAndFrequencyClicked()" class="btn btn-default">Update</button>
-                            <button onClick="muteClicked()" class="btn btn-default">Mute</button>
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="tx-phase">
-                                TX octave #
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="tx-octave-number" value="6" onChange="octaveNumberChanged()" />
+                            <button onClick="init()" class="btn btn-default">Init</button>
+                            <button onClick="startTx()" class="btn btn-default">Start TX</button>
+                            <button onClick="startRx()" class="btn btn-default">Start RX</button>
                         </div>
                     </div>
 
-                    <div class="margin-bottom" id="piano-container"></div>
+                    <pre>
+FFT 2048
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label>
-                                TX phase
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="updatePhaseClicked(0.00)" class="btn btn-default">0.00</button>
-                            <button onClick="updatePhaseClicked(0.25)" class="btn btn-default">0.25</button>
-                            <button onClick="updatePhaseClicked(0.50)" class="btn btn-default">0.50</button>
-                            <button onClick="updatePhaseClicked(0.75)" class="btn btn-default">0.75</button>
-                        </div>
-                    </div>
+    resolution:     21.5 Hz
+    blockTime:      46.4 ms
+    bandwidth:      5504 Hz (256 levels)
+    sampleRate:     21.5 Hz
+    maxSubcarrier:   9.0 Hz
 
-                    RX frequency (Hz): <span id="rx-frequency-hz"></span><br/>
-                    RX frequency (dB): <span id="rx-frequency-db"></span><br/>
-                    RX note name: <span id="rx-note-name"></span><br/>
-                    RX test: <span id="rx-test"></span>
+1 Hz   pilot
+2 Hz   OFDM subcarrier #1
+3 Hz   OFDM subcarrier #2
+4 Hz   OFDM subcarrier #3
+5 Hz   OFDM subcarrier #4
+6 Hz   OFDM subcarrier #5
+7 Hz   OFDM subcarrier #6
+8 Hz   OFDM subcarrier #7
+9 Hz   OFDM subcarrier #8
+
+8 subcarriers x 64-QAM  -> 512 bits/sec = 64 B/sec
+                    </pre>
+
+                    <div id="log"></div>
+
 
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-000-audio-context-initialization/audio-context-initialization.html" data-numposts="5"></div>
+            <script>
+                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+            </script>
 
         </div>
 
@@ -134,22 +161,11 @@
 
     </div>
 
-    <!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
-    <!--
-    <script>
-        var AudioNetworkBootConfig = {
-            devScriptLoad: true,
-            createAlias: false
-        };
-    </script>
-    <script src="../../src/audio-network-boot.js"></script>
-    -->
-    <!-- audio network END -->
-
-    <script src="../common/web-audio-api-mono-io.js"></script>
+    <script src="../common/audio-mono-io.js"></script>
+    <script src="../common/fft-result.js"></script>
     <script src="../common/dom-util.js"></script>
-    <script src="../common/music-calculator.js"></script>
-    <script src="piano.js"></script>
+    <script src="fft-fm-detection-speed.js"></script>
+    <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--
     <script>

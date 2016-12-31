@@ -24,11 +24,19 @@ function init() {
     setInterval(updateRandomTone, 1000);
 
     // attach nodes to speakers
-    microphoneVirtual.connect(audioContext.destination);
+    // microphoneVirtual.connect(audioContext.destination);   // Feedback Loop might occur !!!
     toneVolume.connect(audioContext.destination);
 }
 
-function connectMicrophoneTo(node) {
+function updateDestination(node, activate) {
+    if (activate) {
+        node.connect(audioContext.destination);
+    } else {
+        node.disconnect(audioContext.destination);
+    }
+}
+
+function connectMicrophoneTo(microphoneVirtual) {
     var constraints, audioConfig;
 
     audioConfig = {
@@ -46,10 +54,11 @@ function connectMicrophoneTo(node) {
     };
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
-            // DO NOT declare this variable in scope of this function
-            // in some browsers it's removed by Garbage Collector
+            // DO NOT declare 'microphone' variable in scope of this function
+            // in some browsers it will be removed by Garbage Collector and 
+            // you will hear silence after few seconds
             microphone = audioContext.createMediaStreamSource(stream);
-            microphone.connect(node);
+            microphone.connect(microphoneVirtual);
         });
 }
 
@@ -62,8 +71,7 @@ function updateRandomTone() {
     toneGenerator.frequency.value = frequency;
     toneGenerator.frequency.setValueAtTime(frequency, now);
 
-    gain = 0.001 + Math.random() * 0.01;
+    gain = Math.random() * 0.01;
     toneVolume.gain.value = gain;
     toneVolume.gain.setValueAtTime(gain, now);
-
 }

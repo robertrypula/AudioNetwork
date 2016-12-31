@@ -2,7 +2,8 @@
 'use strict';
 
 var
-    webAudioAPIMonoIO,
+    FFT_SIZE = 8 * 1024,
+    audioMonoIO,
     musicCalculator,
     harmonicAmplitudeViolin = [
         1.0,
@@ -28,17 +29,27 @@ var
         0.002860679, 0.002558108, 0.000000000, // 22, 23, 24
         0.001650392                            // 25
     ],
-    harmonicAmplitude = harmonicAmplitudeViolin;
+    animationFrameFirstCall = true,
+    harmonicAmplitude = undefined;//harmonicAmplitudeViolin;
 
 function init() {
-    webAudioAPIMonoIO = new WebAudioAPIMonoIO();
+    audioMonoIO = new AudioMonoIO();
     musicCalculator = new MusicCalculator();
     generatePianoOctave();
-    refresh();
+    animationFrameLoop();
+}
+
+function animationFrameLoop() {
+    if (!animationFrameFirstCall) {
+        nextAnimationFrame();
+    } else {
+        animationFrameFirstCall = false;
+    }
+    requestAnimationFrame(animationFrameLoop);
 }
 
 function pianoKeyClicked(semitoneNumber) {
-    var frequency = musicCalculator.convertSemitoneNumberToFrequency(semitoneNumber);
+    var frequency = musicCalculator.getFrequency(semitoneNumber);
 
     setValue('#tx-frequency', frequency);
     setOutputWave();
@@ -78,22 +89,7 @@ function setOutputWave() {
 
     frequency = getValue('#tx-frequency', 'float');
     phase = getValue('#tx-phase', 'float');
-    webAudioAPIMonoIO.setOutputWave(frequency, 0.1, phase, harmonicAmplitude);
-}
-
-function findMaxIndex(data) {
-    var maxIndex, max, i;
-
-    maxIndex = -1;
-    max = undefined;
-    for (i = 0; i < data.length; i++) {
-        if (maxIndex === -1 || data[i] > max) {
-            max = data[i];
-            maxIndex = i;
-        }
-    }
-
-    return maxIndex;
+    audioMonoIO.setOutputWave(frequency, 0.1, phase, harmonicAmplitude);
 }
 
 function generatePianoOctave() {
@@ -108,39 +104,35 @@ function generatePianoOctave() {
     htmlResult = '<div class="piano-key-octave">';
     for (i = 0; i <= MusicCalculator.SEMITONE_PER_OCTAVE; i++) {
         semitoneNumber = txSemitoneNumberStart + i;
-        noteName = musicCalculator.convertSemitoneNumberToNoteName(semitoneNumber);
+        noteName = musicCalculator.getNoteName(semitoneNumber);
         htmlResult += '<a href="javascript:void(0)" class="key-index-' + i + '" onClick="pianoKeyClicked(' + semitoneNumber + ')"><span>' + noteName +'</span></a>'
     }
     htmlResult += '</div>';
     html('#piano-container', htmlResult);
 }
 
-function refresh() {
+function nextAnimationFrame() {
     var
-        fftSize = 16 * 1024,
-        fft = webAudioAPIMonoIO.getFrequencyData(fftSize),
+        fftResult = new FFTResult(audioMonoIO.getFrequencyData(FFT_SIZE), audioMonoIO.getSampleRate()),
         txOctaveNumber = getValue('#tx-octave-number', 'int'),
         txSemitoneNumberStart = (txOctaveNumber - MusicCalculator.OCTAVE_HOLDING_A4) * MusicCalculator.SEMITONE_PER_OCTAVE,
         txSemitoneNumberEnd = (txOctaveNumber - MusicCalculator.OCTAVE_HOLDING_A4 + 1) * MusicCalculator.SEMITONE_PER_OCTAVE,
-        decibelMax,
-        frequencyBinMaxIndex,
+        loudestDecibel,
+        loudestFrequency,
         frequency,
         semitoneNumber,
         noteName,
-        frequencyBinIndex,
         semitoneIndexInOctave,
         i,
         line;
 
-    frequencyBinMaxIndex = findMaxIndex(fft);
-    decibelMax = fft[frequencyBinMaxIndex];
+    loudestDecibel = fftResult.getLoudestDecibel();
+    loudestFrequency = fftResult.getLoudestFrequency();
+    semitoneNumber = musicCalculator.getSemitoneNumber(loudestFrequency);
+    noteName = musicCalculator.getNoteName(semitoneNumber);
 
-    frequency = convertFrequencyBinIndexToFrequency(frequencyBinMaxIndex, webAudioAPIMonoIO.getSampleRate(), fftSize);
-    semitoneNumber = musicCalculator.convertFrequencyToSemitoneNumber(frequency);
-    noteName = musicCalculator.convertSemitoneNumberToNoteName(semitoneNumber);
-
-    html('#rx-frequency-hz', (frequency).toFixed(2));
-    html('#rx-frequency-db', (decibelMax).toFixed(2));
+    html('#rx-frequency-hz', (loudestFrequency).toFixed(2));
+    html('#rx-frequency-db', (loudestDecibel).toFixed(2));
     html('#rx-note-name', noteName);
 
     if (semitoneNumber && semitoneNumber >= txSemitoneNumberStart && semitoneNumber <= txSemitoneNumberEnd) {
@@ -149,21 +141,23 @@ function refresh() {
             removeClass('.piano-key-octave a', 'active');
             addClass('.piano-key-octave a.key-index-' + semitoneIndexInOctave, 'active');
         }
+    } else {
+        if (hasClass('.piano-key-octave a', 'active')) {
+            removeClass('.piano-key-octave a', 'active');
+        }
     }
 
     line = [];
     for (i = 0; i <= MusicCalculator.SEMITONE_PER_OCTAVE; i++) {
         semitoneNumber = txSemitoneNumberStart + i;
-        frequency = musicCalculator.convertSemitoneNumberToFrequency(semitoneNumber);
-        noteName = musicCalculator.convertSemitoneNumberToNoteName(semitoneNumber);
-        frequencyBinIndex = convertFrequencyToFrequencyBinIndex(frequency, webAudioAPIMonoIO.getSampleRate(), fftSize);
+        frequency = musicCalculator.getFrequency(semitoneNumber);
+        noteName = musicCalculator.getNoteName(semitoneNumber);
         line.push(
             (frequency).toFixed(2) + ' ' +
+            (fftResult.getBinIndex(frequency)) + ' ' +
             noteName + ': ' +
-            (fft[frequencyBinIndex]).toFixed(2)
+            (fftResult.getDecibelFromFrequency(frequency)).toFixed(2)
         );
     }
     html('#rx-test', '<br/>' + line.join('<br/>'));
-
-    setTimeout(refresh, 80);
 }

@@ -1,0 +1,29 @@
+44100  - 1 Hz
+
+
+4 900  - 1 Hz    / 9
+
+
+OFDM carriers:
+    1 Hz  9 Hz
+    2 Hz  18 Hz
+    3 Hz  27 Hz
+    4 Hz  36 Hz
+    IQ sampleRate: 98 Hz (2.72x max carrier)
+
+
+450 audio input samples per one baseband sample -> 98x / sec  DFT on 450 samples
+
+
+
+baseband*I + baseband*Q = OUT
+OUT 
+
+
+1 2 3 4 5 6 7 8 9
+* * * * * * * * *
+S S - - - - S S - - - -
+
+1.29 OFDM symbols / sec
+5.16 symbols / sec
+15.48 bit / s

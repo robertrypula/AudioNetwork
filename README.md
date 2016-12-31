@@ -8,7 +8,7 @@ microphone, speakers and the browser!
 
 [Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
 
-[Discrete Fourier Transform demo](https://audio-network.rypula.pl/example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html)
+[Discrete Fourier Transform demo](https://audio-network.rypula.pl/dft-full)
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
 features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit

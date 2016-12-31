@@ -1,9 +1,24 @@
 Redirect 301 /example/01-physical-layer/physical-layer.html /example/01-001-physical-layer-full/physical-layer-full.html
 Redirect 301 /example/02-physical-layer-simple/physical-layer-simple.html /example/01-000-physical-layer-simple/physical-layer-simple.html
-Redirect 301 /example/03-physical-layer-carrier/physical-layer-carrier.html /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
-Redirect 301 /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /example/03-physical-layer-carrier/physical-layer-carrier.html /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
 
-Redirect 301 /dft-simple /example/00-040-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
-Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-040-discrete-fourier-transform-simple
-Redirect 301 /dft-full /example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html
-Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-041-discrete-fourier-transform-full
+Redirect 301 /dft-simple /example/00-000-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
+Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-discrete-fourier-transform-simple
+
+Redirect 301 /dft-full /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-001-discrete-fourier-transform-full
+
+Redirect 301 /audio-context-init /example/00-010-audio-context-initialization/audio-context-initialization.html
+Redirect 301 /audio-context-init-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-010-audio-context-initialization
+
+Redirect 301 /audio-mono-io https://github.com/robertrypula/AudioNetwork/tree/master/example/common/audio-mono-io.js
+
+Redirect 301 /audio-mono-io-basic /example/00-011-audio-mono-io-basic/audio-mono-io-basic.html
+Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-011-audio-mono-io-basic
+
+Redirect 301 /robotic-sound /example/00-012-robotic-sound/robotic-sound.html
+Redirect 301 /robotic-sound-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-012-robotic-sound
+
+Redirect 301 /harmonics-and-phase /example/00-013-harmonics-and-phase/harmonics-and-phase.html
+Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-013-harmonics-and-phase

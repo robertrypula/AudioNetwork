@@ -5,7 +5,7 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
     <title>Audio Network - data transmission over sound waves - physical layer carrier example</title>
 
-    <meta name="description" content="Example of restoring carrier's phase and power from raw data samples that contains couple of others frequencies.">
+    <meta name="description" content="Example of restoring carrier's phase and amplitude from raw data samples that contains couple of others frequencies.">
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
@@ -233,6 +233,20 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- -- -->
+                <div id="separate-sine-3"></div>
+                <div id="separate-sine-4"></div>
+                <div id="separate-sine-5"></div>
+                <div id="separate-sine-6"></div>
+                <div id="separate-sine-7"></div>
+                <div id="separate-sine-8"></div>
+                <div id="separate-sine-9"></div>
+                <div id="separate-sine-10"></div>
+                <div id="separate-sine-11"></div>
+                <div id="separate-sine-12"></div>
+                <!-- -- -->
+
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <label for="form-white-noise-amplitude">
@@ -366,14 +380,14 @@
             <div id="section-frequency-domain-content">
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <label for="form-power-decibel-min">
-                            Minimal power in decibels
+                        <label for="form-amplitude-decibel-min">
+                            Minimal amplitude in decibels
                         </label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
                         <input
                             type="number"
-                            id="form-power-decibel-min"
+                            id="form-amplitude-decibel-min"
                             onChange="formFrequencyDomainDataChanged()"
                             value=""
                         />
@@ -472,11 +486,11 @@
                 <div class="row margin-bottom">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <b class="label">
-                            Power
+                            Amplitude
                         </b>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <span id="frequency-bin-power-decibel"></span> dB
+                        <span id="frequency-bin-amplitude-decibel"></span> dB
                     </div>
                 </div>
                 <div class="row margin-bottom">
@@ -497,7 +511,7 @@
                     </div>
                     <div class="col col-xs-12 col-sm-7 col-md-9">
                         <p>
-                            Constellation diagram shows two things at once - power in decibels and phase of the selected
+                            Constellation diagram shows two things at once - amplitude in decibels and phase of the selected
                             frequency bin. If point is far away from chart origin it means that signal is strong, if near
                             origin it means that signal is weak. Position of point on the circle tells about phase. At
                             the top (12 o'clock) we have phase offset equal to 0 degrees (or 360 degrees since it's the
@@ -505,7 +519,7 @@
                             (3 o'clock), point on the far bottom will have 180 degrees phase offset (6 o'clock) and so on.
                         </p>
                         <p>
-                            To test that please select frequency bin with peak power and try to manipulate phase
+                            To test that please select frequency bin with peak amplitude and try to manipulate phase
                             of that sine from 'Separate sines' section.
                         </p>
                         <div id="constellation-diagram"></div>
@@ -596,7 +610,9 @@
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-041-discrete-fourier-transform-full/discrete-fourier-transform-full.html" data-numposts="5"></div>
+            <script>
+                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+            </script>
 
         </div>
 

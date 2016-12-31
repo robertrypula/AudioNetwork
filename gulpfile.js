@@ -41,6 +41,13 @@ gulp.task('md-changelog', function () {
         .pipe(gulp.dest(DEST));
 });
 
+gulp.task('md-article02', function () {
+    return gulp.src('article_02.md')
+        .pipe(markdown())
+        .pipe(gulp.dest(DEST));
+});
+
+
 
 var webserver = require('gulp-webserver');
 

@@ -68,3 +68,7 @@
 .piano-key-octave a.active {
     background-color: lightgreen;
 }
+
+#rx-test {
+    font-family: monospace;
+}

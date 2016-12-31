@@ -42,7 +42,7 @@ function findUnitAngle(x, y) {
 }
 
 function getFrequencyBin(timeDomain, samplePerPeriod) {
-    var windowSize, real, imm, i, sample, r, power, powerDecibel, phase;
+    var windowSize, real, imm, i, sample, r, amplitude, amplitudeDecibel, phase;
 
     windowSize = timeDomain.length;            // timeDomain array length is our window size
     real = 0;
@@ -56,14 +56,14 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
     real /= windowSize;                        // normalize final vector
     imm /= windowSize;                         // normalize final vector
 
-    power = Math.sqrt(real * real + imm * imm);                 // compute length of the vector
-    powerDecibel = 10 * Math.log(power) / Math.LN10;            // convert into decibels
-    powerDecibel = powerDecibel < -100 ? -100 : powerDecibel;   // limit weak values to -100 decibels
+    amplitude = Math.sqrt(real * real + imm * imm);                         // compute length of the vector
+    amplitudeDecibel = 10 * Math.log(amplitude) / Math.LN10;                // convert into decibels
+    amplitudeDecibel = amplitudeDecibel < -100 ? -100 : amplitudeDecibel;   // limit weak values to -100 decibels
 
     phase = findUnitAngle(real, imm);          // get angle between vector and positive Y axis clockwise
 
     return {
-        powerDecibel: powerDecibel,
+        amplitudeDecibel: amplitudeDecibel,
         phase: phase
     };
 }
@@ -106,16 +106,16 @@ function logger(s) {
     element.innerHTML = element.innerHTML + s + '\n';
 }
 
-function logPowerDecibel(
+function logAmplitudeDecibel(
     frequencyDomain, index, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
 ) {
-    var powerDecibelTwoDecimalPlaces, step, samplePerPeriod;
+    var amplitudeDecibelTwoDecimalPlaces, step, samplePerPeriod;
 
     step = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
     samplePerPeriod = frequencyBinSamplePerPeriodMax - step * index;
-    powerDecibelTwoDecimalPlaces = Math.round(frequencyDomain[index].powerDecibel * 100) / 100;
+    amplitudeDecibelTwoDecimalPlaces = Math.round(frequencyDomain[index].amplitudeDecibel * 100) / 100;
 
-    logger('[' + index + '] ' + powerDecibelTwoDecimalPlaces + ' dB | samplePerPeriod: ' + samplePerPeriod);
+    logger('[' + index + '] ' + amplitudeDecibelTwoDecimalPlaces + ' dB | samplePerPeriod: ' + samplePerPeriod);
 }
 
 function logPhase(frequencyDomain, index) {
@@ -146,7 +146,7 @@ function init() {
     logger('frequencyDomain.length: ' + frequencyDomain.length);
 
     for (i = 0; i < frequencyDomain.length; i++) {
-        logPowerDecibel(
+        logAmplitudeDecibel(
             frequencyDomain, i, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
         );
     }

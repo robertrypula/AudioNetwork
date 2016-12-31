@@ -9,12 +9,12 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="web-audio-api-mono-io-class-test.css">
+    <link rel="stylesheet" type="text/css" href="fft-performance.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="init()">
+<body onLoad="">
     <!--
     <div id="fb-root"></div>
     <script>(function(d, s, id) {
@@ -55,13 +55,67 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="fft-size">
+                                FFT size
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input type="number" id="fft-size" value="2048" class="" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="timestep">
+                                Time step [ms]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input type="number" id="timestep" value="46" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="init()" class="btn btn-default">Start test!</button>
+                        </div>
+                    </div>
+
+                    <pre>
+FFT 2048
+
+    resolution:     21.5 Hz
+    blockTime:      46.4 ms
+    bandwidth:      5504 Hz (256 levels)
+    sampleRate:     21.5 Hz
+    maxSubcarrier:   9.0 Hz
+
+1 Hz   pilot
+2 Hz   OFDM subcarrier #1
+3 Hz   OFDM subcarrier #2
+4 Hz   OFDM subcarrier #3
+5 Hz   OFDM subcarrier #4
+6 Hz   OFDM subcarrier #5
+7 Hz   OFDM subcarrier #6
+8 Hz   OFDM subcarrier #7
+9 Hz   OFDM subcarrier #8
+
+8 subcarriers x 64-QAM  -> 512 bits/sec = 64 B/sec
+                    </pre>
+
+                    <div id="log"></div>
+
 
                 </div>
             </div>
 
             <!-- ---------------- -->
 
-            <div class="fb-comments" data-href="https://audio-network.rypula.pl/example/00-002-audio-mono-io-test/audio-mono-io-test.html" data-numposts="5"></div>
+            <script>
+                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+            </script>
 
         </div>
 
@@ -75,8 +129,10 @@
 
     </div>
 
-    <script src="../common/web-audio-api-mono-io.js"></script>
-    <script src="web-audio-api-mono-io-class-test.js"></script>
+    <script src="../common/audio-mono-io.js"></script>
+    <script src="../common/fft-result.js"></script>
+    <script src="../common/dom-util.js"></script>
+    <script src="fft-performance.js"></script>
     <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--
