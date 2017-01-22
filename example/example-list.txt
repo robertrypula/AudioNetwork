@@ -1,19 +1,2 @@
-(!) OBSOLETE LIST...
-
-- 00-000-discrete-fourier-transform-simple                    ready
-- 00-001-discrete-fourier-transform-full                      ready
-- 00-000-audio-context-initialization
-- 00-010-analyzer-chart
-- 00-011-script-processor-node
-- 00-012-sample-chart-and-queue
-- 00-013-script-processor-node-with-sample-chart
-- 00-020-carrier-generate-with-sample-chart
-- 00-021-carrier-generate-with-sample-chart-animated          ready
-- 00-022-carrier-generate-adding-couple-of-sines
-- 00-030-power-chart
-- 00-031-constellation-diagram
-- 00-032-complex-plane
-- 00-050-amplitude-modulation-transmission-simple
-- 00-051-amplitude-modulation-transmission-full               ready
-- 01-000-physical-layer-simple                                ready
-- 01-001-physical-layer-full                                  ready
+00-xxx | Standalone examples. They are not dependent on the AudioNetwork lib.
+01-xxx | Examples dependent to AudioNetwork lib. They will be all related to Physical Layer only

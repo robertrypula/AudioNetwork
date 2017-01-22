@@ -63,7 +63,7 @@
             this.$$sampleComputed = (
                 fadeFactor *
                 currentCarrierData.amplitude *
-                MathUtil.sin(
+                MathUtil.sin(                                // TODO: consider changing to cosine
                     this.$$omega * this.$$sampleNumber
                     - MathUtil.TWO_PI * (currentCarrierData.phase - this.$$phaseCorrection)
                 )
@@ -100,7 +100,7 @@
         };
 
         CarrierGenerate.prototype.getSample = function () {
-            if (this.$$sampleComputed) {
+            if (this.$$sampleComputed) {       // TODO fix me, 0 will not pass but this is valid sample!!!
                 return this.$$sampleComputed;
             }
 

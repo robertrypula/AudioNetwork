@@ -3,22 +3,41 @@ Redirect 301 /example/02-physical-layer-simple/physical-layer-simple.html /examp
 Redirect 301 /example/03-physical-layer-carrier/physical-layer-carrier.html /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
 Redirect 301 /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-simple.html /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
 
-Redirect 301 /dft-simple /example/00-000-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
-Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-discrete-fourier-transform-simple
 
-Redirect 301 /dft-full /example/00-001-discrete-fourier-transform-full/discrete-fourier-transform-full.html
-Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-001-discrete-fourier-transform-full
+# Article 1 aliases:
 
-Redirect 301 /audio-context-init /example/00-010-audio-context-initialization/audio-context-initialization.html
-Redirect 301 /audio-context-init-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-010-audio-context-initialization
+Redirect 301 /dft-simple /example/00-010-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
+Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-010-discrete-fourier-transform-simple
 
-Redirect 301 /audio-mono-io https://github.com/robertrypula/AudioNetwork/tree/master/example/common/audio-mono-io.js
+Redirect 301 /dft-full /example/00-011-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-011-discrete-fourier-transform-full
 
-Redirect 301 /audio-mono-io-basic /example/00-011-audio-mono-io-basic/audio-mono-io-basic.html
-Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-011-audio-mono-io-basic
+# Article 2 aliases:
 
-Redirect 301 /robotic-sound /example/00-012-robotic-sound/robotic-sound.html
-Redirect 301 /robotic-sound-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-012-robotic-sound
+Redirect 301 /audio-mono-io-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/audio-mono-io.js
+Redirect 301 /example-docs https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common
 
-Redirect 301 /harmonics-and-phase /example/00-013-harmonics-and-phase/harmonics-and-phase.html
-Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-013-harmonics-and-phase
+Redirect 301 /audio-context-init /example/00-020-audio-context-init/audio-context-init.html
+Redirect 301 /audio-context-init-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-020-audio-context-init
+
+Redirect 301 /square-wave /example/00-021-square-wave/square-wave.html
+Redirect 301 /square-wave-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-021-square-wave
+
+Redirect 301 /square-wave-phase /example/00-022-square-wave-phase/square-wave-phase.html
+Redirect 301 /square-wave-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-022-square-wave-phase
+
+Redirect 301 /analyser-node /example/00-023-analyser-node/analyser-node.html
+Redirect 301 /analyser-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-023-analyser-node
+
+Redirect 301 /script-processor-node /example/00-024-script-processor-node/script-processor-node.html
+Redirect 301 /script-processor-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-024-script-processor-node
+
+Redirect 301 /audio-mono-io-basic /example/00-025-audio-mono-io-basic/audio-mono-io-basic.html
+Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-025-audio-mono-io-basic
+
+Redirect 301 /harmonics-and-phase /example/00-026-harmonics-and-phase/harmonics-and-phase.html
+Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-026-harmonics-and-phase
+
+Redirect 301 /harmonics-and-phase /example/00-028-piano/piano.html
+Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-028-piano
+
