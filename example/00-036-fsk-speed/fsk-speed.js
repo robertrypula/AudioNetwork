@@ -105,7 +105,7 @@ function tx() {
     frequencyBinIndex = carrierFrequencyBinIndex + sample;
     frequency = FFTResult.getFrequency(frequencyBinIndex, audioMonoIO.getSampleRate(), fftSize);
 
-    audioMonoIO.setOutputWave(frequency, 1);
+    audioMonoIO.setPeriodicWave(frequency, 1);
 
     txDataIndex = (txDataIndex + 1) % txData.length;
 }

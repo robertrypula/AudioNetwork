@@ -71,9 +71,10 @@ function init() {
         }
     });
 
+    audioMonoIO.setPeriodicWave(txFrequency, 0.5);         // 50% volume
     setInterval(function () {
-        audioMonoIO.setOutputWave(txFrequency, 0.5);         // 50% volume
         txFrequency = (txFrequency === 2000 ? 2500 : 2000);
+        audioMonoIO.setPeriodicWave(txFrequency, 0.5);         // 50% volume
     }, 1000);
 
     animationFrameLoop();

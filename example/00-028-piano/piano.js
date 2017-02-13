@@ -139,21 +139,21 @@ function pianoKeyClicked(semitoneNumber) {
     var frequency = musicCalculator.getFrequency(semitoneNumber);
 
     setValue('#tx-frequency', frequency);
-    setOutputWave();
+    setPeriodicWave();
 }
 
 function updatePhaseClicked(newPhase) {
     setValue('#tx-phase', newPhase);
-    setOutputWave();
+    setPeriodicWave();
 }
 
 function muteClicked() {
     setValue('#tx-frequency', 0);
-    setOutputWave();
+    setPeriodicWave();
 }
 
 function updatePhaseAndFrequencyClicked() {
-    setOutputWave();
+    setPeriodicWave();
 }
 
 function octaveNumberChanged() {
@@ -175,12 +175,12 @@ function octaveNumberChanged() {
     generateHtml();
 }
 
-function setOutputWave() {
+function setPeriodicWave() {
     var frequency, phase;
 
     frequency = getValue('#tx-frequency', 'float');
     phase = getValue('#tx-phase', 'float');
-    audioMonoIO.setOutputWave(frequency, 0.1, phase, harmonicAmplitude);
+    audioMonoIO.setPeriodicWave(frequency, 0.1, phase, harmonicAmplitude);
 }
 
 function isSemitoneNumberInRange(semitoneNumber, semitoneNumberStart, semitoneNumberEnd) {

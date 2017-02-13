@@ -96,7 +96,7 @@ AudioMonoIO.prototype.$$initializeCommon = function () {
     this.$$connectMicrophoneTo(this.$$microphoneVirtual);
 
     this.$$masterIn = this.$$audioContext.createGain();
-    this.$$masterOut = this.$$audioContext.createGain();//ChannelMerger(AudioMonoIO.$$_MONO);
+    this.$$masterOut = this.$$audioContext.createGain();
     this.$$masterOutVolume = this.$$audioContext.createGain();
 
     this.$$sampleProcessor = this.$$audioContext.createScriptProcessor(
@@ -124,7 +124,7 @@ AudioMonoIO.prototype.$$initializeOutput = function () {
     this.$$outOscillator = this.$$audioContext.createOscillator();
     this.$$outOscillatorGain = this.$$audioContext.createGain();
 
-    this.setOutputWave(
+    this.setPeriodicWave(
         AudioMonoIO.$$_OUTPUT_WAVE_FREQUENCY,
         AudioMonoIO.$$_OUTPUT_WAVE_VOLUME,
         AudioMonoIO.$$_OUTPUT_WAVE_PHASE,
@@ -265,7 +265,7 @@ AudioMonoIO.prototype.setLoopback = function (state) {
     return true;
 };
 
-AudioMonoIO.prototype.setOutputWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
+AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
     var periodicWave;
 
     frequency = AudioMonoIO.$$getValueOrDefault(

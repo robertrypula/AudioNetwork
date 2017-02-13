@@ -31,9 +31,9 @@ function txTone(symbol) {
     }
 
     txActive = true;
-    audioMonoIO.setOutputWave(symbolFrequency[symbol], 0.01);
+    audioMonoIO.setPeriodicWave(symbolFrequency[symbol], 0.01);
     setTimeout(function () {
-        audioMonoIO.setOutputWave(0, 0);
+        audioMonoIO.setPeriodicWave(0, 0);
         setTimeout(function () {
             txActive = false;
         }, TX_GUARD_TIME_MS);

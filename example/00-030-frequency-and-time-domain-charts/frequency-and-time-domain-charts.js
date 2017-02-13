@@ -29,6 +29,18 @@ function init() {
 
     audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
 
+    // square wave test
+    /*
+    audioMonoIO.setLoopback(true);
+    audioMonoIO.setPeriodicWave(3000, 0.3, 0.0, [ 1/1, 0, 1/3, 0, 1/5 ], [ 0, 0, 0, 0, 0 ]);
+    audioMonoIO.setSampleOutHandler(function (monoOut) {
+        for (var i = 0; i < monoOut.length; i++) {
+            monoOut[i] = 0.05 * (Math.random() * 2 - 1);    // white noise
+        }
+    });
+    */
+    // --------------
+
     audioMonoIO.setSampleInHandler(function (monoIn) {
         domGaugeRaw.style.width = (monoIn[getIndexOfMax(monoIn, true)] * 100) + '%';
         drawTimeDomainData(ctxTimeDomainDataRawSample, monoIn);
@@ -78,7 +90,7 @@ function draw() {
         timeDomainData = audioMonoIO.getTimeDomainData(),
         frequencyData = audioMonoIO.getFrequencyData();
 
-    domGaugeAnalyser.style.width = (timeDomain[getIndexOfMax(timeDomain, true)] * 100) + '%';
+    domGaugeAnalyser.style.width = (timeDomainData[getIndexOfMax(timeDomainData, true)] * 100) + '%';
     drawTimeDomainData(ctxTimeDomainData, timeDomainData);
     drawFrequencyDomainData(ctxFrequencyData, frequencyData)
 }
