@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 Robert Rypuła - https://audio-network.rypula.pl
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // MusicCalculator class implements Scientific Pitch Notation:
