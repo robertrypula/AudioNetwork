@@ -51,6 +51,8 @@ function nextAnimationFrame() {
 }
 
 function init() {
+    var i;
+
     txFrequency = 2000;
 
     domPeakFrequency = document.getElementById('peak-frequency');
@@ -66,7 +68,7 @@ function init() {
     });
 
     audioMonoIO.setSampleOutHandler(function (monoOut, monoIn) {
-        for (var i = 0; i < monoOut.length; i++) {
+        for (i = 0; i < monoOut.length; i++) {
             monoOut[i] = 0.05 * (Math.random() * 2 - 1);    // white noise
         }
     });

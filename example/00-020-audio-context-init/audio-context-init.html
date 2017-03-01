@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!--<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>-->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
     <title>Audio Network - data transmission over sound waves</title>
 
     <meta name="description" content="">
@@ -10,26 +10,29 @@
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
     <link rel="stylesheet" type="text/css" href="audio-context-init.css">
-    <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
-    <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <script src="../../asset/js/site.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body onLoad="init()">
-    <!--
+
     <div id="fb-root"></div>
-    <script>(function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));</script>
-    -->
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        }
+    </script>
 
     <div class="wrapper">
 
         <div class="container">
-            <!--
             <h1>Audio Network - send data over sound in JavaScript</h1>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
@@ -48,7 +51,6 @@
                     </p>
                 </div>
             </div>
-            -->
 
             <!-- ---------------- -->
 
@@ -56,23 +58,44 @@
                 <div class="col col-xs-12" id="test">
 
                     <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="output-tone" class="label-for-checkbox">
-                                Random tone on speakers
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="checkbox" onChange="outputTone(this.checked)" id="output-tone" value="1" checked="checked" />
+                        <div class="col col-xs-12">
+                            <p>
+                                This example shows how to initialize AudioContext and
+                                microphone. You can also choose what you want to hear
+                                on your speakers. To avoid audio feedback find your
+                                headset before trying to enable microphone.
+                            </p>
                         </div>
                     </div>
+
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="output-microphone" class="label-for-checkbox">
-                                Microphone on speakers
+                            <label for="output-microphone-checkbox" class="label-for-checkbox">
+                                Enable microphone
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="checkbox" onChange="outputMicrophone(this.checked)" id="output-microphone" value="1" />
+                            <input
+                                type="checkbox"
+                                onChange="onMicrophoneCheckboxChange()"
+                                id="output-microphone-checkbox"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="tone-checkbox" class="label-for-checkbox">
+                                Enable random tone
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onToneCheckboxChange()"
+                                id="tone-checkbox"
+                                value="1"
+                                checked="checked" />
                         </div>
                     </div>
 
@@ -82,7 +105,9 @@
             <!-- ---------------- -->
 
             <script>
-                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+                if (isProduction()) { // TODO refactor this
+                    document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+                }
             </script>
 
         </div>
@@ -99,17 +124,17 @@
 
     <script src="audio-context-init.js"></script>
 
-    <!--
     <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        if (isProduction()) { // TODO refactor this
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-        ga('create', 'UA-76662342-1', 'auto');
-        ga('send', 'pageview');
+            ga('create', 'UA-76662342-1', 'auto');
+            ga('send', 'pageview');
+        }
     </script>
-    -->
 
 </body>
 </html>

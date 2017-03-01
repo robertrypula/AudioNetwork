@@ -37,7 +37,7 @@ function init() {
 
     updateFrequency(FREQUENCY);
     updateVolume(SILENCE);
-    updateOscillator('custom');
+    updateOscillator();
 
     oscillator.start();
 
@@ -53,19 +53,20 @@ function updateFrequency(frequency) {
     setImmediately(oscillator.frequency, frequency);
 }
 
-function updateOscillator(type) {
+function updatePhase(phase) {
+    squareWaveGlobalPhase = phase;
+    updateOscillator();
+}
+
+function updateOscillator() {
     var periodicWave;
 
-    if (type === 'custom') {
-        periodicWave = getPeriodicWave(
-            squareWaveGlobalPhase,
-            squareWaveAmplitudeList,
-            squareWavePhaseList
-        );
-        oscillator.setPeriodicWave(periodicWave);
-    } else {
-        oscillator.type = 'square';
-    }
+    periodicWave = getPeriodicWave(
+        squareWaveGlobalPhase,
+        squareWaveAmplitudeList,
+        squareWavePhaseList
+    );
+    oscillator.setPeriodicWave(periodicWave);
 }
 
 function getPeriodicWave(globalPhase, harmonicAmplitude, harmonicPhase) {

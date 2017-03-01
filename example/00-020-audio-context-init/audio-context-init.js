@@ -2,6 +2,8 @@
 'use strict';
 
 var
+    microphoneCheckbox,
+    toneCheckbox,
     audioContext,
     microphone,
     microphoneVirtual,
@@ -11,6 +13,10 @@ var
 function init() {
     audioContext = new AudioContext();
 
+    // DOM elements
+    microphoneCheckbox = document.getElementById('output-microphone-checkbox');
+    toneCheckbox = document.getElementById('tone-checkbox');
+
     // input
     microphoneVirtual = audioContext.createGain();
     connectMicrophoneTo(microphoneVirtual);
@@ -18,25 +24,33 @@ function init() {
     // output
     toneGenerator = audioContext.createOscillator();
     toneVolume = audioContext.createGain();
-    updateRandomTone();
     toneGenerator.start();
     toneGenerator.connect(toneVolume);
-    setInterval(updateRandomTone, 1000);
+    updateTone();
+    setInterval(updateTone, 1000);
 
-    // attach nodes to speakers
-    // microphoneVirtual.connect(audioContext.destination);   // Feedback Loop might occur !!!
-    toneVolume.connect(audioContext.destination);
+    // connect nodes to the destination
+    if (microphoneCheckbox.checked) {
+        microphoneVirtual.connect(audioContext.destination);
+    }
+    if (toneCheckbox.checked) {
+        toneVolume.connect(audioContext.destination);
+    }
 }
 
-function outputTone() {
-    // TODO depending on flags enable or disable node
+function onMicrophoneCheckboxChange() {
+    updateDestination(microphoneVirtual, microphoneCheckbox);
 }
 
-function updateDestination(node, activate) {
-    if (activate) {
-        node.connect(audioContext.destination);
+function onToneCheckboxChange() {
+    updateDestination(toneVolume, toneCheckbox);
+}
+
+function updateDestination(audioNode, domElement) {
+    if (domElement.checked) {
+        audioNode.connect(audioContext.destination);
     } else {
-        node.disconnect(audioContext.destination);
+        audioNode.disconnect(audioContext.destination);
     }
 }
 
@@ -66,7 +80,7 @@ function connectMicrophoneTo(microphoneVirtual) {
         });
 }
 
-function updateRandomTone() {
+function updateTone() {
     var frequency, gain, now;
 
     now = audioContext.currentTime;

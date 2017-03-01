@@ -57,7 +57,6 @@ function updateOscillator(type) {
     if (type === 'custom') {
         periodicWave = getPeriodicWave();
         oscillator.setPeriodicWave(periodicWave);
-
     } else {
         oscillator.type = 'square';
     }
@@ -67,7 +66,7 @@ function getPeriodicWave() {
     var real, imag;
 
     // NOTE: for no phase shift we need to put amplitudes to imaginary array
-    real = new Float32Array(squareWaveAmplitudeList.length); // this will fill array with zeros
+    real = new Float32Array(squareWaveAmplitudeList.length); // this will fill 'real' array with zeros
     imag = new Float32Array(squareWaveAmplitudeList);        // amplitude array goes here
 
     return audioContext.createPeriodicWave(real, imag);
