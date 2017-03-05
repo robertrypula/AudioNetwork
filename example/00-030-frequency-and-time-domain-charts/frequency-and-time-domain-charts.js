@@ -49,11 +49,11 @@ function init() {
     animationFrameLoop();
 }
 
-function getIndexOfMax(data, useAbsValue) {
+function getIndexOfMax(data, absoluteValue) {
     var i, maxIndex, max, value;
 
     for (i = 0; i < data.length; i++) {
-        value = useAbsValue ? Math.abs(data[i]) : data[i];
+        value = absoluteValue ? Math.abs(data[i]) : data[i];
         if (i === 0 || value > max) {
             max = value;
             maxIndex = i;

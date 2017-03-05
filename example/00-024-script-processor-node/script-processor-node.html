@@ -62,6 +62,76 @@
                 </div>
             </div>
 
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Raw sine frequency
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="rawSineUpdateFrequency(50)" class="btn btn-default">50 Hz</button>
+                            <button onClick="rawSineUpdateFrequency(100)" class="btn btn-default">100 Hz</button>
+                            <button onClick="rawSineUpdateFrequency(500)" class="btn btn-default">500 Hz</button>
+                            <button onClick="rawSineUpdateFrequency(1000)" class="btn btn-default">1000 Hz</button>
+                            <button onClick="rawSineUpdateFrequency(2000)" class="btn btn-default">2000 Hz</button>
+                            <button onClick="rawSineUpdateFrequency(5000)" class="btn btn-default">5000 Hz</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Raw sine phase
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="rawSineUpdatePhase(0)" class="btn btn-default">0 degrees</button>
+                            <button onClick="rawSineUpdatePhase(90)" class="btn btn-default">90 degrees</button>
+                            <button onClick="rawSineUpdatePhase(180)" class="btn btn-default">180 degrees</button>
+                            <button onClick="rawSineUpdatePhase(270)" class="btn btn-default">270 degrees</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Raw sine volume
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="rawSineUpdateVolume(0)" class="btn btn-default">Mute</button>
+                            <button onClick="rawSineUpdateVolume(0.01)" class="btn btn-default">Volume 1%</button>
+                            <button onClick="rawSineUpdateVolume(0.1)" class="btn btn-default">Volume 10%</button>
+                            <button onClick="rawSineUpdateVolume(1.0)" class="btn btn-default">Volume 100%</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="mix-with-microphone" class="label-for-checkbox">
+                                Mix with microphone
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                              type="checkbox"
+                              id="mix-with-microphone"
+                              value="1" />
+                        </div>
+                    </div>
+
+                    <h2>Time domain (ScriptProcessorNode input)</h2>
+                    <canvas id="canvas-input"></canvas>
+
+                    <h2>Time domain (ScriptProcessorNode output)</h2>
+                    <canvas id="canvas-output"></canvas>
+
+                </div>
+            </div>
+
             <!-- ---------------- -->
 
             <script>
@@ -82,7 +152,6 @@
 
     </div>
 
-    <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="script-processor-node.js"></script>
 
     <script>

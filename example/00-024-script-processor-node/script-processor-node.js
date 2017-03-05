@@ -2,16 +2,30 @@
 'use strict';
 
 var
-    BUFFER_SIZE = 4 * 1024,
+    LIMIT_CANVAS_WIDTH = true,
+    BUFFER_SIZE = 1 * 1024,
+    CANVAS_WIDTH = BUFFER_SIZE,
+    CANVAS_HEIGHT = 201,
+    MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     MONO = 1,
     MONO_INDEX = 0,
+    ctxInput,
+    ctxOutput,
     audioContext,
     microphone,
     microphoneVirtual,
     scriptProcessorNode,
+    rawSineAmplitude = 0.01,
+    rawSineFrequency = 1000,
+    rawSinePhase = 0,
+    mixWithMicrophoneCheckbox,
     sampleGlobal = 0;
 
 function init() {
+    mixWithMicrophoneCheckbox = document.getElementById('mix-with-microphone');
+    ctxInput = getConfiguredCanvasContext('canvas-input', CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctxOutput = getConfiguredCanvasContext('canvas-output', CANVAS_WIDTH, CANVAS_HEIGHT);
+
     audioContext = new AudioContext();
 
     microphoneVirtual = audioContext.createGain();
@@ -66,6 +80,62 @@ function connectMicrophoneTo(microphoneVirtual) {
 }
 
 // -----------------------------------------------------------------------
+
+function rawSineUpdateVolume(volume) {
+    rawSineAmplitude = volume;
+}
+
+function rawSineUpdateFrequency(frequency) {
+    rawSineFrequency = frequency;
+}
+
+function rawSineUpdatePhase(phase) {
+    rawSinePhase = phase;
+}
+
+// -----------------------------------------------------------------------
+// canvas 2d context
+
+function clear(ctx) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+function drawLine(ctx, x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+}
+
+function getConfiguredCanvasContext(elementId, width, height) {
+    var element, ctx;
+
+    element = document.getElementById(elementId);
+    element.width = Math.min(MAX_WIDTH, width);
+    element.height = height;
+    ctx = element.getContext('2d');
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'black';
+
+    return ctx;
+}
+
+function drawTimeDomainData(ctx, data) {
+    var limit, hMid, x, y1, y2;
+
+    clear(ctx);
+
+    hMid = Math.floor(0.5 * CANVAS_HEIGHT);
+    limit = Math.min(MAX_WIDTH, data.length);
+    for (x = 0; x < limit - 1; x++) {
+        y1 = hMid * (1 - data[x]);
+        y2 = hMid * (1 - data[x + 1]);
+        drawLine(ctx, x, y1, x + 1, y2);
+    }
+}
+
+// -----------------------------------------------------------------------
 // sine wave generator
 
 function getSamplePerPeriod(frequency) {
@@ -84,23 +154,30 @@ function generateSineWave(samplePerPeriod, amplitude, degreesPhaseOffset, sample
 // script processor handlers
 
 function inputSampleHandler(monoIn) {
-
+    drawTimeDomainData(ctxInput, monoIn);
 }
 
 function outputSampleHandler(monoOut, monoIn) {
-    var i, v;
+    var
+      rawSineSample,
+      i;
 
     for (i = 0; i < monoIn.length; i++) {
-        v = generateSineWave(
-            getSamplePerPeriod(500),
-            1,
-            0,
+        rawSineSample = generateSineWave(
+            getSamplePerPeriod(rawSineFrequency),
+            rawSineAmplitude,
+            rawSinePhase,
             sampleGlobal
         );
-        monoOut[i] = v * monoIn[i];
 
-        // monoOut[i] = Math.round(200 * monoIn[i]) / 200;
+        if (mixWithMicrophoneCheckbox.checked) {
+            monoOut[i] = rawSineSample * monoIn[i];
+        } else {
+            monoOut[i] = rawSineSample;
+        }
 
         sampleGlobal++;
     }
+
+    drawTimeDomainData(ctxOutput, monoOut);
 }

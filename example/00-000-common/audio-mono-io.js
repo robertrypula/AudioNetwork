@@ -383,3 +383,7 @@ AudioMonoIO.prototype.getTimeDomainData = function () {
 AudioMonoIO.prototype.getSampleRate = function () {
     return this.$$audioContext.sampleRate;
 };
+
+AudioMonoIO.prototype.getFFTResolution = function () {
+    return this.getSampleRate() / this.getFFTSize();
+};

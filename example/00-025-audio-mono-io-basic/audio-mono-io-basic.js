@@ -2,34 +2,38 @@
 'use strict';
 
 var
-    FFT_SIZE = 4096,
-    BUFFER_SIZE = 4096,
+    FFT_SIZE = 4 * 1024,
+    BUFFER_SIZE = 4 * 1024,
+    ONE_SECOND = 1000,
+    ABSOLUTE_VALUE = true,
+    NORMAL_VALUE = false,
     audioMonoIO,
-    fftResolution,
-    timeDomain,
-    freqDomain,
-    frequencyPeak,
-    timeDomainMaxAbsValueAnalyser,
-    timeDomainMaxAbsValueRaw,
     domGaugeRaw,
     domGaugeAnalyser,
     domPeakFrequency,
     txFrequency,
     animationFrameFirstCall = true;
 
-function getIndexOfMax(data, useAbsValue) {
-    var i, maxIndex, max, value;
+function init() {
+    txFrequency = 2000;
 
-    for (i = 0; i < data.length; i++) {
-        value = useAbsValue ? Math.abs(data[i]) : data[i];
-        if (i === 0 || value > max) {
-            max = value;
-            maxIndex = i;
-        }
-    }
+    domPeakFrequency = document.getElementById('peak-frequency');
+    domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
+    domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
 
-    return maxIndex;
+    audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
+
+    audioMonoIO.setSampleInHandler(sampleInHandler);
+    audioMonoIO.setSampleOutHandler(sampleOutHandler);
+
+    audioMonoIO.setPeriodicWave(txFrequency, 0.01);
+    setInterval(intervalHandler, ONE_SECOND);
+
+    animationFrameLoop();
 }
+
+// -----------------------------------------------------------------------
+// utils
 
 function animationFrameLoop() {
     if (!animationFrameFirstCall) {
@@ -40,44 +44,71 @@ function animationFrameLoop() {
     requestAnimationFrame(animationFrameLoop);
 }
 
-function nextAnimationFrame() {
-    timeDomain = audioMonoIO.getTimeDomainData();
-    freqDomain = audioMonoIO.getFrequencyData();
-    frequencyPeak = getIndexOfMax(freqDomain, false) * fftResolution;
-    timeDomainMaxAbsValueAnalyser = timeDomain[getIndexOfMax(timeDomain, true)];
+function getMaxAbsoluteValue(data) {
+    var index = getIndexOfMax(data, ABSOLUTE_VALUE);
 
-    domGaugeAnalyser.style.width = (timeDomainMaxAbsValueAnalyser * 100) + '%';
+    return data[index];
+}
+
+function getMaxValue(data) {
+    var index = getIndexOfMax(data, NORMAL_VALUE);
+
+    return data[index];
+}
+
+function getIndexOfMax(data, absoluteValue) {
+    var i, maxIndex, max, value;
+
+    for (i = 0; i < data.length; i++) {
+        value = absoluteValue ? Math.abs(data[i]) : data[i];
+        if (i === 0 || value > max) {
+            max = value;
+            maxIndex = i;
+        }
+    }
+
+    return maxIndex;
+}
+
+function normalizeToUnit(value) {
+    value = value > 1 ? 1 : value;
+    value = value < 0 ? 0 : value;
+
+    return value;
+}
+
+// -----------------------------------------------------------------------
+
+function nextAnimationFrame() {
+    var
+        timeDomain = audioMonoIO.getTimeDomainData(),
+        freqDomain = audioMonoIO.getFrequencyData(),
+        freqDomainMaxValueIndex = getIndexOfMax(freqDomain, NORMAL_VALUE),
+        frequencyPeak = freqDomainMaxValueIndex * audioMonoIO.getFFTResolution(),
+        maxAbsoluteSample = getMaxAbsoluteValue(timeDomain),
+        maxAbsoluteSampleUnit = normalizeToUnit(maxAbsoluteSample);
+
+    domGaugeAnalyser.style.width = (maxAbsoluteSampleUnit * 100) + '%';
     domPeakFrequency.innerHTML = frequencyPeak.toFixed(2) + ' Hz';
 }
 
-function init() {
+function sampleInHandler(monoIn) {
+    var
+        maxAbsoluteSample = getMaxAbsoluteValue(monoIn),
+        maxAbsoluteSampleUnit = normalizeToUnit(maxAbsoluteSample);
+
+    domGaugeRaw.style.width = (maxAbsoluteSampleUnit * 100) + '%';
+}
+
+function sampleOutHandler(monoOut, monoIn) {
     var i;
 
-    txFrequency = 2000;
+    for (i = 0; i < monoOut.length; i++) {
+        monoOut[i] = 0.05 * (Math.random() * 2 - 1);    // white noise
+    }
+}
 
-    domPeakFrequency = document.getElementById('peak-frequency');
-    domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
-    domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
-
-    audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
-    fftResolution = audioMonoIO.getSampleRate() / audioMonoIO.getFFTSize();
-
-    audioMonoIO.setSampleInHandler(function (monoIn) {
-        timeDomainMaxAbsValueRaw = monoIn[getIndexOfMax(monoIn, true)];
-        domGaugeRaw.style.width = (timeDomainMaxAbsValueRaw * 100) + '%';
-    });
-
-    audioMonoIO.setSampleOutHandler(function (monoOut, monoIn) {
-        for (i = 0; i < monoOut.length; i++) {
-            monoOut[i] = 0.05 * (Math.random() * 2 - 1);    // white noise
-        }
-    });
-
-    audioMonoIO.setPeriodicWave(txFrequency, 0.5);         // 50% volume
-    setInterval(function () {
-        txFrequency = (txFrequency === 2000 ? 2500 : 2000);
-        audioMonoIO.setPeriodicWave(txFrequency, 0.5);         // 50% volume
-    }, 1000);
-
-    animationFrameLoop();
+function intervalHandler() {
+    txFrequency = (txFrequency === 2000 ? 2500 : 2000);
+    audioMonoIO.setPeriodicWave(txFrequency, 0.01);
 }

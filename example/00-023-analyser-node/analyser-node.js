@@ -37,20 +37,20 @@ function initDomElements() {
     domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
     domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
 
-    ctxTimeDomainDataRawSample = getConfiguredCanvasContext(
-        'canvas-time-domain-data-raw-sample',
-        CANVAS_WIDTH_TIME_DOMAIN_RAW_SAMPLE,
-        CANVAS_HEIGHT
+    ctxFrequencyData = getConfiguredCanvasContext(
+      'canvas-frequency-data',
+      CANVAS_WIDTH_FREQUENCY,
+      CANVAS_HEIGHT
     );
     ctxTimeDomainData = getConfiguredCanvasContext(
         'canvas-time-domain-data',
         CANVAS_WIDTH_TIME_DOMAIN,
         CANVAS_HEIGHT
     );
-    ctxFrequencyData = getConfiguredCanvasContext(
-        'canvas-frequency-data',
-        CANVAS_WIDTH_FREQUENCY,
-        CANVAS_HEIGHT
+    ctxTimeDomainDataRawSample = getConfiguredCanvasContext(
+      'canvas-time-domain-data-raw-sample',
+      CANVAS_WIDTH_TIME_DOMAIN_RAW_SAMPLE,
+      CANVAS_HEIGHT
     );
 }
 

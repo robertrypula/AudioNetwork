@@ -61,23 +61,24 @@
                     </p>
                     <ul>
                         <li>
-                            <b>[TIME DOMAIN] ScriptProcessorNode - audioProcessingEvent</b>
-                            <br/>
-                            Continuous sample blocks without overlapping, it could still have gaps when CPU is slow
-                        </li>
-                        <li>
-                            <b>[TIME DOMAIN] AnalyserNode - getFloatTimeDomainData</b>
-                            <br/>
-                            Blocks may overlap or have gaps when CPU is slow
-                        </li>
-                        <li>
                             <b>[FREQUENCY DOMAIN] AnalyserNode - getFloatFrequencyData</b>
                             <br/>
                             FFT performed on getFloatTimeDomainData block pair
                         </li>
+                        <li>
+                            <b>[TIME DOMAIN] AnalyserNode - getFloatTimeDomainData</b>
+                            <br/>
+                            Audio samples from adjacent block may overlap or some gap may exists
+                        </li>
+                        <li>
+                            <b>[TIME DOMAIN] ScriptProcessorNode - audioProcessingEvent</b>
+                            <br/>
+                            Samples from audio stream should be accessible only once without any gap.
+                        </li>
                     </ul>
                     <p>
-                        Additionally it shows very simple 'volume meter' based on max absolute sample value from current block.
+                        Additionally it shows very simple 'volume meter' based on max
+                        absolute sample value from current block.
                     </p>
                 </div>
             </div>
@@ -85,22 +86,8 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    <h2>Time domain (ScriptProcessorNode based)</h2>
-                    <canvas id="canvas-time-domain-data-raw-sample"></canvas>
-
-                    <div class="row margin-bottom-triple">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Max absolute sample value
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <div class="gauge-container">
-                                <div id="max-absolute-amplitude-gauge-rawsample" class="gauge"></div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <h2>Frequency domain (AnalyserNode based)</h2>
+                    <canvas id="canvas-frequency-data"></canvas>
 
                     <h2>Time domain (AnalyserNode based)</h2>
                     <canvas id="canvas-time-domain-data"></canvas>
@@ -117,9 +104,21 @@
                         </div>
                     </div>
 
+                    <h2>Time domain (ScriptProcessorNode based for comparison)</h2>
+                    <canvas id="canvas-time-domain-data-raw-sample"></canvas>
 
-                    <h2>Frequency domain (AnalyserNode based)</h2>
-                    <canvas id="canvas-frequency-data"></canvas>
+                    <div class="row margin-bottom-triple">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Max absolute sample value
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div class="gauge-container">
+                                <div id="max-absolute-amplitude-gauge-rawsample" class="gauge"></div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
