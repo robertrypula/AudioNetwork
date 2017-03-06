@@ -133,7 +133,7 @@ function getTimeDomainData() {
 function getMaxAbsoluteValue(data) {
     var index = getIndexOfMaxAbsoluteValue(data);
 
-    return data[index];
+    return Math.abs(data[index]);
 }
 
 function getIndexOfMaxAbsoluteValue(data) {

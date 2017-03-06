@@ -38,6 +38,6 @@ Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwo
 Redirect 301 /harmonics-and-phase /example/00-026-harmonics-and-phase/harmonics-and-phase.html
 Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-026-harmonics-and-phase
 
-Redirect 301 /harmonics-and-phase /example/00-028-piano/piano.html
-Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-028-piano
+Redirect 301 /piano /example/00-028-piano/piano.html
+Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-028-piano
 

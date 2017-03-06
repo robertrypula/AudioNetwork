@@ -385,5 +385,5 @@ AudioMonoIO.prototype.getSampleRate = function () {
 };
 
 AudioMonoIO.prototype.getFFTResolution = function () {
-    return this.getSampleRate() / this.getFFTSize();
+    return this.getSampleRate() / audioMonoIO.getFFTSize()
 };

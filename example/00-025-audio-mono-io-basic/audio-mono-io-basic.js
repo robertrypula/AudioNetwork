@@ -2,22 +2,30 @@
 'use strict';
 
 var
-    FFT_SIZE = 4 * 1024,
-    BUFFER_SIZE = 4 * 1024,
+    FFT_SIZE = 8 * 1024,
+    BUFFER_SIZE = 8 * 1024,
     ONE_SECOND = 1000,
     ABSOLUTE_VALUE = true,
     NORMAL_VALUE = false,
+    TONE_LOW = 2000,
+    TONE_HIGH = 2500,
+    txFrequency = TONE_LOW,
+    txVolume = 0.01,
+    whiteNoiseVolume = 0.05,
+    whiteNoiseCheckbox,
+    toneCheckbox,
     audioMonoIO,
     domGaugeRaw,
     domGaugeAnalyser,
+    domFftResolution,
     domPeakFrequency,
-    txFrequency,
+    domFftMaxValueIndex,
     animationFrameFirstCall = true;
 
 function init() {
-    txFrequency = 2000;
-
+    domFftResolution = document.getElementById('fft-resolution');
     domPeakFrequency = document.getElementById('peak-frequency');
+    domFftMaxValueIndex = document.getElementById('fft-max-value-index');
     domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
     domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
 
@@ -26,10 +34,18 @@ function init() {
     audioMonoIO.setSampleInHandler(sampleInHandler);
     audioMonoIO.setSampleOutHandler(sampleOutHandler);
 
-    audioMonoIO.setPeriodicWave(txFrequency, 0.01);
+    audioMonoIO.setPeriodicWave(txFrequency, txVolume);
     setInterval(intervalHandler, ONE_SECOND);
 
     animationFrameLoop();
+}
+
+function whiteNoiseUpdateVolume(volume) {
+    whiteNoiseVolume = volume;
+}
+
+function toneUpdateVolume(volume) {
+    txVolume = volume;
 }
 
 // -----------------------------------------------------------------------
@@ -47,7 +63,7 @@ function animationFrameLoop() {
 function getMaxAbsoluteValue(data) {
     var index = getIndexOfMax(data, ABSOLUTE_VALUE);
 
-    return data[index];
+    return Math.abs(data[index]);
 }
 
 function getMaxValue(data) {
@@ -82,14 +98,23 @@ function normalizeToUnit(value) {
 function nextAnimationFrame() {
     var
         timeDomain = audioMonoIO.getTimeDomainData(),
-        freqDomain = audioMonoIO.getFrequencyData(),
+        freqDomain = audioMonoIO.getFrequencyData();
+
+    for (var i = 0; i < 100; i++) {
+        freqDomain[i] = -100;
+    }
+
+    var
         freqDomainMaxValueIndex = getIndexOfMax(freqDomain, NORMAL_VALUE),
         frequencyPeak = freqDomainMaxValueIndex * audioMonoIO.getFFTResolution(),
+        decibelValue = freqDomain[freqDomainMaxValueIndex],
         maxAbsoluteSample = getMaxAbsoluteValue(timeDomain),
         maxAbsoluteSampleUnit = normalizeToUnit(maxAbsoluteSample);
 
+    domFftResolution.innerHTML = audioMonoIO.getFFTResolution().toFixed(2) + ' Hz';
+    domFftMaxValueIndex.innerHTML = freqDomainMaxValueIndex;
+    domPeakFrequency.innerHTML = frequencyPeak.toFixed(2) + ' Hz (' + decibelValue.toFixed(1) + ' dB)';
     domGaugeAnalyser.style.width = (maxAbsoluteSampleUnit * 100) + '%';
-    domPeakFrequency.innerHTML = frequencyPeak.toFixed(2) + ' Hz';
 }
 
 function sampleInHandler(monoIn) {
@@ -104,11 +129,11 @@ function sampleOutHandler(monoOut, monoIn) {
     var i;
 
     for (i = 0; i < monoOut.length; i++) {
-        monoOut[i] = 0.05 * (Math.random() * 2 - 1);    // white noise
+        monoOut[i] = whiteNoiseVolume * (Math.random() * 2 - 1);    // white noise
     }
 }
 
 function intervalHandler() {
-    txFrequency = (txFrequency === 2000 ? 2500 : 2000);
-    audioMonoIO.setPeriodicWave(txFrequency, 0.01);
+    txFrequency = (txFrequency === TONE_LOW ? TONE_HIGH : TONE_LOW);
+    audioMonoIO.setPeriodicWave(txFrequency, txVolume);
 }
