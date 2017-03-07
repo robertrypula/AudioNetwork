@@ -1,19 +1,5 @@
-.gauge-container {
-    width: 256px;
-    height: 16px;
-    border: 1px solid black;
-    background-color: lightgray;
-    overflow: hidden;
-}
-
-.gauge-container .gauge {
-    height: 100%;
-    background-color: darkorange;
-
-    width: 25%;
-}
-
 canvas {
+    border: 1px solid gray;
     display: block;
-    border: 1px solid lightgray;
+    margin-bottom: 20px;
 }

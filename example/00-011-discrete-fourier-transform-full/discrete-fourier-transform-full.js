@@ -42,69 +42,6 @@ var
         { amplitude: 0.3, samplePerPeriod: 16, phase: 0 }
     ],
 
-    // square START
-    /*
-    _amp = 0.8,
-    _phase = 60,
-    _spp = 120,
-    separateSineParameter = [
-        { amplitude: _amp/1, samplePerPeriod: _spp/1, phase: 1 * _phase },
-        { amplitude: 0.0/2, samplePerPeriod: _spp/2, phase: 2 * _phase },
-        { amplitude: _amp/3, samplePerPeriod: _spp/3, phase: 3 * _phase },
-        { amplitude: 0.0/4, samplePerPeriod: _spp/4, phase: 4 * _phase },
-        { amplitude: _amp/5, samplePerPeriod: _spp/5, phase: 5 * _phase },
-        { amplitude: 0.0/6, samplePerPeriod: _spp/6, phase: 6 * _phase },
-        { amplitude: _amp/7, samplePerPeriod: _spp/7, phase: 7 * _phase },
-        { amplitude: 0.0/8, samplePerPeriod: _spp/8, phase: 8 * _phase },
-        { amplitude: _amp/9, samplePerPeriod: _spp/9, phase: 9 * _phase },
-        { amplitude: 0.0/10, samplePerPeriod: _spp/10, phase: 10 * _phase },
-        { amplitude: _amp/11, samplePerPeriod: _spp/11, phase: 11 * _phase }
-    ],
-    */
-    // square END
-
-    /*
-    // sawtooth START
-    _amp = 2 * 0.8 / Math.PI,
-    _phase = 0,
-    _spp = 120,
-    separateSineParameter = [
-        { amplitude: _amp * Math.pow(-1, 1) / 1, samplePerPeriod: _spp/1, phase: 1 * _phase },
-        { amplitude: _amp * Math.pow(-1, 2) / 2, samplePerPeriod: _spp/2, phase: 2 * _phase },
-        { amplitude: _amp * Math.pow(-1, 3) / 3, samplePerPeriod: _spp/3, phase: 3 * _phase },
-        { amplitude: _amp * Math.pow(-1, 4) / 4, samplePerPeriod: _spp/4, phase: 4 * _phase },
-        { amplitude: _amp * Math.pow(-1, 5) / 5, samplePerPeriod: _spp/5, phase: 5 * _phase },
-        { amplitude: _amp * Math.pow(-1, 6) / 6, samplePerPeriod: _spp/6, phase: 6 * _phase },
-        { amplitude: _amp * Math.pow(-1, 7) / 7, samplePerPeriod: _spp/7, phase: 7 * _phase },
-        { amplitude: _amp * Math.pow(-1, 8) / 8, samplePerPeriod: _spp/8, phase: 8 * _phase },
-        { amplitude: _amp * Math.pow(-1, 9) / 9, samplePerPeriod: _spp/9, phase: 9 * _phase },
-        { amplitude: _amp * Math.pow(-1, 10) / 10, samplePerPeriod: _spp/10, phase: 10 * _phase },
-        { amplitude: _amp * Math.pow(-1, 11) / 11, samplePerPeriod: _spp/11, phase: 11 * _phase }
-    ],
-    // sawtooth END
-    */
-
-    /*
-    // triangle START
-    _amp = 8 / (Math.PI * Math.PI),
-    _phase = 0,
-    _spp = 120,
-    separateSineParameter = [
-        { amplitude: _amp * Math.pow(-1, 0) / Math.pow(2 * 0 + 1, 2), samplePerPeriod: _spp/1, phase: 1 * _phase },
-        { amplitude: 0, samplePerPeriod: _spp/2, phase: 2 * _phase },
-        { amplitude: _amp * Math.pow(-1, 1) / Math.pow(2 * 1 + 1, 2), samplePerPeriod: _spp/3, phase: 3 * _phase },
-        { amplitude: 0, samplePerPeriod: _spp/4, phase: 4 * _phase },
-        { amplitude: _amp * Math.pow(-1, 2) / Math.pow(2 * 2 + 1, 2), samplePerPeriod: _spp/5, phase: 5 * _phase },
-        { amplitude: 0, samplePerPeriod: _spp/6, phase: 6 * _phase },
-        { amplitude: _amp * Math.pow(-1, 3) / Math.pow(2 * 3 + 1, 2), samplePerPeriod: _spp/7, phase: 7 * _phase },
-        { amplitude: 0, samplePerPeriod: _spp/8, phase: 8 * _phase },
-        { amplitude: _amp * Math.pow(-1, 4) / Math.pow(2 * 4 + 1, 2), samplePerPeriod: _spp/9, phase: 9 * _phase },
-        { amplitude: 0, samplePerPeriod: _spp/10, phase: 10 * _phase },
-        { amplitude: _amp * Math.pow(-1, 5) / Math.pow(2 * 5 + 1, 2), samplePerPeriod: _spp/11, phase: 11 * _phase }
-    ],
-    // triangle END
-    */
-
     whiteNoiseAmplitude = 0,
     windowSampleOffset = 0,
     windowSampleSize = 1024,

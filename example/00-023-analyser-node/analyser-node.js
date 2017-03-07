@@ -13,13 +13,19 @@ var
     DECIBEL_MIN = -150,
     MONO = 1,
     MONO_INDEX = 0,
-    FFT_SMOOTHING_DISABLED = 0,
+    ABSOLUTE_VALUE = true,
+    NORMAL_VALUE = false,
     audioContext,
     scriptProcessorNode,
     microphone,
     microphoneVirtual,
     analyzerNode,
     animationFrameFirstCall = true,
+    domSampleRate,
+    domFftSize,
+    domFftResolution,
+    domFftBinIndexExamples,
+    domLoudestFrequency,
     domGaugeRaw,
     domGaugeAnalyser,
     ctxTimeDomainDataRawSample,
@@ -34,6 +40,11 @@ function init() {
 }
 
 function initDomElements() {
+    domSampleRate = document.getElementById('sample-rate');
+    domFftSize = document.getElementById('fft-size');
+    domFftResolution = document.getElementById('fft-resolution');
+    domFftBinIndexExamples = document.getElementById('fft-bin-index-examples');
+    domLoudestFrequency = document.getElementById('loudest-frequency');
     domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
     domGaugeAnalyser = document.getElementById('max-absolute-amplitude-gauge-analysernode');
 
@@ -73,11 +84,19 @@ function initWebAudioApi() {
 
     analyzerNode = audioContext.createAnalyser();
     analyzerNode.fftSize = FFT_SIZE;
-    analyzerNode.smoothingTimeConstant = FFT_SMOOTHING_DISABLED;
 
     microphoneVirtual.connect(scriptProcessorNode);
     microphoneVirtual.connect(analyzerNode);
     scriptProcessorNode.connect(audioContext.destination);     // it's needed because of common bug in the browsers
+
+    domSampleRate.innerHTML = audioContext.sampleRate;
+    domFftSize.innerHTML = analyzerNode.fftSize;
+    domFftResolution.innerHTML = audioContext.sampleRate + ' Hz / ' + analyzerNode.fftSize + ' = ' +
+        (audioContext.sampleRate / analyzerNode.fftSize).toFixed(2) + ' Hz';
+}
+
+function smoothingTimeConstantUpdate(value) {
+    analyzerNode.smoothingTimeConstant = value;
 }
 
 // -----------------------------------------------------------------------
@@ -131,16 +150,16 @@ function getTimeDomainData() {
 // utils
 
 function getMaxAbsoluteValue(data) {
-    var index = getIndexOfMaxAbsoluteValue(data);
+    var index = getIndexOfMax(data, ABSOLUTE_VALUE);
 
     return Math.abs(data[index]);
 }
 
-function getIndexOfMaxAbsoluteValue(data) {
+function getIndexOfMax(data, absoluteValue) {
     var i, maxIndex, max, value;
 
     for (i = 0; i < data.length; i++) {
-        value = Math.abs(data[i]);
+        value = absoluteValue ? Math.abs(data[i]) : data[i];
         if (i === 0 || value > max) {
             max = value;
             maxIndex = i;
@@ -155,6 +174,12 @@ function normalizeToUnit(value) {
     value = value < 0 ? 0 : value;
 
     return value;
+}
+
+function getFrequency(fftBinIndex) {
+    var resolution = audioContext.sampleRate / analyzerNode.fftSize;
+
+    return (fftBinIndex * resolution).toFixed(2);
 }
 
 // -----------------------------------------------------------------------
@@ -187,7 +212,7 @@ function getConfiguredCanvasContext(elementId, width, height) {
 
 function animationFrameLoop() {
     if (!animationFrameFirstCall) {
-        draw();
+        refreshDataOnScreen();
     } else {
         animationFrameFirstCall = false;
     }
@@ -206,16 +231,30 @@ function scriptProcessorNodeHandler(monoIn) {
     drawTimeDomainData(ctxTimeDomainDataRawSample, monoIn);
 }
 
-function draw() {
+function refreshDataOnScreen() {
     var
         timeDomainData = getTimeDomainData(),
         frequencyData = getFrequencyData(),
         maxAbsoluteSample = getMaxAbsoluteValue(timeDomainData),
-        maxAbsoluteSampleUnit = normalizeToUnit(maxAbsoluteSample);
+        maxAbsoluteSampleUnit = normalizeToUnit(maxAbsoluteSample),
+        frequencyDataMaxValueIndex = getIndexOfMax(frequencyData, NORMAL_VALUE),
+        dbc = analyzerNode.frequencyBinCount;    // alias
 
     domGaugeAnalyser.style.width = (maxAbsoluteSampleUnit * 100) + '%';
     drawTimeDomainData(ctxTimeDomainData, timeDomainData);
-    drawFrequencyDomainData(ctxFrequencyData, frequencyData)
+    drawFrequencyDomainData(ctxFrequencyData, frequencyData, frequencyDataMaxValueIndex);
+
+    domFftBinIndexExamples.innerHTML =
+        '[' + 0 + '] ' + frequencyData[0].toFixed(2) + ' dB (0.00 Hz) - DC offset' + '<br/>' +
+        '[' + (0.0625 * dbc) + '] ' + frequencyData[0.0625 * dbc].toFixed(2) + ' dB (' + getFrequency(0.0625 * dbc) + ' Hz)' + '<br/>' +
+        '[' + (0.1250 * dbc) + '] ' + frequencyData[0.1250 * dbc].toFixed(2) + ' dB (' + getFrequency(0.1250 * dbc) + ' Hz)' + '<br/>' +
+        '[' + (0.2500 * dbc) + '] ' + frequencyData[0.2500 * dbc].toFixed(2) + ' dB (' + getFrequency(0.2500 * dbc) + ' Hz)' + '<br/>' +
+        '[' + (0.5000 * dbc) + '] ' + frequencyData[0.5000 * dbc].toFixed(2) + ' dB (' + getFrequency(0.5000 * dbc) + ' Hz) - middle index' + '<br/>' +
+        '[' + (dbc - 1) + '] ' + frequencyData[dbc - 1].toFixed(2) + ' dB (' + getFrequency(dbc - 1) + ' Hz) - last index';
+
+
+    domLoudestFrequency.innerHTML =
+        '[' + frequencyDataMaxValueIndex + '] ' + frequencyData[frequencyDataMaxValueIndex].toFixed(2) + ' dB (' + getFrequency(frequencyDataMaxValueIndex) + ' Hz)';
 }
 
 function drawTimeDomainData(ctx, data) {
@@ -232,7 +271,7 @@ function drawTimeDomainData(ctx, data) {
     }
 }
 
-function drawFrequencyDomainData(ctx, data) {
+function drawFrequencyDomainData(ctx, data, frequencyDataMaxValueIndex) {
     var limit, hMaxPix, x, y1, y2;
 
     clear(ctx);
@@ -243,5 +282,11 @@ function drawFrequencyDomainData(ctx, data) {
         y1 = hMaxPix * (data[x] / DECIBEL_MIN);
         y2 = hMaxPix * (data[x  + 1] / DECIBEL_MIN);
         drawLine(ctx, x, y1, x + 1, y2);
+
+        // mark loudest frequency
+        if (x === frequencyDataMaxValueIndex) {
+            drawLine(ctx, x, y1, x, hMaxPix);
+        }
     }
+
 }

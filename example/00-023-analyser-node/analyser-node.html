@@ -86,13 +86,80 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    TODO:
-                    add resolution
-                    numbers of bins
-                    input for smoothing constant
-
                     <h2>Frequency domain (AnalyserNode based)</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="sample-rate"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                FFT size
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="fft-size"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                FFT resolution
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="fft-resolution"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                FFT bin index examples
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="fft-bin-index-examples"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Smoothing time constant
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="smoothingTimeConstantUpdate(0.00)" class="btn btn-default">0.00 (smoothing disabled)</button>
+                            <button onClick="smoothingTimeConstantUpdate(0.30)" class="btn btn-default">0.30</button>
+                            <button onClick="smoothingTimeConstantUpdate(0.80)" class="btn btn-default">0.80 (default)</button>
+                            <button onClick="smoothingTimeConstantUpdate(0.90)" class="btn btn-default">0.90</button>
+                            <button onClick="smoothingTimeConstantUpdate(0.99)" class="btn btn-default">0.99</button>
+                            <button onClick="smoothingTimeConstantUpdate(1.00)" class="btn btn-default">1.00</button>
+                        </div>
+                    </div>
+
                     <canvas id="canvas-frequency-data"></canvas>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Loudest frequency
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="loudest-frequency"></span>
+                        </div>
+                    </div>
 
                     <h2>Time domain (AnalyserNode based)</h2>
                     <canvas id="canvas-time-domain-data"></canvas>
