@@ -90,9 +90,9 @@ function generateInfoTable() {
     // yeah, I know - Angular would be better...
     table = '<table>';
     table += '<tr>' +
-        '<th class="th-0">Nazwa<br/>dźwięku</th>' +
-        '<th class="th-1">Częst.<br/>dźwięku</th>' +
-        '<th class="th-2-3-4" colspan="3">Najbliższy element FFT</th>' +
+        '<th class="th-0">Note<br/>name</th>' +
+        '<th class="th-1">Note<br/>freq.</th>' +
+        '<th class="th-2-3-4" colspan="3">Closest FFT bin</th>' +
         '<th class="th-5">&nbsp;</th>' +
         '</tr>';
     for (i = 0; i <= MusicCalculator.SEMITONE_PER_OCTAVE; i++) {
@@ -206,6 +206,7 @@ function nextAnimationFrame() {
         semitoneNumber,
         noteName,
         semitoneDecibel,
+        barWidth,
         semitoneIndexInOctave,
         element,
         i;
@@ -249,6 +250,10 @@ function nextAnimationFrame() {
             semitoneDecibel.toFixed(2) + ' dB'
         );
         element = select('#rx-semitone-db-gauge-' + semitoneNumber)[0];
-        element.style.width = (100 + semitoneDecibel) + '%';
+
+        barWidth = 100 - Math.abs(semitoneDecibel);
+        barWidth = barWidth < 0 ? 0 : barWidth;
+        barWidth = barWidth > 100 ? 100 : barWidth;
+        element.style.width = barWidth + '%';
     }
 }

@@ -98,13 +98,7 @@ function normalizeToUnit(value) {
 function nextAnimationFrame() {
     var
         timeDomain = audioMonoIO.getTimeDomainData(),
-        freqDomain = audioMonoIO.getFrequencyData();
-
-    for (var i = 0; i < 100; i++) {
-        freqDomain[i] = -100;
-    }
-
-    var
+        freqDomain = audioMonoIO.getFrequencyData(),
         freqDomainMaxValueIndex = getIndexOfMax(freqDomain, NORMAL_VALUE),
         frequencyPeak = freqDomainMaxValueIndex * audioMonoIO.getFFTResolution(),
         decibelValue = freqDomain[freqDomainMaxValueIndex],
