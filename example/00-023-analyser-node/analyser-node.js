@@ -288,5 +288,4 @@ function drawFrequencyDomainData(ctx, data, frequencyDataMaxValueIndex) {
             drawLine(ctx, x, y1, x, hMaxPix);
         }
     }
-
 }

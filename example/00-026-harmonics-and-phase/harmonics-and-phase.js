@@ -275,7 +275,7 @@ function getConfiguredCanvasContext(elementId, width, height) {
     element.height = height;
     ctx = element.getContext('2d');
     ctx.lineWidth = 1;
-    ctx.strokeStyle = '#eee';
+    ctx.strokeStyle = 'black';
 
     return ctx;
 }
