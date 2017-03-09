@@ -4,7 +4,7 @@
 var
     LIMIT_CANVAS_WIDTH = true,
     FFT_SIZE = 2 * 1024,         // powers of 2 in range: 32, 32768
-    BUFFER_SIZE = 16 * 1024,
+    BUFFER_SIZE = 1 * 1024,
     CANVAS_WIDTH_TIME_DOMAIN = BUFFER_SIZE,
     CANVAS_WIDTH_FREQUENCY = FFT_SIZE * 0.5,
     CANVAS_HEIGHT = 201,
@@ -182,21 +182,45 @@ function loadTriangleWave() {
 }
 
 function loadPianoWave() {
+    // harmonics from:
+    // http://stackoverflow.com/questions/10702942/note-synthesis-harmonics-violin-piano-guitar-bass-frequencies-midi/11615460
+
     txHarmonicAmplitude = [
-        1
+        1.0,                                   // 1
+        0.399064778, 0.229404484, 0.151836061, // 2, 3, 4
+        0.196754229, 0.093742264, 0.060871957, // 5, 6, 7
+        0.138605419, 0.010535002, 0.071021868, // 8, 9, 10
+        0.029954614, 0.051299684, 0.055948288, // 11, 12, 13
+        0.066208224, 0.010067391, 0.007536790, // 14, 15, 16
+        0.008196947, 0.012955577, 0.007316738, // 17, 18, 19
+        0.006216476, 0.005116215, 0.006243983, // 20, 21, 22
+        0.002860679, 0.002558108, 0.000000000, // 23, 24, 25
+        0.001650392                            // 26
     ];
-    txHarmonicPhase = [
-        0
-    ];
+    txHarmonicPhase = [];
+
+    txHarmonicPhase.length = txHarmonicAmplitude.length;
 }
 
 function loadViolinWave() {
+    // harmonics from:
+    // http://stackoverflow.com/questions/10702942/note-synthesis-harmonics-violin-piano-guitar-bass-frequencies-midi/11615460
+
     txHarmonicAmplitude = [
-        1
+        1.0,                                   // 1
+        0.286699025, 0.150079537, 0.042909002, // 2, 3, 4
+        0.203797365, 0.229228698, 0.156931925, // 5, 6, 7
+        0.115470898, 0.000000000, 0.097401803, // 8, 9, 10
+        0.087653465, 0.052331036, 0.052922462, // 11, 12, 13
+        0.038850593, 0.053554676, 0.053697434, // 14, 15, 16
+        0.022270261, 0.013072562, 0.008585879, // 17, 18, 19
+        0.005771505, 0.004343925, 0.002141371, // 20, 21, 22
+        0.005343231, 0.000530244, 0.004711017, // 23, 24, 25
+        0.009014153                            // 26
     ];
-    txHarmonicPhase = [
-        0
-    ];
+    txHarmonicPhase = [];
+
+    txHarmonicPhase.length = txHarmonicAmplitude.length;
 }
 
 function updateOutputWave() {
@@ -326,7 +350,7 @@ function drawTimeDomainData(ctx, data) {
 
     if (domSyncCheckbox.checked) {
         syncSamplePerPeriod = getSamplePerPeriod(syncFrequency);
-        console.log(syncSamplePerPeriod, sampleGlobalCounter);
+        // console.log(syncSamplePerPeriod, sampleGlobalCounter);
         firstZeroCrossingIndex = Math.round(sampleGlobalCounter % syncSamplePerPeriod);
     } else {
         firstZeroCrossingIndex = 0;
