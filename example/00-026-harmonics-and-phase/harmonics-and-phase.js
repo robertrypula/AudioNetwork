@@ -15,20 +15,20 @@ var
     INITIAL_FREQUENCY = 500,
     INITIAL_VOLUME = 0.1,
     INITIAL_PHASE = 0,
-    INITIAL_HARMONIC_AMPLITUDE = undefined,
-    INITIAL_HARMONIC_PHASE = undefined,
     animationFrameFirstCall = true,
     domLoudestFrequency,
     domSyncCheckbox,
     domLoopbackCheckbox,
+    domHarmonicNumberInput,
     ctxFrequencyData,
     ctxTimeDomain,
     audioMonoIO,
     txFrequency = INITIAL_FREQUENCY,
     txVolume = INITIAL_VOLUME,
     txPhase = INITIAL_PHASE,
-    txHarmonicAmplitude = INITIAL_HARMONIC_AMPLITUDE,
-    txHarmonicPhase = INITIAL_HARMONIC_PHASE,
+    txHarmonicAmplitude = [],
+    txHarmonicPhase = [],
+    txHarmonicNumber = 5,
     sampleGlobalCounter = 0,
     syncFrequency = INITIAL_FREQUENCY;
 
@@ -43,6 +43,7 @@ function initDomElements() {
     domLoudestFrequency = document.getElementById('loudest-frequency');
     domSyncCheckbox = document.getElementById('sync-checkbox');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domHarmonicNumberInput = document.getElementById('harmonic-number');
 
     ctxFrequencyData = getConfiguredCanvasContext(
         'canvas-frequency-data',
@@ -54,6 +55,9 @@ function initDomElements() {
         CANVAS_WIDTH_TIME_DOMAIN,
         CANVAS_HEIGHT
     );
+
+    domHarmonicNumberInput.value = txHarmonicNumber;
+    updateHarmonicArrayLength();
 }
 
 function initWebAudioApi() {
@@ -67,6 +71,13 @@ function initWebAudioApi() {
 
 function onLoopbackCheckboxChange() {
     audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+}
+
+function onHarmonicNumberInputChange() {
+    txHarmonicNumber = parseInt(domHarmonicNumberInput.value);
+    txHarmonicNumber = txHarmonicNumber >= 1 ? txHarmonicNumber : 1;
+    domHarmonicNumberInput.value = txHarmonicNumber;
+    updateHarmonicArrayLength();
 }
 
 // -----------------------------------------------------------------------
@@ -89,91 +100,85 @@ function loadPredefinedWaveType(type) {
         case 'violin':
             loadViolinWave();
             break;
-        default:
-            txHarmonicAmplitude = INITIAL_HARMONIC_AMPLITUDE;
-            txHarmonicPhase = INITIAL_HARMONIC_PHASE;
+        default:       // use just 'sine' for all not defined types
+            loadSineWave();
     }
     updateOutputWave();
 }
 
+function updateHarmonicArrayLength() {
+    if (txHarmonicAmplitude) {
+        txHarmonicAmplitude.length = txHarmonicNumber;
+    }
+    if (txHarmonicPhase) {
+        txHarmonicPhase.length = txHarmonicNumber;
+    }
+}
+
+function loadSineWave() {
+    var i, harmonicNumber;
+
+    for (i = 0; i < txHarmonicNumber; i++) {
+        harmonicNumber = i + 1;
+        txHarmonicAmplitude[i] = (harmonicNumber === 1) ? 1 : 0;
+        txHarmonicPhase[i] = 0;
+    }
+}
+
 function loadSquareWave() {
-    txHarmonicAmplitude = [
-        1/1, 0/1, 1/3, 0/1, 1/5, 0/1, 1/7, 0/1, 1/9, 0/1, 1/11, 0/1, 1/13, 0/1, 1/15
-    ];
-    txHarmonicPhase = [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ];
-    /*
-     _amp = 0.8,
-     _phase = 60,
-     _spp = 120,
-     separateSineParameter = [
-     { amplitude: _amp/1, samplePerPeriod: _spp/1, phase: 1 * _phase },
-     { amplitude: 0.0/2, samplePerPeriod: _spp/2, phase: 2 * _phase },
-     { amplitude: _amp/3, samplePerPeriod: _spp/3, phase: 3 * _phase },
-     { amplitude: 0.0/4, samplePerPeriod: _spp/4, phase: 4 * _phase },
-     { amplitude: _amp/5, samplePerPeriod: _spp/5, phase: 5 * _phase },
-     { amplitude: 0.0/6, samplePerPeriod: _spp/6, phase: 6 * _phase },
-     { amplitude: _amp/7, samplePerPeriod: _spp/7, phase: 7 * _phase },
-     { amplitude: 0.0/8, samplePerPeriod: _spp/8, phase: 8 * _phase },
-     { amplitude: _amp/9, samplePerPeriod: _spp/9, phase: 9 * _phase },
-     { amplitude: 0.0/10, samplePerPeriod: _spp/10, phase: 10 * _phase },
-     { amplitude: _amp/11, samplePerPeriod: _spp/11, phase: 11 * _phase }
-     ],
-     */
+    var i, harmonicNumber, isOddHarmonic;
+
+    for (i = 0; i < txHarmonicNumber; i++) {
+        harmonicNumber = i + 1;
+        isOddHarmonic = (harmonicNumber % 2 === 1);
+        txHarmonicAmplitude[i] = isOddHarmonic ? (1 / harmonicNumber) : 0;
+        txHarmonicPhase[i] = 0;
+    }
 }
 
 function loadSawtoothWave() {
-    txHarmonicAmplitude = [
-        1
-    ];
-    txHarmonicPhase = [
-        0
-    ];
-    /*
-     // sawtooth START
-     _amp = 2 * 0.8 / Math.PI,
-     _phase = 0,
-     _spp = 120,
-     separateSineParameter = [
-     { amplitude: _amp * Math.pow(-1, 1) / 1, samplePerPeriod: _spp/1, phase: 1 * _phase },
-     { amplitude: _amp * Math.pow(-1, 2) / 2, samplePerPeriod: _spp/2, phase: 2 * _phase },
-     { amplitude: _amp * Math.pow(-1, 3) / 3, samplePerPeriod: _spp/3, phase: 3 * _phase },
-     { amplitude: _amp * Math.pow(-1, 4) / 4, samplePerPeriod: _spp/4, phase: 4 * _phase },
-     { amplitude: _amp * Math.pow(-1, 5) / 5, samplePerPeriod: _spp/5, phase: 5 * _phase },
-     { amplitude: _amp * Math.pow(-1, 6) / 6, samplePerPeriod: _spp/6, phase: 6 * _phase },
-     { amplitude: _amp * Math.pow(-1, 7) / 7, samplePerPeriod: _spp/7, phase: 7 * _phase },
-     { amplitude: _amp * Math.pow(-1, 8) / 8, samplePerPeriod: _spp/8, phase: 8 * _phase },
-     { amplitude: _amp * Math.pow(-1, 9) / 9, samplePerPeriod: _spp/9, phase: 9 * _phase },
-     { amplitude: _amp * Math.pow(-1, 10) / 10, samplePerPeriod: _spp/10, phase: 10 * _phase },
-     { amplitude: _amp * Math.pow(-1, 11) / 11, samplePerPeriod: _spp/11, phase: 11 * _phase }
-     ],
-     // sawtooth END
-     */
+    var i, baseAmplitude, harmonicNumber, isOddHarmonic, sign;
+
+    baseAmplitude = 2 * 0.8 / Math.PI;
+    for (i = 0; i < txHarmonicNumber; i++) {
+        harmonicNumber = i + 1;
+        isOddHarmonic = (harmonicNumber % 2 === 1);
+        sign = isOddHarmonic ? -1 : +1;
+        txHarmonicAmplitude[i] = sign * baseAmplitude / harmonicNumber;
+        txHarmonicPhase[i] = 0;
+    }
 }
 
 function loadTriangleWave() {
-    txHarmonicAmplitude = [
-        1
-    ];
-    txHarmonicPhase = [
-        0
-    ];
+    var i, iDoubled, iHalf, baseAmplitude, harmonicNumber, isOddHarmonic, sign;
+
+    baseAmplitude = 8.0 / (Math.PI * Math.PI);
+    for (i = 0; i < txHarmonicNumber; i++) {
+        iDoubled = i * 2;
+        iHalf = i / 2;
+        harmonicNumber = i + 1;
+        isOddHarmonic = (harmonicNumber % 2 === 1);
+        sign = (iHalf % 2) === 1 ? +1 : -1;
+        txHarmonicAmplitude[i] = isOddHarmonic
+            ? (sign * baseAmplitude /  Math.pow(2 * iHalf + 1, 2))
+            : 0;
+        txHarmonicPhase[i] = 0;
+    }
     /*
      // triangle START
      _amp = 8 / (Math.PI * Math.PI),
      _phase = 0,
      _spp = 120,
      separateSineParameter = [
-     { amplitude: _amp * Math.pow(-1, 0) / Math.pow(2 * 0 + 1, 2), samplePerPeriod: _spp/1, phase: 1 * _phase },
+     +{ amplitude: _amp * Math.pow(-1, 0) / Math.pow(2 * 0 + 1, 2), samplePerPeriod: _spp/1, phase: 1 * _phase },
      { amplitude: 0, samplePerPeriod: _spp/2, phase: 2 * _phase },
-     { amplitude: _amp * Math.pow(-1, 1) / Math.pow(2 * 1 + 1, 2), samplePerPeriod: _spp/3, phase: 3 * _phase },
+     -{ amplitude: _amp * Math.pow(-1, 1) / Math.pow(2 * 1 + 1, 2), samplePerPeriod: _spp/3, phase: 3 * _phase },
      { amplitude: 0, samplePerPeriod: _spp/4, phase: 4 * _phase },
-     { amplitude: _amp * Math.pow(-1, 2) / Math.pow(2 * 2 + 1, 2), samplePerPeriod: _spp/5, phase: 5 * _phase },
+     +{ amplitude: _amp * Math.pow(-1, 2) / Math.pow(2 * 2 + 1, 2), samplePerPeriod: _spp/5, phase: 5 * _phase },
      { amplitude: 0, samplePerPeriod: _spp/6, phase: 6 * _phase },
-     { amplitude: _amp * Math.pow(-1, 3) / Math.pow(2 * 3 + 1, 2), samplePerPeriod: _spp/7, phase: 7 * _phase },
+     -{ amplitude: _amp * Math.pow(-1, 3) / Math.pow(2 * 3 + 1, 2), samplePerPeriod: _spp/7, phase: 7 * _phase },
      { amplitude: 0, samplePerPeriod: _spp/8, phase: 8 * _phase },
-     { amplitude: _amp * Math.pow(-1, 4) / Math.pow(2 * 4 + 1, 2), samplePerPeriod: _spp/9, phase: 9 * _phase },
+     +{ amplitude: _amp * Math.pow(-1, 4) / Math.pow(2 * 4 + 1, 2), samplePerPeriod: _spp/9, phase: 9 * _phase },
      { amplitude: 0, samplePerPeriod: _spp/10, phase: 10 * _phase },
      { amplitude: _amp * Math.pow(-1, 5) / Math.pow(2 * 5 + 1, 2), samplePerPeriod: _spp/11, phase: 11 * _phase }
      ],
@@ -184,43 +189,53 @@ function loadTriangleWave() {
 function loadPianoWave() {
     // harmonics from:
     // http://stackoverflow.com/questions/10702942/note-synthesis-harmonics-violin-piano-guitar-bass-frequencies-midi/11615460
+    var
+        piano = [
+            1.0,                                   // 1
+            0.399064778, 0.229404484, 0.151836061, // 2, 3, 4
+            0.196754229, 0.093742264, 0.060871957, // 5, 6, 7
+            0.138605419, 0.010535002, 0.071021868, // 8, 9, 10
+            0.029954614, 0.051299684, 0.055948288, // 11, 12, 13
+            0.066208224, 0.010067391, 0.007536790, // 14, 15, 16
+            0.008196947, 0.012955577, 0.007316738, // 17, 18, 19
+            0.006216476, 0.005116215, 0.006243983, // 20, 21, 22
+            0.002860679, 0.002558108, 0.000000000, // 23, 24, 25
+            0.001650392                            // 26
+        ],
+        i,
+        indexLimit;
 
-    txHarmonicAmplitude = [
-        1.0,                                   // 1
-        0.399064778, 0.229404484, 0.151836061, // 2, 3, 4
-        0.196754229, 0.093742264, 0.060871957, // 5, 6, 7
-        0.138605419, 0.010535002, 0.071021868, // 8, 9, 10
-        0.029954614, 0.051299684, 0.055948288, // 11, 12, 13
-        0.066208224, 0.010067391, 0.007536790, // 14, 15, 16
-        0.008196947, 0.012955577, 0.007316738, // 17, 18, 19
-        0.006216476, 0.005116215, 0.006243983, // 20, 21, 22
-        0.002860679, 0.002558108, 0.000000000, // 23, 24, 25
-        0.001650392                            // 26
-    ];
-    txHarmonicPhase = [];
-
-    txHarmonicPhase.length = txHarmonicAmplitude.length;
+    indexLimit = Math.min(txHarmonicNumber, piano.length);
+    for (i = 0; i < indexLimit; i++) {
+        txHarmonicAmplitude[i] = piano[i];
+        txHarmonicPhase[i] = 0;
+    }
 }
 
 function loadViolinWave() {
     // harmonics from:
     // http://stackoverflow.com/questions/10702942/note-synthesis-harmonics-violin-piano-guitar-bass-frequencies-midi/11615460
+    var
+        violin = [
+            1.0,                                   // 1
+            0.286699025, 0.150079537, 0.042909002, // 2, 3, 4
+            0.203797365, 0.229228698, 0.156931925, // 5, 6, 7
+            0.115470898, 0.000000000, 0.097401803, // 8, 9, 10
+            0.087653465, 0.052331036, 0.052922462, // 11, 12, 13
+            0.038850593, 0.053554676, 0.053697434, // 14, 15, 16
+            0.022270261, 0.013072562, 0.008585879, // 17, 18, 19
+            0.005771505, 0.004343925, 0.002141371, // 20, 21, 22
+            0.005343231, 0.000530244, 0.004711017, // 23, 24, 25
+            0.009014153                            // 26
+        ],
+        i,
+        indexLimit;
 
-    txHarmonicAmplitude = [
-        1.0,                                   // 1
-        0.286699025, 0.150079537, 0.042909002, // 2, 3, 4
-        0.203797365, 0.229228698, 0.156931925, // 5, 6, 7
-        0.115470898, 0.000000000, 0.097401803, // 8, 9, 10
-        0.087653465, 0.052331036, 0.052922462, // 11, 12, 13
-        0.038850593, 0.053554676, 0.053697434, // 14, 15, 16
-        0.022270261, 0.013072562, 0.008585879, // 17, 18, 19
-        0.005771505, 0.004343925, 0.002141371, // 20, 21, 22
-        0.005343231, 0.000530244, 0.004711017, // 23, 24, 25
-        0.009014153                            // 26
-    ];
-    txHarmonicPhase = [];
-
-    txHarmonicPhase.length = txHarmonicAmplitude.length;
+    indexLimit = Math.min(txHarmonicNumber, violin.length);
+    for (i = 0; i < indexLimit; i++) {
+        txHarmonicAmplitude[i] = violin[i];
+        txHarmonicPhase[i] = 0;
+    }
 }
 
 function updateOutputWave() {

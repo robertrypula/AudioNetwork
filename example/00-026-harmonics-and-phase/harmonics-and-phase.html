@@ -92,11 +92,25 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Predefined wave types
+                                Harmonics:
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button class="btn btn-default" onClick="loadPredefinedWaveType('sine')">Sine</button>
+                            <input
+                                type="number"
+                                onChange="onHarmonicNumberInputChange()"
+                                id="harmonic-number" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Update amplitude and phase
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button class="btn btn-default" onClick="loadPredefinedWaveType()">Sine</button>
                             <button class="btn btn-default" onClick="loadPredefinedWaveType('square')">Square</button>
                             <button class="btn btn-default" onClick="loadPredefinedWaveType('sawtooth')">Sawtooth</button>
                             <button class="btn btn-default" onClick="loadPredefinedWaveType('triangle')">Triangle</button>
@@ -108,7 +122,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Fundamental frequency
+                                Update fundamental frequency
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -125,7 +139,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Amplitude
+                                Update amplitude
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -140,7 +154,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Global phase offset
+                                Update global phase offset
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">

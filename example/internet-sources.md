@@ -61,6 +61,15 @@ Frequency response
 Simple checksum:
     http://stackoverflow.com/questions/811195/fast-open-source-checksum-for-small-strings
 
+Nice article about FM radio demodulation via RTL-SDR
+    http://aaronscher.com/wireless_com_SDR/RTL_SDR_AM_spectrum_demod.html
+
+FFT implementation in Java
+    http://stackoverflow.com/questions/7821473/fft-in-javascript
+
+CRC checksum implementation
+    http://stackoverflow.com/questions/21001659/crc32-algorithm-implementation-in-c-without-a-look-up-table-and-with-a-public-li
+
 -----------------------
 
 FIR filters
