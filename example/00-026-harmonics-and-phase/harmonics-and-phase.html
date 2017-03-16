@@ -56,8 +56,6 @@
 
             <pre>
                 TODO
-                add number of harmonics input
-                add receive frequency
                 add phase values table + controls
             </pre>
 
@@ -83,6 +81,7 @@
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
                                 id="loopback-checkbox"
+                                checked="checked"
                                 value="1" />
                         </div>
                     </div>
@@ -106,7 +105,18 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Update amplitude and phase
+                                Edit manually amplitude and phase
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Update with predefined amplitude and phase
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -181,6 +191,63 @@
                                 id="sync-checkbox"
                                 checked="checked"
                                 value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Sync frequency
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6 clearfix">
+
+                            <div id="sync-frequency" class="clearfix margin-bottom"></div>
+
+                            <div class="editable-float-widget clearfix" id="sync-frequency-editable-float-widget">
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 4)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 4)"></a>
+                                    <span class="digit_4">6</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 3)"></a>
+                                    <span class="digit_3">1</span>
+                                </div>
+                                <div><span></span></div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 2)"></a>
+                                    <span class="digit_2">3</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 1)"></a>
+                                    <span class="digit_1">4</span>
+                                </div>
+                                <div class="digit sdigit-show-dot">
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 0)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 0)"></a>
+                                    <span class="digit_0">5</span>
+                                </div>
+                                <div><span>.</span></div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -1)"></a>
+                                    <span class="digit_-1">4</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -2)"></a>
+                                    <span class="digit_-2">5</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -3)"></a>
+                                    <span class="digit_-3">5</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

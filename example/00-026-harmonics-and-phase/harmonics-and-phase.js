@@ -15,11 +15,14 @@ var
     INITIAL_FREQUENCY = 500,
     INITIAL_VOLUME = 0.1,
     INITIAL_PHASE = 0,
+    SYNC_FREQUENCY_DIGIT_BEFORE_THE_DOT = 5,
+    SYNC_FREQUENCY_DIGIT_AFTER_THE_DOT = 3,
     animationFrameFirstCall = true,
     domLoudestFrequency,
     domSyncCheckbox,
     domLoopbackCheckbox,
     domHarmonicNumberInput,
+    domSyncFrequencWidget,
     ctxFrequencyData,
     ctxTimeDomain,
     audioMonoIO,
@@ -44,6 +47,7 @@ function initDomElements() {
     domSyncCheckbox = document.getElementById('sync-checkbox');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domHarmonicNumberInput = document.getElementById('harmonic-number');
+    domSyncFrequencWidget = document.getElementById('sync-frequency-editable-float-widget');
 
     ctxFrequencyData = getConfiguredCanvasContext(
         'canvas-frequency-data',
@@ -58,6 +62,7 @@ function initDomElements() {
 
     domHarmonicNumberInput.value = txHarmonicNumber;
     updateHarmonicArrayLength();
+    updateSyncFrequencyOnScreen();
 }
 
 function initWebAudioApi() {
@@ -66,7 +71,7 @@ function initWebAudioApi() {
         scriptProcessorNodeHandler(monoDataIn);
     });
     onLoopbackCheckboxChange();
-    updateOutputWave();
+    loadPredefinedWaveType();
 }
 
 function onLoopbackCheckboxChange() {
@@ -79,7 +84,52 @@ function onHarmonicNumberInputChange() {
     domHarmonicNumberInput.value = txHarmonicNumber;
     updateHarmonicArrayLength();
 }
+/*
+sample rate
 
+
+100 kHz
+
+300 kHz
+
+175 kHz
+ */
+
+// -----------------------------------------------------------------------
+// float edit widget stuff
+
+function syncFrequencyWidgetClick(action, digitPosition) {
+    syncFrequency = changeDigitInFloat(
+        action,
+        digitPosition,
+        syncFrequency,
+        SYNC_FREQUENCY_DIGIT_BEFORE_THE_DOT,
+        SYNC_FREQUENCY_DIGIT_AFTER_THE_DOT
+    );
+    updateSyncFrequencyOnScreen();
+}
+
+function updateSyncFrequencyOnScreen() {
+    updateDigitInWidget(
+        domSyncFrequencWidget,
+        syncFrequency,
+        SYNC_FREQUENCY_DIGIT_BEFORE_THE_DOT,
+        SYNC_FREQUENCY_DIGIT_AFTER_THE_DOT
+    );
+}
+
+function updateDigitInWidget(domElement, value, digitBeforeTheDot, digitAfterTheDot) {
+    var element, digitSelector, digitValue, selector, i;
+
+    for (i = digitBeforeTheDot - 1; i >= -digitAfterTheDot; i--) {
+        digitValue = getDecimalDigit(value, i, digitAfterTheDot);
+        digitSelector = '.digit_' + i;
+        selector = '#' + domElement.id + ' span' + digitSelector;
+        element = document.querySelector(selector);
+        element.innerHTML = digitValue;
+    }
+}
+    
 // -----------------------------------------------------------------------
 // output wave stuff
 
@@ -164,26 +214,6 @@ function loadTriangleWave() {
             : 0;
         txHarmonicPhase[i] = 0;
     }
-    /*
-     // triangle START
-     _amp = 8 / (Math.PI * Math.PI),
-     _phase = 0,
-     _spp = 120,
-     separateSineParameter = [
-     +{ amplitude: _amp * Math.pow(-1, 0) / Math.pow(2 * 0 + 1, 2), samplePerPeriod: _spp/1, phase: 1 * _phase },
-     { amplitude: 0, samplePerPeriod: _spp/2, phase: 2 * _phase },
-     -{ amplitude: _amp * Math.pow(-1, 1) / Math.pow(2 * 1 + 1, 2), samplePerPeriod: _spp/3, phase: 3 * _phase },
-     { amplitude: 0, samplePerPeriod: _spp/4, phase: 4 * _phase },
-     +{ amplitude: _amp * Math.pow(-1, 2) / Math.pow(2 * 2 + 1, 2), samplePerPeriod: _spp/5, phase: 5 * _phase },
-     { amplitude: 0, samplePerPeriod: _spp/6, phase: 6 * _phase },
-     -{ amplitude: _amp * Math.pow(-1, 3) / Math.pow(2 * 3 + 1, 2), samplePerPeriod: _spp/7, phase: 7 * _phase },
-     { amplitude: 0, samplePerPeriod: _spp/8, phase: 8 * _phase },
-     +{ amplitude: _amp * Math.pow(-1, 4) / Math.pow(2 * 4 + 1, 2), samplePerPeriod: _spp/9, phase: 9 * _phase },
-     { amplitude: 0, samplePerPeriod: _spp/10, phase: 10 * _phase },
-     { amplitude: _amp * Math.pow(-1, 5) / Math.pow(2 * 5 + 1, 2), samplePerPeriod: _spp/11, phase: 11 * _phase }
-     ],
-     // triangle END
-     */
 }
 
 function loadPianoWave() {
@@ -260,12 +290,57 @@ function phaseChange(phase) {
 
 function frequencyChange(frequency) {
     txFrequency = frequency;
-    syncFrequency = frequency;
     updateOutputWave();
 }
 
 // -----------------------------------------------------------------------
 // utils
+
+function getDecimalDigit(value, digitPosition, digitAfterTheDot) {
+    var
+        valueStr = value.toFixed(digitAfterTheDot),
+        dotIndex = valueStr.indexOf('.'),
+        zeroPositionIndex,
+        index,
+        result = 0;
+
+    if (dotIndex === -1) {
+        zeroPositionIndex = valueStr.length - 1;
+    } else {
+        zeroPositionIndex = dotIndex - 1;
+        valueStr = valueStr.replace('.', '');
+    }
+
+    index = zeroPositionIndex - digitPosition;
+    if (index >= 0 && index < valueStr.length) {
+        result = valueStr[index];
+    }
+
+    return result;
+}
+
+function changeDigitInFloat(action, digitPosition, value, digitBeforeTheDot, digitAfterTheDot) {
+    var
+        maxValue = Math.pow(10, digitBeforeTheDot) - 1,
+        minValue = 0; // TODO check it: Math.pow(10, -digitAfterTheDot);
+
+    switch (action) {
+        case '+':
+            value += Math.pow(10, digitPosition);
+            value = value > maxValue ? maxValue : value;
+            break;
+        case '-':
+            value -= Math.pow(10, digitPosition);
+            value = value < minValue ? minValue : value;
+            break;
+    }
+
+    value = parseFloat(
+        value.toFixed(digitAfterTheDot)
+    );
+
+    return value;
+}
 
 function getIndexOfMax(data, absoluteValue) {
     var i, maxIndex, max, value;

@@ -3,3 +3,49 @@ canvas {
     display: block;
     margin-bottom: 20px;
 }
+
+.editable-float-widget {
+    border: 1px solid gray;
+    float: left;
+}
+
+.editable-float-widget div {
+    float: left;
+    width: 20px;
+    height: 30px;
+    position: relative;
+
+}
+
+.editable-float-widget div a {
+    width: 100%;
+    height: 50%;
+    display: block;
+    z-index: 2;
+    position: absolute;
+}
+
+.editable-float-widget div a:hover {
+    background-color: black;
+    opacity: 0.1;
+}
+
+.editable-float-widget div a.digit-plus {
+    top: 0px;
+}
+
+.editable-float-widget div a.digit-minus {
+    bottom: 0px;
+}
+
+.editable-float-widget div span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
+    font-family: monospace;
+    text-align: center;
+    line-height: 30px;
+    font-size: 30px;
+}

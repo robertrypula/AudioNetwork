@@ -1,5 +1,6 @@
 # Internet sources:
 
+```
 Web Audio API - missing phase info
     'Sadly, even though the analyser node computes a complex fft, it doesn't give access to the complex representations, just the magnitudes of it.'
     http://stackoverflow.com/questions/14169317/interpreting-web-audio-api-fft-results
@@ -117,3 +118,4 @@ How to convert complex sample stream to real:
 
         Dale B. Dalrymple
         http://dbdimages.com
+```
