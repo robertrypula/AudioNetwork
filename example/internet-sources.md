@@ -68,17 +68,25 @@ How to shift the frequency spectrum?
 ## FFT
 
 ```
-FFT implementation in Java
+FFT FAQ
+    http://dspguru.com/dsp/faqs/fft/
+
+FFT explained (Decimation In Time) - REALLY GREAT!
+    https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
+    
+FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!! Buterfly diagrams are the most accurate that I found so far
+    http://www.cmlab.csie.ntu.edu.tw/cml/dsp/training/coding/transform/fft.html
+    
+FFT very clean implementation in Java (FFT Decimation In Time)
     http://stackoverflow.com/questions/7821473/fft-in-javascript
+    http://introcs.cs.princeton.edu/java/97data/FFT.java.html        < link from stackoverflow answer
+    http://introcs.cs.princeton.edu/java/97data/Complex.java.html    < link from stackoverflow answer
 
 FFT - Decimation In Time vs Decimation In Frequency
     https://www.quora.com/What-is-the-difference-between-decimation-in-time-and-decimation-in-frequency
 
 FFT calculator:
     http://scistatcalc.blogspot.com/2013/12/fft-calculator.html
-
-FFT explained
-    https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
 
 FFT output:
     http://stackoverflow.com/questions/6740545/need-help-understanding-fft-output
