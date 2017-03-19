@@ -25,8 +25,8 @@ How to interpret negative frequencies
 Freq domain time resolution:
     http://electronics.stackexchange.com/questions/12407/what-is-the-relation-between-fft-length-and-frequency-resolution
 
-GREAT IQ explanation:
-    http://whiteboard.ping.se/SDR/IQ
+IQ sampling explanation (complex signal):
+    http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!
     https://www.youtube.com/watch?v=h_7d-m1ehoY
 
 Capture and decode fm radio
@@ -74,7 +74,12 @@ FFT FAQ
 FFT explained (Decimation In Time) - REALLY GREAT!
     https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
     
-FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!! Buterfly diagrams are the most accurate that I found so far
+FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!
+    https://cnx.org/contents/JqoGchv3@3/Overview-of-Fast-Fourier-Trans     FFT Overview
+    https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2     DIT
+    https://cnx.org/contents/XaYDVUAS@6/Decimation-in-Frequency-DIF-Ra     DIF
+    
+FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!!
     http://www.cmlab.csie.ntu.edu.tw/cml/dsp/training/coding/transform/fft.html
     
 FFT very clean implementation in Java (FFT Decimation In Time)

@@ -1,7 +1,10 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-function computeDiscreteFourierTransform(
+
+// TODO this is actually not traditional DFT, I should add second version of this...
+// TODO ...method that implements classic aproach with hertz on horizontal axis
+function computeNonClassicDFT(
     timeDomain, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
 ) {
     var frequencyDomain, step, i, samplePerPeriod, frequencyBin;
@@ -49,10 +52,15 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
     imm = 0;
     for (i = 0; i < windowSize; i++) {
         sample = timeDomain[i];
+        // TODO this formula is not like in traditional DFT, probably I should use traditional formula here and correct phase value later
+        // TODO the reason to use non traditional formula was to produce correct phase angle in the end but I think that it should be changed
+        // TODO to avoid any confusion
         r = 2 * Math.PI * i / samplePerPeriod; // compute radians for 'unit vector' sine/cosine
         real += -Math.cos(r) * sample;         // 'sample' value alters 'unit vector' length, it could also change
         imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
     }
+
+    // TODO I shouldn't normalize it because classic DFT is not doing that 
     real /= windowSize;                        // normalize final vector
     imm /= windowSize;                         // normalize final vector
 
@@ -60,6 +68,8 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
     amplitudeDecibel = 10 * Math.log(amplitude) / Math.LN10;                // convert into decibels
     amplitudeDecibel = amplitudeDecibel < -100 ? -100 : amplitudeDecibel;   // limit weak values to -100 decibels
 
+    // TODO when formula from the loop will be changed to traditional we need to fix the phase because...
+    // TODO ...sine waves without phase offset produces complex number that points downwards (negative imaginary axis)
     phase = findUnitAngle(real, imm);          // get angle between vector and positive Y axis clockwise
 
     return {
@@ -138,7 +148,7 @@ function init() {
     frequencyBinSamplePerPeriodMax = 50;
     frequencyBinSamplePerPeriodMin = 10;
     frequencyBinSize = 160;
-    frequencyDomain = computeDiscreteFourierTransform(
+    frequencyDomain = computeNonClassicDFT(
         timeDomain, frequencyBinSamplePerPeriodMax, frequencyBinSamplePerPeriodMin, frequencyBinSize
     );
 
