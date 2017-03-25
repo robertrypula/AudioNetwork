@@ -200,7 +200,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6 clearfix">
-                            <div class="editable-float-widget clearfix" id="fundamental-frequency-editable-float-widget">
+                            <div class="editable-float-widget clearfix margin-bottom" id="fundamental-frequency-editable-float-widget">
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 4)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 4)"></a>
@@ -257,6 +257,11 @@
                                     <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -6)"></a>
                                     <span class="digit_-6">-</span>
                                 </div>
+                            </div>
+                            <div class="clearfix">
+                                <button class="btn btn-default" onClick="txFrequencyAlignWithFrequencyBinClick()">
+                                    Align with closest frequency bin
+                                </button>
                             </div>
                         </div>
                     </div>

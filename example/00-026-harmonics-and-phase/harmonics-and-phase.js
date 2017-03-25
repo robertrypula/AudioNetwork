@@ -130,6 +130,13 @@ function harmonicDownWidgetClick() {
     refreshHarmonicDataOnScreen();
 }
 
+function txFrequencyAlignWithFrequencyBinClick() {
+    fundamentalFrequency = audioMonoIO.getFFTResolution() *
+        Math.round(fundamentalFrequency / audioMonoIO.getFFTResolution());
+    updateFundamentalFrequencyOnScreen();
+    frequencyChange(fundamentalFrequency);
+}
+
 // -----------------------------------------------------------------------
 // float edit widget stuff
 
