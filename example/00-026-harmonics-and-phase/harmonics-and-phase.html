@@ -54,11 +54,6 @@
 
             <!-- ---------------- -->
 
-            <pre>
-                TODO
-                add phase values table + controls
-            </pre>
-
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
@@ -108,8 +103,77 @@
                                 Edit manually amplitude and phase
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-6 clearfix">
 
+                            <div id="harmonic-listing-widget" class="clearfix margin-bottom"></div>
+
+                            <div class="clearfix margin-bottom">
+                                <button class="btn btn-default" onClick="harmonicUpWidgetClick()">Up</button>
+                                <button class="btn btn-default" onClick="harmonicDownWidgetClick()">Down</button>
+                            </div>
+
+                            <div class="editable-float-widget clearfix margin-right" id="harmonic-amplitude-editable-float-widget">
+                                <div class="digit">
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', 0)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', 0)"></a>
+                                    <span class="digit_0">-</span>
+                                </div>
+                                <div><span>.</span></div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -1)"></a>
+                                    <span class="digit_-1">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -2)"></a>
+                                    <span class="digit_-2">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -3)"></a>
+                                    <span class="digit_-3">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -4)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -4)"></a>
+                                    <span class="digit_-4">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -5)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -5)"></a>
+                                    <span class="digit_-5">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicAmplitudeWidgetClick('+', -6)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicAmplitudeWidgetClick('-', -6)"></a>
+                                    <span class="digit_-6">-</span>
+                                </div>
+                            </div>
+
+                            <div class="editable-float-widget clearfix" id="harmonic-local-phase-editable-float-widget">
+                                <div class="digit">
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicLocalPhaseWidgetClick('+', 0)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicLocalPhaseWidgetClick('-', 0)"></a>
+                                    <span class="digit_0">-</span>
+                                </div>
+                                <div><span>.</span></div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicLocalPhaseWidgetClick('+', -1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicLocalPhaseWidgetClick('-', -1)"></a>
+                                    <span class="digit_-1">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicLocalPhaseWidgetClick('+', -2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicLocalPhaseWidgetClick('-', -2)"></a>
+                                    <span class="digit_-2">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="harmonicLocalPhaseWidgetClick('+', -3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="harmonicLocalPhaseWidgetClick('-', -3)"></a>
+                                    <span class="digit_-3">-</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -135,14 +199,65 @@
                                 Update fundamental frequency
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button class="btn btn-default" onClick="frequencyChange(50)">50 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(100)">100 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(500)">500 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(1000)">1000 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(1500)">1500 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(2000)">2000 Hz</button>
-                            <button class="btn btn-default" onClick="frequencyChange(10000)">10000 Hz</button>
+                        <div class="col col-xs-6 col-sm-7 col-md-6 clearfix">
+                            <div class="editable-float-widget clearfix" id="fundamental-frequency-editable-float-widget">
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 4)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 4)"></a>
+                                    <span class="digit_4">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 3)"></a>
+                                    <span class="digit_3">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 2)"></a>
+                                    <span class="digit_2">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 1)"></a>
+                                    <span class="digit_1">-</span>
+                                </div>
+                                <div class="digit">
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', 0)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', 0)"></a>
+                                    <span class="digit_0">-</span>
+                                </div>
+                                <div><span>.</span></div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -1)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -1)"></a>
+                                    <span class="digit_-1">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -2)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -2)"></a>
+                                    <span class="digit_-2">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -3)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -3)"></a>
+                                    <span class="digit_-3">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -4)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -4)"></a>
+                                    <span class="digit_-4">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -5)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -5)"></a>
+                                    <span class="digit_-5">-</span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="digit-plus" onClick="fundamentalFrequencyWidgetClick('+', -6)"></a>
+                                    <a href="javascript:void(0)" class="digit-minus" onClick="fundamentalFrequencyWidgetClick('-', -6)"></a>
+                                    <span class="digit_-6">-</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -201,51 +316,47 @@
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6 clearfix">
-
-                            <div id="sync-frequency" class="clearfix margin-bottom"></div>
-
                             <div class="editable-float-widget clearfix" id="sync-frequency-editable-float-widget">
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 4)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 4)"></a>
-                                    <span class="digit_4">6</span>
+                                    <span class="digit_4">-</span>
                                 </div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 3)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 3)"></a>
-                                    <span class="digit_3">1</span>
+                                    <span class="digit_3">-</span>
                                 </div>
-                                <div><span></span></div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 2)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 2)"></a>
-                                    <span class="digit_2">3</span>
+                                    <span class="digit_2">-</span>
                                 </div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 1)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 1)"></a>
-                                    <span class="digit_1">4</span>
+                                    <span class="digit_1">-</span>
                                 </div>
-                                <div class="digit sdigit-show-dot">
+                                <div class="digit">
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', 0)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', 0)"></a>
-                                    <span class="digit_0">5</span>
+                                    <span class="digit_0">-</span>
                                 </div>
                                 <div><span>.</span></div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -1)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -1)"></a>
-                                    <span class="digit_-1">4</span>
+                                    <span class="digit_-1">-</span>
                                 </div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -2)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -2)"></a>
-                                    <span class="digit_-2">5</span>
+                                    <span class="digit_-2">-</span>
                                 </div>
                                 <div>
                                     <a href="javascript:void(0)" class="digit-plus" onClick="syncFrequencyWidgetClick('+', -3)"></a>
                                     <a href="javascript:void(0)" class="digit-minus" onClick="syncFrequencyWidgetClick('-', -3)"></a>
-                                    <span class="digit_-3">5</span>
+                                    <span class="digit_-3">-</span>
                                 </div>
                             </div>
                         </div>

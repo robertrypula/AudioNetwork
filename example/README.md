@@ -1,9 +1,13 @@
 # Examples
 
+You may wonder why I didn't use any framework like AngularJs. Sometimes
+even I asked that question to myself because writing in pure JavaScript
+is often a pain ;) In general I wanted to keep those examples free from
+any dependencies. 
+
 ## 00-xxx
 
-Standalone examples without any dependencies like Angular. They are also not dependent
-to the AudioNetwork lib. You can grab the code and use it in your project.
+Standalone examples mostly about Web Audio API and DSP.
 
 ## 01-xxx
 

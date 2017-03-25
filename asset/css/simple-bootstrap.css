@@ -181,6 +181,10 @@ button, textarea, input {
     display: none !important;
 }
 
+.margin-right {
+    margin-right: 10px;
+}
+
 .margin-bottom {
     margin-bottom: 10px;
 }

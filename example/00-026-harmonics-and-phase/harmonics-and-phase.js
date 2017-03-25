@@ -10,19 +10,28 @@ var
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -150,
-    ABSOLUTE_VALUE = true,
     NORMAL_VALUE = false,
     INITIAL_FREQUENCY = 500,
-    INITIAL_VOLUME = 0.1,
+    INITIAL_VOLUME = 0.25,
     INITIAL_PHASE = 0,
     SYNC_FREQUENCY_DIGIT_BEFORE_THE_DOT = 5,
     SYNC_FREQUENCY_DIGIT_AFTER_THE_DOT = 3,
+    FUNDAMENTAL_FREQUENCY_DIGIT_BEFORE_THE_DOT = 5,
+    FUNDAMENTAL_FREQUENCY_DIGIT_AFTER_THE_DOT = 6,
+    HARMONIC_AMPLITUDE_DIGIT_BEFORE_THE_DOT = 1,
+    HARMONIC_AMPLITUDE_DIGIT_AFTER_THE_DOT = 6,
+    HARMONIC_LOCAL_PHASE_DIGIT_BEFORE_THE_DOT = 1,
+    HARMONIC_LOCAL_PHASE_DIGIT_AFTER_THE_DOT = 3,
     animationFrameFirstCall = true,
     domLoudestFrequency,
     domSyncCheckbox,
     domLoopbackCheckbox,
     domHarmonicNumberInput,
     domSyncFrequencWidget,
+    domFundamentalFrequencyWidget,
+    domHarmonicListingWidget,
+    domHarmonicAmplitudeWidget,
+    domHarmonicLocalPhaseWidget,
     ctxFrequencyData,
     ctxTimeDomain,
     audioMonoIO,
@@ -31,13 +40,23 @@ var
     txPhase = INITIAL_PHASE,
     txHarmonicAmplitude = [],
     txHarmonicPhase = [],
-    txHarmonicNumber = 5,
+    txHarmonicNumber = 16,
+    currentHarmonicIndex = 0,
     sampleGlobalCounter = 0,
-    syncFrequency = INITIAL_FREQUENCY;
+    syncFrequency = INITIAL_FREQUENCY,
+    fundamentalFrequency = INITIAL_FREQUENCY;    // this is acctually txFrequency TODO use only txFrequency variable
 
 function init() {
     initDomElements();
     initWebAudioApi();
+
+    overwriteInitialFrequency();    // experimental
+
+    loadPredefinedWaveType('square');
+    updateHarmonicArrayLength();
+    updateSyncFrequencyOnScreen();
+    updateFundamentalFrequencyOnScreen();
+    refreshHarmonicDataOnScreen();
 
     animationFrameLoop();   // run animation loop
 }
@@ -48,6 +67,10 @@ function initDomElements() {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domHarmonicNumberInput = document.getElementById('harmonic-number');
     domSyncFrequencWidget = document.getElementById('sync-frequency-editable-float-widget');
+    domFundamentalFrequencyWidget = document.getElementById('fundamental-frequency-editable-float-widget');
+    domHarmonicListingWidget = document.getElementById('harmonic-listing-widget');
+    domHarmonicAmplitudeWidget = document.getElementById('harmonic-amplitude-editable-float-widget');
+    domHarmonicLocalPhaseWidget = document.getElementById('harmonic-local-phase-editable-float-widget');
 
     ctxFrequencyData = getConfiguredCanvasContext(
         'canvas-frequency-data',
@@ -61,8 +84,6 @@ function initDomElements() {
     );
 
     domHarmonicNumberInput.value = txHarmonicNumber;
-    updateHarmonicArrayLength();
-    updateSyncFrequencyOnScreen();
 }
 
 function initWebAudioApi() {
@@ -71,7 +92,17 @@ function initWebAudioApi() {
         scriptProcessorNodeHandler(monoDataIn);
     });
     onLoopbackCheckboxChange();
-    loadPredefinedWaveType();
+}
+
+function overwriteInitialFrequency() {
+    var
+        fftResolution = audioMonoIO.getFFTResolution(),
+        halfkHzBinIndex = Math.ceil(500 / fftResolution),
+        newInitialFrequency = halfkHzBinIndex * fftResolution;
+
+    txFrequency = newInitialFrequency;
+    syncFrequency = newInitialFrequency;
+    fundamentalFrequency = newInitialFrequency;
 }
 
 function onLoopbackCheckboxChange() {
@@ -81,22 +112,95 @@ function onLoopbackCheckboxChange() {
 function onHarmonicNumberInputChange() {
     txHarmonicNumber = parseInt(domHarmonicNumberInput.value);
     txHarmonicNumber = txHarmonicNumber >= 1 ? txHarmonicNumber : 1;
+    currentHarmonicIndex = currentHarmonicIndex >= txHarmonicNumber ? txHarmonicNumber - 1 : currentHarmonicIndex;
     domHarmonicNumberInput.value = txHarmonicNumber;
     updateHarmonicArrayLength();
+    refreshHarmonicDataOnScreen();
 }
-/*
-sample rate
 
+function harmonicUpWidgetClick() {
+    currentHarmonicIndex--;
+    currentHarmonicIndex = currentHarmonicIndex < 0 ? txHarmonicNumber - 1 : currentHarmonicIndex;
+    refreshHarmonicDataOnScreen();
+}
 
-100 kHz
-
-300 kHz
-
-175 kHz
- */
+function harmonicDownWidgetClick() {
+    currentHarmonicIndex++;
+    currentHarmonicIndex = currentHarmonicIndex >= txHarmonicNumber ? 0 : currentHarmonicIndex;
+    refreshHarmonicDataOnScreen();
+}
 
 // -----------------------------------------------------------------------
 // float edit widget stuff
+
+function harmonicAmplitudeWidgetClick(action, digitPosition) {
+    txHarmonicAmplitude[currentHarmonicIndex] = changeDigitInFloat(
+        action,
+        digitPosition,
+        txHarmonicAmplitude[currentHarmonicIndex],
+        HARMONIC_AMPLITUDE_DIGIT_BEFORE_THE_DOT,
+        HARMONIC_AMPLITUDE_DIGIT_AFTER_THE_DOT
+    );
+    updateHarmonicAmplitudeOnScreen();
+    updateOutputWave();
+}
+
+function updateHarmonicAmplitudeOnScreen() {
+    updateDigitInWidget(
+        domHarmonicAmplitudeWidget,
+        txHarmonicAmplitude[currentHarmonicIndex],
+        HARMONIC_AMPLITUDE_DIGIT_BEFORE_THE_DOT,
+        HARMONIC_AMPLITUDE_DIGIT_AFTER_THE_DOT
+    );
+}
+
+// ------
+
+function harmonicLocalPhaseWidgetClick(action, digitPosition) {
+    txHarmonicPhase[currentHarmonicIndex] = changeDigitInFloat(
+        action,
+        digitPosition,
+        txHarmonicPhase[currentHarmonicIndex],
+        HARMONIC_LOCAL_PHASE_DIGIT_BEFORE_THE_DOT,
+        HARMONIC_LOCAL_PHASE_DIGIT_AFTER_THE_DOT
+    );
+    updateHarmonicLocalPhaseOnScreen();
+    updateOutputWave();
+}
+
+function updateHarmonicLocalPhaseOnScreen() {
+    updateDigitInWidget(
+        domHarmonicLocalPhaseWidget,
+        txHarmonicPhase[currentHarmonicIndex],
+        HARMONIC_LOCAL_PHASE_DIGIT_BEFORE_THE_DOT,
+        HARMONIC_LOCAL_PHASE_DIGIT_AFTER_THE_DOT
+    );
+}
+
+// ------
+
+function fundamentalFrequencyWidgetClick(action, digitPosition) {
+    fundamentalFrequency = changeDigitInFloat(
+        action,
+        digitPosition,
+        fundamentalFrequency,
+        FUNDAMENTAL_FREQUENCY_DIGIT_BEFORE_THE_DOT,
+        FUNDAMENTAL_FREQUENCY_DIGIT_AFTER_THE_DOT
+    );
+    updateFundamentalFrequencyOnScreen();
+    frequencyChange(fundamentalFrequency);
+}
+
+function updateFundamentalFrequencyOnScreen() {
+    updateDigitInWidget(
+        domFundamentalFrequencyWidget,
+        fundamentalFrequency,
+        FUNDAMENTAL_FREQUENCY_DIGIT_BEFORE_THE_DOT,
+        FUNDAMENTAL_FREQUENCY_DIGIT_AFTER_THE_DOT
+    );
+}
+
+// ------
 
 function syncFrequencyWidgetClick(action, digitPosition) {
     syncFrequency = changeDigitInFloat(
@@ -117,6 +221,8 @@ function updateSyncFrequencyOnScreen() {
         SYNC_FREQUENCY_DIGIT_AFTER_THE_DOT
     );
 }
+
+// ------
 
 function updateDigitInWidget(domElement, value, digitBeforeTheDot, digitAfterTheDot) {
     var element, digitSelector, digitValue, selector, i;
@@ -154,14 +260,27 @@ function loadPredefinedWaveType(type) {
             loadSineWave();
     }
     updateOutputWave();
+    refreshHarmonicDataOnScreen();
 }
 
 function updateHarmonicArrayLength() {
+    var i;
+
     if (txHarmonicAmplitude) {
         txHarmonicAmplitude.length = txHarmonicNumber;
+        for (i = 0; i < txHarmonicAmplitude.length; i++) {
+            if (typeof txHarmonicAmplitude[i] === 'undefined') {
+                txHarmonicAmplitude[i] = 0;
+            }
+        }
     }
     if (txHarmonicPhase) {
         txHarmonicPhase.length = txHarmonicNumber;
+        for (i = 0; i < txHarmonicPhase.length; i++) {
+            if (typeof txHarmonicPhase[i] === 'undefined') {
+                txHarmonicPhase[i] = 0;
+            }
+        }
     }
 }
 
@@ -291,6 +410,31 @@ function phaseChange(phase) {
 function frequencyChange(frequency) {
     txFrequency = frequency;
     updateOutputWave();
+}
+
+// -----------------------------------------------------------------------
+// harmonic editor stuff
+
+function refreshHarmonicDataOnScreen() {
+    updateHarmonicAmplitudeOnScreen();
+    updateHarmonicLocalPhaseOnScreen();
+    updateHarmonicListingOnScreen();
+}
+
+function updateHarmonicListingOnScreen() {
+    var i, html;
+
+    html = '';
+    for (i = 0; i < txHarmonicNumber; i++) {
+        html += '[' + (i + 1) + '] ';
+        html += ' a=' + txHarmonicAmplitude[i].toFixed(HARMONIC_AMPLITUDE_DIGIT_AFTER_THE_DOT);
+        html += ' p=' + txHarmonicPhase[i].toFixed(HARMONIC_LOCAL_PHASE_DIGIT_AFTER_THE_DOT);
+        if (i === currentHarmonicIndex) {
+            html += ' <---';
+        }
+        html += '<br/>';
+    }
+    domHarmonicListingWidget.innerHTML = html;
 }
 
 // -----------------------------------------------------------------------

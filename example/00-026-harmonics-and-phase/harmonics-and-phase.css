@@ -49,3 +49,7 @@ canvas {
     line-height: 30px;
     font-size: 30px;
 }
+
+#harmonic-listing-widget {
+    font-family: monospace;
+}
