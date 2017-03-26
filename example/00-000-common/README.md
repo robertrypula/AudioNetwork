@@ -3,6 +3,10 @@
 Classes described below are not dependent to Audio Network project. You can grab them
 as standalone files and use in your project.
 
+```
+TODO: add descriptions
+```
+
 ## AudioMonoIO
 
 AudioMonoIO = function (fftSize, bufferSize, smoothingTimeConstant)
@@ -30,8 +34,6 @@ AudioMonoIO.prototype.getTimeDomainData = function ()
 AudioMonoIO.prototype.getSampleRate = function ()
  
 AudioMonoIO.prototype.getFFTResolution = function ()
-
------------------------------
 
 ## FFTResult
  
@@ -72,8 +74,6 @@ FFTResult.getFrequency = function (frequencyBinIndex, sampleRate, fftSize)
 FFTResult.getBinIndex = function (frequency, sampleRate, fftSize)
  
 FFTResult.getFrequencyOfClosestBin = function (frequency, sampleRate, fftSize)
-
------------------------------
 
 ## MusicCalculator
  

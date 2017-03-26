@@ -429,3 +429,8 @@ pre {
     margin: 10px 0 10px;
     border: 1px solid #eee;
 }
+
+.scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
