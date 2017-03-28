@@ -107,8 +107,8 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
         // TODO to avoid any confusion
         if (samplePerPeriod === Infinity) {
             // DC-Offset case
-            real += sample;
-            imm += sample;
+            real += -1 * sample;
+            imm += 0 * sample;
         } else {
             r = 2 * Math.PI * n / samplePerPeriod; // compute radians for 'unit vector' sine/cosine
             real += -Math.cos(r) * sample;         // 'sample' value alters 'unit vector' length, it could also change
