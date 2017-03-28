@@ -222,13 +222,21 @@ function applyWindowFunction(timeDomain) {
 
 // ------------------------------------------------------------------
 
-function logger(s) {
+function logger(s, overwrite, cssClass) {
     var element = document.getElementById('dft-output');
 
-    element.innerHTML = element.innerHTML + s + '\n';
+    cssClass = cssClass ? cssClass : '';
+    s = (s === '') ? '&nbsp;' : s;
+    s = '<div class="' + cssClass + '">' + s + '</div>';
+
+    if (overwrite) {
+        element.innerHTML = s + '\n';
+    } else {
+        element.innerHTML = element.innerHTML + s + '\n';
+    }
 }
 
-function logFrequencyBin(index, frequencyDomain, highlightList) {
+function logFrequencyBin(index, frequencyDomain, highlightText) {
     var
         fd = frequencyDomain[index],  // alias
         real,
@@ -238,7 +246,9 @@ function logFrequencyBin(index, frequencyDomain, highlightList) {
         phase,
         samplePerPeriod,
         frequencyInHertz,
-        i;
+        i,
+        cssClass,
+        html;
 
     real = fd.real.toFixed(3);
     imm = (fd.imm >= 0 ? '+' : '') + fd.imm.toFixed(3);
@@ -251,14 +261,17 @@ function logFrequencyBin(index, frequencyDomain, highlightList) {
         ? (SAMPLE_RATE / samplePerPeriod).toFixed(3)
         : 0;
 
-    logger(
-        '[' + index + '] ' +
+    cssClass = highlightText ? 'highlight' : '';
+
+    html = '[' + index + '] ' +
         real + ' ' + imm + 'i |' +
         dB + ' dB | ' +
         'amplitude: ' + amplitude + ' | ' +
         'phase: ' + phase + ' | ' +
-        'samplePerPeriod: ' + samplePerPeriod + ' (' + frequencyInHertz + ' Hz)'
-    );
+        'samplePerPeriod: ' + samplePerPeriod + ' (' + frequencyInHertz + ' Hz)' +
+        (highlightText ? ' | ' + highlightText : '');
+
+    logger(html, false, cssClass);
 }
 
 // ------------------------------------------------------------------
@@ -275,7 +288,7 @@ function init() {
     addWhiteNoise(timeDomain, whiteNoiseAmplitude);
     applyWindowFunction(timeDomain);
 
-    logger('timeDomain.length: ' + timeDomain.length);
+    logger('timeDomain.length: ' + timeDomain.length, true);
     logger('whiteNoiseAmplitude: ' + whiteNoiseAmplitude);
     logger('Sample rate for frequencies expressed in hertz: ' + SAMPLE_RATE + ' Hz');
     logger('');
@@ -290,6 +303,7 @@ function nonClassicDFT(timeDomain) {
         frequencyBinSamplePerPeriodMax,
         frequencyBinSize,
         frequencyDomain,
+        highlightText,
         i;
 
     frequencyBinSamplePerPeriodMax = 50;
@@ -308,14 +322,23 @@ function nonClassicDFT(timeDomain) {
     logger('frequencyDomain.length: ' + frequencyDomain.length);
 
     for (i = 0; i < frequencyDomain.length; i++) {
+        switch (i) {
+            case 88:
+                highlightText = 'Sine A';
+                break;
+            case 120:
+                highlightText = 'Sine B';
+                break;
+            case 136:
+                highlightText = 'Sine C';
+                break;
+            default:
+                highlightText = undefined;
+        }
         logFrequencyBin(
             i,
             frequencyDomain,
-            [
-                [ 88, 'Sine A' ],
-                [ 120, 'Sine B' ],
-                [ 136, 'Sine C' ]
-            ]
+            highlightText
         );
     }
 
@@ -325,6 +348,7 @@ function nonClassicDFT(timeDomain) {
 function classicDFT(timeDomain) {
     var
         frequencyDomain,
+        highlightText,
         i;
 
     frequencyDomain = computeDFT(timeDomain);
@@ -334,21 +358,42 @@ function classicDFT(timeDomain) {
     logger('frequencyDomain.length: ' + frequencyDomain.length);
 
     for (i = 0; i < frequencyDomain.length; i++) {
+        switch (i) {
+            case 0:
+                highlightText = 'DC Offset';
+                break;
+            case 512:
+                highlightText = 'Nyquist frequency';
+                break;
+            // positive frequencies
+            case 37:
+                highlightText = 'Sine A (closest bin)';
+                break;
+            case 51:
+                highlightText = 'Sine B (closest bin)';
+                break;
+            case 64:
+                highlightText = 'Sine C (exact bin)';
+                break;
+            // negative frequencies (for real valued signal it's a complex conjugate
+            // of complex number obtained for same frequency but on positive side)
+            case 960:
+                highlightText = 'Sine C (exact bin) - negative frequency';
+                break;
+            case 973:
+                highlightText = 'Sine B (closest bin) - negative frequency';
+                break;
+            case 987:
+                highlightText = 'Sine A (closest bin) - negative frequency';
+                break;
+            default:
+                highlightText = undefined;
+        }
+
         logFrequencyBin(
             i,
             frequencyDomain,
-            [
-                // TODO find indexes, add also image from negative frequenciess
-                // positive frequencies
-                [ 0, 'Sine A' ],
-                [ 0, 'Sine B' ],
-                [ 0, 'Sine C' ],
-                // negative frequencies (for real valued signal it's a complex conjugate
-                // of complex number obtained for same frequency but on positive side)
-                [ 0, 'Sine A' ],
-                [ 0, 'Sine B' ],
-                [ 0, 'Sine C' ]
-            ]
+            highlightText
         );
     }
 }
