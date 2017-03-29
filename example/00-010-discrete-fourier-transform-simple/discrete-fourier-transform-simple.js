@@ -47,19 +47,24 @@ function computeNonClassicDFT(
  * This method returns DFT output from the classic formula:
  *
  *         N-1
- *    Fk = SUM [ xn * e^(-2pi*k*n/N) ]          k in range <0, N-1>
+ *    Fk = SUM [ xn * e^(-i*2*PI*k*n/N) ]          k is integer in range <0, N-1>
  *         n=0
  *
  * Where:
- *   N  - timeDomain.length
- *   xn - sample of the n-th sample from timeDomain array
- *   Fk - complex number that represents amplitude and phase of the k-th frequency bin
+ *   e^(i*x) -> cos(x) + i*sin(x)
+ *   N       -> timeDomain.length
+ *   i       -> sqrt(-1)
+ *   PI      -> ~3.14
+ *   xn      -> sample of the n-th sample from timeDomain array
+ *   n       -> sample index from timeDomain array
+ *   k       -> number of cycles of a wave that fits the window, it's different for every frequency bins
+ *   Fk      -> complex number that represents amplitude and phase of the k-th frequency bin
  *
  * In order to follow approach described in the article from polish 'Programista' magazine (2016/51) exponent
  * was re-arranged in a way to use samplePerPeriod variable:
  *
  *  samplePerPeriod = N/k
- *  -2pi*k*n/N = (-2pi*n)/(N/k) = (-2pi*n) / samplePerPeriod
+ *  -i*2*PI*k*n/N = (-i*2*PI*n)/(N/k) = (-i*2*PI*n) / samplePerPeriod
  *
  * @param timeDomain
  * @returns {Array}
