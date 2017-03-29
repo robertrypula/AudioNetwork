@@ -46,7 +46,7 @@ var
     windowSampleOffset = 0,
     windowSampleSize = 1024,
     windowFunctionEnabled = 1,
-    amplitudeDecibelMin = -80,
+    dBMin = -140,
     frequencyBinSize = 160,
     frequencyBinSamplePerPeriodMax = 50,
     frequencyBinSamplePerPeriodMin = 10,

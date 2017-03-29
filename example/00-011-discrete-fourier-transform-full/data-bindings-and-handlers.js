@@ -15,7 +15,7 @@ function dataBindingTemplateToCode() {
     windowSampleOffset = parseIntFromForm('form-window-sample-offset');
     windowSampleSize = parseIntFromForm('form-window-sample-size');
     windowFunctionEnabled = !!document.getElementById('form-window-function-enabled').checked;
-    amplitudeDecibelMin = parseIntFromForm('form-amplitude-decibel-min');
+    dBMin = parseIntFromForm('form-db-min');
     frequencyBinSize = parseIntFromForm('form-frequency-bin-size');
     frequencyBinSamplePerPeriodMax = parseFloatFromForm('form-frequency-bin-sample-per-period-max');
     frequencyBinSamplePerPeriodMin = parseFloatFromForm('form-frequency-bin-sample-per-period-min');
@@ -37,7 +37,7 @@ function dataBindingCodeToTemplate() {
     document.getElementById('form-window-sample-offset').value = windowSampleOffset;
     document.getElementById('form-window-sample-size').value = windowSampleSize;
     document.getElementById('form-window-function-enabled').checked = windowFunctionEnabled ? true : false;
-    document.getElementById('form-amplitude-decibel-min').value = amplitudeDecibelMin;
+    document.getElementById('form-db-min').value = dBMin;
     document.getElementById('form-frequency-bin-size').value = frequencyBinSize;
     document.getElementById('form-frequency-bin-sample-per-period-max').value = frequencyBinSamplePerPeriodMax;
     document.getElementById('form-frequency-bin-sample-per-period-min').value = frequencyBinSamplePerPeriodMin;
@@ -46,8 +46,8 @@ function dataBindingCodeToTemplate() {
         (Math.round(getSamplePerPeriodFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
     document.getElementById('frequency-bin-frequency').innerHTML =
         (Math.round(getFrequencyFromIndex(frequencyBinToExplainIndex) * 100) / 100).toString();
-    document.getElementById('frequency-bin-amplitude-decibel').innerHTML =
-        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).amplitudeDecibel * 100) / 100).toString();
+    document.getElementById('frequency-bin-db').innerHTML =
+        (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).dB * 100) / 100).toString();
     document.getElementById('frequency-bin-phase').innerHTML =
         (Math.round(frequencyBinQueue.getItem(frequencyBinToExplainIndex).phase * 360) % 360).toString();
     document.getElementById('form-frequency-bin-to-explain-iteration-offset').value =

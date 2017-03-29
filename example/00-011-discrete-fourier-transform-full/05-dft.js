@@ -11,7 +11,7 @@ function discreteFourierTransformInitialize() {
         (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart = new FrequencyDomainChart(
         element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue,
-        amplitudeDecibelMin,
+        dBMin,
         FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
     );
 
@@ -22,38 +22,49 @@ function discreteFourierTransformInitialize() {
 }
 
 function discreteFourierTransformUpdate() {
-    var binStep, i, samplePerPeriod, frequencyBin, chartWidth;
+    var binStep, k, samplePerPeriod, frequencyBin, chartWidth;
 
     frequencyDomainQueue.setSizeMax(frequencyBinSize);
     frequencyBinQueue.setSizeMax(frequencyBinSize);
     binStep = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
-    for (i = 0; i < frequencyBinSize; i++) {
-        samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;
+    for (k = 0; k < frequencyBinSize; k++) {
+        samplePerPeriod = frequencyBinSamplePerPeriodMax - k * binStep;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
-        frequencyDomainQueue.pushEvenIfFull(frequencyBin.amplitudeDecibel);
+        frequencyDomainQueue.pushEvenIfFull(frequencyBin.dB);
         frequencyBinQueue.pushEvenIfFull(frequencyBin);
     }
     chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart.setWidth(chartWidth);
-    frequencyDomainChart.setPowerDecibelMin(amplitudeDecibelMin);       // TODO change to amplitude !!!!!!
+    frequencyDomainChart.setPowerDecibelMin(dBMin);
 }
 
 function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
-    var i, r, x, y, sample, result, detail, amplitude;
+    var n, r, x, y, N, realNormalized, immNormalized, sample, result, detail, amplitude;
 
     result = {
         samplePerPeriod: samplePerPeriod,
         real: 0,
         imm: 0,
-        amplitudeDecibel: 0,
+        dB: 0,
+        amplitude: 0,
         phase: 0,
         detail: []
     };
-    for (i = 0; i < timeDomainQueue.getSize(); i++) {
-        sample = timeDomainQueue.getItem(i);
-        r = 2 * Math.PI * (i + windowSampleOffset) / samplePerPeriod;   // TODO check it (windowSampleOffset) !!!!!!!!!
-        x = -Math.cos(r);
-        y = Math.sin(r);
+    N = timeDomainQueue.getSize();
+    for (n = 0; n < N; n++) {
+        sample = timeDomainQueue.getItem(n);
+        // TODO this formula is not like in traditional DFT, probably I should use traditional formula here and correct phase value later
+        // TODO the reason to use non traditional formula was to produce correct phase angle in the end but I think that it should be changed
+        // TODO to avoid any confusion
+        if (samplePerPeriod === Infinity) {
+            // DC-Offset case
+            x = -1;
+            y = 0;
+        } else {
+            r = 2 * Math.PI * (n + windowSampleOffset) / samplePerPeriod;
+            x = -Math.cos(r);
+            y = Math.sin(r);
+        }
 
         detail = {
             realUnit: x,
@@ -68,14 +79,21 @@ function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
         result.detail.push(detail);
     }
 
-    result.real /= timeDomainQueue.getSize();
-    result.imm /= timeDomainQueue.getSize();
+    realNormalized = result.real / N;
+    immNormalized = result.imm / N;
 
-    amplitude = Math.sqrt(result.real * result.real + result.imm * result.imm);
+    amplitude = Math.sqrt(
+        realNormalized * realNormalized +
+        immNormalized * immNormalized
+    );
 
-    result.amplitudeDecibel = 10 * Math.log(amplitude) / Math.LN10;
-    result.amplitudeDecibel = result.amplitudeDecibel < amplitudeDecibelMin ? amplitudeDecibelMin : result.amplitudeDecibel;
+    result.dB = 20 * Math.log(amplitude) / Math.LN10;
+    result.dB = result.dB < dBMin ? dBMin : result.dB;
 
+    result.amplitude = amplitude;
+
+    // TODO when formula from the loop will be changed to traditional we need to fix the phase because...
+    // TODO ...sine waves without phase offset produces complex number that points downwards (negative imaginary axis)
     result.phase = Util.findUnitAngle(result.real, result.imm);
 
     return result;

@@ -7,7 +7,7 @@ function constellationDiagramInitialize() {
     constellationDiagramQueue = new Queue(CONSTELLATION_DIAGRAM_POINT_HISTORY);
     element = document.getElementById('constellation-diagram');
     constellationDiagramChart = new ConstellationDiagram(
-        element, CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT, constellationDiagramQueue, amplitudeDecibelMin
+        element, CONSTELLATION_DIAGRAM_WIDTH, CONSTELLATION_DIAGRAM_HEIGHT, constellationDiagramQueue, dBMin
     );
 }
 
@@ -16,8 +16,8 @@ function constellationDiagramUpdate() {
 
     frequencyBin = frequencyBinQueue.getItem(frequencyBinToExplainIndex);
     constellationDiagramQueue.pushEvenIfFull({
-        powerDecibel: frequencyBin.amplitudeDecibel,          // TODO change to amplitude !!!!!
+        powerDecibel: frequencyBin.dB,
         phase: frequencyBin.phase
     });
-    constellationDiagramChart.setPowerDecibelMin(amplitudeDecibelMin);   // TODO change to amplitude !!!!!
+    constellationDiagramChart.setPowerDecibelMin(dBMin);
 }
