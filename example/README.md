@@ -9,14 +9,14 @@ any dependencies.
 
 Standalone examples mostly about Web Audio API and DSP.
 
-Examples described in polish 'Programista' magazine (2016/51)
+Examples described in polish '[Programista](https://programistamag.pl/programista-08-2016-51/)' magazine (2016/51)
 
 - [Discrete fourier transform simple](https://audio-network.rypula.pl/dft-simple)
   [(source)](https://github.com/robertrypula/AudioNetwork/tree/master/example/00-010-discrete-fourier-transform-simple)
 - [Discrete fourier transform](https://audio-network.rypula.pl/dft-full)
   [(source)](https://audio-network.rypula.pl/dft-full-src)
 
-Examples described in polish 'Programista' magazine (2017/57)
+Examples described in polish '[Programista](https://programistamag.pl/programista-2-2017-57/)' magazine (2017/57)
 
 - [Audio Context Init](https://audio-network.rypula.pl/audio-context-init)
   [(source)](https://audio-network.rypula.pl/audio-context-init-src)
