@@ -56,7 +56,7 @@
 
             <pre>[2017-03-28] Small update will be deployed in next days :)</pre>
 
-            <h2 id="section-generic-settings" onClick="sectionToggle('generic-settings')">
+            <h2 id="section-generic-settings" onClick="onSectionToggleClick('generic-settings')">
                 Generic settings
             </h2>
             <div id="section-generic-settings-content">
@@ -79,7 +79,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-separate-sines" onClick="sectionToggle('separate-sines')">
+            <h2 id="section-separate-sines" onClick="onSectionToggleClick('separate-sines')">
                 Separate sines
             </h2>
             <div id="section-separate-sines-content">
@@ -274,7 +274,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-final-signal" onClick="sectionToggle('final-signal')">
+            <h2 id="section-final-signal" onClick="onSectionToggleClick('final-signal')">
                 Final signal - sum of all sines from above and white noise
             </h2>
             <div id="section-final-signal-content">
@@ -322,7 +322,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-time-domain-raw" onClick="sectionToggle('time-domain-raw')">
+            <h2 id="section-time-domain-raw" onClick="onSectionToggleClick('time-domain-raw')">
                 Samples from final signal that fits the window
             </h2>
             <div id="section-time-domain-raw-content">
@@ -337,7 +337,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-window-function" onClick="sectionToggle('window-function')">
+            <h2 id="section-window-function" onClick="onSectionToggleClick('window-function')">
                 Window function
             </h2>
             <div id="section-window-function-content">
@@ -367,7 +367,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-time-domain-processed" onClick="sectionToggle('time-domain-processed')">
+            <h2 id="section-time-domain-processed" onClick="onSectionToggleClick('time-domain-processed')">
                 Samples from the window after applying window function
             </h2>
             <div id="section-time-domain-processed-content">
@@ -382,7 +382,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-frequency-domain" onClick="sectionToggle('frequency-domain')">
+            <h2 id="section-frequency-domain" onClick="onSectionToggleClick('frequency-domain')">
                 Frequency domain - output of Discrete Fourier Transform
             </h2>
             <div id="section-frequency-domain-content">
@@ -537,7 +537,7 @@
 
             <!-- ---------------- -->
 
-            <h2 id="section-frequency-bin-explanation" onClick="sectionToggle('frequency-bin-explanation')">
+            <h2 id="section-frequency-bin-explanation" onClick="onSectionToggleClick('frequency-bin-explanation')">
                 Frequency bin explanation
             </h2>
             <div id="section-frequency-bin-explanation-content">
@@ -645,7 +645,18 @@
     <script src="../../src/audio-network-boot.js"></script>
     <!-- audio network END -->
 
-    <script src="discrete-fourier-transform-full.js"></script>
+    <script src="init.js"></script>
+    <script src="00-separate-sine.js"></script>
+    <script src="01-summed-size.js"></script>
+    <script src="02-time-domain.js"></script>
+    <script src="03-window-function.js"></script>
+    <script src="04-time-domain-processed.js"></script>
+    <script src="05-dft.js"></script>
+    <script src="06-constellation-diagram.js"></script>
+    <script src="07-frequency-bin-explanation.js"></script>
+    <script src="utils.js"></script>
+    <script src="data-bindings-and-handlers.js"></script>
+    <script src="boot.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
