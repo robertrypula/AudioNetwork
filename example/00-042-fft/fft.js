@@ -51,6 +51,84 @@ function onLoopbackCheckboxChange() {
 }
 
 // -----------------------------------------------------------------------
+// recursive DIT FFT (decimation in time)
+
+function fft(input) {
+    var
+        n = input.length,
+        nHalf,
+        even,
+        odd,
+        output = [],
+        wnkMultiplied,
+        wnk,
+        k,
+        r;
+
+    if (n === 1) {
+        return input;
+    }
+
+    // even and odd parts
+    even = fft(getListHalf(input, 0));
+    odd = fft(getListHalf(input, 1));
+
+    // combine
+    output.length = n;
+    nHalf = n / 2;
+    for (k = 0; k < nHalf; k++) {
+        r = -2 * Math.PI * k / n;
+        wnk = getComplexFromRadians(r);
+        wnkMultiplied = complexMultiply(wnk, odd[k]);
+        output[k] = complexAdd(even[k], wnkMultiplied);
+        output[nHalf + k] = complexSubtract(even[k], wnkMultiplied);
+    }
+
+    return output;
+}
+
+function getListHalf(list, offset) {
+    var i, listHalf, item, lengthHalf;
+
+    listHalf = [];
+    lengthHalf = list.length / 2;
+    for (i = 0; i < lengthHalf; i++) {
+        item = list[i * 2 + offset];
+        listHalf.push(item);
+    }
+
+    return listHalf;
+}
+
+function getComplexFromRadians(r) {
+    return {
+        real: Math.cos(r),
+        imm: Math.sin(r)
+    }
+}
+
+function complexMultiply(a, b) {
+    return {
+        real: a.real * b.real - a.imm * b.imm,
+        imm: a.real * b.imm + a.imm * b.real
+    };
+}
+
+function complexSubtract(a, b) {
+    return {
+        real: a.real - b.real,
+        imm: a.imm - b.imm
+    };
+}
+
+function complexAdd(a, b) {
+    return {
+        real: a.real + b.real,
+        imm: a.imm + b.imm
+    };
+}
+
+// -----------------------------------------------------------------------
 // utils
 
 function getIndexOfMax(data) {
@@ -127,8 +205,17 @@ function drawFrequencyDomainData(ctx, data, frequencyDataMaxValueIndex) {
 // data handlers
 
 function sampleInHandler(monoIn) {
-    var i, complex, timeDomain, frequencyDomain;
+    var
+        i,
+        complex,
+        timeDomain,
+        frequencyDomain,
+        data,
+        magnitude,
+        magnitudeNormalized,
+        frequencyDataMaxValueIndex;
 
+    // convert to complex samples
     timeDomain = [];
     for (i = 0; i < monoIn.length; i++) {
         complex = {
@@ -138,22 +225,21 @@ function sampleInHandler(monoIn) {
         timeDomain.push(complex);
     }
 
-    // TODO clean up !!!
+    // compute FFT
     frequencyDomain = fft(timeDomain);
-    var data = [];
-    var x;
+    data = [];
     data.length = frequencyDomain.length;
     for (i = 0; i < frequencyDomain.length; i++) {
-        x = Math.sqrt(
+        magnitude = Math.sqrt(
             frequencyDomain[i].real * frequencyDomain[i].real +
             frequencyDomain[i].imm * frequencyDomain[i].imm
         );
-        x /= frequencyDomain.length;
-        data[i] = 20 * Math.log(x) / Math.LN10;
+        magnitudeNormalized = magnitude / frequencyDomain.length;
+        data[i] = 20 * Math.log(magnitudeNormalized) / Math.LN10;
     }
 
-    var frequencyDataMaxValueIndex = getIndexOfMax(data);
-
+    // draw FFT output
+    frequencyDataMaxValueIndex = getIndexOfMax(data);
     drawFrequencyDomainData(ctxFft, data, frequencyDataMaxValueIndex);
 }
 
@@ -163,82 +249,4 @@ function refreshDataOnScreen() {
         frequencyDataMaxValueIndex = getIndexOfMax(frequencyData);
 
     drawFrequencyDomainData(ctxRxFrequencyData, frequencyData, frequencyDataMaxValueIndex);
-}
-
-// -------------------
-
-function fft(timeDomain) {
-    var n, complex, nHalf, i, k, wk, r, evenTimeDomain, evenFreq, oddTimeDomain, oddFreq, freq, wkTimes;
-
-    n = timeDomain.length;
-    nHalf = n / 2;
-
-    if (n === 1) {
-        complex = {
-            real: timeDomain[0].real,
-            imm: timeDomain[0].imm
-        };
-        return [complex];
-    }
-
-    // even
-    evenTimeDomain = [];
-    for (i = 0; i < nHalf; i++) {
-        complex = {
-            real: timeDomain[i * 2].real,
-            imm: timeDomain[i * 2].imm
-        };
-        evenTimeDomain.push(complex);
-    }
-    evenFreq = fft(evenTimeDomain);
-
-    // odd
-    oddTimeDomain = [];
-    for (i = 0; i < nHalf; i++) {
-        complex = {
-            real: timeDomain[i * 2 + 1].real,
-            imm: timeDomain[i * 2 + 1].imm
-        };
-        oddTimeDomain.push(complex);
-    }
-    oddFreq = fft(oddTimeDomain);
-
-    // combine
-    freq = [];
-    freq.length = n;
-    for (k = 0; k < nHalf; k++) {
-        r = -2 * k * Math.PI / n;
-        wk = {
-            real: Math.cos(r),
-            imm: Math.sin(r)
-        };
-        wkTimes = complexMultiply(wk, oddFreq[k]);
-
-        freq[k] = complexAdd(evenFreq[k], wkTimes);
-        freq[nHalf + k] = complexSubtract(evenFreq[k], wkTimes);
-    }
-
-    return freq;
-}
-
-function complexMultiply(a, b) {
-    return {
-        real: a.real * b.real - a.imm * b.imm,
-        imm: a.real * b.imm + a.imm * b.real
-    };
-}
-
-function complexSubtract(a, b) {
-    return {
-        real: a.real - b.real,
-        imm: a.imm - b.imm
-    };
-}
-
-
-function complexAdd(a, b) {
-    return {
-        real: a.real + b.real,
-        imm: a.imm + b.imm
-    };
 }
