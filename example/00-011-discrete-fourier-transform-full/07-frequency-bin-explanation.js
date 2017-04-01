@@ -44,7 +44,8 @@ function frequencyBinExplanationInitialize() {
         chart = new ComplexPlaneChart(
             element,
             FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_WIDTH, FREQUENCY_BIN_TO_EXPLAIN_ITERATION_CHART_HEIGHT,
-            queue, 1.1
+            queue,
+            1.1
         );
         frequencyBinToExplainQueue.push(queue);
         frequencyBinToExplainChart.push(chart);

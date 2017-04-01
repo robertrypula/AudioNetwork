@@ -44,18 +44,43 @@ function computeNonClassicDFT(
 }
 
 /**
- * This method returns DFT output from the classic formula:
+ * This method will produce classic Discrete Fourier Transform output
+ *
+ * @param timeDomain
+ * @returns {Array}
+ */
+function computeDFT(timeDomain) {
+    var
+        frequencyDomain = [],
+        N = timeDomain.length,
+        samplePerPeriod,
+        frequencyBin,
+        k;
+
+    for (k = 0; k < N; k++) {
+        samplePerPeriod = (k === 0)
+            ? Infinity               // DC-offset
+            : N / k;
+        frequencyBin = getFrequencyBin(timeDomain, samplePerPeriod);
+        frequencyDomain.push(frequencyBin);
+    }
+
+    return frequencyDomain;
+}
+
+/**
+ * This method returns frequency bin from the classic DFT formula:
  *
  *         N-1
- *    Fk = SUM [ xn * e^(-i*2*PI*k*n/N) ]          k is integer in range <0, N-1>
+ *    Fk = SUM [ xn * e^(-i*2*PI*k*n/N) ]
  *         n=0
  *
  * Where:
- *   e^(i*x) -> cos(x) + i*sin(x)
+ *   e^(i*x) -> Euler's formula that produces complex number: cos(x) + i*sin(x)
  *   N       -> timeDomain.length
  *   i       -> sqrt(-1)
  *   PI      -> ~3.14
- *   xn      -> sample of the n-th sample from timeDomain array
+ *   xn      -> value of the n-th sample from timeDomain array
  *   n       -> sample index from timeDomain array
  *   k       -> number of cycles of a wave that fits the window, it's different for every frequency bins
  *   Fk      -> complex number that represents amplitude and phase of the k-th frequency bin
@@ -67,32 +92,16 @@ function computeNonClassicDFT(
  *  -i*2*PI*k*n/N = (-i*2*PI*n)/(N/k) = (-i*2*PI*n) / samplePerPeriod
  *
  * @param timeDomain
- * @returns {Array}
+ * @param samplePerPeriod
+ * @returns {{real: number, imm: number, dB: (number|*), amplitude: (number|*), phase: *, samplePerPeriod: *}}
  */
-function computeDFT(timeDomain) {
-    var
-        frequencyDomain = [],
-        N = timeDomain.length,
-        samplePerPeriod,
-        Fk,
-        k;
-
-    for (k = 0; k < N; k++) {
-        samplePerPeriod = (k === 0)
-            ? Infinity               // DC-offset
-            : N / k;
-        Fk = getFrequencyBin(timeDomain, samplePerPeriod);
-        frequencyDomain.push(Fk);
-    }
-
-    return frequencyDomain;
-}
-
 function getFrequencyBin(timeDomain, samplePerPeriod) {
     var
         N,
         n,
-        sample,
+        xn,
+        realUnit,
+        immUnit,
         real,
         imm,
         realNormalized,
@@ -106,47 +115,61 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
     real = 0;
     imm = 0;
     for (n = 0; n < N; n++) {
-        sample = timeDomain[n];
-        // TODO this formula is not like in traditional DFT, probably I should use traditional formula here and correct phase value later
-        // TODO the reason to use non traditional formula was to produce correct phase angle in the end but I think that it should be changed
-        // TODO to avoid any confusion
-        if (samplePerPeriod === Infinity) {
-            // DC-Offset case
-            real += -1 * sample;
-            imm += 0 * sample;
-        } else {
-            r = 2 * Math.PI * n / samplePerPeriod; // compute radians for 'unit vector' sine/cosine
-            real += -Math.cos(r) * sample;         // 'sample' value alters 'unit vector' length, it could also change
-            imm += Math.sin(r) * sample;           // direction of vector in case of negative 'sample' values
-        }
+        xn = timeDomain[n];
+
+        r = (samplePerPeriod === Infinity)
+            ? 0                                    // DC-Offset case (0 Hz -> samplePerPeriod is Infinite)
+            : -2 * Math.PI * n / samplePerPeriod;
+
+        realUnit = Math.cos(r);                    // 'in-phase' component
+        immUnit = Math.sin(r);                     // 'quadrature' component
+
+        // value of the sample alters 'unit vector' length
+        // it could also 'rotate' vector 180 degrees in case of negative value
+        real += realUnit * xn;
+        imm += immUnit * xn;
     }
 
     realNormalized = real / N;                     // normalize final vector
     immNormalized = imm / N;                       // normalize final vector
-
     amplitude = Math.sqrt(                         // compute length of the vector
         realNormalized * realNormalized +
         immNormalized * immNormalized
     );
-    dB = 20 * Math.log(amplitude) / Math.LN10;     // convert into decibels (in dB power is used that's why we have 20 instead 10)
 
-    // TODO when formula from the loop will be changed to traditional we need to fix the phase because...
-    // TODO ...sine waves without phase offset produces complex number that points downwards (negative imaginary axis)
-    phase = findUnitAngle(real, imm);              // get angle between vector and positive Y axis clockwise
+    dB = 20 * Math.log(amplitude) / Math.LN10;     // convert into decibels (dB value computed from amplitudes needs to have 20 instead 10)
+
+    phase = getPhaseFromComplexNumber(real, imm);  // phase of a sine wave related to this frequency bin
 
     return {
         real: real,
         imm: imm,
-        // ----
+        // extras
         dB: dB,
         amplitude: amplitude,
         phase: phase,
-        // ----
         samplePerPeriod: samplePerPeriod
     };
 }
 
 // ------------------------------------------------------------------
+
+function getPhaseFromComplexNumber(real, imm) {
+    var phase;
+
+    // get angle between positive X axis and vector counter-clockwise
+    phase = findUnitAngle(real, imm);
+    // sine wave without any phase offset is a complex number with real part equal zero
+    // and immaginary part on the negative side (vector pointing downwards -> 270 degrees)
+    phase = phase - 0.75;
+    // correction from line above may produce negative phase so we need to fix it
+    phase = phase < 0 ? phase + 1 : phase;
+    // fix direction - when sine wave is moving to the right in time domain
+    // then phase angle should increase counter-clockwise
+    phase = 1 - phase;
+
+    return phase;
+}
 
 function findUnitAngle(x, y) {
     var length, quarter, angle;
@@ -154,37 +177,43 @@ function findUnitAngle(x, y) {
     length = Math.sqrt(x * x + y * y);
     length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
 
-    quarter = (x >= 0)
-        ? (y >= 0 ? 0 : 1)
-        : (y < 0 ? 2 : 3);
+    //       ^
+    //    II | I
+    //  -----+----->
+    //   III | IV
+    //       |
+
+    quarter = (y >= 0)
+        ? (x >= 0 ? 1 : 2)
+        : (x <= 0 ? 3 : 4);
 
     switch (quarter) {
-        case 0:
-            angle = Math.asin(x / length);
-            break;
         case 1:
-            angle = Math.asin(-y / length) + 0.5 * Math.PI;
+            angle = Math.asin(y / length);
             break;
         case 2:
-            angle = Math.asin(-x / length) + Math.PI;
+            angle = Math.asin(-x / length) + 0.5 * Math.PI;
             break;
         case 3:
-            angle = Math.asin(y / length) + 1.5 * Math.PI;
+            angle = Math.asin(-y / length) + 1.0 * Math.PI;
+            break;
+        case 4:
+            angle = Math.asin(x / length) + 1.5 * Math.PI;
             break;
     }
 
-    return angle / (2 * Math.PI);   // return angle in range: <0, 1)
-}
-
-function generateSineWave(samplePerPeriod, amplitude, degreesPhaseOffset, sample) {
-    var
-        unitPhaseOffset = degreesPhaseOffset / 360,
-        x = 2 * Math.PI * (sample / samplePerPeriod - unitPhaseOffset);
-
-    return amplitude * Math.sin(x);
+    return angle / (2 * Math.PI);   // returns angle in range: <0, 1)
 }
 
 // ------------------------------------------------------------------
+
+function generateSineWave(samplePerPeriod, amplitude, phaseInDegrees, sample) {
+    var
+        phase = phaseInDegrees / 360,
+        x = 2 * Math.PI * (sample / samplePerPeriod - phase);
+
+    return amplitude * Math.sin(x);
+}
 
 function blackmanNuttall(n, N) {
     return 0.3635819
@@ -199,10 +228,10 @@ function generateTimeDomain(windowSize) {
     timeDomain = [];
     for (i = 0; i < windowSize; i++) {
         sample = 0;
-        sample += generateSineWave(28, 0.3, 0, i); // sine A: samplePerPeriod 28, amplitude 0.3, degreesPhaseOffset 0
-        sample += generateSineWave(20, 0.3, 0, i); // sine B: samplePerPeriod 20, amplitude 0.3, degreesPhaseOffset 0
-        sample += generateSineWave(16, 0.3, 0, i); // sine C: samplePerPeriod 16, amplitude 0.3, degreesPhaseOffset 0
-        timeDomain.push(sample);                   // push processed sample to array
+        sample += generateSineWave(28, 0.3, 0, i);  // sine A: samplePerPeriod 28, amplitude 0.3, phaseInDegrees 0
+        sample += generateSineWave(20, 0.3, 0, i);  // sine B: samplePerPeriod 20, amplitude 0.3, phaseInDegrees 0
+        sample += generateSineWave(16, 0.3, 0, i);  // sine C: samplePerPeriod 16, amplitude 0.3, phaseInDegrees 0
+        timeDomain.push(sample);                    // push processed sample to array
     }
 
     return timeDomain;
@@ -259,7 +288,7 @@ function logFrequencyBin(index, frequencyDomain, highlightText) {
     imm = (fd.imm >= 0 ? '+' : '') + fd.imm.toFixed(3);
     dB = fd.dB.toFixed(3);
     amplitude = fd.amplitude.toFixed(3);
-    phase = fd.phase.toFixed(3);
+    phase = Math.round(fd.phase * 360) % 360;
     samplePerPeriod = fd.samplePerPeriod.toFixed(3);
 
     frequencyInHertz = (samplePerPeriod !== Infinity)
@@ -272,7 +301,7 @@ function logFrequencyBin(index, frequencyDomain, highlightText) {
         real + ' ' + imm + 'i |' +
         dB + ' dB | ' +
         'amplitude: ' + amplitude + ' | ' +
-        'phase: ' + phase + ' | ' +
+        'phase: ' + phase + ' deg | ' +
         'samplePerPeriod: ' + samplePerPeriod + ' (' + frequencyInHertz + ' Hz)' +
         (highlightText ? ' | ' + highlightText : '');
 
@@ -299,7 +328,7 @@ function init() {
     logger('');
 
     nonClassicDFT(timeDomain);  // example for algorithm described in polish 'Programista' magazine (2016/51)
-    classicDFT(timeDomain);   // classic DFT
+    classicDFT(timeDomain);     // classic DFT
 }
 
 function nonClassicDFT(timeDomain) {
@@ -311,9 +340,9 @@ function nonClassicDFT(timeDomain) {
         highlightText,
         i;
 
-    frequencyBinSamplePerPeriodMax = 50;
-    frequencyBinSamplePerPeriodMin = 10;
-    frequencyBinSize = 160;
+    frequencyBinSamplePerPeriodMax = 50;    // lowest frequency in hertz
+    frequencyBinSamplePerPeriodMin = 10;    // highest frequency in hertz
+    frequencyBinSize = 160;                 // how many frequency bin in that range will be generated
     frequencyDomain = computeNonClassicDFT(
         timeDomain,
         frequencyBinSamplePerPeriodMax,
@@ -381,7 +410,7 @@ function classicDFT(timeDomain) {
                 highlightText = 'Sine C (exact bin)';
                 break;
             // negative frequencies (for real valued signal it's a complex conjugate
-            // of complex number obtained for same frequency but on positive side)
+            // of complex number obtained for same frequency on positive side)
             case 960:
                 highlightText = 'Sine C (exact bin) - negative frequency';
                 break;

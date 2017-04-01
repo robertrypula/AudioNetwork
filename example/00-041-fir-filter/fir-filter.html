@@ -61,15 +61,20 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to experiment with Finite Impluse Response filter
+                                This example allows to experiment with Finite Impulse Response filter.
+                                It implements Windowed-Sinc lowpass filter.
                             </p>
+                            <ul>
+                                <li>When Loopback is enabled then randomly generated white noise is used for filtering. You can see how this signal gets filtered on the frequency domain chart.</li>
+                                <li>When Loopback is disabled then input from microphone is used for filtering. IMPORTANT NOTE: frequency domain chart shows input BEFORE filtering.</li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div class="row margin-bottom-triple">
+                    <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label for="loopback-checkbox" class="label-for-checkbox">
-                                Enable loopback
+                                Loopback
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -77,13 +82,81 @@
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
                                 id="loopback-checkbox"
+                                checked="checked"
                                 value="1" />
                         </div>
                     </div>
 
-                    <h2>RX - Frequency domain (AnalyserNode based)</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Cutoff Frequency [Hz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                onChange="onFilterParametersChange()"
+                                value="1500"
+                                id="cutoff-frequency" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Transition bandwidth [Hz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                onChange="onFilterParametersChange()"
+                                value="300"
+                                id="transition-bandwidth" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="window-function-checkbox" class="label-for-checkbox">
+                                Window function
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onFilterParametersChange()"
+                                id="window-function-checkbox"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Filter taps number
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="filter-taps-number"></span>
+                        </div>
+                    </div>
+
+                    <h2>Filter impulse response</h2>
+                    <div class="scroll-container" id="filter-impulse-response-container"></div>
+
+                    <h2>Frequency domain computed from input</h2>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-12">
+                            <p>
+                                Plase
+                            </p>
+                        </div>
+                    </div>
                     <div class="scroll-container">
-                        <canvas id="canvas-rx-frequency-data"></canvas>
+                        <canvas id="canvas-frequency-data"></canvas>
                     </div>
 
                 </div>
@@ -108,6 +181,14 @@
         </footer>
 
     </div>
+
+    <script>
+        var AudioNetworkBootConfig = {
+            createAlias: false,
+            devScriptLoad: true
+        };
+    </script>
+    <script src="../../src/audio-network-boot.js"></script>
 
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="fir-filter.js"></script>

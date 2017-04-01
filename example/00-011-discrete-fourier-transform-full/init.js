@@ -6,11 +6,10 @@ var
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
     ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
     ComplexPlaneChart = AudioNetwork.Visualizer.ComplexPlaneChart,
+    SampleChart = AudioNetwork.Visualizer.SampleChart,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     WindowFunction = AudioNetwork.Common.WindowFunction,
-    SampleChart = AudioNetwork.Visualizer.SampleChart,
     Queue = AudioNetwork.Common.Queue,
-    Util = AudioNetwork.Common.Util,
 
     // general settings
     SAMPLE_RATE = 44100,

@@ -2,30 +2,47 @@
 'use strict';
 
 var
+    Queue = AudioNetwork.Injector.resolve('Common.Queue'),   // TODO remove this dependency
     audioMonoIO,
-    LIMIT_CANVAS_WIDTH = true,
+    LIMIT_CANVAS_WIDTH = false,   // TODO probably I can remove it completely
     FFT_SIZE = 2 * 1024,         // powers of 2 in range: 32, 32768
-    BUFFER_SIZE = 1 * 1024,
+    BUFFER_SIZE = 8 * 1024,
     CANVAS_WIDTH_FREQUENCY = FFT_SIZE * 0.5,
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
-    DECIBEL_MIN = -150,
+    DECIBEL_MIN = -200,
+    TABS_MAX = 2000,
+    ABSOLUTE_VALUE = true,
     animationFrameFirstCall = true,
-    ctxRxFrequencyData,
-    domLoopbackCheckbox;
+    ctxFrequencyData,
+    ctxFilterImpulseResponse,
+    domLoopbackCheckbox,
+    domWindowFunctionCheckbox,
+    domCutoffFrequency,
+    domTransitionBandwidth,
+    domFilterTapsNumber,
+    domFilterImpulseResponseContainer,
+    filterCoefficient = [],
+    sampleHistoryBuffer;
 
 function init() {
     initDomElement();
     initWebAudioApi();
+    onFilterParametersChange();
 
     animationFrameLoop();   // run animation loop
 }
 
 function initDomElement() {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domWindowFunctionCheckbox = document.getElementById('window-function-checkbox');
+    domCutoffFrequency = document.getElementById('cutoff-frequency');
+    domTransitionBandwidth = document.getElementById('transition-bandwidth');
+    domFilterTapsNumber = document.getElementById('filter-taps-number');
+    domFilterImpulseResponseContainer = document.getElementById('filter-impulse-response-container');
 
-    ctxRxFrequencyData = getConfiguredCanvasContext(
-        'canvas-rx-frequency-data',
+    ctxFrequencyData = getConfiguredCanvasContext(
+        'canvas-frequency-data',
         CANVAS_WIDTH_FREQUENCY,
         CANVAS_HEIGHT
     );
@@ -34,9 +51,8 @@ function initDomElement() {
 function initWebAudioApi() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
 
-    audioMonoIO.setVolume(0.01);
+    audioMonoIO.setVolume(1);
     audioMonoIO.setSampleOutHandler(sampleOutHandler);
-    audioMonoIO.setSampleInHandler(sampleInHandler);
 
     onLoopbackCheckboxChange();
 }
@@ -45,21 +61,104 @@ function onLoopbackCheckboxChange() {
     audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
 }
 
+function onFilterParametersChange() {
+    var
+        maxCutoffFrequency = audioMonoIO.getSampleRate() / 2,
+        maximumTransitionBandwidth,
+        cutoffFrequency = parseInt(domCutoffFrequency.value),
+        transitionBandwidth = parseInt(domTransitionBandwidth.value);
+
+    cutoffFrequency = cutoffFrequency < 1
+        ? 1
+        : cutoffFrequency;
+    cutoffFrequency = cutoffFrequency >= maxCutoffFrequency
+        ? maxCutoffFrequency - 1
+        : cutoffFrequency;
+    maximumTransitionBandwidth = 2 * Math.min(
+        maxCutoffFrequency - cutoffFrequency,
+        cutoffFrequency
+    );
+    transitionBandwidth = transitionBandwidth > maximumTransitionBandwidth
+        ? maximumTransitionBandwidth
+        : transitionBandwidth;
+
+    domCutoffFrequency.value = cutoffFrequency;
+    domTransitionBandwidth.value = transitionBandwidth;
+
+    refreshFirFilter();
+
+    domFilterTapsNumber.innerHTML = filterCoefficient.length;
+
+    domFilterImpulseResponseContainer.innerHTML = '<canvas id="canvas-filter-impulse-response"></canvas>';
+    ctxFilterImpulseResponse = getConfiguredCanvasContext(
+        'canvas-filter-impulse-response',
+        filterCoefficient.length,
+        CANVAS_HEIGHT
+    );
+    drawFilterImpulseResponse(ctxFilterImpulseResponse, filterCoefficient);
+}
+
 // -----------------------------------------------------------------------
-// utils
+// Finite Impulse Response filter
 
-function getIndexOfMax(data) {
-    var i, maxIndex, max, value;
+function refreshFirFilter() {
+    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
 
-    for (i = 0; i < data.length; i++) {
-        value = data[i];
-        if (i === 0 || value > max) {
-            max = value;
-            maxIndex = i;
-        }
+    N = numberOfTaps();
+    if (N > TABS_MAX) {
+        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
+        N = TABS_MAX;
     }
 
-    return maxIndex;
+    sampleHistoryBuffer = new Queue(N);
+
+    // windowed-sinc lowpass filter
+    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
+    middleIndex = (N - 1) / 2;
+    sum = 0;
+    filterCoefficient.length = 0;
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
+        if (domWindowFunctionCheckbox.checked) {
+            filterCoefficient[n] *= blackmanNuttall(n, N);
+        }
+        sum += filterCoefficient[n];
+    }
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] /= sum;
+    }
+}
+
+function numberOfTaps() {
+    // http://dsp.stackexchange.com/questions/31066/how-many-taps-does-an-fir-filter-need
+    var
+        pb = Math.pow(10, -4),  // pass band: 0.1% of amplitude variations gives -40dB
+        sb = Math.pow(10, -6),  // stop band: 60 dB should be fine
+        logValue,
+        transitionBandNormalized,
+        numberOfTabs;
+
+    transitionBandNormalized = parseInt(domTransitionBandwidth.value) / audioMonoIO.getSampleRate();
+
+    logValue = Math.log(1 / (10 * pb * sb)) / Math.LN10;
+    numberOfTabs = (2 / 3) * logValue * (1 / transitionBandNormalized);
+    numberOfTabs = Math.round(numberOfTabs);
+    numberOfTabs = numberOfTabs % 2 ? numberOfTabs : numberOfTabs + 1;  // keep this number always off for symmetry
+
+    return numberOfTabs;
+}
+
+function sinc(x) {
+    return x !== 0
+        ? Math.sin(Math.PI * x) / (Math.PI * x)
+        : 1;
+}
+
+function blackmanNuttall(n, N) {
+    return 0.3635819
+        - 0.4891775 * Math.cos(2 * Math.PI * n / (N - 1))
+        + 0.1365995 * Math.cos(4 * Math.PI * n / (N - 1))
+        - 0.0106411 * Math.cos(6 * Math.PI * n / (N - 1));
 }
 
 // -----------------------------------------------------------------------
@@ -99,7 +198,7 @@ function animationFrameLoop() {
     requestAnimationFrame(animationFrameLoop);
 }
 
-function drawFrequencyDomainData(ctx, data, frequencyDataMaxValueIndex) {
+function drawFrequencyDomainData(ctx, data) {
     var limit, hMaxPix, x, y1, y2;
 
     clear(ctx);
@@ -110,51 +209,75 @@ function drawFrequencyDomainData(ctx, data, frequencyDataMaxValueIndex) {
         y1 = hMaxPix * (data[x] / DECIBEL_MIN);
         y2 = hMaxPix * (data[x  + 1] / DECIBEL_MIN);
         drawLine(ctx, x, y1, x + 1, y2);
+    }
+}
 
-        // mark loudest frequency
-        if (x === frequencyDataMaxValueIndex) {
-            drawLine(ctx, x, y1, x, hMaxPix);
+function drawFilterImpulseResponse(ctx, data) {
+    var limit, hMid, x, y1, y2, absValue, maxAbsValue, scale;
+
+    clear(ctx);
+
+    limit = Math.min(MAX_WIDTH, data.length);
+    for (x = 0; x < limit; x++) {
+        absValue = Math.abs(data[x]);
+        if (x === 0 || absValue > maxAbsValue) {
+            maxAbsValue = absValue
         }
+    }
+    scale = 1 / maxAbsValue;
+
+    hMid = Math.floor(0.5 * CANVAS_HEIGHT);
+    for (x = 0; x < limit - 1; x++) {
+        y1 = hMid * (1 - data[x] * scale);
+        y2 = hMid * (1 - data[x + 1] * scale);
+        drawLine(ctx, x, y1, x + 1, y2);
     }
 }
 
 // -----------------------------------------------------------------------
 // data handlers
 
-function sampleInHandler(monoIn) {
-
-}
-
-var lastSample = 0;
-
 function sampleOutHandler(monoOut, monoIn) {
-    var i;
+    var
+        i,
+        whiteNoiseSample,
+        microphoneSample,
+        sampleToFilter,
+        isLoopbackEnabled;
+
+    isLoopbackEnabled = domLoopbackCheckbox.checked;
 
     for (i = 0; i < monoOut.length; i++) {
-        monoOut[i] = (-1 + Math.random() * 2) * 0.1;
+        whiteNoiseSample = (-1 + Math.random() * 2) * 0.05;
+        microphoneSample = monoIn[i];
 
-        if (i >= 5) {
-            monoOut[i] = monoOut[i] +
-              monoOut[i - 1] +
-              monoOut[i - 2] +
-              monoOut[i - 3] +
-              monoOut[i - 4] +
-              monoOut[i - 5];
+        sampleToFilter = isLoopbackEnabled ? whiteNoiseSample : microphoneSample;
+        monoOut[i] = applyFirFilter(sampleToFilter);
+    }
+}
 
-            monoOut[i] /= 5;
-        } else {
-            // monoOut[i] = 0.5 * monoOut[i] + 0.5 * lastSample;
+function applyFirFilter(sampleToFilter) {
+    var N, i, sampleFiltered;
+
+    if (!sampleHistoryBuffer) {
+        return sampleToFilter;
+    }
+
+    N = filterCoefficient.length;
+    sampleFiltered = 0;
+    sampleHistoryBuffer.pushEvenIfFull(sampleToFilter);
+    if (sampleHistoryBuffer.getSize() === N) {   // let's wait for buffer to fill completely...
+        // convolve
+        for (i = 0; i < N; i++) {
+            sampleFiltered += sampleHistoryBuffer.getItem(i) * filterCoefficient[i];
         }
     }
 
-    lastSample = monoOut[monoOut.length - 1];
+    return sampleFiltered;
 }
 
 function refreshDataOnScreen() {
-    var
-        frequencyData = audioMonoIO.getFrequencyData(),
-        frequencyDataMaxValueIndex = getIndexOfMax(frequencyData);
+    var frequencyData = audioMonoIO.getFrequencyData();
 
-    drawFrequencyDomainData(ctxRxFrequencyData, frequencyData, frequencyDataMaxValueIndex);
+    drawFrequencyDomainData(ctxFrequencyData, frequencyData);
 }
-

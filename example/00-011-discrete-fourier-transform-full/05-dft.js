@@ -10,9 +10,14 @@ function discreteFourierTransformInitialize() {
     frequencyDomainChartWidth = frequencyBinSize *
         (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart = new FrequencyDomainChart(
-        element, frequencyDomainChartWidth, FREQUENCY_BIN_CHART_HEIGHT, frequencyDomainQueue,
+        element,
+        frequencyDomainChartWidth,
+        FREQUENCY_BIN_CHART_HEIGHT,
+        frequencyDomainQueue,
         dBMin,
-        FREQUENCY_BIN_CHART_RADIUS, FREQUENCY_BIN_CHART_BAR_WIDTH, FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
+        FREQUENCY_BIN_CHART_RADIUS,
+        FREQUENCY_BIN_CHART_BAR_WIDTH,
+        FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH
     );
 
     element = document.getElementById('frequency-domain-visualizer-overlay');
@@ -22,79 +27,182 @@ function discreteFourierTransformInitialize() {
 }
 
 function discreteFourierTransformUpdate() {
-    var binStep, k, samplePerPeriod, frequencyBin, chartWidth;
+    // discreteFourierTransformUpdateLinearHertz();           // TODO it still have some errors -> fix it and enable
+    discreteFourierTransformUpdateLinearSamplePerPeriod();
+}
+
+function discreteFourierTransformUpdateLinearHertz() {
+    var
+        N = timeDomainProcessedQueue.getSize(),
+        samplePerPeriod,
+        frequencyBin,
+        kMin,
+        kMax,
+        kStep,
+        i,
+        k,
+        chartWidth;
 
     frequencyDomainQueue.setSizeMax(frequencyBinSize);
     frequencyBinQueue.setSizeMax(frequencyBinSize);
-    binStep = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
-    for (k = 0; k < frequencyBinSize; k++) {
-        samplePerPeriod = frequencyBinSamplePerPeriodMax - k * binStep;
+
+    kMin = (frequencyBinSamplePerPeriodMax === Infinity) ? 0 : N / frequencyBinSamplePerPeriodMax;
+    kMax = (frequencyBinSamplePerPeriodMin === Infinity) ? 0 : N / frequencyBinSamplePerPeriodMin;
+    kStep = (kMax - kMin) / frequencyBinSize;
+
+    for (i = 0; i < frequencyBinSize; i++) {
+        k = kMin + i * kStep;
+        samplePerPeriod = (k === 0) ? Infinity : N / k;
         frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
         frequencyDomainQueue.pushEvenIfFull(frequencyBin.dB);
         frequencyBinQueue.pushEvenIfFull(frequencyBin);
     }
+    
+    chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
+    frequencyDomainChart.setWidth(chartWidth);
+    frequencyDomainChart.setPowerDecibelMin(dBMin);
+}
+
+function discreteFourierTransformUpdateLinearSamplePerPeriod() {
+    var
+        binStep,
+        i,
+        samplePerPeriod,
+        frequencyBin,
+        chartWidth;
+
+    frequencyDomainQueue.setSizeMax(frequencyBinSize);
+    frequencyBinQueue.setSizeMax(frequencyBinSize);
+    binStep = (frequencyBinSamplePerPeriodMax - frequencyBinSamplePerPeriodMin) / frequencyBinSize;
+
+    for (i = 0; i < frequencyBinSize; i++) {
+        samplePerPeriod = frequencyBinSamplePerPeriodMax - i * binStep;
+        frequencyBin = getFrequencyBin(timeDomainProcessedQueue, samplePerPeriod);
+        frequencyDomainQueue.pushEvenIfFull(frequencyBin.dB);
+        frequencyBinQueue.pushEvenIfFull(frequencyBin);
+    }
+    
     chartWidth = frequencyBinSize * (FREQUENCY_BIN_CHART_BAR_WIDTH + FREQUENCY_BIN_CHART_BAR_SPACING_WIDTH);
     frequencyDomainChart.setWidth(chartWidth);
     frequencyDomainChart.setPowerDecibelMin(dBMin);
 }
 
 function getFrequencyBin(timeDomainQueue, samplePerPeriod) {
-    var n, r, x, y, N, realNormalized, immNormalized, sample, result, detail, amplitude;
+    var
+        N,
+        n,
+        xn,
+        realUnit,
+        immUnit,
+        real,
+        imm,
+        realNormalized,
+        immNormalized,
+        r,
+        amplitude,
+        dB,
+        phase,
+        detail = [],
+        detailItem;
 
-    result = {
-        samplePerPeriod: samplePerPeriod,
-        real: 0,
-        imm: 0,
-        dB: 0,
-        amplitude: 0,
-        phase: 0,
-        detail: []
-    };
     N = timeDomainQueue.getSize();
+    real = 0;
+    imm = 0;
     for (n = 0; n < N; n++) {
-        sample = timeDomainQueue.getItem(n);
-        // TODO this formula is not like in traditional DFT, probably I should use traditional formula here and correct phase value later
-        // TODO the reason to use non traditional formula was to produce correct phase angle in the end but I think that it should be changed
-        // TODO to avoid any confusion
-        if (samplePerPeriod === Infinity) {
-            // DC-Offset case
-            x = -1;
-            y = 0;
-        } else {
-            r = 2 * Math.PI * (n + windowSampleOffset) / samplePerPeriod;
-            x = -Math.cos(r);
-            y = Math.sin(r);
-        }
+        xn = timeDomainQueue.getItem(n);
 
-        detail = {
-            realUnit: x,
-            immUnit: y,
-            real: sample * x,
-            imm: sample * y,
-            sample: sample
+        r = (samplePerPeriod === Infinity)
+            ? 0                                    // DC-Offset case (0 Hz -> samplePerPeriod is Infinite)
+            : -2 * Math.PI * n / samplePerPeriod;
+
+        realUnit = Math.cos(r);                    // 'in-phase' component
+        immUnit = Math.sin(r);                     // 'quadrature' component
+
+        // value of the sample alters 'unit vector' length
+        // it could also 'rotate' vector 180 degrees in case of negative value
+        real += realUnit * xn;
+        imm += immUnit * xn;
+
+        detailItem = {
+            realUnit: realUnit,
+            immUnit: immUnit,
+            real: realUnit * xn,
+            imm: immUnit * xn,
+            sample: xn
         };
-        result.real += detail.real;
-        result.imm += detail.imm;
-
-        result.detail.push(detail);
+        detail.push(detailItem);
     }
 
-    realNormalized = result.real / N;
-    immNormalized = result.imm / N;
-
-    amplitude = Math.sqrt(
+    realNormalized = real / N;                     // normalize final vector
+    immNormalized = imm / N;                       // normalize final vector
+    amplitude = Math.sqrt(                         // compute length of the vector
         realNormalized * realNormalized +
         immNormalized * immNormalized
     );
 
-    result.dB = 20 * Math.log(amplitude) / Math.LN10;
-    result.dB = result.dB < dBMin ? dBMin : result.dB;
+    dB = 20 * Math.log(amplitude) / Math.LN10;     // convert into decibels (dB value computed from amplitudes needs to have 20 instead 10)
 
-    result.amplitude = amplitude;
+    phase = getPhaseFromComplexNumber(real, imm);  // phase of a sine wave related to this frequency bin
 
-    // TODO when formula from the loop will be changed to traditional we need to fix the phase because...
-    // TODO ...sine waves without phase offset produces complex number that points downwards (negative imaginary axis)
-    result.phase = Util.findUnitAngle(result.real, result.imm);
+    return {
+        real: real,
+        imm: imm,
+        // extras
+        dB: dB,
+        amplitude: amplitude,
+        phase: phase,
+        samplePerPeriod: samplePerPeriod,
+        detail: detail
+    };
+}
 
-    return result;
+function getPhaseFromComplexNumber(real, imm) {
+    var phase;
+
+    // get angle between positive X axis and vector counter-clockwise
+    phase = findUnitAngle(real, imm);
+    // sine wave without any phase offset is a complex number with real part equal zero
+    // and immaginary part on the negative side (vector pointing downwards -> 270 degrees)
+    phase = phase - 0.75;
+    // correction from line above may produce negative phase so we need to fix it
+    phase = phase < 0 ? phase + 1 : phase;
+    // fix direction - when sine wave is moving to the right in time domain
+    // then phase angle should increase counter-clockwise
+    phase = 1 - phase;
+
+    return phase;
+}
+
+function findUnitAngle(x, y) {
+    var length, quarter, angle;
+
+    length = Math.sqrt(x * x + y * y);
+    length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
+
+    //       ^
+    //    II | I
+    //  -----+----->
+    //   III | IV
+    //       |
+
+    quarter = (y >= 0)
+        ? (x >= 0 ? 1 : 2)
+        : (x <= 0 ? 3 : 4);
+
+    switch (quarter) {
+        case 1:
+            angle = Math.asin(y / length);
+            break;
+        case 2:
+            angle = Math.asin(-x / length) + 0.5 * Math.PI;
+            break;
+        case 3:
+            angle = Math.asin(-y / length) + 1.0 * Math.PI;
+            break;
+        case 4:
+            angle = Math.asin(x / length) + 1.5 * Math.PI;
+            break;
+    }
+
+    return angle / (2 * Math.PI);   // returns angle in range: <0, 1)
 }
