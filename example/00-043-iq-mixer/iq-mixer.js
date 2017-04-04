@@ -10,20 +10,31 @@ var
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -150,
+    domLocalOscillatorHertzFrequency,
+    domLocalOscillatorMiliHertzFrequency,
     ctxFrequencyDomain,
     ctxFrequencyDomainMixed,
     ctxFrequencyDomainFiltered,
     ctxFrequencyDomainDecimated,
     ctxFrequencyDomainZoom,
     sampleNumber = 0,
-    localOscillator = 2000;
+    localOscillator,
+    firFilterSampleHistoryBufferA,
+    firFilterSampleHistoryBufferB,
+    firFilterCoefficientA,
+    firFilterCoefficientB;
 
 function init() {
     initDomElement();
     initWebAudioApi();
+
+    onLocalOscillatorFrequencyChange();
 }
 
 function initDomElement() {
+    domLocalOscillatorHertzFrequency = document.getElementById('local-oscillator-hertz-frequency');
+    domLocalOscillatorMiliHertzFrequency = document.getElementById('local-oscillator-mili-hertz-frequency');
+
     ctxFrequencyDomain = getConfiguredCanvasContext('canvas-frequency-domain-00', BUFFER_SIZE, CANVAS_HEIGHT);
     ctxFrequencyDomainMixed = getConfiguredCanvasContext('canvas-frequency-domain-01-mixed', BUFFER_SIZE, CANVAS_HEIGHT);
     ctxFrequencyDomainFiltered = getConfiguredCanvasContext('canvas-frequency-domain-02-filtered', BUFFER_SIZE, CANVAS_HEIGHT);
@@ -35,6 +46,12 @@ function initWebAudioApi() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
 
     audioMonoIO.setSampleInHandler(sampleInHandler);
+}
+
+function onLocalOscillatorFrequencyChange() {
+    localOscillator =
+        parseFloat(domLocalOscillatorHertzFrequency.value) +
+        parseFloat(domLocalOscillatorMiliHertzFrequency.value) / 1000;
 }
 
 // -----------------------------------------------------------------------
@@ -181,58 +198,41 @@ function getTimeDomainMixed(timeDomain, sampleNumber, localOscillatorFrequency, 
 // -----------------------------------------------------------------------
 // Finite Impulse Response filter
 
-/*
-TODO finish it
-function refreshFirFilter() {
-    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
+function getFirFilterCoefficientLowPassSinc(cutoffNormalized, numberOfTaps) {
+    var n, middleIndex, output;
 
-    N = numberOfTaps();
-    if (N > TABS_MAX) {
-        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
-        N = TABS_MAX;
+    middleIndex = (numberOfTaps - 1) / 2;
+    output = [];
+    for (n = 0; n < numberOfTaps; n++) {
+        output[n] = sinc(2 * cutoffNormalized * (n - middleIndex));
     }
 
-    sampleHistoryBuffer = new Queue(N);
-
-    // windowed-sinc lowpass filter
-    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
-    middleIndex = (N - 1) / 2;
-    sum = 0;
-    filterCoefficient.length = 0;
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
-        filterCoefficient[n] *= blackmanNuttall(n, N);
-        sum += filterCoefficient[n];
-    }
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] /= sum;
-    }
+    return output;
 }
 
-function refreshFirFilter() {
-    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
+function sinc(x) {
+    return x !== 0
+        ? Math.sin(Math.PI * x) / (Math.PI * x)
+        : 1;
+}
 
-    N = numberOfTaps();
-    if (N > TABS_MAX) {
-        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
-        N = TABS_MAX;
-    }
+function applyWindowFunctionAndNormalize(input) {
+    var i, windowValue, length, output, newValue, sum;
 
-    sampleHistoryBuffer = new Queue(N);
-
-    // windowed-sinc lowpass filter
-    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
-    middleIndex = (N - 1) / 2;
+    output = [];
+    length = input.length;
     sum = 0;
-    filterCoefficient.length = 0;
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
-        filterCoefficient[n] *= blackmanNuttall(n, N);
-        sum += filterCoefficient[n];
+    for (i = 0; i < length; i++) {
+        windowValue = blackmanNuttall(i, length);
+        newValue = input[i] * windowValue;
+        sum += newValue;
+        output.push(newValue);
     }
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] /= sum;
+    for (i = 0; i < length; i++) {
+        output[i] /= sum;
     }
+    
+    return output;
 }
 
 function getNumberOfTaps(transitionBandNormalized) {
@@ -251,40 +251,54 @@ function getNumberOfTaps(transitionBandNormalized) {
     return numberOfTabs;
 }
 
-function sinc(x) {
-    return x !== 0
-        ? Math.sin(Math.PI * x) / (Math.PI * x)
-        : 1;
-}
+function refreshFirFilter() {
+    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
 
-function getConvolvedSample(sampleToFilter) {
-    var N, i, sampleFiltered;
-
-    if (!sampleHistoryBuffer) {
-        return sampleToFilter;
+    N = numberOfTaps();
+    if (N > TABS_MAX) {
+        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
+        N = TABS_MAX;
     }
 
-    N = filterCoefficient.length;
+    sampleHistoryBuffer = new Queue(N);
+
+    // windowed-sinc lowpass filter
+    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
+    middleIndex = (N - 1) / 2;
+    sum = 0;
+    filterCoefficient.length = 0;
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
+        filterCoefficient[n] *= blackmanNuttall(n, N);
+        sum += filterCoefficient[n];
+    }
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] /= sum;
+    }
+}
+
+function getFilteredSampleConvolutionCore(sampleHistoryBuffer, coefficient) {
+    var i, sampleFiltered, length;
+
+    length = coefficient.length;
     sampleFiltered = 0;
-    if (sampleHistoryBuffer.getSize() === N) {   // let's wait for buffer to fill completely...
-        for (i = 0; i < N; i++) {
-            sampleFiltered += sampleHistoryBuffer.getItem(i) * filterCoefficient[i];
+    if (sampleHistoryBuffer.getSize() === length) {   // let's wait for buffer to fill completely...
+        for (i = 0; i < length; i++) {
+            sampleFiltered += sampleHistoryBuffer.getItem(i) * coefficient[i];
         }
     }
 
     return sampleFiltered;
 }
 
-function getFilteredSample(sampleToFilter) {
+function getFilteredSample(sampleToFilter, sampleHistoryBuffer, coefficient) {
     var sampleFiltered;
 
-    sampleFiltered = 0;
     sampleHistoryBuffer.pushEvenIfFull(sampleToFilter);
-    getConvolvedSample(sampleToFilter);
+    sampleFiltered = getFilteredSampleConvolutionCore(sampleHistoryBuffer, coefficient);
 
     return sampleFiltered;
 }
-*/
 
 // -----------------------------------------------------------------------
 // common

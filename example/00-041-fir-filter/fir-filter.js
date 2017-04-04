@@ -53,6 +53,7 @@ function initWebAudioApi() {
     audioMonoIO.setVolume(1);
     audioMonoIO.setSampleOutHandler(sampleOutHandler);
 
+    audioMonoIO.setSmoothingTimeConstant(0.9);
     onLoopbackCheckboxChange();
 }
 
@@ -73,6 +74,8 @@ function onFilterParametersChange() {
     cutoffFrequency = cutoffFrequency >= maxCutoffFrequency
         ? maxCutoffFrequency - 1
         : cutoffFrequency;
+
+    // TODO verify transition bandwidth, something might be wrong here
     maximumTransitionBandwidth = 2 * Math.min(
         maxCutoffFrequency - cutoffFrequency,
         cutoffFrequency

@@ -77,6 +77,34 @@
                     </div>
 
                     <h2>Frequency domain after mixing (tuning)</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Local Oscillator [hertz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                onChange="onLocalOscillatorFrequencyChange()"
+                                value="2000"
+                                id="local-oscillator-hertz-frequency" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Local Oscillator [mili hertz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                onChange="onLocalOscillatorFrequencyChange()"
+                                value="0"
+                                id="local-oscillator-mili-hertz-frequency" />
+                        </div>
+                    </div>
                     <div class="scroll-container">
                         <canvas id="canvas-frequency-domain-01-mixed"></canvas>
                     </div>
