@@ -10,28 +10,25 @@ var
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -150,
-    animationFrameFirstCall = true,
-    ctxAnalyserNode,
-    ctxFft;
+    ctxFrequencyDomain,
+    ctxFrequencyDomainMixed,
+    ctxFrequencyDomainFiltered,
+    ctxFrequencyDomainDecimated,
+    ctxFrequencyDomainZoom,
+    sampleNumber = 0,
+    localOscillator = 2000;
 
 function init() {
     initDomElement();
     initWebAudioApi();
-
-    animationFrameLoop();   // run animation loop
 }
 
 function initDomElement() {
-    ctxAnalyserNode = getConfiguredCanvasContext(
-        'canvas-analyser-node',
-        CANVAS_WIDTH_FREQUENCY,
-        CANVAS_HEIGHT
-    );
-    ctxFft = getConfiguredCanvasContext(
-        'canvas-fft',
-        BUFFER_SIZE,
-        CANVAS_HEIGHT
-    );
+    ctxFrequencyDomain = getConfiguredCanvasContext('canvas-frequency-domain-00', BUFFER_SIZE, CANVAS_HEIGHT);
+    ctxFrequencyDomainMixed = getConfiguredCanvasContext('canvas-frequency-domain-01-mixed', BUFFER_SIZE, CANVAS_HEIGHT);
+    ctxFrequencyDomainFiltered = getConfiguredCanvasContext('canvas-frequency-domain-02-filtered', BUFFER_SIZE, CANVAS_HEIGHT);
+    // ctxFrequencyDomainDecimated = getConfiguredCanvasContext('canvas-frequency-domain-03-decimated', BUFFER_SIZE, CANVAS_HEIGHT);
+    // ctxFrequencyDomainZoom = getConfiguredCanvasContext('canvas-frequency-domain-04-zoom', BUFFER_SIZE, CANVAS_HEIGHT);
 }
 
 function initWebAudioApi() {
@@ -157,13 +154,151 @@ function getFrequencyData(timeDomain) {
 
     timeDomainWindowed = applyWindowFunctionComplex(timeDomain);
     frequencyDomain = fft(timeDomainWindowed);
+    fftShift(frequencyDomain);
     frequencyDomainDecibel = getFrequencyDomainDecibel(frequencyDomain);
 
     return frequencyDomainDecibel;
 }
 
 // -----------------------------------------------------------------------
+// iq mixer
+
+function getTimeDomainMixed(timeDomain, sampleNumber, localOscillatorFrequency, sampleRate) {
+    var i, n, output, complexSin, timeDomainMixed, omega;
+
+    output = [];
+    omega = -2 * Math.PI * localOscillatorFrequency / sampleRate;
+    for (i = 0; i < timeDomain.length; i++) {
+        n = sampleNumber + i;
+        complexSin = getComplexFromRadians(omega * n);
+        timeDomainMixed = complexMultiply(timeDomain[i], complexSin);
+        output.push(timeDomainMixed);
+    }
+
+    return output;
+}
+
+// -----------------------------------------------------------------------
+// Finite Impulse Response filter
+
+/*
+TODO finish it
+function refreshFirFilter() {
+    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
+
+    N = numberOfTaps();
+    if (N > TABS_MAX) {
+        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
+        N = TABS_MAX;
+    }
+
+    sampleHistoryBuffer = new Queue(N);
+
+    // windowed-sinc lowpass filter
+    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
+    middleIndex = (N - 1) / 2;
+    sum = 0;
+    filterCoefficient.length = 0;
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
+        filterCoefficient[n] *= blackmanNuttall(n, N);
+        sum += filterCoefficient[n];
+    }
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] /= sum;
+    }
+}
+
+function refreshFirFilter() {
+    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
+
+    N = numberOfTaps();
+    if (N > TABS_MAX) {
+        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
+        N = TABS_MAX;
+    }
+
+    sampleHistoryBuffer = new Queue(N);
+
+    // windowed-sinc lowpass filter
+    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
+    middleIndex = (N - 1) / 2;
+    sum = 0;
+    filterCoefficient.length = 0;
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
+        filterCoefficient[n] *= blackmanNuttall(n, N);
+        sum += filterCoefficient[n];
+    }
+    for (n = 0; n < N; n++) {
+        filterCoefficient[n] /= sum;
+    }
+}
+
+function getNumberOfTaps(transitionBandNormalized) {
+    // http://dsp.stackexchange.com/questions/31066/how-many-taps-does-an-fir-filter-need
+    var
+        pb = Math.pow(10, -4),  // pass band: 0.1% of amplitude variations gives -40dB
+        sb = Math.pow(10, -6),  // stop band: 60 dB should be fine
+        logValue,
+        numberOfTabs;
+
+    logValue = Math.log(1 / (10 * pb * sb)) / Math.LN10;
+    numberOfTabs = (2 / 3) * logValue * (1 / transitionBandNormalized);
+    numberOfTabs = Math.round(numberOfTabs);
+    numberOfTabs = numberOfTabs % 2 ? numberOfTabs : numberOfTabs + 1;  // keep this number always odd for symmetry
+
+    return numberOfTabs;
+}
+
+function sinc(x) {
+    return x !== 0
+        ? Math.sin(Math.PI * x) / (Math.PI * x)
+        : 1;
+}
+
+function getConvolvedSample(sampleToFilter) {
+    var N, i, sampleFiltered;
+
+    if (!sampleHistoryBuffer) {
+        return sampleToFilter;
+    }
+
+    N = filterCoefficient.length;
+    sampleFiltered = 0;
+    if (sampleHistoryBuffer.getSize() === N) {   // let's wait for buffer to fill completely...
+        for (i = 0; i < N; i++) {
+            sampleFiltered += sampleHistoryBuffer.getItem(i) * filterCoefficient[i];
+        }
+    }
+
+    return sampleFiltered;
+}
+
+function getFilteredSample(sampleToFilter) {
+    var sampleFiltered;
+
+    sampleFiltered = 0;
+    sampleHistoryBuffer.pushEvenIfFull(sampleToFilter);
+    getConvolvedSample(sampleToFilter);
+
+    return sampleFiltered;
+}
+*/
+
+// -----------------------------------------------------------------------
 // common
+
+function fftShift(frequencyDomain) {
+    var i, lengthHalf, tmp;
+
+    lengthHalf = frequencyDomain.length / 2;      // this is assuming even lengths!
+    for (i = 0; i < lengthHalf; i++) {
+        tmp = frequencyDomain[i];
+        frequencyDomain[i] = frequencyDomain[lengthHalf + i];
+        frequencyDomain[lengthHalf + i] = tmp;
+    }
+}
 
 function complexClone(complex) {
     return {
@@ -231,15 +366,6 @@ function getConfiguredCanvasContext(elementId, width, height) {
     return ctx;
 }
 
-function animationFrameLoop() {
-    if (!animationFrameFirstCall) {
-        refreshDataOnScreen();
-    } else {
-        animationFrameFirstCall = false;
-    }
-    requestAnimationFrame(animationFrameLoop);
-}
-
 function drawFrequencyDomainData(ctx, data) {
     var limit, hMaxPix, x, y1, y2;
 
@@ -260,17 +386,20 @@ function drawFrequencyDomainData(ctx, data) {
 function sampleInHandler(monoIn) {
     var
         timeDomain,
-        frequencyData;
+        timeDomainMixed,
+        frequencyData,
+        frequencyDataMixed;
 
-    // compute FFT from raw ScriptProcessorNode samples
+    // convert real signal to complex signal
     timeDomain = convertRealSignalToComplexSignal(monoIn);
+
+    // untouched signal
     frequencyData = getFrequencyData(timeDomain);
-    drawFrequencyDomainData(ctxFft, frequencyData);
-}
+    drawFrequencyDomainData(ctxFrequencyDomain, frequencyData);
 
-function refreshDataOnScreen() {
-    var frequencyData = audioMonoIO.getFrequencyData();
-
-    // this comes from AnalyserNode
-    drawFrequencyDomainData(ctxAnalyserNode, frequencyData);
+    // mixed signal
+    timeDomainMixed = getTimeDomainMixed(timeDomain, sampleNumber, localOscillator, audioMonoIO.getSampleRate());
+    sampleNumber += timeDomain.length;
+    frequencyDataMixed = getFrequencyData(timeDomainMixed);
+    drawFrequencyDomainData(ctxFrequencyDomainMixed, frequencyDataMixed);
 }

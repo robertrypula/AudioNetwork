@@ -12,7 +12,6 @@ var
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -200,
     TABS_MAX = 2000,
-    ABSOLUTE_VALUE = true,
     animationFrameFirstCall = true,
     ctxFrequencyData,
     ctxFilterImpulseResponse,
@@ -143,7 +142,7 @@ function numberOfTaps() {
     logValue = Math.log(1 / (10 * pb * sb)) / Math.LN10;
     numberOfTabs = (2 / 3) * logValue * (1 / transitionBandNormalized);
     numberOfTabs = Math.round(numberOfTabs);
-    numberOfTabs = numberOfTabs % 2 ? numberOfTabs : numberOfTabs + 1;  // keep this number always off for symmetry
+    numberOfTabs = numberOfTabs % 2 ? numberOfTabs : numberOfTabs + 1;  // keep this number always odd for symmetry
 
     return numberOfTabs;
 }

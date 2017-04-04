@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="fft.css">
+    <link rel="stylesheet" type="text/css" href="iq-mixer.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -61,19 +61,39 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to experiment with FFT algorithm
+                                This example allows to experiment with IQ mixer. All spectrum charts
+                                comes from custom FFT implementation.
+                            </p>
+                            <p>
+                                IMPORTANT NOTE: zero frequency component (DC-offset) was shifted to the center of the
+                                spectrum.
                             </p>
                         </div>
                     </div>
 
-                    <h2>Frequency domain (AnalyserNode)</h2>
+                    <h2>Frequency domain (microphone input)</h2>
                     <div class="scroll-container">
-                        <canvas id="canvas-analyser-node"></canvas>
+                        <canvas id="canvas-frequency-domain-00"></canvas>
                     </div>
 
-                    <h2>Frequency domain (FFT computed from ScriptProcessorNode's raw samples)</h2>
+                    <h2>Frequency domain after mixing (tuning)</h2>
                     <div class="scroll-container">
-                        <canvas id="canvas-fft"></canvas>
+                        <canvas id="canvas-frequency-domain-01-mixed"></canvas>
+                    </div>
+
+                    <h2>Frequency domain after mixing and filtering</h2>
+                    <div class="scroll-container">
+                        <canvas id="canvas-frequency-domain-02-filtered"></canvas>
+                    </div>
+
+                    <h2>Frequency domain after mixing, filtering and decimation</h2>
+                    <div class="scroll-container">
+                        <canvas id="canvas-frequency-domain-03-decimated"></canvas>
+                    </div>
+
+                    <h2>Frequency domain after mixing, filtering, decimation and zoom</h2>
+                    <div class="scroll-container">
+                        <canvas id="canvas-frequency-domain-04-zoom"></canvas>
                     </div>
 
                 </div>
@@ -100,7 +120,7 @@
     </div>
 
     <script src="../00-000-common/audio-mono-io.js"></script>
-    <script src="fft.js"></script>
+    <script src="iq-mixer.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
