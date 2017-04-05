@@ -7,10 +7,11 @@ var
     LIMIT_CANVAS_WIDTH = true,
     FFT_SIZE = 1 * 1024,         // powers of 2 in range: 32, 32768
     BUFFER_SIZE = 1 * 1024,
-    CANVAS_WIDTH_FREQUENCY = FFT_SIZE * 0.5,
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
-    DECIBEL_MIN = -150,
+    DECIBEL_MIN = -100,
+    ZOOM_SIZE = 128,
+    domLowCpuUsage,
     domLocalOscillatorHertzFrequency,
     domLocalOscillatorMiliHertzFrequency,
     ctxFrequencyDomain,
@@ -31,7 +32,7 @@ var
     firFilterCoefficientB,
     FIR_FILTER_A_DECIMATION = 8,
     FIR_FILTER_B_DECIMATION = 4,
-    FIR_FILTER_TRANSITION_BAND = 0.015,
+    FIR_FILTER_TRANSITION_BAND = 0.04,
     FIR_FILTER_MARGIN_BAND = 0.00;      // TODO remove it, only for testing purposes
 
 function init() {
@@ -39,9 +40,20 @@ function init() {
     initWebAudioApi();
 
     onLocalOscillatorFrequencyChange();
+
+/*
+    audioMonoIO.setPeriodicWave(
+        16 * audioMonoIO.getSampleRate() / BUFFER_SIZE,
+        1.0,
+        0,
+        [ 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    );*/
+    // audioMonoIO.setLoopback(true);
 }
 
 function initDomElement() {
+    domLowCpuUsage = document.getElementById('low-cpu-usage');
     domLocalOscillatorHertzFrequency = document.getElementById('local-oscillator-hertz-frequency');
     domLocalOscillatorMiliHertzFrequency = document.getElementById('local-oscillator-mili-hertz-frequency');
 
@@ -51,7 +63,7 @@ function initDomElement() {
     ctxFrequencyDomainDecimatedA = getConfiguredCanvasContext('canvas-frequency-domain-03-decimated-a', BUFFER_SIZE / FIR_FILTER_A_DECIMATION, CANVAS_HEIGHT);
     ctxFrequencyDomainFilteredB = getConfiguredCanvasContext('canvas-frequency-domain-04-filtered-b', BUFFER_SIZE / FIR_FILTER_A_DECIMATION, CANVAS_HEIGHT);
     ctxFrequencyDomainDecimatedB = getConfiguredCanvasContext('canvas-frequency-domain-05-decimated-b', BUFFER_SIZE / (FIR_FILTER_A_DECIMATION * FIR_FILTER_B_DECIMATION), CANVAS_HEIGHT);
-    ctxFrequencyDomainZoom = getConfiguredCanvasContext('canvas-frequency-domain-06-zoom', BUFFER_SIZE, CANVAS_HEIGHT);
+    ctxFrequencyDomainZoom = getConfiguredCanvasContext('canvas-frequency-domain-06-zoom', ZOOM_SIZE, CANVAS_HEIGHT);
 }
 
 function initWebAudioApi() {
@@ -87,7 +99,7 @@ function initFirFilter() {
     firFilterSampleHistoryRealBufferB = new Queue(firFilterCoefficientB.length);
     firFilterSampleHistoryImmBufferB = new Queue(firFilterCoefficientB.length);
 
-    zoomBuffer = new Queue(BUFFER_SIZE);
+    zoomBuffer = new Queue(ZOOM_SIZE);
 }
 
 function onLocalOscillatorFrequencyChange() {
@@ -479,40 +491,52 @@ function sampleInHandler(monoIn) {
     timeDomain = convertRealSignalToComplexSignal(monoIn);
 
     // untouched signal
-    frequencyData = getFrequencyData(timeDomain);
-    drawFrequencyDomainData(ctxFrequencyDomain, frequencyData);
+    if (!domLowCpuUsage.checked) {
+        frequencyData = getFrequencyData(timeDomain);
+        drawFrequencyDomainData(ctxFrequencyDomain, frequencyData);
+    }
 
     // mixed signal
     timeDomainMixed = getTimeDomainMixed(timeDomain, sampleNumber, localOscillator, audioMonoIO.getSampleRate());
     sampleNumber += timeDomain.length;
-    frequencyDataMixed = getFrequencyData(timeDomainMixed);
-    drawFrequencyDomainData(ctxFrequencyDomainMixed, frequencyDataMixed);
+    if (!domLowCpuUsage.checked) {
+        frequencyDataMixed = getFrequencyData(timeDomainMixed);
+        drawFrequencyDomainData(ctxFrequencyDomainMixed, frequencyDataMixed);
+    }
 
     // filtering/decimation stage A
-    timeDomainFilteredA = getTimeDomainComplexFiltered(timeDomainMixed, firFilterSampleHistoryRealBufferA, firFilterSampleHistoryImmBufferA, firFilterCoefficientA);
-    frequencyDataFilteredA = getFrequencyData(timeDomainFilteredA);
-    drawFrequencyDomainData(ctxFrequencyDomainFilteredA, frequencyDataFilteredA);
-    timeDomainDecimatedA = getDecimated(timeDomainFilteredA, FIR_FILTER_A_DECIMATION);
-    frequencyDataDecimatedA = getFrequencyData(timeDomainDecimatedA);
-    drawFrequencyDomainData(ctxFrequencyDomainDecimatedA, frequencyDataDecimatedA);
+    if (domLowCpuUsage.checked) {
+        timeDomainDecimatedA = getTimeDomainComplexFiltered(timeDomainMixed, firFilterSampleHistoryRealBufferA, firFilterSampleHistoryImmBufferA, firFilterCoefficientA, FIR_FILTER_A_DECIMATION);
+    } else {
+        timeDomainFilteredA = getTimeDomainComplexFiltered(timeDomainMixed, firFilterSampleHistoryRealBufferA, firFilterSampleHistoryImmBufferA, firFilterCoefficientA);
+        frequencyDataFilteredA = getFrequencyData(timeDomainFilteredA);
+        drawFrequencyDomainData(ctxFrequencyDomainFilteredA, frequencyDataFilteredA);
+        timeDomainDecimatedA = getDecimated(timeDomainFilteredA, FIR_FILTER_A_DECIMATION);
+        frequencyDataDecimatedA = getFrequencyData(timeDomainDecimatedA);
+        drawFrequencyDomainData(ctxFrequencyDomainDecimatedA, frequencyDataDecimatedA);
+    }
 
     // filtering/decimation stage B
-    timeDomainFilteredB = getTimeDomainComplexFiltered(timeDomainDecimatedA, firFilterSampleHistoryRealBufferB, firFilterSampleHistoryImmBufferB, firFilterCoefficientB);
-    frequencyDataFilteredB = getFrequencyData(timeDomainFilteredB);
-    drawFrequencyDomainData(ctxFrequencyDomainFilteredB, frequencyDataFilteredB);
-    timeDomainDecimatedB = getDecimated(timeDomainFilteredB, FIR_FILTER_B_DECIMATION);
-    frequencyDataDecimatedB = getFrequencyData(timeDomainDecimatedB);
-    drawFrequencyDomainData(ctxFrequencyDomainDecimatedB, frequencyDataDecimatedB);
+    if (domLowCpuUsage.checked) {
+        timeDomainDecimatedB = getTimeDomainComplexFiltered(timeDomainDecimatedA, firFilterSampleHistoryRealBufferB, firFilterSampleHistoryImmBufferB, firFilterCoefficientB, FIR_FILTER_B_DECIMATION);
+    } else {
+        timeDomainFilteredB = getTimeDomainComplexFiltered(timeDomainDecimatedA, firFilterSampleHistoryRealBufferB, firFilterSampleHistoryImmBufferB, firFilterCoefficientB);
+        frequencyDataFilteredB = getFrequencyData(timeDomainFilteredB);
+        drawFrequencyDomainData(ctxFrequencyDomainFilteredB, frequencyDataFilteredB);
+        timeDomainDecimatedB = getDecimated(timeDomainFilteredB, FIR_FILTER_B_DECIMATION);
+        frequencyDataDecimatedB = getFrequencyData(timeDomainDecimatedB);
+        drawFrequencyDomainData(ctxFrequencyDomainDecimatedB, frequencyDataDecimatedB);
+    }
 
     // zoom
     for (i = 0; i < timeDomainDecimatedB.length; i++) {
         zoomBuffer.pushEvenIfFull(timeDomainDecimatedB[i]);
     }
-    timeDomainZoom = [];
-    for (i = 0; i < zoomBuffer.getSize(); i++) {
-        timeDomainZoom.push(zoomBuffer.getItem(i));
-    }
-    if (timeDomain.length === timeDomainZoom.length) {
+    if (zoomBuffer.isFull()) {
+        timeDomainZoom = [];
+        for (i = 0; i < zoomBuffer.getSize(); i++) {
+            timeDomainZoom.push(zoomBuffer.getItem(i));
+        }
         frequencyDataZoom = getFrequencyData(timeDomainZoom);
         drawFrequencyDomainData(ctxFrequencyDomainZoom, frequencyDataZoom);
     }
