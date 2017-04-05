@@ -221,7 +221,7 @@ function sampleOutHandler(monoOut, monoIn) {
 
     for (i = 0; i < monoOut.length; i++) {
         basebandSample = generateSineWave(getSamplePerPeriod(basebandFrequency), 1.0, 0, sampleNumber);
-        phaseSpeed = carrierFrequencyDeviation * basebandSample;
+        phaseSpeed = carrierFrequencyDeviation * basebandSample;    // TODO potential problem, when basebandSample will be zero it may not be zero because of accumulating rounding errors
         carrierPhase += phaseSpeed * dt;
         audioSample = generateSineWave(getSamplePerPeriod(carrierFrequency), 0.5, carrierPhase, sampleNumber);
 

@@ -82,7 +82,7 @@ function computeDFT(timeDomain) {
  *   PI      -> ~3.14
  *   xn      -> value of the n-th sample from timeDomain array
  *   n       -> sample index from timeDomain array
- *   k       -> number of cycles of a wave that fits the window, it's different for every frequency bins
+ *   k       -> number of cycles of a wave that fully fits the window, it's different for every frequency bins
  *   Fk      -> complex number that represents amplitude and phase of the k-th frequency bin
  *
  * In order to follow approach described in the article from polish 'Programista' magazine (2016/51) exponent

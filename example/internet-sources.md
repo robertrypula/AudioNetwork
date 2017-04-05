@@ -29,6 +29,10 @@ IQ sampling explanation (complex signal):
     http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!
     https://www.youtube.com/watch?v=h_7d-m1ehoY
 
+Very nice project about DSP and Software Defined Radio
+    https://github.com/simonyiszk/openwebrx
+    http://openwebrx.org/bsc-thesis.pdf
+
 Capture and decode fm radio
     https://witestlab.poly.edu/blog/capture-and-decode-fm-radio/
     https://en.wikipedia.org/wiki/Digital_down_converter

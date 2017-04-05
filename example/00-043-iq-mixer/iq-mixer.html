@@ -76,7 +76,7 @@
                         <canvas id="canvas-frequency-domain-00"></canvas>
                     </div>
 
-                    <h2>Frequency domain after mixing (tuning)</h2>
+                    <h2>Frequency domain - mixing (tuning)</h2>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
@@ -87,7 +87,7 @@
                             <input
                                 type="number"
                                 onChange="onLocalOscillatorFrequencyChange()"
-                                value="2000"
+                                value="1500"
                                 id="local-oscillator-hertz-frequency" />
                         </div>
                     </div>
@@ -109,19 +109,17 @@
                         <canvas id="canvas-frequency-domain-01-mixed"></canvas>
                     </div>
 
-                    <h2>Frequency domain after mixing and filtering</h2>
+                    <h2>Frequency domain - filtering and decimation (two stages of decimation: 8 and 4)</h2>
                     <div class="scroll-container">
-                        <canvas id="canvas-frequency-domain-02-filtered"></canvas>
+                        <canvas id="canvas-frequency-domain-02-filtered-a"></canvas>
+                        <canvas id="canvas-frequency-domain-03-decimated-a"></canvas>
+                        <canvas id="canvas-frequency-domain-04-filtered-b"></canvas>
+                        <canvas id="canvas-frequency-domain-05-decimated-b"></canvas>
                     </div>
 
-                    <h2>Frequency domain after mixing, filtering and decimation</h2>
+                    <h2>Frequency domain - zoom (size of window increased 32 times to get same width of the spectrum)</h2>
                     <div class="scroll-container">
-                        <canvas id="canvas-frequency-domain-03-decimated"></canvas>
-                    </div>
-
-                    <h2>Frequency domain after mixing, filtering, decimation and zoom</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-frequency-domain-04-zoom"></canvas>
+                        <canvas id="canvas-frequency-domain-06-zoom"></canvas>
                     </div>
 
                 </div>
@@ -146,6 +144,14 @@
         </footer>
 
     </div>
+
+    <script>
+        var AudioNetworkBootConfig = {
+            createAlias: false,
+            devScriptLoad: true
+        };
+    </script>
+    <script src="../../src/audio-network-boot.js"></script>
 
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="iq-mixer.js"></script>
