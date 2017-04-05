@@ -31,8 +31,8 @@ var
     firFilterCoefficientB,
     FIR_FILTER_A_DECIMATION = 8,
     FIR_FILTER_B_DECIMATION = 4,
-    FIR_FILTER_TRANSITION_BAND = 0.03,
-    FIR_FILTER_MARGIN_BAND = 0.01;      // TODO remove it, only for testing purposes
+    FIR_FILTER_TRANSITION_BAND = 0.015,
+    FIR_FILTER_MARGIN_BAND = 0.00;      // TODO remove it, only for testing purposes
 
 function init() {
     initDomElement();
@@ -73,6 +73,7 @@ function initFirFilter() {
         1 / (2 * FIR_FILTER_A_DECIMATION) - FIR_FILTER_TRANSITION_BAND - FIR_FILTER_MARGIN_BAND,
         numberOfTaps
     );
+    firFilterCoefficientA = applyWindowFunctionAndNormalize(firFilterCoefficientA);
     firFilterSampleHistoryRealBufferA = new Queue(firFilterCoefficientA.length);
     firFilterSampleHistoryImmBufferA = new Queue(firFilterCoefficientA.length);
 
@@ -82,6 +83,7 @@ function initFirFilter() {
         1 / (2 * FIR_FILTER_B_DECIMATION) - FIR_FILTER_TRANSITION_BAND - FIR_FILTER_MARGIN_BAND,
         numberOfTaps
     );
+    firFilterCoefficientB = applyWindowFunctionAndNormalize(firFilterCoefficientB);
     firFilterSampleHistoryRealBufferB = new Queue(firFilterCoefficientB.length);
     firFilterSampleHistoryImmBufferB = new Queue(firFilterCoefficientB.length);
 
@@ -433,7 +435,7 @@ function getConfiguredCanvasContext(elementId, width, height) {
     element.height = height;
     ctx = element.getContext('2d');
     ctx.lineWidth = 1;
-    ctx.strokeStyle = '#EEE';
+    ctx.strokeStyle = 'black';
 
     return ctx;
 }
