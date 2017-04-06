@@ -10,8 +10,7 @@ var
     CANVAS_WIDTH_FREQUENCY = FFT_SIZE * 0.5,
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
-    DECIBEL_MIN = -200,
-    TABS_MAX = 2000,
+    DECIBEL_MIN = -400,
     animationFrameFirstCall = true,
     ctxFrequencyData,
     ctxFilterImpulseResponse,
@@ -21,8 +20,8 @@ var
     domTransitionBandwidth,
     domFilterTapsNumber,
     domFilterImpulseResponseContainer,
-    filterCoefficient = [],
-    sampleHistoryBuffer;
+    firFilterCoefficient,
+    firFilterSampleHistoryBuffer;
 
 function init() {
     initDomElement();
@@ -68,18 +67,15 @@ function onFilterParametersChange() {
         cutoffFrequency = parseInt(domCutoffFrequency.value),
         transitionBandwidth = parseInt(domTransitionBandwidth.value);
 
-    cutoffFrequency = cutoffFrequency < 1
-        ? 1
+    cutoffFrequency = cutoffFrequency < 0
+        ? 0
         : cutoffFrequency;
     cutoffFrequency = cutoffFrequency >= maxCutoffFrequency
         ? maxCutoffFrequency - 1
         : cutoffFrequency;
 
     // TODO verify transition bandwidth, something might be wrong here
-    maximumTransitionBandwidth = 2 * Math.min(
-        maxCutoffFrequency - cutoffFrequency,
-        cutoffFrequency
-    );
+    maximumTransitionBandwidth = maxCutoffFrequency - cutoffFrequency;
     transitionBandwidth = transitionBandwidth > maximumTransitionBandwidth
         ? maximumTransitionBandwidth
         : transitionBandwidth;
@@ -87,60 +83,84 @@ function onFilterParametersChange() {
     domCutoffFrequency.value = cutoffFrequency;
     domTransitionBandwidth.value = transitionBandwidth;
 
-    refreshFirFilter();
+    updateFirFilter();
 
-    domFilterTapsNumber.innerHTML = filterCoefficient.length;
+    domFilterTapsNumber.innerHTML = firFilterCoefficient.length;
 
     domFilterImpulseResponseContainer.innerHTML = '<canvas id="canvas-filter-impulse-response"></canvas>';
     ctxFilterImpulseResponse = getConfiguredCanvasContext(
         'canvas-filter-impulse-response',
-        filterCoefficient.length,
+        firFilterCoefficient.length,
         CANVAS_HEIGHT
     );
-    drawFilterImpulseResponse(ctxFilterImpulseResponse, filterCoefficient);
+    drawFilterImpulseResponse(ctxFilterImpulseResponse, firFilterCoefficient);
+}
+
+function updateFirFilter() {
+    var
+        cutoffNormalized,
+        transitionBandNormalized,
+        numberOfTaps;
+
+    cutoffNormalized = parseFloat(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
+    transitionBandNormalized = parseFloat(domTransitionBandwidth.value) / audioMonoIO.getSampleRate();
+    numberOfTaps = getNumberOfTaps(transitionBandNormalized);
+
+    firFilterCoefficient = getFirFilterCoefficientLowPassSinc(
+        cutoffNormalized,
+        numberOfTaps
+    );
+    firFilterCoefficient = applyWindowFunctionAndNormalize(firFilterCoefficient);
+    firFilterSampleHistoryBuffer = new Queue(firFilterCoefficient.length);
 }
 
 // -----------------------------------------------------------------------
 // Finite Impulse Response filter
 
-function refreshFirFilter() {
-    var n, N, sum, middleIndex, cutoffFrequencyNormalized;
+function getFirFilterCoefficientLowPassSinc(cutoffNormalized, numberOfTaps) {
+    var n, middleIndex, output;
 
-    N = numberOfTaps();
-    if (N > TABS_MAX) {
-        alert('Number of required tabs is too high! Value ' + N + ' was limited to ' + TABS_MAX);
-        N = TABS_MAX;
+    middleIndex = (numberOfTaps - 1) / 2;
+    output = [];
+    for (n = 0; n < numberOfTaps; n++) {
+        output[n] = sinc(2 * cutoffNormalized * (n - middleIndex));
     }
 
-    sampleHistoryBuffer = new Queue(N);
-
-    // windowed-sinc lowpass filter
-    cutoffFrequencyNormalized = parseInt(domCutoffFrequency.value) / audioMonoIO.getSampleRate();
-    middleIndex = (N - 1) / 2;
-    sum = 0;
-    filterCoefficient.length = 0;
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] = sinc(2 * cutoffFrequencyNormalized * (n - middleIndex));
-        if (domWindowFunctionCheckbox.checked) {
-            filterCoefficient[n] *= blackmanNuttall(n, N);
-        }
-        sum += filterCoefficient[n];
-    }
-    for (n = 0; n < N; n++) {
-        filterCoefficient[n] /= sum;
-    }
+    return output;
 }
 
-function numberOfTaps() {
+function sinc(x) {
+    return x !== 0
+        ? Math.sin(Math.PI * x) / (Math.PI * x)
+        : 1;
+}
+
+function applyWindowFunctionAndNormalize(input) {
+    var i, windowValue, length, output, newValue, sum;
+
+    output = [];
+    length = input.length;
+    sum = 0;
+    for (i = 0; i < length; i++) {
+        windowValue = blackmanNuttall(i, length);
+        newValue = input[i] * windowValue;
+        sum += newValue;
+        output.push(newValue);
+    }
+    for (i = 0; i < length; i++) {
+        output[i] /= sum;
+    }
+
+    return output;
+}
+
+function getNumberOfTaps(transitionBandNormalized) {
     // http://dsp.stackexchange.com/questions/31066/how-many-taps-does-an-fir-filter-need
     var
         pb = Math.pow(10, -4),  // pass band: 0.1% of amplitude variations gives -40dB
         sb = Math.pow(10, -6),  // stop band: 60 dB should be fine
         logValue,
-        transitionBandNormalized,
         numberOfTabs;
-
-    transitionBandNormalized = parseInt(domTransitionBandwidth.value) / audioMonoIO.getSampleRate();
 
     logValue = Math.log(1 / (10 * pb * sb)) / Math.LN10;
     numberOfTabs = (2 / 3) * logValue * (1 / transitionBandNormalized);
@@ -150,10 +170,19 @@ function numberOfTaps() {
     return numberOfTabs;
 }
 
-function sinc(x) {
-    return x !== 0
-        ? Math.sin(Math.PI * x) / (Math.PI * x)
-        : 1;
+function getFilteredSample(sampleHistoryBuffer, coefficient) {
+    var i, sampleFiltered, length;
+
+    length = coefficient.length;
+    sampleFiltered = 0;
+    if (sampleHistoryBuffer.getSize() === length) {   // let's wait for buffer to fill completely...
+        // ...and do convolution step
+        for (i = 0; i < length; i++) {
+            sampleFiltered += sampleHistoryBuffer.getItem(i) * coefficient[i];
+        }
+    }
+
+    return sampleFiltered;
 }
 
 function blackmanNuttall(n, N) {
@@ -254,28 +283,18 @@ function sampleOutHandler(monoOut, monoIn) {
         microphoneSample = monoIn[i];
 
         sampleToFilter = isLoopbackEnabled ? whiteNoiseSample : microphoneSample;
-        monoOut[i] = applyFirFilter(sampleToFilter);
+
+        monoOut[i] = applyFilter(sampleToFilter);
     }
 }
 
-function applyFirFilter(sampleToFilter) {
-    var N, i, sampleFiltered;
+function applyFilter(sampleToFilter) {
+    var filteredSample;
 
-    if (!sampleHistoryBuffer) {
-        return sampleToFilter;
-    }
+    firFilterSampleHistoryBuffer.pushEvenIfFull(sampleToFilter);
+    filteredSample = getFilteredSample(firFilterSampleHistoryBuffer, firFilterCoefficient);
 
-    N = filterCoefficient.length;
-    sampleFiltered = 0;
-    sampleHistoryBuffer.pushEvenIfFull(sampleToFilter);
-    if (sampleHistoryBuffer.getSize() === N) {   // let's wait for buffer to fill completely...
-        // convolve
-        for (i = 0; i < N; i++) {
-            sampleFiltered += sampleHistoryBuffer.getItem(i) * filterCoefficient[i];
-        }
-    }
-
-    return sampleFiltered;
+    return filteredSample;
 }
 
 function refreshDataOnScreen() {

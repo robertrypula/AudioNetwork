@@ -160,7 +160,7 @@ function getPhaseFromComplexNumber(real, imm) {
     // get angle between positive X axis and vector counter-clockwise
     phase = findUnitAngle(real, imm);
     // sine wave without any phase offset is a complex number with real part equal zero
-    // and immaginary part on the negative side (vector pointing downwards -> 270 degrees)
+    // and imaginary part on the negative side (vector pointing downwards -> 270 degrees)
     phase = phase - 0.75;
     // correction from line above may produce negative phase so we need to fix it
     phase = phase < 0 ? phase + 1 : phase;
@@ -177,11 +177,12 @@ function findUnitAngle(x, y) {
     length = Math.sqrt(x * x + y * y);
     length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
 
-    //       ^
-    //    II | I
-    //  -----+----->
-    //   III | IV
-    //       |
+    //         ^             Legend:
+    //  II     *     I        '!' = 0 degrees
+    //         |              '*' = 90 degrees
+    //  ----@--+--!---->      '@' = 180 degrees
+    //         |              '%' = 270 degrees
+    //  III    %     IV
 
     quarter = (y >= 0)
         ? (x >= 0 ? 1 : 2)

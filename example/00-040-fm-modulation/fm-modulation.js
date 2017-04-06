@@ -231,8 +231,8 @@ function sampleOutHandler(monoOut, monoIn) {
         sampleNumber++;
     }
 
-    drawTimeDomainData(ctxTxTimeDomainBaseband, baseband);
-    drawTimeDomainData(ctxTxTimeDomainAudio, monoOut);
+    // drawTimeDomainData(ctxTxTimeDomainBaseband, baseband);
+    // drawTimeDomainData(ctxTxTimeDomainAudio, monoOut);
 }
 
 function refreshDataOnScreen() {

@@ -10,7 +10,7 @@ var
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -100,
-    ZOOM_SIZE = 128,
+    ZOOM_SIZE = 256,
     domLowCpuUsage,
     domLocalOscillatorHertzFrequency,
     domLocalOscillatorMiliHertzFrequency,
@@ -21,6 +21,7 @@ var
     ctxFrequencyDomainFilteredB,
     ctxFrequencyDomainDecimatedB,
     ctxFrequencyDomainZoom,
+    ctxFrequencyDomainPhaseZoom,
     zoomBuffer,                           // TODO refactor variable name, etc
     sampleNumber = 0,
     localOscillator,
@@ -37,19 +38,27 @@ var
 
 function init() {
     initDomElement();
-    initWebAudioApi();
+
+    audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
+    audioMonoIO.setVolume(0.1);
+    audioMonoIO.setSampleInHandler(sampleInHandler);
+    initFirFilter();
+    zoomBuffer = new Queue(ZOOM_SIZE);
 
     onLocalOscillatorFrequencyChange();
 
-/*
+
+    // TODO move OFDM tests to another example
     audioMonoIO.setPeriodicWave(
-        16 * audioMonoIO.getSampleRate() / BUFFER_SIZE,
+        50,
         1.0,
         0,
-        [ 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-    );*/
-    // audioMonoIO.setLoopback(true);
+        //                                                       1 kHz                        1.5 kHz                        2 kHz
+        //                                                         |                             |                             |
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    );
+    audioMonoIO.setLoopback(true);
 }
 
 function initDomElement() {
@@ -64,16 +73,7 @@ function initDomElement() {
     ctxFrequencyDomainFilteredB = getConfiguredCanvasContext('canvas-frequency-domain-04-filtered-b', BUFFER_SIZE / FIR_FILTER_A_DECIMATION, CANVAS_HEIGHT);
     ctxFrequencyDomainDecimatedB = getConfiguredCanvasContext('canvas-frequency-domain-05-decimated-b', BUFFER_SIZE / (FIR_FILTER_A_DECIMATION * FIR_FILTER_B_DECIMATION), CANVAS_HEIGHT);
     ctxFrequencyDomainZoom = getConfiguredCanvasContext('canvas-frequency-domain-06-zoom', ZOOM_SIZE, CANVAS_HEIGHT);
-}
-
-function initWebAudioApi() {
-    audioMonoIO = new AudioMonoIO(FFT_SIZE, BUFFER_SIZE);
-
-    // we need to put it here because we need audioMonoIO instance
-    // and additionally we don't want handler to run before FIR filter initialization
-    initFirFilter();
-
-    audioMonoIO.setSampleInHandler(sampleInHandler);
+    ctxFrequencyDomainPhaseZoom = getConfiguredCanvasContext('canvas-frequency-domain-phase-07-zoom', ZOOM_SIZE, CANVAS_HEIGHT);
 }
 
 function initFirFilter() {
@@ -98,8 +98,6 @@ function initFirFilter() {
     firFilterCoefficientB = applyWindowFunctionAndNormalize(firFilterCoefficientB);
     firFilterSampleHistoryRealBufferB = new Queue(firFilterCoefficientB.length);
     firFilterSampleHistoryImmBufferB = new Queue(firFilterCoefficientB.length);
-
-    zoomBuffer = new Queue(ZOOM_SIZE);
 }
 
 function onLocalOscillatorFrequencyChange() {
@@ -189,6 +187,58 @@ function complexAdd(a, b) {
 // -----------------------------------------------------------------------
 // fft utils
 
+function getFrequencyBinPhase(complex) {
+    var phase;
+
+    // get angle between positive X axis and vector counter-clockwise
+    phase = findUnitAngle(complex.real, complex.imm);
+    // sine wave without any phase offset is a complex number with real part equal zero
+    // and imaginary part on the negative side (vector pointing downwards -> 270 degrees)
+    phase = phase - 0.75;
+    // correction from line above may produce negative phase so we need to fix it
+    phase = phase < 0 ? phase + 1 : phase;
+    // fix direction - when sine wave is moving to the right in time domain
+    // then phase angle should increase counter-clockwise
+    phase = 1 - phase;
+
+    return phase;
+}
+
+function findUnitAngle(x, y) {
+    var length, quarter, angle;
+
+    length = Math.sqrt(x * x + y * y);
+    length = (length < 0.000001) ? 0.000001 : length;    // prevents from dividing by zero
+
+    //         ^             Legend:
+    //  II     *     I        '!' = 0 degrees
+    //         |              '*' = 90 degrees
+    //  ----@--+--!---->      '@' = 180 degrees
+    //         |              '%' = 270 degrees
+    //  III    %     IV
+
+    quarter = (y >= 0)
+        ? (x >= 0 ? 1 : 2)
+        : (x <= 0 ? 3 : 4);
+
+    switch (quarter) {
+        case 1:
+            angle = Math.asin(y / length);
+            break;
+        case 2:
+            angle = Math.asin(-x / length) + 0.5 * Math.PI;
+            break;
+        case 3:
+            angle = Math.asin(-y / length) + 1.0 * Math.PI;
+            break;
+        case 4:
+            angle = Math.asin(x / length) + 1.5 * Math.PI;
+            break;
+    }
+
+    return angle / (2 * Math.PI);   // returns angle in range: <0, 1)
+}
+
 function applyWindowFunctionComplex(input) {
     var i, windowValue, length, output, complex;
 
@@ -201,6 +251,27 @@ function applyWindowFunctionComplex(input) {
     }
 
     return output;
+}
+
+function fftShift(frequencyDomain) {
+    var i, lengthHalf, tmp;
+
+    lengthHalf = frequencyDomain.length / 2;      // this is assuming even lengths!
+    for (i = 0; i < lengthHalf; i++) {
+        tmp = frequencyDomain[i];
+        frequencyDomain[i] = frequencyDomain[lengthHalf + i];
+        frequencyDomain[lengthHalf + i] = tmp;
+    }
+}
+
+function getFrequencyDomainComplex(timeDomain) {
+    var timeDomainWindowed, frequencyDomain;
+
+    timeDomainWindowed = applyWindowFunctionComplex(timeDomain);
+    frequencyDomain = fft(timeDomainWindowed);
+    fftShift(frequencyDomain);
+
+    return frequencyDomain;
 }
 
 function getFrequencyDomainDecibel(frequencyDomain) {
@@ -220,15 +291,35 @@ function getFrequencyDomainDecibel(frequencyDomain) {
     return decibel;
 }
 
-function getFrequencyData(timeDomain) {
-    var timeDomainWindowed, frequencyDomain, frequencyDomainDecibel;
+function getFrequencyDomainPhase(frequencyDomain) {
+    var i, phase, complex;
 
-    timeDomainWindowed = applyWindowFunctionComplex(timeDomain);
-    frequencyDomain = fft(timeDomainWindowed);
-    fftShift(frequencyDomain);
-    frequencyDomainDecibel = getFrequencyDomainDecibel(frequencyDomain);
+    phase = [];
+    phase.length = frequencyDomain.length;
+    for (i = 0; i < frequencyDomain.length; i++) {
+        complex = frequencyDomain[i];
+        phase[i] = getFrequencyBinPhase(complex);
+    }
+
+    return phase;
+}
+
+function getFrequencyData(timeDomain) {                   // this is actually returning decibel values but
+    var frequencyComplexData, frequencyDomainDecibel;     // it's better to follow AnalyserNode's method name
+
+    frequencyComplexData = getFrequencyDomainComplex(timeDomain);
+    frequencyDomainDecibel = getFrequencyDomainDecibel(frequencyComplexData);
 
     return frequencyDomainDecibel;
+}
+
+function getFrequencyPhaseData(timeDomain) {              // in AnalyserNode we don't have that method...
+    var frequencyComplexData, frequencyDomainPhase;
+
+    frequencyComplexData = getFrequencyDomainComplex(timeDomain);
+    frequencyDomainPhase = getFrequencyDomainPhase(frequencyComplexData);
+
+    return frequencyDomainPhase;
 }
 
 // -----------------------------------------------------------------------
@@ -319,23 +410,6 @@ function getFilteredSample(sampleHistoryBuffer, coefficient) {
     return sampleFiltered;
 }
 
-function getTimeDomainFiltered(timeDomain, sampleHistoryBuffer, coefficient, decimate) {
-    var output, length, i, filteredSample;
-
-    output = [];
-    length = timeDomain.length;
-    for (i = 0; i < length; i++) {
-        sampleHistoryBuffer.pushEvenIfFull(timeDomain[i]);
-        // important: in order to keep alignment timeDomain.length and decimate should be power of two!
-        if (!decimate || i % decimate === 0) {
-            filteredSample = getFilteredSample(sampleHistoryBuffer, coefficient);
-            output.push(filteredSample);
-        }
-    }
-
-    return output;
-}
-
 function getTimeDomainComplexFiltered(timeDomainComplex, sampleHistoryRealBuffer, sampleHistoryImmBuffer, coefficient, decimate) {
     var output, length, i, filteredRealSample, filteredImmSample, complex;
 
@@ -361,17 +435,6 @@ function getTimeDomainComplexFiltered(timeDomainComplex, sampleHistoryRealBuffer
 
 // -----------------------------------------------------------------------
 // common
-
-function fftShift(frequencyDomain) {
-    var i, lengthHalf, tmp;
-
-    lengthHalf = frequencyDomain.length / 2;      // this is assuming even lengths!
-    for (i = 0; i < lengthHalf; i++) {
-        tmp = frequencyDomain[i];
-        frequencyDomain[i] = frequencyDomain[lengthHalf + i];
-        frequencyDomain[lengthHalf + i] = tmp;
-    }
-}
 
 function complexClone(complex) {
     return {
@@ -466,6 +529,20 @@ function drawFrequencyDomainData(ctx, data) {
     }
 }
 
+function drawPhaseData(ctx, data) {
+    var limit, hMid, x, y;
+
+    clear(ctx);
+
+    hMid = Math.floor(0.5 * CANVAS_HEIGHT);
+    limit = Math.min(MAX_WIDTH, data.length);
+    for (x = 0; x < limit; x++) {
+        y = hMid * (1 - data[x]);
+        drawLine(ctx, x - 1, y - 1, x + 1, y + 1);
+        drawLine(ctx, x + 1, y - 1, x - 1, y + 1);
+    }
+}
+
 // -----------------------------------------------------------------------
 // data handlers
 
@@ -485,7 +562,8 @@ function sampleInHandler(monoIn) {
         frequencyDataDecimatedA,
         frequencyDataFilteredB,
         frequencyDataDecimatedB,
-        frequencyDataZoom;
+        frequencyDataZoom,
+        frequencyDataPhaseZoom;
 
     // convert real signal to complex signal
     timeDomain = convertRealSignalToComplexSignal(monoIn);
@@ -537,7 +615,32 @@ function sampleInHandler(monoIn) {
         for (i = 0; i < zoomBuffer.getSize(); i++) {
             timeDomainZoom.push(zoomBuffer.getItem(i));
         }
+
+        // TODO refactor it - I was testing phase output so the code is messy here
         frequencyDataZoom = getFrequencyData(timeDomainZoom);
         drawFrequencyDomainData(ctxFrequencyDomainZoom, frequencyDataZoom);
+
+        var isLocalMax;
+
+        frequencyDataPhaseZoom = getFrequencyPhaseData(timeDomainZoom);
+
+        for (i = 0; i < frequencyDataPhaseZoom.length; i++) {
+            if (i > 0 && i < frequencyDataPhaseZoom.length - 1) {
+                isLocalMax = frequencyDataZoom[i] > -80 &&
+                    frequencyDataZoom[i - 1] < frequencyDataZoom[i] &&
+                    frequencyDataZoom[i + 1] < frequencyDataZoom[i]
+            } else {
+                isLocalMax = false;
+            }
+
+            if (isLocalMax) {
+                frequencyDataPhaseZoom[i] = frequencyDataPhaseZoom[i] * 2 - 1;
+            }  else {
+                frequencyDataPhaseZoom[i] = 0;
+            }
+        }
+
+        drawPhaseData(ctxFrequencyDomainPhaseZoom, frequencyDataPhaseZoom);     // yeah... this is not frequency domain chart
+
     }
 }

@@ -27,3 +27,14 @@ S S - - - - S S - - - -
 1.29 OFDM symbols / sec
 5.16 symbols / sec
 15.48 bit / s
+
+Profiles:
+
+OFDM - FFT and OscillatorNode (QAM)
+OFDM - AnalyserNode and OscillatorNode (ASK)
+spread spectrum - AnalyserNode and OscillatorNode
+
+
+Phone -> Phone
+
+Phone -> PC
