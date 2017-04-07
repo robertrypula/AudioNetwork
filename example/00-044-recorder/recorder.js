@@ -18,7 +18,7 @@ function init() {
 }
 
 function onRecordClick() {
-    bufferSize = 1 * 1024;
+    bufferSize = 2 * 1024;
     canvasWidth = bufferSize * BUFFER_NUMBER;
     recordedBuffers = 0;
     timeDomainData = [];
@@ -91,10 +91,8 @@ function sampleInHandler(monoIn) {
         return;
     }
 
-    for (i = 0; i < monoIn.length; i++) {
-        timeDomainData.push(monoIn[i]);
-    }
-
+    timeDomainData.push(monoIn);
+ 
     recordedBuffers++;
     console.log('Recorded buffer: ', recordedBuffers);
 
@@ -105,6 +103,17 @@ function sampleInHandler(monoIn) {
 }
 
 function draw() {
-    drawTimeDomainData(ctxRecordedBuffers, timeDomainData);
-    console.log(timeDomainData);
+    var i, j, data;
+    
+    data = [];
+    for (i = 0; i < timeDomainData.length; i++) {
+        for (j = 0; j < timeDomainData[i].length; j++) {
+            data.push(
+                timeDomainData[i][j]
+            );
+        }
+    }
+
+    drawTimeDomainData(ctxRecordedBuffers, data);
+    // console.log(timeDomainData);
 }
