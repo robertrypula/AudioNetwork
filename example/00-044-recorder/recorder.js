@@ -11,13 +11,13 @@ var
     bufferSize,
     canvasWidth,
     audioMonoIO,
-    domGaugeRaw;
+    domGaugeRaw,
+    record;
 
 function init() {
     // domGaugeRaw = document.getElementById('max-absolute-amplitude-gauge-rawsample');
-}
 
-function onRecordClick() {
+    record = false;
     bufferSize = 2 * 1024;
     canvasWidth = bufferSize * BUFFER_NUMBER;
     recordedBuffers = 0;
@@ -30,9 +30,11 @@ function onRecordClick() {
         CANVAS_HEIGHT
     );
 
-    setTimeout(function () {
-        audioMonoIO.setSampleInHandler(sampleInHandler);
-    }, 2000);
+    audioMonoIO.setSampleInHandler(sampleInHandler);
+}
+
+function onRecordClick() {
+    record = true;
 }
 
 // -----------------------------------------------------------------------
@@ -85,7 +87,9 @@ function drawTimeDomainData(ctx, data) {
 // data handlers
 
 function sampleInHandler(monoIn) {
-    var i;
+    if (!record) {
+        return;
+    }
 
     if (recordedBuffers >= BUFFER_NUMBER) {
         return;
