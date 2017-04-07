@@ -19,15 +19,15 @@ AudioMonoIO = function (fftSize, bufferSize, smoothingTimeConstant) {
 
     this.$$fftSize = AudioMonoIO.$$getValueOrDefault(
         fftSize,
-        AudioMonoIO.$$_FFT_SIZE
+        AudioMonoIO.FFT_SIZE
     );
     this.$$bufferSize = AudioMonoIO.$$getValueOrDefault(
         bufferSize,
-        AudioMonoIO.$$_BUFFER_SIZE
+        AudioMonoIO.BUFFER_SIZE
     );
     this.$$smoothingTimeConstant = AudioMonoIO.$$getValueOrDefault(
         smoothingTimeConstant,
-        AudioMonoIO.$$_SMOOTHING_TIME_CONSTANT
+        AudioMonoIO.SMOOTHING_TIME_CONSTANT
     );
 
     this.$$sampleInHandler = null;
@@ -51,9 +51,9 @@ AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_AMPLITUDE = [ 1 ];
 AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_PHASE = [ 0 ];
 
 // default values for AudioMonoIO class constructor
-AudioMonoIO.$$_FFT_SIZE = 2 * 1024;
-AudioMonoIO.$$_BUFFER_SIZE = 4 * 1024;
-AudioMonoIO.$$_SMOOTHING_TIME_CONSTANT = 0;
+AudioMonoIO.FFT_SIZE = 2 * 1024;
+AudioMonoIO.BUFFER_SIZE = 4 * 1024;
+AudioMonoIO.SMOOTHING_TIME_CONSTANT = 0;
 
 AudioMonoIO.prototype.$$normalizeBrowserApi = function () {
     if (AudioMonoIO.$$firstInstance) {

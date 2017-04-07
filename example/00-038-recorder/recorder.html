@@ -58,7 +58,7 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
                     <p>
-                        This example allows to examine ScriptProcessorNode's block and how they overlap
+                        This example allows to examine ScriptProcessorNode's block and how waves are connected
                     </p>
                 </div>
             </div>
@@ -68,20 +68,69 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Lorem
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Loopback
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button class="btn btn-default" onClick="onRecordClick()">
-                                Record 10 blocks of samples
+                            <input
+                                type="checkbox"
+                                onChange="onLoopbackCheckboxChange()"
+                                id="loopback-checkbox"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double" id="audio-mono-io-init-div">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Buffer Size
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(256)">256</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(512)">512</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(1024)">1024</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(2048)">2048</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(4096)">4096</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(8192)">8192</button>
+                            <button class="btn btn-default" onClick="onAudioMonoIoInitClick(16384)">16384</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Record
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button class="btn btn-default" onClick="onRecordClick()" id="record-button">
+                                Initialize first
                             </button>
                         </div>
                     </div>
 
-                    <h2>Recorded blocks</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-recorded-blocks"></canvas>
+                    <h2>Recorded buffers</h2>
+                    <div class="margin-bottom-double">
+                        <div class="scroll-container">
+                            <div id="canvas-container" class="clearfix">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>Test sound</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Play
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button class="btn btn-default" onClick="onPlayClick()" id="play-button">
+                                Initialize first
+                            </button>
+                        </div>
                     </div>
 
                 </div>
