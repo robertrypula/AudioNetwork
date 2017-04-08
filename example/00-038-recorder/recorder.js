@@ -189,7 +189,7 @@ function appendBitChirp(buffer, isOne) {
     carrierFullCycles = samplePerBit / 32;
     phaseSpeed = 4 * (isOne ? -1 : 1);
     for (i = 0; i < samplePerBit; i++) {
-        carrierPhase += phaseSpeed * dt;
+        carrierPhase += (i / samplePerBit) * phaseSpeed * dt;
         sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
 
         buffer.push(sample);
@@ -207,10 +207,10 @@ function getTestSoundBuffer() {
         for (i = 0; i < 8; i++) {
             binaryStr = i.toString(2);
             binaryStr = pad(binaryStr, 3);
-            binaryStr = '1';
+            binaryStr = '01';
 
             for (j = 0; j < binaryStr.length; j++) {
-                isOne = (binaryStr[j] === '01');
+                isOne = (binaryStr[j] === '1');
 
                 switch (modulation) {
                     /*
