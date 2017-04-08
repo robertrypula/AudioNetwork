@@ -38,7 +38,9 @@ function init() {
 }
 
 function onLoopbackCheckboxChange() {
-    audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+    if (audioMonoIO) {
+        audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+    }
 }
 
 function onAudioMonoIoInitClick(bufferSizeValue) {
@@ -137,55 +139,110 @@ function pad(num, size) {
 // -----------------------------------------------------------------------
 // test sound
 
+function appendBitASK(buffer, isOne) {
+    var samplePerBit, i, sample;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < samplePerBit; i++) {
+        sample = generateSineWave(32, isOne ? 1.0 : 0.3, 0, buffer.length);
+        buffer.push(sample);
+    }
+}
+
+function appendBitBPSK(buffer, isOne) {
+    var samplePerBit, i, sample;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < samplePerBit; i++) {
+        sample = generateSineWave(32, 1, isOne ? 0.5 : 0.0, buffer.length);
+        buffer.push(sample);
+    }
+}
+
+function appendBitFSK(buffer, isOne) {
+    var samplePerBit, i, sample;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < samplePerBit; i++) {
+        sample = generateSineWave(isOne ? 16 : 32, 1, 0, buffer.length);
+        buffer.push(sample);
+    }
+}
+
+function appendBitHighLow(buffer, isOne) {
+    var samplePerBit, i, sample;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < samplePerBit; i++) {
+        sample = isOne ? 0.8 : -0.8;
+        buffer.push(sample);
+    }
+}
+
+function appendBitChirp(buffer, isOne) {
+    var samplePerBit, i, sample, phaseSpeed, carrierPhase, dt, carrierFullCycles;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    carrierPhase = 0;
+    dt = 1 / audioMonoIO.getSampleRate();
+
+    carrierFullCycles = samplePerBit / 32;
+    phaseSpeed = 1 * (isOne ? -1 : 1);
+    for (i = 0; i < samplePerBit; i++) {
+        carrierPhase += phaseSpeed * (i / (samplePerBit - 1));
+        sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
+
+        buffer.push(sample);
+    }
+}
+
 function getTestSoundBuffer() {
-    var i, j, k, output, sample, sampleNumber, length, isOne, binaryStr, samplePerBit, modulation;
+    var i, j, k, output, isOne, binaryStr, samplePerBit, modulation;
 
     output = [];
     samplePerBit = parseInt(domSamplePerBit.value);
-    sampleNumber = 0;
     modulation = 0;
     while (true) {
 
         for (i = 0; i < 8; i++) {
             binaryStr = i.toString(2);
             binaryStr = pad(binaryStr, 3);
-
-            console.log(modulation + ' ' + binaryStr);
+            binaryStr = '1';
 
             for (j = 0; j < binaryStr.length; j++) {
-                isOne = (binaryStr[j] === '1');
-                for (k = 0; k < samplePerBit; k++) {
+                isOne = (binaryStr[j] === '01');
 
-                    switch (modulation) {
-                        case 0:
-                            sample = generateSineWave(32, isOne ? 1.0 : 0.05, 0, sampleNumber);
-                            break;
-                        case 1:
-                            sample = generateSineWave(32, 1, isOne ? 0.0 : 0.5, sampleNumber);
-                            break;
-                        case 2:
-                            sample = generateSineWave(isOne ? 16 : 32, 1, 0, sampleNumber);
-                            break;
-                        default:
-                            sample = 0;
-                    }
-                    output.push(sample);
-                    sampleNumber++;
+                switch (modulation) {
+                    /*
+                    case 0:   // ASK
+                        appendBitASK(output, isOne);
+                        break;
+                    case 1:   // BPSK
+                        appendBitBPSK(output, isOne);
+                        break;
+                    case 2:   // FSK
+                        appendBitFSK(output, isOne);
+                        break;
+                    case 3:   // High/Low state
+                        appendBitHighLow(output, isOne);
+                        break;
+                    */
+                    case 4:   // chirp
+                        appendBitChirp(output, isOne);
+                        break;
                 }
             }
+
             for (k = 0; k < samplePerBit; k++) {
-                sample = 0;
-                output.push(sample);
-                sampleNumber++;
+                output.push(0);
             }
         }
 
         modulation++;
 
-        if (modulation === 3) {
+        if (modulation === 5) {
             break;
         }
-        // samplePerBit /= 2;
     }
 
     for (i = 0; i < 3000; i++) {
