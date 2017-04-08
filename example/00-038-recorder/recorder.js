@@ -146,9 +146,9 @@ function getTestSoundBuffer() {
     modulation = 0;
     while (true) {
 
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 8; i++) {
             binaryStr = i.toString(2);
-            binaryStr = pad(binaryStr, 4);
+            binaryStr = pad(binaryStr, 3);
 
             console.log(modulation + ' ' + binaryStr);
 
