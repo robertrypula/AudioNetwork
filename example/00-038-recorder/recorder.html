@@ -122,6 +122,29 @@
                     <h2>Test sound</h2>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="loopback-checkbox">
+                                Sample per bit
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="sample-per-bit"
+                                value="128" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Sequence duration
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="sequence-duration"></span>
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
                                 Play
                             </label>

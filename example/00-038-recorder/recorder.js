@@ -10,6 +10,8 @@ var
     domRecordButton,
     domPlayButton,
     domLoopbackCheckbox,
+    domSamplePerBit,
+    domSequenceDuration,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -31,6 +33,8 @@ function init() {
     domRecordButton = document.getElementById('record-button');
     domPlayButton = document.getElementById('play-button');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domSamplePerBit = document.getElementById('sample-per-bit');
+    domSequenceDuration = document.getElementById('sequence-duration');
 }
 
 function onLoopbackCheckboxChange() {
@@ -81,7 +85,10 @@ function onPlayClick() {
     }
 
     testSoundBuffer = getTestSoundBuffer();
-    console.log('testSoundBuffer: ' + testSoundBuffer.length / audioMonoIO.getSampleRate() + ' sec');
+
+    domSequenceDuration.innerHTML =
+        (testSoundBuffer.length / audioMonoIO.getSampleRate()).toFixed(3) + ' sec';
+
     buffer = audioMonoIO
         .$$audioContext
         .createBuffer(
@@ -134,7 +141,7 @@ function getTestSoundBuffer() {
     var i, j, k, output, sample, sampleNumber, length, isOne, binaryStr, samplePerBit, modulation;
 
     output = [];
-    samplePerBit = 128;
+    samplePerBit = parseInt(domSamplePerBit.value);
     sampleNumber = 0;
     modulation = 0;
     while (true) {
@@ -157,7 +164,7 @@ function getTestSoundBuffer() {
                             sample = generateSineWave(32, 1, isOne ? 0.0 : 0.5, sampleNumber);
                             break;
                         case 2:
-                            sample = generateSineWave(isOne ? 32 : 16, 1, 0, sampleNumber);
+                            sample = generateSineWave(isOne ? 16 : 32, 1, 0, sampleNumber);
                             break;
                         default:
                             sample = 0;
