@@ -184,12 +184,12 @@ function appendBitChirp(buffer, isOne) {
 
     samplePerBit = parseInt(domSamplePerBit.value);
     carrierPhase = 0;
-    dt = 1 / audioMonoIO.getSampleRate();
+    dt = 1 / samplePerBit;
 
     carrierFullCycles = samplePerBit / 32;
-    phaseSpeed = 1 * (isOne ? -1 : 1);
+    phaseSpeed = 4 * (isOne ? -1 : 1);
     for (i = 0; i < samplePerBit; i++) {
-        carrierPhase += phaseSpeed * (i / (samplePerBit - 1));
+        carrierPhase += phaseSpeed * dt;
         sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
 
         buffer.push(sample);
