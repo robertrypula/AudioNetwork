@@ -12,6 +12,7 @@ var
     domLoopbackCheckbox,
     domSamplePerBit,
     domSequenceDuration,
+    domRawSamples,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -35,6 +36,7 @@ function init() {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domSamplePerBit = document.getElementById('sample-per-bit');
     domSequenceDuration = document.getElementById('sequence-duration');
+    domRawSamples = document.getElementById('raw-samples');
 }
 
 function onLoopbackCheckboxChange() {
@@ -80,6 +82,7 @@ function onPlayClick() {
         buffer,
         bufferChannelData,
         bufferSourceNode,
+        html,
         i;
 
     if (playInProgress || !audioMonoIO) {
@@ -113,6 +116,12 @@ function onPlayClick() {
 
     domPlayButton.innerHTML = 'Playing in a loop...';
     playInProgress = true;
+
+    html = '';
+    for (i = 0; i < testSoundBuffer.length; i++) {
+        html += testSoundBuffer[i].toFixed(6) + '\n';
+    }
+    domRawSamples.value = html;
 }
 
 // -----------------------------------------------------------------------
@@ -180,19 +189,39 @@ function appendBitHighLow(buffer, isOne) {
 }
 
 function appendBitChirp(buffer, isOne) {
-    var samplePerBit, i, sample, phaseSpeed, carrierPhase, dt, carrierFullCycles;
+    var samplePerBit, i, sample, phaseAcceleration, carrierPhase, t, carrierFullCycles;
 
     samplePerBit = parseInt(domSamplePerBit.value);
     carrierPhase = 0;
-    dt = 1 / samplePerBit;
 
     carrierFullCycles = samplePerBit / 32;
-    phaseSpeed = 4 * (isOne ? -1 : 1);
+    phaseAcceleration = carrierFullCycles * (isOne ? -1 : 1);   // this will double the full cycles in bit period
     for (i = 0; i < samplePerBit; i++) {
-        carrierPhase += (i / samplePerBit) * phaseSpeed * dt;
+        t = i / samplePerBit;
+        carrierPhase = phaseAcceleration * t * t / 2;
         sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
 
         buffer.push(sample);
+    }
+}
+
+function appendWhiteNoise(buffer, amount) {
+    var i, samplePerBit;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < amount * samplePerBit; i++) {
+        buffer.push(
+            -1 + Math.random() * 2
+        );
+    }
+}
+
+function appendSilence(buffer, amount) {
+    var i, samplePerBit;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    for (i = 0; i < amount * samplePerBit; i++) {
+        buffer.push(0);
     }
 }
 
@@ -207,13 +236,11 @@ function getTestSoundBuffer() {
         for (i = 0; i < 8; i++) {
             binaryStr = i.toString(2);
             binaryStr = pad(binaryStr, 3);
-            binaryStr = '01';
 
             for (j = 0; j < binaryStr.length; j++) {
                 isOne = (binaryStr[j] === '1');
 
                 switch (modulation) {
-                    /*
                     case 0:   // ASK
                         appendBitASK(output, isOne);
                         break;
@@ -226,7 +253,6 @@ function getTestSoundBuffer() {
                     case 3:   // High/Low state
                         appendBitHighLow(output, isOne);
                         break;
-                    */
                     case 4:   // chirp
                         appendBitChirp(output, isOne);
                         break;
@@ -240,16 +266,16 @@ function getTestSoundBuffer() {
 
         modulation++;
 
+        appendWhiteNoise(output, 2);
+        appendSilence(output, 1);
+
         if (modulation === 5) {
             break;
         }
     }
 
-    for (i = 0; i < 3000; i++) {
-        output.push(
-            -1 + Math.random() * 2
-        );
-    }
+    appendWhiteNoise(output, 16);
+    appendSilence(output, 1);
 
     return output;
 }
