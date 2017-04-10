@@ -80,6 +80,15 @@ Symbol transition windowing
 WiFi explained
     http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/wlan-ofdm/content/ofdm_80211-overview.htm
     http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/wlan-ofdm/content/ofdm_basicprinciplesoverview.htm
+
+Another great example
+    http://www.sharetechnote.com/html/Communication_OFDM.html
+
+Complete Acoustic Communication System - 'Acoustic OFDM'   GREAT!!!!!!!
+    https://www.nttdocomo.co.jp/english/binary/pdf/corporate/technology/rd/technical_journal/bn/vol8_2/vol8_2_004en.pdf
+
+Nice articles about OFDM
+    http://www.skydsp.com/publications/index.htm
 ```
 
 ## FFT

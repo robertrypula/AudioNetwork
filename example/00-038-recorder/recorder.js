@@ -4,7 +4,8 @@
 var
     CANVAS_HEIGHT = 201,
     RECORD_TIME = 2,    // seconds
-    domCanvasContainer,
+    domCanvasContainerRecord,
+    domCanvasContainerPlay,
     domAudioMonoIoInitDiv,
     domRecordButton,
     domPlayButton,
@@ -18,6 +19,9 @@ var
     domModulationFskCheckbox,
     domModulationChirpCheckbox,
     domModulationOfdmCheckbox,
+    domSeparateBinaryValuesCheckbox,
+    domSeparateModulationTypesCheckbox,
+    domSeparateSequenceRepetitionsCheckbox,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -35,7 +39,8 @@ var
     };
 
 function init() {
-    domCanvasContainer = document.getElementById('canvas-container');
+    domCanvasContainerRecord = document.getElementById('canvas-container-record');
+    domCanvasContainerPlay = document.getElementById('canvas-container-play');
     domAudioMonoIoInitDiv = document.getElementById('audio-mono-io-init-div');
     domRecordButton = document.getElementById('record-button');
     domPlayButton = document.getElementById('play-button');
@@ -49,6 +54,10 @@ function init() {
     domModulationFskCheckbox = document.getElementById('modulation-fsk-checkbox');
     domModulationChirpCheckbox = document.getElementById('modulation-chirp-checkbox');
     domModulationOfdmCheckbox = document.getElementById('modulation-ofdm-checkbox');
+
+    domSeparateBinaryValuesCheckbox = document.getElementById('separate-binary-value-checkbox');
+    domSeparateModulationTypesCheckbox = document.getElementById('separate-modulation-types-checkbox');
+    domSeparateSequenceRepetitionsCheckbox = document.getElementById('separate-sequence-repetitions-checkbox');
 }
 
 function onLoopbackCheckboxChange() {
@@ -84,8 +93,8 @@ function onRecordClick() {
     recordInProgress = true;
     bufferRecorded = 0;
     timeDomainBlock.length = 0;
-    domCanvasContainer.innerHTML = '';
-    domCanvasContainer.style.width = '0';
+    domCanvasContainerRecord.innerHTML = '';
+    domCanvasContainerRecord.style.width = '0';
     domRawSamplesRecord.value = '';
 }
 
@@ -96,6 +105,9 @@ function onPlayClick() {
         bufferChannelData,
         bufferSourceNode,
         i,
+        canvasHtml,
+        ctx,
+        timeDomainBlock,
         modulationTypeList = [];
 
     if (playInProgress || !audioMonoIO) {
@@ -148,10 +160,43 @@ function onPlayClick() {
     playInProgress = true;
 
     domRawSamplesPlay.value = dumpAsAsciiSoundFile(testSoundBuffer);
+
+    canvasHtml = '';
+    timeDomainBlock = getTimeDomainBlockFromBuffer(testSoundBuffer);
+    for (i = 0; i < timeDomainBlock.length; i++) {
+        canvasHtml += '<canvas id="canvas-block-play-' + i + '"></canvas>';
+    }
+    domCanvasContainerPlay.innerHTML = canvasHtml;
+    domCanvasContainerPlay.style.width = timeDomainBlock.length * bufferSize + timeDomainBlock.length + 'px';
+    for (i = 0; i < timeDomainBlock.length; i++) {
+        ctx = getConfiguredCanvasContext(
+            'canvas-block-play-' + i,
+            bufferSize,
+            CANVAS_HEIGHT
+        );
+        drawTimeDomainData(ctx, timeDomainBlock[i], i, audioMonoIO.getSampleRate());
+    }
 }
 
 // -----------------------------------------------------------------------
 // utils
+
+function getTimeDomainBlockFromBuffer(buffer) {
+    var i, output, block;
+
+    output = [];
+    for (i = 0; i < buffer.length; i++) {
+        if (i % bufferSize === 0) {
+            block = [];
+        }
+        block.push(buffer[i]);
+        if (i % bufferSize === bufferSize - 1 || i === buffer.length - 1) {
+            output.push(block);
+        }
+    }
+
+    return output;
+}
 
 function dumpAsAsciiSoundFile(buffer) {
     var output, i;
@@ -322,13 +367,15 @@ function appendBinaryValueSerial(output, modulationType, binaryValue) {
 function appendBinaryValueParallel(output, modulationType, binaryValue) {
     switch (modulationType) {
         case MODULATION_TYPE.OFDM:
+            // TODO tests with multiple symbol repetitions
+            appendOfdmSymbol(output, binaryValue);
             appendOfdmSymbol(output, binaryValue);
             break;
     }
 }
 
 function getTestSoundBuffer(modulationTypeList) {
-    var i, j, value, binaryValue, output, modulationType;
+    var i, value, binaryValue, output, modulationType;
 
     output = [];
     for (i = 0; i < modulationTypeList.length; i++) {
@@ -344,14 +391,20 @@ function getTestSoundBuffer(modulationTypeList) {
                     appendBinaryValueSerial(output, modulationType, binaryValue);
                     break;
             }
+            if (domSeparateBinaryValuesCheckbox.checked) {
+                appendSilence(output, 1);
+            }
+        }
+        if (domSeparateModulationTypesCheckbox.checked) {
+            appendWhiteNoise(output, 2);
             appendSilence(output, 1);
         }
-        appendWhiteNoise(output, 2);
-        appendSilence(output, 1);
     }
 
-    appendWhiteNoise(output, 16);
-    appendSilence(output, 1);
+    if (domSeparateSequenceRepetitionsCheckbox.checked) {
+        appendWhiteNoise(output, 16);
+        appendSilence(output, 1);
+    }
 
     return output;
 }
@@ -398,7 +451,7 @@ function drawTimeDomainData(ctx, data, offset, sampleRate) {
         drawLine(ctx, x, y1, x + 1, y2);
     }
 
-    duration = data.length / sampleRate;
+    duration = bufferSize / sampleRate;
     for (x = 0; x < data.length; x += 128) {
         drawLine(ctx, x, 0, x, 12);
         ctx.fillText(
@@ -408,7 +461,7 @@ function drawTimeDomainData(ctx, data, offset, sampleRate) {
         );
         drawLine(ctx, x, CANVAS_HEIGHT, x, CANVAS_HEIGHT - 12);
         ctx.fillText(
-            (offset * data.length + x).toFixed(0),
+            (bufferSize * offset + x).toFixed(0),
             x + 4,
             CANVAS_HEIGHT - 2
         );
@@ -449,13 +502,13 @@ function showRecording() {
 
     canvasHtml = '';
     for (i = 0; i < timeDomainBlock.length; i++) {
-        canvasHtml += '<canvas id="canvas-block-' + i + '"></canvas>';
+        canvasHtml += '<canvas id="canvas-block-record-' + i + '"></canvas>';
     }
-    domCanvasContainer.innerHTML = canvasHtml;
-    domCanvasContainer.style.width = timeDomainBlock.length * bufferSize + timeDomainBlock.length + 'px';
+    domCanvasContainerRecord.innerHTML = canvasHtml;
+    domCanvasContainerRecord.style.width = timeDomainBlock.length * bufferSize + timeDomainBlock.length + 'px';
     for (i = 0; i < timeDomainBlock.length; i++) {
         ctx = getConfiguredCanvasContext(
-            'canvas-block-' + i,
+            'canvas-block-record-' + i,
             bufferSize,
             CANVAS_HEIGHT
         );
