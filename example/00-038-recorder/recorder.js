@@ -12,7 +12,8 @@ var
     domLoopbackCheckbox,
     domSamplePerBit,
     domSequenceDuration,
-    domRawSamples,
+    domRawSamplesPlay,
+    domRawSamplesRecord,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -36,7 +37,8 @@ function init() {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domSamplePerBit = document.getElementById('sample-per-bit');
     domSequenceDuration = document.getElementById('sequence-duration');
-    domRawSamples = document.getElementById('raw-samples');
+    domRawSamplesPlay = document.getElementById('raw-samples-play');
+    domRawSamplesRecord = document.getElementById('raw-samples-record');
 }
 
 function onLoopbackCheckboxChange() {
@@ -74,6 +76,7 @@ function onRecordClick() {
     timeDomainBlock.length = 0;
     domCanvasContainer.innerHTML = '';
     domCanvasContainer.style.width = '0';
+    domRawSamplesRecord.value = '';
 }
 
 function onPlayClick() {
@@ -82,7 +85,6 @@ function onPlayClick() {
         buffer,
         bufferChannelData,
         bufferSourceNode,
-        html,
         i;
 
     if (playInProgress || !audioMonoIO) {
@@ -117,15 +119,22 @@ function onPlayClick() {
     domPlayButton.innerHTML = 'Playing in a loop...';
     playInProgress = true;
 
-    html = '';
-    for (i = 0; i < testSoundBuffer.length; i++) {
-        html += testSoundBuffer[i].toFixed(6) + '\n';
-    }
-    domRawSamples.value = html;
+    domRawSamplesPlay.value = dumpAsAsciiSoundFile(testSoundBuffer);
 }
 
 // -----------------------------------------------------------------------
 // utils
+
+function dumpAsAsciiSoundFile(buffer) {
+    var output, i;
+
+    output = '[ASCII ' + audioMonoIO.getSampleRate() + 'Hz, Channels: 1, Samples: ' + buffer.length + ', Flags: 0]\n';
+    for (i = 0; i < buffer.length; i++) {
+        output += buffer[i].toFixed(6) + '\n';
+    }
+
+    return output;
+}
 
 function generateSineWave(samplePerPeriod, amplitude, unitPhaseOffset, sample) {
     var x;
@@ -174,16 +183,6 @@ function appendBitFSK(buffer, isOne) {
     samplePerBit = parseInt(domSamplePerBit.value);
     for (i = 0; i < samplePerBit; i++) {
         sample = generateSineWave(isOne ? 16 : 32, 1, 0, buffer.length);
-        buffer.push(sample);
-    }
-}
-
-function appendBitHighLow(buffer, isOne) {
-    var samplePerBit, i, sample;
-
-    samplePerBit = parseInt(domSamplePerBit.value);
-    for (i = 0; i < samplePerBit; i++) {
-        sample = isOne ? 0.8 : -0.8;
         buffer.push(sample);
     }
 }
@@ -250,10 +249,8 @@ function getTestSoundBuffer() {
                     case 2:   // FSK
                         appendBitFSK(output, isOne);
                         break;
-                    case 3:   // High/Low state
-                        appendBitHighLow(output, isOne);
                         break;
-                    case 4:   // chirp
+                    case 3:   // chirp
                         appendBitChirp(output, isOne);
                         break;
                 }
@@ -269,7 +266,7 @@ function getTestSoundBuffer() {
         appendWhiteNoise(output, 2);
         appendSilence(output, 1);
 
-        if (modulation === 5) {
+        if (modulation === 4) {
             break;
         }
     }
@@ -369,7 +366,7 @@ function sampleInHandler(monoIn) {
 }
 
 function showRecording() {
-    var i, ctx, canvasHtml;
+    var i, j, ctx, canvasHtml, buffer;
 
     canvasHtml = '';
     for (i = 0; i < timeDomainBlock.length; i++) {
@@ -385,4 +382,12 @@ function showRecording() {
         );
         drawTimeDomainData(ctx, timeDomainBlock[i], i, audioMonoIO.getSampleRate());
     }
+
+    buffer = [];
+    for (i = 0; i < timeDomainBlock.length; i++) {
+        for (j = 0; j < timeDomainBlock[i].length; j++) {
+            buffer.push(timeDomainBlock[i][j]);
+        }
+    }
+    domRawSamplesRecord.value = dumpAsAsciiSoundFile(buffer);
 }

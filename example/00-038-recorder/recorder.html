@@ -98,6 +98,7 @@
                         </div>
                     </div>
 
+                    <h2>Recorded buffers</h2>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
@@ -110,12 +111,20 @@
                             </button>
                         </div>
                     </div>
-
-                    <h2>Recorded buffers</h2>
                     <div class="margin-bottom-double">
                         <div class="scroll-container">
                             <div id="canvas-container" class="clearfix">
                             </div>
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                RAW recorded samples
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <textarea id="raw-samples-record" style="height: 50px;"></textarea>
                         </div>
                     </div>
 
@@ -158,11 +167,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                RAW samples
+                                RAW played samples
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <textarea id="raw-samples"></textarea>
+                            <textarea id="raw-samples-play" style="height: 50px;"></textarea>
                         </div>
                     </div>
 

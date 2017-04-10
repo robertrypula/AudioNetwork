@@ -69,6 +69,19 @@ How to shift the frequency spectrum?
 
 ```
 
+### OFDM
+
+```
+
+Symbol transition windowing
+    https://books.google.pl/books?id=OgsbDgAAQBAJ&lpg=PA93&dq=ofdm%20symbol%20transition&hl=pl&pg=PA93#v=onepage&q&f=false
+    http://rfmw.em.keysight.com/rfcomms/n4010a/n4010aWLAN/onlineguide/ofdm_raised_cosine_windowing.htm
+
+WiFi explained
+    http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/wlan-ofdm/content/ofdm_80211-overview.htm
+    http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/wlan-ofdm/content/ofdm_basicprinciplesoverview.htm
+```
+
 ## FFT
 
 ```
