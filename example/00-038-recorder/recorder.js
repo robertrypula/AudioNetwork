@@ -4,7 +4,6 @@
 var
     CANVAS_HEIGHT = 201,
     RECORD_TIME = 2,    // seconds
-    PLAY_TIME = 10,      // seconds
     domCanvasContainer,
     domAudioMonoIoInitDiv,
     domRecordButton,
@@ -14,6 +13,11 @@ var
     domSequenceDuration,
     domRawSamplesPlay,
     domRawSamplesRecord,
+    domModulationAskCheckbox,
+    domModulationBpskCheckbox,
+    domModulationFskCheckbox,
+    domModulationChirpCheckbox,
+    domModulationOfdmCheckbox,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -21,13 +25,14 @@ var
     recordNeverStarted = true,
     bufferRecorded,
     bufferRecordedLimit,
-    timeDomainBlock = [];
-
-/*
-TODO:
-    - add test signal via buffer: Chirp, ASK, FSK, BPSK
-    - improovements in AudioMonoIO
- */
+    timeDomainBlock = [],
+    MODULATION_TYPE = {
+        'ASK': 'ASK',
+        'BPSK': 'BPSK',
+        'FSK': 'FSK',
+        'CHIRP': 'CHIRP',
+        'OFDM': 'OFDM'
+    };
 
 function init() {
     domCanvasContainer = document.getElementById('canvas-container');
@@ -39,6 +44,11 @@ function init() {
     domSequenceDuration = document.getElementById('sequence-duration');
     domRawSamplesPlay = document.getElementById('raw-samples-play');
     domRawSamplesRecord = document.getElementById('raw-samples-record');
+    domModulationAskCheckbox = document.getElementById('modulation-ask-checkbox');
+    domModulationBpskCheckbox = document.getElementById('modulation-bpsk-checkbox');
+    domModulationFskCheckbox = document.getElementById('modulation-fsk-checkbox');
+    domModulationChirpCheckbox = document.getElementById('modulation-chirp-checkbox');
+    domModulationOfdmCheckbox = document.getElementById('modulation-ofdm-checkbox');
 }
 
 function onLoopbackCheckboxChange() {
@@ -61,7 +71,7 @@ function onAudioMonoIoInitClick(bufferSizeValue) {
 
     domAudioMonoIoInitDiv.parentNode.removeChild(domAudioMonoIoInitDiv);
     domRecordButton.innerHTML = 'Start';
-    domPlayButton.innerHTML = 'Start';
+    domPlayButton.innerHTML = 'Generate and Play';
 }
 
 function onRecordClick() {
@@ -85,17 +95,35 @@ function onPlayClick() {
         buffer,
         bufferChannelData,
         bufferSourceNode,
-        i;
+        i,
+        modulationTypeList = [];
 
     if (playInProgress || !audioMonoIO) {
         return;
     }
 
-    testSoundBuffer = getTestSoundBuffer();
+    if (domModulationAskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.ASK);
+    }
+    if (domModulationBpskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.BPSK);
+    }
+    if (domModulationFskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.FSK);
+    }
+    if (domModulationChirpCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.CHIRP);
+    }
+    if (domModulationOfdmCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.OFDM);
+    }
+
+    testSoundBuffer = getTestSoundBuffer(modulationTypeList);
 
     domSequenceDuration.innerHTML =
         (testSoundBuffer.length / audioMonoIO.getSampleRate()).toFixed(3) + ' sec';
 
+    // TODO create method in AudioMonoIO class for creatingBuffer !!!
     buffer = audioMonoIO
         .$$audioContext
         .createBuffer(
@@ -194,12 +222,56 @@ function appendBitChirp(buffer, isOne) {
     carrierPhase = 0;
 
     carrierFullCycles = samplePerBit / 32;
-    phaseAcceleration = carrierFullCycles * (isOne ? -1 : 1);   // this will double the full cycles in bit period
+    // this will effectively increase/decrease number of full cycles by a factor of two
+    phaseAcceleration = carrierFullCycles * (isOne ? -1 : 1);
     for (i = 0; i < samplePerBit; i++) {
         t = i / samplePerBit;
         carrierPhase = phaseAcceleration * t * t / 2;
         sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
 
+        buffer.push(sample);
+    }
+}
+
+function appendOfdmSymbol(buffer, binaryValue) {
+    var i, bit, isOne, cycles, samplePerPeriod, samplePerBit, ofdmSymbol, sample;
+
+    samplePerBit = parseInt(domSamplePerBit.value);
+    cycles = samplePerBit / 32;      // first pilot cycles (first subcarrier)
+
+    // pilot #1 (first subcarrier)
+    ofdmSymbol = [];
+    for (i = 0; i < samplePerBit; i++) {
+        samplePerPeriod = samplePerBit / cycles;
+        sample = generateSineWave(samplePerPeriod, 1, 0, i);
+        ofdmSymbol.push(sample);
+    }
+    cycles++;
+
+    // add data subcarriers
+    for (bit = 0; bit < binaryValue.length; bit++) {
+        isOne = (binaryValue[bit] === '1');
+        for (i = 0; i < samplePerBit; i++) {
+            samplePerPeriod = samplePerBit / cycles;
+            ofdmSymbol[i] += generateSineWave(
+                samplePerPeriod,
+                1,
+                isOne ? 0.25 : 0.25 + 0.5,
+                i
+            );
+        }
+        cycles++;
+    }
+
+    // pilot #2 (last subcarrier)
+    for (i = 0; i < samplePerBit; i++) {
+        samplePerPeriod = samplePerBit / cycles;
+        ofdmSymbol[i] += generateSineWave(samplePerPeriod, 1, 0, i);
+    }
+
+    // append to the buffer
+    for (i = 0; i < ofdmSymbol.length; i++) {
+        sample = ofdmSymbol[i] / (2 + binaryValue.length);
         buffer.push(sample);
     }
 }
@@ -224,51 +296,58 @@ function appendSilence(buffer, amount) {
     }
 }
 
-function getTestSoundBuffer() {
-    var i, j, k, output, isOne, binaryStr, samplePerBit, modulation;
+function appendBinaryValueSerial(output, modulationType, binaryValue) {
+    var i, isOne;
+
+    for (i = 0; i < binaryValue.length; i++) {
+        isOne = (binaryValue[i] === '1');
+
+        switch (modulationType) {
+            case MODULATION_TYPE.ASK:
+                appendBitASK(output, isOne);
+                break;
+            case MODULATION_TYPE.BPSK:
+                appendBitBPSK(output, isOne);
+                break;
+            case MODULATION_TYPE.FSK:
+                appendBitFSK(output, isOne);
+                break;
+            case MODULATION_TYPE.CHIRP:
+                appendBitChirp(output, isOne);
+                break;
+        }
+    }
+}
+
+function appendBinaryValueParallel(output, modulationType, binaryValue) {
+    switch (modulationType) {
+        case MODULATION_TYPE.OFDM:
+            appendOfdmSymbol(output, binaryValue);
+            break;
+    }
+}
+
+function getTestSoundBuffer(modulationTypeList) {
+    var i, j, value, binaryValue, output, modulationType;
 
     output = [];
-    samplePerBit = parseInt(domSamplePerBit.value);
-    modulation = 0;
-    while (true) {
-
-        for (i = 0; i < 8; i++) {
-            binaryStr = i.toString(2);
-            binaryStr = pad(binaryStr, 3);
-
-            for (j = 0; j < binaryStr.length; j++) {
-                isOne = (binaryStr[j] === '1');
-
-                switch (modulation) {
-                    case 0:   // ASK
-                        appendBitASK(output, isOne);
-                        break;
-                    case 1:   // BPSK
-                        appendBitBPSK(output, isOne);
-                        break;
-                    case 2:   // FSK
-                        appendBitFSK(output, isOne);
-                        break;
-                        break;
-                    case 3:   // chirp
-                        appendBitChirp(output, isOne);
-                        break;
-                }
+    for (i = 0; i < modulationTypeList.length; i++) {
+        modulationType = modulationTypeList[i];
+        for (value = 0; value < 8; value++) {
+            binaryValue = value.toString(2);
+            binaryValue = pad(binaryValue, 3);
+            switch (modulationType) {
+                case MODULATION_TYPE.OFDM:
+                    appendBinaryValueParallel(output, modulationType, binaryValue);
+                    break;
+                default:
+                    appendBinaryValueSerial(output, modulationType, binaryValue);
+                    break;
             }
-
-            for (k = 0; k < samplePerBit; k++) {
-                output.push(0);
-            }
+            appendSilence(output, 1);
         }
-
-        modulation++;
-
         appendWhiteNoise(output, 2);
         appendSilence(output, 1);
-
-        if (modulation === 4) {
-            break;
-        }
     }
 
     appendWhiteNoise(output, 16);

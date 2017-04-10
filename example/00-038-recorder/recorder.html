@@ -63,6 +63,7 @@
                 </div>
             </div>
 
+
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
@@ -77,6 +78,7 @@
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
                                 id="loopback-checkbox"
+                                checked="checked"
                                 value="1" />
                         </div>
                     </div>
@@ -120,7 +122,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                RAW recorded samples
+                                RAW samples
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -129,6 +131,37 @@
                     </div>
 
                     <h2>Test sound</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Modulation
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="modulation-ask-checkbox" />
+                            ASK
+                            <input
+                                type="checkbox"
+                                id="modulation-bpsk-checkbox" />
+                            B-PSK
+                            <input
+                                type="checkbox"
+                                id="modulation-fsk-checkbox"
+                                checked="checked" />
+                            FSK
+                            <input
+                                type="checkbox"
+                                id="modulation-chirp-checkbox" />
+                            Chirp
+                            <input
+                                type="checkbox"
+                                id="modulation-ofdm-checkbox"
+                                checked="checked" />
+                            OFDM
+                        </div>
+                    </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label for="loopback-checkbox">
@@ -167,7 +200,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                RAW played samples
+                                RAW samples
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
