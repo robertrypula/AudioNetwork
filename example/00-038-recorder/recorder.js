@@ -4,6 +4,14 @@
 var
     CANVAS_HEIGHT = 201,
     RECORD_TIME = 2,    // seconds
+    SEPARATION_BIT = 1,
+    SEPARATION_MODULATION_TYPE_WHITE_NOISE = 2,
+    SEPARATION_MODULATION_TYPE = 1,
+    SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE = 4,
+    SEPARATION_SEQUENCE_REPETITION = 1,
+    OFDM_GUARD = 0.5,
+    OFDM_GUARD_WINDOW = true,
+    OFDM_SYMBOL_REPETITION = 2,
     domCanvasContainerRecord,
     domCanvasContainerPlay,
     domAudioMonoIoInitDiv,
@@ -235,7 +243,7 @@ function appendBitASK(buffer, isOne) {
 
     samplePerBit = parseInt(domSamplePerBit.value);
     for (i = 0; i < samplePerBit; i++) {
-        sample = generateSineWave(32, isOne ? 1.0 : 0.3, 0, buffer.length);
+        sample = generateSineWave(samplePerPeriodLow, isOne ? 1.0 : 0.3, 0, buffer.length);
         buffer.push(sample);
     }
 }
@@ -245,7 +253,7 @@ function appendBitBPSK(buffer, isOne) {
 
     samplePerBit = parseInt(domSamplePerBit.value);
     for (i = 0; i < samplePerBit; i++) {
-        sample = generateSineWave(32, 1, isOne ? 0.5 : 0.0, buffer.length);
+        sample = generateSineWave(samplePerPeriodLow, 1, isOne ? 0.5 : 0.0, buffer.length);
         buffer.push(sample);
     }
 }
@@ -255,24 +263,24 @@ function appendBitFSK(buffer, isOne) {
 
     samplePerBit = parseInt(domSamplePerBit.value);
     for (i = 0; i < samplePerBit; i++) {
-        sample = generateSineWave(isOne ? 16 : 32, 1, 0, buffer.length);
+        sample = generateSineWave(isOne ? samplePerPeriodHigh : samplePerPeriodLow, 1, 0, buffer.length);
         buffer.push(sample);
     }
 }
 
 function appendBitChirp(buffer, isOne) {
-    var samplePerBit, i, sample, phaseAcceleration, carrierPhase, t, carrierFullCycles;
+    var samplePerBit, i, sample, phaseAcceleration, carrierPhase, t, cycles;
 
     samplePerBit = parseInt(domSamplePerBit.value);
     carrierPhase = 0;
 
-    carrierFullCycles = samplePerBit / 32;
+    cycles = samplePerBit / samplePerPeriodLow;
     // this will effectively increase/decrease number of full cycles by a factor of two
-    phaseAcceleration = carrierFullCycles * (isOne ? -1 : 1);
+    phaseAcceleration = cycles * (isOne ? -1 : 1);
     for (i = 0; i < samplePerBit; i++) {
         t = i / samplePerBit;
         carrierPhase = phaseAcceleration * t * t / 2;
-        sample = generateSineWave(isOne ? 32 : 16, 1, carrierPhase, buffer.length);
+        sample = generateSineWave(isOne ? samplePerPeriodLow : samplePerPeriodHigh, 1, carrierPhase, buffer.length);
 
         buffer.push(sample);
     }
@@ -282,7 +290,7 @@ function appendOfdmSymbol(buffer, binaryValue) {
     var i, bit, isOne, cycles, samplePerPeriod, samplePerBit, ofdmSymbol, sample;
 
     samplePerBit = parseInt(domSamplePerBit.value);
-    cycles = samplePerBit / 32;      // first pilot cycles (first subcarrier)
+    cycles = samplePerBit / samplePerPeriodLow;      // first pilot cycles (first subcarrier)
 
     // pilot #1 (first subcarrier)
     ofdmSymbol = [];
@@ -392,18 +400,18 @@ function getTestSoundBuffer(modulationTypeList) {
                     break;
             }
             if (domSeparateBinaryValuesCheckbox.checked) {
-                appendSilence(output, 1);
+                appendSilence(output, SEPARATION_BIT);
             }
         }
         if (domSeparateModulationTypesCheckbox.checked) {
-            appendWhiteNoise(output, 2);
-            appendSilence(output, 1);
+            appendWhiteNoise(output, SEPARATION_MODULATION_TYPE_WHITE_NOISE);
+            appendSilence(output, SEPARATION_MODULATION_TYPE);
         }
     }
 
     if (domSeparateSequenceRepetitionsCheckbox.checked) {
-        appendWhiteNoise(output, 16);
-        appendSilence(output, 1);
+        appendWhiteNoise(output, SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE);
+        appendSilence(output, SEPARATION_SEQUENCE_REPETITION);
     }
 
     return output;
