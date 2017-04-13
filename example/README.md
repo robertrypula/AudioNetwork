@@ -3,7 +3,9 @@
 You may wonder why I didn't use any framework like AngularJs. Sometimes
 even I asked that question to myself because writing in pure JavaScript
 is often a pain ;) In general I wanted to keep those examples free from
-any dependencies. 
+any dependencies.
+Those examples are also some kind of playground. I check ideas here before
+I add some new feature to the AudioNetwork main project.
 
 ## 00-xxx
 

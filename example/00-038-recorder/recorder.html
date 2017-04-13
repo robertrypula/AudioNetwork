@@ -78,7 +78,6 @@
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
                                 id="loopback-checkbox"
-                                checked="checked"
                                 value="1" />
                         </div>
                     </div>
@@ -140,7 +139,8 @@
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <input
                                 type="checkbox"
-                                id="separate-binary-value-checkbox" />
+                                id="separate-binary-value-checkbox"
+                                checked="checked" />
                             Binary value
                             <input
                                 type="checkbox"
@@ -171,8 +171,7 @@
                             B-PSK
                             <input
                                 type="checkbox"
-                                id="modulation-fsk-checkbox"
-                                checked="checked" />
+                                id="modulation-fsk-checkbox" />
                             FSK
                             <input
                                 type="checkbox"
@@ -246,6 +245,7 @@
                             </button>
                         </div>
                     </div>
+                    <button onClick="todoRemoveMe()">TODO: remove this button at the end</button>
                     <div class="margin-bottom-double">
                         <div class="scroll-container">
                             <div id="canvas-container-play" class="clearfix">

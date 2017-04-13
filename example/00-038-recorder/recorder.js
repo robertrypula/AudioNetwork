@@ -12,6 +12,7 @@ var
     NUMBER_OF_BINARY_VALUES = 8,
     OFDM_GUARD = 0.5,
     OFDM_GUARD_WINDOW = true,
+    OFDM_GUARD_WINDOW_INCLUDE_PILOTS = true,
     OFDM_SYMBOL_REPETITION = 2,
     domCanvasContainerRecord,
     domCanvasContainerPlay,
@@ -78,6 +79,12 @@ function init() {
     domSeparateBinaryValuesCheckbox = document.getElementById('separate-binary-value-checkbox');
     domSeparateModulationTypesCheckbox = document.getElementById('separate-modulation-types-checkbox');
     domSeparateSequenceRepetitionsCheckbox = document.getElementById('separate-sequence-repetitions-checkbox');
+}
+
+function todoRemoveMe() {
+    // TODO remove it, only for making test easier
+    onAudioMonoIoInitClick(1024);
+    onPlayClick();
 }
 
 function onLoopbackCheckboxChange() {
@@ -310,48 +317,79 @@ function appendBitChirp(buffer, isOne) {
     }
 }
 
-function getOfdmSymbol(binaryValue) {
-    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample, buffer;
+function appendOfdmSymbol(output, binaryValue) {
+    var ofdmSymbolPilotPart, ofdmSymbolDataPart, i, j, sample, divide;
 
-    cycles = cycleLow;
+    // TODO add guard internals (cyclic prefix)
+    /*
+    OFDM_GUARD
+    OFDM_GUARD_WINDOW
+    OFDM_GUARD_WINDOW_INCLUDE_PILOTS
+    */
+    ofdmSymbolPilotPart = getOfdmSymbolPilotPart(binaryValue);
+    ofdmSymbolDataPart = getOfdmSymbolDataPart(binaryValue);
 
-    // pilot #1 (first subcarrier)
-    ofdmSymbol = [];
-    for (i = 0; i < samplePerBit; i++) {
-        samplePerPeriod = samplePerBit / cycles;
-        sample = generateSineWave(samplePerPeriod, 1, 0, i);
-        ofdmSymbol.push(sample);
+    divide = 2 + binaryValue.length;        // two pilots + BPSK subcarriers for each bit
+    for (i = 0; i < OFDM_SYMBOL_REPETITION; i++) {
+        for (j = 0; j < ofdmSymbolPilotPart.length; j++) {
+            sample = ofdmSymbolPilotPart[j] + ofdmSymbolDataPart[j];
+            sample /= divide;
+            output.push(sample);
+        }
     }
-    cycles++;
+}
+
+function getOfdmSymbolDataPart(binaryValue) {
+    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample;
+
+    ofdmSymbol = [];
 
     // add data subcarriers
+    cycles = cycleLow + 1;   // skip first pilot
     for (bit = 0; bit < binaryValue.length; bit++) {
         isOne = (binaryValue[bit] === '1');
         for (i = 0; i < samplePerBit; i++) {
             samplePerPeriod = samplePerBit / cycles;
-            ofdmSymbol[i] += generateSineWave(
+            sample = generateSineWave(
                 samplePerPeriod,
                 1,
                 isOne ? 0.25 : 0.25 + 0.5,
                 i
             );
+
+            if (bit === 0) {
+                ofdmSymbol.push(sample);
+            } else {
+                ofdmSymbol[i] += sample;
+            }
         }
         cycles++;
     }
 
+    return ofdmSymbol;
+}
+
+function getOfdmSymbolPilotPart(binaryValue) {
+    var i, cycles, samplePerPeriod,  ofdmSymbol, sample;
+
+    ofdmSymbol = [];
+
+    // pilot #1 (first subcarrier)
+    cycles = cycleLow;
+    for (i = 0; i < samplePerBit; i++) {
+        samplePerPeriod = samplePerBit / cycles;
+        sample = generateSineWave(samplePerPeriod, 1, 0, i);
+        ofdmSymbol.push(sample);
+    }
+
     // pilot #2 (last subcarrier)
+    cycles += binaryValue.length + 1;
     for (i = 0; i < samplePerBit; i++) {
         samplePerPeriod = samplePerBit / cycles;
         ofdmSymbol[i] += generateSineWave(samplePerPeriod, 1, 0, i);
     }
 
-    buffer = [];
-    for (i = 0; i < ofdmSymbol.length; i++) {
-        sample = ofdmSymbol[i] / (2 + binaryValue.length);
-        buffer.push(sample);
-    }
-
-    return buffer;
+    return ofdmSymbol;
 }
 
 function appendWhiteNoise(buffer, amount) {
@@ -391,19 +429,6 @@ function appendBinaryValueSerial(output, modulationType, binaryValue) {
             case MODULATION_TYPE.CHIRP:
                 appendBitChirp(output, isOne);
                 break;
-        }
-    }
-}
-
-function appendOfdmSymbol(output, binaryValue) {
-    var ofdmSymbol, i, j;
-
-    ofdmSymbol = getOfdmSymbol(binaryValue);
-
-
-    for (i = 0; i < OFDM_SYMBOL_REPETITION; i++) {
-        for (j = 0; j < ofdmSymbol.length; j++) {
-            output.push(ofdmSymbol[j]);
         }
     }
 }
@@ -463,7 +488,7 @@ function getConfiguredCanvasContext(elementId, width, height) {
     element.height = height;
     ctx = element.getContext('2d');
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = '#ddd';
     ctx.font = "12px Arial";
 
     return ctx;
