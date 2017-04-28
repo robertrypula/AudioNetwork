@@ -21,7 +21,7 @@ WaveGenerate.prototype.$$getSample = function () {
 
     phase = this.$$phase * 2 * Math.PI;
     x = this.$$omega * this.$$sampleNumber;
-    sample = this.$$amplitude * Math.cos(x - phase);
+    sample = this.$$amplitude * Math.sin(x - phase);
 
     return sample;
 };

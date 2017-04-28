@@ -144,6 +144,12 @@ FFT Zoom:
 
 ```
 
+## Convolution, cross-correlation, auto-correlation
+
+```
+    https://dsp.stackexchange.com/questions/736/how-do-i-implement-cross-correlation-to-prove-two-audio-files-are-similar
+```
+
 ## FIR and IIR filters (Finite Impulse Response and Infinite Impulse Response)
 
 ```

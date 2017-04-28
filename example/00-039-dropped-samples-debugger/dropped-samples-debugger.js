@@ -10,7 +10,7 @@ var
     SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE = 4,
     SEPARATION_SEQUENCE_REPETITION = 1,
     NUMBER_OF_BINARY_VALUES = 8,
-    OFDM_GUARD = 0.5,
+    OFDM_GUARD = 0.5,             // in range <0, 1>
     OFDM_GUARD_WINDOW = true,
     OFDM_GUARD_WINDOW_INCLUDE_PILOTS = true,
     OFDM_SYMBOL_REPETITION = 2,
@@ -47,7 +47,9 @@ var
     samplePerPeriodHigh,
     cycleLow,
     cycleHigh,
-    lastOfdmSymbol,
+    lastOfdmSymbolPilot,
+    lastOfdmSymbolData,
+    lastOfdmSymbolAvailable = false,
 
     MODULATION_TYPE = {
         'ASK': 'ASK',
@@ -84,6 +86,7 @@ function init() {
 function todoRemoveMe() {
     // TODO remove it, only for making test easier
     onAudioMonoIoInitClick(1024);
+    audioMonoIO.setVolume(0.001);
     onPlayClick();
 }
 
@@ -267,6 +270,81 @@ function pad(num, size) {
     return s.substr(s.length - size);
 }
 
+function arraySmartCopy(src, size) {
+    var result, index, srcLength, limit, i, isFromBack, element;
+
+    srcLength = src.length;
+    isFromBack = size < 0;
+    limit = Math.min(
+        srcLength,
+        Math.abs(size)
+    );
+    result = [];
+    for (i = 0; i < limit; i++) {
+        index = isFromBack
+            ? srcLength - limit + i
+            : i;
+        element = src[index];
+        result.push(element);
+    }
+
+    return result;
+}
+
+function arrayAdd(src1, src2) {
+    var result, i, element;
+
+    // assumed that two arrays are the same length
+    result = [];
+    for (i = 0; i < src1.length; i++) {
+        element = src1[i] + src2[i];
+        result.push(element);
+    }
+
+    return result;
+}
+
+function arrayDivide(src, scalar) {
+    var result, i, element;
+
+    result = [];
+    for (i = 0; i < src.length; i++) {
+        element = src[i] / scalar;
+        result.push(element);
+    }
+
+    return result;
+}
+
+function arrayAppend(a, b) {
+    var i;
+
+    for (i = 0; i < b.length; i++) {
+        a.push(b[i]);
+    }
+}
+
+function applyCosineWindow(data, isZeroToOne) {
+    var i, windowValue, N;
+
+    N = data.length;
+    for (i = 0; i < N; i++) {
+        windowValue = cosineWindow(i, N);
+        if (isZeroToOne) {
+            windowValue = 1 - windowValue;
+        }
+        data[i] *= windowValue;
+    }
+}
+
+function cosineWindow(n, N) {
+    var cos;
+
+    cos = Math.cos(Math.PI * n / (N - 1));
+
+    return (cos + 1) / 2;
+}
+
 // -----------------------------------------------------------------------
 // test sound
 
@@ -311,35 +389,74 @@ function appendBitChirp(buffer, isOne) {
         t = i / samplePerBit;
         carrierPhase = phaseAcceleration * t * t / 2;
         samplePerPeriod = isOne ? samplePerPeriodLow : samplePerPeriodHigh;
+        // FM modulation can be expressed as phase modulation
         sample = generateSineWave(samplePerPeriod, 1, carrierPhase, buffer.length);
 
         buffer.push(sample);
     }
 }
 
+function getOfdmGuard(ofdmSymbolPilot, ofdmSymbolData) {
+    var
+        guardLength,
+        guard,
+        symbolEndPilot,
+        symbolEndData,
+        lastSymbolStartPilot,
+        lastSymbolStartData,
+        a,
+        b;
+
+    guardLength = Math.round(ofdmSymbolPilot.length * OFDM_GUARD);
+    symbolEndPilot = arraySmartCopy(ofdmSymbolPilot, -guardLength);
+    symbolEndData = arraySmartCopy(ofdmSymbolData, -guardLength);
+
+    if (OFDM_GUARD_WINDOW) {
+        lastSymbolStartPilot = arraySmartCopy(lastOfdmSymbolPilot, guardLength);
+        lastSymbolStartData = arraySmartCopy(lastOfdmSymbolData, guardLength);
+
+        a = arrayAdd(lastSymbolStartPilot, lastSymbolStartData);
+        applyCosineWindow(a, false);
+        //a = arrayDivide(a, 1000000);    // TODO remove me
+
+        b = arrayAdd(symbolEndPilot, symbolEndData);
+        applyCosineWindow(b, true);
+        //b = arrayDivide(b, 1000000);    // TODO remove me
+
+        guard = arrayAdd(a, b);
+    } else {
+        guard = arrayAdd(symbolEndPilot, symbolEndData);
+    }
+
+    return guard;
+}
+
 function appendOfdmSymbol(output, binaryValue) {
-    var ofdmSymbolPilotPart, ofdmSymbolDataPart, i, j, sample, divide;
+    var ofdmSymbolPilot, ofdmSymbolData, i, ofdmGuard, normalizeFactor, ofdmSymbol;
 
-    // TODO add guard internals (cyclic prefix)
-    /*
-    OFDM_GUARD
-    OFDM_GUARD_WINDOW
-    OFDM_GUARD_WINDOW_INCLUDE_PILOTS
-    */
-    ofdmSymbolPilotPart = getOfdmSymbolPilotPart(binaryValue);
-    ofdmSymbolDataPart = getOfdmSymbolDataPart(binaryValue);
+    normalizeFactor = 2 + binaryValue.length;        // two pilots + BPSK subcarriers for each bit
+    ofdmSymbolPilot = getOfdmSymbolPilot(binaryValue);
+    ofdmSymbolData = getOfdmSymbolData(binaryValue);
 
-    divide = 2 + binaryValue.length;        // two pilots + BPSK subcarriers for each bit
-    for (i = 0; i < OFDM_SYMBOL_REPETITION; i++) {
-        for (j = 0; j < ofdmSymbolPilotPart.length; j++) {
-            sample = ofdmSymbolPilotPart[j] + ofdmSymbolDataPart[j];
-            sample /= divide;
-            output.push(sample);
+    if (OFDM_GUARD > 0) {
+        if (lastOfdmSymbolAvailable) {
+            ofdmGuard = getOfdmGuard(ofdmSymbolPilot, ofdmSymbolData);
+            ofdmGuard = arrayDivide(ofdmGuard, normalizeFactor);
+            arrayAppend(output, ofdmGuard);
         }
+        lastOfdmSymbolPilot = arraySmartCopy(ofdmSymbolPilot, ofdmSymbolPilot.length);
+        lastOfdmSymbolData = arraySmartCopy(ofdmSymbolData, ofdmSymbolData.length);
+        lastOfdmSymbolAvailable = true;
+    }
+
+    for (i = 0; i < OFDM_SYMBOL_REPETITION; i++) {
+        ofdmSymbol = arrayAdd(ofdmSymbolPilot, ofdmSymbolData);
+        ofdmSymbol = arrayDivide(ofdmSymbol, normalizeFactor);
+        arrayAppend(output, ofdmSymbol);
     }
 }
 
-function getOfdmSymbolDataPart(binaryValue) {
+function getOfdmSymbolData(binaryValue) {
     var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample;
 
     ofdmSymbol = [];
@@ -369,7 +486,7 @@ function getOfdmSymbolDataPart(binaryValue) {
     return ofdmSymbol;
 }
 
-function getOfdmSymbolPilotPart(binaryValue) {
+function getOfdmSymbolPilot(binaryValue) {
     var i, cycles, samplePerPeriod,  ofdmSymbol, sample;
 
     ofdmSymbol = [];
@@ -488,7 +605,7 @@ function getConfiguredCanvasContext(elementId, width, height) {
     element.height = height;
     ctx = element.getContext('2d');
     ctx.lineWidth = 1;
-    ctx.strokeStyle = '#ddd';
+    ctx.strokeStyle = '#AAA';
     ctx.font = "12px Arial";
 
     return ctx;

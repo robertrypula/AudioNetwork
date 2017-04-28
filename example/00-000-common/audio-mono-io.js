@@ -197,15 +197,24 @@ AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
         constraints = {
             video: false,
             audio: {
-                mandatory: {
+                // channelCount: 1,
+                // sampleRate: 44100,
+                echoCancellation: true
+                /*
+                // mandatory: {},
+                optional: {
                     googEchoCancellation: false, // disabling audio processing
                     googAutoGainControl: false,
                     googNoiseSuppression: false,
                     googHighpassFilter: false
-                },
-                optional: []
+                }
+                */
             }
         };
+
+    console.log(
+        navigator.mediaDevices.getSupportedConstraints()
+    );
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
