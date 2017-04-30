@@ -128,6 +128,16 @@
                             <textarea id="raw-samples-record" style="height: 50px;"></textarea>
                         </div>
                     </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                WAV file
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="wav-record"></div>
+                        </div>
+                    </div>
 
                     <h2>Test sound</h2>
                     <div class="row margin-bottom-double">
@@ -194,7 +204,7 @@
                             <input
                                 type="number"
                                 id="sample-per-bit"
-                                value="128" />
+                                value="512" />
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -207,7 +217,7 @@
                             <input
                                 type="number"
                                 id="cycle-low"
-                                value="4" />
+                                value="16" />
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -220,7 +230,7 @@
                             <input
                                 type="number"
                                 id="cycle-high"
-                                value="8" />
+                                value="32" />
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -262,6 +272,16 @@
                             <textarea id="raw-samples-play" style="height: 50px;"></textarea>
                         </div>
                     </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                WAV file
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="wav-play"></div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -287,6 +307,7 @@
     </div>
 
     <script src="../00-000-common/audio-mono-io.js"></script>
+    <script src="../00-000-common/wav-audio-file.js"></script>
     <script src="dropped-samples-debugger.js"></script>
 
     <script>

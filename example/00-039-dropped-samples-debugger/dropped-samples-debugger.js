@@ -25,7 +25,9 @@ var
     domCycleHigh,
     domSequenceDuration,
     domRawSamplesPlay,
+    domWavPlay,
     domRawSamplesRecord,
+    domWavRecord,
     domModulationAskCheckbox,
     domModulationBpskCheckbox,
     domModulationFskCheckbox,
@@ -71,7 +73,9 @@ function init() {
     domCycleHigh = document.getElementById('cycle-high');
     domSequenceDuration = document.getElementById('sequence-duration');
     domRawSamplesPlay = document.getElementById('raw-samples-play');
+    domWavPlay = document.getElementById('wav-play');
     domRawSamplesRecord = document.getElementById('raw-samples-record');
+    domWavRecord = document.getElementById('wav-record');
     domModulationAskCheckbox = document.getElementById('modulation-ask-checkbox');
     domModulationBpskCheckbox = document.getElementById('modulation-bpsk-checkbox');
     domModulationFskCheckbox = document.getElementById('modulation-fsk-checkbox');
@@ -135,7 +139,9 @@ function onPlayClick() {
         canvasHtml,
         ctx,
         timeDomainBlock,
-        modulationTypeList;
+        modulationTypeList,
+        url,
+        filename;
 
     if (playInProgress || !audioMonoIO) {
         return;
@@ -156,6 +162,13 @@ function onPlayClick() {
         (testSoundBuffer.length / audioMonoIO.getSampleRate()).toFixed(3) + ' sec';
     domPlayButton.innerHTML = 'Playing in a loop...';
     domRawSamplesPlay.value = dumpAsAsciiSoundFile(testSoundBuffer);
+
+    url = WavAudioFile.getBlobUrl(testSoundBuffer, audioMonoIO.getSampleRate());
+    filename = 'play_' + WavAudioFile.getFilename();
+    domWavPlay.innerHTML =
+        '<a id="link" href="' + url + '" download="' + filename + '">' +
+        'Download ' + filename +
+        '</a>';
 
     canvasHtml = '';
     timeDomainBlock = getTimeDomainBlockFromBuffer(testSoundBuffer);
@@ -662,7 +675,10 @@ function sampleInHandler(monoIn) {
         return;
     }
 
-    timeDomainBlock.push(monoIn);
+    // This line is very important due to:
+    // - http://stackoverflow.com/questions/24069400/web-audio-api-recording-works-in-firefox-but-not-chrome
+    // - http://stackoverflow.com/questions/3978492/javascript-fastest-way-to-duplicate-an-array-slice-vs-for-loop/21514254#21514254
+    timeDomainBlock.push(monoIn.slice(0));
     bufferRecorded++;
 
     if (bufferRecorded === bufferRecordedLimit) {
@@ -671,7 +687,7 @@ function sampleInHandler(monoIn) {
 }
 
 function showRecording() {
-    var i, j, ctx, canvasHtml, buffer;
+    var i, j, ctx, canvasHtml, buffer, url, filename;
 
     canvasHtml = '';
     for (i = 0; i < timeDomainBlock.length; i++) {
@@ -695,4 +711,11 @@ function showRecording() {
         }
     }
     domRawSamplesRecord.value = dumpAsAsciiSoundFile(buffer);
+
+    url = WavAudioFile.getBlobUrl(buffer, audioMonoIO.getSampleRate());
+    filename = 'record_' + WavAudioFile.getFilename();
+    domWavRecord.innerHTML =
+        '<a id="link" href="' + url + '" download="' + filename + '">' +
+        'Download ' + filename +
+        '</a>';
 }
