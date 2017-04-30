@@ -194,7 +194,7 @@ AudioMonoIO.prototype.$$createAudioContext = function () {
 AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
     var
         self = this,
-        constraints = {
+        constraints = {   // TODO investigate more on this
             video: false,
             audio: {
                 // channelCount: 1,
@@ -212,9 +212,11 @@ AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
             }
         };
 
+    /*
     console.log(
         navigator.mediaDevices.getSupportedConstraints()
     );
+    */
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {

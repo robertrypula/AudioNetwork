@@ -66,12 +66,28 @@
 
         <div class="row margin-bottom">
             <div class="col col-xs-12">
+                <div class="row margin-bottom-double">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label for="record-time">
+                            Record time [sec]
+                        </label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <input
+                            type="number"
+                            id="record-time"
+                            value="2" />
+                    </div>
+                </div>
 
-                <button onClick="onRecordClick()" class="btn btn-default">Record</button>
-                <button onClick="onResetClick()" class="btn btn-default">Reset</button>
-
-                <div id="download-link-container"></div>
-
+                <div class="row margin-bottom-double">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <button onClick="onRecordClick()" class="btn btn-default" id="record-button">Record</button>
+                        <div id="download-link-container" class="margin-top"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -96,6 +112,7 @@
 </div>
 
 <script src="../00-000-common/audio-mono-io.js"></script>
+<script src="../00-000-common/wav-audio-file.js"></script>
 <script src="wav-file-recorder.js"></script>
 
 <script>
