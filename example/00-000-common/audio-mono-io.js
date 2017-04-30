@@ -196,11 +196,11 @@ AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
         self = this,
         constraints = {   // TODO investigate more on this
             video: false,
-            audio: {
+            audio: true/*{
                 // channelCount: 1,
                 // sampleRate: 44100,
                 echoCancellation: true
-                /*
+
                 // mandatory: {},
                 optional: {
                     googEchoCancellation: false, // disabling audio processing
@@ -208,8 +208,8 @@ AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
                     googNoiseSuppression: false,
                     googHighpassFilter: false
                 }
-                */
-            }
+
+            }*/
         };
 
     /*
