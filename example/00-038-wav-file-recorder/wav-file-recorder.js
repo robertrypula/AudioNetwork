@@ -8,14 +8,30 @@ var
     domDownloadLinkContainer,
     isRecording = false;
 
-function init() {
+function initAudioMonoIO() {
+    if (audioMonoIO) {
+        return;
+    }
     audioMonoIO = new AudioMonoIO(AudioMonoIO.FFT_SIZE, BUFFER_SIZE);
+    initCommon();
+}
 
+function initAudioMonoIOLite() {
+    if (audioMonoIO) {
+        return;
+    }
+    audioMonoIO = new AudioMonoIOLite(BUFFER_SIZE);
+    initCommon();
+}
+
+function initCommon() {
     audioMonoIO.setSampleInHandler(sampleInHandler);
 
     domRecordButton = document.getElementById('record-button');
     domRecordTime = document.getElementById('record-time');
     domDownloadLinkContainer = document.getElementById('download-link-container');
+
+    domRecordButton.style.display = 'block';
 }
 
 function sampleInHandler(monoIn) {

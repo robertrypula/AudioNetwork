@@ -15,7 +15,7 @@
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="init()">
+<body>
 
 <div id="fb-root"></div>
 <script>
@@ -66,6 +66,16 @@
 
         <div class="row margin-bottom">
             <div class="col col-xs-12">
+
+                <div class="row margin-bottom-double">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <button onClick="initAudioMonoIO()" class="btn btn-default">Init AudioMonoIO</button>
+                        <button onClick="initAudioMonoIOLite()" class="btn btn-default">Init AudioMonoIOLite</button>
+                    </div>
+                </div>
+
                 <div class="row margin-bottom-double">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                         <label for="record-time">
@@ -84,7 +94,13 @@
                     <div class="col col-xs-6 col-sm-5 col-md-3">
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button onClick="onRecordClick()" class="btn btn-default" id="record-button">Record</button>
+                        <button
+                            style="display: none"
+                            onClick="onRecordClick()"
+                            class="btn btn-default"
+                            id="record-button">
+                            Record
+                        </button>
                         <div id="download-link-container" class="margin-top"></div>
                     </div>
                 </div>
@@ -112,6 +128,7 @@
 </div>
 
 <script src="../00-000-common/audio-mono-io.js"></script>
+<script src="../00-000-common/audio-mono-io-lite.js"></script>
 <script src="../00-000-common/wav-audio-file.js"></script>
 <script src="wav-file-recorder.js"></script>
 
