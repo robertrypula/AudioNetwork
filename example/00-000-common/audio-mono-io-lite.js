@@ -1,6 +1,10 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+/**
+ * Minimalized version of AudioMonoIO class. So far only for mobile device testing purposes.
+ */
+
 var AudioMonoIOLite;
 
 AudioMonoIOLite = function (bufferSize) {

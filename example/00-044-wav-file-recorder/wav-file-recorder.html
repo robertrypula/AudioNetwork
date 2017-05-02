@@ -67,12 +67,25 @@
         <div class="row margin-bottom">
             <div class="col col-xs-12">
 
-                <div class="row margin-bottom-double">
+                <div class="row margin-bottom-double" id="init-button-container">
                     <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label>Init AudioMonoIO</label>
                     </div>
                     <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button onClick="initAudioMonoIO()" class="btn btn-default">Init AudioMonoIO</button>
-                        <button onClick="initAudioMonoIOLite()" class="btn btn-default">Init AudioMonoIOLite</button>
+                        <button onClick="initAudioMonoIO(2048)" class="btn btn-default">2048</button>
+                        <button onClick="initAudioMonoIO(8192)" class="btn btn-default">8192</button>
+                        <button onClick="initAudioMonoIO(16384)" class="btn btn-default">16384</button>
+                    </div>
+                </div>
+
+                <div class="row margin-bottom-double" id="init-lite-button-container">
+                    <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <label>Init AudioMonoIOLite</label>
+                    </div>
+                    <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <button onClick="initAudioMonoIOLite(2048)" class="btn btn-default">2048</button>
+                        <button onClick="initAudioMonoIOLite(8192)" class="btn btn-default">8192</button>
+                        <button onClick="initAudioMonoIOLite(16384)" class="btn btn-default">16384</button>
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 var
-    BUFFER_SIZE = 2 * 1024,
     audioMonoIO,
+    audioMonoIOBufferSize,
     bufferListLimit,
     bufferList = [],
     domRecordButton,
@@ -8,24 +8,29 @@ var
     domDownloadLinkContainer,
     isRecording = false;
 
-function initAudioMonoIO() {
+function initAudioMonoIO(bufferSize) {
     if (audioMonoIO) {
         return;
     }
-    audioMonoIO = new AudioMonoIO(AudioMonoIO.FFT_SIZE, BUFFER_SIZE);
+    audioMonoIO = new AudioMonoIO(AudioMonoIO.FFT_SIZE, bufferSize);
+    audioMonoIOBufferSize = bufferSize;
     initCommon();
 }
 
-function initAudioMonoIOLite() {
+function initAudioMonoIOLite(bufferSize) {
     if (audioMonoIO) {
         return;
     }
-    audioMonoIO = new AudioMonoIOLite(BUFFER_SIZE);
+    audioMonoIO = new AudioMonoIOLite(bufferSize);
+    audioMonoIOBufferSize = bufferSize;
     initCommon();
 }
 
 function initCommon() {
     audioMonoIO.setSampleInHandler(sampleInHandler);
+
+    document.getElementById('init-button-container').style.display = 'none';
+    document.getElementById('init-lite-button-container').style.display = 'none';
 
     domRecordButton = document.getElementById('record-button');
     domRecordTime = document.getElementById('record-time');
@@ -80,7 +85,7 @@ function onRecordClick() {
 
     domRecordButton.innerHTML = 'Recording...';
 
-    bufferDuration = BUFFER_SIZE / audioMonoIO.getSampleRate();
+    bufferDuration = audioMonoIOBufferSize / audioMonoIO.getSampleRate();
     recordTime = parseInt(domRecordTime.value);
     bufferListLimit = Math.ceil(recordTime / bufferDuration);
     isRecording = true;

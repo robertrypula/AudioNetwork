@@ -9,10 +9,8 @@ var
     SEPARATION_MODULATION_TYPE = 1,
     SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE = 4,
     SEPARATION_SEQUENCE_REPETITION = 1,
-    NUMBER_OF_BINARY_VALUES = 8,
     OFDM_GUARD = 0.5,             // in range <0, 1>
     OFDM_GUARD_WINDOW = true,
-    OFDM_GUARD_WINDOW_INCLUDE_PILOTS = true,
     OFDM_SYMBOL_REPETITION = 2,
     domCanvasContainerRecord,
     domCanvasContainerPlay,
@@ -20,6 +18,7 @@ var
     domRecordButton,
     domPlayButton,
     domLoopbackCheckbox,
+    domNumberOfBinaryValues,
     domSamplePerBit,
     domCycleLow,
     domCycleHigh,
@@ -68,6 +67,7 @@ function init() {
     domRecordButton = document.getElementById('record-button');
     domPlayButton = document.getElementById('play-button');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domNumberOfBinaryValues = document.getElementById('number-of-binary-values');
     domSamplePerBit = document.getElementById('sample-per-bit');
     domCycleLow = document.getElementById('cycle-low');
     domCycleHigh = document.getElementById('cycle-high');
@@ -85,13 +85,6 @@ function init() {
     domSeparateBinaryValuesCheckbox = document.getElementById('separate-binary-value-checkbox');
     domSeparateModulationTypesCheckbox = document.getElementById('separate-modulation-types-checkbox');
     domSeparateSequenceRepetitionsCheckbox = document.getElementById('separate-sequence-repetitions-checkbox');
-}
-
-function todoRemoveMe() {
-    // TODO remove it, only for making test easier
-    onAudioMonoIoInitClick(1024);
-    audioMonoIO.setVolume(0.001);
-    onPlayClick();
 }
 
 function onLoopbackCheckboxChange() {
@@ -278,7 +271,7 @@ function generateSineWave(samplePerPeriod, amplitude, unitPhaseOffset, sample) {
 }
 
 function pad(num, size) {
-    var s = '000000' + num;
+    var s = '0000000' + num;
 
     return s.substr(s.length - size);
 }
@@ -564,14 +557,15 @@ function appendBinaryValueSerial(output, modulationType, binaryValue) {
 }
 
 function getTestSoundBuffer(modulationTypeList) {
-    var i, value, binaryValue, output, modulationType;
+    var i, value, binaryValue, numberOfBinaryValues, output, modulationType;
 
     output = [];
+    numberOfBinaryValues = parseInt(domNumberOfBinaryValues.value);
     for (i = 0; i < modulationTypeList.length; i++) {
         modulationType = modulationTypeList[i];
-        for (value = 0; value < NUMBER_OF_BINARY_VALUES; value++) {
+        for (value = 0; value < numberOfBinaryValues; value++) {
             binaryValue = value.toString(2);
-            binaryValue = pad(binaryValue, (NUMBER_OF_BINARY_VALUES - 1).toString(2).length);
+            binaryValue = pad(binaryValue, (numberOfBinaryValues - 1).toString(2).length);
             if (modulationType === MODULATION_TYPE.OFDM) {
                 appendOfdmSymbol(output, binaryValue);
             } else {

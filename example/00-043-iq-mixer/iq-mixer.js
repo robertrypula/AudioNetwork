@@ -46,8 +46,9 @@ function init() {
     zoomBuffer = new Queue(ZOOM_SIZE);
 
     onLocalOscillatorFrequencyChange();
+}
 
-
+function runOfdmTest() {
     // TODO move OFDM tests to another example
     audioMonoIO.setPeriodicWave(
         50,
