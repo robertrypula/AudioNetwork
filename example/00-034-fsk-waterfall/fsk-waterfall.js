@@ -18,8 +18,8 @@ function init() {
     fftSize = getValue('#fft-size', 'int');
     range = getValue('#range', 'int');
     audioMonoIO = new AudioMonoIO(fftSize);
-    audioMonoIO.setVolume(0.1);
-    audioMonoIO.setLoopback(true);
+    // audioMonoIO.setVolume(0.1);
+    // audioMonoIO.setLoopback(true);
 
     carrierFrequency = getValue('#carrier-frequency', 'float');
     carrierFrequency = FFTResult.getFrequencyOfClosestBin(carrierFrequency, audioMonoIO.getSampleRate(), fftSize);

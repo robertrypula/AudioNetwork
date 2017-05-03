@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="dropped-samples-debugger.css">
+    <link rel="stylesheet" type="text/css" href="modulation-types-debugger.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -58,7 +58,9 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
                     <p>
-                        This example allows to examine dropped samples and check how those voids looks like in the time domain.
+                        This example allows to debug few modulation types. Additionally it
+                        allows to examine dropped samples and check how those voids looks
+                        like in the time domain.
                     </p>
                 </div>
             </div>
@@ -103,7 +105,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Record
+                                Record [2 seconds]
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -147,21 +149,26 @@
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input
-                                type="checkbox"
-                                id="separate-binary-value-checkbox"
-                                checked="checked" />
-                            Binary value
-                            <input
-                                type="checkbox"
-                                id="separate-modulation-types-checkbox"
-                                checked="checked" />
-                            Modulation types
-                            <input
-                                type="checkbox"
-                                id="separate-sequence-repetitions-checkbox"
-                                checked="checked" />
-                            Sequence repetitions
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="separate-bits-checkbox" />
+                                Bits (no effect on OFDM)
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="separate-binary-value-checkbox"
+                                    checked="checked" />
+                                Binary values
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="separate-modulation-types-checkbox"
+                                    checked="checked" />
+                                Modulation types
+                            </div>
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -171,32 +178,42 @@
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input
-                                type="checkbox"
-                                id="modulation-ask-checkbox" />
-                            ASK
-                            <input
-                                type="checkbox"
-                                id="modulation-bpsk-checkbox" />
-                            B-PSK
-                            <input
-                                type="checkbox"
-                                id="modulation-fsk-checkbox" />
-                            FSK
-                            <input
-                                type="checkbox"
-                                id="modulation-chirp-checkbox" />
-                            Chirp
-                            <input
-                                type="checkbox"
-                                id="modulation-ofdm-checkbox"
-                                checked="checked" />
-                            OFDM
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-ask-checkbox" />
+                                ASK
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-bpsk-checkbox" />
+                                B-PSK
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-fsk-checkbox" />
+                                FSK
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-chirp-checkbox" />
+                                Chirp
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-ofdm-checkbox"
+                                    checked="checked" />
+                                OFDM
+                            </div>
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox">
+                            <label>
                                 Number of binary values
                             </label>
                         </div>
@@ -209,7 +226,20 @@
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox">
+                            <label>
+                                Number of binary values repetitions
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="number-of-binary-values-repetitions"
+                                value="1" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
                                 Sample per bit
                             </label>
                         </div>
@@ -222,8 +252,8 @@
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox">
-                                Cycles in LOW bit
+                            <label>
+                                Cycles in bit duration - LOW (no effect in OFDM)
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -235,8 +265,8 @@
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox">
-                                Cycles in HIGH bit
+                            <label>
+                                Cycles in bit duration - HIGH (no effect in ASK, B-PSK and OFDM)
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -248,7 +278,83 @@
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
+                            <label>
+                                OFDM pilots
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="text"
+                                id="ofdm-frequency-bin-index-pilot"
+                                value="23 29" />
+                            Frequency bin index list separated by spaces
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                OFDM data
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="text"
+                                id="ofdm-frequency-bin-index-data"
+                                value="25 26 27" />
+                            This should be equal to number of bits that are needed to store binary value. If you picked 8
+                            as 'Number of binary values' it means that you require 3 bits to store one binary value.
+                            In that case you need to provide 3 frequnecy bin indexes separated by spaces.
+                            Please do NOT pick same indexes as at 'OFDM pilots' section
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                OFDM symbol repetitions
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="ofdm-symbol-repetition"
+                                value="2" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                OFDM guard (cyclic prefix)
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="ofdm-guard"
+                                value="0.5" />
+                            <br/>
+                            0 means no cyclic prefix
+                            <br/>
+                            1 means cyclic prefix duration is equal to symbol duration
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                OFDM guard windowing
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="ofdm-guard-window"
+                                checked="checked" />
+                            <br/>
+                            When checked cyclic prefix from previous symbol is merged with cyclic prefix from current symbol (0->1, 0->1 cosine windows function)
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
                                 Sequence duration
                             </label>
                         </div>
@@ -320,7 +426,7 @@
 
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="../00-000-common/wav-audio-file.js"></script>
-    <script src="dropped-samples-debugger.js"></script>
+    <script src="modulation-types-debugger.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

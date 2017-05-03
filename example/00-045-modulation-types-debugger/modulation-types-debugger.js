@@ -4,14 +4,9 @@
 var
     CANVAS_HEIGHT = 201,
     RECORD_TIME = 2,    // seconds
-    SEPARATION_BIT = 1,
-    SEPARATION_MODULATION_TYPE_WHITE_NOISE = 2,
+    SEPARATION_BITS = 1,
+    SEPARATION_BINARY_VALUES = 1,
     SEPARATION_MODULATION_TYPE = 1,
-    SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE = 4,
-    SEPARATION_SEQUENCE_REPETITION = 1,
-    OFDM_GUARD = 0.5,             // in range <0, 1>
-    OFDM_GUARD_WINDOW = true,
-    OFDM_SYMBOL_REPETITION = 2,
     domCanvasContainerRecord,
     domCanvasContainerPlay,
     domAudioMonoIoInitDiv,
@@ -19,9 +14,15 @@ var
     domPlayButton,
     domLoopbackCheckbox,
     domNumberOfBinaryValues,
+    domNumberOfBinaryValuesRepetitions,
     domSamplePerBit,
     domCycleLow,
     domCycleHigh,
+    domOfdmGuard,
+    domOfdmGuardWindow,
+    domOfdmSymbolRepetition,
+    domOfdmFrequencyBinIndexPilot,
+    domOfdmFrequencyBinIndexData,
     domSequenceDuration,
     domRawSamplesPlay,
     domWavPlay,
@@ -32,9 +33,9 @@ var
     domModulationFskCheckbox,
     domModulationChirpCheckbox,
     domModulationOfdmCheckbox,
+    domSeparateBitsCheckbox,
     domSeparateBinaryValuesCheckbox,
     domSeparateModulationTypesCheckbox,
-    domSeparateSequenceRepetitionsCheckbox,
     bufferSize,
     audioMonoIO,
     recordInProgress = false,
@@ -68,9 +69,15 @@ function init() {
     domPlayButton = document.getElementById('play-button');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domNumberOfBinaryValues = document.getElementById('number-of-binary-values');
+    domNumberOfBinaryValuesRepetitions = document.getElementById('number-of-binary-values-repetitions');
     domSamplePerBit = document.getElementById('sample-per-bit');
     domCycleLow = document.getElementById('cycle-low');
     domCycleHigh = document.getElementById('cycle-high');
+    domOfdmGuard = document.getElementById('ofdm-guard');
+    domOfdmGuardWindow = document.getElementById('ofdm-guard-window');
+    domOfdmSymbolRepetition = document.getElementById('ofdm-symbol-repetition');
+    domOfdmFrequencyBinIndexPilot = document.getElementById('ofdm-frequency-bin-index-pilot');
+    domOfdmFrequencyBinIndexData = document.getElementById('ofdm-frequency-bin-index-data');
     domSequenceDuration = document.getElementById('sequence-duration');
     domRawSamplesPlay = document.getElementById('raw-samples-play');
     domWavPlay = document.getElementById('wav-play');
@@ -82,9 +89,9 @@ function init() {
     domModulationChirpCheckbox = document.getElementById('modulation-chirp-checkbox');
     domModulationOfdmCheckbox = document.getElementById('modulation-ofdm-checkbox');
 
+    domSeparateBitsCheckbox = document.getElementById('separate-bits-checkbox');
     domSeparateBinaryValuesCheckbox = document.getElementById('separate-binary-value-checkbox');
     domSeparateModulationTypesCheckbox = document.getElementById('separate-modulation-types-checkbox');
-    domSeparateSequenceRepetitionsCheckbox = document.getElementById('separate-sequence-repetitions-checkbox');
 }
 
 function onLoopbackCheckboxChange() {
@@ -413,11 +420,11 @@ function getOfdmGuard(ofdmSymbolPilot, ofdmSymbolData) {
         a,
         b;
 
-    guardLength = Math.round(ofdmSymbolPilot.length * OFDM_GUARD);
+    guardLength = Math.round(ofdmSymbolPilot.length * parseFloat(domOfdmGuard.value));
     symbolEndPilot = arraySmartCopy(ofdmSymbolPilot, -guardLength);
     symbolEndData = arraySmartCopy(ofdmSymbolData, -guardLength);
 
-    if (OFDM_GUARD_WINDOW) {
+    if (domOfdmGuardWindow.checked) {
         lastSymbolStartPilot = arraySmartCopy(lastOfdmSymbolPilot, guardLength);
         lastSymbolStartData = arraySmartCopy(lastOfdmSymbolData, guardLength);
 
@@ -438,13 +445,16 @@ function getOfdmGuard(ofdmSymbolPilot, ofdmSymbolData) {
 }
 
 function appendOfdmSymbol(output, binaryValue) {
-    var ofdmSymbolPilot, ofdmSymbolData, i, ofdmGuard, normalizeFactor, ofdmSymbol;
+    var ofdmSymbolPilot, ofdmSymbolData, i, ofdmGuard, normalizeFactor, ofdmSymbol, frequencyBinIndexPilot, frequencyBinIndexData;
 
-    normalizeFactor = 2 + binaryValue.length;        // two pilots + BPSK subcarriers for each bit
-    ofdmSymbolPilot = getOfdmSymbolPilot(binaryValue);
+    frequencyBinIndexPilot = getOfdmFrequencyBinIndexPilot();
+    frequencyBinIndexData = getOfdmFrequencyBinIndexData();
+    normalizeFactor = frequencyBinIndexPilot.length + frequencyBinIndexData.length;
+
+    ofdmSymbolPilot = getOfdmSymbolPilot();
     ofdmSymbolData = getOfdmSymbolData(binaryValue);
 
-    if (OFDM_GUARD > 0) {
+    if (parseFloat(domOfdmGuard.value) > 0) {
         if (lastOfdmSymbolAvailable) {
             ofdmGuard = getOfdmGuard(ofdmSymbolPilot, ofdmSymbolData);
             ofdmGuard = arrayDivide(ofdmGuard, normalizeFactor);
@@ -455,7 +465,7 @@ function appendOfdmSymbol(output, binaryValue) {
         lastOfdmSymbolAvailable = true;
     }
 
-    for (i = 0; i < OFDM_SYMBOL_REPETITION; i++) {
+    for (i = 0; i < parseInt(domOfdmSymbolRepetition.value); i++) {
         ofdmSymbol = arrayAdd(ofdmSymbolPilot, ofdmSymbolData);
         ofdmSymbol = arrayDivide(ofdmSymbol, normalizeFactor);
         arrayAppend(output, ofdmSymbol);
@@ -463,15 +473,24 @@ function appendOfdmSymbol(output, binaryValue) {
 }
 
 function getOfdmSymbolData(binaryValue) {
-    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample;
+    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample, frequencyBinIndexData;
+
+    frequencyBinIndexData = getOfdmFrequencyBinIndexData();
 
     ofdmSymbol = [];
+    for (i = 0; i < samplePerBit; i++) {
+        ofdmSymbol.push(0);
+    }
 
     // add data subcarriers
-    cycles = cycleLow + 1;   // skip first pilot
     for (bit = 0; bit < binaryValue.length; bit++) {
+        if (bit >= frequencyBinIndexData.length) {
+            break;
+        }
+
         isOne = (binaryValue[bit] === '1');
         for (i = 0; i < samplePerBit; i++) {
+            cycles = frequencyBinIndexData[bit];
             samplePerPeriod = samplePerBit / cycles;
             sample = generateSineWave(
                 samplePerPeriod,
@@ -480,39 +499,62 @@ function getOfdmSymbolData(binaryValue) {
                 i
             );
 
-            if (bit === 0) {
-                ofdmSymbol.push(sample);
-            } else {
-                ofdmSymbol[i] += sample;
-            }
+            ofdmSymbol[i] += sample;
         }
-        cycles++;
     }
 
     return ofdmSymbol;
 }
 
-function getOfdmSymbolPilot(binaryValue) {
-    var i, cycles, samplePerPeriod,  ofdmSymbol, sample;
+function getOfdmSymbolPilot() {
+    var i, pilot, cycles, samplePerPeriod,  ofdmSymbol, sample, frequencyBinIndexPilot;
 
     ofdmSymbol = [];
-
-    // pilot #1 (first subcarrier)
-    cycles = cycleLow;
     for (i = 0; i < samplePerBit; i++) {
-        samplePerPeriod = samplePerBit / cycles;
-        sample = generateSineWave(samplePerPeriod, 1, 0, i);
-        ofdmSymbol.push(sample);
+        ofdmSymbol.push(0);
     }
 
-    // pilot #2 (last subcarrier)
-    cycles += binaryValue.length + 1;
-    for (i = 0; i < samplePerBit; i++) {
-        samplePerPeriod = samplePerBit / cycles;
-        ofdmSymbol[i] += generateSineWave(samplePerPeriod, 1, 0, i);
+    frequencyBinIndexPilot = getOfdmFrequencyBinIndexPilot();
+    for (pilot = 0; pilot < frequencyBinIndexPilot.length; pilot++) {
+        for (i = 0; i < samplePerBit; i++) {
+            cycles = frequencyBinIndexPilot[pilot];
+            samplePerPeriod = samplePerBit / cycles;
+            sample = generateSineWave(samplePerPeriod, 1, 0, i);
+            ofdmSymbol[i] += sample;
+        }
     }
 
     return ofdmSymbol;
+}
+
+function getOfdmFrequencyBinIndexPilot() {
+    return getIntArrayFromString(
+        domOfdmFrequencyBinIndexPilot.value + ''
+    );
+}
+
+function getOfdmFrequencyBinIndexData() {
+    return getIntArrayFromString(
+        domOfdmFrequencyBinIndexData.value + ''
+    );
+}
+
+function getIntArrayFromString(str) {
+    var
+        result = [],
+        split,
+        i;
+
+    if (str === '') {
+        return result;
+    }
+
+    split = str.split(' ');
+    for (i = 0; i < split.length; i++) {
+        result.push(parseInt(split[i]));
+    }
+
+    return result;
 }
 
 function appendWhiteNoise(buffer, amount) {
@@ -553,37 +595,40 @@ function appendBinaryValueSerial(output, modulationType, binaryValue) {
                 appendBitChirp(output, isOne);
                 break;
         }
+
+        if (domSeparateBitsCheckbox.checked) {
+            appendSilence(output, SEPARATION_BITS);
+        }
     }
 }
 
 function getTestSoundBuffer(modulationTypeList) {
-    var i, value, binaryValue, numberOfBinaryValues, output, modulationType;
+    var i, value, repetition, binaryValue, numberOfBinaryValues, numberOfBinaryValuesRepetitions, output, modulationType;
 
     output = [];
     numberOfBinaryValues = parseInt(domNumberOfBinaryValues.value);
+    numberOfBinaryValuesRepetitions = parseInt(domNumberOfBinaryValuesRepetitions.value);
     for (i = 0; i < modulationTypeList.length; i++) {
         modulationType = modulationTypeList[i];
-        for (value = 0; value < numberOfBinaryValues; value++) {
-            binaryValue = value.toString(2);
-            binaryValue = pad(binaryValue, (numberOfBinaryValues - 1).toString(2).length);
-            if (modulationType === MODULATION_TYPE.OFDM) {
-                appendOfdmSymbol(output, binaryValue);
-            } else {
-                appendBinaryValueSerial(output, modulationType, binaryValue);
-            }
-            if (domSeparateBinaryValuesCheckbox.checked) {
-                appendSilence(output, SEPARATION_BIT);
+
+        for (repetition = 0; repetition < numberOfBinaryValuesRepetitions; repetition++) {
+            for (value = 0; value < numberOfBinaryValues; value++) {
+                binaryValue = value.toString(2);
+                binaryValue = pad(binaryValue, (numberOfBinaryValues - 1).toString(2).length);
+                if (modulationType === MODULATION_TYPE.OFDM) {
+                    appendOfdmSymbol(output, binaryValue);
+                } else {
+                    appendBinaryValueSerial(output, modulationType, binaryValue);
+                }
+                if (domSeparateBinaryValuesCheckbox.checked) {
+                    appendSilence(output, SEPARATION_BINARY_VALUES);
+                }
             }
         }
+
         if (domSeparateModulationTypesCheckbox.checked) {
-            appendWhiteNoise(output, SEPARATION_MODULATION_TYPE_WHITE_NOISE);
             appendSilence(output, SEPARATION_MODULATION_TYPE);
         }
-    }
-
-    if (domSeparateSequenceRepetitionsCheckbox.checked) {
-        appendWhiteNoise(output, SEPARATION_SEQUENCE_REPETITION_WHITE_NOISE);
-        appendSilence(output, SEPARATION_SEQUENCE_REPETITION);
     }
 
     return output;
