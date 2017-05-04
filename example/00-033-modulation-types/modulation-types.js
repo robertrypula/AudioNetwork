@@ -7,6 +7,13 @@ var
     SEPARATION_BITS = 1,
     SEPARATION_BINARY_VALUES = 1,
     SEPARATION_MODULATION_TYPE = 1,
+    AMPLITUDE_ONE_UNIT = 1,
+    PHASE_NO_OFFSET = 0,
+    PHASE_OFFSET_BPSK_180_DEEGRE = 0.5,
+    PHASE_OFFSET_OFDM_BPSK_DATA_SUBCARRIER_HIGH = 0.0,
+    PHASE_OFFSET_OFDM_BPSK_DATA_SUBCARRIER_LOW = PHASE_OFFSET_OFDM_BPSK_DATA_SUBCARRIER_HIGH + PHASE_OFFSET_BPSK_180_DEEGRE,
+    PHASE_OFFSET_BPSK_HIGH = 0.0,
+    PHASE_OFFSET_BPSK_LOW = PHASE_OFFSET_BPSK_HIGH + PHASE_OFFSET_BPSK_180_DEEGRE,
     domCanvasContainerRecord,
     domCanvasContainerPlay,
     domAudioMonoIoInitDiv,
@@ -15,9 +22,11 @@ var
     domLoopbackCheckbox,
     domNumberOfBinaryValues,
     domNumberOfBinaryValuesRepetitions,
-    domSamplePerBit,
+    domSamplePerSymbol,
     domCycleLow,
     domCycleHigh,
+    domAmplitudeLow,
+    domAmplitudeHigh,
     domOfdmGuard,
     domOfdmGuardWindow,
     domOfdmSymbolRepetition,
@@ -28,8 +37,11 @@ var
     domWavPlay,
     domRawSamplesRecord,
     domWavRecord,
+    domModulationBaskCheckbox,
     domModulationAskCheckbox,
     domModulationBpskCheckbox,
+    domModulationPskCheckbox,
+    domModulationBfskCheckbox,
     domModulationFskCheckbox,
     domModulationChirpCheckbox,
     domModulationOfdmCheckbox,
@@ -44,18 +56,23 @@ var
     bufferRecorded,
     bufferRecordedLimit,
     timeDomainBlock = [],
-    samplePerBit,
+    samplePerSymbol,
     samplePerPeriodLow,
     samplePerPeriodHigh,
     cycleLow,
     cycleHigh,
+    amplitudeLow,
+    amplitudeHigh,
     lastOfdmSymbolPilot,
     lastOfdmSymbolData,
     lastOfdmSymbolAvailable = false,
 
     MODULATION_TYPE = {
+        'BASK': 'BASK',
         'ASK': 'ASK',
         'BPSK': 'BPSK',
+        'PSK': 'PSK',
+        'BFSK': 'BFSK',
         'FSK': 'FSK',
         'CHIRP': 'CHIRP',
         'OFDM': 'OFDM'
@@ -70,9 +87,11 @@ function init() {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
     domNumberOfBinaryValues = document.getElementById('number-of-binary-values');
     domNumberOfBinaryValuesRepetitions = document.getElementById('number-of-binary-values-repetitions');
-    domSamplePerBit = document.getElementById('sample-per-bit');
+    domSamplePerSymbol = document.getElementById('sample-per-symbol');
     domCycleLow = document.getElementById('cycle-low');
     domCycleHigh = document.getElementById('cycle-high');
+    domAmplitudeLow = document.getElementById('amplitude-low');
+    domAmplitudeHigh = document.getElementById('amplitude-high');
     domOfdmGuard = document.getElementById('ofdm-guard');
     domOfdmGuardWindow = document.getElementById('ofdm-guard-window');
     domOfdmSymbolRepetition = document.getElementById('ofdm-symbol-repetition');
@@ -83,8 +102,11 @@ function init() {
     domWavPlay = document.getElementById('wav-play');
     domRawSamplesRecord = document.getElementById('raw-samples-record');
     domWavRecord = document.getElementById('wav-record');
+    domModulationBaskCheckbox = document.getElementById('modulation-bask-checkbox');
     domModulationAskCheckbox = document.getElementById('modulation-ask-checkbox');
     domModulationBpskCheckbox = document.getElementById('modulation-bpsk-checkbox');
+    domModulationPskCheckbox = document.getElementById('modulation-psk-checkbox');
+    domModulationBfskCheckbox = document.getElementById('modulation-bfsk-checkbox');
     domModulationFskCheckbox = document.getElementById('modulation-fsk-checkbox');
     domModulationChirpCheckbox = document.getElementById('modulation-chirp-checkbox');
     domModulationOfdmCheckbox = document.getElementById('modulation-ofdm-checkbox');
@@ -148,11 +170,13 @@ function onPlayClick() {
     }
 
     // global variables
-    samplePerBit = parseInt(domSamplePerBit.value);
-    cycleLow = parseInt(domCycleLow.value);
-    cycleHigh = parseInt(domCycleHigh.value);
-    samplePerPeriodLow = samplePerBit / cycleLow;
-    samplePerPeriodHigh = samplePerBit / cycleHigh;
+    samplePerSymbol = parseInt(domSamplePerSymbol.value);  // TODO implement fractional symbol durations
+    cycleLow = parseFloat(domCycleLow.value);
+    cycleHigh = parseFloat(domCycleHigh.value);
+    amplitudeLow = parseFloat(domAmplitudeLow.value);
+    amplitudeHigh = parseFloat(domAmplitudeHigh.value);
+    samplePerPeriodLow = samplePerSymbol / cycleLow;
+    samplePerPeriodHigh = samplePerSymbol / cycleHigh;
 
     modulationTypeList = getSelectedModulationTypes();
     testSoundBuffer = getTestSoundBuffer(modulationTypeList);
@@ -190,6 +214,24 @@ function onPlayClick() {
 // -----------------------------------------------------------------------
 // utils
 
+function getIntArrayFromString(str) {
+    var
+        result = [],
+        split,
+        i;
+
+    if (str === '') {
+        return result;
+    }
+
+    split = str.split(' ');
+    for (i = 0; i < split.length; i++) {
+        result.push(parseInt(split[i]));
+    }
+
+    return result;
+}
+
 function addBufferToWebAudioApi(testSoundBuffer) {
     var
         buffer,
@@ -222,11 +264,20 @@ function addBufferToWebAudioApi(testSoundBuffer) {
 function getSelectedModulationTypes() {
     var modulationTypeList = [];
 
+    if (domModulationBaskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.BASK);
+    }
     if (domModulationAskCheckbox.checked) {
         modulationTypeList.push(MODULATION_TYPE.ASK);
     }
     if (domModulationBpskCheckbox.checked) {
         modulationTypeList.push(MODULATION_TYPE.BPSK);
+    }
+    if (domModulationPskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.PSK);
+    }
+    if (domModulationBfskCheckbox.checked) {
+        modulationTypeList.push(MODULATION_TYPE.BFSK);
     }
     if (domModulationFskCheckbox.checked) {
         modulationTypeList.push(MODULATION_TYPE.FSK);
@@ -278,7 +329,7 @@ function generateSineWave(samplePerPeriod, amplitude, unitPhaseOffset, sample) {
 }
 
 function pad(num, size) {
-    var s = '0000000' + num;
+    var s = '000000000' + num;
 
     return s.substr(s.length - size);
 }
@@ -361,49 +412,125 @@ function cosineWindow(n, N) {
 // -----------------------------------------------------------------------
 // test sound
 
-function appendBitASK(buffer, isOne) {
+function appendBinaryAskSymbol(buffer, isOne) {
     var i, sample, amplitude;
 
-    for (i = 0; i < samplePerBit; i++) {
-        amplitude = isOne ? 1.0 : 0.3;
-        sample = generateSineWave(samplePerPeriodLow, amplitude, 0, buffer.length);
+    for (i = 0; i < samplePerSymbol; i++) {
+        amplitude = isOne
+            ? amplitudeHigh
+            : amplitudeLow;
+        sample = generateSineWave(
+            samplePerPeriodLow,
+            amplitude,
+            PHASE_NO_OFFSET,
+            buffer.length
+        );
         buffer.push(sample);
     }
 }
 
-function appendBitBPSK(buffer, isOne) {
+function appendAskSymbol(buffer, binaryValueFactor) {
+    var i, sample, diff, amplitude;
+
+    for (i = 0; i < samplePerSymbol; i++) {
+        diff = amplitudeHigh - amplitudeLow;
+        amplitude = amplitudeLow + diff * binaryValueFactor;
+        sample = generateSineWave(
+            samplePerPeriodLow,
+            amplitude,
+            PHASE_NO_OFFSET,
+            buffer.length
+        );
+        buffer.push(sample);
+    }
+}
+
+function appendBinaryPskSymbol(buffer, isOne) {
     var i, sample, phase;
 
-    for (i = 0; i < samplePerBit; i++) {
-        phase = isOne ? 0.5 : 0.0;
-        sample = generateSineWave(samplePerPeriodLow, 1, phase, buffer.length);
+    for (i = 0; i < samplePerSymbol; i++) {
+        phase = isOne
+            ? PHASE_OFFSET_BPSK_HIGH
+            : PHASE_OFFSET_BPSK_LOW;
+        sample = generateSineWave(
+            samplePerPeriodLow,
+            AMPLITUDE_ONE_UNIT,
+            phase,
+            buffer.length
+        );
         buffer.push(sample);
     }
 }
 
-function appendBitFSK(buffer, isOne) {
+function appendPskSymbol(buffer, value, numberOfBinaryValues) {
+    var i, sample, phase;
+
+    for (i = 0; i < samplePerSymbol; i++) {
+        phase = value / numberOfBinaryValues;
+        sample = generateSineWave(
+            samplePerPeriodLow,
+            AMPLITUDE_ONE_UNIT,
+            phase,
+            buffer.length
+        );
+        buffer.push(sample);
+    }
+}
+
+function appendBinaryFskSymbol(buffer, isOne) {
     var i, sample, samplePerPeriod;
 
-    for (i = 0; i < samplePerBit; i++) {
-        samplePerPeriod = isOne ? samplePerPeriodHigh : samplePerPeriodLow;
-        sample = generateSineWave(samplePerPeriod, 1, 0, buffer.length);
+    for (i = 0; i < samplePerSymbol; i++) {
+        samplePerPeriod = isOne
+            ? samplePerPeriodHigh
+            : samplePerPeriodLow;
+        sample = generateSineWave(
+            samplePerPeriod,
+            AMPLITUDE_ONE_UNIT,
+            PHASE_NO_OFFSET,
+            buffer.length
+        );
         buffer.push(sample);
     }
 }
 
-function appendBitChirp(buffer, isOne) {
-    var i, sample, phaseAcceleration, carrierPhase, t, samplePerPeriod;
+function appendFskSymbol(buffer, binaryValueFactor) {
+    var i, sample, samplePerPeriod, cycle, diff;
 
-    carrierPhase = 0;
+    for (i = 0; i < samplePerSymbol; i++) {
+        diff = cycleHigh - cycleLow;
+        cycle = cycleLow + diff * binaryValueFactor;
+        samplePerPeriod = samplePerSymbol / cycle;
+        sample = generateSineWave(
+            samplePerPeriod,
+            AMPLITUDE_ONE_UNIT,
+            PHASE_NO_OFFSET,
+            buffer.length
+        );
+        buffer.push(sample);
+    }
+}
+
+function appendChirpSymbol(buffer, isOne) {
+    var i, sample, phaseAcceleration, phase, t, samplePerPeriod;
+
+    phase = 0;
     // LOW symbol will be chirp that goes from low frequency to high
     // HIGH symbol will be chirp that goes from high frequency to low
     phaseAcceleration = (cycleHigh - cycleLow) * (isOne ? -1 : 1);
-    for (i = 0; i < samplePerBit; i++) {
-        t = i / samplePerBit;
-        carrierPhase = phaseAcceleration * t * t / 2;
-        samplePerPeriod = isOne ? samplePerPeriodLow : samplePerPeriodHigh;
+    for (i = 0; i < samplePerSymbol; i++) {
+        t = i / samplePerSymbol;
+        phase = phaseAcceleration * t * t / 2;
+        samplePerPeriod = isOne
+            ? samplePerPeriodLow
+            : samplePerPeriodHigh;
         // FM modulation can be expressed as phase modulation
-        sample = generateSineWave(samplePerPeriod, 1, carrierPhase, buffer.length);
+        sample = generateSineWave(
+            samplePerPeriod,
+            AMPLITUDE_ONE_UNIT,
+            phase,
+            buffer.length
+        );
 
         buffer.push(sample);
     }
@@ -473,12 +600,12 @@ function appendOfdmSymbol(output, binaryValue) {
 }
 
 function getOfdmSymbolData(binaryValue) {
-    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, sample, frequencyBinIndexData;
+    var i, bit, isOne, cycles, samplePerPeriod,  ofdmSymbol, phase, sample, frequencyBinIndexData;
 
     frequencyBinIndexData = getOfdmFrequencyBinIndexData();
 
     ofdmSymbol = [];
-    for (i = 0; i < samplePerBit; i++) {
+    for (i = 0; i < samplePerSymbol; i++) {
         ofdmSymbol.push(0);
     }
 
@@ -489,13 +616,16 @@ function getOfdmSymbolData(binaryValue) {
         }
 
         isOne = (binaryValue[bit] === '1');
-        for (i = 0; i < samplePerBit; i++) {
+        for (i = 0; i < samplePerSymbol; i++) {
             cycles = frequencyBinIndexData[bit];
-            samplePerPeriod = samplePerBit / cycles;
+            samplePerPeriod = samplePerSymbol / cycles;
+            phase = isOne
+                ? PHASE_OFFSET_OFDM_BPSK_DATA_SUBCARRIER_HIGH
+                : PHASE_OFFSET_OFDM_BPSK_DATA_SUBCARRIER_LOW;
             sample = generateSineWave(
                 samplePerPeriod,
-                1,
-                isOne ? 0.25 : 0.25 + 0.5,
+                AMPLITUDE_ONE_UNIT,
+                phase,
                 i
             );
 
@@ -510,16 +640,21 @@ function getOfdmSymbolPilot() {
     var i, pilot, cycles, samplePerPeriod,  ofdmSymbol, sample, frequencyBinIndexPilot;
 
     ofdmSymbol = [];
-    for (i = 0; i < samplePerBit; i++) {
+    for (i = 0; i < samplePerSymbol; i++) {
         ofdmSymbol.push(0);
     }
 
     frequencyBinIndexPilot = getOfdmFrequencyBinIndexPilot();
     for (pilot = 0; pilot < frequencyBinIndexPilot.length; pilot++) {
-        for (i = 0; i < samplePerBit; i++) {
+        for (i = 0; i < samplePerSymbol; i++) {
             cycles = frequencyBinIndexPilot[pilot];
-            samplePerPeriod = samplePerBit / cycles;
-            sample = generateSineWave(samplePerPeriod, 1, 0, i);
+            samplePerPeriod = samplePerSymbol / cycles;
+            sample = generateSineWave(
+                samplePerPeriod,
+                AMPLITUDE_ONE_UNIT,
+                PHASE_NO_OFFSET,
+                i
+            );
             ofdmSymbol[i] += sample;
         }
     }
@@ -539,28 +674,10 @@ function getOfdmFrequencyBinIndexData() {
     );
 }
 
-function getIntArrayFromString(str) {
-    var
-        result = [],
-        split,
-        i;
-
-    if (str === '') {
-        return result;
-    }
-
-    split = str.split(' ');
-    for (i = 0; i < split.length; i++) {
-        result.push(parseInt(split[i]));
-    }
-
-    return result;
-}
-
 function appendWhiteNoise(buffer, amount) {
     var i;
 
-    for (i = 0; i < amount * samplePerBit; i++) {
+    for (i = 0; i < amount * samplePerSymbol; i++) {
         buffer.push(
             -1 + Math.random() * 2
         );
@@ -570,29 +687,29 @@ function appendWhiteNoise(buffer, amount) {
 function appendSilence(buffer, amount) {
     var i;
 
-    for (i = 0; i < amount * samplePerBit; i++) {
+    for (i = 0; i < amount * samplePerSymbol; i++) {
         buffer.push(0);
     }
 }
 
-function appendBinaryValueSerial(output, modulationType, binaryValue) {
+function appendSymbol(output, modulationType, binaryValue) {
     var i, isOne;
 
     for (i = 0; i < binaryValue.length; i++) {
         isOne = (binaryValue[i] === '1');
 
         switch (modulationType) {
-            case MODULATION_TYPE.ASK:
-                appendBitASK(output, isOne);
+            case MODULATION_TYPE.BASK:
+                appendBinaryAskSymbol(output, isOne);
                 break;
             case MODULATION_TYPE.BPSK:
-                appendBitBPSK(output, isOne);
+                appendBinaryPskSymbol(output, isOne);
                 break;
-            case MODULATION_TYPE.FSK:
-                appendBitFSK(output, isOne);
+            case MODULATION_TYPE.BFSK:
+                appendBinaryFskSymbol(output, isOne);
                 break;
             case MODULATION_TYPE.CHIRP:
-                appendBitChirp(output, isOne);
+                appendChirpSymbol(output, isOne);
                 break;
         }
 
@@ -603,7 +720,16 @@ function appendBinaryValueSerial(output, modulationType, binaryValue) {
 }
 
 function getTestSoundBuffer(modulationTypeList) {
-    var i, value, repetition, binaryValue, numberOfBinaryValues, numberOfBinaryValuesRepetitions, output, modulationType;
+    var
+        i,
+        value,
+        repetition,
+        binaryValue,
+        binaryValueFactor,
+        numberOfBinaryValues,
+        numberOfBinaryValuesRepetitions,
+        output,
+        modulationType;
 
     output = [];
     numberOfBinaryValues = parseInt(domNumberOfBinaryValues.value);
@@ -615,10 +741,22 @@ function getTestSoundBuffer(modulationTypeList) {
             for (value = 0; value < numberOfBinaryValues; value++) {
                 binaryValue = value.toString(2);
                 binaryValue = pad(binaryValue, (numberOfBinaryValues - 1).toString(2).length);
-                if (modulationType === MODULATION_TYPE.OFDM) {
-                    appendOfdmSymbol(output, binaryValue);
-                } else {
-                    appendBinaryValueSerial(output, modulationType, binaryValue);
+                binaryValueFactor = value / (numberOfBinaryValues - 1);
+                switch (modulationType) {
+                    case MODULATION_TYPE.ASK:
+                        appendAskSymbol(output, binaryValueFactor);
+                        break;
+                    case MODULATION_TYPE.PSK:
+                        appendPskSymbol(output, value, numberOfBinaryValues);
+                        break;
+                    case MODULATION_TYPE.FSK:
+                        appendFskSymbol(output, binaryValueFactor);
+                        break;
+                    case MODULATION_TYPE.OFDM:
+                        appendOfdmSymbol(output, binaryValue);
+                        break;
+                    default:
+                        appendSymbol(output, modulationType, binaryValue);
                 }
                 if (domSeparateBinaryValuesCheckbox.checked) {
                     appendSilence(output, SEPARATION_BINARY_VALUES);

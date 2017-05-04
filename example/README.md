@@ -8,8 +8,8 @@ Examples are also in ES5. The reason was to keep it as simple as possible.
 For people that worked with JS some time ago stuff like webpack, ES6, Babel
 and others might be little scary. In general you can just grab the scripts
 and run it directly in the browser.
-Those examples are also some kind of playground. I check ideas here before
-I add some new feature to the AudioNetwork main project.
+Those examples are also some kind of playground. I'm checking ideas here
+before I add some new feature to the AudioNetwork main project.
 
 ## 00-xxx
 

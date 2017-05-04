@@ -5,6 +5,8 @@ https://www.youtube.com/playlist?list=PLw1tfxH2oZ8OXnTSO6u6-hbgttynp1fo3
 
 Additionally you can find a lot of articles in the links below:
 
+TODO: This is direct copy of txt file. Reformat and make links clickable
+
 ## Not categorised (yet)
 
 ```
@@ -67,6 +69,11 @@ How to shift the frequency spectrum?
     http://dsp.stackexchange.com/questions/1991/how-to-shift-the-frequency-spectrum
     https://en.wikipedia.org/wiki/Heterodyne
 
+--------------------------
+
+Find beginning of signal for BPSK Demodulation
+    https://dsp.stackexchange.com/questions/12838/find-beginning-of-signal-for-bpsk-demodulation?noredirect=1&lq=1
+
 ```
 
 ### OFDM
@@ -84,11 +91,18 @@ WiFi explained
 Another great example
     http://www.sharetechnote.com/html/Communication_OFDM.html
 
+Nice articles about OFDM
+    http://www.skydsp.com/publications/index.htm
+```
+
+## Audio Communication Systems
+
+```
 Complete Acoustic Communication System - 'Acoustic OFDM'   GREAT!!!!!!!
     https://www.nttdocomo.co.jp/english/binary/pdf/corporate/technology/rd/technical_journal/bn/vol8_2/vol8_2_004en.pdf
 
-Nice articles about OFDM
-    http://www.skydsp.com/publications/index.htm
+Nice project
+    http://courses.cs.washington.edu/courses/cse561/10sp/project_files/FinalReport_FCI_YH.pdf
 ```
 
 ## FFT

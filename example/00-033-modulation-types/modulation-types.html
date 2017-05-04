@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="modulation-types-debugger.css">
+    <link rel="stylesheet" type="text/css" href="modulation-types.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -153,7 +153,7 @@
                                 <input
                                     type="checkbox"
                                     id="separate-bits-checkbox" />
-                                Bits (no effect on OFDM)
+                                Bits
                             </div>
                             <div class="clearfix">
                                 <input
@@ -181,33 +181,51 @@
                             <div class="clearfix">
                                 <input
                                     type="checkbox"
+                                    id="modulation-bask-checkbox" />
+                                B-ASK (bits of binaryValue encoded as separate B-ASK symbols)
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
                                     id="modulation-ask-checkbox" />
-                                ASK
+                                ASK (binaryValue encoded as one ASK symbol)
                             </div>
                             <div class="clearfix">
                                 <input
                                     type="checkbox"
                                     id="modulation-bpsk-checkbox" />
-                                B-PSK
+                                B-PSK (bits of binaryValue encoded as separate B-PSK symbols)
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-psk-checkbox" />
+                                PSK (binaryValue encoded as one PSK symbol)
+                            </div>
+                            <div class="clearfix">
+                                <input
+                                    type="checkbox"
+                                    id="modulation-bfsk-checkbox" />
+                                B-FSK (bits of binaryValue encoded as separate B-FSK symbols)
                             </div>
                             <div class="clearfix">
                                 <input
                                     type="checkbox"
                                     id="modulation-fsk-checkbox" />
-                                FSK
+                                FSK (binaryValue encoded as one FSK symbol)
                             </div>
                             <div class="clearfix">
                                 <input
                                     type="checkbox"
                                     id="modulation-chirp-checkbox" />
-                                Chirp
+                                Chirp (bits of binaryValue encoded as separate Chirp symbols)
                             </div>
                             <div class="clearfix">
                                 <input
                                     type="checkbox"
                                     id="modulation-ofdm-checkbox"
                                     checked="checked" />
-                                OFDM
+                                OFDM (bits of binaryValue as one OFDM symbol but on separate B-PSK subcarriers)
                             </div>
                         </div>
                     </div>
@@ -240,20 +258,46 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Sample per bit
+                                Sample per symbol
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <input
                                 type="number"
-                                id="sample-per-bit"
+                                id="sample-per-symbol"
                                 value="512" />
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Cycles in bit duration - LOW (no effect in OFDM)
+                                Amplitude - LOW
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="amplitude-low"
+                                value="0.1" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Amplitude - HIGH
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="amplitude-high"
+                                value="1" />
+                        </div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Cycles in symbol duration - LOW
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -266,7 +310,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Cycles in bit duration - HIGH (no effect in ASK, B-PSK and OFDM)
+                                Cycles in symbol duration - HIGH
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -287,7 +331,7 @@
                                 type="text"
                                 id="ofdm-frequency-bin-index-pilot"
                                 value="23 29" />
-                            Frequency bin index list separated by spaces
+                            Frequency bin indexes separated by spaces
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -301,10 +345,11 @@
                                 type="text"
                                 id="ofdm-frequency-bin-index-data"
                                 value="25 26 27" />
-                            This should be equal to number of bits that are needed to store binary value. If you picked 8
-                            as 'Number of binary values' it means that you require 3 bits to store one binary value.
-                            In that case you need to provide 3 frequnecy bin indexes separated by spaces.
-                            Please do NOT pick same indexes as at 'OFDM pilots' section
+                            This should be equal to number of bits that are needed to store binary value.
+                            If you picked 8 as 'Number of binary values' it means that you require 3 bits
+                            to store one binary value. In that case you need to provide 3 frequency bin
+                            indexes separated by spaces. Please do NOT pick same indexes as at 'OFDM pilots'
+                            section.
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -349,7 +394,8 @@
                                 id="ofdm-guard-window"
                                 checked="checked" />
                             <br/>
-                            When checked cyclic prefix from previous symbol is merged with cyclic prefix from current symbol (0->1, 0->1 cosine windows function)
+                            When checked part of previous symbol is merged with part of current symbol (0->1, 0->1 cosine window function).
+                            No effect when 'OFDM guard' is equal to zero.
                         </div>
                     </div>
                     <div class="row margin-bottom-double">
@@ -426,7 +472,7 @@
 
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="../00-000-common/wav-audio-file.js"></script>
-    <script src="modulation-types-debugger.js"></script>
+    <script src="modulation-types.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
