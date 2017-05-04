@@ -53,7 +53,7 @@
         }
 
         function convertToDecibel(value) {
-            return 10 * MathUtil.log(value) / MathUtil.LN10;
+            return 10 * MathUtil.log(value) / MathUtil.LN10; // TODO it should be (20 * ...) because decibels describes power levels
         }
 
         function findUnitAngle(x, y) {
