@@ -8,18 +8,27 @@ var
     audioMonoIO,
     waveAnalyser,
     rxFrequency = 1500,
-    rxBufferSize = 1000,
+    rxWindowSize = 4410,
     rxSampleCounter = 0;
 
 function init() {
     domRxFrequencyWidget = document.getElementById('rx-frequency-widget');
 
     audioMonoIO = new AudioMonoIO();
-    waveAnalyser = new WaveAnalyser();
+    waveAnalyser = new WaveAnalyser(
+        getSamplePerPeriod(
+            audioMonoIO.getSampleRate(),
+            rxFrequency
+        ),
+        rxWindowSize,
+        true
+    );
     audioMonoIO.setSampleInHandler(sampleInHandler);
 
     updateRxFrequencyOnScreen();
 }
+
+// -----------------------------------------------------------------------
 
 function rxFrequencyWidgetClick(action, digitPosition) {
     rxFrequency = changeDigitInFloat(
@@ -41,18 +50,29 @@ function updateRxFrequencyOnScreen() {
     );
 }
 
-// ----------------------
+// -----------------------------------------------------------------------
+
+function getSamplePerPeriod(sampleRate, frequency) {
+    return sampleRate / frequency;
+}
 
 function sampleInHandler(monoIn) {
     var i, sample;
 
+    // waveAnaluser.setWindowFunction();
     for (i = 0; i < monoIn.length; i++) {
         sample = monoIn[i];
         waveAnalyser.handle(sample);
         rxSampleCounter++;
 
-        if (rxSampleCounter % rxBufferSize === 0) {
-            waveAnalyser.getFrequencyData();
+        if (rxSampleCounter % rxWindowSize === 0) {
+            var log =
+
+                'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(3) + '<br/>' +
+                'Phase: ' + waveAnalyser.getPhase().toFixed(3) + '<br/>' +
+                'Decibel: ' + waveAnalyser.getDecibel().toFixed(3);
+
+            document.getElementById('log').innerHTML = log;
         }
     }
 

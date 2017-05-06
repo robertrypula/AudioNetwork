@@ -3,7 +3,7 @@
 var WaveGenerate;
 
 WaveGenerate = function (samplePerPeriod) {
-    this.$$sample = undefined;
+    this.$$sampleNumber = undefined;
     this.$$samplePerPeriod = 0;
     this.$$phase = 0;
     this.$$amplitude = 1;
@@ -28,27 +28,27 @@ WaveGenerate.prototype.$$getSample = function () {
 
 WaveGenerate.prototype.setPhase = function (phase) {
     this.$$phase = phase;
-    this.$$sample = undefined;       // clear cache
+    this.$$sampleNumber = undefined;       // clear cache
 };
 
 WaveGenerate.prototype.setAmplitude = function (amplitude) {
     this.$$amplitude = amplitude;
-    this.$$sample = undefined;       // clear cache
+    this.$$sampleNumber = undefined;       // clear cache
 };
 
 WaveGenerate.prototype.nextSample = function () {
     this.$$sampleNumber++;
-    this.$$sample = undefined;       // clear cache
+    this.$$sampleNumber = undefined;       // clear cache
 };
 
 WaveGenerate.prototype.getSample = function () {
-    if (typeof this.$$sample !== 'undefined') {
-        return this.$$sample;
+    if (typeof this.$$sampleNumber !== 'undefined') {
+        return this.$$sampleNumber;
     }
     
-    this.$$sample = this.$$getSample();      // cache sample
+    this.$$sampleNumber = this.$$getSample();      // cache sample
 
-    return this.$$sample;
+    return this.$$sampleNumber;
 };
 
 WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod, connected) {
@@ -61,7 +61,7 @@ WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod, connected
     this.$$samplePerPeriod = samplePerPeriod;
     this.$$omega = 2 * Math.PI / this.$$samplePerPeriod;  // revolutions per sample
     this.$$sampleNumber = 0;
-    this.$$sample = undefined;       // clear cache
+    this.$$sampleNumber = undefined;       // clear cache
 
     return true;
 };
