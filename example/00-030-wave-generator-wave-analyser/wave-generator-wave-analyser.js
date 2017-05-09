@@ -2,17 +2,20 @@
 'use strict';
 
 var
-    RX_FREQUENCY_DIGIT_BEFORE_THE_DOT = 5,
-    RX_FREQUENCY_DIGIT_AFTER_THE_DOT = 6,
+    DIGIT_BEFORE_THE_DOT = 5,
+    DIGIT_AFTER_THE_DOT = 6,
     domRxFrequencyWidget,
+    domLoopbackCheckbox,
     audioMonoIO,
     waveAnalyser,
+    waveGenerate,
     rxFrequency = 1500,
     rxWindowSize = 4410,
     rxSampleCounter = 0;
 
 function init() {
     domRxFrequencyWidget = document.getElementById('rx-frequency-widget');
+    domLoopbackCheckbox = document.getElementById('loopback-checkbox');
 
     audioMonoIO = new AudioMonoIO();
     waveAnalyser = new WaveAnalyser(
@@ -23,20 +26,39 @@ function init() {
         rxWindowSize,
         true
     );
+    waveGenerate = new WaveGenerate(
+        getSamplePerPeriod(
+            audioMonoIO.getSampleRate(),
+            rxFrequency
+        )
+    );
     audioMonoIO.setSampleInHandler(sampleInHandler);
-
+    audioMonoIO.setSampleOutHandler(sampleOutHandler);
+    onLoopbackCheckboxChange();
     updateRxFrequencyOnScreen();
 }
 
-// -----------------------------------------------------------------------
+function onLoopbackCheckboxChange() {
+    if (audioMonoIO) {
+        audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+    }
+}
+
+// ------------------------------------------------------------------------
 
 function rxFrequencyWidgetClick(action, digitPosition) {
     rxFrequency = changeDigitInFloat(
         action,
         digitPosition,
         rxFrequency,
-        RX_FREQUENCY_DIGIT_BEFORE_THE_DOT,
-        RX_FREQUENCY_DIGIT_AFTER_THE_DOT
+        DIGIT_BEFORE_THE_DOT,
+        DIGIT_AFTER_THE_DOT
+    );
+    waveAnalyser.setSamplePerPeriod(
+        getSamplePerPeriod(
+            audioMonoIO.getSampleRate(),
+            rxFrequency
+        )
     );
     updateRxFrequencyOnScreen();
 }
@@ -45,8 +67,8 @@ function updateRxFrequencyOnScreen() {
     updateDigitInWidget(
         domRxFrequencyWidget,
         rxFrequency,
-        RX_FREQUENCY_DIGIT_BEFORE_THE_DOT,
-        RX_FREQUENCY_DIGIT_AFTER_THE_DOT
+        DIGIT_BEFORE_THE_DOT,
+        DIGIT_AFTER_THE_DOT
     );
 }
 
@@ -56,10 +78,22 @@ function getSamplePerPeriod(sampleRate, frequency) {
     return sampleRate / frequency;
 }
 
+function sampleOutHandler(monoOut) {
+    var i, sample;
+
+    for (i = 0; i < monoOut.length; i++) {
+        sample = waveGenerate.getSample();
+        waveGenerate.nextSample();
+
+
+        monoOut[i] = sample;
+    }
+}
+
 function sampleInHandler(monoIn) {
     var i, sample;
 
-    // waveAnaluser.setWindowFunction();
+    // waveAnalyser.setWindowFunction();
     for (i = 0; i < monoIn.length; i++) {
         sample = monoIn[i];
         waveAnalyser.handle(sample);
@@ -67,8 +101,8 @@ function sampleInHandler(monoIn) {
 
         if (rxSampleCounter % rxWindowSize === 0) {
             var log =
-
-                'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(3) + '<br/>' +
+                'Omega: ' + waveAnalyser.$$omega.toFixed(9) + '<br/>' +
+                'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(12) + '<br/>' +
                 'Phase: ' + waveAnalyser.getPhase().toFixed(3) + '<br/>' +
                 'Decibel: ' + waveAnalyser.getDecibel().toFixed(3);
 

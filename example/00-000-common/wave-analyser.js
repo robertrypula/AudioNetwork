@@ -9,13 +9,17 @@
 var WaveAnalyser;
 
 WaveAnalyser = function (samplePerPeriod, windowSize, applyWindowFunction) {
-    this.$$omega = 2 * Math.PI / samplePerPeriod;
+    this.$$omega = undefined;
+    this.$$sampleNumber = undefined;
+    this.setSamplePerPeriod(samplePerPeriod);
     this.$$sampleBuffer = new Buffer(windowSize);
     this.$$applyWindowFunction = applyWindowFunction;
-    this.$$sampleNumber = 0;
-
-    this.$$frequencyBin = null;
+    this.$$frequencyBin = undefined;
 };
+
+WaveAnalyser.$$_UNIT_PHASE = 1;
+WaveAnalyser.$$_NEGATIVE_FREQUENCIES_AMPLITUDE_FIX = 2;
+WaveAnalyser.$$_PHASE_CORRECTION = 0.75;
 
 WaveAnalyser.prototype.$$computeFrequencyBin = function () {
     var i, size, windowFunctionValue, sampleValue, angle, complex;
@@ -23,18 +27,24 @@ WaveAnalyser.prototype.$$computeFrequencyBin = function () {
     this.$$frequencyBin = new Complex(0, 0);
     size = this.$$sampleBuffer.getSize();
     for (i = 0; i < size; i++) {
-        sampleValue = this.$$sampleBuffer.getItem(i);
-
         angle = this.$$omega * this.$$sampleNumber;
         complex = Complex.polar(angle);
 
+        sampleValue = this.$$sampleBuffer.getItem(i);
         complex.multiplyScalar(sampleValue);
+
         if (this.$$applyWindowFunction) {
             windowFunctionValue = WaveAnalyser.blackmanNuttall(i, size);
-            complex.multiplyScalar(sampleValue);
+            complex.multiplyScalar(windowFunctionValue);
         }
+
         this.$$frequencyBin.add(complex);
     }
+};
+
+WaveAnalyser.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+    this.$$omega = 2 * Math.PI / samplePerPeriod;
+    this.$$sampleNumber = 0;
 };
 
 WaveAnalyser.prototype.handle = function (sample) {
@@ -42,15 +52,25 @@ WaveAnalyser.prototype.handle = function (sample) {
         this.$$sampleNumber++;
     }
     this.$$sampleBuffer.pushEvenIfFull(sample);
-    this.$$frequencyBin = null;
+    this.$$frequencyBin = undefined;
 };
 
 WaveAnalyser.prototype.getAmplitude = function () {
+    var radius, amplitude;
+
     if (!this.$$frequencyBin) {
         this.$$computeFrequencyBin();
     }
 
-    return this.$$frequencyBin.getRadius();
+    radius = this.$$frequencyBin.getRadius();
+    amplitude = radius / this.$$sampleBuffer.getSize();
+
+    // for real samples half of the energy is in negative frequency
+    amplitude *= WaveAnalyser.$$_NEGATIVE_FREQUENCIES_AMPLITUDE_FIX;
+
+    // this is valid only when window function is disabled and you have pure
+    // sine wave in the signal with integer number of cycles in the window size
+    return amplitude;
 };
 
 WaveAnalyser.prototype.getPhase = function () {
@@ -63,25 +83,27 @@ WaveAnalyser.prototype.getPhase = function () {
     phase = this.$$frequencyBin.getAngle();
     // sine wave without any phase offset is a complex number with real part equal zero
     // and imaginary part on the negative side (vector pointing downwards -> 270 degrees)
-    phase = phase - 0.75;
+    phase = phase - WaveAnalyser.$$_PHASE_CORRECTION;
     // correction from line above may produce negative phase so we need to fix it
-    phase = phase < 0 ? phase + 1 : phase;
+    phase = phase < 0
+        ? phase + WaveAnalyser.$$_UNIT_PHASE
+        : phase;
     // fix direction - when sine wave is moving to the right in time domain
     // then phase angle should increase counter-clockwise
-    phase = 1 - phase;
+    phase = WaveAnalyser.$$_UNIT_PHASE - phase;
 
     return phase;
 };
 
 WaveAnalyser.prototype.getDecibel = function () {
-    var dB, amplitude;
+    var dB, magnitude;
 
     if (!this.$$frequencyBin) {
         this.$$computeFrequencyBin();
     }
 
-    amplitude = this.getAmplitude();
-    dB = 20 * Math.log(amplitude) / Math.LN10;
+    magnitude = this.getAmplitude();
+    dB = 20 * Math.log(magnitude) / Math.LN10;
 
     return dB;
 };

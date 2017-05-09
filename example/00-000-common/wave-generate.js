@@ -3,65 +3,44 @@
 var WaveGenerate;
 
 WaveGenerate = function (samplePerPeriod) {
+    this.$$omega = undefined;
     this.$$sampleNumber = undefined;
-    this.$$samplePerPeriod = 0;
+    this.setSamplePerPeriod(samplePerPeriod);
     this.$$phase = 0;
     this.$$amplitude = 1;
-    this.$$omega = 0;
-    this.$$sampleNumber = 0;
-    this.$$phase = 0;
-    this.setSamplePerPeriod(samplePerPeriod);
+    this.$$sample = null;
 };
 
-WaveGenerate.prototype.$$getSample = function () {
-    var
-        phase,
-        x,
-        sample;
+WaveGenerate.prototype.$$computeSample = function () {
+    var phase, x;
 
-    phase = this.$$phase * 2 * Math.PI;
+    phase = 2 * Math.PI * this.$$phase;
     x = this.$$omega * this.$$sampleNumber;
-    sample = this.$$amplitude * Math.sin(x - phase);
+    this.$$sample = this.$$amplitude * Math.sin(x - phase);
+};
 
-    return sample;
+WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
+    this.$$omega = 2 * Math.PI / samplePerPeriod;
+    this.$$sampleNumber = 0;
 };
 
 WaveGenerate.prototype.setPhase = function (phase) {
     this.$$phase = phase;
-    this.$$sampleNumber = undefined;       // clear cache
 };
 
 WaveGenerate.prototype.setAmplitude = function (amplitude) {
     this.$$amplitude = amplitude;
-    this.$$sampleNumber = undefined;       // clear cache
 };
 
 WaveGenerate.prototype.nextSample = function () {
     this.$$sampleNumber++;
-    this.$$sampleNumber = undefined;       // clear cache
+    this.$$sample = null;       // clear cache
 };
 
 WaveGenerate.prototype.getSample = function () {
-    if (typeof this.$$sampleNumber !== 'undefined') {
-        return this.$$sampleNumber;
-    }
-    
-    this.$$sampleNumber = this.$$getSample();      // cache sample
-
-    return this.$$sampleNumber;
-};
-
-WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod, connected) {
-    if (samplePerPeriod === this.$$samplePerPeriod) {
-        return false;
+    if (this.$$sample === null) {
+        this.$$computeSample();
     }
 
-    // TODO add logic that will make new cos continuous
-
-    this.$$samplePerPeriod = samplePerPeriod;
-    this.$$omega = 2 * Math.PI / this.$$samplePerPeriod;  // revolutions per sample
-    this.$$sampleNumber = 0;
-    this.$$sampleNumber = undefined;       // clear cache
-
-    return true;
+    return this.$$sample;
 };
