@@ -81,6 +81,33 @@
                         </div>
                     </div>
 
+                    <h2>Wave Generator</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Tx frequency [Hz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-frequency"></div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Tx amplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-amplitude"></div>
+                    </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Tx phase
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-phase"></div>
+                    </div>
+
                     <h2>Wave Analyser</h2>
 
                     <div class="row margin-bottom-double">
@@ -89,74 +116,35 @@
                                 Rx frequency [Hz]
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <div class="editable-float-widget clearfix margin-bottom" id="rx-frequency-widget">
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', 4)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', 4)"></a>
-                                    <span class="digit_4">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', 3)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', 3)"></a>
-                                    <span class="digit_3">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', 2)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', 2)"></a>
-                                    <span class="digit_2">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', 1)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', 1)"></a>
-                                    <span class="digit_1">-</span>
-                                </div>
-                                <div class="digit">
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', 0)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', 0)"></a>
-                                    <span class="digit_0">-</span>
-                                </div>
-                                <div><span>.</span></div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -1)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -1)"></a>
-                                    <span class="digit_-1">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -2)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -2)"></a>
-                                    <span class="digit_-2">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -3)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -3)"></a>
-                                    <span class="digit_-3">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -4)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -4)"></a>
-                                    <span class="digit_-4">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -5)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -5)"></a>
-                                    <span class="digit_-5">-</span>
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0)" class="digit-plus" onClick="rxFrequencyWidgetClick('+', -6)"></a>
-                                    <a href="javascript:void(0)" class="digit-minus" onClick="rxFrequencyWidgetClick('-', -6)"></a>
-                                    <span class="digit_-6">-</span>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-frequency"></div>
                     </div>
-
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Rx frequency [Hz]
+                                Rx window size [samples]
                             </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-window-size"></div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="rx-window-function" class="label-for-checkbox">
+                                Apply window function
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onRxWindowFunctionChange()"
+                                id="rx-window-function"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="log"></div>

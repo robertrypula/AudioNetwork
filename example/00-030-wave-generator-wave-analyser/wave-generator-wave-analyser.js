@@ -4,63 +4,64 @@
 var
     DIGIT_BEFORE_THE_DOT = 5,
     DIGIT_AFTER_THE_DOT = 6,
-    domRxFrequencyWidget,
+    INITIAL_FREQUENCY = 1500,
+    INITIAL_RX_WINDOW_SIZE = 2024,
+    INITIAL_TX_AMPLITUDE = 0.01,
+    INITIAL_TX_PHASE = 0,
     domLoopbackCheckbox,
+    domRxWindowFunctionCheckbox,
     audioMonoIO,
     waveAnalyser,
     waveGenerate,
-    rxFrequency = 1500,
-    rxWindowSize = 4410,
+    txFrequency,
+    txAmplitude,
+    txPhase,
+    rxFrequency,
+    rxWindowSize,
     rxSampleCounter = 0;
 
 function init() {
-    var i, sample, sample2, SIZE = 16, omega, samplePerPeriod = SIZE / 3,
-    phase,
-    amplitude = 1,
-    unitPhase = 0.25;
-
-    waveGenerate = new WaveGenerate(samplePerPeriod);
-    waveGenerate.setAmplitude(amplitude);
-    waveGenerate.setUnitPhase(unitPhase);
-
-    waveAnalyser = new WaveAnalyser(samplePerPeriod, SIZE, false);
-    omega = 2 * Math.PI / samplePerPeriod;
-    phase = 2 * Math.PI * unitPhase;
-    for (i = 0; i < SIZE; i++) {
-        sample = amplitude * Math.sin(omega * i - phase);
-
-        sample2 = waveGenerate.getSample();
-        waveGenerate.nextSample();
-
-        console.log(i, sample.toFixed(6), sample2.toFixed(6));
-        waveAnalyser.handle(sample);
-    }
-
-    console.log(waveAnalyser.getFrequencyBin());
-    console.log(waveAnalyser.getDecibel().toFixed(3) + ' dB');
-    console.log(waveAnalyser.getAmplitude().toFixed(3));
-    console.log(waveAnalyser.getUnitPhase().toFixed(3));
-    console.log(waveAnalyser);
-
-    return;
-
-    domRxFrequencyWidget = document.getElementById('rx-frequency-widget');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    txFrequency = new EditableFloatWidget(
+        document.getElementById('tx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxFrequencyChange
+    );
+    txAmplitude = new EditableFloatWidget(
+        document.getElementById('tx-amplitude'), INITIAL_TX_AMPLITUDE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxAmplitudeChange
+    );
+    txPhase = new EditableFloatWidget(
+        document.getElementById('tx-phase'), INITIAL_TX_PHASE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxPhaseChange
+    );
+    rxFrequency = new EditableFloatWidget(
+        document.getElementById('rx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onRxFrequencyChange
+    );
+    rxWindowSize = new EditableFloatWidget(
+        document.getElementById('rx-window-size'), INITIAL_RX_WINDOW_SIZE, DIGIT_BEFORE_THE_DOT, 0, onRxWindowSizeChange
+    );
+    domRxWindowFunctionCheckbox = document.getElementById('rx-window-function');
 
     audioMonoIO = new AudioMonoIO();
     waveAnalyser = new WaveAnalyser(
-        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency),
-        rxWindowSize,
-        true
+        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency.getValue()),
+        rxWindowSize.getValue(),
+        domRxWindowFunctionCheckbox.checked
     );
     waveGenerate = new WaveGenerate(
-        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency)
+        getSamplePerPeriod(audioMonoIO.getSampleRate(), txFrequency.getValue())
     );
+    waveGenerate.setAmplitude(txAmplitude.getValue());
+    waveGenerate.setUnitPhase(txPhase.getValue());
+    
     audioMonoIO.setSampleInHandler(sampleInHandler);
     audioMonoIO.setSampleOutHandler(sampleOutHandler);
+
     onLoopbackCheckboxChange();
-    updateRxFrequencyOnScreen();
 }
+
+function getSamplePerPeriod(samplePerOneCycle, cycle) {
+    return samplePerOneCycle / cycle;
+}
+
+// -----------------------------------------------------------------------
 
 function onLoopbackCheckboxChange() {
     if (audioMonoIO) {
@@ -68,36 +69,47 @@ function onLoopbackCheckboxChange() {
     }
 }
 
-// ------------------------------------------------------------------------
-
-function rxFrequencyWidgetClick(action, digitPosition) {
-    rxFrequency = changeDigitInFloat(
-        action,
-        digitPosition,
-        rxFrequency,
-        DIGIT_BEFORE_THE_DOT,
-        DIGIT_AFTER_THE_DOT
-    );
-    waveAnalyser.setSamplePerPeriod(
-        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency)
-    );
-    updateRxFrequencyOnScreen();
+function onTxFrequencyChange(value) {
+    if (waveGenerate) {
+        waveGenerate.setSamplePerPeriod(
+            getSamplePerPeriod(audioMonoIO.getSampleRate(), value)
+        );
+    }
 }
 
-function updateRxFrequencyOnScreen() {
-    updateDigitInWidget(
-        domRxFrequencyWidget,
-        rxFrequency,
-        DIGIT_BEFORE_THE_DOT,
-        DIGIT_AFTER_THE_DOT
+function onTxAmplitudeChange(value) {
+    if (waveGenerate) {
+        waveGenerate.setAmplitude(value)
+    }
+}
+
+function onTxPhaseChange(value) {
+    if (waveGenerate) {
+        waveGenerate.setUnitPhase(value)
+    }
+}
+
+function onRxFrequencyChange(value) {
+    if (waveAnalyser) {
+        waveAnalyser.setSamplePerPeriod(
+            getSamplePerPeriod(audioMonoIO.getSampleRate(), value)
+        );
+    }
+}
+
+function onRxWindowSizeChange(value) {
+    if (waveAnalyser) {
+        waveAnalyser.setWindowSize(value);
+    }
+}
+
+function onRxWindowFunctionChange() {
+    waveAnalyser.setWindowFunction(
+        domRxWindowFunctionCheckbox.checked
     );
 }
 
-// -----------------------------------------------------------------------
-
-function getSamplePerPeriod(samplePerOneCycle, cycle) {
-    return samplePerOneCycle / cycle;
-}
+// ------------------------
 
 function sampleOutHandler(monoOut) {
     var i, sample;
@@ -119,10 +131,9 @@ function sampleInHandler(monoIn) {
         waveAnalyser.handle(sample);
         rxSampleCounter++;
 
-        if (rxSampleCounter % rxWindowSize === 0) {
+        if (rxSampleCounter % rxWindowSize.getValue() === 0) {
             var log =
-                'Omega: ' + waveAnalyser.$$omega.toFixed(9) + '<br/>' +
-                'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(12) + '<br/>' +
+                'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(6) + '<br/>' +
                 'Phase: ' + waveAnalyser.getUnitPhase().toFixed(3) + '<br/>' +
                 'Decibel: ' + waveAnalyser.getDecibel().toFixed(3);
 
