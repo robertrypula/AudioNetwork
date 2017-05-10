@@ -3,20 +3,22 @@
 var WaveGenerate;
 
 WaveGenerate = function (samplePerPeriod) {
-    this.$$omega = undefined;
-    this.$$sampleNumber = undefined;
+    this.$$omega = null;
+    this.$$sampleNumber = null;
     this.setSamplePerPeriod(samplePerPeriod);
-    this.$$phase = 0;
-    this.$$amplitude = 1;
+    this.$$phase = WaveGenerate.NO_PHASE_SHIFT;
+    this.$$amplitude = WaveGenerate.UNIT_AMPLITUDE;
     this.$$sample = null;
 };
 
-WaveGenerate.prototype.$$computeSample = function () {
-    var phase, x;
+WaveGenerate.UNIT_AMPLITUDE = 1;
+WaveGenerate.NO_PHASE_SHIFT = 0;
 
-    phase = 2 * Math.PI * this.$$phase;
+WaveGenerate.prototype.$$computeSample = function () {
+    var x;
+
     x = this.$$omega * this.$$sampleNumber;
-    this.$$sample = this.$$amplitude * Math.sin(x - phase);
+    this.$$sample = this.$$amplitude * Math.sin(x - this.$$phase);
 };
 
 WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
@@ -24,8 +26,8 @@ WaveGenerate.prototype.setSamplePerPeriod = function (samplePerPeriod) {
     this.$$sampleNumber = 0;
 };
 
-WaveGenerate.prototype.setPhase = function (phase) {
-    this.$$phase = phase;
+WaveGenerate.prototype.setUnitPhase = function (unitPhase) {
+    this.$$phase = 2 * Math.PI * unitPhase;  // convert to radians
 };
 
 WaveGenerate.prototype.setAmplitude = function (amplitude) {

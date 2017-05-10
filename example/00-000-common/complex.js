@@ -17,17 +17,23 @@ Complex.prototype.clone = function () {
     );
 };
 
-Complex.polar = function (angle, radius) {
-    radius = typeof radius === 'undefined'
-        ? Complex.$$_UNIT_RADIUS
-        : radius;
+Complex.polar = function (unitAngle, magnitude) {
+    var radian;
 
-    angle = 2 * Math.PI * angle;
+    magnitude = typeof magnitude === 'undefined'
+        ? Complex.$$_UNIT_RADIUS
+        : magnitude;
+
+    radian = 2 * Math.PI * unitAngle;
 
     return new Complex(
-        radius * Math.cos(angle),
-        radius * Math.sin(angle)
+        magnitude * Math.cos(radian),
+        magnitude * Math.sin(radian)
     );
+};
+
+Complex.zero = function () {
+    return new Complex(0, 0);
 };
 
 Complex.prototype.add = function (b) {
@@ -36,8 +42,8 @@ Complex.prototype.add = function (b) {
 };
 
 Complex.prototype.subtract = function (b) {
-    this.$$real += b.$$real;
-    this.$$imag += b.$$imag;
+    this.$$real -= b.$$real;
+    this.$$imag -= b.$$imag;
 };
 
 Complex.prototype.multiply = function (b) {
@@ -49,7 +55,7 @@ Complex.prototype.multiply = function (b) {
     this.$$imag = imag;
 };
 
-Complex.prototype.conjugate = function (b) {
+Complex.prototype.conjugate = function () {
     this.$$imag *= -1;
 };
 
@@ -63,22 +69,22 @@ Complex.prototype.divideScalar = function (b) {
     this.$$imag /= b;
 };
 
-Complex.prototype.getRadius = function () {
+Complex.prototype.getMagnitude = function () {
     return Math.sqrt(
         this.$$real * this.$$real +
         this.$$imag * this.$$imag
     );
 };
 
-Complex.prototype.getAngle = function () {
-    var length, quarter, angle, x, y;
+Complex.prototype.getUnitAngle = function () {
+    var x, y, magnitude, quarter, angle, unitAngle;
 
     x = this.$$real;
     y = this.$$imag;
-    length = Math.sqrt(x * x + y * y);
-    length = (length < Complex.$$_EPSILON)  // prevents from dividing by zero
+    magnitude = this.getMagnitude();
+    magnitude = magnitude < Complex.$$_EPSILON  // prevents from dividing by zero
         ? Complex.$$_EPSILON
-        : length;
+        : magnitude;
 
     //         ^             Legend:
     //  II     *     I        '!' = 0 degrees
@@ -93,24 +99,26 @@ Complex.prototype.getAngle = function () {
 
     switch (quarter) {
         case 1:
-            angle = Math.asin(y / length);
+            angle = Math.asin(y / magnitude);
             break;
         case 2:
-            angle = Math.asin(-x / length) + 0.5 * Math.PI;
+            angle = Math.asin(-x / magnitude) + 0.5 * Math.PI;
             break;
         case 3:
-            angle = Math.asin(-y / length) + Math.PI;
+            angle = Math.asin(-y / magnitude) + Math.PI;
             break;
         case 4:
-            angle = Math.asin(x / length) + 1.5 * Math.PI;
+            angle = Math.asin(x / magnitude) + 1.5 * Math.PI;
             break;
     }
 
-    return angle / (2 * Math.PI);   // returns angle in range: <0, 1)
+    unitAngle = angle / (2 * Math.PI);
+
+    return unitAngle;
 };
 
 Complex.prototype.normalize = function () {
     this.divideScalar(
-        this.getRadius()
+        this.getMagnitude()
     );
 };

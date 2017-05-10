@@ -14,23 +14,36 @@ var
     rxSampleCounter = 0;
 
 function init() {
-    /*
-    var i, sample, SIZE = 8, samplePerPeriod = 8;
+    var i, sample, sample2, SIZE = 16, omega, samplePerPeriod = SIZE / 3,
+    phase,
+    amplitude = 1,
+    unitPhase = 0.25;
 
+    waveGenerate = new WaveGenerate(samplePerPeriod);
+    waveGenerate.setAmplitude(amplitude);
+    waveGenerate.setUnitPhase(unitPhase);
 
     waveAnalyser = new WaveAnalyser(samplePerPeriod, SIZE, false);
+    omega = 2 * Math.PI / samplePerPeriod;
+    phase = 2 * Math.PI * unitPhase;
     for (i = 0; i < SIZE; i++) {
-        sample = Math.sin(2 * Math.PI * i / samplePerPeriod);
-        console.log(i, sample.toFixed(6));
+        sample = amplitude * Math.sin(omega * i - phase);
+
+        sample2 = waveGenerate.getSample();
+        waveGenerate.nextSample();
+
+        console.log(i, sample.toFixed(6), sample2.toFixed(6));
         waveAnalyser.handle(sample);
     }
-    console.log(waveAnalyser.getAmplitude());
+
     console.log(waveAnalyser.getFrequencyBin());
-    console.log(waveAnalyser.getFrequencyBin().getRadius());
+    console.log(waveAnalyser.getDecibel().toFixed(3) + ' dB');
+    console.log(waveAnalyser.getAmplitude().toFixed(3));
+    console.log(waveAnalyser.getUnitPhase().toFixed(3));
     console.log(waveAnalyser);
 
     return;
-    */
+
     domRxFrequencyWidget = document.getElementById('rx-frequency-widget');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
 
@@ -38,7 +51,7 @@ function init() {
     waveAnalyser = new WaveAnalyser(
         getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency),
         rxWindowSize,
-        false
+        true
     );
     waveGenerate = new WaveGenerate(
         getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency)
@@ -82,8 +95,8 @@ function updateRxFrequencyOnScreen() {
 
 // -----------------------------------------------------------------------
 
-function getSamplePerPeriod(sampleRate, frequency) {
-    return sampleRate / frequency;
+function getSamplePerPeriod(samplePerOneCycle, cycle) {
+    return samplePerOneCycle / cycle;
 }
 
 function sampleOutHandler(monoOut) {
@@ -110,7 +123,7 @@ function sampleInHandler(monoIn) {
             var log =
                 'Omega: ' + waveAnalyser.$$omega.toFixed(9) + '<br/>' +
                 'Amplitude: ' + waveAnalyser.getAmplitude().toFixed(12) + '<br/>' +
-                'Phase: ' + waveAnalyser.getPhase().toFixed(3) + '<br/>' +
+                'Phase: ' + waveAnalyser.getUnitPhase().toFixed(3) + '<br/>' +
                 'Decibel: ' + waveAnalyser.getDecibel().toFixed(3);
 
             document.getElementById('log').innerHTML = log;
