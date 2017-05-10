@@ -14,23 +14,34 @@ var
     rxSampleCounter = 0;
 
 function init() {
+    /*
+    var i, sample, SIZE = 8, samplePerPeriod = 8;
+
+
+    waveAnalyser = new WaveAnalyser(samplePerPeriod, SIZE, false);
+    for (i = 0; i < SIZE; i++) {
+        sample = Math.sin(2 * Math.PI * i / samplePerPeriod);
+        console.log(i, sample.toFixed(6));
+        waveAnalyser.handle(sample);
+    }
+    console.log(waveAnalyser.getAmplitude());
+    console.log(waveAnalyser.getFrequencyBin());
+    console.log(waveAnalyser.getFrequencyBin().getRadius());
+    console.log(waveAnalyser);
+
+    return;
+    */
     domRxFrequencyWidget = document.getElementById('rx-frequency-widget');
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
 
     audioMonoIO = new AudioMonoIO();
     waveAnalyser = new WaveAnalyser(
-        getSamplePerPeriod(
-            audioMonoIO.getSampleRate(),
-            rxFrequency
-        ),
+        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency),
         rxWindowSize,
-        true
+        false
     );
     waveGenerate = new WaveGenerate(
-        getSamplePerPeriod(
-            audioMonoIO.getSampleRate(),
-            rxFrequency
-        )
+        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency)
     );
     audioMonoIO.setSampleInHandler(sampleInHandler);
     audioMonoIO.setSampleOutHandler(sampleOutHandler);
@@ -55,10 +66,7 @@ function rxFrequencyWidgetClick(action, digitPosition) {
         DIGIT_AFTER_THE_DOT
     );
     waveAnalyser.setSamplePerPeriod(
-        getSamplePerPeriod(
-            audioMonoIO.getSampleRate(),
-            rxFrequency
-        )
+        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency)
     );
     updateRxFrequencyOnScreen();
 }
@@ -84,7 +92,6 @@ function sampleOutHandler(monoOut) {
     for (i = 0; i < monoOut.length; i++) {
         sample = waveGenerate.getSample();
         waveGenerate.nextSample();
-
 
         monoOut[i] = sample;
     }

@@ -10,7 +10,7 @@ var WaveAnalyser;
 
 WaveAnalyser = function (samplePerPeriod, windowSize, applyWindowFunction) {
     this.$$omega = undefined;
-    this.$$sampleNumber = undefined;
+    this.$$bufferFirstSampleNumber = undefined;
     this.setSamplePerPeriod(samplePerPeriod);
     this.$$sampleBuffer = new Buffer(windowSize);
     this.$$applyWindowFunction = applyWindowFunction;
@@ -22,12 +22,13 @@ WaveAnalyser.$$_NEGATIVE_FREQUENCIES_AMPLITUDE_FIX = 2;
 WaveAnalyser.$$_PHASE_CORRECTION = 0.75;
 
 WaveAnalyser.prototype.$$computeFrequencyBin = function () {
-    var i, size, windowFunctionValue, sampleValue, angle, complex;
+    var i, size, windowFunctionValue, sampleValue, angle, n, complex;
 
     this.$$frequencyBin = new Complex(0, 0);
     size = this.$$sampleBuffer.getSize();
     for (i = 0; i < size; i++) {
-        angle = this.$$omega * this.$$sampleNumber;
+        n = this.$$bufferFirstSampleNumber + i;
+        angle = this.$$omega * n;
         complex = Complex.polar(angle);
 
         sampleValue = this.$$sampleBuffer.getItem(i);
@@ -43,13 +44,13 @@ WaveAnalyser.prototype.$$computeFrequencyBin = function () {
 };
 
 WaveAnalyser.prototype.setSamplePerPeriod = function (samplePerPeriod) {
-    this.$$omega = 2 * Math.PI / samplePerPeriod;
-    this.$$sampleNumber = 0;
+    this.$$omega = 1 / samplePerPeriod;
+    this.$$bufferFirstSampleNumber = 0;
 };
 
 WaveAnalyser.prototype.handle = function (sample) {
     if (this.$$sampleBuffer.isFull()) {
-        this.$$sampleNumber++;
+        this.$$bufferFirstSampleNumber++;
     }
     this.$$sampleBuffer.pushEvenIfFull(sample);
     this.$$frequencyBin = undefined;
