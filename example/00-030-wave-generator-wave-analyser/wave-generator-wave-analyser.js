@@ -9,6 +9,8 @@ var
     INITIAL_TX_AMPLITUDE = 0.01,
     INITIAL_TX_PHASE = 0,
     domLoopbackCheckbox,
+    domTxActivatedCheckbox,
+    domRxActivatedCheckbox,
     domRxWindowFunctionCheckbox,
     audioMonoIO,
     waveAnalyser,
@@ -18,10 +20,12 @@ var
     txPhase,
     rxFrequency,
     rxWindowSize,
-    rxSampleCounter = 0;
+    rxSampleCounter = 0,
+    txFilledWithZeros = true;
 
-function init() {
+function init(useLite, bufferSize) {
     domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domTxActivatedCheckbox = document.getElementById('tx-activated');
     txFrequency = new EditableFloatWidget(
         document.getElementById('tx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxFrequencyChange
     );
@@ -31,6 +35,7 @@ function init() {
     txPhase = new EditableFloatWidget(
         document.getElementById('tx-phase'), INITIAL_TX_PHASE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxPhaseChange
     );
+    domRxActivatedCheckbox = document.getElementById('rx-activated');
     rxFrequency = new EditableFloatWidget(
         document.getElementById('rx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onRxFrequencyChange
     );
@@ -39,7 +44,12 @@ function init() {
     );
     domRxWindowFunctionCheckbox = document.getElementById('rx-window-function');
 
-    audioMonoIO = new AudioMonoIO();
+    if (!useLite) {
+        audioMonoIO = new AudioMonoIO(AudioMonoIO.FFT_SIZE, bufferSize);
+    } else {
+        audioMonoIO = new AudioMonoIOLite(bufferSize);
+    }
+
     waveAnalyser = new WaveAnalyser(
         getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency.getValue()),
         rxWindowSize.getValue(),
@@ -65,7 +75,7 @@ function getSamplePerPeriod(samplePerOneCycle, cycle) {
 
 function onLoopbackCheckboxChange() {
     if (audioMonoIO) {
-        audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+        audioMonoIO.setLoopback(domLoopbackCheckbox.checked);    // TODO fix loop back issues
     }
 }
 
@@ -75,6 +85,12 @@ function onTxFrequencyChange(value) {
             getSamplePerPeriod(audioMonoIO.getSampleRate(), value)
         );
     }
+}
+
+function onTxActivatedCheckboxChange() {
+    audioMonoIO.setVolume(
+        domTxActivatedCheckbox.checked ? 1 : 0
+    );
 }
 
 function onTxAmplitudeChange(value) {
@@ -114,18 +130,31 @@ function onRxWindowFunctionChange() {
 function sampleOutHandler(monoOut) {
     var i, sample;
 
+    if (!domTxActivatedCheckbox.checked) {
+        return;
+    }
+
     for (i = 0; i < monoOut.length; i++) {
         sample = waveGenerate.getSample();
         waveGenerate.nextSample();
 
         monoOut[i] = sample;
     }
+
+    if (!domTxActivatedCheckbox.checked) {
+        txFilledWithZeros = true;
+    } else {
+        txFilledWithZeros = false;
+    }
 }
 
 function sampleInHandler(monoIn) {
     var i, sample;
 
-    // waveAnalyser.setWindowFunction();
+    if (!domRxActivatedCheckbox.checked) {
+        return;
+    }
+
     for (i = 0; i < monoIn.length; i++) {
         sample = monoIn[i];
         waveAnalyser.handle(sample);
@@ -138,7 +167,7 @@ function sampleInHandler(monoIn) {
                 'Decibel: ' + waveAnalyser.getDecibel().toFixed(3);
 
             document.getElementById('log').innerHTML = log;
+            document.getElementById('phase').style.transform = 'rotate(' + (-waveAnalyser.getUnitPhase() * 360) + 'deg)';
         }
     }
-
 }

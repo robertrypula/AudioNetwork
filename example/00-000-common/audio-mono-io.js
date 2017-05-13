@@ -11,7 +11,7 @@ AudioMonoIO = function (fftSize, bufferSize, smoothingTimeConstant) {
     this.$$masterOut = null;
     this.$$masterOutVolume = null;
 
-    this.$$sampleProcessor = null;
+    this.$$sampleProcessor = null;  // TODO fix it: loopback is not working when we have one ScriptProcessor for IN and OUT
 
     this.$$inAnalyzer = null;
     this.$$outOscillator = null;

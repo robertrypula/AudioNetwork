@@ -16,7 +16,7 @@
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="init()">
+<body>
 
     <div id="fb-root"></div>
     <script>
@@ -34,6 +34,7 @@
     <div class="wrapper">
 
         <div class="container">
+            <!--
             <h1>Audio Network - send data over sound in JavaScript</h1>
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
@@ -52,6 +53,7 @@
                     </p>
                 </div>
             </div>
+            -->
 
             <!-- ---------------- -->
 
@@ -65,6 +67,28 @@
 
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
+
+                    <div class="row margin-bottom-double" id="init-button-container">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>Init AudioMonoIO</label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="init(false, 2048)" class="btn btn-default">2048</button>
+                            <button onClick="init(false, 8192)" class="btn btn-default">8192</button>
+                            <button onClick="init(false, 16384)" class="btn btn-default">16384</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double" id="init-lite-button-container">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>Init AudioMonoIOLite</label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="init(true, 2048)" class="btn btn-default">2048</button>
+                            <button onClick="init(true, 8192)" class="btn btn-default">8192</button>
+                            <button onClick="init(true, 16384)" class="btn btn-default">16384</button>
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -82,6 +106,21 @@
                     </div>
 
                     <h2>Wave Generator</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="tx-activated" class="label-for-checkbox">
+                                Activated
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onTxActivatedCheckboxChange()"
+                                id="tx-activated"
+                                value="1" />
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -109,6 +148,21 @@
                     </div>
 
                     <h2>Wave Analyser</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="rx-activated" class="label-for-checkbox">
+                                Activated
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="rx-activated"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
@@ -148,6 +202,14 @@
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="log"></div>
+
+                            <div style="width: 50%; padding-top: 50%; position: relative; outline: 1px solid #eee;">
+                                <div style="position: absolute; top: 50%; left: 50%; width: 50%; height: 0; outline: 1px solid lightgray; transform: rotate(-45deg); transform-origin: left top;" id="phase">
+                                    <div style="position: absolute; top: 0; right: 0; width: 2px; height: 2px; outline: 1px solid lightblue;">
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -180,6 +242,7 @@
     <script src="../00-000-common/wave-generate.js"></script>
     <script src="../00-000-common/wave-analyser.js"></script>
     <script src="../00-000-common/audio-mono-io.js"></script>
+    <script src="../00-000-common/audio-mono-io-lite.js"></script>
     <script src="wave-generator-wave-analyser.js"></script>
 
     <script>
