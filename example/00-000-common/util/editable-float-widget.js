@@ -45,7 +45,7 @@ EditableFloatWidget.prototype.setValue = function (value) {
         value.toFixed(this.$$digitAfterTheDot)
     );
     this.$$updateDigitInWidget();
-    this.$$handler(this.$$value);
+    // this.$$handler(this.$$value); // TODO verify if needed
 };
 
 EditableFloatWidget.prototype.getValue = function () {

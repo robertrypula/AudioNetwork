@@ -93,7 +93,7 @@ function computeDFT(timeDomain) {
  *
  * @param timeDomain
  * @param samplePerPeriod
- * @returns {{real: number, imm: number, dB: (number|*), amplitude: (number|*), phase: *, samplePerPeriod: *}}
+ * @returns {{real: number, imag: number, dB: (number|*), amplitude: (number|*), phase: *, samplePerPeriod: *}}
  */
 function getFrequencyBin(timeDomain, samplePerPeriod) {
     var
@@ -101,11 +101,11 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
         n,
         xn,
         realUnit,
-        immUnit,
+        imagUnit,
         real,
-        imm,
+        imag,
         realNormalized,
-        immNormalized,
+        imagNormalized,
         r,
         amplitude,
         dB,
@@ -113,7 +113,7 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
 
     N = timeDomain.length;                         // timeDomain array length is our window size
     real = 0;
-    imm = 0;
+    imag = 0;
     for (n = 0; n < N; n++) {
         xn = timeDomain[n];
 
@@ -122,28 +122,28 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
             : -2 * Math.PI * n / samplePerPeriod;
 
         realUnit = Math.cos(r);                    // 'in-phase' component
-        immUnit = Math.sin(r);                     // 'quadrature' component
+        imagUnit = Math.sin(r);                    // 'quadrature' component
 
         // value of the sample alters 'unit vector' length
         // it could also 'rotate' vector 180 degrees in case of negative value
         real += realUnit * xn;
-        imm += immUnit * xn;
+        imag += imagUnit * xn;
     }
 
     realNormalized = real / N;                     // normalize final vector
-    immNormalized = imm / N;                       // normalize final vector
+    imagNormalized = imag / N;                     // normalize final vector
     amplitude = Math.sqrt(                         // compute length of the vector
         realNormalized * realNormalized +
-        immNormalized * immNormalized
+        imagNormalized * imagNormalized
     );
 
     dB = 20 * Math.log(amplitude) / Math.LN10;     // convert into decibels (dB value computed from amplitudes needs to have 20 instead 10)
 
-    phase = getPhaseFromComplexNumber(real, imm);  // phase of a sine wave related to this frequency bin
+    phase = getPhaseFromComplexNumber(real, imag);  // phase of a sine wave related to this frequency bin
 
     return {
         real: real,
-        imm: imm,
+        imag: imag,
         // extras
         dB: dB,
         amplitude: amplitude,
@@ -154,11 +154,11 @@ function getFrequencyBin(timeDomain, samplePerPeriod) {
 
 // ------------------------------------------------------------------
 
-function getPhaseFromComplexNumber(real, imm) {
+function getPhaseFromComplexNumber(real, imag) {
     var phase;
 
     // get angle between positive X axis and vector counter-clockwise
-    phase = findUnitAngle(real, imm);
+    phase = findUnitAngle(real, imag);
     // sine wave without any phase offset is a complex number with real part equal zero
     // and imaginary part on the negative side (vector pointing downwards -> 270 degrees)
     phase = phase - 0.75;
@@ -275,7 +275,7 @@ function logFrequencyBin(index, frequencyDomain, highlightText) {
     var
         fd = frequencyDomain[index],  // alias
         real,
-        imm,
+        imag,
         dB,
         amplitude,
         phase,
@@ -286,7 +286,7 @@ function logFrequencyBin(index, frequencyDomain, highlightText) {
         html;
 
     real = fd.real.toFixed(3);
-    imm = (fd.imm >= 0 ? '+' : '') + fd.imm.toFixed(3);
+    imag = (fd.imag >= 0 ? '+' : '') + fd.imag.toFixed(3);
     dB = fd.dB.toFixed(3);
     amplitude = fd.amplitude.toFixed(3);
     phase = Math.round(fd.phase * 360) % 360;
@@ -299,7 +299,7 @@ function logFrequencyBin(index, frequencyDomain, highlightText) {
     cssClass = highlightText ? 'highlight' : '';
 
     html = '[' + index + '] ' +
-        real + ' ' + imm + 'i |' +
+        real + ' ' + imag + 'i |' +
         dB + ' dB | ' +
         'amplitude: ' + amplitude + ' | ' +
         'phase: ' + phase + ' deg | ' +

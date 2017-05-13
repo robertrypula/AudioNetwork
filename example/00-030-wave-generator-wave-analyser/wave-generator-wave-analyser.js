@@ -3,8 +3,8 @@
 
 var
     DIGIT_BEFORE_THE_DOT = 5,
-    DIGIT_AFTER_THE_DOT = 6,
-    INITIAL_FREQUENCY = 1500,
+    DIGIT_AFTER_THE_DOT = 3,
+    INITIAL_FREQUENCY_HERTZ = 1500,
     INITIAL_RX_WINDOW_SIZE = 2024,
     INITIAL_TX_AMPLITUDE = 0.01,
     INITIAL_TX_PHASE = 0,
@@ -18,40 +18,61 @@ var
     txFrequency,
     txAmplitude,
     txPhase,
-    rxFrequency,
+    rxFrequencyHertz,
+    rxFrequencyCyclePerWindow,
+    rxFrequencySamplePerPeriod,
     rxWindowSize,
-    rxSampleCounter = 0,
-    txFilledWithZeros = true;
+    rxSampleCounter = 0;
 
 function init(useLite, bufferSize) {
-    domLoopbackCheckbox = document.getElementById('loopback-checkbox');
-    domTxActivatedCheckbox = document.getElementById('tx-activated');
-    txFrequency = new EditableFloatWidget(
-        document.getElementById('tx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxFrequencyChange
-    );
-    txAmplitude = new EditableFloatWidget(
-        document.getElementById('tx-amplitude'), INITIAL_TX_AMPLITUDE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxAmplitudeChange
-    );
-    txPhase = new EditableFloatWidget(
-        document.getElementById('tx-phase'), INITIAL_TX_PHASE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onTxPhaseChange
-    );
-    domRxActivatedCheckbox = document.getElementById('rx-activated');
-    rxFrequency = new EditableFloatWidget(
-        document.getElementById('rx-frequency'), INITIAL_FREQUENCY, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT, onRxFrequencyChange
-    );
-    rxWindowSize = new EditableFloatWidget(
-        document.getElementById('rx-window-size'), INITIAL_RX_WINDOW_SIZE, DIGIT_BEFORE_THE_DOT, 0, onRxWindowSizeChange
-    );
-    domRxWindowFunctionCheckbox = document.getElementById('rx-window-function');
-
     if (!useLite) {
         audioMonoIO = new AudioMonoIO(AudioMonoIO.FFT_SIZE, bufferSize);
     } else {
         audioMonoIO = new AudioMonoIOLite(bufferSize);
     }
 
+    domLoopbackCheckbox = document.getElementById('loopback-checkbox');
+    domTxActivatedCheckbox = document.getElementById('tx-activated');
+    txFrequency = new EditableFloatWidget(
+        document.getElementById('tx-frequency'),
+        INITIAL_FREQUENCY_HERTZ, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onTxFrequencyChange
+    );
+    txAmplitude = new EditableFloatWidget(
+        document.getElementById('tx-amplitude'),
+        INITIAL_TX_AMPLITUDE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onTxAmplitudeChange
+    );
+    txPhase = new EditableFloatWidget(
+        document.getElementById('tx-phase'),
+        INITIAL_TX_PHASE, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onTxPhaseChange
+    );
+    domRxActivatedCheckbox = document.getElementById('rx-activated');
+    rxWindowSize = new EditableFloatWidget(
+        document.getElementById('rx-window-size'),
+        INITIAL_RX_WINDOW_SIZE, DIGIT_BEFORE_THE_DOT, 0,
+        onRxWindowSizeChange
+    );
+    rxFrequencyHertz = new EditableFloatWidget(
+        document.getElementById('rx-frequency-hertz'),
+        INITIAL_FREQUENCY_HERTZ, DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onRxFrequencyHertzChange
+    );
+    rxFrequencyCyclePerWindow = new EditableFloatWidget(
+        document.getElementById('rx-frequency-cycle-per-window'),
+        getCyclePerWindowFromHertz(INITIAL_FREQUENCY_HERTZ), DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onRxFrequencyCyclePerWindowChange
+    );
+    rxFrequencySamplePerPeriod = new EditableFloatWidget(
+        document.getElementById('rx-frequency-sample-per-period'),
+        getSamplePerPeriodFromHertz(INITIAL_FREQUENCY_HERTZ), DIGIT_BEFORE_THE_DOT, DIGIT_AFTER_THE_DOT,
+        onRxFrequencySamplePerPeriodChange
+    );
+    domRxWindowFunctionCheckbox = document.getElementById('rx-window-function');
+
     waveAnalyser = new WaveAnalyser(
-        getSamplePerPeriod(audioMonoIO.getSampleRate(), rxFrequency.getValue()),
+        rxFrequencySamplePerPeriod.getValue(),
         rxWindowSize.getValue(),
         domRxWindowFunctionCheckbox.checked
     );
@@ -67,8 +88,34 @@ function init(useLite, bufferSize) {
     onLoopbackCheckboxChange();
 }
 
+// -----------------------------------------------------------------------
+
 function getSamplePerPeriod(samplePerOneCycle, cycle) {
     return samplePerOneCycle / cycle;
+}
+
+function getSamplePerPeriodFromHertz(hertz) {
+    return audioMonoIO.getSampleRate() / hertz;
+}
+
+function getHertzFromSamplePerPeriod(samplePerPeriod) {
+    return audioMonoIO.getSampleRate() / samplePerPeriod;
+}
+
+function getCyclePerWindowFromHertz(hertz) {
+    return hertz * rxWindowSize.getValue() / audioMonoIO.getSampleRate();
+}
+
+function getHertzFromCyclePerWindow(cyclePerWindow) {
+    return cyclePerWindow * audioMonoIO.getSampleRate() / rxWindowSize.getValue();
+}
+
+function getSamplePerPeriodFromCyclePerWindow(cyclePerWindow) {
+    return rxWindowSize.getValue() / cyclePerWindow;
+}
+
+function getCyclePerWindowFromSamplePerPeriod(samplePerPeriod) {
+    return rxWindowSize.getValue() / samplePerPeriod;
 }
 
 // -----------------------------------------------------------------------
@@ -105,11 +152,27 @@ function onTxPhaseChange(value) {
     }
 }
 
-function onRxFrequencyChange(value) {
+function onRxFrequencyHertzChange(hertz) {
     if (waveAnalyser) {
-        waveAnalyser.setSamplePerPeriod(
-            getSamplePerPeriod(audioMonoIO.getSampleRate(), value)
-        );
+        rxFrequencyCyclePerWindow.setValue(getCyclePerWindowFromHertz(hertz));
+        rxFrequencySamplePerPeriod.setValue(getSamplePerPeriodFromHertz(hertz));
+        waveAnalyser.setSamplePerPeriod(rxFrequencySamplePerPeriod.getValue());
+    }
+}
+
+function onRxFrequencyCyclePerWindowChange(cyclePerWindow) {
+    if (waveAnalyser) {
+        rxFrequencyHertz.setValue(getHertzFromCyclePerWindow(cyclePerWindow));
+        rxFrequencySamplePerPeriod.setValue(getSamplePerPeriodFromCyclePerWindow(cyclePerWindow));
+        waveAnalyser.setSamplePerPeriod(rxFrequencySamplePerPeriod.getValue());
+    }
+}
+
+function onRxFrequencySamplePerPeriodChange(samplePerPeriod) {
+    if (waveAnalyser) {
+        rxFrequencyHertz.setValue(getHertzFromSamplePerPeriod(samplePerPeriod));
+        rxFrequencyCyclePerWindow.setValue(getCyclePerWindowFromSamplePerPeriod(samplePerPeriod));
+        waveAnalyser.setSamplePerPeriod(rxFrequencySamplePerPeriod.getValue());
     }
 }
 
@@ -139,12 +202,6 @@ function sampleOutHandler(monoOut) {
         waveGenerate.nextSample();
 
         monoOut[i] = sample;
-    }
-
-    if (!domTxActivatedCheckbox.checked) {
-        txFilledWithZeros = true;
-    } else {
-        txFilledWithZeros = false;
     }
 }
 
