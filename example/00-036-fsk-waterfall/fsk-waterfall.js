@@ -1,6 +1,45 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+
+var SmartTimer;
+
+SmartTimer = function (interval) {
+    this.$$interval = interval;
+    this.$$intervalCounter = 0;
+    this.$$timeRefference = new Date();
+
+    this.$$scheduleNext();
+};
+
+SmartTimer.prototype.setHandler = function (handler) {
+    this.$$handler = handler;
+};
+
+SmartTimer.prototype.$$scheduleNext = function () {
+    var
+        newDate = new Date(this.$$timeRefference),
+        now = new Date(),
+        diff;
+
+    this.$$intervalCounter++;
+    newDate.setMilliseconds(
+        newDate.getMilliseconds() + 1000 * this.$$interval * this.$$intervalCounter
+    );
+
+    diff = newDate.getTime() - now.getTime();
+    setTimeout(this.$$notifyHandler.bind(this), diff);
+};
+
+SmartTimer.prototype.$$notifyHandler = function () {
+    if (this.$$handler) {
+        this.$$handler();
+    }
+    this.$$scheduleNext();
+};
+
+// ----------------------
+
 var
     audioMonoIO,
     fftSize,
@@ -12,9 +51,16 @@ var
     carrierFrequency,
     carrierFrequencyBinIndex,
     frequencyMin,
-    frequencyMax;
+    frequencyMax,
+    smartTimer;
 
 function init() {
+    smartTimer = new SmartTimer(0.3);
+    smartTimer.setHandler(function () {
+        var now = new Date();
+        console.log(now.getMinutes() + ':' + now.getSeconds() + '.' + now.getMilliseconds());
+    });
+
     fftSize = getValue('#fft-size', 'int');
     range = getValue('#range', 'int');
     audioMonoIO = new AudioMonoIO(fftSize);
