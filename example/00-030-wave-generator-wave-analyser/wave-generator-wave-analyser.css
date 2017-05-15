@@ -1,0 +1,42 @@
+.power-bar {
+    width: 90%;
+    position: relative;
+    outline: 1px solid #aaa;
+    height: 20px;
+}
+
+.power-bar-inner-0 {
+    position: absolute;
+    background-color: #738BD7;
+    left: 0;
+    bottom: 0;
+    top: 0;
+    width: 100%;
+}
+
+.constellation-diagram {
+    width: 90%;
+    padding-top: 90%;
+    position: relative;
+    outline: 1px solid #aaa;
+}
+
+.constellation-diagram-inner-0 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 0;
+    outline: 1px solid black;
+    transform: rotate(-45deg);
+    transform-origin: left top;
+}
+
+.constellation-diagram-inner-1 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 2px;
+    outline: 1px solid black;
+}

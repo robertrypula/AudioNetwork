@@ -105,6 +105,15 @@
                         </div>
                     </div>
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="sample-rate"></div>
+                    </div>
+
                     <h2>Wave Generator</h2>
 
                     <div class="row margin-bottom-double">
@@ -125,11 +134,21 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Tx frequency [Hz]
+                                Tx frequency
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-frequency"></div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div class="clearfix margin-bottom">
+                                Hertz:
+                                <div id="tx-frequency-hertz"></div>
+                            </div>
+                            <div class="clearfix margin-bottom">
+                                Samples per period:
+                                <div id="tx-frequency-sample-per-period"></div>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
@@ -215,13 +234,15 @@
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <div id="log"></div>
+                            <div id="log" class="margin-bottom"></div>
 
-                            <div style="width: 90%; padding-top: 90%; position: relative; outline: 1px solid #aaa;">
-                                <div style="position: absolute; top: 50%; left: 50%; width: 50%; height: 0; outline: 1px solid black; transform: rotate(-45deg); transform-origin: left top;" id="phase">
-                                    <div style="position: absolute; top: 0; right: 0; width: 2px; height: 2px; outline: 1px solid black;">
+                            <div class="power-bar margin-bottom">
+                                <div class="power-bar-inner-0" id="power-bar"></div>
+                            </div>
 
-                                    </div>
+                            <div class="constellation-diagram">
+                                <div class="constellation-diagram-inner-0" id="phase">
+                                    <div class="constellation-diagram-inner-1"></div>
                                 </div>
                             </div>
                         </div>
