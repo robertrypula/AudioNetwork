@@ -1,45 +1,93 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var
+    RX_FFT_SIZE_EXPONENT = 10,
+    RX_TIME_MS = 500,
+    audioMonoIO,
+    rxSmartTimer,
+    rxFftSizeExponent,
+    rxTimeMs,
+    rxIndexMin,
+    rxIndexMax;
 
-var SmartTimer;
+function init() {
+    audioMonoIO = new AudioMonoIO(Math.pow(2, RX_FFT_SIZE_EXPONENT));
 
-SmartTimer = function (interval) {
-    this.$$interval = interval;
-    this.$$intervalCounter = 0;
-    this.$$timeRefference = new Date();
+    document.getElementById('sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
-    this.$$scheduleNext();
-};
+    initFloatWidget();
 
-SmartTimer.prototype.setHandler = function (handler) {
-    this.$$handler = handler;
-};
-
-SmartTimer.prototype.$$scheduleNext = function () {
-    var
-        newDate = new Date(this.$$timeRefference),
-        now = new Date(),
-        diff;
-
-    this.$$intervalCounter++;
-    newDate.setMilliseconds(
-        newDate.getMilliseconds() + 1000 * this.$$interval * this.$$intervalCounter
+    rxSmartTimer = new SmartTimer(
+        rxTimeMs.getValue() / 1000
     );
+    rxSmartTimer.setHandler(rxSmartTimerHandler);
+}
 
-    diff = newDate.getTime() - now.getTime();
-    setTimeout(this.$$notifyHandler.bind(this), diff);
-};
-
-SmartTimer.prototype.$$notifyHandler = function () {
-    if (this.$$handler) {
-        this.$$handler();
-    }
-    this.$$scheduleNext();
-};
+function initFloatWidget() {
+    rxFftSizeExponent = new EditableFloatWidget(
+        document.getElementById('rx-fft-size-exponent'),
+        RX_FFT_SIZE_EXPONENT, 2, 0,
+        onRxFftSizeExponentChange
+    );
+    rxTimeMs = new EditableFloatWidget(
+        document.getElementById('rx-time-ms'),
+        RX_TIME_MS, 4, 0,
+        onRxTimeMsChange
+    );
+    rxIndexMin = new EditableFloatWidget(
+        document.getElementById('rx-index-min'),
+        0, 3, 0,
+        onRxIndexMinChange
+    );
+    rxIndexMax = new EditableFloatWidget(
+        document.getElementById('rx-index-max'),
+        1, 3, 0,
+        onRxIndexMaxChange
+    );
+}
 
 // ----------------------
 
+function onRxFftSizeExponentChange() {
+    var fftSize;
+
+    fftSize = Math.pow(
+        2,
+        rxFftSizeExponent.getValue()
+    );
+    audioMonoIO.setFFTSize(fftSize);
+}
+
+function onRxTimeMsChange() {
+    rxSmartTimer.setInterval(
+        rxTimeMs.getValue() / 1000
+    );
+}
+
+function onRxIndexMinChange() {
+    rxIndexMin.getValue();
+}
+
+function onRxIndexMaxChange() {
+    rxIndexMax.getValue();
+}
+
+// ----------------------
+
+function rxSmartTimerHandler() {
+    var
+        frequencyData = audioMonoIO.getFrequencyData(),
+        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
+
+
+    fftResult.getLo
+    console.log(fftResult);
+}
+
+// ----------------------
+
+/*
 var
     audioMonoIO,
     fftSize,
@@ -55,7 +103,7 @@ var
     smartTimer;
 
 function init() {
-    smartTimer = new SmartTimer(0.3);
+    smartTimer = new SmartTimer(0.2);
     smartTimer.setHandler(function () {
         var now = new Date();
         console.log(now.getMinutes() + ':' + now.getSeconds() + '.' + now.getMilliseconds());
@@ -155,3 +203,4 @@ function tx() {
 
     txDataIndex = (txDataIndex + 1) % txData.length;
 }
+*/

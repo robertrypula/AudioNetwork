@@ -9,12 +9,14 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
+    <link rel="stylesheet" type="text/css" href="../00-000-common/util/editable-float-widget.css">
+    <link rel="stylesheet" type="text/css" href="../00-000-common/util/spectrogram.css">
     <link rel="stylesheet" type="text/css" href="fsk-waterfall.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body onLoad="">
+<body onLoad="init()">
     <!--
     <div id="fb-root"></div>
     <script>(function(d, s, id) {
@@ -55,6 +57,63 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="sample-rate"></div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                FFT Size exponent
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-fft-size-exponent"></div>
+                        <!-- TODO add real value, add time span, add resolution -->
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                RX sample every
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-time-ms"></div>
+                        <!-- TODO add info that it sould be triple and not exeed the CPU -->
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Frequency Index min
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-index-min"></div>
+                        <!-- TODO add info about related frequency -->
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Frequency Index max
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-index-max"></div>
+                        <!-- TODO add info about related frequency -->
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+
+                            <div id=""></div>
+                        </div>
+                    </div>
+
+                    <!--
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label for="fft-size">
@@ -125,6 +184,11 @@
                         </div>
                     </div>
 
+                    <div>
+
+                    </div>
+
+
                     <pre style="display: none">
 TODO:
     - show max and min values that we could send
@@ -151,7 +215,7 @@ FFT 2048
                     </pre>
 
                     <div id="log"></div>
-
+                    -->
 
                 </div>
             </div>
@@ -177,6 +241,9 @@ FFT 2048
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="../00-000-common/fft-result.js"></script>
     <script src="../00-000-common/dom-util.js"></script>
+    <script src="../00-000-common/util/smart-timer.js"></script>
+    <script src="../00-000-common/util/editable-float-widget.js"></script>
+    <script src="../00-000-common/util/spectrogram.js"></script>
     <script src="fsk-waterfall.js"></script>
     <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
