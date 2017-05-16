@@ -72,8 +72,21 @@
                                 FFT Size exponent
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-fft-size-exponent"></div>
-                        <!-- TODO add real value, add time span, add resolution -->
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="rx-fft-size-exponent" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>FFT size: </span>
+                                <span id="rx-fft-size"></span>
+                            </div>
+                            <div class="margin-bottom">
+                                <span>FFT time span: </span>
+                                <span id="rx-fft-size-time"></span>
+                            </div>
+                            <div class="margin-bottom">
+                                <span>FFT resolution: </span>
+                                <span id="rx-fft-size-resolution"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row margin-bottom-double">
@@ -82,34 +95,48 @@
                                 RX sample every
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-time-ms"></div>
-                        <!-- TODO add info that it sould be triple and not exeed the CPU -->
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="rx-time-ms" class="margin-bottom clearfix"></div>
+                            <span>
+                                Please triple this value on transmitter side
+                            </span>
+                        </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Frequency Index min
+                                Frequency bin index min
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-index-min"></div>
-                        <!-- TODO add info about related frequency -->
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="rx-index-min" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>Frequency: </span>
+                                <span id="rx-index-min-frequency"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Frequency Index max
+                                Frequency bin index max
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-index-max"></div>
-                        <!-- TODO add info about related frequency -->
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="rx-index-max" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>Frequency: </span>
+                                <span id="rx-index-max-frequency"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
 
-                            <div id=""></div>
+                            <div id="rx-spectrogram"></div>
                         </div>
                     </div>
 
@@ -244,6 +271,7 @@ FFT 2048
     <script src="../00-000-common/util/smart-timer.js"></script>
     <script src="../00-000-common/util/editable-float-widget.js"></script>
     <script src="../00-000-common/util/spectrogram.js"></script>
+    <script src="../00-000-common/util/frequency-calculator.js"></script>
     <script src="fsk-waterfall.js"></script>
     <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 

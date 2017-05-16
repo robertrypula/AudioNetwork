@@ -1,0 +1,14 @@
+.spectrogram {
+    display: table;
+    width: 100%;
+}
+
+.spectrogram .s-row {
+    display: table-row;
+}
+
+.spectrogram .s-cell {
+    display: table-cell;
+    border: 1px solid transparent;
+    height: 5px;
+}

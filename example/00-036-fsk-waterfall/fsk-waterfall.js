@@ -2,21 +2,33 @@
 'use strict';
 
 var
-    RX_FFT_SIZE_EXPONENT = 10,
+    RX_FFT_SIZE_EXPONENT = 12,
     RX_TIME_MS = 500,
     audioMonoIO,
+    frequencyCalculator,
     rxSmartTimer,
     rxFftSizeExponent,
     rxTimeMs,
     rxIndexMin,
-    rxIndexMax;
+    rxIndexMax,
+    rxSpectrogram;
 
 function init() {
     audioMonoIO = new AudioMonoIO(Math.pow(2, RX_FFT_SIZE_EXPONENT));
+    frequencyCalculator = new FrequencyCalculator(
+        function () {
+            return audioMonoIO.getSampleRate();
+        },
+        function () {
+            return Math.pow(2, rxFftSizeExponent.getValue());
+        }
+    );
 
     document.getElementById('sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
+
+    rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
 
     rxSmartTimer = new SmartTimer(
         rxTimeMs.getValue() / 1000
@@ -37,14 +49,18 @@ function initFloatWidget() {
     );
     rxIndexMin = new EditableFloatWidget(
         document.getElementById('rx-index-min'),
-        0, 3, 0,
+        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * 1500 / audioMonoIO.getSampleRate()), 4, 0,
         onRxIndexMinChange
     );
     rxIndexMax = new EditableFloatWidget(
         document.getElementById('rx-index-max'),
-        1, 3, 0,
+        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * 2000 / audioMonoIO.getSampleRate()), 4, 0,
         onRxIndexMaxChange
     );
+
+    rxFftSizeExponent.forceUpdate();
+    rxIndexMin.forceUpdate();
+    rxIndexMax.forceUpdate();
 }
 
 // ----------------------
@@ -52,11 +68,15 @@ function initFloatWidget() {
 function onRxFftSizeExponentChange() {
     var fftSize;
 
-    fftSize = Math.pow(
-        2,
-        rxFftSizeExponent.getValue()
-    );
+    fftSize = Math.pow(2, rxFftSizeExponent.getValue());
     audioMonoIO.setFFTSize(fftSize);
+
+    html('#rx-fft-size', fftSize);
+    html('#rx-fft-size-time', (1000 * fftSize / audioMonoIO.getSampleRate()).toFixed(1) + ' ms');
+    html('#rx-fft-size-resolution', (audioMonoIO.getSampleRate() / fftSize).toFixed(6) + ' Hz');
+
+    rxIndexMin.forceUpdate();
+    rxIndexMax.forceUpdate();
 }
 
 function onRxTimeMsChange() {
@@ -66,11 +86,15 @@ function onRxTimeMsChange() {
 }
 
 function onRxIndexMinChange() {
-    rxIndexMin.getValue();
+    var hertz = frequencyCalculator.getHertzFromCyclePerWindow(rxIndexMin.getValue());
+
+    html('#rx-index-min-frequency', hertz.toFixed(6) + ' Hz');
 }
 
 function onRxIndexMaxChange() {
-    rxIndexMax.getValue();
+    var hertz = frequencyCalculator.getHertzFromCyclePerWindow(rxIndexMax.getValue());
+
+    html('#rx-index-max-frequency', hertz.toFixed(6) + ' Hz');
 }
 
 // ----------------------
@@ -78,11 +102,14 @@ function onRxIndexMaxChange() {
 function rxSmartTimerHandler() {
     var
         frequencyData = audioMonoIO.getFrequencyData(),
-        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
+        frequencyDataInner = [],
+        i;
 
+    for (i = rxIndexMin.getValue(); i <= rxIndexMax.getValue(); i++) {
+        frequencyDataInner.push(frequencyData[i]);
+    }
 
-    fftResult.getLo
-    console.log(fftResult);
+    rxSpectrogram.add(frequencyDataInner);
 }
 
 // ----------------------
