@@ -59,11 +59,28 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample rate
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Loopback
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="sample-rate"></div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onLoopbackCheckboxChange()"
+                                id="loopback-checkbox"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <h2>r</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                RX Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-sample-rate"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
@@ -136,112 +153,141 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
 
-                            <div id="rx-spectrogram"></div>
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="opacity: 1.00; min-height: 400px;"></div>
+
+                            <div id="spectrogram-log"></div>
                         </div>
+                    </div>
+
+                    <!-- ----- -->
+
+                    <h2>t</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
+                            <span>
+                                This value should match sample rate that is displayed on the receiver's side
+                                at 'RX section'<br/>
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                FFT Size exponent
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-fft-size-exponent" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>FFT size: </span>
+                                <span id="tx-fft-size"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                TX sample every
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-time-ms" class="margin-bottom clearfix"></div>
+                            <span>
+                                Should be at least 2 times greater than 'RX sample'
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Frequency bin index min
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-index-min" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>Frequency: </span>
+                                <span id="tx-index-min-frequency"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Frequency bin index max
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-index-max" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>Frequency: </span>
+                                <span id="tx-index-max-frequency"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Frequency index to transmit
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-index-to-transmit" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>Frequency: </span>
+                                <span id="tx-index-to-transmit-frequency"></span>
+                            </div>
+                            <div class="margin-bottom">
+                                <span>Play immediately: </span>
+                                <span>
+                                    <input
+                                        type="checkbox"
+                                        id="tx-immediately"
+                                        onChange="onTxImmediatelyChange()"
+                                    />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Amplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-amplitude"></div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Fine tune
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-fine-tune"></div>
                     </div>
 
                     <!--
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="fft-size">
-                                FFT size
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="fft-size" value="2048" class="" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="range">
-                                Range
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="range" value="64" class="" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="rx-timestep">
-                                RX time step [ms]
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="rx-timestep" value="50" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="tx-timestep">
-                                TX time step [ms]
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="tx-timestep" value="50" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="tx-timestep">
-                                TX data
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="text" id="tx-data" value="-64 -48 -30 -20 -10 0 10 20 30 48 64 48 30 20 10 0 -10 -20 -30 -48" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="carrier-frequency">
-                                Carrier frequency
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input type="number" id="carrier-frequency" value="5000" />
-                        </div>
-                    </div>
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="init()" class="btn btn-default">Init</button>
-                            <button onClick="startTx()" class="btn btn-default">Start TX</button>
-                            <button onClick="startRx()" class="btn btn-default">Start RX</button>
-                        </div>
-                    </div>
-
-                    <div>
-
-                    </div>
-
-
-                    <pre style="display: none">
-TODO:
-    - show max and min values that we could send
-    - add buttons like SINE
-
-FFT 2048
-
-    resolution:     21.5 Hz
-    blockTime:      46.4 ms
-    bandwidth:      5504 Hz (256 levels)
-    sampleRate:     21.5 Hz
-    maxSubcarrier:   9.0 Hz
-
-1 Hz   pilot
-2 Hz   OFDM subcarrier #1
-3 Hz   OFDM subcarrier #2
-4 Hz   OFDM subcarrier #3
-5 Hz   OFDM subcarrier #4
-6 Hz   OFDM subcarrier #5
-7 Hz   OFDM subcarrier #6
-8 Hz   OFDM subcarrier #7
-9 Hz   OFDM subcarrier #8
-
-                    </pre>
-
-                    <div id="log"></div>
+                    FFT 2048
+                    resolution:     21.5 Hz
+                    blockTime:      46.4 ms
+                    bandwidth:      5504 Hz (256 levels)
                     -->
 
                 </div>

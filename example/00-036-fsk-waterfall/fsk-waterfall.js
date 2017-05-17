@@ -2,20 +2,37 @@
 'use strict';
 
 var
-    RX_FFT_SIZE_EXPONENT = 12,
-    RX_TIME_MS = 500,
+    FFT_SIZE_EXPONENT = 12,
+    RX_TIME_MS = 250,
+    TX_TIME_MS = 750,
+    TX_SAMPLE_RATE = 48000,
+    TX_AMPLITUDE = 0.05,
+
     audioMonoIO,
-    frequencyCalculator,
+    domLoopbackCheckbox,
+    rxSpectrogram,
+
+    rxFrequencyCalculator,
     rxSmartTimer,
     rxFftSizeExponent,
     rxTimeMs,
     rxIndexMin,
     rxIndexMax,
-    rxSpectrogram;
+
+    txFrequencyCalculator,
+    txSampleRate,
+    txSmartTimer,
+    txFftSizeExponent,
+    txTimeMs,
+    txIndexMin,
+    txIndexMax,
+    txIndexToTransmit,
+    txAmplitude,
+    txFineTune;
 
 function init() {
-    audioMonoIO = new AudioMonoIO(Math.pow(2, RX_FFT_SIZE_EXPONENT));
-    frequencyCalculator = new FrequencyCalculator(
+    audioMonoIO = new AudioMonoIO(Math.pow(2, FFT_SIZE_EXPONENT));
+    rxFrequencyCalculator = new FrequencyCalculator(
         function () {
             return audioMonoIO.getSampleRate();
         },
@@ -23,8 +40,17 @@ function init() {
             return Math.pow(2, rxFftSizeExponent.getValue());
         }
     );
+    txFrequencyCalculator = new FrequencyCalculator(
+        function () {
+            return txSampleRate.getValue();
+        },
+        function () {
+            return Math.pow(2, txFftSizeExponent.getValue());
+        }
+    );
 
-    document.getElementById('sample-rate').innerHTML = audioMonoIO.getSampleRate();
+    document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
+    domLoopbackCheckbox = document.getElementById('loopback-checkbox');
 
     initFloatWidget();
 
@@ -34,12 +60,25 @@ function init() {
         rxTimeMs.getValue() / 1000
     );
     rxSmartTimer.setHandler(rxSmartTimerHandler);
+
+    txSmartTimer = new SmartTimer(
+        txTimeMs.getValue() / 1000
+    );
+    txSmartTimer.setHandler(txSmartTimerHandler);
+
+    onLoopbackCheckboxChange();
+}
+
+function onLoopbackCheckboxChange() {
+    if (audioMonoIO) {
+        audioMonoIO.setLoopback(domLoopbackCheckbox.checked);
+    }
 }
 
 function initFloatWidget() {
     rxFftSizeExponent = new EditableFloatWidget(
         document.getElementById('rx-fft-size-exponent'),
-        RX_FFT_SIZE_EXPONENT, 2, 0,
+        FFT_SIZE_EXPONENT, 2, 0,
         onRxFftSizeExponentChange
     );
     rxTimeMs = new EditableFloatWidget(
@@ -61,6 +100,54 @@ function initFloatWidget() {
     rxFftSizeExponent.forceUpdate();
     rxIndexMin.forceUpdate();
     rxIndexMax.forceUpdate();
+
+    // ---
+
+    txSampleRate = new EditableFloatWidget(
+        document.getElementById('tx-sample-rate'),
+        TX_SAMPLE_RATE, 5, 0,
+        onTxSampleRateChange
+    );
+    txFftSizeExponent = new EditableFloatWidget(
+        document.getElementById('tx-fft-size-exponent'),
+        FFT_SIZE_EXPONENT, 2, 0,
+        onTxFftSizeExponentChange
+    );
+    txTimeMs = new EditableFloatWidget(
+        document.getElementById('tx-time-ms'),
+        TX_TIME_MS, 4, 0,
+        onTxTimeMsChange
+    );
+    txIndexMin = new EditableFloatWidget(
+        document.getElementById('tx-index-min'),
+        Math.round(Math.pow(2, txFftSizeExponent.getValue()) * 1500 / audioMonoIO.getSampleRate()), 4, 0,
+        onTxIndexMinChange
+    );
+    txIndexMax = new EditableFloatWidget(
+        document.getElementById('tx-index-max'),
+        Math.round(Math.pow(2, txFftSizeExponent.getValue()) * 2000 / audioMonoIO.getSampleRate()), 4, 0,
+        onTxIndexMaxChange
+    );
+    txIndexToTransmit = new EditableFloatWidget(
+        document.getElementById('tx-index-to-transmit'),
+        Math.round(Math.pow(2, txFftSizeExponent.getValue()) * 1750 / audioMonoIO.getSampleRate()), 4, 0,
+        onTxIndexToTransmitChange
+    );
+    txAmplitude = new EditableFloatWidget(
+        document.getElementById('tx-amplitude'),
+        TX_AMPLITUDE, 1, 9,
+        onTxAmplitudeChange
+    );
+    txFineTune = new EditableFloatWidget(
+        document.getElementById('tx-fine-tune'),
+        50, 2, 9,
+        onTxFineTuneChange
+    );
+
+    txFftSizeExponent.forceUpdate();
+    txIndexMin.forceUpdate();
+    txIndexMax.forceUpdate();
+    txIndexToTransmit.forceUpdate();
 }
 
 // ----------------------
@@ -86,15 +173,90 @@ function onRxTimeMsChange() {
 }
 
 function onRxIndexMinChange() {
-    var hertz = frequencyCalculator.getHertzFromCyclePerWindow(rxIndexMin.getValue());
+    var hertz = rxFrequencyCalculator.getHertzFromCyclePerWindow(rxIndexMin.getValue());
 
     html('#rx-index-min-frequency', hertz.toFixed(6) + ' Hz');
 }
 
 function onRxIndexMaxChange() {
-    var hertz = frequencyCalculator.getHertzFromCyclePerWindow(rxIndexMax.getValue());
+    var hertz = rxFrequencyCalculator.getHertzFromCyclePerWindow(rxIndexMax.getValue());
 
     html('#rx-index-max-frequency', hertz.toFixed(6) + ' Hz');
+}
+
+// ---
+
+function onTxSampleRateChange() {
+    txSampleRate.getValue();
+
+    txIndexMin.forceUpdate();
+    txIndexMax.forceUpdate();
+}
+
+function onTxFftSizeExponentChange() {
+    var fftSize;
+
+    fftSize = Math.pow(2, txFftSizeExponent.getValue());
+
+    html('#tx-fft-size', fftSize);
+
+    txIndexMin.forceUpdate();
+    txIndexMax.forceUpdate();
+}
+
+function onTxTimeMsChange() {
+    txSmartTimer.setInterval(
+        txTimeMs.getValue() / 1000
+    );
+}
+
+function onTxIndexMinChange() {
+    var hertz = txFrequencyCalculator.getHertzFromCyclePerWindow(txIndexMin.getValue());
+
+    html('#tx-index-min-frequency', hertz.toFixed(6) + ' Hz');
+    onTxImmediatelyChange();
+}
+
+function onTxIndexMaxChange() {
+    var hertz = txFrequencyCalculator.getHertzFromCyclePerWindow(txIndexMax.getValue());
+
+    html('#tx-index-max-frequency', hertz.toFixed(6) + ' Hz');
+    onTxImmediatelyChange();
+}
+
+function onTxIndexToTransmitChange() {
+    var hertz = txFrequencyCalculator.getHertzFromCyclePerWindow(txIndexToTransmit.getValue());
+
+    html('#tx-index-to-transmit-frequency', hertz.toFixed(6) + ' Hz');
+    onTxImmediatelyChange();
+}
+
+function onTxAmplitudeChange() {
+    onTxImmediatelyChange();
+}
+
+function onTxFineTuneChange() {
+    onTxImmediatelyChange();
+}
+
+// ----------------------
+
+function onTxImmediatelyChange() {
+    var
+        checked = document.getElementById('tx-immediately').checked,
+        frequency,
+        frequencyFineTune;
+
+    if (checked) {
+        frequency = txFrequencyCalculator.getHertzFromCyclePerWindow(txIndexToTransmit.getValue());
+        frequencyFineTune = txFineTune.getValue();
+        audioMonoIO.setPeriodicWave(
+            frequency - 50 + frequencyFineTune,   // TODO negative values in widget are missing, fix it!!
+            txAmplitude.getValue()
+        );
+    } else {
+        audioMonoIO.setPeriodicWave(0);
+    }
 }
 
 // ----------------------
@@ -102,14 +264,37 @@ function onRxIndexMaxChange() {
 function rxSmartTimerHandler() {
     var
         frequencyData = audioMonoIO.getFrequencyData(),
+        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
+        loudestBinIndex,
+        loudestDecibel,
+        loudestHertz,
+        htmlLog,
         frequencyDataInner = [],
         i;
+
+    loudestBinIndex = fftResult.getLoudestBinIndex(
+        fftResult.getFrequency(rxIndexMin.getValue()),
+        fftResult.getFrequency(rxIndexMax.getValue())
+    );
+    loudestDecibel = frequencyData[loudestBinIndex];
+    loudestHertz = fftResult.getFrequency(loudestBinIndex);
+
+    htmlLog = '' +
+        'Loudest bin index: ' + loudestBinIndex + '<br/>' +
+        'Loudest decibel: ' + loudestDecibel.toFixed(6) + ' dB<br/>' +
+        'Loudest frequency: ' + loudestHertz.toFixed(6) + ' Hz<br/>' +
+        '';
+    html('#spectrogram-log', htmlLog);
 
     for (i = rxIndexMin.getValue(); i <= rxIndexMax.getValue(); i++) {
         frequencyDataInner.push(frequencyData[i]);
     }
 
     rxSpectrogram.add(frequencyDataInner);
+}
+
+function txSmartTimerHandler() {
+    console.log('TX timer');
 }
 
 // ----------------------

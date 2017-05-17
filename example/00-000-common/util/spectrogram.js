@@ -35,25 +35,34 @@ Spectrogram.getHueFromDecibel = function (decibel) {
     tmp = 360 * tmp / 100;
 
     return tmp;
-}
+};
 
 Spectrogram.prototype.add = function (data) {
-    var i, html, firstRow, divRow, color;
+    var i, html, firstRow, divRow, color, legend;
 
     if (this.$$lastDataLength !== data.length) {
+        this.$$lastDataLength = data.length;
         document.getElementById(this.$$id).innerHTML = '';
         this.$$rowCount = 0;
+
+        legend = [];
+        for (i = 0; i < data.length; i++) {
+            legend.push(
+                -100 + 100 * i / (data.length - 1)
+            );
+        }
+        this.add(legend);
     }
 
     if (this.$$rowCount > 64) {
-        firstRow = document.querySelectorAll('#' + this.$$id + ' .s-row:first-child')[0];
+        firstRow = document.querySelectorAll('#' + this.$$id + ' .s-row:nth-child(2)')[0];
         document.getElementById(this.$$id).removeChild(firstRow);
     }
 
     html = '';
     for (i = 0; i < data.length; i++) {
         color = Spectrogram.getHueFromDecibel(data[i]);
-        html += '<div class="s-cell" title="' + data[i].toFixed(1) + ' dB" style="background-color: hsl(' + color + ', 100%, 30%)">';
+        html += '<div class="s-cell" title="' + data[i].toFixed(1) + ' dB" style="background-color: hsl(' + color + ', 60%, 60%)">';
         html += '</div>';
     }
 
@@ -62,7 +71,4 @@ Spectrogram.prototype.add = function (data) {
     divRow.innerHTML = html;
     document.getElementById(this.$$id).appendChild(divRow);
     this.$$rowCount++;
-
-    this.$$lastDataLength = data.length;
 };
-

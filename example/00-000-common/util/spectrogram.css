@@ -1,6 +1,8 @@
 .spectrogram {
     display: table;
     width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 .spectrogram .s-row {
@@ -9,6 +11,6 @@
 
 .spectrogram .s-cell {
     display: table-cell;
-    border: 1px solid transparent;
+    padding: 0;
     height: 5px;
 }
