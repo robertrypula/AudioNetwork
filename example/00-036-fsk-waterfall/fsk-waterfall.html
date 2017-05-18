@@ -115,7 +115,7 @@
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="rx-time-ms" class="margin-bottom clearfix"></div>
                             <span>
-                                Please triple this value on transmitter side
+                                This value should not be less than 'FFT time span'!
                             </span>
                         </div>
                     </div>
@@ -152,9 +152,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
-
                             <div id="rx-spectrogram" class="margin-bottom-double" style="opacity: 1.00; min-height: 400px;"></div>
-
                             <div id="spectrogram-log"></div>
                         </div>
                     </div>
@@ -205,7 +203,7 @@
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="tx-time-ms" class="margin-bottom clearfix"></div>
                             <span>
-                                Should be at least 2 times greater than 'RX sample'
+                                Should be at least 2 times greater than 'RX sample' configured on receiver's side!
                             </span>
                         </div>
                     </div>
@@ -243,6 +241,15 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
+                                Amplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-amplitude"></div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
                                 Frequency index to transmit
                             </label>
                         </div>
@@ -268,22 +275,34 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
-                                Amplitude
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-amplitude"></div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label>
                                 Fine tune
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-fine-tune"></div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-fine-tune" class="margin-bottom clearfix"></div>
+                            <span>
+                                50 Hz means no offset (TODO add negative values to editable float widget)
+                            </span>
+                        </div>
                     </div>
 
                     <!--
+                    TODO:
+                        - frequency resolution exponent
+                            - widget
+                            - info on spectrum log
+                            - markers on spectrogram
+
+                        - add ADD TO QUEUE button near TX index
+-                       - sending queue (ready only), tx handler pops one at a time
+
+                        - synchronization sequence textarea with button ADD TO QUEUE
+                        - sample factor
+                            - new widget RX interval
+                            - new widget with factor 1-9
+                            - info with current TX internal
+                            - markers on spectrogram
+
                     FFT 2048
                     resolution:     21.5 Hz
                     blockTime:      46.4 ms

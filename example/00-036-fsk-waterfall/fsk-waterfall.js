@@ -266,7 +266,6 @@ function rxSmartTimerHandler() {
         frequencyData = audioMonoIO.getFrequencyData(),
         fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
         loudestBinIndex,
-        loudestDecibel,
         loudestHertz,
         htmlLog,
         frequencyDataInner = [],
@@ -276,12 +275,15 @@ function rxSmartTimerHandler() {
         fftResult.getFrequency(rxIndexMin.getValue()),
         fftResult.getFrequency(rxIndexMax.getValue())
     );
-    loudestDecibel = frequencyData[loudestBinIndex];
     loudestHertz = fftResult.getFrequency(loudestBinIndex);
 
     htmlLog = '' +
         'Loudest bin index: ' + loudestBinIndex + '<br/>' +
-        'Loudest decibel: ' + loudestDecibel.toFixed(6) + ' dB<br/>' +
+        'Decibels at [' + (loudestBinIndex - 2) + ']: ' + frequencyData[loudestBinIndex - 2].toFixed(6) + ' dB<br/>' +
+        'Decibels at [' + (loudestBinIndex - 1) + ']: ' + frequencyData[loudestBinIndex - 1].toFixed(6) + ' dB<br/>' +
+        'Decibels at [' + (loudestBinIndex + 0) + ']: ' + frequencyData[loudestBinIndex].toFixed(6) + ' dB <- max<br/>' +
+        'Decibels at [' + (loudestBinIndex + 1) + ']: ' + frequencyData[loudestBinIndex + 1].toFixed(6) + ' dB<br/>' +
+        'Decibels at [' + (loudestBinIndex + 2) + ']: ' + frequencyData[loudestBinIndex + 2].toFixed(6) + ' dB<br/>' +
         'Loudest frequency: ' + loudestHertz.toFixed(6) + ' Hz<br/>' +
         '';
     html('#spectrogram-log', htmlLog);
