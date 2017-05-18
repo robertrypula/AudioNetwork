@@ -30,9 +30,16 @@ Spectrogram.getHueFromDecibel = function (decibel) {
     var tmp;
 
     tmp = 100 + decibel;
+    tmp /= 100;
     tmp = tmp < 0 ? 0 : tmp;
-    tmp = tmp > 100 ? 100 : tmp;
-    tmp = 360 * tmp / 100;
+    tmp = tmp > 1 ? 1 : tmp;
+
+    tmp = 1 - tmp;
+
+    tmp -= 0.3;
+    tmp *= 1.0;
+
+    tmp *= 360;
 
     return tmp;
 };
