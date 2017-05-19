@@ -2,6 +2,11 @@
     font-family: monospace;
 }
 
+#rx-frequency-bin {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
 #spectrogram-log {
     font-family: monospace;
 }

@@ -151,8 +151,25 @@
                     </div>
 
                     <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Resolution exponent
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="rx-resolution-exponent" class="margin-bottom clearfix"></div>
+                            <div class="margin-bottom">
+                                <span>How many RX bins is used for one TX bin: </span>
+                                <span id="rx-resolution-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
-                            <div id="rx-spectrogram" class="margin-bottom-double" style="opacity: 1.00; height: 340px;"></div>
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 340px;"></div>
+
+                            <div id="rx-frequency-bin" class="margin-bottom"></div>
                             <div id="spectrogram-log"></div>
                         </div>
                     </div>
@@ -190,6 +207,10 @@
                             <div class="margin-bottom">
                                 <span>FFT size: </span>
                                 <span id="tx-fft-size"></span>
+                                <div class="margin-bottom">
+                                    <span>Resolution: </span>
+                                    <span id="tx-fft-size-resolution"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -287,21 +308,25 @@
                     </div>
 
                     <!--
-                    TODO:
-                        - frequency resolution exponent
-                            - widget
-                            - info on spectrum log
+
+                    TODO [2,75h]:
+
+                        - [0.25h] RX frequency resolution exponent: markers on spectrogram
+                        - [1.00h] RX sampling:
+                            - new widget with: how many times RX is slower than RX
+                            - offset widget
                             - markers on spectrogram
 
-                        - add ADD TO QUEUE button near TX index
--                       - sending queue (ready only), tx handler pops one at a time
+                        - [0.25h] checkbox for RX symbols logging + log area
+-                       - [0.50h] sending queue (ready only), tx handler pops one at a time
+                        - [0.50h] add ADD TO QUEUE button near TX index
+                        - [0.25h] add text area with ADD TO QUEUE
 
-                        - synchronization sequence textarea with button ADD TO QUEUE
-                        - sample factor
-                            - new widget RX interval
-                            - new widget with factor 1-9
-                            - info with current TX internal
-                            - markers on spectrogram
+                    ------
+
+                    SKIP:
+                        - synchronization sequences textarea with ADD TO QUEUE
+                        - on the left two cols for two SYNC symbols
 
                     FFT 2048
                     resolution:     21.5 Hz
@@ -338,7 +363,6 @@
     <script src="../00-000-common/util/spectrogram.js"></script>
     <script src="../00-000-common/util/frequency-calculator.js"></script>
     <script src="fsk-waterfall.js"></script>
-    <!--<script src="../_copy_oscillatorNode_harmonics.js"></script>-->
 
     <!--
     <script>

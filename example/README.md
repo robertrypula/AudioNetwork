@@ -9,7 +9,8 @@ For people that worked with JS some time ago stuff like webpack, ES6, Babel
 and others might be little scary. In general you can just grab the scripts
 and run it directly in the browser.
 Those examples are also some kind of playground. I'm checking ideas here
-before I add some new feature to the AudioNetwork main project.
+before I add some new feature to the AudioNetwork main project. They all
+should work but treat it more like Proof of Concept than some ideal solution.
 
 ## 00-xxx
 

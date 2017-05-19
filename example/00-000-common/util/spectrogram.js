@@ -26,22 +26,45 @@ Spectrogram.prototype.clear = function () {
 
 };
 
-Spectrogram.getHueFromDecibel = function (decibel) {
-    var tmp;
+Spectrogram.unitToHue = function (unit) {
+    var result = 240 * (1 - (1 / 0.6) * (unit - 0.2));
 
-    tmp = 100 + decibel;
-    tmp /= 100;
-    tmp = tmp < 0 ? 0 : tmp;
-    tmp = tmp > 1 ? 1 : tmp;
+    result = result < 0 ? 0 : result;
+    result = result > 240 ? 240 : result;
 
-    tmp = 1 - tmp;
+    return result;
+};
 
-    tmp -= 0.3;
-    tmp *= 1.0;
+Spectrogram.unitToLight = function (unit) {
+    if (unit >= 0.2 && unit <= 0.8) {
+        return 60;
+    }
+    if (unit < 0.2) {
+        return 20 + 40 * (unit / 0.2);
+    }
+    if (unit > 0.8) {
+        return 60 - 10 * ((unit - 0.8) / 0.2);
+    }
+};
 
-    tmp *= 360;
+Spectrogram.decibelToUnit = function (decibel) {
+    var result = (100 + decibel) / 100;
 
-    return tmp;
+    result = result > 1 ? 1 : result;
+    result = result < 0 ? 0 : result;
+
+    return result;
+};
+
+Spectrogram.getColor = function (decibel) {
+    var unit, hue, light, color;
+
+    unit = Spectrogram.decibelToUnit(decibel);
+    hue = Spectrogram.unitToHue(unit);
+    light = Spectrogram.unitToLight(unit);
+    color = 'hsl(' + hue + ', 80%, ' + light + '%)';
+
+    return color;
 };
 
 Spectrogram.prototype.add = function (data) {
@@ -68,8 +91,8 @@ Spectrogram.prototype.add = function (data) {
 
     html = '';
     for (i = 0; i < data.length; i++) {
-        color = Spectrogram.getHueFromDecibel(data[i]);
-        html += '<div class="s-cell" title="' + data[i].toFixed(1) + ' dB" style="background-color: hsl(' + color + ', 60%, 60%)">';
+        color = Spectrogram.getColor(data[i]);
+        html += '<div class="s-cell" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
         html += '</div>';
     }
 
