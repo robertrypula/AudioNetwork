@@ -197,6 +197,10 @@ function onRxIndexMaxChange() {
 
 function onRxResolutionExponentChange() {
     html('#rx-resolution-value', Math.pow(2, rxResolutionExponent.getValue()));
+
+    if (rxSpectrogram) {
+        rxSpectrogram.forceClearInNextAdd();
+    }
 }
 
 // ---
@@ -297,7 +301,11 @@ function rxSmartTimerHandler() {
 
     rxResolutionValue = Math.pow(2, rxResolutionExponent.getValue());
 
-    html('#rx-frequency-bin', Math.round(loudestBinIndex / rxResolutionValue));
+    html('#rx-frequency-bin', Math.round(loudestBinIndex / rxResolutionValue) + ' (' + loudestBinIndex + ')');
+
+    if (!document.getElementById('tx-logging-checkbox').checked) {
+        return;
+    }
 
     indexSpan = 3 * rxResolutionValue;
     htmlLog = '';
@@ -318,7 +326,7 @@ function rxSmartTimerHandler() {
         frequencyDataInner.push(frequencyData[i]);
     }
 
-    rxSpectrogram.add(frequencyDataInner);
+    rxSpectrogram.add(frequencyDataInner, loudestBinIndex - rxIndexMin.getValue(), rxIndexMin.getValue(), rxResolutionValue);
 }
 
 function txSmartTimerHandler() {

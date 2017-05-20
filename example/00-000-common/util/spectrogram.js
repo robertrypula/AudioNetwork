@@ -67,13 +67,21 @@ Spectrogram.getColor = function (decibel) {
     return color;
 };
 
-Spectrogram.prototype.add = function (data) {
-    var i, html, firstRow, divRow, color, legend;
+Spectrogram.prototype.$$reset = function () {
+    document.getElementById(this.$$id).innerHTML = '';
+    this.$$rowCount = 0;
+};
+
+Spectrogram.prototype.forceClearInNextAdd = function () {
+    this.$$lastDataLength = null;
+};
+
+Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue) {
+    var i, lastRow, legend, marker;
 
     if (this.$$lastDataLength !== data.length) {
         this.$$lastDataLength = data.length;
-        document.getElementById(this.$$id).innerHTML = '';
-        this.$$rowCount = 0;
+        this.$$reset();
 
         legend = [];
         for (i = 0; i < data.length; i++) {
@@ -81,24 +89,45 @@ Spectrogram.prototype.add = function (data) {
                 -100 + 100 * i / (data.length - 1)
             );
         }
-        this.add(legend);
+        this.$$add(legend);
+
+        marker = [];
+        for (i = 0; i < data.length; i++) {
+            marker.push(
+                Math.round((rxIndexMin + i) / rxResolutionValue) % 2 === 0 ? -35 : -100
+            );
+        }
+        this.$$add(marker);
     }
 
     if (this.$$rowCount > 64) {
-        firstRow = document.querySelectorAll('#' + this.$$id + ' .s-row:nth-child(2)')[0];
-        document.getElementById(this.$$id).removeChild(firstRow);
+        lastRow = document.querySelectorAll('#' + this.$$id + ' .s-row:last-child')[0];
+        lastRow.parentNode.removeChild(lastRow);
     }
+
+    this.$$add(data, loudestIndex);
+};
+
+Spectrogram.prototype.$$add = function (data, loudestIndex) {
+    var i, html, divRow, color, secondRow;
 
     html = '';
     for (i = 0; i < data.length; i++) {
         color = Spectrogram.getColor(data[i]);
-        html += '<div class="s-cell" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
+        html += '<div class="s-cell ' + (loudestIndex === i ? 'mark' : '') + '" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
         html += '</div>';
     }
 
     divRow = document.createElement('div');
     divRow.className = 's-row';
     divRow.innerHTML = html;
-    document.getElementById(this.$$id).appendChild(divRow);
+
+    secondRow = document.querySelectorAll('#' + this.$$id + ' .s-row:nth-child(2)')[0];
+    if (!secondRow) {
+        document.getElementById(this.$$id).appendChild(divRow);
+    } else {
+        secondRow.parentNode.insertBefore(divRow, secondRow.nextSibling);     // this is acctually 'insertAfter' the second element
+    }
+
     this.$$rowCount++;
 };

@@ -1,5 +1,6 @@
 .spectrogram {
     display: table;
+    table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
@@ -13,4 +14,8 @@
     display: table-cell;
     padding: 0;
     height: 5px;
+}
+
+.spectrogram .s-cell.mark {
+    border: 1px solid white;
 }

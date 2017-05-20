@@ -159,6 +159,9 @@
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="rx-resolution-exponent" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
+                                <span>
+                                    To propertly set this value you need to look at RX 'FFT Size exponent' and subtract it from TX 'FFT Size exponent'
+                                </span>
                                 <span>How many RX bins is used for one TX bin: </span>
                                 <span id="rx-resolution-value"></span>
                             </div>
@@ -166,10 +169,48 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-12">
-                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 340px;"></div>
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Symbol sampling
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            Store symbol value every 'x' samples:
+                            <div id="rx-symbol-sampling-every" class="margin-bottom clearfix"></div>
+                            Store sample offset:
+                            <div id="rx-symbol-sampling-offset" class="margin-bottom clearfix"></div>
+                        </div>
+                    </div>
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Received frequency bin
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
                             <div id="rx-frequency-bin" class="margin-bottom"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Logging active
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="tx-logging-checkbox"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 370px;"></div>
                             <div id="spectrogram-log"></div>
                         </div>
                     </div>
@@ -311,7 +352,6 @@
 
                     TODO [2,75h]:
 
-                        - [0.25h] RX frequency resolution exponent: markers on spectrogram
                         - [1.00h] RX sampling:
                             - new widget with: how many times RX is slower than RX
                             - offset widget
