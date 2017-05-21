@@ -74,6 +74,11 @@ How to shift the frequency spectrum?
 Find beginning of signal for BPSK Demodulation
     https://dsp.stackexchange.com/questions/12838/find-beginning-of-signal-for-bpsk-demodulation?noredirect=1&lq=1
 
+--------------------------
+
+Window function
+    https://dsp.stackexchange.com/questions/208/what-should-be-considered-when-selecting-a-windowing-function-when-smoothing-a-t
+
 ```
 
 ### OFDM

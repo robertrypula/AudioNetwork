@@ -15,6 +15,7 @@ var
     audioMonoIO,
     domLoopbackCheckbox,
     rxSpectrogram,
+    rxSampleCount = 0,
 
     rxFrequencyCalculator,
     rxSmartTimer,
@@ -23,6 +24,8 @@ var
     rxIndexMin,
     rxIndexMax,
     rxResolutionExponent,
+    rxSymbolSamplingEvery,
+    rxSymbolSamplingOffset,
 
     txFrequencyCalculator,
     txSampleRate,
@@ -80,6 +83,22 @@ function onLoopbackCheckboxChange() {
     }
 }
 
+function setTxSound(indexToTransmit) {
+    var frequency, frequencyFineTune;
+
+    if (!indexToTransmit) {
+        audioMonoIO.setPeriodicWave(0);
+        return;
+    }
+
+    frequency = txFrequencyCalculator.getHertzFromCyclePerWindow(indexToTransmit);
+    frequencyFineTune = txFineTune.getValue();
+    audioMonoIO.setPeriodicWave(
+        frequency - 50 + frequencyFineTune,   // TODO negative values in widget are missing, fix it!!
+        txAmplitude.getValue()
+    );
+}
+
 function initFloatWidget() {
     rxFftSizeExponent = new EditableFloatWidget(
         document.getElementById('rx-fft-size-exponent'),
@@ -105,6 +124,17 @@ function initFloatWidget() {
         document.getElementById('rx-resolution-exponent'),
         2, 1, 0,
         onRxResolutionExponentChange
+    );
+
+    rxSymbolSamplingEvery = new EditableFloatWidget(
+        document.getElementById('rx-symbol-sampling-every'),
+        3, 1, 0,
+        onRxSymbolSamplingEveryChange
+    );
+    rxSymbolSamplingOffset = new EditableFloatWidget(
+        document.getElementById('rx-symbol-sampling-offset'),
+        0, 1, 0,
+        onRxSymbolSamplingOffsetChange
     );
 
     rxFftSizeExponent.forceUpdate();
@@ -203,6 +233,14 @@ function onRxResolutionExponentChange() {
     }
 }
 
+function onRxSymbolSamplingEveryChange() {
+
+}
+
+function onRxSymbolSamplingOffsetChange() {
+
+}
+
 // ---
 
 function onTxSampleRateChange() {
@@ -262,21 +300,28 @@ function onTxFineTuneChange() {
 // ----------------------
 
 function onTxImmediatelyChange() {
-    var
-        checked = document.getElementById('tx-immediately').checked,
-        frequency,
-        frequencyFineTune;
+    var checked = document.getElementById('tx-immediately').checked;
 
-    if (checked) {
-        frequency = txFrequencyCalculator.getHertzFromCyclePerWindow(txIndexToTransmit.getValue());
-        frequencyFineTune = txFineTune.getValue();
-        audioMonoIO.setPeriodicWave(
-            frequency - 50 + frequencyFineTune,   // TODO negative values in widget are missing, fix it!!
-            txAmplitude.getValue()
-        );
-    } else {
-        audioMonoIO.setPeriodicWave(0);
+    setTxSound(checked ? txIndexToTransmit.getValue() : 0);
+}
+
+function onTxAddToQueueNearWidget() {
+    document.getElementById('tx-symbol-edit').value += ' ' + txIndexToTransmit.getValue();
+}
+
+function onTxAddToQueueNearTextarea() {
+    var
+        contentRaw = document.getElementById('tx-symbol-edit').value,
+        content = contentRaw.trim().replace(/ +(?= )/g, ''),
+        symbolList = content.split(' '),
+        htmlString,
+        i;
+
+    for (i = 0; i < symbolList.length; i++) {
+        htmlString = '<div>' + parseInt(symbolList[i]) + '</div>';
+        html('#tx-symbol-queue', htmlString, true);
     }
+    document.getElementById('tx-symbol-edit').value = '';
 }
 
 // ----------------------
@@ -286,31 +331,46 @@ function rxSmartTimerHandler() {
         frequencyData = audioMonoIO.getFrequencyData(),
         fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
         loudestBinIndex,
-        loudestHertz,
-        htmlLog,
+        potentialFrequencyBinIndexAtTxSide,
+        htmlString,
         frequencyDataInner = [],
         rxResolutionValue,
         indexSpan,
+        storedSymbolSample,
         i;
+
+    if (typeof rxSampleCount === 'undefined') {
+        rxSampleCount = 0;
+    } else {
+        rxSampleCount++;
+    }
+
 
     loudestBinIndex = fftResult.getLoudestBinIndex(
         fftResult.getFrequency(rxIndexMin.getValue()),
         fftResult.getFrequency(rxIndexMax.getValue())
     );
-    loudestHertz = fftResult.getFrequency(loudestBinIndex);
 
     rxResolutionValue = Math.pow(2, rxResolutionExponent.getValue());
 
-    html('#rx-frequency-bin', Math.round(loudestBinIndex / rxResolutionValue) + ' (' + loudestBinIndex + ')');
+    potentialFrequencyBinIndexAtTxSide = Math.round(loudestBinIndex / rxResolutionValue);
+    html('#rx-frequency-bin', potentialFrequencyBinIndexAtTxSide + ' (' + loudestBinIndex + ')');
 
-    if (!document.getElementById('tx-logging-checkbox').checked) {
+    storedSymbolSample = (rxSampleCount - rxSymbolSamplingOffset.getValue()) % rxSymbolSamplingEvery.getValue() === 0;
+
+    if (storedSymbolSample && document.getElementById('rx-symbol-logging-checkbox').checked) {
+        htmlString = '<div>' + potentialFrequencyBinIndexAtTxSide + '</div>';
+        html('#rx-symbol-log', htmlString, true);
+    }
+
+    if (!document.getElementById('rx-spectrum-logging-checkbox').checked) {
         return;
     }
 
     indexSpan = 3 * rxResolutionValue;
-    htmlLog = '';
+    htmlString = '';
     for (i = -indexSpan; i <= indexSpan; i++) {
-        htmlLog += '' +
+        htmlString += '' +
             'Decibels at ' +
             '[' +
             'rx = ' + (loudestBinIndex + i) + ', ' +
@@ -320,15 +380,39 @@ function rxSmartTimerHandler() {
             ' dB' + (i === 0 ? ' <--- loudest' : '') +
             '<br/>';
     }
-    html('#spectrogram-log', htmlLog);
+    html('#spectrogram-log', htmlString);
 
     for (i = rxIndexMin.getValue(); i <= rxIndexMax.getValue(); i++) {
         frequencyDataInner.push(frequencyData[i]);
     }
 
-    rxSpectrogram.add(frequencyDataInner, loudestBinIndex - rxIndexMin.getValue(), rxIndexMin.getValue(), rxResolutionValue);
+    rxSpectrogram.add(
+        frequencyDataInner,
+        document.getElementById('loudest-marker').checked
+            ? loudestBinIndex - rxIndexMin.getValue()
+            : -1,
+        rxIndexMin.getValue(),
+        rxResolutionValue,
+        storedSymbolSample
+    );
 }
 
 function txSmartTimerHandler() {
-    console.log('TX timer');
+    var
+        isPlayingAlready = document.getElementById('tx-immediately').checked,
+        firstNode = select('#tx-symbol-queue > div:first-child'),
+        symbol;
+
+    if (isPlayingAlready) {
+        return;
+    }
+
+    if (firstNode.length > 0){
+        symbol = parseInt(firstNode[0].innerHTML);
+        firstNode[0].parentNode.removeChild(firstNode[0]);
+    } else {
+        symbol = 0;
+    }
+
+    setTxSound(symbol);
 }

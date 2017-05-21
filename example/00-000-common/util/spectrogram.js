@@ -7,7 +7,8 @@ Spectrogram = function (domElement) {
     this.$$id = 'spectrogram-' + Math.round(Math.random() * 1000000);
     this.$$domElement = domElement;
     this.$$lastDataLength = null;
-    this.$$rowCount = 0;
+    this.$$rowCountVisible = 0;
+    this.$$rowCountTotal = 0;
 
     this.$$initializeHtml();
 };
@@ -20,10 +21,6 @@ Spectrogram.prototype.$$initializeHtml = function () {
     html += '</div>';
 
     this.$$domElement.innerHTML = html;
-};
-
-Spectrogram.prototype.clear = function () {
-
 };
 
 Spectrogram.unitToHue = function (unit) {
@@ -69,14 +66,15 @@ Spectrogram.getColor = function (decibel) {
 
 Spectrogram.prototype.$$reset = function () {
     document.getElementById(this.$$id).innerHTML = '';
-    this.$$rowCount = 0;
+    this.$$rowCountVisible = 0;
+    this.$$rowCountTotal = 0;
 };
 
 Spectrogram.prototype.forceClearInNextAdd = function () {
     this.$$lastDataLength = null;
 };
 
-Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue) {
+Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue, storedSymbolSample) {
     var i, lastRow, legend, marker;
 
     if (this.$$lastDataLength !== data.length) {
@@ -100,18 +98,34 @@ Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResoluti
         this.$$add(marker);
     }
 
-    if (this.$$rowCount > 64) {
+    if (this.$$rowCountVisible === 64) {
         lastRow = document.querySelectorAll('#' + this.$$id + ' .s-row:last-child')[0];
         lastRow.parentNode.removeChild(lastRow);
+        this.$$rowCountVisible--;
     }
 
-    this.$$add(data, loudestIndex);
+    this.$$add(data, loudestIndex, storedSymbolSample);
+    this.$$rowCountVisible++;
+    this.$$rowCountTotal++;
 };
 
-Spectrogram.prototype.$$add = function (data, loudestIndex) {
-    var i, html, divRow, color, secondRow;
+Spectrogram.prototype.$$add = function (data, loudestIndex, storedSymbolSample) {
+    var i, html, divRow, title, decibelForColor, color, secondRow, isDataRow;
+
+    isDataRow = typeof loudestIndex !== 'undefined' && typeof storedSymbolSample !== 'undefined';
 
     html = '';
+    if (isDataRow) {
+        decibelForColor = storedSymbolSample ? -35 : -100;
+        color = Spectrogram.getColor(decibelForColor);
+        title = 'title="sample #' + this.$$rowCountTotal + '"';
+    } else {
+        color = 'white';
+        title = '';
+    }
+    html += '<div class="s-cell" ' + title + ' style="background-color: ' + color + '">';
+    html += '</div>';
+
     for (i = 0; i < data.length; i++) {
         color = Spectrogram.getColor(data[i]);
         html += '<div class="s-cell ' + (loudestIndex === i ? 'mark' : '') + '" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
@@ -128,6 +142,4 @@ Spectrogram.prototype.$$add = function (data, loudestIndex) {
     } else {
         secondRow.parentNode.insertBefore(divRow, secondRow.nextSibling);     // this is acctually 'insertAfter' the second element
     }
-
-    this.$$rowCount++;
 };

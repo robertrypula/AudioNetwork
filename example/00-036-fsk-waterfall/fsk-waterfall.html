@@ -162,7 +162,7 @@
                                 <span>
                                     To propertly set this value you need to look at RX 'FFT Size exponent' and subtract it from TX 'FFT Size exponent'
                                 </span>
-                                <span>How many RX bins is used for one TX bin: </span>
+                                <span>How many RX bins are used for one TX bin: </span>
                                 <span id="rx-resolution-value"></span>
                             </div>
                         </div>
@@ -195,14 +195,60 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
-                                Logging active
+                            <label for="rx-symbol-logging-checkbox" class="label-for-checkbox">
+                                Symbol logging active
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
                             <input
                                 type="checkbox"
-                                id="tx-logging-checkbox"
+                                id="rx-symbol-logging-checkbox"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Logged symbols
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button
+                                onClick="document.getElementById('rx-symbol-log').innerHTML = ''"
+                                class="btn btn-default"
+                            >
+                                Clear
+                            </button>
+                            <div id="rx-symbol-log"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="rx-spectrum-logging-checkbox" class="label-for-checkbox">
+                                Spectrum logging active
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="rx-spectrum-logging-checkbox"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="loudest-marker" class="label-for-checkbox">
+                                Show loudest marker
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                id="loudest-marker"
                                 checked="checked"
                                 value="1" />
                         </div>
@@ -312,6 +358,20 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label>
+                                Fine tune
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div id="tx-fine-tune" class="margin-bottom clearfix"></div>
+                            <span>
+                                50 Hz means no offset (TODO add negative values to editable float widget)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
                                 Frequency index to transmit
                             </label>
                         </div>
@@ -331,48 +391,39 @@
                                     />
                                 </span>
                             </div>
+                            <button
+                                onClick="onTxAddToQueueNearWidget()"
+                                class="btn btn-default"
+                            >
+                                Add to queue textarea
+                            </button>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label>
-                                Fine tune
+                            <label class="label-for-checkbox">
+                                TX queue
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <div id="tx-fine-tune" class="margin-bottom clearfix"></div>
-                            <span>
-                                50 Hz means no offset (TODO add negative values to editable float widget)
-                            </span>
+                            <textarea id="tx-symbol-edit"></textarea>
+                            <button
+                                onClick="onTxAddToQueueNearTextarea()"
+                                class="btn btn-default"
+                            >
+                                Add to queue
+                            </button>
+                            <button
+                                onClick="document.getElementById('tx-symbol-queue').innerHTML = ''"
+                                class="btn btn-default"
+                            >
+                                Clear
+                            </button>
+                            <div id="tx-symbol-queue">
+                            </div>
                         </div>
                     </div>
-
-                    <!--
-
-                    TODO [2,75h]:
-
-                        - [1.00h] RX sampling:
-                            - new widget with: how many times RX is slower than RX
-                            - offset widget
-                            - markers on spectrogram
-
-                        - [0.25h] checkbox for RX symbols logging + log area
--                       - [0.50h] sending queue (ready only), tx handler pops one at a time
-                        - [0.50h] add ADD TO QUEUE button near TX index
-                        - [0.25h] add text area with ADD TO QUEUE
-
-                    ------
-
-                    SKIP:
-                        - synchronization sequences textarea with ADD TO QUEUE
-                        - on the left two cols for two SYNC symbols
-
-                    FFT 2048
-                    resolution:     21.5 Hz
-                    blockTime:      46.4 ms
-                    bandwidth:      5504 Hz (256 levels)
-                    -->
 
                 </div>
             </div>
