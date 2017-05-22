@@ -81,6 +81,10 @@ button, textarea, input {
     clear: both;
 }
 
+.pull-left {
+    float: left;
+}
+
 .col {
     position: relative;
     min-height: 1px;

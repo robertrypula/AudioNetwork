@@ -74,7 +74,7 @@ Spectrogram.prototype.forceClearInNextAdd = function () {
     this.$$lastDataLength = null;
 };
 
-Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue, storedSymbolSample) {
+Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue, isSampleToStore) {
     var i, lastRow, legend, marker;
 
     if (this.$$lastDataLength !== data.length) {
@@ -104,19 +104,19 @@ Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResoluti
         this.$$rowCountVisible--;
     }
 
-    this.$$add(data, loudestIndex, storedSymbolSample);
+    this.$$add(data, loudestIndex, isSampleToStore);
     this.$$rowCountVisible++;
     this.$$rowCountTotal++;
 };
 
-Spectrogram.prototype.$$add = function (data, loudestIndex, storedSymbolSample) {
+Spectrogram.prototype.$$add = function (data, loudestIndex, isSampleToStore) {
     var i, html, divRow, title, decibelForColor, color, secondRow, isDataRow;
 
-    isDataRow = typeof loudestIndex !== 'undefined' && typeof storedSymbolSample !== 'undefined';
+    isDataRow = typeof loudestIndex !== 'undefined' && typeof isSampleToStore !== 'undefined';
 
     html = '';
     if (isDataRow) {
-        decibelForColor = storedSymbolSample ? -35 : -100;
+        decibelForColor = isSampleToStore ? -35 : -100;
         color = Spectrogram.getColor(decibelForColor);
         title = 'title="sample #' + this.$$rowCountTotal + '"';
     } else {

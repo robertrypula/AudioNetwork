@@ -2,9 +2,11 @@
 'use strict';
 
 var
+    RX_RESOLUTION_EXPONENT = 2,
     RX_FFT_SIZE_EXPONENT = 13,
-    TX_FFT_SIZE_EXPONENT = RX_FFT_SIZE_EXPONENT - 2,
-    FREQUENCY_MIN = 1500,   // TODO align with TX frequency bin
+    TX_FFT_SIZE_EXPONENT = RX_FFT_SIZE_EXPONENT - RX_RESOLUTION_EXPONENT,
+    TX_FINE_TUNE_MIDDLE_FREQUENCY = 50,
+    FREQUENCY_MIN = 1500,
     FREQUENCY_TX = 1650,
     FREQUENCY_MAX = 1700,
     RX_TIME_MS = 200,
@@ -16,6 +18,7 @@ var
     domLoopbackCheckbox,
     rxSpectrogram,
     rxSampleCount = 0,
+    packetReceptionInProgress,
 
     rxFrequencyCalculator,
     rxSmartTimer,
@@ -26,6 +29,8 @@ var
     rxResolutionExponent,
     rxSymbolSamplingEvery,
     rxSymbolSamplingOffset,
+    rxFrameSymbolStart,
+    rxFrameSymbolEnd,
 
     txFrequencyCalculator,
     txSampleRate,
@@ -112,29 +117,39 @@ function initFloatWidget() {
     );
     rxIndexMin = new EditableFloatWidget(
         document.getElementById('rx-index-min'),
-        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * FREQUENCY_MIN / audioMonoIO.getSampleRate()), 4, 0,
+        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * FREQUENCY_MIN / audioMonoIO.getSampleRate()) - 4, 4, 0,
         onRxIndexMinChange
     );
     rxIndexMax = new EditableFloatWidget(
         document.getElementById('rx-index-max'),
-        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * FREQUENCY_MAX / audioMonoIO.getSampleRate()), 4, 0,
+        Math.round(Math.pow(2, rxFftSizeExponent.getValue()) * FREQUENCY_MAX / audioMonoIO.getSampleRate()) + 4, 4, 0,
         onRxIndexMaxChange
     );
     rxResolutionExponent = new EditableFloatWidget(
         document.getElementById('rx-resolution-exponent'),
-        2, 1, 0,
+        RX_RESOLUTION_EXPONENT, 1, 0,
         onRxResolutionExponentChange
     );
 
     rxSymbolSamplingEvery = new EditableFloatWidget(
         document.getElementById('rx-symbol-sampling-every'),
         3, 1, 0,
-        onRxSymbolSamplingEveryChange
+        null
     );
     rxSymbolSamplingOffset = new EditableFloatWidget(
         document.getElementById('rx-symbol-sampling-offset'),
         0, 1, 0,
-        onRxSymbolSamplingOffsetChange
+        null
+    );
+    rxFrameSymbolStart = new EditableFloatWidget(
+        document.getElementById('rx-frame-symbol-start'),
+        Math.round((rxIndexMin.getValue() + 4) / Math.pow(2, rxResolutionExponent.getValue())), 4, 0,
+        null
+    );
+    rxFrameSymbolEnd = new EditableFloatWidget(
+        document.getElementById('rx-frame-symbol-end'),
+        Math.round((rxIndexMax.getValue() - 4) / Math.pow(2, rxResolutionExponent.getValue())), 4, 0,
+        null
     );
 
     rxFftSizeExponent.forceUpdate();
@@ -181,7 +196,7 @@ function initFloatWidget() {
     );
     txFineTune = new EditableFloatWidget(
         document.getElementById('tx-fine-tune'),
-        50, 2, 9,
+        TX_FINE_TUNE_MIDDLE_FREQUENCY, 2, 9,
         onTxFineTuneChange
     );
 
@@ -231,14 +246,6 @@ function onRxResolutionExponentChange() {
     if (rxSpectrogram) {
         rxSpectrogram.forceClearInNextAdd();
     }
-}
-
-function onRxSymbolSamplingEveryChange() {
-
-}
-
-function onRxSymbolSamplingOffsetChange() {
-
 }
 
 // ---
@@ -321,7 +328,6 @@ function onTxAddToQueueNearTextarea() {
         htmlString = '<div>' + parseInt(symbolList[i]) + '</div>';
         html('#tx-symbol-queue', htmlString, true);
     }
-    document.getElementById('tx-symbol-edit').value = '';
 }
 
 // ----------------------
@@ -336,7 +342,7 @@ function rxSmartTimerHandler() {
         frequencyDataInner = [],
         rxResolutionValue,
         indexSpan,
-        storedSymbolSample,
+        isSampleToStore,
         i;
 
     if (typeof rxSampleCount === 'undefined') {
@@ -356,11 +362,26 @@ function rxSmartTimerHandler() {
     potentialFrequencyBinIndexAtTxSide = Math.round(loudestBinIndex / rxResolutionValue);
     html('#rx-frequency-bin', potentialFrequencyBinIndexAtTxSide + ' (' + loudestBinIndex + ')');
 
-    storedSymbolSample = (rxSampleCount - rxSymbolSamplingOffset.getValue()) % rxSymbolSamplingEvery.getValue() === 0;
+    isSampleToStore = (rxSampleCount - rxSymbolSamplingOffset.getValue()) % rxSymbolSamplingEvery.getValue() === 0;
 
-    if (storedSymbolSample && document.getElementById('rx-symbol-logging-checkbox').checked) {
+    if (isSampleToStore && document.getElementById('rx-symbol-logging-checkbox').checked) {
         htmlString = '<div>' + potentialFrequencyBinIndexAtTxSide + '</div>';
         html('#rx-symbol-log', htmlString, true);
+    }
+
+    if (isSampleToStore) {
+        if (!packetReceptionInProgress && potentialFrequencyBinIndexAtTxSide === rxFrameSymbolStart.getValue()) {
+            packetReceptionInProgress = true;
+        }
+        if (packetReceptionInProgress) {
+            htmlString = '<div>' + potentialFrequencyBinIndexAtTxSide + '</div>';
+            html('#rx-packet-log', htmlString, true);
+        }
+        if (packetReceptionInProgress && potentialFrequencyBinIndexAtTxSide === rxFrameSymbolEnd.getValue()) {
+            htmlString = '<div class="packet-separator">-</div>';
+            html('#rx-packet-log', htmlString, true);
+            packetReceptionInProgress = false;
+        }
     }
 
     if (!document.getElementById('rx-spectrum-logging-checkbox').checked) {
@@ -393,7 +414,7 @@ function rxSmartTimerHandler() {
             : -1,
         rxIndexMin.getValue(),
         rxResolutionValue,
-        storedSymbolSample
+        isSampleToStore
     );
 }
 

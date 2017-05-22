@@ -63,7 +63,7 @@
                                 Loopback
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
@@ -80,7 +80,7 @@
                                 RX Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="rx-sample-rate"></div>
+                        <div class="col col-xs-6 col-sm-7 col-md-9" id="rx-sample-rate"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
@@ -89,7 +89,7 @@
                                 FFT Size exponent
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-fft-size-exponent" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>FFT size: </span>
@@ -112,7 +112,7 @@
                                 RX sample every
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-time-ms" class="margin-bottom clearfix"></div>
                             <span>
                                 This value should not be less than 'FFT time span'!
@@ -126,7 +126,7 @@
                                 Frequency bin index min
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-index-min" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>Frequency: </span>
@@ -141,7 +141,7 @@
                                 Frequency bin index max
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-index-max" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>Frequency: </span>
@@ -156,7 +156,7 @@
                                 Resolution exponent
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-resolution-exponent" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>
@@ -174,7 +174,7 @@
                                 Symbol sampling
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             Store symbol value every 'x' samples:
                             <div id="rx-symbol-sampling-every" class="margin-bottom clearfix"></div>
                             Store sample offset:
@@ -188,7 +188,7 @@
                                 Received frequency bin
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="rx-frequency-bin" class="margin-bottom"></div>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                                 Symbol logging active
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 id="rx-symbol-logging-checkbox"
@@ -213,7 +213,7 @@
                                 Logged symbols
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <button
                                 onClick="document.getElementById('rx-symbol-log').innerHTML = ''"
                                 class="btn btn-default"
@@ -226,11 +226,42 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Frame START/END Symbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
+                            <div class="clearfix">
+                                <div id="rx-frame-symbol-start" class="margin-bottom margin-right pull-left"></div>
+                                <div id="rx-frame-symbol-end" class="margin-bottom pull-left"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Logged packets
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
+                            <button
+                                onClick="document.getElementById('rx-packet-log').innerHTML = ''"
+                                class="btn btn-default"
+                            >
+                                Clear
+                            </button>
+                            <div id="rx-packet-log"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label for="rx-spectrum-logging-checkbox" class="label-for-checkbox">
                                 Spectrum logging active
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 id="rx-spectrum-logging-checkbox"
@@ -245,7 +276,7 @@
                                 Show loudest marker
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 id="loudest-marker"
@@ -271,7 +302,7 @@
                                 Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
                             <span>
                                 This value should match sample rate that is displayed on the receiver's side
@@ -289,7 +320,7 @@
                                 FFT Size exponent
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-fft-size-exponent" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>FFT size: </span>
@@ -308,7 +339,7 @@
                                 TX sample every
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-time-ms" class="margin-bottom clearfix"></div>
                             <span>
                                 Should be at least 2 times greater than 'RX sample' configured on receiver's side!
@@ -322,7 +353,7 @@
                                 Frequency bin index min
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-index-min" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>Frequency: </span>
@@ -337,7 +368,7 @@
                                 Frequency bin index max
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-index-max" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>Frequency: </span>
@@ -352,7 +383,7 @@
                                 Amplitude
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6" id="tx-amplitude"></div>
+                        <div class="col col-xs-6 col-sm-7 col-md-9" id="tx-amplitude"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
@@ -361,7 +392,7 @@
                                 Fine tune
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-fine-tune" class="margin-bottom clearfix"></div>
                             <span>
                                 50 Hz means no offset (TODO add negative values to editable float widget)
@@ -375,7 +406,7 @@
                                 Frequency index to transmit
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <div id="tx-index-to-transmit" class="margin-bottom clearfix"></div>
                             <div class="margin-bottom">
                                 <span>Frequency: </span>
@@ -406,7 +437,7 @@
                                 TX queue
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                        <div class="col col-xs-6 col-sm-7 col-md-9">
                             <textarea id="tx-symbol-edit"></textarea>
                             <button
                                 onClick="onTxAddToQueueNearTextarea()"
