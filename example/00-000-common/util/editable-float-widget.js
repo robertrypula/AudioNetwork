@@ -48,7 +48,9 @@ EditableFloatWidget.prototype.setValue = function (value) {
 };
 
 EditableFloatWidget.prototype.forceUpdate = function () {
-    this.$$handler(this.$$value);
+    if (typeof this.$$handler === 'function') {
+        this.$$handler(this.$$value);
+    }
 };
 
 EditableFloatWidget.prototype.getValue = function () {
@@ -64,7 +66,9 @@ EditableFloatWidget.prototype.onClick = function (action, digitPosition) {
         this.$$digitAfterTheDot
     );
     this.$$updateDigitInWidget();
-    this.$$handler(this.$$value);
+    if (typeof this.$$handler === 'function') {
+        this.$$handler(this.$$value);
+    }
 };
 
 EditableFloatWidget.prototype.$$initializeHtml = function () {

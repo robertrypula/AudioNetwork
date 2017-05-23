@@ -1,0 +1,27 @@
+#log {
+    font-family: monospace;
+}
+
+#rx-symbol-log, #rx-packet-log, #tx-symbol-queue {
+    padding: 10px;
+    border: 1px solid lightgrey;
+    height: 250px;
+    overflow-y: auto;
+}
+
+#rx-symbol-log div, #rx-packet-log div, #tx-symbol-queue div {
+    float: left;
+    margin: 0 10px 2px 0;
+    padding: 2px 0;
+    font-family: monospace;
+    background-color: black;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    width: 55px;
+    text-align: center;
+}
+
+#rx-packet-log .packet-separator {
+    background-color: gray;
+}
