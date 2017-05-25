@@ -4,7 +4,7 @@
 var BarkerCode;
 
 BarkerCode = function () {
-    this.$$buffer = new Buffer(11);
+    this.$$buffer = new Buffer(11 *  2);
 };
 
 BarkerCode.CODE_11 = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1];
@@ -16,11 +16,11 @@ BarkerCode.prototype.handle = function (isOne) {
 BarkerCode.prototype.getCorrelationValue = function () {
     var i, item, code, result, log;
 
-    if (this.$$buffer.getSize() === BarkerCode.CODE_11.length) {
+    if (this.$$buffer.getSize() === 2 * BarkerCode.CODE_11.length) {
         result = 0;
         log = '';
         for (i = 0; i < BarkerCode.CODE_11.length; i++) {
-            item = this.$$buffer.getItem(i);
+            item = this.$$buffer.getItem(i * 2);
             code = BarkerCode.CODE_11[i];
             log += (item >= 0 ? '+' : '') + item + '*' + (code >= 0 ? '+' : '') + code + ' + ';
             result += item * code;
