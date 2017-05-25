@@ -14,10 +14,12 @@ var
     audioMonoIO,
     rxSmartTimer,
     txSampleRate,
-    txSmartTimer;
+    txSmartTimer,
+    barkerCode;
 
 function init() {
     audioMonoIO = new AudioMonoIO(RX_FFT_SIZE);
+    barkerCode = new BarkerCode();
 
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
@@ -74,24 +76,35 @@ function onTxAddToQueueNearTextarea() {
 function rxSmartTimerHandler() {
     var
         frequencyData = audioMonoIO.getFrequencyData(),
+        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
         htmlString,
         decibelA,
         decibelB,
+        correlationValue,
         isOne;
 
-    decibelA = frequencyData[BIN_INDEX_A * RX_RESOLUTION_VALUE];
-    decibelB = frequencyData[BIN_INDEX_B * RX_RESOLUTION_VALUE];
+    fftResult.downconvert(2);
+    decibelA = frequencyData[BIN_INDEX_A];
+    decibelB = frequencyData[BIN_INDEX_B];
 
     /*
-     100  101   102  103  104   105    106  107    108  109
-      25 25.25  25.5 25.75 26   26.25  26.5  26.75  27    27.25
-                ---------------------  ||||||||||||||||||||||||
+
+     0    1     2    3     4
+     0    0.25  0.5  0.75  1.00
+
+     100  101   102  103  104   124    125   126    127
+      25 25.25  25.5 25.75 26   31    31.25  31.50  31.75
+                       ---------------------  ||||||||||||||||||||||||
                            ^                         ^
     */
 
     isOne = decibelA < decibelB;
 
-    htmlString = '<div>' + (isOne ? 'one' : 'zero') + '</div>';
+    barkerCode.handle(isOne);
+
+    correlationValue = barkerCode.getCorrelationValue();
+
+    htmlString = '<div>' + (isOne ? '1' : '0') + ' (' + correlationValue + ')</div>';
     html('#rx-symbol-log', htmlString, true);
 }
 

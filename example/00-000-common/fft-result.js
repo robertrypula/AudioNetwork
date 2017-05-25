@@ -5,7 +5,6 @@ var FFTResult;
 
 FFTResult = function (fftData, sampleRate) {
     this.$$fftData = fftData;
-    this.$$fftSize = 2 * fftData.length;
     this.$$sampleRate = sampleRate;
 };
 
@@ -13,6 +12,25 @@ FFTResult.$$_FREQUENCY_BIN_INDEX_ZERO = 0;
 FFTResult.$$_FREQUENCY_BIN_INDEX_FIRST = 1;
 FFTResult.$$_EQUAL_EPSILON = 0.001;
 FFTResult.$$_HALF = 0.5;
+
+FFTResult.prototype.downconvert = function (exponent) {
+    var
+        result = [],
+        value = Math.pow(2, exponent),
+        valueHalf = value / 2,
+        max,
+        i,
+        j;
+
+    for (i = 0; i < this.$$fftData.length; i += value) {
+        max = this.$$fftData[i];
+        for (j = Math.max(0, i - valueHalf); j < Math.min(i + valueHalf - 1, this.$$fftData.length); j++) {
+            max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
+        }
+        result.push(max);
+    }
+    this.$$fftData = result;
+};
 
 FFTResult.prototype.getLoudestBinIndex = function (frequencyStart, frequencyEnd) {
     return this.$$getLoudestBinIndexInRange(
@@ -30,7 +48,7 @@ FFTResult.prototype.getLoudestFrequency = function (frequencyStart, frequencyEnd
     return FFTResult.getFrequency(
         loudestBinIndex,
         this.$$sampleRate,
-        this.$$fftSize
+        this.getFFTSize()
     );
 };
 
@@ -57,7 +75,7 @@ FFTResult.prototype.getFrequency = function (frequencyBinIndex) {
     return FFTResult.getFrequency(
         frequencyBinIndex,
         this.$$sampleRate,
-        this.$$fftSize
+        this.getFFTSize()
     );
 };
 
@@ -65,7 +83,7 @@ FFTResult.prototype.getFrequencyOfClosestBin = function (frequency) {
     return FFTResult.getFrequencyOfClosestBin(
         frequency,
         this.$$sampleRate,
-        this.$$fftSize
+        this.getFFTSize()
     );
 };
 
@@ -73,14 +91,14 @@ FFTResult.prototype.getBinIndex = function (frequency) {
     return FFTResult.getBinIndex(
         frequency,
         this.$$sampleRate,
-        this.$$fftSize
+        this.getFFTSize()
     );
 };
 
 FFTResult.prototype.getResolution = function () {
     return FFTResult.getResolution(
         this.$$sampleRate,
-        this.$$fftSize
+        this.getFFTSize()
     );
 };
 
@@ -99,7 +117,7 @@ FFTResult.prototype.getNyquistFrequency = function () {
 };
 
 FFTResult.prototype.getFFTSize = function () {
-    return this.$$fftSize;
+    return this.$$fftData.length * 2;
 };
 
 FFTResult.prototype.equal = function (fftResult) {
