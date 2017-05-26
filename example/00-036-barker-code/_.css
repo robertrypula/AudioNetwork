@@ -17,11 +17,30 @@
     background-color: black;
     color: white;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 12px;
     width: 55px;
     text-align: center;
 }
 
-#rx-packet-log .packet-separator {
-    background-color: gray;
+#rx-symbol-log div.highlight-positive-hot {
+    background-color: lightgreen;
+    color: black;
+    outline: 3px solid red;
+}
+
+#rx-symbol-log div.highlight-positive {
+    background-color: green;
+    color: white;
+}
+
+#rx-symbol-log div.highlight-negative {
+
+    background-color: blue;
+    color: white;
+}
+
+#rx-symbol-log div.highlight-negative-hot {
+    background-color: lightblue;
+    color: black;
+    outline: 3px solid red;
 }

@@ -2,24 +2,34 @@
 'use strict';
 
 var
-    RX_RESOLUTION_VALUE = 4,
-    RX_FFT_SIZE = 8192,
-    TX_FFT_SIZE = RX_FFT_SIZE / RX_RESOLUTION_VALUE,
-    RX_TIME_MS = 1.0,
-    TX_TIME_MS = RX_TIME_MS * 2,
+    RX_RESOLUTION_EXPONENT = 2,
+    RX_FFT_SIZE = 4 * 1024,
+    TX_FFT_SIZE = RX_FFT_SIZE / Math.pow(2, RX_RESOLUTION_EXPONENT),
+    RX_TIME_MS = 0.1,
+    RX_SAMPLE_FACTOR = 2,
+    TX_TIME_MS = RX_TIME_MS * RX_SAMPLE_FACTOR,
     TX_SAMPLE_RATE = 48000,
-    TX_AMPLITUDE = 0.05,
-    BIN_INDEX_A = 70,
-    BIN_INDEX_B = 71,
+    TX_AMPLITUDE = 0.25,
+    FREQUENCY_BAND_START = 3000,
+    rxBinIndexA,
+    rxBinIndexB,
     audioMonoIO,
     rxSmartTimer,
     txSampleRate,
     txSmartTimer,
-    barkerCode;
+    barkerCode,
+    realBitPrevious = null;
 
 function init() {
     audioMonoIO = new AudioMonoIO(RX_FFT_SIZE);
-    barkerCode = new BarkerCode();
+    barkerCode = new BarkerCode(RX_SAMPLE_FACTOR);
+
+    rxBinIndexA = FFTResult.getBinIndex(
+        FREQUENCY_BAND_START,
+        audioMonoIO.getSampleRate(),
+        TX_FFT_SIZE // TX is fine here because we are down-converting rx decibel array before indexing
+    );
+    rxBinIndexB = rxBinIndexA + 1;
 
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
@@ -81,42 +91,71 @@ function rxSmartTimerHandler() {
         decibelA,
         decibelB,
         correlationValue,
-        isOne;
+        highlightClass,
+        isOne,
+        realBit;
 
-    fftResult.downconvert(2);
-    decibelA = frequencyData[BIN_INDEX_A];
-    decibelB = frequencyData[BIN_INDEX_B];
-
-    /*
-
-     0    1     2    3     4
-     0    0.25  0.5  0.75  1.00
-
-     100  101   102  103  104   124    125   126    127
-      25 25.25  25.5 25.75 26   31    31.25  31.50  31.75
-                       ---------------------  ||||||||||||||||||||||||
-                           ^                         ^
-    */
+    fftResult.downconvert(RX_RESOLUTION_EXPONENT);
+    decibelA = fftResult.getDecibel(rxBinIndexA);
+    decibelB = fftResult.getDecibel(rxBinIndexB);
 
     isOne = decibelA < decibelB;
 
     barkerCode.handle(isOne);
-
     correlationValue = barkerCode.getCorrelationValue();
 
-    htmlString = '<div>' + (isOne ? '1' : '0') + ' (' + correlationValue + ')</div>';
-    html('#rx-symbol-log', htmlString, true);
+    realBit = null;
+    switch (barkerCode.getCorrelationRank()) {
+        case BarkerCode.CORRELATION_RANK_POSITIVE_HIGH:
+            highlightClass = 'highlight-positive-hot';
+            realBit = 1;
+            break;
+        case BarkerCode.CORRELATION_RANK_POSITIVE:
+            highlightClass = 'highlight-positive';
+            break;
+        case BarkerCode.CORRELATION_RANK_NEGATIVE:
+            highlightClass = 'highlight-negative';
+            break;
+        case BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH:
+            highlightClass = 'highlight-negative-hot';
+            realBit = 0;
+            break;
+        default:
+            highlightClass = '';
+    }
+
+    if (document.getElementById('rx-symbol-log-checkbox').checked) {
+        htmlString = '<div class="' + highlightClass + '">' +
+            (isOne ? '1' : '0') + ',' + correlationValue +
+            '</div>';
+        html('#rx-symbol-log', htmlString, true);
+    }
+
+    if (realBit !== null && realBit !== realBitPrevious) {
+        htmlString = '<div>' + realBit + '</div>';
+        html('#rx-packet-log', htmlString, true);
+    }
+    realBitPrevious = realBit;
 }
 
 function txSmartTimerHandler() {
     var
         firstNode = select('#tx-symbol-queue > div:first-child'),
+        binIndexA,
+        binIndexB,
         symbol;
 
-    if (firstNode.length > 0){
+    binIndexA = FFTResult.getBinIndex(
+        FREQUENCY_BAND_START,
+        txSampleRate.getValue(),
+        TX_FFT_SIZE
+    );
+    binIndexB = binIndexA + 1;
+
+    if (firstNode.length > 0) {
         symbol = firstNode[0].innerHTML === '0'
-            ? BIN_INDEX_A
-            : BIN_INDEX_B;
+            ? binIndexA
+            : binIndexB;
         firstNode[0].parentNode.removeChild(firstNode[0]);
     } else {
         symbol = 0;

@@ -76,8 +76,20 @@ Find beginning of signal for BPSK Demodulation
 
 --------------------------
 
-Window function
+About Window function:
     https://dsp.stackexchange.com/questions/208/what-should-be-considered-when-selecting-a-windowing-function-when-smoothing-a-t
+    http://www.electronicdesign.com/analog/choose-right-fft-window-function-when-evaluating-precision-adcs
+
+--------------------------
+
+Great about Wifi with Barker codes
+    http://ece.eng.wayne.edu/~smahmud/ECECourses/ECE5620/Notes/Wi-Fi-Lecture.pdf
+    http://www.gummy-stuff.org/WiFi.htm
+
+--------------------------
+
+Great online book about DSP:
+    http://www.dspguide.com/pdfbook.htm
 
 ```
 

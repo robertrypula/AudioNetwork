@@ -58,12 +58,12 @@
                 <div class="col col-xs-12">
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label for="loopback-checkbox" class="label-for-checkbox">
                                 Loopback
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
@@ -75,28 +75,48 @@
                     <h2>r</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 RX Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-9" id="rx-sample-rate"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="rx-sample-rate"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 Logged symbols
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="rx-symbol-log-checkbox"
+                                value="1" />
                             <button
                                 onClick="document.getElementById('rx-symbol-log').innerHTML = ''"
-                                class="btn btn-default"
-                            >
+                                class="btn btn-default">
                                 Clear
                             </button>
+
                             <div id="rx-symbol-log"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Logged packets
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button
+                                    onClick="document.getElementById('rx-packet-log').innerHTML = ''"
+                                    class="btn btn-default">
+                                Clear
+                            </button>
+                            <div id="rx-packet-log"></div>
                         </div>
                     </div>
 
@@ -105,12 +125,12 @@
                     <h2>t</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
                             <span>
                                 This value should match sample rate that is displayed on the receiver's side
@@ -123,23 +143,33 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 TX queue
                             </label>
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-9">
-                            <textarea id="tx-symbol-edit">1 1 1 0 0 0 1 0 0 1 0 </textarea>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button
+                                onClick="document.getElementById('tx-symbol-edit').value += '1 1 1 0 0 0 1 0 0 1 0 '"
+                                class="btn btn-default">
+                                Barker 'Positive'
+                            </button>
+                            <button
+                                onClick="document.getElementById('tx-symbol-edit').value += '0 0 0 1 1 1 0 1 1 0 1 '"
+                                class="btn btn-default">
+                                Barker 'Negative'
+                            </button>
+
+
+                            <textarea id="tx-symbol-edit"></textarea>
                             <button
                                 onClick="onTxAddToQueueNearTextarea()"
-                                class="btn btn-default"
-                            >
+                                class="btn btn-default">
                                 Add to queue
                             </button>
                             <button
                                 onClick="document.getElementById('tx-symbol-queue').innerHTML = ''"
-                                class="btn btn-default"
-                            >
+                                class="btn btn-default">
                                 Clear
                             </button>
                             <div id="tx-symbol-queue">

@@ -24,7 +24,7 @@ FFTResult.prototype.downconvert = function (exponent) {
 
     for (i = 0; i < this.$$fftData.length; i += value) {
         max = this.$$fftData[i];
-        for (j = Math.max(0, i - valueHalf); j < Math.min(i + valueHalf - 1, this.$$fftData.length); j++) {
+        for (j = Math.max(0, i - valueHalf); j < Math.min(i + valueHalf, this.$$fftData.length); j++) {
             max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
         }
         result.push(max);
@@ -36,6 +36,20 @@ FFTResult.prototype.getLoudestBinIndex = function (frequencyStart, frequencyEnd)
     return this.$$getLoudestBinIndexInRange(
         frequencyStart,
         frequencyEnd
+    );
+};
+
+FFTResult.prototype.getLoudestBinIndexInBinRange = function (binIndexStart, binIndexEnd) {
+    var frequencyBinCount = FFTResult.$$_HALF * fftSize;
+
+    if (binIndexStart < 0 || binIndexEnd >= frequencyBinCount) {
+        throw 'FrequencyBinIndex out of range';
+    }
+
+    return FFTResult.$$findMaxIndexInRange(
+        this.$$fftData,
+        binIndexStart,
+        binIndexEnd
     );
 };
 
