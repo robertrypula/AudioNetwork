@@ -79,6 +79,8 @@ Find beginning of signal for BPSK Demodulation
 About Window function:
     https://dsp.stackexchange.com/questions/208/what-should-be-considered-when-selecting-a-windowing-function-when-smoothing-a-t
     http://www.electronicdesign.com/analog/choose-right-fft-window-function-when-evaluating-precision-adcs
+    http://www.edn.com/electronics-news/4383713/Windowing-Functions-Improve-FFT-Results-Part-I
+    http://www.edn.com/electronics-news/4386852/Windowing-Functions-Improve-FFT-Results-Part-II
 
 --------------------------
 

@@ -57,7 +57,165 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
+                    <h2>Receiver</h2>
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="rx-sample-rate"></span> Hz
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Reception mode
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <select onchange="onReceptionModeChange()" id="rx-mode">
+                                <option value="RX_MODE_DISABLED">Disabled</option>
+                                <option value="RX_MODE_CHANNEL_A_NORMAL">Channel A</option>
+                                <option value="RX_MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
+                                <option value="RX_MODE_CHANNEL_B_NORMAL">Channel B</option>
+                                <option value="RX_MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Speed
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-speed"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Bandwidth
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-bandwidth"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sync count
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-sync-count"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Received symbols
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom">
+                                <input
+                                    type="checkbox"
+                                    id="rx-symbol-log-checkbox"
+                                    value="1" />
+                                Log active
+                            </div>
+                            <button
+                                onClick="document.getElementById('rx-symbol-log').innerHTML = ''"
+                                class="btn btn-default">
+                                Clear
+                            </button>
+                            <div id="rx-symbol-log"></div>
+                        </div>
+                    </div>
+
+                    <h2>Transmitter</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate of the receiver
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix">
+                                <input type="radio" name="tx-sample-rate" value="TX_SAMPLE_RATE_44100" checked="checked" /> 44100 Hz
+                            </div>
+                            <div class="clearfix">
+                                <input type="radio" name="tx-sample-rate" value="TX_SAMPLE_RATE_48000" /> 48000 Hz
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Transmission mode
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <select onchange="onTransmissionModeChange()" id="tx-mode">
+                                <option value="TX_MODE_DISABLED">Disabled</option>
+                                <option value="TX_MODE_CHANNEL_A_NORMAL">Channel A</option>
+                                <option value="TX_MODE_CHANNEL_A_BARKER_CODE">Channel B - Barker Code</option>
+                                <option value="TX_MODE_CHANNEL_B_NORMAL">Channel B</option>
+                                <option value="TX_MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Sync
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button class="btn btn-default">Send Synchronization sequence</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Symbol queue
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <textarea id="tx-symbol-edit"></textarea>
+                            <button
+                                onClick="onTxAddToQueueNearTextarea()"
+                                class="btn btn-default">
+                                Add to queue
+                            </button>
+                            <button
+                                onClick="document.getElementById('tx-symbol-edit').value = ''"
+                                class="btn btn-default">
+                                Clear textarea
+                            </button>
+                            <button
+                                onClick="document.getElementById('tx-symbol-queue').innerHTML = ''"
+                                class="btn btn-default">
+                                Clear queue
+                            </button>
+                            <div id="tx-symbol-queue">
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -81,11 +239,12 @@
     </div>
 
     <script src="../00-000-common/audio-mono-io.js"></script>
-    <script src="../00-000-common/dom-util.js"></script>
     <script src="../00-000-common/util/smart-timer.js"></script>
     <script src="../00-000-common/fft-result.js"></script>
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/barker-code.js"></script>
+    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/dom-util.js"></script>
     <script src="../00-000-common/util/editable-float-widget.js"></script>
     <script src="physical-layer.js"></script>
 
