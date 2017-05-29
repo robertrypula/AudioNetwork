@@ -350,10 +350,13 @@ PhysicalLayer.prototype.transmit = function (symbol) {
         return;
     }
 
-    nullSymbolSize = this.$$getNullSymbolSize();
-    for (i = 0; i < nullSymbolSize; i++) {
-        this.$$txQueue.push(-1);
+    if (this.$$txQueue.getSize() === 0) {
+        nullSymbolSize = this.$$getNullSymbolSize();
+        for (i = 0; i < nullSymbolSize; i++) {
+            this.$$txQueue.push(-1);
+        }
     }
+
     symbolNormalized = symbol % this.$$txBinSizeTotal;
 
     switch (this.$$txMode) {
@@ -379,11 +382,12 @@ PhysicalLayer.prototype.$$txSmartTimerHandler = function () {
     }
 
     symbol = this.$$txQueue.pop();
+    console.log('tx symbol', symbol, '@', this.$$txRawSampleNumber);
     if (symbol !== null && symbol !== -1) {
-        console.log('tx symbol', symbol, '@', this.$$txRawSampleNumber);
         frequencyBinIndex = this.$$txBinIndexFirst + symbol;
         this.$$setTxSound(frequencyBinIndex);
     } else {
+
         this.$$setTxSound(0);
     }
 
