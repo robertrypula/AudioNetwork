@@ -2,10 +2,34 @@
 'use strict';
 
 var
-    physicalLayer;
+    physicalLayer,
+    rxRawSampleOffset;
 
 function init() {
     physicalLayer = new PhysicalLayer();
+    physicalLayer.setReceiveHandler(receiveHandler);
 
-    // physicalLayer.setReceivedSymbolHandler();
+    rxRawSampleOffset = new EditableFloatWidget(
+        document.getElementById('rx-raw-sample-offset'),
+        0, 2, 0,
+        onRxRawSampleOffsetChange
+    );
+}
+
+function onReceptionModeChange(event) {
+    var mode = event.target.value;
+
+    physicalLayer.setReceiverMode(mode);
+    console.log(physicalLayer.getReceiveBand());
+    console.log(physicalLayer.getReceiveSpeed());
+    console.log(physicalLayer.getReceiveSymbol());
+    console.log(physicalLayer.getReceiveRawSampleOffset());
+}
+
+function onRxRawSampleOffsetChange() {
+    physicalLayer.setReceiveRawSampleOffset(rxRawSampleOffset.getValue());
+}
+
+function receiveHandler(data) {
+    console.log(data);
 }

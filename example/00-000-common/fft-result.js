@@ -40,7 +40,7 @@ FFTResult.prototype.getLoudestBinIndex = function (frequencyStart, frequencyEnd)
 };
 
 FFTResult.prototype.getLoudestBinIndexInBinRange = function (binIndexStart, binIndexEnd) {
-    var frequencyBinCount = FFTResult.$$_HALF * fftSize;
+    var frequencyBinCount = FFTResult.$$_HALF * this.getFFTSize();
 
     if (binIndexStart < 0 || binIndexEnd >= frequencyBinCount) {
         throw 'FrequencyBinIndex out of range';

@@ -77,12 +77,12 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <select onchange="onReceptionModeChange()" id="rx-mode">
-                                <option value="RX_MODE_DISABLED">Disabled</option>
-                                <option value="RX_MODE_CHANNEL_A_NORMAL">Channel A</option>
-                                <option value="RX_MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
-                                <option value="RX_MODE_CHANNEL_B_NORMAL">Channel B</option>
-                                <option value="RX_MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
+                            <select onchange="onReceptionModeChange(event)" id="rx-mode">
+                                <option value="MODE_DISABLED">Disabled</option>
+                                <option value="MODE_CHANNEL_A_NORMAL">Channel A</option>
+                                <option value="MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
+                                <option value="MODE_CHANNEL_B_NORMAL">Channel B</option>
+                                <option value="MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
                             </select>
                         </div>
                     </div>
@@ -112,11 +112,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Sync count
+                                Raw Sample Offset
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-sync-count"></span>
+                            <div class="clearfix margin-bottom" id="rx-raw-sample-offset"></div>
                         </div>
                     </div>
 
