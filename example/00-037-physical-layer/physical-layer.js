@@ -9,6 +9,8 @@ function init() {
     physicalLayer = new PhysicalLayer();
     physicalLayer.setReceiveHandler(receiveHandler);
 
+    document.getElementById('rx-sample-rate').innerHTML = physicalLayer.getReceiveSampleRate();
+
     rxRawSampleOffset = new EditableFloatWidget(
         document.getElementById('rx-raw-sample-offset'),
         0, 2, 0,
@@ -51,6 +53,20 @@ function onTransmissionModeChange(event) {
 
 function onRxRawSampleOffsetChange() {
     physicalLayer.setReceiveRawSampleOffset(rxRawSampleOffset.getValue());
+}
+
+function onTxAddToQueueNearTextarea() {
+    var
+        contentRaw = document.getElementById('tx-symbol-edit').value,
+        content = contentRaw.trim().replace(/ +(?= )/g, ''),
+        symbolList = content.split(' '),
+        symbol,
+        i;
+
+    for (i = 0; i < symbolList.length; i++) {
+        symbol = parseInt(symbolList[i]);
+        physicalLayer.transmit(symbol);
+    }
 }
 
 function receiveHandler(data) {

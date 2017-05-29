@@ -37,7 +37,7 @@ PhysicalLayer = function () {
     this.$$txBinIndexFirst;
     this.$$txBinIndexFrameStart;
     this.$$txBinIndexFrameEnd;
-    this.$$txQueue = new Buffer(1024);
+    this.$$txQueue = new Buffer(PhysicalLayer.TX_QUEUE_BUFFER_SIZE);
     this.setTransmitterMode(PhysicalLayer.MODE_DISABLED, 0);
 
     this.$$rxSmartTimer.setHandler(this.$$rxSmartTimerHandler.bind(this));
@@ -51,6 +51,7 @@ PhysicalLayer.TX_FFT_SIZE = PhysicalLayer.RX_FFT_SIZE / Math.pow(2, PhysicalLaye
 PhysicalLayer.RX_TIME_MS = 0.1;
 PhysicalLayer.TX_TIME_MS = PhysicalLayer.RX_TIME_MS * PhysicalLayer.RX_SAMPLE_FACTOR;
 PhysicalLayer.TX_INITIAL_AMPLITUDE = 0.5;
+PhysicalLayer.TX_QUEUE_BUFFER_SIZE = 1024;
 
 PhysicalLayer.SINGLE_CHANNEL_BIT_PER_DATA_SYMBOL = 6;
 PhysicalLayer.CHANNEL_A_FREQUENCY_BAND_START = 1000;
@@ -66,6 +67,10 @@ PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION = 'Unsupported RX mode';
 
 PhysicalLayer.prototype.setLoopback = function (loopback) {
     this.$$audioMonoIO.setLoopback(loopback);
+};
+
+PhysicalLayer.prototype.getReceiveSampleRate = function () {
+    return this.$$audioMonoIO.getSampleRate();
 };
 
 PhysicalLayer.prototype.setReceiveHandler = function (handler) {
@@ -308,6 +313,7 @@ PhysicalLayer.prototype.setTransmitterMode = function (mode, sampleRate) {
     );
     this.$$txBinIndexFrameStart = this.$$txBinIndexFirst + this.$$txBinSizeData;
     this.$$txBinIndexFrameEnd = this.$$txBinIndexFrameStart + 1;
+    this.$$txQueue.setSizeMax(PhysicalLayer.TX_QUEUE_BUFFER_SIZE);
 };
 
 PhysicalLayer.prototype.$$setTxSound = function (frequencyBinIndex) {
