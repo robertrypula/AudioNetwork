@@ -4,6 +4,8 @@
 var BarkerCode;
 
 BarkerCode = function (sampleFactor) {
+    sampleFactor = sampleFactor || 1;
+
     this.setSampleFactor(sampleFactor);
 };
 
@@ -13,6 +15,28 @@ BarkerCode.CORRELATION_RANK_POSITIVE = 'CORRELATION_RANK_POSITIVE';
 BarkerCode.CORRELATION_RANK_NONE = 'CORRELATION_RANK_NONE';
 BarkerCode.CORRELATION_RANK_NEGATIVE = 'CORRELATION_RANK_NEGATIVE';
 BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH = 'CORRELATION_RANK_NEGATIVE_HIGH';
+
+BarkerCode.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
+BarkerCode.MINUS_ONE_AS_ZERO = true;
+
+BarkerCode.getCodeLength = function () {
+    return BarkerCode.CODE_11.length;
+};
+
+BarkerCode.getCodeValue = function (position, minusOneAsZero) {
+    var value;
+
+    if (position < 0 || position >= BarkerCode.getCodeLength()) {
+        throw BarkerCode.POSITION_OUT_OF_RANGE_EXCEPTION;
+    }
+
+    value = BarkerCode.CODE_11[position];
+    if (minusOneAsZero === BarkerCode.MINUS_ONE_AS_ZERO && value === -1) {
+        value = 0;
+    }
+
+    return value;
+};
 
 BarkerCode.prototype.setSampleFactor = function (sampleFactor) {
     this.$$sampleFactor = sampleFactor;

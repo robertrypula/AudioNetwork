@@ -57,6 +57,21 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label for="loopback-checkbox" class="label-for-checkbox">
+                                Loopback
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                onChange="onLoopbackCheckboxChange()"
+                                id="loopback-checkbox"
+                                value="1" />
+                        </div>
+                    </div>
+
                     <h2>Receiver</h2>
 
                     <div class="row margin-bottom-double">
@@ -153,10 +168,10 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix">
-                                <input type="radio" name="tx-sample-rate" value="TX_SAMPLE_RATE_44100" checked="checked" /> 44100 Hz
+                                <input type="radio" name="tx-sample-rate" value="44100" checked="checked" /> 44100 Hz
                             </div>
                             <div class="clearfix">
-                                <input type="radio" name="tx-sample-rate" value="TX_SAMPLE_RATE_48000" /> 48000 Hz
+                                <input type="radio" name="tx-sample-rate" value="48000" /> 48000 Hz
                             </div>
                         </div>
                     </div>
@@ -168,12 +183,12 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <select onchange="onTransmissionModeChange()" id="tx-mode">
-                                <option value="TX_MODE_DISABLED">Disabled</option>
-                                <option value="TX_MODE_CHANNEL_A_NORMAL">Channel A</option>
-                                <option value="TX_MODE_CHANNEL_A_BARKER_CODE">Channel B - Barker Code</option>
-                                <option value="TX_MODE_CHANNEL_B_NORMAL">Channel B</option>
-                                <option value="TX_MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
+                            <select onchange="onTransmissionModeChange(event)" id="tx-mode">
+                                <option value="MODE_DISABLED">Disabled</option>
+                                <option value="MODE_CHANNEL_A_NORMAL">Channel A</option>
+                                <option value="MODE_CHANNEL_A_BARKER_CODE">Channel B - Barker Code</option>
+                                <option value="MODE_CHANNEL_B_NORMAL">Channel B</option>
+                                <option value="MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
                             </select>
                         </div>
                     </div>

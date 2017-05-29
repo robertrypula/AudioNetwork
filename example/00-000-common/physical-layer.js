@@ -23,11 +23,22 @@ PhysicalLayer = function () {
     this.$$rxBinIndexFrameEnd;   // index of end frame
     this.$$rxFrequencyBandStart;
     this.$$rxFrequencyBandEnd;
+    this.$$rxBarkerCode = [];
+    this.$$rxBarkerCodePower = [];
     this.setReceiverMode(PhysicalLayer.MODE_DISABLED);
 
-    this.$$txMode = null;
-    this.$$txSampleRate = null;
-    this.$$txQueue = [];
+    this.$$txMode;
+    this.$$txRawSampleOffsetMax;
+    this.$$txRawSampleNumber;
+    this.$$txBitPerDataSymbol;
+    this.$$txBinSizeData;
+    this.$$txBinSizeTotal;
+    this.$$txSampleRate;
+    this.$$txBinIndexFirst;
+    this.$$txBinIndexFrameStart;
+    this.$$txBinIndexFrameEnd;
+    this.$$txQueue = new Buffer(1024);
+    this.setTransmitterMode(PhysicalLayer.MODE_DISABLED, 0);
 
     this.$$rxSmartTimer.setHandler(this.$$rxSmartTimerHandler.bind(this));
     this.$$txSmartTimer.setHandler(this.$$txSmartTimerHandler.bind(this));
@@ -52,6 +63,10 @@ PhysicalLayer.MODE_CHANNEL_B_NORMAL = 'MODE_CHANNEL_B_NORMAL';
 PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE = 'MODE_CHANNEL_B_BARKER_CODE';
 
 PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION = 'Unsupported RX mode';
+
+PhysicalLayer.prototype.setLoopback = function (loopback) {
+    this.$$audioMonoIO.setLoopback(loopback);
+};
 
 PhysicalLayer.prototype.setReceiveHandler = function (handler) {
     if (typeof handler === 'function') {
@@ -114,7 +129,7 @@ PhysicalLayer.prototype.getReceiveSymbol = function () {
 };
 
 PhysicalLayer.prototype.setReceiverMode = function (mode) {
-    var channelFrequencyBandStart, rxRawSampleOffsetMax;
+    var channelFrequencyBandStart, rxRawSampleOffsetMax, i;
 
     switch (mode) {
         case PhysicalLayer.MODE_DISABLED:
@@ -125,7 +140,7 @@ PhysicalLayer.prototype.setReceiverMode = function (mode) {
             break;
         case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
             channelFrequencyBandStart = PhysicalLayer.CHANNEL_A_FREQUENCY_BAND_START;
-            rxRawSampleOffsetMax = PhysicalLayer.RX_SAMPLE_FACTOR * BarkerCode.CODE_11.length;
+            rxRawSampleOffsetMax = PhysicalLayer.RX_SAMPLE_FACTOR * BarkerCode.getCodeLength();
             break;
         case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
             channelFrequencyBandStart = PhysicalLayer.CHANNEL_B_FREQUENCY_BAND_START;
@@ -133,7 +148,7 @@ PhysicalLayer.prototype.setReceiverMode = function (mode) {
             break;
         case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
             channelFrequencyBandStart = PhysicalLayer.CHANNEL_B_FREQUENCY_BAND_START;
-            rxRawSampleOffsetMax = PhysicalLayer.RX_SAMPLE_FACTOR * BarkerCode.CODE_11.length;
+            rxRawSampleOffsetMax = PhysicalLayer.RX_SAMPLE_FACTOR * BarkerCode.getCodeLength();
             break;
         default:
             throw PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION;
@@ -167,6 +182,14 @@ PhysicalLayer.prototype.setReceiverMode = function (mode) {
         this.$$audioMonoIO.getSampleRate(),
         PhysicalLayer.TX_FFT_SIZE
     );
+
+    // TODO create array only when mode is barker
+    this.$$rxBarkerCode.length = 0;
+    this.$$rxBarkerCodePower.length = 0;
+    for (i = 0; i < this.$$rxBinSizeTotal; i++) {
+        this.$$rxBarkerCode.push(new BarkerCode());
+        this.$$rxBarkerCodePower.push(new Buffer(BarkerCode.getCodeLength()));
+    }
 };
 
 PhysicalLayer.prototype.$$isSampleToGrab = function () {
@@ -214,11 +237,7 @@ PhysicalLayer.prototype.$$rxNormal = function () {
 };
 
 PhysicalLayer.prototype.$$rxBarker = function () {
-    var
-        frequencyData,
-        fftResult,
-        loudestBinIndex,
-        receivedSymbol;
+    var fftResult;
 
     if (!this.$$isSampleToGrab()) {
         return;
@@ -246,17 +265,121 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     this.$$rxRawSampleNumber++;
 };
 
-PhysicalLayer.prototype.setTransmitterMode = function (txMode) {
+PhysicalLayer.prototype.setTransmitterMode = function (mode, sampleRate) {
+    var channelFrequencyBandStart, txRawSampleOffsetMax;
 
+    switch (mode) {
+        case PhysicalLayer.MODE_DISABLED:
+            break;
+        case PhysicalLayer.MODE_CHANNEL_A_NORMAL:
+            channelFrequencyBandStart = PhysicalLayer.CHANNEL_A_FREQUENCY_BAND_START;
+            txRawSampleOffsetMax = 1;
+            break;
+        case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
+            channelFrequencyBandStart = PhysicalLayer.CHANNEL_A_FREQUENCY_BAND_START;
+            txRawSampleOffsetMax = BarkerCode.getCodeLength();
+            break;
+        case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
+            channelFrequencyBandStart = PhysicalLayer.CHANNEL_B_FREQUENCY_BAND_START;
+            txRawSampleOffsetMax = 1;
+            break;
+        case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
+            channelFrequencyBandStart = PhysicalLayer.CHANNEL_B_FREQUENCY_BAND_START;
+            txRawSampleOffsetMax = BarkerCode.getCodeLength();
+            break;
+        default:
+            throw PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION;
+    }
+
+    this.$$txMode = mode;
+    if (this.$$txMode === PhysicalLayer.MODE_DISABLED) {
+        return;
+    }
+    this.$$txRawSampleOffsetMax = txRawSampleOffsetMax;
+    this.$$txRawSampleNumber = 0;
+    this.$$txBitPerDataSymbol = PhysicalLayer.SINGLE_CHANNEL_BIT_PER_DATA_SYMBOL;
+    this.$$txBinSizeData = Math.pow(2, this.$$txBitPerDataSymbol);
+    this.$$txBinSizeTotal = this.$$txBinSizeData + 2;
+    this.$$txSampleRate = sampleRate;
+    this.$$txBinIndexFirst = FFTResult.getBinIndex(
+        channelFrequencyBandStart,
+        this.$$txSampleRate,
+        PhysicalLayer.TX_FFT_SIZE
+    );
+    this.$$txBinIndexFrameStart = this.$$txBinIndexFirst + this.$$txBinSizeData;
+    this.$$txBinIndexFrameEnd = this.$$txBinIndexFrameStart + 1;
 };
 
-PhysicalLayer.prototype.$$setTxSound = function (indexToTransmit) {
+PhysicalLayer.prototype.$$setTxSound = function (frequencyBinIndex) {
     var frequency;
 
-    frequency = indexToTransmit * this.$$txSampleRate / PhysicalLayer.TX_FFT_SIZE;
-    audioMonoIO.setPeriodicWave(frequency, this.$$txAmplitude);
+    frequency = frequencyBinIndex * this.$$txSampleRate / PhysicalLayer.TX_FFT_SIZE;
+    this.$$audioMonoIO.setPeriodicWave(frequency, this.$$txAmplitude);
+};
+
+PhysicalLayer.prototype.$$getNullSymbolSize = function () {
+    var
+        sampleNumber = this.$$txRawSampleNumber,
+        offsetMax = this.$$txRawSampleOffsetMax;
+
+    return (offsetMax - (sampleNumber % offsetMax)) % offsetMax;
+};
+
+PhysicalLayer.prototype.$$getBarkerNormalizedSymbolList = function (symbol) {
+    var i, codeOffset, symbolNormalized, result = [];
+
+    for (i = 0; i < BarkerCode.getCodeLength(); i++) {
+        codeOffset = BarkerCode.getCodeValue(i, BarkerCode.MINUS_ONE_AS_ZERO);
+        symbolNormalized = (symbol + codeOffset) % this.$$txBinSizeTotal;
+        result.push(symbolNormalized);
+    }
+
+    return result;
+};
+
+PhysicalLayer.prototype.transmit = function (symbol) {
+    var nullSymbolSize, i, symbolNormalized, barkerNormalizedSymbolList;
+
+    if (this.$$txMode === PhysicalLayer.MODE_DISABLED) {
+        return;
+    }
+
+    nullSymbolSize = this.$$getNullSymbolSize();
+    for (i = 0; i < nullSymbolSize; i++) {
+        this.$$txQueue.push(-1);
+    }
+    symbolNormalized = symbol % this.$$txBinSizeTotal;
+
+    switch (this.$$txMode) {
+        case PhysicalLayer.MODE_CHANNEL_A_NORMAL:
+        case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
+            this.$$txQueue.push(symbolNormalized);
+            break;
+        case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
+        case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
+            barkerNormalizedSymbolList = this.$$getBarkerNormalizedSymbolList(symbol);
+            for (i = 0; i < barkerNormalizedSymbolList.length; i++) {
+                this.$$txQueue.push(barkerNormalizedSymbolList[i]);
+            }
+            break;
+    }
 };
 
 PhysicalLayer.prototype.$$txSmartTimerHandler = function () {
+    var symbol, frequencyBinIndex;
 
+    if (this.$$txMode === PhysicalLayer.MODE_DISABLED) {
+        return;
+    }
+
+    symbol = this.$$txQueue.pop();
+    if (symbol !== null && symbol !== -1) {
+        console.log('tx symbol', symbol, '@', this.$$txRawSampleNumber);
+        frequencyBinIndex = this.$$txBinIndexFirst + symbol;
+        this.$$setTxSound(frequencyBinIndex);
+    } else {
+        this.$$setTxSound(0);
+    }
+
+    this.$$txRawSampleNumber++;
 };
