@@ -6,6 +6,12 @@ var BarkerCode;
 BarkerCode = function (sampleFactor) {
     sampleFactor = sampleFactor || 1;
 
+    this.$$sampleFactor;
+    this.$$data;
+    this.$$decibel;
+    this.$$cacheCorrelactionValue;
+    this.$$cacheDecibelAverage;
+
     this.setSampleFactor(sampleFactor);
 };
 
@@ -40,20 +46,24 @@ BarkerCode.getCodeValue = function (position, minusOneAsZero) {
 
 BarkerCode.prototype.setSampleFactor = function (sampleFactor) {
     this.$$sampleFactor = sampleFactor;
-    this.$$buffer = new Buffer(BarkerCode.CODE_11.length *  this.$$sampleFactor);
-    this.$$cache = null;
+    this.$$data = new Buffer(BarkerCode.getCodeLength() *  this.$$sampleFactor);
+    this.$$decibel = new Buffer(BarkerCode.getCodeLength() *  this.$$sampleFactor);
+    this.$$cacheCorrelactionValue = null;
+    this.$$cacheDecibelAverage = null;
 };
 
-BarkerCode.prototype.handle = function (isOne) {
-    this.$$buffer.pushEvenIfFull(isOne ? 1 : -1);
-    this.$$cache = null;
+BarkerCode.prototype.handle = function (isOne, decibel) {
+    this.$$data.pushEvenIfFull(isOne ? 1 : -1);
+    this.$$decibel.pushEvenIfFull(decibel);
+    this.$$cacheCorrelactionValue = null;
+    this.$$cacheDecibelAverage = null;
 };
 
 BarkerCode.prototype.getCorrelationRank = function () {
     var
         correlationValue = this.getCorrelationValue(),
-        high = Math.floor(0.85 * BarkerCode.CODE_11.length), // <9, 11>
-        low = Math.floor(0.5 * BarkerCode.CODE_11.length);    // <5, 9)
+        high = Math.floor(0.85 * BarkerCode.getCodeLength()), // <9, 11>
+        low = Math.floor(0.5 * BarkerCode.getCodeLength());   // <5, 9)
 
     if (correlationValue >= high) {
         return BarkerCode.CORRELATION_RANK_POSITIVE_HIGH;
@@ -74,25 +84,52 @@ BarkerCode.prototype.getCorrelationRank = function () {
     return BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH;
 };
 
-BarkerCode.prototype.getCorrelationValue = function () {
-    var enoughData, i, item, code, result;
+BarkerCode.prototype.getDecibelAverage = function () {
+    var enoughData, i, item, result;
 
-    if (this.$$cache !== null) {
-        return this.$$cache;
+    if (this.$$cacheDecibelAverage !== null) {
+        return this.$$cacheDecibelAverage;
     }
 
-    enoughData = this.$$buffer.getSize() === this.$$sampleFactor * BarkerCode.CODE_11.length;
+    enoughData = this.$$decibel.getSize() === this.$$sampleFactor * BarkerCode.getCodeLength();
 
     if (enoughData) {
         result = 0;
-        for (i = 0; i < BarkerCode.CODE_11.length; i++) {
-            item = this.$$buffer.getItem(i * this.$$sampleFactor);
-            code = BarkerCode.CODE_11[i];
+        for (i = 0; i < BarkerCode.getCodeLength(); i++) {
+            item = this.$$decibel.getItem(i * this.$$sampleFactor);
+            result += item;
+        }
+        result /= BarkerCode.getCodeLength();
+    } else {
+        result = 0;
+    }
+
+    this.$$cacheDecibelAverage = result;
+
+    return result;
+};
+
+BarkerCode.prototype.getCorrelationValue = function () {
+    var enoughData, i, item, code, result;
+
+    if (this.$$cacheCorrelactionValue !== null) {
+        return this.$$cacheCorrelactionValue;
+    }
+
+    enoughData = this.$$data.getSize() === this.$$sampleFactor * BarkerCode.getCodeLength();
+
+    if (enoughData) {
+        result = 0;
+        for (i = 0; i < BarkerCode.getCodeLength(); i++) {
+            item = this.$$data.getItem(i * this.$$sampleFactor);
+            code = BarkerCode.getCodeValue(i);
             result += item * code;
         }
     } else {
         result = 0;
     }
+
+    this.$$cacheCorrelactionValue = result;
 
     return result;
 };

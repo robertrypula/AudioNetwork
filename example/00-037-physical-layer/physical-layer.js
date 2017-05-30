@@ -74,7 +74,7 @@ function receiveHandler(data) {
 
     if (document.getElementById('rx-symbol-log-checkbox').checked) {
         htmlString = '<span>' +
-            data.symbol +
+            data.symbol + //', ' + data.symbolDecibel.toFixed(1) + ' | ' +
             '</span>, ';
         html('#rx-symbol-log', htmlString, true);
     }

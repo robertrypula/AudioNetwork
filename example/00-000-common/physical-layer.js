@@ -5,7 +5,6 @@ var PhysicalLayer;
 
 PhysicalLayer = function () {
     this.$$audioMonoIO = new AudioMonoIO(PhysicalLayer.RX_FFT_SIZE);
-    this.$$syncBarkerCode = new BarkerCode(PhysicalLayer.RX_SAMPLE_FACTOR);
     this.$$rxSmartTimer = new SmartTimer(PhysicalLayer.RX_TIME_MS);
     this.$$txSmartTimer = new SmartTimer(PhysicalLayer.TX_TIME_MS);
     this.$$rxHandler = null;
@@ -24,7 +23,9 @@ PhysicalLayer = function () {
     this.$$rxFrequencyBandStart;
     this.$$rxFrequencyBandEnd;
     this.$$rxBarkerCode = [];
-    this.$$rxBarkerCodePower = [];
+    this.$$rxBarkerCodeSymbolLookup = [];
+    this.$$rxBarkerCodeSync;
+    this.$$rxBarkerCodeSyncLookup;
     this.setReceiverMode(PhysicalLayer.MODE_DISABLED);
 
     this.$$txMode;
@@ -46,7 +47,7 @@ PhysicalLayer = function () {
 
 PhysicalLayer.RX_RESOLUTION_EXPONENT = 2;
 PhysicalLayer.RX_SAMPLE_FACTOR = 2;
-PhysicalLayer.RX_FFT_SIZE = 4 * 1024;
+PhysicalLayer.RX_FFT_SIZE = 4096;
 PhysicalLayer.TX_FFT_SIZE = PhysicalLayer.RX_FFT_SIZE / Math.pow(2, PhysicalLayer.RX_RESOLUTION_EXPONENT);
 PhysicalLayer.RX_TIME_MS = 0.1;
 PhysicalLayer.TX_TIME_MS = PhysicalLayer.RX_TIME_MS * PhysicalLayer.RX_SAMPLE_FACTOR;
@@ -74,11 +75,9 @@ PhysicalLayer.prototype.getReceiveSampleRate = function () {
 };
 
 PhysicalLayer.prototype.setReceiveHandler = function (handler) {
-    if (typeof handler === 'function') {
-        this.$$rxHandler = handler;
-    } else {
-        this.$$rxHandler = null;
-    }
+    this.$$rxHandler = (typeof handler === 'function')
+        ? handler
+        : null;
 };
 
 PhysicalLayer.prototype.setReceiveRawSampleOffset = function (offset) {
@@ -134,7 +133,7 @@ PhysicalLayer.prototype.getReceiveSymbol = function () {
 };
 
 PhysicalLayer.prototype.setReceiverMode = function (mode) {
-    var channelFrequencyBandStart, rxRawSampleOffsetMax, i;
+    var channelFrequencyBandStart, rxRawSampleOffsetMax, symbol;
 
     switch (mode) {
         case PhysicalLayer.MODE_DISABLED:
@@ -188,17 +187,50 @@ PhysicalLayer.prototype.setReceiverMode = function (mode) {
         PhysicalLayer.TX_FFT_SIZE
     );
 
-    // TODO create array only when mode is barker
+    // TODO create array only when mode is barker?
     this.$$rxBarkerCode.length = 0;
-    this.$$rxBarkerCodePower.length = 0;
-    for (i = 0; i < this.$$rxBinSizeTotal; i++) {
+    this.$$rxBarkerCodeSymbolLookup.length = 0;
+    for (symbol = 0; symbol < this.$$rxBinSizeTotal; symbol++) {
         this.$$rxBarkerCode.push(new BarkerCode());
-        this.$$rxBarkerCodePower.push(new Buffer(BarkerCode.getCodeLength()));
+        this.$$rxBarkerCodeSymbolLookup.push(
+            this.$$getBarkerCodeSymbolLookup(symbol, this.$$rxBinSizeTotal)
+        );
     }
+    this.$$rxBarkerCodeSync = new BarkerCode(PhysicalLayer.RX_SAMPLE_FACTOR);
+    this.$$rxBarkerCodeSyncLookup = this.$$getBarkerCodeSymbolLookup(this.$$rxBinSizeData + 1, this.$$rxBinSizeTotal);    // TODO frameEnd is also sync, make it explicit in the code
 };
 
-PhysicalLayer.prototype.$$isSampleToGrab = function () {
-    return this.$$rxRawSampleNumber % this.$$rxRawSampleOffsetMax === this.$$rxRawSampleOffset
+PhysicalLayer.prototype.$$getSymbolSamplingPosition = function () {
+    var
+        offset = this.$$rxRawSampleNumber % this.$$rxRawSampleOffsetMax,
+        diff;
+
+    diff = (2 * this.$$rxRawSampleOffsetMax + offset)
+        - (1 * this.$$rxRawSampleOffsetMax + this.$$rxRawSampleOffset);
+
+    return diff % this.$$rxRawSampleOffsetMax;
+};
+
+PhysicalLayer.prototype.$$isSymbolSamplingPoint = function () {
+    var position = this.$$getSymbolSamplingPosition();
+
+    return position === 0;
+};
+
+PhysicalLayer.prototype.$$getBarkerCodeSamplingPosition = function () {
+    var
+        position = this.$$getSymbolSamplingPosition(),
+        barkerPosition = Math.floor(position / PhysicalLayer.RX_SAMPLE_FACTOR);
+
+    return barkerPosition;   // valid only when $$isBarkerCodeSamplingPoint is true
+};
+
+PhysicalLayer.prototype.$$isBarkerCodeSamplingPoint = function () {
+    var
+        position = this.$$getSymbolSamplingPosition(),
+        offset = position % PhysicalLayer.RX_SAMPLE_FACTOR;
+    
+    return offset === 0;
 };
 
 PhysicalLayer.prototype.$$getFftResult = function () {
@@ -216,17 +248,14 @@ PhysicalLayer.prototype.$$getFftResult = function () {
     return fftResult;
 };
 
-PhysicalLayer.prototype.$$rxNormal = function () {
+PhysicalLayer.prototype.$$rxNormal = function (fftResult) {
     var
-        fftResult,
         loudestBinIndex,
         receivedSymbol;
 
-    if (!this.$$isSampleToGrab()) {
+    if (!this.$$isSymbolSamplingPoint()) {
         return;
     }
-
-    fftResult = this.$$getFftResult();
 
     loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(
         this.$$rxBinIndexFirst,
@@ -241,30 +270,134 @@ PhysicalLayer.prototype.$$rxNormal = function () {
     });
 };
 
-PhysicalLayer.prototype.$$rxBarker = function () {
-    var fftResult;
+PhysicalLayer.prototype.$$rxBarkerSymbolDecision = function () {
+    var symbol, decisionList = [];
 
-    if (!this.$$isSampleToGrab()) {
+    if (this.$$rxRawSampleNumber === 0) {
         return;
     }
 
-    fftResult = this.$$getFftResult();
+    for (symbol = 0; symbol < this.$$rxBinSizeTotal; symbol++) {
+        decisionList.push({
+            symbol: symbol,
+            correlationValue: this.$$rxBarkerCode[symbol].getCorrelationValue(),
+            decibelAverage: this.$$rxBarkerCode[symbol].getDecibelAverage()
+        });
+    }
 
+    decisionList.sort(function (a, b) {
+        return 0 ||
+            a.correlationValue < b.correlationValue ? 1 : a.correlationValue > b.correlationValue ? -1 : 0 ||
+            a.decibelAverage < b.decibelAverage ? 1 : a.decibelAverage > b.decibelAverage ? -1 : 0;
+    });
+    // console.log(decisionList);
+
+    this.$$rxHandler({
+        symbol: decisionList[0].symbol,
+        symbolDecibel: decisionList[0].decibelAverage,
+        rawSampleNumber: this.$$rxRawSampleNumber
+    });
+
+    // TODO remove me:
+    var l = document.getElementById('rx-decision-log'), html;
+    if (l) {
+        html = '';
+        for (var i = 0; i < 5; i++) {
+            html += 'symbol ' + decisionList[i].symbol + ',  correlationValue ' + decisionList[i].correlationValue + ' @ ' + decisionList[i].decibelAverage.toFixed(2) + 'dB<br/>';
+        }
+        l.innerHTML = html;
+    }
+};
+
+PhysicalLayer.prototype.$$rxBarker = function (fftResult) {
+    var symbol, barkerCodePosition, lookup, decibelZero, decibelOne, decibel, isOne;
+
+    if (this.$$isSymbolSamplingPoint()) {
+        this.$$rxBarkerSymbolDecision();
+    }
+
+    if (!this.$$isBarkerCodeSamplingPoint()) {
+        return;
+    }
+
+    barkerCodePosition = this.$$getBarkerCodeSamplingPosition();
+    for (symbol = 0; symbol < this.$$rxBarkerCodeSymbolLookup.length; symbol++) {
+        lookup = this.$$rxBarkerCodeSymbolLookup[symbol][barkerCodePosition];
+
+        decibelZero = fftResult.getDecibel(this.$$rxBinIndexFirst + lookup.symbolZero);
+        decibelOne = fftResult.getDecibel(this.$$rxBinIndexFirst + lookup.symbolOne);
+
+        if (decibelOne > decibelZero) {
+            isOne = true;
+            decibel = decibelOne;
+        } else {
+            isOne = false;
+            decibel = decibelZero;
+        }
+
+        this.$$rxBarkerCode[symbol].handle(isOne, decibel);
+    }
+};
+
+PhysicalLayer.prototype.$$rxSync = function (fftResult) {
+    var rank, offset, correlationValue, lookup, decibelZero, decibelOne, isOne, decibel;
+
+    // TODO verify logic
+    rank = this.$$rxBarkerCodeSync.getCorrelationRank();
+    if (rank === BarkerCode.CORRELATION_RANK_POSITIVE_HIGH || rank === BarkerCode.CORRELATION_RANK_POSITIVE) {
+        offset = this.$$rxRawSampleNumber % this.$$rxRawSampleOffsetMax;
+
+        correlationValue = this.$$rxBarkerCodeSync.getCorrelationValue();
+        decibel = this.$$rxBarkerCodeSync.getDecibelAverage();
+
+        // TODO remove me:
+        var l = document.getElementById('rx-offset-log');
+        if (l) {
+            l.innerHTML = 'Offset: ' + offset + ', correlationValue ' + correlationValue + ' @ ' + decibel.toFixed(2) + 'dB';
+        }
+    }
+
+    lookup = this.$$rxBarkerCodeSyncLookup[0];
+    // console.log(lookup);
+    // TODO merge similar code that is at $$rxBarker method
+    // console.log(this.$$rxBinIndexFirst + lookup.symbolZero, this.$$rxBinIndexFirst + lookup.symbolOne);
+
+    decibelZero = fftResult.getDecibel(this.$$rxBinIndexFirst + lookup.symbolZero);
+    decibelOne = fftResult.getDecibel(this.$$rxBinIndexFirst + lookup.symbolOne);
+
+
+
+    if (decibelOne > decibelZero) {
+        isOne = true;
+        decibel = decibelOne;
+    } else {
+        isOne = false;
+        decibel = decibelZero;
+    }
+
+    // console.log(decibelOne, decibelZero, isOne, decibel);
+
+    this.$$rxBarkerCodeSync.handle(isOne, decibel);
 };
 
 PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
+    var fftResult;
+
     if (this.$$rxMode === PhysicalLayer.MODE_DISABLED) {
         return;
     }
 
+    fftResult = this.$$getFftResult();
+    this.$$rxSync(fftResult);
+
     switch (this.$$rxMode) {
         case PhysicalLayer.MODE_CHANNEL_A_NORMAL:
         case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
-            this.$$rxNormal();
+            this.$$rxNormal(fftResult);
             break;
         case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
         case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
-            this.$$rxBarker();
+            this.$$rxBarker(fftResult);
     }
 
     this.$$rxRawSampleNumber++;
@@ -323,7 +456,7 @@ PhysicalLayer.prototype.$$setTxSound = function (frequencyBinIndex) {
     this.$$audioMonoIO.setPeriodicWave(frequency, this.$$txAmplitude);
 };
 
-PhysicalLayer.prototype.$$getNullSymbolSize = function () {
+PhysicalLayer.prototype.$$getTxNullSymbolSize = function () {
     var
         sampleNumber = this.$$txRawSampleNumber,
         offsetMax = this.$$txRawSampleOffsetMax;
@@ -331,44 +464,53 @@ PhysicalLayer.prototype.$$getNullSymbolSize = function () {
     return (offsetMax - (sampleNumber % offsetMax)) % offsetMax;
 };
 
-PhysicalLayer.prototype.$$getBarkerNormalizedSymbolList = function (symbol) {
-    var i, codeOffset, symbolNormalized, result = [];
+PhysicalLayer.prototype.$$getBarkerCodeSymbolLookup = function (symbol, binSizeTotal) {
+    var i, symbolOffset, code, result = [];
 
     for (i = 0; i < BarkerCode.getCodeLength(); i++) {
-        codeOffset = BarkerCode.getCodeValue(i, BarkerCode.MINUS_ONE_AS_ZERO);
-        symbolNormalized = (symbol + codeOffset) % this.$$txBinSizeTotal;
-        result.push(symbolNormalized);
+        code = BarkerCode.getCodeValue(i, BarkerCode.MINUS_ONE_AS_ZERO);
+        symbolOffset = code ? 1 : 0;
+        result.push({
+            // symbol: symbol,                              <-- uncomment when chirp field will be there
+            symbolZero: (symbol) % binSizeTotal,
+            symbolOne: (symbol + 1) % binSizeTotal,
+            position: i,                                    // TODO add chirp field
+            isOne: code ? true : false,                     // TODO add chirp field
+            symbol: (symbol + symbolOffset) % binSizeTotal  // TODO add chirp field
+        });
     }
 
     return result;
 };
 
 PhysicalLayer.prototype.transmit = function (symbol) {
-    var nullSymbolSize, i, symbolNormalized, barkerNormalizedSymbolList;
+    var nullSymbolSize, i, barkerCodeSymbolLookup;
 
     if (this.$$txMode === PhysicalLayer.MODE_DISABLED) {
         return;
     }
 
     if (this.$$txQueue.getSize() === 0) {
-        nullSymbolSize = this.$$getNullSymbolSize();
+        nullSymbolSize = this.$$getTxNullSymbolSize();
         for (i = 0; i < nullSymbolSize; i++) {
             this.$$txQueue.push(-1);
         }
     }
 
-    symbolNormalized = symbol % this.$$txBinSizeTotal;
+    symbol = symbol % this.$$txBinSizeTotal;
 
     switch (this.$$txMode) {
         case PhysicalLayer.MODE_CHANNEL_A_NORMAL:
         case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
-            this.$$txQueue.push(symbolNormalized);
+            this.$$txQueue.push(symbol);
             break;
         case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
         case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
-            barkerNormalizedSymbolList = this.$$getBarkerNormalizedSymbolList(symbol);
-            for (i = 0; i < barkerNormalizedSymbolList.length; i++) {
-                this.$$txQueue.push(barkerNormalizedSymbolList[i]);
+            barkerCodeSymbolLookup = this.$$getBarkerCodeSymbolLookup(symbol, this.$$txBinSizeTotal);
+            for (i = 0; i < barkerCodeSymbolLookup.length; i++) {
+                this.$$txQueue.push(
+                    barkerCodeSymbolLookup[i].symbol
+                );
             }
             break;
     }
@@ -382,7 +524,7 @@ PhysicalLayer.prototype.$$txSmartTimerHandler = function () {
     }
 
     symbol = this.$$txQueue.pop();
-    console.log('tx symbol', symbol, '@', this.$$txRawSampleNumber);
+    // console.log('tx symbol', symbol, '@', this.$$txRawSampleNumber);
     if (symbol !== null && symbol !== -1) {
         frequencyBinIndex = this.$$txBinIndexFirst + symbol;
         this.$$setTxSound(frequencyBinIndex);
