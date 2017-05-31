@@ -95,8 +95,8 @@
                             <select onchange="onReceptionModeChange(event)" id="rx-mode">
                                 <option value="MODE_DISABLED">Disabled</option>
                                 <option value="MODE_CHANNEL_A_NORMAL">Channel A</option>
-                                <option value="MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
                                 <option value="MODE_CHANNEL_B_NORMAL">Channel B</option>
+                                <option value="MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
                                 <option value="MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
                             </select>
                         </div>
@@ -105,22 +105,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Speed
+                                Link details
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-speed"></span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Bandwidth
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-bandwidth"></span>
+                            <span id="rx-detail"></span>
                         </div>
                     </div>
 
@@ -165,32 +154,20 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Sample rate of the receiver
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix">
-                                <input type="radio" name="tx-sample-rate" value="44100" checked="checked" /> 44100 Hz
-                            </div>
-                            <div class="clearfix">
-                                <input type="radio" name="tx-sample-rate" value="48000" /> 48000 Hz
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
                                 Transmission mode
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <select onchange="onTransmissionModeChange(event)" id="tx-mode">
                                 <option value="MODE_DISABLED">Disabled</option>
-                                <option value="MODE_CHANNEL_A_NORMAL">Channel A</option>
-                                <option value="MODE_CHANNEL_A_BARKER_CODE">Channel A - Barker Code</option>
-                                <option value="MODE_CHANNEL_B_NORMAL">Channel B</option>
-                                <option value="MODE_CHANNEL_B_BARKER_CODE">Channel B - Barker Code</option>
+                                <option value="MODE_CHANNEL_A_NORMAL__44100">Receiver @ 44.1 kHz - Channel A</option>
+                                <option value="MODE_CHANNEL_B_NORMAL__44100">Receiver @ 44.1 kHz - Channel B</option>
+                                <option value="MODE_CHANNEL_A_BARKER_CODE__44100">Receiver @ 44.1 kHz - Channel A - Barker Code</option>
+                                <option value="MODE_CHANNEL_B_BARKER_CODE__44100">Receiver @ 44.1 kHz - Channel B - Barker Code</option>
+                                <option value="MODE_CHANNEL_A_NORMAL__48000">Receiver @ 48.0 kHz - Channel A</option>
+                                <option value="MODE_CHANNEL_B_NORMAL__48000">Receiver @ 48.0 kHz - Channel B</option>
+                                <option value="MODE_CHANNEL_A_BARKER_CODE__48000">Receiver @ 48.0 kHz - Channel A - Barker Code</option>
+                                <option value="MODE_CHANNEL_B_BARKER_CODE__48000">Receiver @ 48.0 kHz - Channel B - Barker Code</option>
                             </select>
                         </div>
                     </div>

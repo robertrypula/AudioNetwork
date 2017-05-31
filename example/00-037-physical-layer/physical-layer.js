@@ -25,27 +25,41 @@ function onLoopbackCheckboxChange() {
 }
 
 function onReceptionModeChange(event) {
-    var mode = event.target.value;
+    var
+        mode = event.target.value,
+        receiveBand,
+        receiveSpeed,
+        receiveSymbol;
 
     physicalLayer.setReceiverMode(mode);
-    console.log(physicalLayer.getReceiveBand());
-    console.log(physicalLayer.getReceiveSpeed());
-    console.log(physicalLayer.getReceiveSymbol());
-    console.log(physicalLayer.getReceiveRawSampleOffset());
+    receiveBand = physicalLayer.getReceiveBand();
+    receiveSpeed = physicalLayer.getReceiveSpeed();
+    receiveSymbol = physicalLayer.getReceiveSymbol();
+
+    if (receiveBand === null) {
+        document.getElementById('rx-detail').innerHTML = '';
+    } else {
+        document.getElementById('rx-detail').innerHTML =
+            'Frequency: ' + receiveBand.frequencyStart.toFixed(0) + ' Hz - ' + receiveBand.frequencyEnd.toFixed(0) + ' Hz<br/>' +
+            'Speed: ' + receiveSpeed.bitPerSymbol + ' bits/symbol, ' + receiveSpeed.symbolPerSecond.toFixed(2) + ' symbols/second<br/>' +
+            'Symbol range: ' + receiveSymbol.dataMin + ' - ' + receiveSymbol.frameEnd;
+    }
 }
 
 function onTransmissionModeChange(event) {
     var
-        mode = event.target.value,
-        radioList = document.getElementsByName('tx-sample-rate'),
-        sampleRate,
-        i;
+        modeRaw = event.target.value,
+        modeSplit,
+        mode,
+        sampleRate;
 
-    for (i = 0; i < radioList.length; i++) {
-        if (radioList[i].checked) {
-            sampleRate = parseInt(radioList[i].value);
-            break;
-        }
+    if (modeRaw === 'MODE_DISABLED') {
+        mode = modeRaw;
+        sampleRate = 0;
+    } else {
+        modeSplit = modeRaw.split('__');
+        mode = modeSplit[0];
+        sampleRate = parseInt(modeSplit[1]);
     }
 
     physicalLayer.setTransmitterMode(mode, sampleRate);

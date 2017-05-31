@@ -64,7 +64,7 @@ PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE = 'MODE_CHANNEL_A_BARKER_CODE';
 PhysicalLayer.MODE_CHANNEL_B_NORMAL = 'MODE_CHANNEL_B_NORMAL';
 PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE = 'MODE_CHANNEL_B_BARKER_CODE';
 
-PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION = 'Unsupported RX mode';
+PhysicalLayer.UNSUPPORTED_MODE_EXCEPTION = 'Unsupported mode';
 
 PhysicalLayer.prototype.setLoopback = function (loopback) {
     this.$$audioMonoIO.setLoopback(loopback);
@@ -107,15 +107,28 @@ PhysicalLayer.prototype.getReceiveBand = function () {
 };
 
 PhysicalLayer.prototype.getReceiveSpeed = function () {
+    var rxSymbolTime;
+
     if (this.$$rxMode === PhysicalLayer.MODE_DISABLED) {
         return null;
     }
 
+    switch (this.$$rxMode) {
+        case PhysicalLayer.MODE_CHANNEL_A_NORMAL:
+        case PhysicalLayer.MODE_CHANNEL_B_NORMAL:
+            rxSymbolTime = PhysicalLayer.TX_TIME_MS;
+            break;
+        case PhysicalLayer.MODE_CHANNEL_A_BARKER_CODE:
+        case PhysicalLayer.MODE_CHANNEL_B_BARKER_CODE:
+            rxSymbolTime = PhysicalLayer.TX_TIME_MS * BarkerCode.getCodeLength();
+            break;
+    }
+
     return {
         bitPerSymbol: this.$$rxBitPerDataSymbol,
-        symbolPerSecond: 1 / PhysicalLayer.TX_TIME_MS,
-        bitPerSecond: this.$$rxBitPerDataSymbol / PhysicalLayer.TX_TIME_MS,
-        bytePerSecond: (this.$$rxBitPerDataSymbol / PhysicalLayer.TX_TIME_MS) / 8
+        symbolPerSecond: 1 / rxSymbolTime,
+        bitPerSecond: this.$$rxBitPerDataSymbol / rxSymbolTime,
+        bytePerSecond: (this.$$rxBitPerDataSymbol / rxSymbolTime) / 8
     };
 };
 
