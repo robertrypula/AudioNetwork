@@ -98,7 +98,7 @@ Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResoluti
         this.$$add(marker);
     }
 
-    if (this.$$rowCountVisible === 64) {
+    if (this.$$rowCountVisible === 35) {
         lastRow = document.querySelectorAll('#' + this.$$id + ' .s-row:last-child')[0];
         lastRow.parentNode.removeChild(lastRow);
         this.$$rowCountVisible--;

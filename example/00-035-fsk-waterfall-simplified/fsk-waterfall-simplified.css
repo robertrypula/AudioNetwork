@@ -1,0 +1,12 @@
+#log {
+    font-family: monospace;
+}
+
+#rx-frequency-bin {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+#rx-log {
+    font-family: monospace;
+}
