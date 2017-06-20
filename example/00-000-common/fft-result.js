@@ -14,17 +14,22 @@ FFTResult.$$_EQUAL_EPSILON = 0.001;
 FFTResult.$$_HALF = 0.5;
 
 FFTResult.prototype.downconvert = function (exponent) {
+    var factor = Math.pow(2, exponent);
+
+    this.downconvertScalar(factor);
+};
+
+FFTResult.prototype.downconvertScalar = function (factor) {
     var
         result = [],
-        value = Math.pow(2, exponent),
-        valueHalf = value / 2,
+        factorHalf = Math.floor(factor / 2),
         max,
         i,
         j;
 
-    for (i = 0; i < this.$$fftData.length; i += value) {
+    for (i = 0; i < this.$$fftData.length; i += factor) {
         max = this.$$fftData[i];
-        for (j = Math.max(0, i - valueHalf); j < Math.min(i + valueHalf, this.$$fftData.length); j++) {
+        for (j = Math.max(0, i - factorHalf); j < Math.min(i + factorHalf, this.$$fftData.length); j++) {
             max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
         }
         result.push(max);

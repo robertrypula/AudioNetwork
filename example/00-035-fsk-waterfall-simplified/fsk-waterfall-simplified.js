@@ -4,6 +4,7 @@
 var
     FFT_SIZE = 1024,
     RX_RESOLUTION_EXPONENT = 2,
+    
     RX_FFT_SIZE = FFT_SIZE * Math.pow(2, RX_RESOLUTION_EXPONENT),
 
     RX_FREQUENCY_MIN = 1000,
@@ -42,19 +43,20 @@ function onLoopbackCheckboxChange() {
     }
 }
 
-function setTxSound(indexToTransmit) {
+function getTransmitFrequency(symbol) {
+    return symbol * txSampleRate.getValue() / FFT_SIZE;
+}
+
+function setTxSound(symbol) {
     var frequency;
 
-    if (!indexToTransmit) {
+    if (!symbol) {
         audioMonoIO.setPeriodicWave(0);
         return;
     }
 
-    frequency = indexToTransmit * txSampleRate.getValue() / FFT_SIZE;
-    audioMonoIO.setPeriodicWave(
-        frequency,
-        TX_AMPLITUDE
-    );
+    frequency = getTransmitFrequency(symbol);
+    audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
 }
 
 function initFloatWidget() {
@@ -95,7 +97,9 @@ function onTxSampleRateChange() {
 }
 
 function onTxIndexToTransmitChange() {
-    var hertz = txIndexToTransmit.getValue() * txSampleRate.getValue() / FFT_SIZE;
+    var
+        symbol = txIndexToTransmit.getValue(),
+        hertz = getTransmitFrequency(symbol);
 
     html('#tx-index-to-transmit-frequency', hertz.toFixed(2) + ' Hz');
     onTxPlayChange();
@@ -113,13 +117,20 @@ function onTxPlayChange() {
 
 function rxSmartTimerHandler() {
     var
-        frequencyData = audioMonoIO.getFrequencyData(),
-        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
+        frequencyData,
+        fftResult,
         rxBinMin,
         rxBinMax,
         loudestBinIndex,
         frequencyDataInner = [],
         i;
+
+    if (!document.getElementById('rx-active').checked) {
+        return;
+    }
+
+    frequencyData = audioMonoIO.getFrequencyData();
+    fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
 
     fftResult.downconvert(RX_RESOLUTION_EXPONENT);
     rxSampleCount++;

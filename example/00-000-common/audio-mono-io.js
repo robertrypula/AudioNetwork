@@ -279,7 +279,11 @@ AudioMonoIO.prototype.setLoopback = function (state) {
 };
 
 AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
-    var periodicWave;
+    var periodicWave, isPureSine;
+
+    isPureSine = typeof phase === 'undefined' &&
+        typeof harmonicAmplitude === 'undefined' &&
+        typeof harmonicPhase === 'undefined';
 
     frequency = AudioMonoIO.$$getValueOrDefault(
         frequency, AudioMonoIO.$$_OUTPUT_WAVE_FREQUENCY
@@ -287,25 +291,30 @@ AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harm
     volume = AudioMonoIO.$$getValueOrDefault(
         volume, AudioMonoIO.$$_OUTPUT_WAVE_VOLUME
     );
-    phase = AudioMonoIO.$$getValueOrDefault(
-        phase, AudioMonoIO.$$_OUTPUT_WAVE_PHASE
-    );
-    harmonicAmplitude = AudioMonoIO.$$getValueOrDefault(
-        harmonicAmplitude, AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_AMPLITUDE
-    );
-    harmonicPhase = AudioMonoIO.$$getValueOrDefault(
-        harmonicPhase, AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_PHASE
-    );
 
     this.$$setImmediately(this.$$outOscillator.frequency, frequency);
     this.$$setImmediately(this.$$outOscillatorGain.gain, volume);
 
-    periodicWave = this.$$getPeriodicWave(
-        phase,
-        harmonicAmplitude,
-        harmonicPhase
-    );
-    this.$$outOscillator.setPeriodicWave(periodicWave);
+    if (isPureSine) {
+        this.$$outOscillator.type = 'sine';
+    } else {
+        phase = AudioMonoIO.$$getValueOrDefault(
+            phase, AudioMonoIO.$$_OUTPUT_WAVE_PHASE
+        );
+        harmonicAmplitude = AudioMonoIO.$$getValueOrDefault(
+            harmonicAmplitude, AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_AMPLITUDE
+        );
+        harmonicPhase = AudioMonoIO.$$getValueOrDefault(
+            harmonicPhase, AudioMonoIO.$$_OUTPUT_WAVE_HARMONIC_PHASE
+        );
+
+        periodicWave = this.$$getPeriodicWave(
+            phase,
+            harmonicAmplitude,
+            harmonicPhase
+        );
+        this.$$outOscillator.setPeriodicWave(periodicWave);
+    }
 };
 
 AudioMonoIO.prototype.$$getPeriodicWave = function (phase, harmonicAmplitude, harmonicPhase) {
