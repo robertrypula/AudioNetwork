@@ -62,8 +62,8 @@ BarkerCode.prototype.handle = function (isOne, decibel) {
 BarkerCode.prototype.getCorrelationRank = function () {
     var
         correlationValue = this.getCorrelationValue(),
-        high = Math.floor(0.85 * BarkerCode.getCodeLength()), // <9, 11>
-        low = Math.floor(0.5 * BarkerCode.getCodeLength());   // <5, 9)
+        high = Math.floor(0.85 * BarkerCode.getCodeLength()),
+        low = Math.floor(0.5 * BarkerCode.getCodeLength());
 
     if (correlationValue >= high) {
         return BarkerCode.CORRELATION_RANK_POSITIVE_HIGH;

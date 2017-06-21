@@ -2,10 +2,8 @@
 'use strict';
 
 var
-    FFT_SIZE = 1024,
-    RX_RESOLUTION_EXPONENT = 2,
-    
-    RX_FFT_SIZE = FFT_SIZE * Math.pow(2, RX_RESOLUTION_EXPONENT),
+    FFT_SIZE = 4096,
+    FFT_SIZE_FACTOR = 5,
 
     RX_FREQUENCY_MIN = 1000,
     RX_FREQUENCY_MAX = 4000,
@@ -25,7 +23,7 @@ var
     txIndexToTransmit;
 
 function init() {
-    audioMonoIO = new AudioMonoIO(RX_FFT_SIZE);
+    audioMonoIO = new AudioMonoIO(FFT_SIZE);
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
@@ -44,7 +42,7 @@ function onLoopbackCheckboxChange() {
 }
 
 function getTransmitFrequency(symbol) {
-    return symbol * txSampleRate.getValue() / FFT_SIZE;
+    return FFT_SIZE_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
 }
 
 function setTxSound(symbol) {
@@ -132,7 +130,7 @@ function rxSmartTimerHandler() {
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
 
-    fftResult.downconvert(RX_RESOLUTION_EXPONENT);
+    fftResult.downconvertScalar(FFT_SIZE_FACTOR);
     rxSampleCount++;
 
     rxBinMin = fftResult.getBinIndex(rxFrequencyMin.getValue());
@@ -161,9 +159,9 @@ function rxSmartTimerHandler() {
 
     html(
         '#rx-log',
-        'Frequency bin index min&nbsp;&nbsp; : ' + rxBinMin + ' (' + fftResult.getFrequency(rxBinMin).toFixed(2) + 'Hz)<br/>' +
-        'Frequency bin index max&nbsp;&nbsp; : ' + rxBinMax + ' (' + fftResult.getFrequency(rxBinMax).toFixed(2) + 'Hz)<br/>' +
-        'Frequency bin index range : ' + (rxBinMax - rxBinMin + 1) + '<br/>'
+        'min&nbsp;&nbsp; : ' + rxBinMin + ' (' + fftResult.getFrequency(rxBinMin).toFixed(2) + 'Hz)<br/>' +
+        'max&nbsp;&nbsp; : ' + rxBinMax + ' (' + fftResult.getFrequency(rxBinMax).toFixed(2) + 'Hz)<br/>' +
+        'range : ' + (rxBinMax - rxBinMin + 1) + '<br/>'
     );
 }
 
