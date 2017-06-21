@@ -58,12 +58,12 @@
                 <div class="col col-xs-12">
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label for="loopback-checkbox" class="label-for-checkbox">
                                 Loopback
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
@@ -75,48 +75,81 @@
                     <h2>r</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 RX Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9" id="rx-sample-rate"></div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9" id="rx-sample-rate"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Logged symbols
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="rx-active" class="label-for-checkbox">
+                                Active
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
-                                id="rx-symbol-log-checkbox"
+                                id="rx-active"
+                                checked="checked"
                                 value="1" />
-                            <button
-                                onClick="document.getElementById('rx-symbol-log').innerHTML = ''"
-                                class="btn btn-default">
-                                Clear
-                            </button>
-
-                            <div id="rx-symbol-log"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Logged packets
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="loudest-marker" class="label-for-checkbox">
+                                Show loudest
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <button
-                                    onClick="document.getElementById('rx-packet-log').innerHTML = ''"
-                                    class="btn btn-default">
-                                Clear
-                            </button>
-                            <div id="rx-packet-log"></div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="loudest-marker"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label>
+                                Symbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="rx-log"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Connect status
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="rx-log-connect-correlation"></div>
+                            <div id="rx-log-connect-offset"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                RX symbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="rx-symbol" class="margin-bottom"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 195px;"></div>
                         </div>
                     </div>
 
@@ -125,55 +158,55 @@
                     <h2>t</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample rate
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label>
+                                TX symbol
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
-                            <span>
-                                This value should match sample rate that is displayed on the receiver's side
-                                at 'RX section'<br/>
-                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </span>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="txConnect(44100)">Connect (44.1 kHz)</button>
+                            <button class="btn btn-default" onClick="txConnect(48000)">Connect (48.0 kHz)</button>
+                            <br/>
+
+                            <button class="btn btn-default" onClick="txSymbol(100)">100</button>
+                            <button class="btn btn-default" onClick="txSymbol(101)">101</button>
+                            <button class="btn btn-default" onClick="txSymbol(102)">102</button>
+                            <button class="btn btn-default" onClick="txSymbol(103)">103</button>
+                            <button class="btn btn-default" onClick="txSymbol(104)">104</button>
+                            <button class="btn btn-default" onClick="txSymbol(105)">105</button>
+                            <button class="btn btn-default" onClick="txSymbol(106)">106</button>
+                            <button class="btn btn-default" onClick="txSymbol(107)">107</button>
+                            <button class="btn btn-default" onClick="txSymbol(108)">108</button>
+                            <button class="btn btn-default" onClick="txSymbol(109)">109</button>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                TX queue
+                                TX symbol queue
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <button
-                                onClick="document.getElementById('tx-symbol-edit').value += '1 1 1 0 0 0 1 0 0 1 0 '"
-                                class="btn btn-default">
-                                Barker 'Positive'
-                            </button>
-                            <button
-                                onClick="document.getElementById('tx-symbol-edit').value += '0 0 0 1 1 1 0 1 1 0 1 '"
-                                class="btn btn-default">
-                                Barker 'Negative'
-                            </button>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="tx-symbol-queue"></div>
+                        </div>
+                    </div>
 
-
-                            <textarea id="tx-symbol-edit"></textarea>
-                            <button
-                                onClick="onTxAddToQueueNearTextarea()"
-                                class="btn btn-default">
-                                Add to queue
-                            </button>
-                            <button
-                                onClick="document.getElementById('tx-symbol-queue').innerHTML = ''"
-                                class="btn btn-default">
-                                Clear
-                            </button>
-                            <div id="tx-symbol-queue">
-                            </div>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
+                            <span>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                <br/>
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </span>
                         </div>
                     </div>
 
@@ -203,8 +236,9 @@
     <script src="../00-000-common/util/smart-timer.js"></script>
     <script src="../00-000-common/fft-result.js"></script>
     <script src="../00-000-common/buffer.js"></script>
-    <script src="../00-000-common/barker-code.js"></script>
+    <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/util/editable-float-widget.js"></script>
+    <script src="../00-000-common/util/spectrogram.js"></script>
     <script src="synchronization.js"></script>
 
     <!--

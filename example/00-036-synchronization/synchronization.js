@@ -2,44 +2,50 @@
 'use strict';
 
 var
-    RX_RESOLUTION_EXPONENT = 2,
-    RX_FFT_SIZE = 4 * 1024,
-    TX_FFT_SIZE = RX_FFT_SIZE / Math.pow(2, RX_RESOLUTION_EXPONENT),
-    RX_TIME_MS = 0.1,
-    RX_SAMPLE_FACTOR = 2,
-    TX_TIME_MS = RX_TIME_MS * RX_SAMPLE_FACTOR,
+    FFT_SIZE = 4 * 1024,
+    SKIP_FACTOR = 5,
+
+    SYMBOL_MIN = 93,
+    SYMBOL_MAX = 117,
+    SYMBOL_SYNC_A = 108,
+    SYMBOL_SYNC_B = 109,
+
+    RX_TIME_MS = 500,
+    TX_FACTOR = 2,
+    TX_TIME_MS = RX_TIME_MS * TX_FACTOR,
     TX_SAMPLE_RATE = 48000,
-    TX_AMPLITUDE = 0.25,
-    FREQUENCY_BAND_START = 3000,
-    rxBinIndexA,
-    rxBinIndexB,
+    TX_AMPLITUDE = 0.01,
+
     audioMonoIO,
+    correlator,
+    rxSpectrogram,
+    rxConnectLog = [],
+    rxConnectDetectedPrevious = false,
+    rxConnectDetected = false,
+    rxSampleCount = 0,
+
     rxSmartTimer,
-    txSampleRate,
     txSmartTimer,
-    barkerCode,
-    realBitPrevious = null;
+
+    txSampleRate,
+    txSymbol,
+    txSymbolQueue = [];
 
 function init() {
-    audioMonoIO = new AudioMonoIO(RX_FFT_SIZE);
-    barkerCode = new BarkerCode(RX_SAMPLE_FACTOR);
-
-    rxBinIndexA = FFTResult.getBinIndex(
-        FREQUENCY_BAND_START,
-        audioMonoIO.getSampleRate(),
-        TX_FFT_SIZE // TX is fine here because we are down-converting rx decibel array before indexing
-    );
-    rxBinIndexB = rxBinIndexA + 1;
-
+    audioMonoIO = new AudioMonoIO(FFT_SIZE);
+    correlator = new Correlator(TX_FACTOR);
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
 
-    rxSmartTimer = new SmartTimer(RX_TIME_MS);
+    rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
+    rxSmartTimer = new SmartTimer(RX_TIME_MS / 1000);
     rxSmartTimer.setHandler(rxSmartTimerHandler);
 
-    txSmartTimer = new SmartTimer(TX_TIME_MS);
-    txSmartTimer.setHandler(txSmartTimerHandler);
+    setTimeout(function () {
+        txSmartTimer = new SmartTimer(TX_TIME_MS / 1000);
+        txSmartTimer.setHandler(txSmartTimerHandler);
+    }, 250);
 
     onLoopbackCheckboxChange();
 }
@@ -50,13 +56,6 @@ function onLoopbackCheckboxChange() {
     }
 }
 
-function setTxSound(indexToTransmit) {
-    var frequency;
-
-    frequency = indexToTransmit * txSampleRate.getValue() / TX_FFT_SIZE;
-    audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
-}
-
 function initFloatWidget() {
     txSampleRate = new EditableFloatWidget(
         document.getElementById('tx-sample-rate'),
@@ -65,101 +64,165 @@ function initFloatWidget() {
     );
 }
 
+function setTxSound(symbol) {
+    var frequency;
+
+    if (!symbol) {
+        audioMonoIO.setPeriodicWave(0);
+        return;
+    }
+
+    frequency = SKIP_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
+    audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
+}
+
+function refreshSymbolQueue() {
+    html('#tx-symbol-queue', txSymbolQueue.join(', '));
+}
+
 // ----------------------
 
-function onTxAddToQueueNearTextarea() {
-    var
-        contentRaw = document.getElementById('tx-symbol-edit').value,
-        content = contentRaw.trim().replace(/ +(?= )/g, ''),
-        symbolList = content.split(' '),
-        htmlString,
-        i;
+function txConnect(sampleRate) {
+    var i, codeValue;
 
-    for (i = 0; i < symbolList.length; i++) {
-        htmlString = '<div>' + parseInt(symbolList[i]) + '</div>';
-        html('#tx-symbol-queue', htmlString, true);
+    txSampleRate.setValue(sampleRate);
+    for (i = 0; i < correlator.getCodeLength(); i++) {
+        codeValue = correlator.getCodeValue(i);
+        txSymbolQueue.push(
+            codeValue === -1 ? SYMBOL_SYNC_A : SYMBOL_SYNC_B
+        );
     }
+    refreshSymbolQueue();
+}
+
+function txSymbol(symbol) {
+    txSymbolQueue.push(symbol);
+    refreshSymbolQueue();
+}
+
+function handleNewDeviceConnection() {
+    var i, j, stats, averageDecibel, htmlLog;
+
+    stats = [];
+    for (i = 0; i < TX_FACTOR; i++) {
+        if (rxConnectLog[i] && rxConnectLog[i].getSize() > 3) {
+            averageDecibel = 0;
+            for (j = 0; j < rxConnectLog[i].getSize(); j++) {
+                averageDecibel += rxConnectLog[i].getItem(j);
+            }
+            averageDecibel /= rxConnectLog[i].getSize();
+            stats.push({
+                offset: i,
+                averageDecibel: averageDecibel
+            });
+        }
+    }
+
+    htmlLog = '';
+    for (i = 0; i < stats.length; i++) {
+        htmlLog += stats[i].offset + ' ' + stats[i].averageDecibel.toFixed(2) + ' dB<br/>';
+    }
+    html('#rx-log-connect-offset', htmlLog);
+    console.log(stats);
+}
+
+function tryToDetectConnectSignal(rxSampleCount, loudestBinIndex, loudestBinDecibel) {
+    var correlationDataLogicValue, offset, rank;
+
+    switch (loudestBinIndex) {
+        case SYMBOL_SYNC_A: correlationDataLogicValue = false; break;
+        case SYMBOL_SYNC_B: correlationDataLogicValue = true; break;
+        default: correlationDataLogicValue = null;
+    }
+    correlator.handle(correlationDataLogicValue, loudestBinDecibel);
+    rank = correlator.getCorrelationRank();
+    rxConnectDetected = (
+        rank === Correlator.CORRELATION_RANK_NEGATIVE_HIGH ||
+        rank === Correlator.CORRELATION_RANK_POSITIVE_HIGH
+    );
+    if (rxConnectDetected) {
+        offset = rxSampleCount % TX_FACTOR;
+        if (!rxConnectLog[offset]) {
+            rxConnectLog[offset] = new Buffer(50);
+        }
+        rxConnectLog[offset].pushEvenIfFull(correlator.getDecibelAverage());
+    }
+
+    if (rxConnectDetectedPrevious && !rxConnectDetected) {
+        handleNewDeviceConnection();
+    }
+
+    rxConnectDetectedPrevious = rxConnectDetected;
+
+    html(
+        '#rx-log-connect-correlation',
+        rxConnectDetected
+            ? 'Connecting new device... (correlation ' + correlator.getCorrelationValue() + '/' + correlator.getCodeLength() + ')'
+            : '-'
+    );
 }
 
 // ----------------------
 
 function rxSmartTimerHandler() {
     var
-        frequencyData = audioMonoIO.getFrequencyData(),
-        fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate()),
-        htmlString,
-        decibelA,
-        decibelB,
-        correlationValue,
-        highlightClass,
-        isOne,
-        realBit;
+        frequencyData,
+        fftResult,
+        loudestBinIndex,
+        loudestBinDecibel,
+        noiseAverageDecibel,
+        frequencyDataInner = [],
+        i;
 
-    fftResult.downconvert(RX_RESOLUTION_EXPONENT);
-    decibelA = fftResult.getDecibel(rxBinIndexA);
-    decibelB = fftResult.getDecibel(rxBinIndexB);
-
-    isOne = decibelA < decibelB;
-
-    barkerCode.handle(isOne);
-    correlationValue = barkerCode.getCorrelationValue();
-
-    realBit = null;
-    switch (barkerCode.getCorrelationRank()) {
-        case BarkerCode.CORRELATION_RANK_POSITIVE_HIGH:
-            highlightClass = 'highlight-positive-hot';
-            realBit = 1;
-            break;
-        case BarkerCode.CORRELATION_RANK_POSITIVE:
-            highlightClass = 'highlight-positive';
-            break;
-        case BarkerCode.CORRELATION_RANK_NEGATIVE:
-            highlightClass = 'highlight-negative';
-            break;
-        case BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH:
-            highlightClass = 'highlight-negative-hot';
-            realBit = 0;
-            break;
-        default:
-            highlightClass = '';
+    if (!document.getElementById('rx-active').checked) {
+        return;
     }
 
-    if (document.getElementById('rx-symbol-log-checkbox').checked) {
-        htmlString = '<div class="' + highlightClass + '">' +
-            (isOne ? '1' : '0') + ',' + correlationValue +
-            '</div>';
-        html('#rx-symbol-log', htmlString, true);
-    }
+    frequencyData = audioMonoIO.getFrequencyData();
+    fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
+    fftResult.downconvertScalar(SKIP_FACTOR);
+    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(SYMBOL_MIN, SYMBOL_MAX);
+    loudestBinDecibel = fftResult.getDecibel(loudestBinIndex);
 
-    if (realBit !== null && realBit !== realBitPrevious) {
-        htmlString = '<div>' + realBit + '</div>';
-        html('#rx-packet-log', htmlString, true);
+    noiseAverageDecibel = 0;
+    for (i = SYMBOL_MIN; i <= SYMBOL_MAX; i++) {
+        frequencyDataInner.push(fftResult.getDecibel(i));
+        noiseAverageDecibel += fftResult.getDecibel(i);
     }
-    realBitPrevious = realBit;
+    noiseAverageDecibel -= loudestBinDecibel;
+    noiseAverageDecibel /= frequencyDataInner.length - 1;
+
+    rxSpectrogram.add(
+        frequencyDataInner,
+        document.getElementById('loudest-marker').checked
+            ? loudestBinIndex - SYMBOL_MIN
+            : -1,
+        SYMBOL_MIN,
+        1,
+        rxSampleCount % TX_FACTOR === 0
+    );
+
+    tryToDetectConnectSignal(rxSampleCount, loudestBinIndex, loudestBinDecibel);
+
+    html(
+        '#rx-symbol',
+        loudestBinIndex +
+        ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz, ' +
+        loudestBinDecibel.toFixed(2) + ' dB)'
+    );
+    html(
+        '#rx-log',
+        'min&nbsp;&nbsp; : ' + SYMBOL_MIN + ' (' + fftResult.getFrequency(SYMBOL_MIN).toFixed(2) + ' Hz)<br/>' +
+        'max&nbsp;&nbsp; : ' + SYMBOL_MAX + ' (' + fftResult.getFrequency(SYMBOL_MAX).toFixed(2) + ' Hz)<br/>' +
+        'range : ' + (SYMBOL_MAX - SYMBOL_MIN + 1) + '<br/>'
+    );
+
+    rxSampleCount++;
 }
 
 function txSmartTimerHandler() {
-    var
-        firstNode = select('#tx-symbol-queue > div:first-child'),
-        binIndexA,
-        binIndexB,
-        symbol;
-
-    binIndexA = FFTResult.getBinIndex(
-        FREQUENCY_BAND_START,
-        txSampleRate.getValue(),
-        TX_FFT_SIZE
-    );
-    binIndexB = binIndexA + 1;
-
-    if (firstNode.length > 0) {
-        symbol = firstNode[0].innerHTML === '0'
-            ? binIndexA
-            : binIndexB;
-        firstNode[0].parentNode.removeChild(firstNode[0]);
-    } else {
-        symbol = 0;
-    }
+    var symbol = txSymbolQueue.shift();
 
     setTxSound(symbol);
+    refreshSymbolQueue();
 }

@@ -100,6 +100,21 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="loudest-marker" class="label-for-checkbox">
+                                Show loudest
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="loudest-marker"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label>
                                 Frequency range [Hz]
                             </label>
@@ -123,21 +138,6 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label for="loudest-marker" class="label-for-checkbox">
-                                Show loudest
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                id="loudest-marker"
-                                checked="checked"
-                                value="1" />
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 RX symbol
                             </label>
@@ -149,7 +149,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
-                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 195px; opacity: 0.05"></div>
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 195px;"></div>
                         </div>
                     </div>
 

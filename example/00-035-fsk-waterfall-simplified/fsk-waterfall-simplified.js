@@ -2,8 +2,8 @@
 'use strict';
 
 var
-    FFT_SIZE = 4096,
-    FFT_SIZE_FACTOR = 5,
+    FFT_SIZE = 4 * 1024,
+    SKIP_FACTOR = 5,
 
     RX_FREQUENCY_MIN = 1000,
     RX_FREQUENCY_MAX = 4000,
@@ -42,7 +42,7 @@ function onLoopbackCheckboxChange() {
 }
 
 function getTransmitFrequency(symbol) {
-    return FFT_SIZE_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
+    return SKIP_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
 }
 
 function setTxSound(symbol) {
@@ -129,17 +129,10 @@ function rxSmartTimerHandler() {
 
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
-
-    fftResult.downconvertScalar(FFT_SIZE_FACTOR);
-    rxSampleCount++;
-
+    fftResult.downconvertScalar(SKIP_FACTOR);
     rxBinMin = fftResult.getBinIndex(rxFrequencyMin.getValue());
     rxBinMax = fftResult.getBinIndex(rxFrequencyMax.getValue());
-
-    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(
-        rxBinMin,
-        rxBinMax
-    );
+    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(rxBinMin, rxBinMax);
 
     for (i = rxBinMin; i <= rxBinMax; i++) {
         frequencyDataInner.push(fftResult.getDecibel(i));
@@ -155,13 +148,14 @@ function rxSmartTimerHandler() {
         rxSampleCount % 2
     );
 
-    html('#rx-symbol', loudestBinIndex + ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz)');
-
+    html('#rx-symbol', loudestBinIndex + ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz, ' + fftResult.getDecibel(loudestBinIndex).toFixed(2) + ' dB)');
     html(
         '#rx-log',
-        'min&nbsp;&nbsp; : ' + rxBinMin + ' (' + fftResult.getFrequency(rxBinMin).toFixed(2) + 'Hz)<br/>' +
-        'max&nbsp;&nbsp; : ' + rxBinMax + ' (' + fftResult.getFrequency(rxBinMax).toFixed(2) + 'Hz)<br/>' +
+        'min&nbsp;&nbsp; : ' + rxBinMin + ' (' + fftResult.getFrequency(rxBinMin).toFixed(2) + ' Hz)<br/>' +
+        'max&nbsp;&nbsp; : ' + rxBinMax + ' (' + fftResult.getFrequency(rxBinMax).toFixed(2) + ' Hz)<br/>' +
         'range : ' + (rxBinMax - rxBinMin + 1) + '<br/>'
     );
+
+    rxSampleCount++;
 }
 

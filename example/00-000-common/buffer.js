@@ -89,3 +89,15 @@ Buffer.prototype.getSizeMax = function () {
 Buffer.prototype.isFull = function () {
     return this.$$size === this.$$sizeMax;
 };
+
+Buffer.prototype.getAll = function () {
+    var i, result = [];
+
+    for (i = 0; i < this.getSize(); i++) {
+        result.push(
+            this.getItem(i)
+        );
+    }
+
+    return result;
+};

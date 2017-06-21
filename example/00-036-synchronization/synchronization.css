@@ -1,46 +1,8 @@
-#log {
-    font-family: monospace;
-}
-
-#rx-symbol-log, #rx-packet-log, #tx-symbol-queue {
-    padding: 10px;
-    border: 1px solid lightgrey;
-    height: 250px;
-    overflow-y: auto;
-}
-
-#rx-symbol-log div, #rx-packet-log div, #tx-symbol-queue div {
-    float: left;
-    margin: 0 10px 2px 0;
-    padding: 2px 0;
-    font-family: monospace;
-    background-color: black;
-    color: white;
+#rx-symbol {
     font-weight: bold;
-    font-size: 12px;
-    width: 55px;
-    text-align: center;
+    font-size: 1.2em;
 }
 
-#rx-symbol-log div.highlight-positive-hot {
-    background-color: lightgreen;
-    color: black;
-    outline: 3px solid red;
-}
-
-#rx-symbol-log div.highlight-positive {
-    background-color: green;
-    color: white;
-}
-
-#rx-symbol-log div.highlight-negative {
-
-    background-color: blue;
-    color: white;
-}
-
-#rx-symbol-log div.highlight-negative-hot {
-    background-color: lightblue;
-    color: black;
-    outline: 3px solid red;
+#rx-log {
+    font-family: monospace;
 }
