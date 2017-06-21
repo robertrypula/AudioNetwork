@@ -85,7 +85,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
+                            <label for="rx-active" class="label-for-checkbox">
                                 Active
                             </label>
                         </div>
@@ -143,13 +143,13 @@
                             </label>
                         </div>
                         <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="rx-frequency-bin" class="margin-bottom"></div>
+                            <div id="rx-symbol" class="margin-bottom"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">
-                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 195px;"></div>
+                            <div id="rx-spectrogram" class="margin-bottom-double" style="height: 195px; opacity: 0.05"></div>
                         </div>
                     </div>
 
@@ -159,33 +159,15 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
-                            <span>
-                                This value should match sample rate that is displayed on the receiver's side
-                                at 'RX section'<br/>
-                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label>
                                 TX symbol
                             </label>
                         </div>
                         <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="tx-index-to-transmit" class="margin-bottom clearfix"></div>
+                            <div id="tx-symbol" class="margin-bottom clearfix"></div>
                             <div class="clearfix">
                                 <span>Frequency: </span>
-                                <span id="tx-index-to-transmit-frequency"></span>
+                                <span id="tx-symbol-frequency"></span>
                             </div>
                         </div>
                     </div>
@@ -202,6 +184,24 @@
                                 id="tx-play"
                                 onChange="onTxPlayChange()"
                             />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
+                            <span>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                <br/>
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </span>
                         </div>
                     </div>
 

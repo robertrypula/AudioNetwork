@@ -9,7 +9,7 @@ var
     RX_FREQUENCY_MAX = 4000,
     RX_TIME_MS = 500,
     TX_SAMPLE_RATE = 48000,
-    TX_AMPLITUDE = 0.50,
+    TX_AMPLITUDE = 0.01,
 
     audioMonoIO,
     rxSpectrogram,
@@ -20,7 +20,7 @@ var
     rxFrequencyMax,
 
     txSampleRate,
-    txIndexToTransmit;
+    txSymbol;
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
@@ -79,27 +79,27 @@ function initFloatWidget() {
         TX_SAMPLE_RATE, 5, 0,
         onTxSampleRateChange
     );
-    txIndexToTransmit = new EditableFloatWidget(
-        document.getElementById('tx-index-to-transmit'),
+    txSymbol = new EditableFloatWidget(
+        document.getElementById('tx-symbol'),
         0, 4, 0,
-        onTxIndexToTransmitChange
+        onTxSymbolChange
     );
-    txIndexToTransmit.forceUpdate();
+    txSymbol.forceUpdate();
 }
 
 // ----------------------
 
 function onTxSampleRateChange() {
     txSampleRate.getValue();
-    onTxIndexToTransmitChange();
+    onTxSymbolChange();
 }
 
-function onTxIndexToTransmitChange() {
+function onTxSymbolChange() {
     var
-        symbol = txIndexToTransmit.getValue(),
+        symbol = txSymbol.getValue(),
         hertz = getTransmitFrequency(symbol);
 
-    html('#tx-index-to-transmit-frequency', hertz.toFixed(2) + ' Hz');
+    html('#tx-symbol-frequency', hertz.toFixed(2) + ' Hz');
     onTxPlayChange();
 }
 
@@ -108,7 +108,7 @@ function onTxIndexToTransmitChange() {
 function onTxPlayChange() {
     var checked = document.getElementById('tx-play').checked;
 
-    setTxSound(checked ? txIndexToTransmit.getValue() : 0);
+    setTxSound(checked ? txSymbol.getValue() : 0);
 }
 
 // ----------------------
@@ -155,7 +155,7 @@ function rxSmartTimerHandler() {
         rxSampleCount % 2
     );
 
-    html('#rx-frequency-bin', loudestBinIndex + ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz)');
+    html('#rx-symbol', loudestBinIndex + ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz)');
 
     html(
         '#rx-log',

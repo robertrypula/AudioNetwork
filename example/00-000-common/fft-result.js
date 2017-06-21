@@ -23,17 +23,22 @@ FFTResult.prototype.downconvertScalar = function (factor) {
     var
         result = [],
         factorHalf = Math.floor(factor / 2),
+        sampleRateCorrection,
         max,
         i,
         j;
 
     for (i = 0; i < this.$$fftData.length; i += factor) {
         max = this.$$fftData[i];
-        for (j = Math.max(0, i - factorHalf); j < Math.min(i + factorHalf, this.$$fftData.length); j++) {
+        for (j = Math.max(0, i - factorHalf); j < Math.min(i - factorHalf + factor, this.$$fftData.length); j++) {
             max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
         }
         result.push(max);
     }
+
+    sampleRateCorrection = factor * result.length / this.$$fftData.length;
+    this.$$sampleRate *= sampleRateCorrection;
+
     this.$$fftData = result;
 };
 
