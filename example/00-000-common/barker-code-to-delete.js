@@ -17,9 +17,9 @@ BarkerCode = function (sampleFactor) {
 
 BarkerCode.CODE_11 = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1];
 BarkerCode.CORRELATION_RANK_POSITIVE_HIGH = 'CORRELATION_RANK_POSITIVE_HIGH';
-BarkerCode.CORRELATION_RANK_POSITIVE = 'CORRELATION_RANK_POSITIVE';
+BarkerCode.CORRELATION_RANK_POSITIVE_LOW = 'CORRELATION_RANK_POSITIVE_LOW';
 BarkerCode.CORRELATION_RANK_NONE = 'CORRELATION_RANK_NONE';
-BarkerCode.CORRELATION_RANK_NEGATIVE = 'CORRELATION_RANK_NEGATIVE';
+BarkerCode.CORRELATION_RANK_NEGATIVE_LOW = 'CORRELATION_RANK_NEGATIVE_LOW';
 BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH = 'CORRELATION_RANK_NEGATIVE_HIGH';
 
 BarkerCode.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
@@ -70,7 +70,7 @@ BarkerCode.prototype.getCorrelationRank = function () {
     }
 
     if (correlationValue >= low) {
-        return BarkerCode.CORRELATION_RANK_POSITIVE;
+        return BarkerCode.CORRELATION_RANK_POSITIVE_LOW;
     }
 
     if (correlationValue > -low) {
@@ -78,7 +78,7 @@ BarkerCode.prototype.getCorrelationRank = function () {
     }
 
     if (correlationValue > -high) {
-        return BarkerCode.CORRELATION_RANK_NEGATIVE;
+        return BarkerCode.CORRELATION_RANK_NEGATIVE_LOW;
     }
 
     return BarkerCode.CORRELATION_RANK_NEGATIVE_HIGH;

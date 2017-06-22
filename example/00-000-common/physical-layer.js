@@ -357,7 +357,7 @@ PhysicalLayer.prototype.$$rxSync = function (fftResult) {
 
     // TODO verify logic
     rank = this.$$rxBarkerCodeSync.getCorrelationRank();
-    if (rank === BarkerCode.CORRELATION_RANK_POSITIVE_HIGH || rank === BarkerCode.CORRELATION_RANK_POSITIVE) {
+    if (rank === BarkerCode.CORRELATION_RANK_POSITIVE_HIGH || rank === BarkerCode.CORRELATION_RANK_POSITIVE_LOW) {
         offset = this.$$rxRawSampleNumber % this.$$rxRawSampleOffsetMax;
 
         correlationValue = this.$$rxBarkerCodeSync.getCorrelationValue();

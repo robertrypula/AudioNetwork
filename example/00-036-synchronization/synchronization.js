@@ -3,6 +3,7 @@
 
 var
     FFT_SIZE = 4 * 1024,
+    BASE_TIME_MS = 500,
     SKIP_FACTOR = 5,
 
     SYMBOL_MIN = 93,
@@ -10,18 +11,17 @@ var
     SYMBOL_SYNC_A = 108,
     SYMBOL_SYNC_B = 109,
 
-    RX_TIME_MS = 500,
-    TX_FACTOR = 2,
-    TX_TIME_MS = RX_TIME_MS * TX_FACTOR,
+    RX_SKIP_FACTOR = 4,
+    RX_TIME_MS = BASE_TIME_MS,
+    TX_SKIP_FACTOR = 2,
+    TX_TIME_MS = BASE_TIME_MS * TX_SKIP_FACTOR,
     TX_SAMPLE_RATE = 48000,
     TX_AMPLITUDE = 0.01,
 
     audioMonoIO,
     correlator,
     rxSpectrogram,
-    rxConnectLog = [],
-    rxConnectDetectedPrevious = false,
-    rxConnectDetected = false,
+    rxConnectSignal = [],
     rxSampleCount = 0,
 
     rxSmartTimer,
@@ -33,7 +33,7 @@ var
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
-    correlator = new Correlator(TX_FACTOR);
+    correlator = new Correlator(RX_SKIP_FACTOR);
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
@@ -82,13 +82,18 @@ function refreshSymbolQueue() {
 
 // ----------------------
 
+function addToTxQueue(symbol) {
+    txSymbolQueue.push(symbol);
+    txSymbolQueue.push(null);   // TODO remove that in the future
+}
+
 function txConnect(sampleRate) {
     var i, codeValue;
 
     txSampleRate.setValue(sampleRate);
     for (i = 0; i < correlator.getCodeLength(); i++) {
         codeValue = correlator.getCodeValue(i);
-        txSymbolQueue.push(
+        addToTxQueue(
             codeValue === -1 ? SYMBOL_SYNC_A : SYMBOL_SYNC_B
         );
     }
@@ -96,21 +101,21 @@ function txConnect(sampleRate) {
 }
 
 function txSymbol(symbol) {
-    txSymbolQueue.push(symbol);
+    addToTxQueue(symbol);
     refreshSymbolQueue();
 }
 
-function handleNewDeviceConnection() {
+function tryToConnectNewDevice() {
     var i, j, stats, averageDecibel, htmlLog;
 
     stats = [];
-    for (i = 0; i < TX_FACTOR; i++) {
-        if (rxConnectLog[i] && rxConnectLog[i].getSize() > 3) {
+    for (i = 0; i < RX_SKIP_FACTOR; i++) {
+        if (rxConnectSignal[i] && rxConnectSignal[i].getSize() > 3) {
             averageDecibel = 0;
-            for (j = 0; j < rxConnectLog[i].getSize(); j++) {
-                averageDecibel += rxConnectLog[i].getItem(j);
+            for (j = 0; j < rxConnectSignal[i].getSize(); j++) {
+                averageDecibel += rxConnectSignal[i].getItem(j);
             }
-            averageDecibel /= rxConnectLog[i].getSize();
+            averageDecibel /= rxConnectSignal[i].getSize();
             stats.push({
                 offset: i,
                 averageDecibel: averageDecibel
@@ -126,39 +131,47 @@ function handleNewDeviceConnection() {
     console.log(stats);
 }
 
-function tryToDetectConnectSignal(rxSampleCount, loudestBinIndex, loudestBinDecibel) {
-    var correlationDataLogicValue, offset, rank;
+function tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel) {
+    var dataLogicValue, offset, connectSignalPresent, bigEnoughBufferSize;
 
-    switch (loudestBinIndex) {
-        case SYMBOL_SYNC_A: correlationDataLogicValue = false; break;
-        case SYMBOL_SYNC_B: correlationDataLogicValue = true; break;
-        default: correlationDataLogicValue = null;
+    bigEnoughBufferSize = 100 * correlator.getCodeLength();
+
+    switch (symbol) {
+        case SYMBOL_SYNC_A: dataLogicValue = false; break;
+        case SYMBOL_SYNC_B: dataLogicValue = true; break;
+        default: dataLogicValue = null;
     }
-    correlator.handle(correlationDataLogicValue, loudestBinDecibel);
-    rank = correlator.getCorrelationRank();
-    rxConnectDetected = (
-        rank === Correlator.CORRELATION_RANK_NEGATIVE_HIGH ||
-        rank === Correlator.CORRELATION_RANK_POSITIVE_HIGH
-    );
-    if (rxConnectDetected) {
-        offset = rxSampleCount % TX_FACTOR;
-        if (!rxConnectLog[offset]) {
-            rxConnectLog[offset] = new Buffer(50);
+    correlator.handle(dataLogicValue, signalDecibel);
+    connectSignalPresent = correlator.isCorrelatedHigh();
+    if (connectSignalPresent) {
+        offset = rxSampleCount % RX_SKIP_FACTOR;
+        if (!rxConnectSignal[offset]) {
+            rxConnectSignal[offset] = {
+                offset: offset,
+                signalDecibelBuffer: new Buffer(bigEnoughBufferSize),
+                noiseDecibelBuffer: new Buffer(bigEnoughBufferSize),
+                signalToNoiseRatioBuffer: new Buffer(bigEnoughBufferSize)
+            };
         }
-        rxConnectLog[offset].pushEvenIfFull(correlator.getDecibelAverage());
+        rxConnectSignal[offset].offset = offset;
+        rxConnectSignal[offset].signalDecibelBuffer.pushEvenIfFull(correlator.getSignalDecibelAverage());
+        rxConnectSignal[offset].noiseDecibelBuffer.pushEvenIfFull(correlator.getNoiseDecibelAverage());
+        rxConnectSignal[offset].signalToNoiseRatioBuffer.pushEvenIfFull(correlator.getSignalToNoiseRatio());
     }
 
-    if (rxConnectDetectedPrevious && !rxConnectDetected) {
-        handleNewDeviceConnection();
+    /*
+    connectSignalJustLost = rxConnectSignalPresentPrevious && !rxConnectSignalPresent;
+    if (connectSignalJustLost) {
+        //tryToConnectNewDevice();
+        rxConnectSignal.length = 0;    // reset
     }
 
-    rxConnectDetectedPrevious = rxConnectDetected;
+    rxConnectSignalPresentPrevious = rxConnectSignalPresent;
+    */
 
     html(
         '#rx-log-connect-correlation',
-        rxConnectDetected
-            ? 'Connecting new device... (correlation ' + correlator.getCorrelationValue() + '/' + correlator.getCodeLength() + ')'
-            : '-'
+        'correlation ' + correlator.getCorrelationValue() + '/' + correlator.getCodeLength()
     );
 }
 
@@ -168,9 +181,11 @@ function rxSmartTimerHandler() {
     var
         frequencyData,
         fftResult,
-        loudestBinIndex,
-        loudestBinDecibel,
-        noiseAverageDecibel,
+        symbol,
+        signalDecibel,
+        noiseDecibelSum,
+        noiseDecibel,
+        signalToNoiseRatio,
         frequencyDataInner = [],
         i;
 
@@ -181,40 +196,46 @@ function rxSmartTimerHandler() {
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
     fftResult.downconvertScalar(SKIP_FACTOR);
-    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(SYMBOL_MIN, SYMBOL_MAX);
-    loudestBinDecibel = fftResult.getDecibel(loudestBinIndex);
+    symbol = fftResult.getLoudestBinIndexInBinRange(SYMBOL_MIN, SYMBOL_MAX);
+    signalDecibel = fftResult.getDecibel(symbol);
 
-    noiseAverageDecibel = 0;
+    noiseDecibelSum = 0;
     for (i = SYMBOL_MIN; i <= SYMBOL_MAX; i++) {
         frequencyDataInner.push(fftResult.getDecibel(i));
-        noiseAverageDecibel += fftResult.getDecibel(i);
+        if (i !== symbol) {
+            noiseDecibelSum += fftResult.getDecibel(i);
+        }
     }
-    noiseAverageDecibel -= loudestBinDecibel;
-    noiseAverageDecibel /= frequencyDataInner.length - 1;
+    noiseDecibel = null;
+    if (frequencyDataInner.length > 1) {
+        noiseDecibel = noiseDecibelSum / (frequencyDataInner.length - 1);
+    }
+    signalToNoiseRatio = signalDecibel - noiseDecibel;
 
     rxSpectrogram.add(
         frequencyDataInner,
         document.getElementById('loudest-marker').checked
-            ? loudestBinIndex - SYMBOL_MIN
+            ? symbol - SYMBOL_MIN
             : -1,
         SYMBOL_MIN,
         1,
-        rxSampleCount % TX_FACTOR === 0
+        rxSampleCount % RX_SKIP_FACTOR === 0
     );
 
-    tryToDetectConnectSignal(rxSampleCount, loudestBinIndex, loudestBinDecibel);
+    tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel);
 
+    html('#rx-symbol', symbol);
     html(
-        '#rx-symbol',
-        loudestBinIndex +
-        ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz, ' +
-        loudestBinDecibel.toFixed(2) + ' dB)'
+        '#rx-symbol-detail',
+        fftResult.getFrequency(symbol).toFixed(2) + ' Hz, ' +
+        signalDecibel.toFixed(2) + ' dB, ' +
+        'signalToNoiseFloorDistance: ' + signalToNoiseRatio + ' dB'
     );
     html(
         '#rx-log',
-        'min&nbsp;&nbsp; : ' + SYMBOL_MIN + ' (' + fftResult.getFrequency(SYMBOL_MIN).toFixed(2) + ' Hz)<br/>' +
-        'max&nbsp;&nbsp; : ' + SYMBOL_MAX + ' (' + fftResult.getFrequency(SYMBOL_MAX).toFixed(2) + ' Hz)<br/>' +
-        'range : ' + (SYMBOL_MAX - SYMBOL_MIN + 1) + '<br/>'
+        'min: ' + SYMBOL_MIN + ' (' + fftResult.getFrequency(SYMBOL_MIN).toFixed(2) + ' Hz)<br/>' +
+        'max: ' + SYMBOL_MAX + ' (' + fftResult.getFrequency(SYMBOL_MAX).toFixed(2) + ' Hz)<br/>' +
+        'range: ' + (SYMBOL_MAX - SYMBOL_MIN + 1) + '<br/>'
     );
 
     rxSampleCount++;
