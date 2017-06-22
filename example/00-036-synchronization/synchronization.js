@@ -83,8 +83,8 @@ function refreshSymbolQueue() {
 // ----------------------
 
 function addToTxQueue(symbol) {
-    txSymbolQueue.push(symbol);
     txSymbolQueue.push(null);   // TODO remove that in the future
+    txSymbolQueue.push(symbol);
 }
 
 function txConnect(sampleRate) {
@@ -105,73 +105,98 @@ function txSymbol(symbol) {
     refreshSymbolQueue();
 }
 
-function tryToConnectNewDevice() {
-    var i, j, stats, averageDecibel, htmlLog;
+function sortConnectionData(data) {
+    data.sort(function (a, b) {
+        return 0 ||
+            a.correlationValue < b.correlationValue ? 1 : a.correlationValue > b.correlationValue ? -1 : 0 ||
+            a.signalToNoiseRatio < b.signalToNoiseRatio ? 1 : a.signalToNoiseRatio > b.signalToNoiseRatio ? -1 : 0;
+    });
+}
 
-    stats = [];
+function tryToConnectNewDevice() {
+    var i, decisionList, deviceInfo;
+
+    decisionList = [];
     for (i = 0; i < RX_SKIP_FACTOR; i++) {
-        if (rxConnectSignal[i] && rxConnectSignal[i].getSize() > 3) {
-            averageDecibel = 0;
-            for (j = 0; j < rxConnectSignal[i].getSize(); j++) {
-                averageDecibel += rxConnectSignal[i].getItem(j);
-            }
-            averageDecibel /= rxConnectSignal[i].getSize();
-            stats.push({
-                offset: i,
-                averageDecibel: averageDecibel
+        if (rxConnectSignal[i] && rxConnectSignal[i].detail.length > 1) {
+            sortConnectionData(rxConnectSignal[i].detail);
+            decisionList.push({
+                offset: rxConnectSignal[i].offset,
+                correlationValue: rxConnectSignal[i].detail[0].correlationValue,
+                signalDecibel: rxConnectSignal[i].detail[0].signalDecibel,
+                noiseDecibel: rxConnectSignal[i].detail[0].noiseDecibel,
+                signalToNoiseRatio: rxConnectSignal[i].detail[0].signalToNoiseRatio
             });
         }
     }
+    sortConnectionData(decisionList);
+    deviceInfo = decisionList[0];
 
-    htmlLog = '';
-    for (i = 0; i < stats.length; i++) {
-        htmlLog += stats[i].offset + ' ' + stats[i].averageDecibel.toFixed(2) + ' dB<br/>';
-    }
-    html('#rx-log-connect-offset', htmlLog);
-    console.log(stats);
+    html(
+        '#rx-log-connect-offset',
+        'Device connected!<br/>' +
+        '- offset ' + deviceInfo.offset + '<br/>' +
+        '- SNR ' + deviceInfo.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +
+        '- cv ' + deviceInfo.correlationValue
+
+        // offset: 2, correlationValue: 18, signalDecibel: -53.55561235215929, noiseDecibel: -219.78040854136145, signalToNoiseRatio: 166.22479618920215}
+    );
 }
 
-function tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel) {
-    var dataLogicValue, offset, connectSignalPresent, bigEnoughBufferSize;
+function tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel, noiseDecibel) {
+    var dataLogicValue, offset, connectSignalDetected, fullSkipBlockAvailable, i, connectSignalDetectedInSkipBlock;
 
-    bigEnoughBufferSize = 100 * correlator.getCodeLength();
+    offset = rxSampleCount % RX_SKIP_FACTOR;
+    fullSkipBlockAvailable = offset === 0 && rxSampleCount !== 0;
+    if (fullSkipBlockAvailable) {
+        for (i = 0; i < rxConnectSignal.length; i++) {
+            if (rxConnectSignal[i].justLost) {
+                tryToConnectNewDevice();
+                rxConnectSignal.length = 0;        // TODO bad reset, refactor
+                break;
+            }
+        }
+    }
+
+    connectSignalDetectedInSkipBlock = false;
+    for (i = 0; i < rxConnectSignal.length; i++) {
+        if (rxConnectSignal[i].detectedPrevious) {
+            connectSignalDetectedInSkipBlock = true;
+            break;
+        }
+    }
 
     switch (symbol) {
         case SYMBOL_SYNC_A: dataLogicValue = false; break;
         case SYMBOL_SYNC_B: dataLogicValue = true; break;
         default: dataLogicValue = null;
     }
-    correlator.handle(dataLogicValue, signalDecibel);
-    connectSignalPresent = correlator.isCorrelatedHigh();
-    if (connectSignalPresent) {
-        offset = rxSampleCount % RX_SKIP_FACTOR;
-        if (!rxConnectSignal[offset]) {
-            rxConnectSignal[offset] = {
-                offset: offset,
-                signalDecibelBuffer: new Buffer(bigEnoughBufferSize),
-                noiseDecibelBuffer: new Buffer(bigEnoughBufferSize),
-                signalToNoiseRatioBuffer: new Buffer(bigEnoughBufferSize)
-            };
-        }
-        rxConnectSignal[offset].offset = offset;
-        rxConnectSignal[offset].signalDecibelBuffer.pushEvenIfFull(correlator.getSignalDecibelAverage());
-        rxConnectSignal[offset].noiseDecibelBuffer.pushEvenIfFull(correlator.getNoiseDecibelAverage());
-        rxConnectSignal[offset].signalToNoiseRatioBuffer.pushEvenIfFull(correlator.getSignalToNoiseRatio());
+    correlator.handle(dataLogicValue, signalDecibel, noiseDecibel);
+    connectSignalDetected = correlator.isCorrelatedHigh();
+
+    if (!rxConnectSignal[offset]) {
+        rxConnectSignal[offset] = {
+            offset: offset,
+            detail: [],
+            justLost: undefined,
+            detectedPrevious: undefined
+        };
     }
 
-    /*
-    connectSignalJustLost = rxConnectSignalPresentPrevious && !rxConnectSignalPresent;
-    if (connectSignalJustLost) {
-        //tryToConnectNewDevice();
-        rxConnectSignal.length = 0;    // reset
+    if (connectSignalDetected) {
+        rxConnectSignal[offset].detail.push({
+            correlationValue: Math.abs(correlator.getCorrelationValue()),
+            signalDecibel: correlator.getSignalDecibelAverage(),
+            noiseDecibel: correlator.getNoiseDecibelAverage(),
+            signalToNoiseRatio: correlator.getSignalToNoiseRatio()
+        });
     }
-
-    rxConnectSignalPresentPrevious = rxConnectSignalPresent;
-    */
+    rxConnectSignal[offset].justLost = rxConnectSignal[offset].detectedPrevious === true && !connectSignalDetected;
+    rxConnectSignal[offset].detectedPrevious = connectSignalDetected;
 
     html(
         '#rx-log-connect-correlation',
-        'correlation ' + correlator.getCorrelationValue() + '/' + correlator.getCodeLength()
+        (connectSignalDetectedInSkipBlock ? 'Connecting new device...' : '-')
     );
 }
 
@@ -185,7 +210,6 @@ function rxSmartTimerHandler() {
         signalDecibel,
         noiseDecibelSum,
         noiseDecibel,
-        signalToNoiseRatio,
         frequencyDataInner = [],
         i;
 
@@ -210,7 +234,6 @@ function rxSmartTimerHandler() {
     if (frequencyDataInner.length > 1) {
         noiseDecibel = noiseDecibelSum / (frequencyDataInner.length - 1);
     }
-    signalToNoiseRatio = signalDecibel - noiseDecibel;
 
     rxSpectrogram.add(
         frequencyDataInner,
@@ -222,14 +245,13 @@ function rxSmartTimerHandler() {
         rxSampleCount % RX_SKIP_FACTOR === 0
     );
 
-    tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel);
+    tryToDetectConnectSignal(rxSampleCount, symbol, signalDecibel, noiseDecibel);
 
     html('#rx-symbol', symbol);
     html(
         '#rx-symbol-detail',
         fftResult.getFrequency(symbol).toFixed(2) + ' Hz, ' +
-        signalDecibel.toFixed(2) + ' dB, ' +
-        'signalToNoiseFloorDistance: ' + signalToNoiseRatio + ' dB'
+        signalDecibel.toFixed(2) + ' dB'
     );
     html(
         '#rx-log',

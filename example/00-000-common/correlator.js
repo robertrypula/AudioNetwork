@@ -72,7 +72,7 @@ Correlator.prototype.handle = function (dataLogicValue, signalDecibel, noiseDeci
     this.$$signalDecibelBuffer.pushEvenIfFull(
         data === null ? null : signalDecibel
     );
-    this.$$signalDecibelBuffer.pushEvenIfFull(
+    this.$$noiseDecibelBuffer.pushEvenIfFull(
         data === null ? null : noiseDecibel
     );
     this.$$cacheCorrelactionValue = undefined;
@@ -92,8 +92,8 @@ Correlator.prototype.isCorrelatedHigh = function () {
     var correlation = this.getCorrelation();
 
     return (
-        correlation === Correlator.CORRELATION_RANK_NEGATIVE_HIGH ||
-        correlation === Correlator.CORRELATION_RANK_POSITIVE_HIGH
+        correlation === Correlator.CORRELATION_NEGATIVE_HIGH ||
+        correlation === Correlator.CORRELATION_POSITIVE_HIGH
     );
 };
 
@@ -183,7 +183,7 @@ Correlator.prototype.getCorrelationValue = function () {
     }
 
     result = 0;
-    enoughData = this.$$dataBuffer.getSize() === this.$$skipFactor * this.getCodeLength();
+    enoughData = this.$$dataBuffer.isFull();
     if (enoughData) {
         for (i = 0; i < this.getCodeLength(); i++) {
             data = this.$$dataBuffer.getItem(i * this.$$skipFactor);
