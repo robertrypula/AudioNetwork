@@ -58,12 +58,12 @@
                 <div class="col col-xs-12">
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label for="loopback-checkbox" class="label-for-checkbox">
                                 Loopback
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
@@ -76,21 +76,21 @@
                     <h2>r</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9" id="rx-sample-rate"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="rx-sample-rate"></div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label for="rx-active" class="label-for-checkbox">
-                                Active
+                                Spectrogram
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 id="rx-active"
@@ -100,12 +100,12 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label for="loudest-marker" class="label-for-checkbox">
-                                Show loudest
+                                Mark loudest
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <input
                                 type="checkbox"
                                 id="loudest-marker"
@@ -115,37 +115,49 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Symbol
+                                Bandwidth
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="rx-log" class="log-container"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 Connection status
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="rx-log-connect-correlation" class="margin-bottom"></div>
-                            <div id="rx-log-connect-offset"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-log-connect" class="log-container"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                RX symbol
+                                Symbol raw
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="rx-symbol" class="margin-bottom"></div>
                             <div id="rx-symbol-detail" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Symbol synchronized
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-symbol-synchronized" class="margin-bottom"></div>
+                            <div id="rx-symbol-synchronized-detail" class="margin-bottom log-container"></div>
+                            <div id="rx-symbol-list"></div>
                         </div>
                     </div>
 
@@ -160,12 +172,12 @@
                     <h2>t</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
                                 TX symbol
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <button class="btn btn-default" onClick="txConnect(44100)">Connect (44.1 kHz)</button>
                             <button class="btn btn-default" onClick="txConnect(48000)">Connect (48.0 kHz)</button>
                             <br/>
@@ -184,23 +196,23 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                TX symbol queue
+                                Symbol queue
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="tx-symbol-queue"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
                                 Sample rate
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
                             <span>
                                 This value should match sample rate that is displayed on the receiver's side.

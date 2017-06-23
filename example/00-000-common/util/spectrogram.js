@@ -76,7 +76,7 @@ Spectrogram.prototype.forceClearInNextAdd = function () {
     this.$$lastDataLength = null;
 };
 
-Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue, isSampleToStore) {
+Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResolutionValue, isSymbolSamplingPoint) {
     var i, lastRow, legend, marker;
 
     if (this.$$lastDataLength !== data.length) {
@@ -106,19 +106,19 @@ Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResoluti
         this.$$rowCountVisible--;
     }
 
-    this.$$add(data, loudestIndex, isSampleToStore);
+    this.$$add(data, loudestIndex, isSymbolSamplingPoint);
     this.$$rowCountVisible++;
     this.$$rowCountTotal++;
 };
 
-Spectrogram.prototype.$$add = function (data, loudestIndex, isSampleToStore) {
+Spectrogram.prototype.$$add = function (data, loudestIndex, isSymbolSamplingPoint) {
     var i, html, divRow, title, decibelForColor, color, secondRow, isDataRow;
 
-    isDataRow = typeof loudestIndex !== 'undefined' && typeof isSampleToStore !== 'undefined';
+    isDataRow = typeof loudestIndex !== 'undefined' && typeof isSymbolSamplingPoint !== 'undefined';
 
     html = '';
     if (isDataRow) {
-        decibelForColor = isSampleToStore ? -35 : -100;
+        decibelForColor = isSymbolSamplingPoint ? -35 : -100;
         color = Spectrogram.getColor(decibelForColor);
         title = 'title="sample #' + this.$$rowCountTotal + '"';
     } else {
@@ -130,12 +130,18 @@ Spectrogram.prototype.$$add = function (data, loudestIndex, isSampleToStore) {
 
     for (i = 0; i < data.length; i++) {
         color = Spectrogram.getColor(data[i]);
-        html += '<div class="s-cell ' + (loudestIndex === i ? 'mark' : '') + '" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
+        html += '<div class="s-cell ' + (loudestIndex === i && isSymbolSamplingPoint ? 'mark' : '') + '" title="' + data[i].toFixed(1) + ' dB" style="background-color: ' + color + '">';
         html += '</div>';
     }
 
     divRow = document.createElement('div');
     divRow.className = 's-row';
+    /*
+    if (isDataRow && !isSymbolSamplingPoint) {
+        divRow.style = 'opacity: 0.8';
+    }
+    */
+
     divRow.innerHTML = html;
 
     secondRow = document.querySelectorAll('#' + this.$$id + ' .s-row:nth-child(2)')[0];

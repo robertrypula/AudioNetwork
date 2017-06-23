@@ -18,8 +18,7 @@ Correlator = function (skipFactor, code) {
     this.setSkipFactor(skipFactor);
 };
 
-Correlator.BARKER_CODE_11 = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1];
-Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
+Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
 
 Correlator.CORRELATION_POSITIVE_HIGH = 'CORRELATION_POSITIVE_HIGH';
 Correlator.CORRELATION_POSITIVE_LOW = 'CORRELATION_POSITIVE_LOW';
@@ -27,7 +26,7 @@ Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
 Correlator.CORRELATION_NEGATIVE_LOW = 'CORRELATION_NEGATIVE_LOW';
 Correlator.CORRELATION_NEGATIVE_HIGH = 'CORRELATION_NEGATIVE_HIGH';
 
-Correlator.THRESHOLD_HIGH = 0.85;
+Correlator.THRESHOLD_HIGH = 0.8;
 Correlator.THRESHOLD_LOW = 0.5;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
@@ -42,6 +41,10 @@ Correlator.prototype.getCodeValue = function (position) {
     }
 
     return this.$$code[position];
+};
+
+Correlator.prototype.reset = function () {
+    this.setSkipFactor(this.$$skipFactor);     // setting skip factor is like reset
 };
 
 Correlator.prototype.setSkipFactor = function (skipFactor) {
