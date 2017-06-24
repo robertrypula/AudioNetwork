@@ -230,6 +230,7 @@ function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, nois
                 '- threshold ' + rxSignalThresholdDecibel.toFixed() + 'dB'
                 // offset: 2, correlationValue: 18, signalDecibel: -53.55561235215929, noiseDecibel: -219.78040854136145, signalToNoiseRatio: 166.22479618920215}
             );
+            console.log(connectionDetail);
         } else {
             html('#rx-log-connect', 'not connected');
         }

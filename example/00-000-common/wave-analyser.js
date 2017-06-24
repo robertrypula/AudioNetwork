@@ -13,7 +13,7 @@ WaveAnalyser = function (samplePerPeriod, windowSize, windowFunction) {
     this.$$firstSampleOfBufferNumber = null;
     this.setSamplePerPeriod(samplePerPeriod);
     this.$$sampleBuffer = new Buffer(windowSize);
-    this.$$windowFunction = windowFunction;
+    this.$$windowFunction = !!windowFunction;
     this.$$frequencyBin = null;
 };
 
