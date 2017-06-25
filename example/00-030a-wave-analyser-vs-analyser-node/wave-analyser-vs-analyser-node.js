@@ -34,6 +34,42 @@ function init() {
     );
 }
 
+function checkWaveAnalyserPerformance() {
+    var
+        dummySamplePerPeriod,
+        windowSize,
+        windowFunction,
+        waveAnalyser,
+        i,
+        timeDomainData = [],
+        start,
+        end,
+        time,
+        subcarriersPerSecond;
+
+    for (i = 0; i < audioMonoIO.getSampleRate(); i++) {
+        timeDomainData.push(-1 + 2 * Math.random());
+    }
+
+    dummySamplePerPeriod = 1;     // just for initialization
+    windowSize = timeDomainData.length;
+    windowFunction = true;
+    waveAnalyser = new WaveAnalyser(dummySamplePerPeriod, windowSize, windowFunction);
+
+    start = new Date().getTime();
+    for (i = 0; i < windowSize; i++) {
+        waveAnalyser.handle(timeDomainData[i]);
+    }
+    end = new Date().getTime();
+    time = end - start;
+
+    subcarriersPerSecond = 1000 / time;    // time domain data is exactly 1 second (length is equal to sampleRate)
+
+    alert(
+        'One subcarrier execution time: ' + time + ' ms\nMax realtime subcarries: ' + subcarriersPerSecond.toFixed(0)
+    );
+}
+
 function compareWithAnalyserNode() {
     var
         timeDomainData = audioMonoIO.getTimeDomainData(),

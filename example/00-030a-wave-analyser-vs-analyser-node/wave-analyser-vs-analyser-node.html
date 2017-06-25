@@ -58,16 +58,18 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to compare AnalyserNode and WaveAnaluser output
+                                This example allows to compare AnalyserNode and WaveAnalyser output and check overall performance of WaveAnaluser class.
                             </p>
                         </div>
                     </div>
 
                     <div class="row margin-bottom">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
+                            Actions
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="compareWithAnalyserNode()" class="btn btn-default">Compare!</button>
+                            <button onClick="checkWaveAnalyserPerformance()" class="btn btn-default">Check WaveAnalyser performance on 1 second of audio</button>
+                            <button onClick="compareWithAnalyserNode()" class="btn btn-default">Compare AnaluserNode and WaveAnalyser</button>
                         </div>
                     </div>
 
@@ -76,12 +78,12 @@
                         <canvas id="canvas-time-domain"></canvas>
                     </div>
 
-                    <h2>Frequency domain (AnalyserNode)</h2>
+                    <h2>Frequency domain (AnalyserNode from WebAudio API)</h2>
                     <div class="scroll-container margin-bottom">
                         <canvas id="canvas-analyser-node"></canvas>
                     </div>
 
-                    <h2>Frequency domain (WaveAnalyser)</h2>
+                    <h2>Frequency domain (WaveAnalyser, our own class)</h2>
                     <div class="scroll-container margin-bottom">
                         <canvas id="canvas-wave-analyser"></canvas>
                     </div>
