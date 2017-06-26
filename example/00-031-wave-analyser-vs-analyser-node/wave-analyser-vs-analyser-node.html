@@ -63,27 +63,48 @@
                         </div>
                     </div>
 
+                    <h2>WaveAnalyser performance</h2>
+
                     <div class="row margin-bottom">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             Actions
                         </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="checkWaveAnalyserPerformance()" class="btn btn-default">Check WaveAnalyser performance on 1 second of audio</button>
-                            <button onClick="compareWithAnalyserNode()" class="btn btn-default">Compare AnaluserNode and WaveAnalyser</button>
+                        <div class="col col-xs-7 col-sm-7 col-md-6">
+                            <button onClick="checkWaveAnalyserPerformance()" class="btn btn-default">Run test</button>
                         </div>
                     </div>
 
-                    <h2>Time domain (taken from AnalyserNode)</h2>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            Log
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-6">
+                            <div id="log-performance"></div>
+                        </div>
+                    </div>
+
+                    <h2>AnalyserNode and WaveAnalyser output comparison</h2>
+
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            Actions
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-6">
+                            <button onClick="compareWithAnalyserNode()" class="btn btn-default">Compare!</button>
+                        </div>
+                    </div>
+
+                    <h3>Time domain (taken from AnalyserNode)</h3>
                     <div class="scroll-container">
                         <canvas id="canvas-time-domain"></canvas>
                     </div>
 
-                    <h2>Frequency domain (AnalyserNode from WebAudio API)</h2>
+                    <h3>Frequency domain (AnalyserNode from WebAudio API)</h3>
                     <div class="scroll-container margin-bottom">
                         <canvas id="canvas-analyser-node"></canvas>
                     </div>
 
-                    <h2>Frequency domain (WaveAnalyser, our own class)</h2>
+                    <h3>Frequency domain (WaveAnalyser, our own class)</h3>
                     <div class="scroll-container margin-bottom">
                         <canvas id="canvas-wave-analyser"></canvas>
                     </div>
