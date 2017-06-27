@@ -2,7 +2,8 @@
 'use strict';
 
 var
-    BASE_TIME_MS = 250,   // 500 or 166
+    BASE_TIME_MS = 200,   // 500 or 166
+    SAMPLE_PER_SYBMOL = 3,
     FFT_SIZE = 4 * 1024,
     FFT_FREQUENCY_BIN_SKIP_FACTOR = 5,
 
@@ -11,14 +12,8 @@ var
     SYMBOL_SYNC_A = 108,
     SYMBOL_SYNC_B = 109,
 
-    SYMBOL_WIDTH = 2,
-    SYMBOL_VOID_AMOUNT = 0,      // TODO nulls not working well... just for testing
-
-    RX_SAMPLING_BLOCK_SIZE = SYMBOL_WIDTH * (SYMBOL_VOID_AMOUNT + 1),
-    RX_TIME_MS = BASE_TIME_MS,
-    TX_TIME_MS = BASE_TIME_MS * SYMBOL_WIDTH,
     TX_SAMPLE_RATE = 48000,
-    TX_AMPLITUDE = 0.01,
+    TX_AMPLITUDE = 0.1,
 
     audioMonoIO,
 
@@ -34,22 +29,23 @@ var
     rxSmartTimer,
     txSmartTimer,
     txSampleRate,
-    txSymbol,
+    txSampleNumber = 0,
+    txCurrentSymbol = null,
     txSymbolQueue = [];
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
-    correlator = new Correlator(RX_SAMPLING_BLOCK_SIZE);
+    correlator = new Correlator(SAMPLE_PER_SYBMOL);
     document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
-    rxSmartTimer = new SmartTimer(RX_TIME_MS / 1000);
+    rxSmartTimer = new SmartTimer(BASE_TIME_MS / 1000);
     rxSmartTimer.setHandler(rxSmartTimerHandler);
 
     setTimeout(function () {
-        txSmartTimer = new SmartTimer(TX_TIME_MS / 1000);
+        txSmartTimer = new SmartTimer(BASE_TIME_MS / 1000);
         txSmartTimer.setHandler(txSmartTimerHandler);
     }, 250);
 
@@ -86,16 +82,19 @@ function initFloatWidget() {
     );
 }
 
-function setTxSound(symbol) {
+function setTxSound(symbol, edge) {
     var frequency;
 
     if (!symbol) {
-        audioMonoIO.setPeriodicWave(0);
+        audioMonoIO.setPeriodicWave(undefined, 0);
         return;
     }
 
     frequency = FFT_FREQUENCY_BIN_SKIP_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
-    audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
+    audioMonoIO.setPeriodicWave(
+        frequency,
+        (edge ? 0.1 : 1) * TX_AMPLITUDE
+    );
 }
 
 function refreshTxSymbolQueue() {
@@ -109,12 +108,6 @@ function refreshRxSymbolList() {
 // ----------------------
 
 function addToTxQueue(symbol) {
-    var i;
-
-    for (i = 0; i < SYMBOL_VOID_AMOUNT; i++) {
-        txSymbolQueue.push(null);   // TODO remove that in the future
-    }
-
     txSymbolQueue.push(symbol);
 }
 
@@ -142,17 +135,17 @@ function sortConnectionDetail(data) {
     data.sort(function (a, b) {
         return 0 ||
             a.correlationValue < b.correlationValue ? 1 : a.correlationValue > b.correlationValue ? -1 : 0 ||
-            a.signalToNoiseRatio < b.signalToNoiseRatio ? 1 : a.signalToNoiseRatio > b.signalToNoiseRatio ? -1 : 0;
+            a.signalDecibel < b.signalDecibel ? 1 : a.signalDecibel > b.signalDecibel ? -1 : 0;
     });
 }
 
 function findStrongestConnectionDetail() {
     var offset, decisionList, innerDecisionList;
 
+    // console.log(rxSamplingBlock.slice(0));
     decisionList = [];
-    for (offset = 0; offset < RX_SAMPLING_BLOCK_SIZE; offset++) {
+    for (offset = 0; offset < SAMPLE_PER_SYBMOL; offset++) {
         innerDecisionList = rxSamplingBlock[offset].decisionList;
-        console.log(offset, innerDecisionList.length);
         if (innerDecisionList.length > 0) {
             sortConnectionDetail(innerDecisionList);
             decisionList.push(innerDecisionList[0]);
@@ -160,14 +153,16 @@ function findStrongestConnectionDetail() {
     }
     
     sortConnectionDetail(decisionList);
+
     connectionDetail = decisionList[0];
+
 }
 
 function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, noiseDecibel) {
     var dataLogicValue, offset, connectSignalDetected, lastConnectSignalDetected, isLastOffsetInSamplingBlock;
 
-    offset = rxSampleNumber % RX_SAMPLING_BLOCK_SIZE;
-    isLastOffsetInSamplingBlock = offset === (RX_SAMPLING_BLOCK_SIZE - 1);
+    offset = rxSampleNumber % SAMPLE_PER_SYBMOL;
+    isLastOffsetInSamplingBlock = offset === (SAMPLE_PER_SYBMOL - 1);
 
     switch (symbolRaw) {
         case SYMBOL_SYNC_A: dataLogicValue = false; break;
@@ -189,6 +184,7 @@ function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, nois
         rxSamplingBlock[offset].decisionList.push({
             offset: offset,
             correlationValue: Math.abs(correlator.getCorrelationValue()),
+            signalDecibel: correlator.getSignalDecibelAverage(),
             noiseDecibel: correlator.getNoiseDecibelAverage(),
             signalToNoiseRatio: correlator.getSignalToNoiseRatio()
         });
@@ -201,7 +197,7 @@ function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, nois
         for (offset = 0; offset < rxSamplingBlock.length; offset++) {
             if (rxSamplingBlock[offset].connectSignalJustLost === true) {
                 findStrongestConnectionDetail();
-                rxSignalThresholdDecibel = connectionDetail.noiseDecibel + 0.5 * connectionDetail.signalToNoiseRatio;
+                rxSignalThresholdDecibel = connectionDetail.noiseDecibel + 0.3 * connectionDetail.signalToNoiseRatio;
                 rxSamplingBlock.length = 0;        // TODO bad reset, refactor
                 correlator.reset();
                 break;
@@ -230,7 +226,7 @@ function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, nois
                 '- threshold ' + rxSignalThresholdDecibel.toFixed() + 'dB'
                 // offset: 2, correlationValue: 18, signalDecibel: -53.55561235215929, noiseDecibel: -219.78040854136145, signalToNoiseRatio: 166.22479618920215}
             );
-            console.log(connectionDetail);
+            //console.log(connectionDetail);
         } else {
             html('#rx-log-connect', 'not connected');
         }
@@ -241,7 +237,7 @@ function tryToDetectConnectSignal(rxSampleNumber, symbolRaw, signalDecibel, nois
 
 function rxSmartTimerHandler() {
     var
-        offset = rxSampleNumber % RX_SAMPLING_BLOCK_SIZE,
+        offset = rxSampleNumber % SAMPLE_PER_SYBMOL,
         frequencyData,
         fftResult,
         symbol,
@@ -275,11 +271,11 @@ function rxSmartTimerHandler() {
     tryToDetectConnectSignal(rxSampleNumber, symbol, signalDecibel, noiseDecibel);
 
     isSymbolSamplingPoint = connectionDetail
-        ? rxSampleNumber % RX_SAMPLING_BLOCK_SIZE === connectionDetail.offset
+        ? rxSampleNumber % SAMPLE_PER_SYBMOL === connectionDetail.offset
         : false;
     isSynchronizedSymbol = isSymbolSamplingPoint && (signalDecibel > rxSignalThresholdDecibel);
 
-    console.log(isSynchronizedSymbol);
+    //console.log(isSynchronizedSymbol);
 
     if (document.getElementById('rx-active').checked) {
         rxSpectrogram.add(
@@ -299,7 +295,7 @@ function rxSmartTimerHandler() {
                 // html('#rx-symbol-synchronized-detail', signalQualityDecibel);
                 rxSymbolList.push(symbol);
 
-                console.log(rxSampleNumber, offset, symbol);
+                //console.log(rxSampleNumber, offset, symbol);
                 refreshRxSymbolList();
             } else {
                 html('#rx-symbol-synchronized', 'idle');
@@ -328,8 +324,22 @@ function rxSmartTimerHandler() {
 }
 
 function txSmartTimerHandler() {
-    var symbol = txSymbolQueue.shift();
+    var
+        offset = txSampleNumber % SAMPLE_PER_SYBMOL,
+        edge;
 
-    setTxSound(symbol);
+    if (offset === 0) {
+        txCurrentSymbol = txSymbolQueue.shift();
+    }
+
+    if (SAMPLE_PER_SYBMOL > 2) {
+        edge = (offset === 0) || (offset === (SAMPLE_PER_SYBMOL - 1));
+    } else {
+        edge = false;
+    }
+
+    setTxSound(txCurrentSymbol, edge);
     refreshTxSymbolQueue();
+
+    txSampleNumber++;
 }
