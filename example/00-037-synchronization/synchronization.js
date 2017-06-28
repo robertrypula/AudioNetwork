@@ -216,7 +216,7 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
                 '- noise ' + cd.noiseDecibel.toFixed(2) + ' dB' + '<br/>' +
                 '- SNR ' + cd.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +
                 '- correlation ' + cd.correlationValue + '/' + cd.correlationValueMax + '<br/>' +
-                '- threshold ' + cd.signalThresholdDecibel.toFixed() + 'dB'
+                '- threshold ' + cd.signalThresholdDecibel.toFixed() + ' dB'
             );
             //console.log(connectionDetail);
         } else {
@@ -240,7 +240,7 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
         if (isSymbolSamplingPoint) {
             if (isSynchronizedSymbol) {
                 signalQualityDecibel = Math.round(signalDecibel - connectSignalDetector.getConnectionDetail().signalThresholdDecibel);
-                html('#rx-symbol-synchronized', symbol + ' (' + signalQualityDecibel + ' dB)');
+                html('#rx-symbol-synchronized', symbol + ' (' + signalDecibel.toFixed(2) + ' dB)');
                 refreshRxSymbolList();
             } else {
                 html('#rx-symbol-synchronized', 'idle');

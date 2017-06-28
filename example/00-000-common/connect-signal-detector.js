@@ -33,7 +33,7 @@ ConnectSignalDetector.prototype.$$sortConnectionDetail = function (data) {
 ConnectSignalDetector.prototype.$$findStrongestConnectionDetail = function () {
     var offset, decisionList, innerDecisionList;
 
-    if (JSON) {
+    if (false && JSON) {
         console.log(
             JSON.stringify(
                 this.$$samplingBlock,
@@ -56,7 +56,7 @@ ConnectSignalDetector.prototype.$$findStrongestConnectionDetail = function () {
 
     this.$$connectionDetail = decisionList[0];
 
-    if (JSON) {
+    if (false && JSON) {
         console.log(
             JSON.stringify(
                 this.$$connectionDetail,
@@ -126,3 +126,55 @@ ConnectSignalDetector.prototype.handle = function (sampleNumber, dataLogicValue,
         }
     }
 };
+
+/*
+var t = new ConnectSignalDetector(3, 0.2);
+
+t.handle(0, null, -20, -100);
+t.handle(1, true, -20, -100);
+t.handle(2, true, -10, -100);
+
+t.handle(3, null, -20, -100);
+t.handle(4, false, -20, -100);
+t.handle(5, false, -10, -100);
+
+t.handle(6, null, -20, -100);
+t.handle(7, true, -20, -100);
+t.handle(8, true, -10, -100);
+
+t.handle(9, null, -20, -100);
+t.handle(10, false, -20, -100);
+t.handle(11, false, -10, -100);
+
+t.handle(12, null, -20, -100);
+t.handle(13, true, -20, -100);
+t.handle(14, true, -10, -100);
+
+t.handle(15, null, -20, -100);
+t.handle(16, false, -20, -100);
+t.handle(17, false, -10, -100);
+
+t.handle(18, null, -20, -100);
+t.handle(19, true, -20, -100);
+t.handle(20, true, -10, -100);
+
+t.handle(21, null, -20, -100);
+t.handle(22, false, -20, -100);
+t.handle(23, false, -10, -100);
+
+t.handle(24, null, -20, -100);
+t.handle(25, true, -20, -100);
+t.handle(26, true, -10, -100);
+
+t.handle(27, null, -20, -100);
+t.handle(28, false, -20, -100);
+console.log(t, t.$$correlator.getCorrelationValue(), t.isConnected() ? JSON.stringify(t.getConnectionDetail(), true, 2) : '');
+t.handle(29, false, -10, -100);
+console.log(t, t.$$correlator.getCorrelationValue(), t.isConnected() ? JSON.stringify(t.getConnectionDetail(), true, 2) : '');
+
+t.handle(30, null, -20, -100);
+t.handle(31, null, -20, -100);
+console.log(t, t.$$correlator.getCorrelationValue(), t.isConnected() ? JSON.stringify(t.getConnectionDetail(), true, 2) : '');
+t.handle(32, false, -10, -100);
+console.log(t, t.$$correlator.getCorrelationValue(), t.isConnected() ? JSON.stringify(t.getConnectionDetail(), true, 2) : '');
+*/

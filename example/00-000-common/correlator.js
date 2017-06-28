@@ -48,6 +48,8 @@ Correlator.prototype.reset = function () {
 };
 
 Correlator.prototype.setSkipFactor = function (skipFactor) {
+    var i;
+
     skipFactor = skipFactor || 1;
 
     this.$$skipFactor = skipFactor;
@@ -57,6 +59,12 @@ Correlator.prototype.setSkipFactor = function (skipFactor) {
     this.$$cacheCorrelactionValue = undefined;
     this.$$cacheSignalDecibelAverage = undefined;
     this.$$cacheNoiseDecibelAverage = undefined;
+
+    for (i = 0; i < this.getCodeLength() * this.$$skipFactor; i++) {
+        this.$$dataBuffer.pushEvenIfFull(null);
+        this.$$signalDecibelBuffer.pushEvenIfFull(null);
+        this.$$noiseDecibelBuffer.pushEvenIfFull(null);
+    }
 };
 
 Correlator.prototype.handle = function (dataLogicValue, signalDecibel, noiseDecibel) {
@@ -126,18 +134,17 @@ Correlator.prototype.getCorrelation = function () {
 };
 
 Correlator.prototype.$$getAverage = function (buffer) {
-    var enoughData, i, value, sum, sumLength, average;
+    var i, offset, bufferIndex, value, sum, sumLength, average;
 
     sum = 0;
     sumLength = 0;
-    enoughData = buffer.getSize() === this.$$skipFactor * this.getCodeLength();
-    if (enoughData) {
-        for (i = 0; i < this.getCodeLength(); i++) {
-            value = buffer.getItem(i * this.$$skipFactor);
-            if (value !== null) {
-                sum += value;
-                sumLength++;
-            }
+    offset = this.$$skipFactor - 1;
+    for (i = 0; i < this.getCodeLength(); i++) {
+        bufferIndex = i * this.$$skipFactor + offset;
+        value = buffer.getItem(bufferIndex);
+        if (value !== null) {
+            sum += value;
+            sumLength++;
         }
     }
 
@@ -179,23 +186,23 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
 };
 
 Correlator.prototype.getCorrelationValue = function () {
-    var enoughData, i, data, code, result;
+    var i, offset, bufferIndex, data, code, result;
 
     if (this.$$cacheCorrelactionValue !== undefined) {
         return this.$$cacheCorrelactionValue;
     }
 
     result = 0;
-    enoughData = this.$$dataBuffer.isFull();
-    if (enoughData) {
-        for (i = 0; i < this.getCodeLength(); i++) {
-            data = this.$$dataBuffer.getItem(i * this.$$skipFactor);
-            if (data !== null) {
-                code = this.getCodeValue(i);
-                result += data * code;
-            }
+    offset = this.$$skipFactor - 1;
+    for (i = 0; i < this.getCodeLength(); i++) {
+        bufferIndex = i * this.$$skipFactor + offset;
+        data = this.$$dataBuffer.getItem(bufferIndex);
+        if (data !== null) {
+            code = this.getCodeValue(i);
+            result += data * code;
         }
     }
+
     this.$$cacheCorrelactionValue = result;
 
     return result;
