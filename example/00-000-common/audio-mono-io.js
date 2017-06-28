@@ -57,7 +57,7 @@ AudioMonoIO.FFT_SIZE = 2 * 1024;
 AudioMonoIO.BUFFER_SIZE = 4 * 1024;
 AudioMonoIO.SMOOTHING_TIME_CONSTANT = 0;
 
-AudioMonoIO.ALMOST_IMMEDIATELLY_UNIT_TIME = 0.015;
+AudioMonoIO.START_TIME_NEEDS_TO_GREATER_THAN_END_TIME_EXCEPTION = 'Start time needs to greater than end time';
 
 AudioMonoIO.prototype.$$normalizeBrowserApi = function () {
     if (AudioMonoIO.$$firstInstance) {
@@ -247,14 +247,17 @@ AudioMonoIO.prototype.$$onAudioProcessHandler = function (audioProcessingEvent) 
     }
 };
 
-AudioMonoIO.prototype.$$setAlmostImmediately = function (audioParam, value, relativeEndTime) {
+AudioMonoIO.prototype.$$setLinearly = function (audioParam, value, relativeStartTime, relativeEndTime) {
     var now = this.$$audioContext.currentTime;
 
-    relativeEndTime = AudioMonoIO.$$getValueOrDefault(relativeEndTime, 0);
-    audioParam.setTargetAtTime(
+    if (relativeStartTime >= relativeEndTime) {
+        throw AudioMonoIO.START_TIME_NEEDS_TO_GREATER_THAN_END_TIME_EXCEPTION;
+    }
+
+    audioParam.setValueAtTime(audioParam.value, now + relativeStartTime);
+    audioParam.linearRampToValueAtTime(
         value,
-        now + relativeEndTime,
-        AudioMonoIO.ALMOST_IMMEDIATELLY_UNIT_TIME
+        now + relativeEndTime
     );
 };
 
@@ -291,6 +294,10 @@ AudioMonoIO.prototype.setLoopback = function (state) {
     return true;
 };
 
+AudioMonoIO.prototype.setPeriodicWaveFading = function (value, relativeStartTime, relativeEndTime) {
+    this.$$setLinearly(this.$$outOscillatorGain.gain, value, relativeStartTime, relativeEndTime);
+};
+
 AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
     var periodicWave, isPureSine;
 
@@ -305,25 +312,12 @@ AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harm
         volume, AudioMonoIO.$$_OUTPUT_WAVE_VOLUME
     );
 
-    this.$$setImmediately(this.$$outOscillatorGain.gain, volume);
+    if (volume !== null || volume !== undefined) {
+        this.$$setImmediately(this.$$outOscillatorGain.gain, volume);
+    }
     if (frequency !== null || frequency !== undefined) {
         this.$$setImmediately(this.$$outOscillator.frequency, frequency);
     }
-
-    /*
-    this.$$setAlmostImmediately(
-        this.$$outOscillatorGain.gain, 0
-    );
-    if (frequency !== null || frequency !== undefined) {
-        this.$$setAlmostImmediately(
-            this.$$outOscillator.frequency, frequency, AudioMonoIO.ALMOST_IMMEDIATELLY_UNIT_TIME
-        );
-    }
-    this.$$setAlmostImmediately(
-        this.$$outOscillatorGain.gain, volume, 2 * AudioMonoIO.ALMOST_IMMEDIATELLY_UNIT_TIME
-    );
-    */
-
 
     if (isPureSine) {
         this.$$outOscillator.type = 'sine';
