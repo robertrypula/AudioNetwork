@@ -3,6 +3,8 @@
 
 var FFTResult;
 
+// TODO add ranges check
+
 FFTResult = function (fftData, sampleRate) {
     this.$$fftData = fftData;
     this.$$sampleRate = sampleRate;
@@ -12,6 +14,8 @@ FFTResult.$$_FREQUENCY_BIN_INDEX_ZERO = 0;
 FFTResult.$$_FREQUENCY_BIN_INDEX_FIRST = 1;
 FFTResult.$$_EQUAL_EPSILON = 0.001;
 FFTResult.$$_HALF = 0.5;
+
+FFTResult.VALUES_OUT_OF_RANGE = 'Values out of range';
 
 FFTResult.prototype.downconvert = function (exponent) {
     var factor = Math.pow(2, exponent);
@@ -53,7 +57,7 @@ FFTResult.prototype.getLoudestBinIndexInBinRange = function (binIndexStart, binI
     var frequencyBinCount = FFTResult.$$_HALF * this.getFFTSize();
 
     if (binIndexStart < 0 || binIndexEnd >= frequencyBinCount) {
-        throw 'FrequencyBinIndex out of range';
+        throw FFTResult.VALUES_OUT_OF_RANGE;
     }
 
     return FFTResult.$$findMaxIndexInRange(
@@ -64,7 +68,8 @@ FFTResult.prototype.getLoudestBinIndexInBinRange = function (binIndexStart, binI
 };
 
 FFTResult.prototype.getLoudestFrequency = function (frequencyStart, frequencyEnd) {
-    var loudestBinIndex = this.$$getLoudestBinIndexInRange(
+    var
+        loudestBinIndex = this.$$getLoudestBinIndexInRange(
         frequencyStart,
         frequencyEnd
     );
@@ -77,12 +82,61 @@ FFTResult.prototype.getLoudestFrequency = function (frequencyStart, frequencyEnd
 };
 
 FFTResult.prototype.getLoudestDecibel = function (frequencyStart, frequencyEnd) {
-    var loudestBinIndex = this.$$getLoudestBinIndexInRange(
+    var
+        loudestBinIndex = this.$$getLoudestBinIndexInRange(
         frequencyStart,
         frequencyEnd
     );
 
     return this.$$fftData[loudestBinIndex];
+};
+
+FFTResult.prototype.getDecibelAverage = function (binIndexStart, binIndexEnd, binIndexExcluded) {
+    var
+        frequencyBinCount = FFTResult.$$_HALF * this.getFFTSize(),
+        itemNumber,
+        sum,
+        average,
+        i;
+
+    if (binIndexStart < 0 || binIndexEnd >= frequencyBinCount) {
+        throw FFTResult.VALUES_OUT_OF_RANGE;
+    }
+
+    itemNumber = 0;
+    sum = 0;
+    for (i = binIndexStart; i <= binIndexEnd; i++) {
+        if (typeof binIndexExcluded === 'undefined' || i !== binIndexExcluded) {
+            sum += this.getDecibel(i);
+            itemNumber++;
+        }
+    }
+
+    average = 0;
+    if (itemNumber > 0) {
+        average = sum / itemNumber;
+    }
+
+    return average;
+};
+
+FFTResult.prototype.getDecibelRange = function (binIndexStart, binIndexEnd) {
+    var
+        frequencyBinCount = FFTResult.$$_HALF * this.getFFTSize(),
+        result = [],
+        i;
+
+    if (binIndexStart < 0 || binIndexEnd >= frequencyBinCount) {
+        throw FFTResult.VALUES_OUT_OF_RANGE;
+    }
+
+    for (i = binIndexStart; i <= binIndexEnd; i++) {
+        result.push(
+            this.getDecibel(i)
+        );
+    }
+
+    return result;
 };
 
 FFTResult.prototype.getDecibel = function (frequencyBinIndex) {
@@ -241,7 +295,7 @@ FFTResult.getFrequency = function (frequencyBinIndex, sampleRate, fftSize) {
     var frequencyBinCount = FFTResult.$$_HALF * fftSize;
 
     if (frequencyBinIndex < 0 || frequencyBinIndex >= frequencyBinCount) {
-        throw 'FrequencyBinIndex out of range';
+        throw FFTResult.VALUES_OUT_OF_RANGE;
     }
 
     return frequencyBinIndex * sampleRate / fftSize;
@@ -253,7 +307,7 @@ FFTResult.getBinIndex = function (frequency, sampleRate, fftSize) {
         frequencyBinCount = FFTResult.$$_HALF * fftSize;
 
     if (frequencyBinIndex < 0 || frequencyBinIndex >= frequencyBinCount) {
-        throw 'FrequencyBinIndex out of range';
+        throw FFTResult.VALUES_OUT_OF_RANGE;
     }
 
     return frequencyBinIndex;

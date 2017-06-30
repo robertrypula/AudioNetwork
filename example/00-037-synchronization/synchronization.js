@@ -2,21 +2,37 @@
 'use strict';
 
 var
-    SAMPLE_TIME_MS = 333,   // 500 or 166
+    SAMPLE_TIME_MS = 250,   // 500 or 166
     SAMPLE_PER_SYMBOL = 3,
     FFT_SIZE = 8 * 1024,
-    FFT_FREQUENCY_BIN_SKIP_FACTOR = 5,
+    FFT_FREQUENCY_BIN_SKIP_FACTOR = 3,
 
     SYMBOL_MIN = 93,
     SYMBOL_MAX = 117,
     SYMBOL_SYNC_A = 108,
     SYMBOL_SYNC_B = 109,
 
+    /*
+    48.0 kHz -> skipping 5 -> 29.296875 Hz      - 7 617 Hz
+    44.1 kHz -> skipping 5 -> 26.91650390625 Hz - 6 998 Hz
+
+    48.0 kHz -> skipping 3 -> 17.578125 Hz      - 4 570 Hz
+    44.1 kHz -> skipping 3 -> 16.14990234375 Hz - 4 199 Hz
+     */
+
     TX_SAMPLE_RATE_DEFAULT = 48000,
     TX_AMPLITUDE = 0.1,
-    RX_SIGNAL_THRESHOLD_FACTOR = 0.3,
+    RX_SIGNAL_THRESHOLD_FACTOR = 0.85,
 
     audioMonoIO,
+    smartTimer,
+
+    txOffset,
+    rxOffset,
+    symbol,
+    signalDecibel,
+    noiseDecibel,
+    frequencyDataReceiveBand,
 
     connectSignalDetector,
     isSymbolSamplingPoint,
@@ -24,9 +40,6 @@ var
     rxSymbolList = [],
     rxSpectrogram,
     rxSampleNumber = 0,
-    rxSmartTimer,
-
-    txSmartTimer,
     txSampleRate,
     txSampleNumber = 0,
     txCurrentSymbol = null,
@@ -40,13 +53,11 @@ function init() {
     initFloatWidget();
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
-    rxSmartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
-    rxSmartTimer.setHandler(rxSmartTimerHandler);
-
-    setTimeout(function () {
-        txSmartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
-        txSmartTimer.setHandler(txSmartTimerHandler);
-    }, SAMPLE_TIME_MS * 0.5);
+    smartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
+    smartTimer.setHandler(function () {
+        rxSmartTimerHandler();
+        txSmartTimerHandler();
+    });
 
     onLoopbackCheckboxChange();
 
@@ -81,29 +92,29 @@ function initFloatWidget() {
     );
 }
 
-function setTxSound(symbol, offset) {
+function setTxSound() {
     var frequency;
 
-    if (!symbol) {
+    if (!txCurrentSymbol) {
         audioMonoIO.setPeriodicWave(undefined, 0);
         return;
     }
 
-    frequency = FFT_FREQUENCY_BIN_SKIP_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
+    frequency = FFT_FREQUENCY_BIN_SKIP_FACTOR * txCurrentSymbol * txSampleRate.getValue() / FFT_SIZE;
 
     if (SAMPLE_PER_SYMBOL === 3) {
-        switch (offset) {
+        switch (txOffset) {
             case 0:
-                // audioMonoIO.setPeriodicWave(frequency, 0);
-                // audioMonoIO.setPeriodicWaveFading(TX_AMPLITUDE, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
-                audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
+                audioMonoIO.setPeriodicWave(frequency, 0);
+                audioMonoIO.setPeriodicWaveFading(TX_AMPLITUDE, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
+                // audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
                 break;
             case 1:
                 audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
                 break;
             case 2:
-                //audioMonoIO.setPeriodicWaveFading(0, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
-                audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
+                audioMonoIO.setPeriodicWaveFading(0, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
+                // audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
                 break;
         }
     } else {
@@ -128,7 +139,6 @@ function addToTxQueue(symbol) {
 function txConnect(sampleRate) {
     var i, codeValue;
 
-
     txSampleRate.setValue(sampleRate);
     for (i = 0; i < connectSignalDetector.$$correlator.getCodeLength(); i++) {  // TODO refactor this
         codeValue = connectSignalDetector.$$correlator.getCodeValue(i);
@@ -146,36 +156,18 @@ function txSymbol(symbol) {
 
 function rxSmartTimerHandler() {
     var
-        offset = rxSampleNumber % SAMPLE_PER_SYMBOL,
         dataLogicValue,
         frequencyData,
-        fftResult,
-        symbol,
-        signalDecibel,
-        noiseDecibelSum,
-        noiseDecibel,
-        frequencyDataInner = [],
-        i;
+        fftResult;
 
+    rxOffset = rxSampleNumber % SAMPLE_PER_SYMBOL;
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
     fftResult.downconvertScalar(FFT_FREQUENCY_BIN_SKIP_FACTOR);
     symbol = fftResult.getLoudestBinIndexInBinRange(SYMBOL_MIN, SYMBOL_MAX);
     signalDecibel = fftResult.getDecibel(symbol);
-
-    // ----- move to fftResult class, get decibelrange and get average in range
-    noiseDecibelSum = 0;
-    for (i = SYMBOL_MIN; i <= SYMBOL_MAX; i++) {
-        frequencyDataInner.push(fftResult.getDecibel(i));
-        if (i !== symbol) {
-            noiseDecibelSum += fftResult.getDecibel(i);
-        }
-    }
-    noiseDecibel = null;
-    if (frequencyDataInner.length > 1) {
-        noiseDecibel = noiseDecibelSum / (frequencyDataInner.length - 1);
-    }
-    // -----
+    noiseDecibel = fftResult.getDecibelAverage(SYMBOL_MIN, SYMBOL_MAX, symbol);
+    frequencyDataReceiveBand = fftResult.getDecibelRange(SYMBOL_MIN, SYMBOL_MAX);
 
     switch (symbol) {
         case SYMBOL_SYNC_A: dataLogicValue = false; break;
@@ -195,13 +187,31 @@ function rxSmartTimerHandler() {
         rxSymbolList.push(symbol);
     }
 
-    rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResult);
+    rxUpdateView(fftResult);
+
+    var state = {
+        dspData: {
+            sampleRate: 44100,
+            fftSize: 2048,
+            fftWindowTime: 0.046,
+            fftFrequencyBinSkipFactor: 5,
+            samplePerSymbol: 3,
+            indexMin: 95,
+            indexMax: 110,
+            indexRange: 15
+        },
+        isConnected: true,
+        isSymbolSamplingPoint: false,
+        connectionDetail: {
+
+        }
+    };
 
     rxSampleNumber++;
 }
 
-function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResult) {
-    var signalQualityDecibel, cd;
+function rxUpdateView(fftResult) {
+    var cd;
 
     if (connectSignalDetector.isConnectionInProgress()) {
         html('#rx-log-connect', 'connecting...');
@@ -218,17 +228,14 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
                 '- correlation ' + cd.correlationValue + '/' + cd.correlationValueMax + '<br/>' +
                 '- threshold ' + cd.signalThresholdDecibel.toFixed() + ' dB'
             );
-            //console.log(connectionDetail);
         } else {
             html('#rx-log-connect', 'not connected');
         }
     }
 
-    //console.log(isSynchronizedSymbol);
-
     if (document.getElementById('rx-active').checked) {
         rxSpectrogram.add(
-            frequencyDataInner,
+            frequencyDataReceiveBand,
             document.getElementById('loudest-marker').checked ? symbol - SYMBOL_MIN : -1,
             SYMBOL_MIN,
             1,
@@ -239,7 +246,6 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
     if (connectSignalDetector.isConnected()) {
         if (isSymbolSamplingPoint) {
             if (isSynchronizedSymbol) {
-                signalQualityDecibel = Math.round(signalDecibel - connectSignalDetector.getConnectionDetail().signalThresholdDecibel);
                 html('#rx-symbol-synchronized', symbol + ' (' + signalDecibel.toFixed(2) + ' dB)');
                 refreshRxSymbolList();
             } else {
@@ -254,7 +260,7 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
     html('#rx-symbol', symbol);
     html(
         '#rx-symbol-detail',
-        offset + '/' + rxSampleNumber + ', ' +
+        rxOffset + '/' + rxSampleNumber + ', ' +
         fftResult.getFrequency(symbol).toFixed(2) + ' Hz, ' +
         signalDecibel.toFixed(2) + ' dB'
     );
@@ -267,13 +273,13 @@ function rxUpdateView(frequencyDataInner, symbol, offset, signalDecibel, fftResu
 }
 
 function txSmartTimerHandler() {
-    var offset = txSampleNumber % SAMPLE_PER_SYMBOL;
+    txOffset = txSampleNumber % SAMPLE_PER_SYMBOL;
 
-    if (offset === 0) {
+    if (txOffset === 0) {
         txCurrentSymbol = txSymbolQueue.shift();
     }
 
-    setTxSound(txCurrentSymbol, offset);
+    setTxSound();
     refreshTxSymbolQueue();
 
     txSampleNumber++;
