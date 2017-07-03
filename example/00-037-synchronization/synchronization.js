@@ -43,12 +43,12 @@ var
     txSampleRate,
     txSampleNumber = 0,
     txCurrentSymbol = null,
-    txSymbolQueue = [];
+    txSymbolQueue = [],
+    state;
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
     connectSignalDetector = new ConnectSignalDetector(SAMPLE_PER_SYMBOL, RX_SIGNAL_THRESHOLD_FACTOR);
-    document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
 
     initFloatWidget();
 
@@ -183,41 +183,57 @@ function rxSmartTimerHandler() {
         isSymbolSamplingPoint &&
         (signalDecibel > connectSignalDetector.getConnectionDetail().signalThresholdDecibel);
 
-    if (isSynchronizedSymbol) {
-        rxSymbolList.push(symbol);
-    }
-
-    rxUpdateView(fftResult);
-
-    var state = {
-        dspData: {
-            sampleRate: 44100,
+    state = {
+        dsp: {
+            sampleRateReceive: 44100,
+            sampleRateTranmit: 48000,
             fftSize: 2048,
             fftWindowTime: 0.046,
-            fftFrequencyBinSkipFactor: 5,
-            samplePerSymbol: 3,
-            indexMin: 95,
-            indexMax: 110,
-            indexRange: 15
+            fftFrequencyBinSkipFactor: FFT_FREQUENCY_BIN_SKIP_FACTOR,
+            samplePerSymbol: SAMPLE_PER_SYMBOL
         },
-        isConnected: true,
-        isSymbolSamplingPoint: false,
-        connectionDetail: {
-
-        }
+        band: {
+            frequencyData: frequencyDataReceiveBand,
+            frequencyDataLoudestIndex: symbol - SYMBOL_MIN,
+            indexMin: SYMBOL_MIN,
+            indexMax: SYMBOL_MAX,
+            indexRange: SYMBOL_MAX - SYMBOL_MIN + 1,
+            frequencyMin: fftResult.getFrequency(SYMBOL_MIN),
+            frequencyMax: fftResult.getFrequency(SYMBOL_MAX)
+        },
+        symbol: symbol,
+        symbolDetail: {
+            frequency: fftResult.getFrequency(symbol),
+            signalDecibel: signalDecibel,
+            noiseDecibel: noiseDecibel
+        },
+        isConnected: connectSignalDetector.isConnected(),
+        isConnectionInProgress: connectSignalDetector.isConnectionInProgress(),
+        isSymbolSamplingPoint: isSymbolSamplingPoint,
+        isSynchronizedSymbol: isSynchronizedSymbol,
+        connectionDetail: connectSignalDetector.getConnectionDetail()
     };
+
+    if (isSynchronizedSymbol) {
+        rxSymbolList.push(symbol);
+        // TODO call symbol handler here
+    }
+    // TODO call status handler here
+    rxUpdateView(state);
 
     rxSampleNumber++;
 }
 
-function rxUpdateView(fftResult) {
+function rxUpdateView(state) {
     var cd;
 
-    if (connectSignalDetector.isConnectionInProgress()) {
+    html('#rx-sample-rate', audioMonoIO.getSampleRate());
+
+    if (state.isConnectionInProgress) {
         html('#rx-log-connect', 'connecting...');
     } else {
-        if (connectSignalDetector.isConnected()) {
-            cd = connectSignalDetector.getConnectionDetail();
+        if (state.isConnected) {
+            cd = state.connectionDetail;
             html(
                 '#rx-log-connect',
                 'Connected!<br/>' +
@@ -235,18 +251,18 @@ function rxUpdateView(fftResult) {
 
     if (document.getElementById('rx-active').checked) {
         rxSpectrogram.add(
-            frequencyDataReceiveBand,
-            document.getElementById('loudest-marker').checked ? symbol - SYMBOL_MIN : -1,
-            SYMBOL_MIN,
+            state.band.frequencyData,
+            document.getElementById('loudest-marker').checked ? state.band.frequencyDataLoudestIndex : -1,
+            state.band.indexMin,
             1,
-            isSynchronizedSymbol
+            state.isSynchronizedSymbol
         );
     }
 
-    if (connectSignalDetector.isConnected()) {
-        if (isSymbolSamplingPoint) {
-            if (isSynchronizedSymbol) {
-                html('#rx-symbol-synchronized', symbol + ' (' + signalDecibel.toFixed(2) + ' dB)');
+    if (state.isConnected) {
+        if (state.isSymbolSamplingPoint) {
+            if (state.isSynchronizedSymbol) {
+                html('#rx-symbol-synchronized', state.symbol + ' (' + state.symbolDetail.signalDecibel.toFixed(2) + ' dB)');
                 refreshRxSymbolList();
             } else {
                 html('#rx-symbol-synchronized', 'idle');
@@ -257,18 +273,18 @@ function rxUpdateView(fftResult) {
         html('#rx-symbol-synchronized', '');
     }
 
-    html('#rx-symbol', symbol);
+    html('#rx-symbol', state.symbol);
     html(
         '#rx-symbol-detail',
         rxOffset + '/' + rxSampleNumber + ', ' +
-        fftResult.getFrequency(symbol).toFixed(2) + ' Hz, ' +
-        signalDecibel.toFixed(2) + ' dB'
+        state.symbolDetail.frequency.toFixed(2) + ' Hz, ' +
+        state.symbolDetail.signalDecibel.toFixed(2) + ' dB'
     );
     html(
         '#rx-log',
-        'min: ' + SYMBOL_MIN + ' (' + fftResult.getFrequency(SYMBOL_MIN).toFixed(2) + ' Hz)<br/>' +
-        'max: ' + SYMBOL_MAX + ' (' + fftResult.getFrequency(SYMBOL_MAX).toFixed(2) + ' Hz)<br/>' +
-        'range: ' + (SYMBOL_MAX - SYMBOL_MIN + 1) + '<br/>'
+        'min: ' + state.band.indexMin + ' (' + state.band.frequencyMin.toFixed(2) + ' Hz)<br/>' +
+        'max: ' + state.band.indexMax + ' (' + state.band.frequencyMax.toFixed(2) + ' Hz)<br/>' +
+        'range: ' + state.band.indexRange + '<br/>'
     );
 }
 
