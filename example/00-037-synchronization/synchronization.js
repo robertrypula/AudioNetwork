@@ -2,16 +2,6 @@
 'use strict';
 
 var
-    SAMPLE_TIME_MS = 250,   // 500 or 166
-    SAMPLE_PER_SYMBOL = 3,
-    FFT_SIZE = 8 * 1024,
-    FFT_FREQUENCY_BIN_SKIP_FACTOR = 3,
-
-    SYMBOL_MIN = 93,
-    SYMBOL_MAX = 117,
-    SYMBOL_SYNC_A = 108,
-    SYMBOL_SYNC_B = 109,
-
     /*
     48.0 kHz -> skipping 5 -> 29.296875 Hz      - 7 617 Hz
     44.1 kHz -> skipping 5 -> 26.91650390625 Hz - 6 998 Hz
@@ -20,39 +10,44 @@ var
     44.1 kHz -> skipping 3 -> 16.14990234375 Hz - 4 199 Hz
      */
 
-    TX_SAMPLE_RATE_DEFAULT = 48000,
-    TX_AMPLITUDE = 0.1,
-    RX_SIGNAL_THRESHOLD_FACTOR = 0.85,
+    this__$$sampleTimeMs = 250,   // 500 or 166
+    this__$$samplePerSymbol = 3,
+    this__$$fftSize = 8 * 1024,
+    this__$$fftFrequencyBinSkipFactor = 3,
+    this__$$symbolMin = 93,
+    this__$$symbolMax = 117,
+    this__$$symbolSyncA = 108,
+    this__$$symbolSyncB = 109,
+    this__$$txAmplitude = 0.1,
+    this__$$rxSignalThresholdFactor = 0.85,
+    this__$$audioMonoIO,
+    this__$$smartTimer,
+    this__$$sampleNumber = 0,
+    this__$$offset,
+    this__$$symbol,
+    this__$$signalDecibel,
+    this__$$noiseDecibel,
+    this__$$txSampleRate,
+    this__$$frequencyDataReceiveBand,
+    this__$$fftResult,
+    this__$$connectSignalDetector,
+    this__$$isSymbolSamplingPoint,
+    this__$$isSymbolAboveThreshold,
+    this__$$txCurrentSymbol = null,
+    this__$$txSymbolQueue = [],
+    this__$$statusHandler,
 
-    audioMonoIO,
-    smartTimer,
-
-    txOffset,
-    rxOffset,
-    symbol,
-    signalDecibel,
-    noiseDecibel,
-    txSampleRate,
-    frequencyDataReceiveBand,
-    fftResult,
-
-    connectSignalDetector,
-    isSymbolSamplingPoint,
-    isSymbolAboveThreshold,
-    rxSymbolList = [],
     rxSpectrogram,
-    rxSampleNumber = 0,
-    txSampleRateWidget,
-    txSampleNumber = 0,
-    txCurrentSymbol = null,
-    txSymbolQueue = [],
-    state;
+    rxSymbolList = [],
+    txSampleRateWidget;
 
 function init() {
+    construct();
+
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
         document.getElementById('tx-sample-rate'),
-        TX_SAMPLE_RATE_DEFAULT, 5, 0,
+        getTxSampleRate(), 5, 0,
         onTxSampleRateWidgetChange
     );
     document.addEventListener('keyup', function(e) {
@@ -71,21 +66,11 @@ function init() {
         }
     }, true);
 
-    audioMonoIO = new AudioMonoIO(FFT_SIZE);
-    connectSignalDetector = new ConnectSignalDetector(SAMPLE_PER_SYMBOL, RX_SIGNAL_THRESHOLD_FACTOR);
-
-    txSampleRate = TX_SAMPLE_RATE_DEFAULT;
-
-    smartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
-    smartTimer.setHandler(smartTimerHandler);
-
     onLoopbackCheckboxChange();
 }
 
 function onLoopbackCheckboxChange() {
-    if (audioMonoIO) {
-        audioMonoIO.setLoopback(document.getElementById('loopback-checkbox').checked);
-    }
+    setLoopback(document.getElementById('loopback-checkbox').checked);
 }
 
 function onTxSampleRateWidgetChange() {
@@ -93,6 +78,8 @@ function onTxSampleRateWidgetChange() {
 }
 
 function refreshTxSymbolQueue() {
+    var txSymbolQueue = getTxSymbolQueue();
+
     html('#tx-symbol-queue', txSymbolQueue.join(', '));
 }
 
@@ -158,7 +145,7 @@ function rxUpdateView(state) {
     html('#rx-symbol', state.symbol);
     html(
         '#rx-symbol-detail',
-        rxOffset + '/' + rxSampleNumber + ', ' +
+        state.offset + '/' + state.sampleNumber + ', ' +
         state.symbolDetail.frequency.toFixed(2) + ' Hz, ' +
         state.symbolDetail.signalDecibel.toFixed(2) + ' dB'
     );
@@ -185,139 +172,170 @@ function onSymbolClick(symbol) {
 
 // --------------------------------------------------------------------
 
-function setTxSampleRate(sampleRate) {
-    txSampleRate = sampleRate;
-}
+function construct() {
 
-function setTxSound() {
-    var frequency;
+    this__$$statusHandler = statusHandler;
 
-    if (!txCurrentSymbol) {
-        audioMonoIO.setPeriodicWave(undefined, 0);
-        return;
-    }
+    this__$$audioMonoIO = new AudioMonoIO(this__$$fftSize);
+    this__$$connectSignalDetector = new ConnectSignalDetector(this__$$samplePerSymbol, this__$$rxSignalThresholdFactor);
 
-    frequency = FFT_FREQUENCY_BIN_SKIP_FACTOR * txCurrentSymbol * txSampleRate / FFT_SIZE;
+    this__$$txSampleRate = 48000;
 
-    if (SAMPLE_PER_SYMBOL === 3) {
-        switch (txOffset) {
-            case 0:
-                audioMonoIO.setPeriodicWave(frequency, 0);
-                audioMonoIO.setPeriodicWaveFading(TX_AMPLITUDE, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
-                // audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
-                break;
-            case 1:
-                audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
-                break;
-            case 2:
-                audioMonoIO.setPeriodicWaveFading(0, (0.5 * SAMPLE_TIME_MS) / 1000, SAMPLE_TIME_MS / 1000);
-                // audioMonoIO.setPeriodicWave(frequency, 0.5 * TX_AMPLITUDE);
-                break;
-        }
-    } else {
-        audioMonoIO.setPeriodicWave(frequency, TX_AMPLITUDE);
-    }
-}
-
-// ----------------------
-
-function addToTxQueue(symbol) {
-    txSymbolQueue.push(symbol);
+    this__$$smartTimer = new SmartTimer(this__$$sampleTimeMs / 1000);
+    this__$$smartTimer.setHandler($$smartTimerHandler);
 }
 
 function txConnect(sampleRate) {
     var i, codeValue;
 
-    txSampleRate = sampleRate;
-    for (i = 0; i < connectSignalDetector.$$correlator.getCodeLength(); i++) {  // TODO refactor this
-        codeValue = connectSignalDetector.$$correlator.getCodeValue(i);
-        addToTxQueue(
-            codeValue === -1 ? SYMBOL_SYNC_A : SYMBOL_SYNC_B
+    this__$$txSampleRate = sampleRate;
+    for (i = 0; i < this__$$connectSignalDetector.$$correlator.getCodeLength(); i++) {  // TODO refactor this
+        codeValue = this__$$connectSignalDetector.$$correlator.getCodeValue(i);
+        $$addToTxQueue(
+            codeValue === -1 ? this__$$symbolSyncA : this__$$symbolSyncB
         );
     }
 }
 
 function txSymbol(symbol) {
-    addToTxQueue(symbol);
+    $$addToTxQueue(symbol);
 }
 
-function smartTimerHandler() {
-    rxSmartTimerHandler();
-    txSmartTimerHandler();
+function getState() {
+    var state;
+
+    state = {
+        dsp: {
+            sampleRateReceive: this__$$audioMonoIO.getSampleRate(),
+            sampleRateTransmit: this__$$txSampleRate,
+            fftSize: this__$$fftSize,
+            fftWindowTime: this__$$fftSize / this__$$audioMonoIO.getSampleRate(),
+            fftFrequencyBinSkipFactor: this__$$fftFrequencyBinSkipFactor,
+            samplePerSymbol: this__$$samplePerSymbol
+        },
+        band: {
+            frequencyData: this__$$frequencyDataReceiveBand,
+            frequencyDataLoudestIndex: this__$$symbol - this__$$symbolMin,
+            indexMin: this__$$symbolMin,
+            indexMax: this__$$symbolMax,
+            indexRange: this__$$symbolMax - this__$$symbolMin + 1,
+            frequencyMin: this__$$fftResult.getFrequency(this__$$symbolMin),
+            frequencyMax: this__$$fftResult.getFrequency(this__$$symbolMax)
+        },
+        symbol: this__$$symbol,
+        isSymbolSamplingPoint: this__$$isSymbolSamplingPoint,
+        isSymbolAboveThreshold: this__$$isSymbolAboveThreshold,
+        symbolDetail: {
+            frequency: this__$$fftResult.getFrequency(this__$$symbol),
+            signalDecibel: this__$$signalDecibel,
+            noiseDecibel: this__$$noiseDecibel
+        },
+        offset: this__$$offset,
+        sampleNumber: this__$$sampleNumber,
+        isConnected: this__$$connectSignalDetector.isConnected(),
+        isConnectionInProgress: this__$$connectSignalDetector.isConnectionInProgress(),
+        connectionDetail: this__$$connectSignalDetector.getConnectionDetail()
+    };
+
+    return state;
 }
 
-function rxSmartTimerHandler() {
+function setLoopback(state) {
+    this__$$audioMonoIO.setLoopback(state);
+}
+
+function getTxSampleRate() {
+    return this__$$txSampleRate;
+}
+
+function getTxSymbolQueue() {
+    return this__$$txSymbolQueue;
+}
+
+function setTxSampleRate(sampleRate) {
+    this__$$txSampleRate = sampleRate;
+}
+
+function $$setTxSound() {
+    var frequency;
+
+    if (!this__$$txCurrentSymbol) {
+        this__$$audioMonoIO.setPeriodicWave(undefined, 0);
+        return;
+    }
+
+    frequency = this__$$fftFrequencyBinSkipFactor * this__$$txCurrentSymbol * this__$$txSampleRate / this__$$fftSize;
+
+    if (this__$$samplePerSymbol === 3) {
+        switch (this__$$offset) {
+            case 0:
+                this__$$audioMonoIO.setPeriodicWave(frequency, 0);
+                this__$$audioMonoIO.setPeriodicWaveFading(this__$$txAmplitude, (0.5 * this__$$sampleTimeMs) / 1000, this__$$sampleTimeMs / 1000);
+                // this__$$audioMonoIO.setPeriodicWave(frequency, 0.5 * this__$$txAmplitude);
+                break;
+            case 1:
+                this__$$audioMonoIO.setPeriodicWave(frequency, this__$$txAmplitude);
+                break;
+            case 2:
+                this__$$audioMonoIO.setPeriodicWaveFading(0, (0.5 * this__$$sampleTimeMs) / 1000, this__$$sampleTimeMs / 1000);
+                // this__$$audioMonoIO.setPeriodicWave(frequency, 0.5 * this__$$txAmplitude);
+                break;
+        }
+    } else {
+        this__$$audioMonoIO.setPeriodicWave(frequency, this__$$txAmplitude);
+    }
+}
+
+function $$addToTxQueue(symbol) {
+    this__$$txSymbolQueue.push(symbol);
+}
+
+function $$smartTimerHandler() {
+    var state;
+
+    this__$$offset = this__$$sampleNumber % this__$$samplePerSymbol;
+    $$rxSmartTimerHandler();
+    $$txSmartTimerHandler();
+    state = getState();
+
+    if (this__$$statusHandler) {
+        this__$$statusHandler(state);
+    }
+
+    this__$$sampleNumber++;
+}
+
+function $$rxSmartTimerHandler() {
     var
         dataLogicValue,
         frequencyData;
 
-    rxOffset = rxSampleNumber % SAMPLE_PER_SYMBOL;
-    frequencyData = audioMonoIO.getFrequencyData();
-    fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
-    fftResult.downconvertScalar(FFT_FREQUENCY_BIN_SKIP_FACTOR);
-    symbol = fftResult.getLoudestBinIndexInBinRange(SYMBOL_MIN, SYMBOL_MAX);
-    signalDecibel = fftResult.getDecibel(symbol);
-    noiseDecibel = fftResult.getDecibelAverage(SYMBOL_MIN, SYMBOL_MAX, symbol);
-    frequencyDataReceiveBand = fftResult.getDecibelRange(SYMBOL_MIN, SYMBOL_MAX);
+    frequencyData = this__$$audioMonoIO.getFrequencyData();
+    this__$$fftResult = new FFTResult(frequencyData, this__$$audioMonoIO.getSampleRate());
+    this__$$fftResult.downconvertScalar(this__$$fftFrequencyBinSkipFactor);
+    this__$$symbol = this__$$fftResult.getLoudestBinIndexInBinRange(this__$$symbolMin, this__$$symbolMax);
+    this__$$signalDecibel = this__$$fftResult.getDecibel(this__$$symbol);
+    this__$$noiseDecibel = this__$$fftResult.getDecibelAverage(this__$$symbolMin, this__$$symbolMax, this__$$symbol);
+    this__$$frequencyDataReceiveBand = this__$$fftResult.getDecibelRange(this__$$symbolMin, this__$$symbolMax);
 
-    switch (symbol) {
-        case SYMBOL_SYNC_A: dataLogicValue = false; break;
-        case SYMBOL_SYNC_B: dataLogicValue = true; break;
+    switch (this__$$symbol) {
+        case this__$$symbolSyncA: dataLogicValue = false; break;
+        case this__$$symbolSyncB: dataLogicValue = true; break;
         default: dataLogicValue = null;
     }
-    connectSignalDetector.handle(rxSampleNumber, dataLogicValue, signalDecibel, noiseDecibel);
+    this__$$connectSignalDetector.handle(this__$$sampleNumber, dataLogicValue, this__$$signalDecibel, this__$$noiseDecibel);
 
-    isSymbolSamplingPoint = connectSignalDetector.isConnected()
-        ? (rxSampleNumber % SAMPLE_PER_SYMBOL) === connectSignalDetector.getConnectionDetail().offset
+    this__$$isSymbolSamplingPoint = this__$$connectSignalDetector.isConnected()
+        ? (this__$$sampleNumber % this__$$samplePerSymbol) === this__$$connectSignalDetector.getConnectionDetail().offset
         : false;
-    isSymbolAboveThreshold =
-        isSymbolSamplingPoint &&
-        (signalDecibel > connectSignalDetector.getConnectionDetail().signalThresholdDecibel);
-
-    state = {
-        dsp: {
-            sampleRateReceive: audioMonoIO.getSampleRate(),
-            sampleRateTransmit: txSampleRate,
-            fftSize: FFT_SIZE,
-            fftWindowTime: FFT_SIZE / audioMonoIO.getSampleRate(),
-            fftFrequencyBinSkipFactor: FFT_FREQUENCY_BIN_SKIP_FACTOR,
-            samplePerSymbol: SAMPLE_PER_SYMBOL
-        },
-        band: {
-            frequencyData: frequencyDataReceiveBand,
-            frequencyDataLoudestIndex: symbol - SYMBOL_MIN,
-            indexMin: SYMBOL_MIN,
-            indexMax: SYMBOL_MAX,
-            indexRange: SYMBOL_MAX - SYMBOL_MIN + 1,
-            frequencyMin: fftResult.getFrequency(SYMBOL_MIN),
-            frequencyMax: fftResult.getFrequency(SYMBOL_MAX)
-        },
-        symbol: symbol,
-        isSymbolSamplingPoint: isSymbolSamplingPoint,
-        isSymbolAboveThreshold: isSymbolAboveThreshold,
-        symbolDetail: {
-            frequency: fftResult.getFrequency(symbol),
-            signalDecibel: signalDecibel,
-            noiseDecibel: noiseDecibel
-        },
-        isConnected: connectSignalDetector.isConnected(),
-        isConnectionInProgress: connectSignalDetector.isConnectionInProgress(),
-        connectionDetail: connectSignalDetector.getConnectionDetail()
-    };
-
-    statusHandler(state);
-
-    rxSampleNumber++;
+    this__$$isSymbolAboveThreshold =
+        this__$$isSymbolSamplingPoint &&
+        (this__$$signalDecibel > this__$$connectSignalDetector.getConnectionDetail().signalThresholdDecibel);
 }
 
-function txSmartTimerHandler() {
-    txOffset = txSampleNumber % SAMPLE_PER_SYMBOL;
-
-    if (txOffset === 0) {
-        txCurrentSymbol = txSymbolQueue.shift();
+function $$txSmartTimerHandler() {
+    if (this__$$offset === 0) {
+        this__$$txCurrentSymbol = this__$$txSymbolQueue.shift();
     }
-
-    setTxSound();
-
-    txSampleNumber++;
+    $$setTxSound();
 }
