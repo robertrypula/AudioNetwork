@@ -24,6 +24,7 @@ PhysicalLayer = function (statusHandler) {
     this.$$fftResult = undefined;
     this.$$isSymbolSamplingPoint = undefined;
     this.$$isSymbolAboveThreshold = undefined;
+    this.$$isSymbolSynchronized = undefined;
     this.$$txCurrentSymbol = undefined;
     this.$$txSymbolQueue = [];
 
@@ -68,7 +69,11 @@ PhysicalLayer.prototype.setTxSampleRate = function (sampleRate) {
 };
 
 PhysicalLayer.prototype.getState = function () {
-    var state;
+    var state, cd;
+
+    cd = this.$$connectSignalDetector.isConnected()
+        ? this.$$connectSignalDetector.getConnectionDetail()
+        : null;
 
     state = {
         dsp: {
@@ -77,20 +82,22 @@ PhysicalLayer.prototype.getState = function () {
             fftSize: this.$$fftSize,
             fftWindowTime: this.$$fftSize / this.$$audioMonoIO.getSampleRate(),
             fftFrequencyBinSkipFactor: this.$$fftFrequencyBinSkipFactor,
+            symbolFrequencySpacing: this.$$fftFrequencyBinSkipFactor * this.$$audioMonoIO.getSampleRate() / this.$$fftSize,
             samplePerSymbol: this.$$samplePerSymbol
         },
         band: {
             frequencyData: this.$$frequencyDataReceiveBand,
             frequencyDataLoudestIndex: this.$$symbol - this.$$symbolMin,
-            indexMin: this.$$symbolMin,
-            indexMax: this.$$symbolMax,
-            indexRange: this.$$symbolMax - this.$$symbolMin + 1,
+            symbolMin: this.$$symbolMin,
+            symbolMax: this.$$symbolMax,
+            symbolRange: this.$$symbolMax - this.$$symbolMin + 1,
             frequencyMin: this.$$fftResult.getFrequency(this.$$symbolMin),
             frequencyMax: this.$$fftResult.getFrequency(this.$$symbolMax)
         },
         symbol: this.$$symbol,
         isSymbolSamplingPoint: this.$$isSymbolSamplingPoint,
         isSymbolAboveThreshold: this.$$isSymbolAboveThreshold,
+        isSymbolSynchronized: this.$$isSymbolSynchronized,
         symbolDetail: {
             frequency: this.$$fftResult.getFrequency(this.$$symbol),
             signalDecibel: this.$$signalDecibel,
@@ -100,7 +107,15 @@ PhysicalLayer.prototype.getState = function () {
         sampleNumber: this.$$sampleNumber,
         isConnected: this.$$connectSignalDetector.isConnected(),
         isConnectionInProgress: this.$$connectSignalDetector.isConnectionInProgress(),
-        connectionDetail: this.$$connectSignalDetector.getConnectionDetail()
+        connectionDetail: !cd ? null : {
+            offset: cd.offset,
+            correlationValue: cd.correlationValue,
+            correlationValueMax: cd.correlationValueMax,
+            signalDecibel: cd.signalDecibel,
+            noiseDecibel: cd.noiseDecibel,
+            signalToNoiseRatio: cd.signalToNoiseRatio,
+            signalThresholdDecibel: cd.signalThresholdDecibel
+        }
     };
 
     return state;
@@ -187,8 +202,11 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
         ? (this.$$sampleNumber % this.$$samplePerSymbol) === connectionDetail.offset
         : false;
 
-    this.$$isSymbolAboveThreshold =
-        this.$$isSymbolSamplingPoint && (this.$$signalDecibel > connectionDetail.signalThresholdDecibel);
+    this.$$isSymbolAboveThreshold = this.$$connectSignalDetector.isConnected()
+        ? this.$$signalDecibel > connectionDetail.signalThresholdDecibel
+        : false;
+
+    this.$$isSymbolSynchronized = this.$$isSymbolSamplingPoint && this.$$isSymbolAboveThreshold;
 };
 
 PhysicalLayer.prototype.$$txSmartTimerHandler = function () {

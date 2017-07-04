@@ -24,27 +24,39 @@ function init() {
         physicalLayer.getTxSampleRate(), 5, 0,
         onTxSampleRateWidgetChange
     );
-    document.addEventListener('keyup', function(e) {
-        var digit = null;
+    document.addEventListener(
+        'keyup',
+        function(e) {
+            var digit = getDigitFromKeyCode(e.keyCode);
 
-        if (e.keyCode >= 48 && e.keyCode <= 57) {
-            digit = e.keyCode - 48;
-        } else {
-            if (e.keyCode >= 96 && e.keyCode <= 105) {
-                digit = e.keyCode - 96;
+            if (digit !== null) {
+                physicalLayer.txSymbol(100 + digit);
             }
-        }
-
-        if (digit !== null) {
-            physicalLayer.txSymbol(100 + digit);
-        }
-    }, true);
+        },
+        true
+    );
 
     onLoopbackCheckboxChange();
 }
 
+function getDigitFromKeyCode(keyCode) {
+    var digit = null;
+
+    if (keyCode >= 48 && keyCode <= 57) {
+        digit = keyCode - 48;
+    } else {
+        if (keyCode >= 96 && keyCode <= 105) {
+            digit = keyCode - 96;
+        }
+    }
+
+    return digit;
+}
+
 function onLoopbackCheckboxChange() {
-    physicalLayer.setLoopback(document.getElementById('loopback-checkbox').checked);
+    physicalLayer.setLoopback(
+        document.getElementById('loopback-checkbox').checked
+    );
 }
 
 function onTxSampleRateWidgetChange() {
@@ -57,12 +69,8 @@ function refreshTxSymbolQueue() {
     html('#tx-symbol-queue', txSymbolQueue.join(', '));
 }
 
-function refreshRxSymbolList() {
-    html('#rx-symbol-list', rxSymbolList.join(', '));
-}
-
 function statusHandler(state) {
-    if (state.isSymbolSamplingPoint) {
+    if (state.isSymbolSynchronized) {
         rxSymbolList.push(state.symbol);
     }
     rxUpdateView(state);
@@ -71,7 +79,12 @@ function statusHandler(state) {
 function rxUpdateView(state) {
     var cd;
 
-    html('#rx-sample-rate', state.dsp.sampleRateReceive);
+    html(
+        '#rx-dsp-detail',
+        'Sample rate: ' + state.dsp.sampleRateReceive + ' Hz<br/>' +
+        'FFT size: ' + state.dsp.fftSize + '<br/>' +
+        'FFT time: ' + state.dsp.fftWindowTime.toFixed(3) + ' sec'
+    );
 
     if (state.isConnectionInProgress) {
         html('#rx-log-connect', 'connecting...');
@@ -82,10 +95,10 @@ function rxUpdateView(state) {
                 '#rx-log-connect',
                 'Connected!<br/>' +
                 '- offset ' + cd.offset + '<br/>' +
+                '- correlation ' + cd.correlationValue + '/' + cd.correlationValueMax + '<br/>' +
                 '- signal ' + cd.signalDecibel.toFixed(2) + ' dB' + '<br/>' +
                 '- noise ' + cd.noiseDecibel.toFixed(2) + ' dB' + '<br/>' +
                 '- SNR ' + cd.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +
-                '- correlation ' + cd.correlationValue + '/' + cd.correlationValueMax + '<br/>' +
                 '- threshold ' + cd.signalThresholdDecibel.toFixed() + ' dB'
             );
         } else {
@@ -97,9 +110,9 @@ function rxUpdateView(state) {
         rxSpectrogram.add(
             state.band.frequencyData,
             document.getElementById('loudest-marker').checked ? state.band.frequencyDataLoudestIndex : -1,
-            state.band.indexMin,
+            state.band.symbolMin,
             1,
-            state.isSymbolAboveThreshold
+            state.isSymbolSynchronized
         );
     }
 
@@ -107,7 +120,7 @@ function rxUpdateView(state) {
         if (state.isSymbolSamplingPoint) {
             if (state.isSymbolAboveThreshold) {
                 html('#rx-symbol-synchronized', state.symbol + ' (' + state.symbolDetail.signalDecibel.toFixed(2) + ' dB)');
-                refreshRxSymbolList();
+                html('#rx-symbol-list', rxSymbolList.join(', '));
             } else {
                 html('#rx-symbol-synchronized', 'idle');
             }
@@ -124,10 +137,10 @@ function rxUpdateView(state) {
         state.symbolDetail.signalDecibel.toFixed(2) + ' dB'
     );
     html(
-        '#rx-log',
-        'min: ' + state.band.indexMin + ' (' + state.band.frequencyMin.toFixed(2) + ' Hz)<br/>' +
-        'max: ' + state.band.indexMax + ' (' + state.band.frequencyMax.toFixed(2) + ' Hz)<br/>' +
-        'range: ' + state.band.indexRange + '<br/>'
+        '#rx-log-band',
+        'min: ' + state.band.symbolMin + ' (' + state.band.frequencyMin.toFixed(2) + ' Hz)<br/>' +
+        'max: ' + state.band.symbolMax + ' (' + state.band.frequencyMax.toFixed(2) + ' Hz)<br/>' +
+        'range: ' + state.band.symbolRange + '<br/>'
     );
 
     refreshTxSymbolQueue();
@@ -143,6 +156,3 @@ function onSymbolClick(symbol) {
     physicalLayer.txSymbol(symbol);
     refreshTxSymbolQueue();
 }
-
-// --------------------------------------------------------------------
-
