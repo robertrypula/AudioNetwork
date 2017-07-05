@@ -76,7 +76,18 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Connection status
+                                Info
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-general-info" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Status
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -87,12 +98,12 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Symbol synchronized
+                                RX data
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="rx-symbol-synchronized" class="margin-bottom"></div>
-                            <div id="rx-symbol-list"></div>
+                            <div id="rx-symbol-list" class="log-container"></div>
                         </div>
                     </div>
 
@@ -103,31 +114,32 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                TX symbol
+                                TX data
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <button class="btn btn-default" onClick="onConnectClick(44100)">Connect (44.1 kHz)</button>
-                            <button class="btn btn-default" onClick="onConnectClick(48000)">Connect (48.0 kHz)</button>
-                            <br/>
-
-                            <button class="btn btn-default" onClick="onSymbolClick(100)">100</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(101)">101</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(102)">102</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(103)">103</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(104)">104</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(105)">105</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(106)">106</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(107)">107</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(108)">108</button>
-                            <button class="btn btn-default" onClick="onSymbolClick(109)">109</button>
+                            <div class="clearfix margin-bottom">
+                                <button class="btn btn-default" onClick="onConnectClick(44100)">Connect (44.1 kHz)</button>
+                                <button class="btn btn-default" onClick="onConnectClick(48000)">Connect (48.0 kHz)</button>
+                            </div>
+                            <div class="clearfix margin-bottom">
+                                <input type="text" class="pull-left margin-right" id="tx-symbol-field" />
+                                <button
+                                    class="btn btn-default pull-left"
+                                    onClick="onSymbolClick(parseInt(document.getElementById('tx-symbol-field').value))">
+                                    Send symbol
+                                </button>
+                            </div>
+                            <div class="clearfix margin-bottom">
+                                <input type="text" placeholder="focus and type" id="tx-keycode-field" />
+                            </div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Symbol queue
+                                Queue
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">

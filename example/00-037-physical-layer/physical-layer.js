@@ -3,38 +3,33 @@
 
 var
     physicalLayer,
-    rxSymbolList = [];
+    physicalLayerState,
+    rxSymbolList,
+    rxAsciiList;
 
 function init() {
     physicalLayer = new PhysicalLayer(statusHandler);
+    rxSymbolList = new Buffer(16);
+    rxAsciiList = new Buffer(16);
 
-    document.addEventListener(
-        'keyup',
+    document.getElementById('tx-keycode-field').addEventListener(
+        'keydown',
         function(e) {
-            var digit = getDigitFromKeyCode(e.keyCode);
+            var
+                isClean = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1,
+                keyCode = isClean ? e.key.charCodeAt(0) : 0,
+                isPrintableAscii = keyCode >= ' '.charCodeAt(0) && keyCode <= '~'.charCodeAt(0);
 
-            if (digit !== null) {
-                physicalLayer.txSymbol(100 + digit);
+            e.preventDefault();
+
+            if (isPrintableAscii && physicalLayerState) {
+                physicalLayer.txSymbol(physicalLayerState.band.symbolMin + keyCode);
             }
         },
         true
     );
 
     onLoopbackCheckboxChange();
-}
-
-function getDigitFromKeyCode(keyCode) {
-    var digit = null;
-
-    if (keyCode >= 48 && keyCode <= 57) {
-        digit = keyCode - 48;
-    } else {
-        if (keyCode >= 96 && keyCode <= 105) {
-            digit = keyCode - 96;
-        }
-    }
-
-    return digit;
 }
 
 function onLoopbackCheckboxChange() {
@@ -46,18 +41,30 @@ function onLoopbackCheckboxChange() {
 function refreshTxSymbolQueue() {
     var txSymbolQueue = physicalLayer.getTxSymbolQueue();
 
-    html('#tx-symbol-queue', txSymbolQueue.join(', '));
+    html('#tx-symbol-queue', txSymbolQueue.join(' '));
 }
 
 function statusHandler(state) {
+    var keyCode, isPrintableAscii;
+
     if (state.isSymbolReadyToTake) {
-        rxSymbolList.push(state.symbol);
+        rxSymbolList.pushEvenIfFull(state.symbol);
+        keyCode = state.symbol - state.band.symbolMin;
+        isPrintableAscii = keyCode >= ' '.charCodeAt(0) && keyCode <= '~'.charCodeAt(0);
+        rxAsciiList.pushEvenIfFull(
+            isPrintableAscii ? String.fromCharCode(keyCode) : '�'
+        );
     }
     updateView(state);
+    physicalLayerState = state;
 }
 
 function updateView(state) {
-    html('#rx-dsp-detail', state.dsp.sampleRateReceive + ' Hz');
+    html(
+        '#rx-general-info',
+        'Sample rate: ' + state.dsp.sampleRateReceive + '&nbsp;Hz<br/>' +
+        'Symbol range: <' + state.band.symbolMin + ',&nbsp;' + state.band.symbolMax + '>'
+    );
 
     if (state.isConnectionInProgress) {
         html('#rx-log-connect', 'connecting...');
@@ -73,7 +80,7 @@ function updateView(state) {
         if (state.isSymbolSamplingPoint) {
             if (state.isSymbolReadyToTake) {
                 html('#rx-symbol-synchronized', state.symbol + ' (' + state.symbolDetail.signalDecibel.toFixed(2) + ' dB)');
-                html('#rx-symbol-list', rxSymbolList.join(', '));
+                html('#rx-symbol-list', rxSymbolList.getAll().join(' ') + '<br/>' + rxAsciiList.getAll().join(''));
             } else {
                 html('#rx-symbol-synchronized', 'idle');
             }

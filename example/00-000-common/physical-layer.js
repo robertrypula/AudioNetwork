@@ -55,7 +55,9 @@ PhysicalLayer.prototype.txConnect = function (sampleRate) {
 };
 
 PhysicalLayer.prototype.txSymbol = function (symbol) {
-    this.$$addToTxQueue(symbol);
+    if (symbol) {
+        this.$$addToTxQueue(symbol);
+    }
 };
 
 PhysicalLayer.prototype.setLoopback = function (state) {

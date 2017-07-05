@@ -81,6 +81,7 @@ ConnectSignalDetector.prototype.handle = function (sampleNumber, dataLogicValue,
     connectSignalDetected = this.$$correlator.isCorrelatedHigh();
 
     if (!this.$$samplingBlock[offset]) {
+        // TODO move this initialization to dedicated place
         this.$$samplingBlock[offset] = {
             decisionList: [],
             connectSignalJustLost: undefined,

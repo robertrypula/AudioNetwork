@@ -270,6 +270,10 @@ input[type=text], input[type=number] {
     margin-bottom: 3px;
 }
 
+input[type=text]::placeholder, input[type=number]::placeholder {
+    color: lightgray;
+}
+
 input[type=text]:disabled, input[type=number]:disabled, textarea:disabled, textarea[readonly=readonly] {
     color: #a4afbd;
     background: #ddd;
