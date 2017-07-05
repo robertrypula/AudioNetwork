@@ -9,18 +9,18 @@ var
 
 function init() {
     physicalLayer = new PhysicalLayer(statusHandler);
-    rxSymbolList = new Buffer(16);
-    rxAsciiList = new Buffer(16);
+    rxSymbolList = new Buffer(20);
+    rxAsciiList = new Buffer(20);
 
     document.getElementById('tx-keycode-field').addEventListener(
         'keydown',
         function(e) {
             var
-                isClean = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1,
-                keyCode = isClean ? e.key.charCodeAt(0) : 0,
+                keyCode = e.key.length === 1 ? e.key.charCodeAt(0) : 0,
                 isPrintableAscii = keyCode >= ' '.charCodeAt(0) && keyCode <= '~'.charCodeAt(0);
 
             e.preventDefault();
+            e.stopPropagation();
 
             if (isPrintableAscii && physicalLayerState) {
                 physicalLayer.txSymbol(physicalLayerState.band.symbolMin + keyCode);
