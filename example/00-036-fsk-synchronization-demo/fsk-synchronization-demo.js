@@ -9,14 +9,22 @@ var
     48.0 kHz -> skipping 3 -> 17.578125 Hz      - 4 570 Hz
     44.1 kHz -> skipping 3 -> 16.14990234375 Hz - 4 199 Hz
      */
+    DIGIT_ZERO_SYMBOL = 100,
 
     physicalLayer,
+    physicalLayerConfiguration = {
+        fftFrequencyBinSkipFactor: 5,
+        symbolMin: 93,
+        symbolMax: 117,
+        symbolSyncA: 108,
+        symbolSyncB: 109
+    },
     rxSpectrogram,
     rxSymbolList = [],
     txSampleRateWidget;
 
 function init() {
-    physicalLayer = new PhysicalLayer(statusHandler);
+    physicalLayer = new PhysicalLayer(statusHandler, physicalLayerConfiguration);
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
@@ -30,7 +38,7 @@ function init() {
             var digit = getDigitFromKeyCode(e.keyCode);
 
             if (digit !== null) {
-                physicalLayer.txSymbol(100 + digit);
+                physicalLayer.txSymbol(DIGIT_ZERO_SYMBOL + digit);
             }
         },
         true
@@ -42,6 +50,7 @@ function init() {
 function getDigitFromKeyCode(keyCode) {
     var digit = null;
 
+    // digits from standard keys and numeric keys
     if (keyCode >= 48 && keyCode <= 57) {
         digit = keyCode - 48;
     } else {
@@ -70,13 +79,14 @@ function refreshTxSymbolQueue() {
 }
 
 function statusHandler(state) {
-    if (state.isSymbolSynchronized) {
+    if (state.isSymbolReadyToTake) {
         rxSymbolList.push(state.symbol);
+        console.log(state);
     }
-    rxUpdateView(state);
+    updateView(state);
 }
 
-function rxUpdateView(state) {
+function updateView(state) {
     var cd;
 
     html(
@@ -112,13 +122,13 @@ function rxUpdateView(state) {
             document.getElementById('loudest-marker').checked ? state.band.frequencyDataLoudestIndex : -1,
             state.band.symbolMin,
             1,
-            state.isSymbolSynchronized
+            state.isSymbolReadyToTake
         );
     }
 
     if (state.isConnected) {
         if (state.isSymbolSamplingPoint) {
-            if (state.isSymbolAboveThreshold) {
+            if (state.isSymbolReadyToTake) {
                 html('#rx-symbol-synchronized', state.symbol + ' (' + state.symbolDetail.signalDecibel.toFixed(2) + ' dB)');
                 html('#rx-symbol-list', rxSymbolList.join(', '));
             } else {

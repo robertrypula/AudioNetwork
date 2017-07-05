@@ -280,6 +280,10 @@ AudioMonoIO.prototype.setVolume = function (volume) {
     this.$$setImmediately(this.$$masterOutVolume.gain, volume);
 };
 
+AudioMonoIO.prototype.isLoopbackEnabled = function () {
+    return this.$$loopbackEnabled;
+};
+
 AudioMonoIO.prototype.setLoopback = function (state) {
     state = !!state;
 
