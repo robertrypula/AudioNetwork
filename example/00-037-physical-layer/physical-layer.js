@@ -13,20 +13,21 @@ function init() {
     rxAsciiList = new Buffer(20);
 
     document.getElementById('tx-keycode-field').addEventListener(
-        'keydown',
+        'keypress',
         function(e) {
             var
-                keyCode = e.key.length === 1 ? e.key.charCodeAt(0) : 0,
-                isPrintableAscii = keyCode >= ' '.charCodeAt(0) && keyCode <= '~'.charCodeAt(0);
+                rawKeyCode = e.keyCode || e.which || 0,
+                char = String.fromCharCode(rawKeyCode),
+                isPrintableAscii = char >= ' ' && char <= '~',
+                charKeyCode = isPrintableAscii ? char.charCodeAt(0) : 0;
 
             e.preventDefault();
             e.stopPropagation();
 
-            if (isPrintableAscii && physicalLayerState) {
-                physicalLayer.txSymbol(physicalLayerState.band.symbolMin + keyCode);
+            if (charKeyCode && physicalLayerState) {
+                physicalLayer.txSymbol(physicalLayerState.band.symbolMin + charKeyCode);
             }
-        },
-        true
+        }
     );
 
     onLoopbackCheckboxChange();
