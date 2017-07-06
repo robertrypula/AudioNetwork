@@ -12,7 +12,7 @@ var
     rxAsciiList;
 
 function init() {
-    physicalLayer = new PhysicalLayer(statusHandler);
+    physicalLayer = new PhysicalLayer(stateHandler);
     rxSymbolList = new Buffer(BUFFER_SIZE);
     rxAsciiList = new Buffer(BUFFER_SIZE);
 
@@ -25,7 +25,7 @@ function onLoopbackCheckboxChange() {
     );
 }
 
-function statusHandler(state) {
+function stateHandler(state) {
     var charCode, char;
 
     if (state.isSymbolReadyToTake) {
@@ -47,11 +47,8 @@ function refreshTxSymbolQueue() {
 }
 
 function updateView(state) {
-    html(
-        '#rx-general-info',
-        'Sample rate: ' + state.dsp.sampleRateReceive + '&nbsp;Hz<br/>' +
-        'Symbol range: <' + state.band.symbolMin + ',&nbsp;' + state.band.symbolMax + '>'
-    );
+    html('#rx-sample-rate', (state.dsp.sampleRateReceive / 1000).toFixed(1) + '&nbsp;kHz');
+    html('#symbol-range', '<' + state.band.symbolMin + ',&nbsp;' + state.band.symbolMax + '>');
 
     if (state.isConnectionInProgress) {
         html('#rx-log-connect', 'connecting...');

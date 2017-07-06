@@ -1,49 +1,56 @@
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+'use strict';
+
 var dataLinkLayer;
 
 function init() {
-    dataLinkLayer = new DataLinkLayer();
+    dataLinkLayer = new DataLinkLayer(stateHandler);
+    onLoopbackCheckboxChange();
 }
 
-function compute16bit(data) {
-    var
-        sum1 = 0,
-        sum2 = 0,
-        i;
+function onLoopbackCheckboxChange() {
+    dataLinkLayer.setLoopback(
+        document.getElementById('loopback-checkbox').checked
+    );
+}
 
-    for (i = 0; i < data.length; i++) {
-        sum1 = (sum1 + data[i]) % 255;
-        sum2 = (sum2 + sum1) % 255;
+function updateView(state) {
+    var plState = state.physicalLayerState;
+
+    if (plState.isConnectionInProgress) {
+        html('#rx-connect-status', 'connecting...');
+    } else {
+        html('#rx-connect-status', plState.isConnected ? 'Connected!' : 'not connected');
     }
 
-    return [
-        sum2,
-        sum1
-    ];
+    html('#rx-frame-candidates', getStringFromByteList(state.byteBuffer));
 }
 
-function compute8bit(data) {
-    var
-        sum1 = 0,
-        sum2 = 0,
-        i,
-        value;
+function stateHandler(state) {
+    console.log(state);
+    updateView(state);
+}
 
-    console.log(data.length);
+function onConnectClick(sampleRate) {
+    dataLinkLayer.connect(sampleRate);
+    // refreshTxSymbolQueue();
+}
 
-    for (i = 0; i < 2 * data.length; i++) {
-        value = i % 2 === 0
-            ? (data[i >>> 1] >>> 4) & 0xF
-            : data[i >>> 1] & 0xF;
+// ---------------------------------------
 
-        console.log(i, value.toString(16));
+function pad(num, size) {
+    var s = '000000000' + num;
 
-        sum1 = (sum1 + value) % 15;
-        sum2 = (sum2 + sum1) % 15;
+    return s.substr(s.length - size);
+}
+
+function getStringFromByteList(byteList) {
+    var i, tmp, formatted = [];
+
+    for (i = 0; i < byteList.length; i++) {
+        tmp = pad(byteList[i].toString(16), 2);
+        formatted.push(tmp);
     }
 
-    return [
-        sum2,
-        sum1
-    ];
+    return formatted.join(' ');
 }
-

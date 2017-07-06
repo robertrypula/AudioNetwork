@@ -3,14 +3,14 @@
 
 var PhysicalLayer;
 
-PhysicalLayer = function (statusHandler, configuration) {
+PhysicalLayer = function (stateHandler, configuration) {
     var
         c = configuration || {},
         vod = PhysicalLayer.$$getValueOrDefault;
 
     // TODO implement builder class that will replace configuration object
     this.$$sampleTimeMs = vod(c.sampleTimeMs, 250);
-    this.$$samplePerSymbol = vod(c.samplePerSymbol, 3);
+    this.$$samplePerSymbol = vod(c.samplePerSymbol, 2);
     this.$$fftSize = vod(c.fftSize, 8 * 1024);
     this.$$fftFrequencyBinSkipFactor = vod(c.fftFrequencyBinSkipFactor, 3);
     this.$$symbolMin = vod(c.symbolMin, 98);
@@ -32,7 +32,7 @@ PhysicalLayer = function (statusHandler, configuration) {
     this.$$txCurrentSymbol = PhysicalLayer.NULL_SYMBOL;
     this.$$txSymbolQueue = [];
 
-    this.$$statusHandler = PhysicalLayer.$$isFunction(statusHandler) ? statusHandler : null;
+    this.$$stateHandler = PhysicalLayer.$$isFunction(stateHandler) ? stateHandler : null;
     this.$$audioMonoIO = new AudioMonoIO(this.$$fftSize);
     this.$$connectSignalDetector = new ConnectSignalDetector(this.$$samplePerSymbol, this.$$rxSignalThresholdFactor);
     this.$$txSampleRate = PhysicalLayer.DEFAULF_TX_SAMPLE_RATE;
@@ -201,8 +201,8 @@ PhysicalLayer.prototype.$$smartTimerHandler = function () {
     this.$$txSmartTimerHandler();
     state = this.getState();
 
-    if (this.$$statusHandler) {
-        this.$$statusHandler(state);
+    if (this.$$stateHandler) {
+        this.$$stateHandler(state);
     }
 
     this.$$sampleNumber++;

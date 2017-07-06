@@ -24,7 +24,7 @@ var
     txSampleRateWidget;
 
 function init() {
-    physicalLayer = new PhysicalLayer(statusHandler, physicalLayerConfiguration);
+    physicalLayer = new PhysicalLayer(stateHandler, physicalLayerConfiguration);
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
@@ -78,7 +78,7 @@ function refreshTxSymbolQueue() {
     html('#tx-symbol-queue', txSymbolQueue.join(', '));
 }
 
-function statusHandler(state) {
+function stateHandler(state) {
     if (state.isSymbolReadyToTake) {
         rxSymbolList.push(state.symbol);
         console.log(state);
