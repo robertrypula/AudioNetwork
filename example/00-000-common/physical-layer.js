@@ -29,7 +29,7 @@ PhysicalLayer = function (statusHandler, configuration) {
     this.$$fftResult = undefined;
     this.$$isSymbolSamplingPoint = undefined;
     this.$$isSymbolReadyToTake = undefined;
-    this.$$txCurrentSymbol = undefined;
+    this.$$txCurrentSymbol = PhysicalLayer.NULL_SYMBOL;
     this.$$txSymbolQueue = [];
 
     this.$$statusHandler = PhysicalLayer.$$isFunction(statusHandler) ? statusHandler : null;
@@ -41,22 +41,37 @@ PhysicalLayer = function (statusHandler, configuration) {
 };
 
 PhysicalLayer.DEFAULF_TX_SAMPLE_RATE = 48000;
+PhysicalLayer.NULL_SYMBOL = null;
+PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
 PhysicalLayer.prototype.txConnect = function (sampleRate) {
-    var i, codeValue;
+    var i, codeValue, symbol;
 
     this.$$txSampleRate = sampleRate;
     for (i = 0; i < this.$$connectSignalDetector.$$correlator.getCodeLength(); i++) {  // TODO refactor this
         codeValue = this.$$connectSignalDetector.$$correlator.getCodeValue(i);
-        this.$$addToTxQueue(
-            codeValue === -1 ? this.$$symbolSyncA : this.$$symbolSyncB
-        );
+        symbol = codeValue === -1
+            ? this.$$symbolSyncA
+            : this.$$symbolSyncB;
+        this.$$txSymbolQueue.push(symbol);
     }
 };
 
 PhysicalLayer.prototype.txSymbol = function (symbol) {
-    if (symbol) {
-        this.$$addToTxQueue(symbol);
+    var isNumber, symbolParsed, isValid;
+
+    if (symbol === PhysicalLayer.NULL_SYMBOL) {
+        this.$$txSymbolQueue.push(symbol);
+    } else {
+        symbolParsed = parseInt(symbol);
+        isNumber = typeof symbolParsed === 'number';
+        isValid = isNumber && this.$$symbolMin <= symbolParsed && symbolParsed <= this.$$symbolMax;
+
+        if (!isValid) {
+            throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
+        }
+
+        this.$$txSymbolQueue.push(symbolParsed);
     }
 };
 
@@ -139,7 +154,7 @@ PhysicalLayer.$$getValueOrDefault = function (value, defaultValue) {
 PhysicalLayer.prototype.$$setTxSound = function () {
     var frequency;
 
-    if (!this.$$txCurrentSymbol) {
+    if (this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL) {
         this.$$audioMonoIO.setPeriodicWave(undefined, 0);
         return;
     }
@@ -178,10 +193,6 @@ PhysicalLayer.prototype.$$setTxSound = function () {
     }
 };
 
-PhysicalLayer.prototype.$$addToTxQueue = function (symbol) {
-    this.$$txSymbolQueue.push(symbol);
-};
-
 PhysicalLayer.prototype.$$smartTimerHandler = function () {
     var state;
 
@@ -213,7 +224,10 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     this.$$noiseDecibel = this.$$fftResult.getDecibelAverage(this.$$symbolMin, this.$$symbolMax, this.$$symbol);
     this.$$frequencyDataReceiveBand = this.$$fftResult.getDecibelRange(this.$$symbolMin, this.$$symbolMax);
 
-    allowedToListenConnectSignal = !this.$$txCurrentSymbol || this.$$audioMonoIO.isLoopbackEnabled();
+    allowedToListenConnectSignal =
+        this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
+        this.$$audioMonoIO.isLoopbackEnabled();
+
     if (allowedToListenConnectSignal) {
         switch (this.$$symbol) {
             case this.$$symbolSyncA:
@@ -243,7 +257,9 @@ PhysicalLayer.prototype.$$txSmartTimerHandler = function () {
     var isFirstSampleOfBlock = this.$$offset === 0;
 
     if (isFirstSampleOfBlock) {
-        this.$$txCurrentSymbol = this.$$txSymbolQueue.shift();
+        this.$$txCurrentSymbol = this.$$txSymbolQueue.length > 0
+            ? this.$$txSymbolQueue.shift()
+            : PhysicalLayer.NULL_SYMBOL;
     }
     this.$$setTxSound();
 };

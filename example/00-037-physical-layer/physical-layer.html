@@ -114,25 +114,48 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                TX data
+                                Connect
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="onConnectClick(44100)">44.1 kHz</button>
+                            <button class="btn btn-default" onClick="onConnectClick(48000)">48.0 kHz</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Symbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix">
+                                <input type="text" class="pull-left margin-right" id="tx-symbol-field" />
+                                <button
+                                        class="btn btn-default pull-left"
+                                        onClick="onSendSymbolClick()">
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Text
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom">
-                                <button class="btn btn-default" onClick="onConnectClick(44100)">Connect (44.1 kHz)</button>
-                                <button class="btn btn-default" onClick="onConnectClick(48000)">Connect (48.0 kHz)</button>
+                                <textarea id="tx-text-field"></textarea>
                             </div>
-                            <div class="clearfix margin-bottom">
-                                <input type="text" class="pull-left margin-right" id="tx-symbol-field" />
-                                <button
-                                    class="btn btn-default pull-left"
-                                    onClick="onSymbolClick(parseInt(document.getElementById('tx-symbol-field').value))">
-                                    Send symbol
-                                </button>
-                            </div>
-                            <div class="clearfix margin-bottom">
-                                <input type="text" placeholder="focus and type" id="tx-keycode-field" />
-                            </div>
+                            <button
+                                class="btn btn-default"
+                                onClick="onSendTextClick()">
+                                Send
+                            </button>
                         </div>
                     </div>
 
