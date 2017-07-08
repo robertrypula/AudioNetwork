@@ -6,10 +6,11 @@ var DataLinkLayer;
 DataLinkLayer = function (stateHandler) {
     this.$$physicalLayer = new PhysicalLayer(this.$$physicalLayerStateHandler.bind(this));
     this.$$physicalLayerState = undefined;
-    this.$$frameDataLimit = 7;
-    this.$$byteBuffer = new Buffer(this.$$frameDataLimit + 2);
+    this.$$dataLimit = 15;
+    this.$$byteBuffer = new Buffer(this.$$dataLimit + 2);
+    this.$$byteBuffer.fillWith(0);
     this.$$stateHandler = DataLinkLayer.$$isFunction(stateHandler) ? stateHandler : null;
-    this.$$frameCandidates = [];
+    this.$$validFrameList = [];
     
     /*
     {
@@ -35,8 +36,8 @@ DataLinkLayer.prototype.setLoopback = function (state) {
 DataLinkLayer.prototype.send = function (data) {
     var i, byte, symbol, frame;
 
-    if (data.length > this.$$frameDataLimit) {
-        throw 'Frame cannot have more than ' + this.$$frameDataLimit + ' bytes';
+    if (data.length > this.$$dataLimit) {
+        throw 'Frame cannot have more than ' + this.$$dataLimit + ' bytes';
     }
 
     frame = [];
@@ -45,11 +46,11 @@ DataLinkLayer.prototype.send = function (data) {
         byte = data[i];
         frame.push(byte);
     }
-    frame.push(computeChecksum(frame));
+    frame.push(this.$$computeChecksum(frame));
 
     for (i = 0; i < frame.length; i++) {
         byte = frame[i];
-        symbol = physicalLayerState.band.symbolMin + byte;
+        symbol = this.$$physicalLayerState.band.symbolMin + byte;
         this.$$physicalLayer.txSymbol(symbol);
     }
 };
@@ -63,31 +64,46 @@ DataLinkLayer.prototype.getState = function () {
 
     state = {
         physicalLayerState: this.$$physicalLayerState,
-        byteBuffer: this.$$byteBuffer.getAll()
+        byteBuffer: this.$$byteBuffer.getAll(),
+        validFrameList: this.$$validFrameList
     };
 
     return state;
 };
 
 DataLinkLayer.prototype.$$tryToFindValidFrame = function () {
-    var i, byte, frame;
+    var i, j, frame, byte, checksumPayload, frameList = [];
 
-    /*
-    0 - 00
-    1 - 0x0
-    2 - 0xx0
-    3 - 0xxx0
-    4 - 0xxxx0
-    5 - 0xxxxx0
-    6 - 0xxxxxx0
-    7 - 0xxxxxxx0
-    */
+    this.$$validFrameList = [];
+    for (i = 0; i <= this.$$dataLimit; i++) {
+        checksumPayload = [];
+        frame = {
+            length: undefined,
+            data: [],
+            checksum: undefined,
+            isValid: false
+        };
 
-    for (i = 0; i < this.$$frameDataLimit; i++) {
-        frame = [];
+        byte = this.$$byteBuffer.getItem(i);
+        frame.length = byte;
+        checksumPayload.push(byte);
+        for (j = i + 1; j <= this.$$dataLimit; j++) {
+            byte = this.$$byteBuffer.getItem(j);
+            frame.data.push(byte);
+            checksumPayload.push(byte);
+        }
+        byte = this.$$byteBuffer.getItem(this.$$dataLimit + 1);
+        frame.checksum = byte;
+        frame.checksumShouldBe = this.$$computeChecksum(checksumPayload);
+        frame.lengthShouldBe = 0xF0 + (this.$$dataLimit - i);
+        frame.isValid = frame.checksumShouldBe === frame.checksum &&
+            frame.lengthShouldBe === frame.length;
 
-        frame.push(this.$$byteBuffer.getItem(i));
+        if (frame.isValid) {
+            this.$$validFrameList.push(frame);
+        }
 
+        frameList.push(frame);
     }
 };
 
@@ -124,20 +140,20 @@ DataLinkLayer.prototype.$$computeChecksum = function (data) {
         i,
         value;
 
-    console.log(data.length);
+    // console.log(data.length);
 
     for (i = 0; i < 2 * data.length; i++) {
         value = i % 2 === 0
             ? (data[i >>> 1] >>> 4) & 0xF
             : data[i >>> 1] & 0xF;
 
-        console.log(i, value.toString(16));
+        // console.log(i, value.toString(16));
 
         sum1 = (sum1 + value) % 15;
         sum2 = (sum2 + sum1) % 15;
     }
 
-    console.log(sum2.toString(16), sum1.toString(16));
+    // console.log(sum2.toString(16), sum1.toString(16));
 
     return (sum2 << 4) | sum1;
 };

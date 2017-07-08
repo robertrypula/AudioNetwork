@@ -101,3 +101,11 @@ Buffer.prototype.getAll = function () {
 
     return result;
 };
+
+Buffer.prototype.fillWith = function (value) {
+    var i;
+
+    for (i = 0; i < this.getSizeMax(); i++) {
+        this.pushEvenIfFull(value);
+    }
+};

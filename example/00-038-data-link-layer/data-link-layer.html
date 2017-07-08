@@ -102,7 +102,9 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-frame-candidates" class="log-container"></div>
+                            <div id="rx-byte-buffer" class="log-container margin-bottom"></div>
+                            <div id="rx-frame-list" class="log-container margin-bottom"></div>
+                            <div id="rx-ascii-list" class="log-container"></div>
                         </div>
                     </div>
 
@@ -135,6 +137,24 @@
                             <button
                                 class="btn btn-default"
                                 onClick="onSendByteHexClick()">
+                                Send
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Text
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom">
+                                <textarea id="tx-text-field"></textarea>
+                            </div>
+                            <button
+                                class="btn btn-default"
+                                onClick="onSendTextClick()">
                                 Send
                             </button>
                         </div>
