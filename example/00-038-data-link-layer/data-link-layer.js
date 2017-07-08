@@ -2,6 +2,7 @@
 'use strict';
 
 var
+    ASCII_NULL = 0,
     UNICODE_UNKNOWN = '�',
     dataLinkLayer,
     receivedPacketList = [],
@@ -35,7 +36,7 @@ function updateView(state) {
 
 function stateHandler(state) {
     var i, j, str, char, charCode;
-    
+
     if (state.isFrameReadyToTake) {
         for (i = 0; i < state.validFrameList.length; i++) {
             str = getStringFromByteList(state.validFrameList[i].data);
