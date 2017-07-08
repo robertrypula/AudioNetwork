@@ -6,9 +6,11 @@ var DataLinkLayer;
 DataLinkLayer = function (stateHandler) {
     this.$$physicalLayer = new PhysicalLayer(this.$$physicalLayerStateHandler.bind(this));
     this.$$physicalLayerState = undefined;
-    this.$$byteBuffer = new Buffer(10);
+    this.$$frameDataLimit = 7;
+    this.$$byteBuffer = new Buffer(this.$$frameDataLimit + 2);
     this.$$stateHandler = DataLinkLayer.$$isFunction(stateHandler) ? stateHandler : null;
     this.$$frameCandidates = [];
+    
     /*
     {
         isPacketReadyToTake:
@@ -31,7 +33,25 @@ DataLinkLayer.prototype.setLoopback = function (state) {
 };
 
 DataLinkLayer.prototype.send = function (data) {
+    var i, byte, symbol, frame;
 
+    if (data.length > this.$$frameDataLimit) {
+        throw 'Frame cannot have more than ' + this.$$frameDataLimit + ' bytes';
+    }
+
+    frame = [];
+    frame.push(0xF0 + data.length);
+    for (i = 0; i < data.length; i++) {
+        byte = data[i];
+        frame.push(byte);
+    }
+    frame.push(computeChecksum(frame));
+
+    for (i = 0; i < frame.length; i++) {
+        byte = frame[i];
+        symbol = physicalLayerState.band.symbolMin + byte;
+        this.$$physicalLayer.txSymbol(symbol);
+    }
 };
 
 DataLinkLayer.prototype.connect = function (sampleRate) {
@@ -50,7 +70,25 @@ DataLinkLayer.prototype.getState = function () {
 };
 
 DataLinkLayer.prototype.$$tryToFindValidFrame = function () {
+    var i, byte, frame;
 
+    /*
+    0 - 00
+    1 - 0x0
+    2 - 0xx0
+    3 - 0xxx0
+    4 - 0xxxx0
+    5 - 0xxxxx0
+    6 - 0xxxxxx0
+    7 - 0xxxxxxx0
+    */
+
+    for (i = 0; i < this.$$frameDataLimit; i++) {
+        frame = [];
+
+        frame.push(this.$$byteBuffer.getItem(i));
+
+    }
 };
 
 DataLinkLayer.prototype.$$physicalLayerStateHandler = function (physicalLayerState) {

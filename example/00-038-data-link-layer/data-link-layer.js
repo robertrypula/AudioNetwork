@@ -36,6 +36,10 @@ function onConnectClick(sampleRate) {
     // refreshTxSymbolQueue();
 }
 
+function onSendByteHexClick() {
+    var data = document.getElementById('tx-byte-hex-field').value;
+}
+
 // ---------------------------------------
 
 function pad(num, size) {
