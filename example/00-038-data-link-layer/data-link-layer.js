@@ -35,18 +35,20 @@ function updateView(state) {
 
 function stateHandler(state) {
     var i, j, str, char, charCode;
+    
+    if (state.isFrameReadyToTake) {
+        for (i = 0; i < state.validFrameList.length; i++) {
+            str = getStringFromByteList(state.validFrameList[i].data);
 
-    for (i = 0; i < state.validFrameList.length; i++) {
-        str = getStringFromByteList(state.validFrameList[i].data);
-
-        for (j = 0; j < state.validFrameList[i].data.length; j++) {
-            charCode = state.validFrameList[i].data[j];
-            char = String.fromCharCode(charCode);
-            asciiList.pushEvenIfFull(
-                isPrintableAscii(char) ? char : UNICODE_UNKNOWN
-            );
+            for (j = 0; j < state.validFrameList[i].data.length; j++) {
+                charCode = state.validFrameList[i].data[j];
+                char = String.fromCharCode(charCode);
+                asciiList.pushEvenIfFull(
+                    isPrintableAscii(char) ? char : UNICODE_UNKNOWN
+                );
+            }
+            receivedPacketList.unshift(str);
         }
-        receivedPacketList.unshift(str);
     }
 
     updateView(state);

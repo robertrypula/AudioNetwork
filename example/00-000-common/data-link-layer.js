@@ -65,7 +65,8 @@ DataLinkLayer.prototype.getState = function () {
     state = {
         physicalLayerState: this.$$physicalLayerState,
         byteBuffer: this.$$byteBuffer.getAll(),
-        validFrameList: this.$$validFrameList
+        validFrameList: this.$$validFrameList,
+        isFrameReadyToTake: this.$$physicalLayerState.isSymbolSamplingPoint
     };
 
     return state;
