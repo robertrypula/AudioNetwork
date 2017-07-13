@@ -42,6 +42,10 @@ Capture and decode fm radio
 
 Nice online charts:
     http://fooplot.com/
+    
+OFDM Symbols synchronization
+
+    https://dsp.stackexchange.com/questions/7724/how-is-symbol-synchronization-with-ofdm-done
 
 Frequency response
     https://codepen.io/DonKarlssonSan/post/fun-with-web-audio-api
