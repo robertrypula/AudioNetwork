@@ -13,7 +13,7 @@ var
 
     physicalLayer,
     physicalLayerConfiguration = {
-        fftFrequencyBinSkipFactor: 5,
+        fftFrequencyBinSkipFactor: 3,
         symbolMin: 93,
         symbolMax: 117,
         symbolSyncA: 108,

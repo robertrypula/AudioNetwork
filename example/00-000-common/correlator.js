@@ -7,27 +7,25 @@ Correlator = function (skipFactor, code) {
     this.$$code = code
         ? code.slice(0)
         : Correlator.SYNC_CODE.slice(0);
-    this.$$skipFactor;
-    this.$$dataBuffer;
-    this.$$signalDecibelBuffer;
-    this.$$noiseDecibelBuffer;
-    this.$$cacheCorrelactionValue;
-    this.$$cacheSignalDecibelAverage;
-    this.$$cacheNoiseDecibelAverage;
+
+    this.$$skipFactor = undefined;
+    this.$$dataBuffer = undefined;
+    this.$$signalDecibelBuffer = undefined;
+    this.$$noiseDecibelBuffer = undefined;
+    this.$$cacheCorrelactionValue = undefined;
+    this.$$cacheSignalDecibelAverage = undefined;
+    this.$$cacheNoiseDecibelAverage = undefined;
 
     this.setSkipFactor(skipFactor);
 };
 
 Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
 
-Correlator.CORRELATION_POSITIVE_HIGH = 'CORRELATION_POSITIVE_HIGH';
-Correlator.CORRELATION_POSITIVE_LOW = 'CORRELATION_POSITIVE_LOW';
+Correlator.CORRELATION_POSITIVE = 'CORRELATION_POSITIVE';
 Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
-Correlator.CORRELATION_NEGATIVE_LOW = 'CORRELATION_NEGATIVE_LOW';
-Correlator.CORRELATION_NEGATIVE_HIGH = 'CORRELATION_NEGATIVE_HIGH';
+Correlator.CORRELATION_NEGATIVE = 'CORRELATION_NEGATIVE';
 
-Correlator.THRESHOLD_HIGH = 0.8;
-Correlator.THRESHOLD_LOW = 0.5;
+Correlator.THRESHOLD = 0.8;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
 
@@ -53,9 +51,9 @@ Correlator.prototype.setSkipFactor = function (skipFactor) {
     skipFactor = skipFactor || 1;
 
     this.$$skipFactor = skipFactor;
-    this.$$dataBuffer = new Buffer(this.getCodeLength() *  this.$$skipFactor);
-    this.$$signalDecibelBuffer = new Buffer(this.getCodeLength() *  this.$$skipFactor);
-    this.$$noiseDecibelBuffer = new Buffer(this.getCodeLength() *  this.$$skipFactor);
+    this.$$dataBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
+    this.$$signalDecibelBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
+    this.$$noiseDecibelBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
     this.$$cacheCorrelactionValue = undefined;
     this.$$cacheSignalDecibelAverage = undefined;
     this.$$cacheNoiseDecibelAverage = undefined;
@@ -91,46 +89,33 @@ Correlator.prototype.handle = function (dataLogicValue, signalDecibel, noiseDeci
     this.$$cacheNoiseDecibelAverage = undefined;
 };
 
-Correlator.prototype.getCorrelationValueThresholdHigh = function () {
-    return Math.floor(Correlator.THRESHOLD_HIGH * this.getCodeLength());
+Correlator.prototype.getCorrelationValueThreshold = function () {
+    return Math.floor(Correlator.THRESHOLD * this.getCodeLength());
 };
 
-Correlator.prototype.getCorrelationValueThresholdLow = function () {
-    return Math.floor(Correlator.THRESHOLD_LOW * this.getCodeLength());
-};
-
-Correlator.prototype.isCorrelatedHigh = function () {
+Correlator.prototype.isCorrelated = function () {
     var correlation = this.getCorrelation();
 
     return (
-        correlation === Correlator.CORRELATION_NEGATIVE_HIGH ||
-        correlation === Correlator.CORRELATION_POSITIVE_HIGH
+        correlation === Correlator.CORRELATION_NEGATIVE ||
+        correlation === Correlator.CORRELATION_POSITIVE
     );
 };
 
 Correlator.prototype.getCorrelation = function () {
     var
         correlationValue = this.getCorrelationValue(),
-        high = this.getCorrelationValueThresholdHigh(),
-        low = this.getCorrelationValueThresholdLow();
+        correlationValueThreshold = this.getCorrelationValueThreshold();
 
-    if (correlationValue >= high) {
-        return Correlator.CORRELATION_POSITIVE_HIGH;
+    if (correlationValue >= correlationValueThreshold) {
+        return Correlator.CORRELATION_POSITIVE;
     }
 
-    if (correlationValue >= low) {
-        return Correlator.CORRELATION_POSITIVE_LOW;
-    }
-
-    if (correlationValue > -low) {
+    if (correlationValue > -correlationValueThreshold) {
         return Correlator.CORRELATION_NONE;
     }
 
-    if (correlationValue > -high) {
-        return Correlator.CORRELATION_NEGATIVE_LOW;
-    }
-
-    return Correlator.CORRELATION_NEGATIVE_HIGH;
+    return Correlator.CORRELATION_NEGATIVE;
 };
 
 Correlator.prototype.$$getAverage = function (buffer) {

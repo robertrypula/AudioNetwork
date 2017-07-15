@@ -2,12 +2,12 @@
 'use strict';
 
 var
-    FFT_SIZE = 4 * 1024,
-    SKIP_FACTOR = 5,
+    FFT_SIZE = 0.25 * 1024,
+    SKIP_FACTOR = 1,
 
-    RX_FREQUENCY_MIN = 1000,
-    RX_FREQUENCY_MAX = 4000,
-    RX_TIME_MS = 500,
+    RX_FREQUENCY_MIN = 0,
+    RX_FREQUENCY_MAX = 14000,
+    RX_TIME_MS = 250,
     TX_SAMPLE_RATE = 48000,
     TX_AMPLITUDE = 0.01,
 

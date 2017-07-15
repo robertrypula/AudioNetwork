@@ -78,7 +78,7 @@ ConnectSignalDetector.prototype.handle = function (sampleNumber, dataLogicValue,
     isLastOffsetInSamplingBlock = offset === (this.$$samplePerSymbol - 1);
     
     this.$$correlator.handle(dataLogicValue, signalDecibel, noiseDecibel);
-    connectSignalDetected = this.$$correlator.isCorrelatedHigh();
+    connectSignalDetected = this.$$correlator.isCorrelated();
 
     if (!this.$$samplingBlock[offset]) {
         // TODO move this initialization to dedicated place
