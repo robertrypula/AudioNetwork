@@ -17,7 +17,7 @@ FFTResult.$$_HALF = 0.5;
 
 FFTResult.VALUES_OUT_OF_RANGE = 'Values out of range';
 
-FFTResult.prototype.downconvert = function (exponent) {
+FFTResult.prototype.downconvert = function (exponent) {  // deprecated
     var factor = Math.pow(2, exponent);
 
     this.downconvertScalar(factor);

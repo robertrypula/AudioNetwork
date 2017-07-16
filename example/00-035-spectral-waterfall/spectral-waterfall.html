@@ -72,15 +72,53 @@
                         </div>
                     </div>
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                FFT Size exponent
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="fft-size-exponent" class="clearfix"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                FFT skip factor
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="fft-frequency-bin-skip-factor" class="clearfix"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Quick View
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="onQuickViewClick('full')">Full range</button>
+                            <button class="btn btn-default" onClick="onQuickViewClick('whistling')">Whistling range</button>
+                        </div>
+                    </div>
+
+
                     <h2>r</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                RX Sample rate
+                                DSP details
                             </label>
                         </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9" id="rx-sample-rate"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-dsp-detail" class="log-container"></div>
+                        </div>
                     </div>
 
                     <div class="row margin-bottom-double">
@@ -126,20 +164,16 @@
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label>
-                                Symbol
-                            </label>
-                        </div>
+                        <div class="col col-xs-5 col-sm-5 col-md-3"></div>
                         <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="rx-log"></div>
+                            <div id="rx-log" class="log-container"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                RX symbol
+                                Symbol RAW
                             </label>
                         </div>
                         <div class="col col-xs-7 col-sm-7 col-md-9">

@@ -113,7 +113,7 @@ Spectrogram.prototype.add = function (data, loudestIndex, rxIndexMin, rxResoluti
         legend = [];
         for (i = 0; i < data.length; i++) {
             legend.push(
-                -100 + 100 * i / (data.length - 1)
+                -160 + 160 * i / (data.length - 1)
             );
         }
         this.$$add(legend);
@@ -145,7 +145,7 @@ Spectrogram.prototype.$$add = function (data, loudestIndex, isSymbolSamplingPoin
 
     html = '';
     if (isDataRow) {
-        decibelForColor = isSymbolSamplingPoint ? -35 : -100;
+        decibelForColor = isSymbolSamplingPoint ? -35 : -160;
         color = Spectrogram.getColor(decibelForColor);
         title = 'title="sample #' + this.$$rowCountTotal + '"';
     } else {

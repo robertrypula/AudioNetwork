@@ -2,35 +2,34 @@
 'use strict';
 
 var
-    FFT_SIZE = 0.25 * 1024,
-    SKIP_FACTOR = 1,
-
+    FFT_SIZE_EXPONENT = 13,
+    FFT_FREQUENCY_BIN_SKIP_FACTOR = 47,
     RX_FREQUENCY_MIN = 0,
-    RX_FREQUENCY_MAX = 14000,
-    RX_TIME_MS = 250,
-    TX_SAMPLE_RATE = 48000,
-    TX_AMPLITUDE = 0.01,
+    RX_FREQUENCY_MAX = 20000,
+    SAMPLE_TIME_MS = 250,
+    TX_SAMPLE_RATE = 44100,
+    TX_AMPLITUDE = 0.1,
 
     audioMonoIO,
     rxSpectrogram,
+    smartTimer,
     rxSampleCount = 0,
-    
-    rxSmartTimer,
+
+    fftSizeExponent,
+    fftFrequencyBinSkipFactor,
     rxFrequencyMin,
     rxFrequencyMax,
-
-    txSampleRate,
-    txSymbol;
+    txSymbol,
+    txSampleRate;
 
 function init() {
-    audioMonoIO = new AudioMonoIO(FFT_SIZE);
-    document.getElementById('rx-sample-rate').innerHTML = audioMonoIO.getSampleRate();
+    audioMonoIO = new AudioMonoIO(Math.pow(2, FFT_SIZE_EXPONENT));
 
     initFloatWidget();
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
-    rxSmartTimer = new SmartTimer(RX_TIME_MS / 1000);
-    rxSmartTimer.setHandler(rxSmartTimerHandler);
+    smartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
+    smartTimer.setHandler(smartTimerHandler);
 
     onLoopbackCheckboxChange();
 }
@@ -41,8 +40,33 @@ function onLoopbackCheckboxChange() {
     }
 }
 
+function onQuickViewClick(type) {
+    switch (type) {
+        case 'full':
+            fftSizeExponent.setValue(FFT_SIZE_EXPONENT);
+            fftFrequencyBinSkipFactor.setValue(FFT_FREQUENCY_BIN_SKIP_FACTOR);
+            rxFrequencyMin.setValue(RX_FREQUENCY_MIN);
+            rxFrequencyMax.setValue(RX_FREQUENCY_MAX);
+
+            fftSizeExponent.forceUpdate();
+            break;
+        case 'whistling':
+            fftSizeExponent.setValue(13);
+            fftFrequencyBinSkipFactor.setValue(1);
+            rxFrequencyMin.setValue(900);
+            rxFrequencyMax.setValue(2100);
+
+            fftSizeExponent.forceUpdate();
+            break;
+    }
+}
+
+function getFftSize() {
+    return Math.pow(2, fftSizeExponent.getValue());
+}
+
 function getTransmitFrequency(symbol) {
-    return SKIP_FACTOR * symbol * txSampleRate.getValue() / FFT_SIZE;
+    return fftFrequencyBinSkipFactor.getValue() * symbol * txSampleRate.getValue() / getFftSize();
 }
 
 function setTxSound(symbol) {
@@ -58,19 +82,29 @@ function setTxSound(symbol) {
 }
 
 function initFloatWidget() {
+    fftSizeExponent = new EditableFloatWidget(
+        document.getElementById('fft-size-exponent'),
+        FFT_SIZE_EXPONENT, 2, 0,
+        onFftSizeExponentChange
+    );
+
+    fftFrequencyBinSkipFactor = new EditableFloatWidget(
+        document.getElementById('fft-frequency-bin-skip-factor'),
+        FFT_FREQUENCY_BIN_SKIP_FACTOR, 2, 0,
+        null
+    );
+
     rxFrequencyMin = new EditableFloatWidget(
         document.getElementById('rx-frequency-min'),
         RX_FREQUENCY_MIN, 5, 0,
         null
     );
+
     rxFrequencyMax = new EditableFloatWidget(
         document.getElementById('rx-frequency-max'),
         RX_FREQUENCY_MAX, 5, 0,
         null
     );
-
-    rxFrequencyMin.forceUpdate();
-    rxFrequencyMax.forceUpdate();
 
     // ---
 
@@ -79,6 +113,7 @@ function initFloatWidget() {
         TX_SAMPLE_RATE, 5, 0,
         onTxSampleRateChange
     );
+
     txSymbol = new EditableFloatWidget(
         document.getElementById('tx-symbol'),
         0, 4, 0,
@@ -89,9 +124,8 @@ function initFloatWidget() {
 
 // ----------------------
 
-function onTxSampleRateChange() {
-    txSampleRate.getValue();
-    onTxSymbolChange();
+function onFftSizeExponentChange() {
+    audioMonoIO.setFFTSize(getFftSize());
 }
 
 function onTxSymbolChange() {
@@ -101,6 +135,11 @@ function onTxSymbolChange() {
 
     html('#tx-symbol-frequency', hertz.toFixed(2) + ' Hz');
     onTxPlayChange();
+}
+
+function onTxSampleRateChange() {
+    txSampleRate.getValue();
+    onTxSymbolChange();
 }
 
 // ----------------------
@@ -113,30 +152,19 @@ function onTxPlayChange() {
 
 // ----------------------
 
-function rxSmartTimerHandler() {
-    var
-        frequencyData,
-        fftResult,
-        rxBinMin,
-        rxBinMax,
-        loudestBinIndex,
-        frequencyDataInner = [],
-        i;
+function updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fftResult) {
+    var fftNominalResolution;
 
-    if (!document.getElementById('rx-active').checked) {
-        return;
-    }
+    fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
 
-    frequencyData = audioMonoIO.getFrequencyData();
-    fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
-    fftResult.downconvertScalar(SKIP_FACTOR);
-    rxBinMin = fftResult.getBinIndex(rxFrequencyMin.getValue());
-    rxBinMax = fftResult.getBinIndex(rxFrequencyMax.getValue());
-    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(rxBinMin, rxBinMax);
-
-    for (i = rxBinMin; i <= rxBinMax; i++) {
-        frequencyDataInner.push(fftResult.getDecibel(i));
-    }
+    html(
+        '#rx-dsp-detail',
+        'Sample rate: ' + audioMonoIO.getSampleRate() + ' Hz<br/>' +
+        'FFT size: ' + getFftSize() + '<br/>' +
+        'FFT time: ' + (getFftSize() / audioMonoIO.getSampleRate()).toFixed(3) + ' sec<br/>' +
+        'FFT native resolution: ' + fftNominalResolution.toFixed(2) + ' Hz<br/>' +
+        'FFT skipped resolution: ' + (fftNominalResolution * fftFrequencyBinSkipFactor.getValue()).toFixed(2) + ' Hz'
+    );
 
     rxSpectrogram.add(
         frequencyDataInner,
@@ -155,6 +183,34 @@ function rxSmartTimerHandler() {
         'max&nbsp;&nbsp; : ' + rxBinMax + ' (' + fftResult.getFrequency(rxBinMax).toFixed(2) + ' Hz)<br/>' +
         'range : ' + (rxBinMax - rxBinMin + 1) + '<br/>'
     );
+}
+
+function smartTimerHandler() {
+    var
+        frequencyData,
+        fftResult,
+        rxBinMin,
+        rxBinMax,
+        loudestBinIndex,
+        frequencyDataInner = [],
+        i;
+
+    if (!document.getElementById('rx-active').checked) {
+        return;
+    }
+
+    frequencyData = audioMonoIO.getFrequencyData();
+    fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
+    fftResult.downconvertScalar(fftFrequencyBinSkipFactor.getValue());
+    rxBinMin = fftResult.getBinIndex(rxFrequencyMin.getValue());
+    rxBinMax = fftResult.getBinIndex(rxFrequencyMax.getValue());
+    loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(rxBinMin, rxBinMax);
+
+    for (i = rxBinMin; i <= rxBinMax; i++) {
+        frequencyDataInner.push(fftResult.getDecibel(i));
+    }
+
+    updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fftResult);
 
     rxSampleCount++;
 }

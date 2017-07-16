@@ -3,6 +3,6 @@
     font-size: 1.2em;
 }
 
-#rx-log {
+.log-container {
     font-family: monospace;
 }
