@@ -60,7 +60,7 @@ function generateInfoTable() {
         frequencyOfClosestBin,
         i;
 
-    // yeah, I know - Angular would be better...
+    // yeah, I know - Angular or React would be better...
     table = '<table>';
     table += '<tr>' +
         '<th class="th-0">Note<br/>name</th>' +

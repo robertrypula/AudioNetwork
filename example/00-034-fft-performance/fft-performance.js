@@ -7,7 +7,13 @@ var
     audioMonoIO,
     equalHistory,
     fftResultPrevious,
-    refreshCounter;
+    refreshCounter,
+    summaryLogged = false,
+    summary = {
+        average: [],
+        best: [],
+        worst: []
+    };
 
 function init() {
 
@@ -59,11 +65,20 @@ function getIndex(data, type) {
 }
 
 function getFps(timeInMs) {
+    // fps -> Ffts Per Second :)
     return 1000 / timeInMs;
 }
 
 function log() {
     var i, logStr, lastNewIndex, timeDiff, speed, equalCount, avg, min, max;
+
+    if (summary.average.length === 5) {
+        if (!summaryLogged) {
+            logSummary();
+            summaryLogged = true;
+        }
+        return;
+    }
 
     lastNewIndex = -1;
     speed = [];
@@ -94,9 +109,40 @@ function log() {
         'Worst: ' + max + ' ms (' + getFps(max).toFixed(2) + ' FFT/s) | ' +
         '<br/><br/>';
 
+    summary.average.push(avg);
+    summary.best.push(min);
+    summary.worst.push(max);
+
     html('#log', logStr, true);
 
     equalHistory.length = 0;
+}
+
+function logSummary() {
+    var table, tableContent, i, average, best, worst;
+
+    average = getAvg(summary.average);
+    best = getAvg(summary.best);
+    worst = getAvg(summary.worst);
+
+    // yeah, I know - Angular or React would be better...
+    table = '<table>';
+    table += '<tr>' +
+        '<th class="th-0">Average</th>' +
+        '<th class="th-0">Best</th>' +
+        '<th class="th-0">Worst</th>' +
+        '</tr>';
+    for (i = 0; i < 1; i++) {
+        tableContent = [];
+        tableContent.push(
+            '<td class="td-0">' + average.toFixed(2) + ' ms (' + getFps(average).toFixed(2) + ' FFT/s)' + '</td>',
+            '<td class="td-0">' + best.toFixed(2) + ' ms (' + getFps(best).toFixed(2) + ' FFT/s)' + '</td>',
+            '<td class="td-0">' + worst.toFixed(2) + ' ms (' + getFps(worst).toFixed(2) + ' FFT/s)' + '</td>'
+        );
+        table += '<tr>' + tableContent.join('') + '</tr>';
+    }
+    table += '</table>';
+    html('#log', table, true);
 }
 
 function refresh() {
