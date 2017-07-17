@@ -58,6 +58,14 @@ function onQuickViewClick(type) {
 
             fftSizeExponent.forceUpdate();
             break;
+        case 'physical-layer':
+            fftSizeExponent.setValue(FFT_SIZE_EXPONENT);
+            fftFrequencyBinSkipFactor.setValue(3);
+            rxFrequencyMin.setValue(1400);
+            rxFrequencyMax.setValue(6050);
+
+            fftSizeExponent.forceUpdate();
+            break;
     }
 }
 
@@ -159,7 +167,7 @@ function updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fft
 
     html(
         '#rx-dsp-detail',
-        'Sample rate: ' + audioMonoIO.getSampleRate() + ' Hz<br/>' +
+        'Sample rate: ' + (audioMonoIO.getSampleRate() / 1000).toFixed(1) + ' kHz<br/>' +
         'FFT size: ' + getFftSize() + '<br/>' +
         'FFT time: ' + (getFftSize() / audioMonoIO.getSampleRate()).toFixed(3) + ' sec<br/>' +
         'FFT native resolution: ' + fftNominalResolution.toFixed(2) + ' Hz<br/>' +

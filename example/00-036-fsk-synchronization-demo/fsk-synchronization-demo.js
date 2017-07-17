@@ -2,13 +2,6 @@
 'use strict';
 
 var
-    /*
-    48.0 kHz -> skipping 5 -> 29.296875 Hz      - 7 617 Hz
-    44.1 kHz -> skipping 5 -> 26.91650390625 Hz - 6 998 Hz
-
-    48.0 kHz -> skipping 3 -> 17.578125 Hz      - 4 570 Hz
-    44.1 kHz -> skipping 3 -> 16.14990234375 Hz - 4 199 Hz
-     */
     DIGIT_ZERO_SYMBOL = 100,
 
     physicalLayer,
@@ -91,9 +84,10 @@ function updateView(state) {
 
     html(
         '#rx-dsp-detail',
-        'Sample rate: ' + state.dsp.sampleRateReceive + ' Hz<br/>' +
+        'Sample rate: ' + (state.dsp.sampleRateReceive / 1000).toFixed(1) + ' kHz<br/>' +
         'FFT size: ' + state.dsp.fftSize + '<br/>' +
-        'FFT time: ' + state.dsp.fftWindowTime.toFixed(3) + ' sec'
+        'FFT time: ' + state.dsp.fftWindowTime.toFixed(3) + ' sec<br/>' +
+        'Symbol spacing: ' + state.dsp.symbolFrequencySpacing.toFixed(3) + ' Hz'
     );
 
     if (state.isConnectionInProgress) {

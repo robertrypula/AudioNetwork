@@ -6,14 +6,22 @@ var PhysicalLayer;
 PhysicalLayer = function (stateHandler, configuration) {
     var
         c = configuration || {},
-        vod = PhysicalLayer.$$getValueOrDefault;
+        vod = PhysicalLayer.$$getValueOrDefault,
+        symbolMin;
+
+    this.$$fftSize = vod(c.fftSize, 8 * 1024);          // should this be constant?
+    this.$$audioMonoIO = new AudioMonoIO(this.$$fftSize);
+
+    // 258 symbols, skip factor 3
+    // 44.1 kHz -> 16.14990234375 Hz -> start 1841 Hz, stop 6008 Hz, bandwidth 4167 Hz -> symbolMin 114
+    // 48.0 kHz -> 17.578125 Hz      -> start 1458 Hz, stop 5994 Hz, bandwidth 4535 Hz -> symbolMin 83
+    symbolMin = this.$$audioMonoIO.getSampleRate() === 44100 ? 114 : 83;
 
     // TODO implement builder class that will replace configuration object
     this.$$sampleTimeMs = vod(c.sampleTimeMs, 250);
     this.$$samplePerSymbol = vod(c.samplePerSymbol, 2);
-    this.$$fftSize = vod(c.fftSize, 8 * 1024);
     this.$$fftFrequencyBinSkipFactor = vod(c.fftFrequencyBinSkipFactor, 3);
-    this.$$symbolMin = vod(c.symbolMin, 98);
+    this.$$symbolMin = vod(c.symbolMin, symbolMin);
     this.$$symbolMax = vod(c.symbolMax, (this.$$symbolMin - 1) + 256 + 2);     // 8-bit data (256 symbol), connection signal (2 symbols)
     this.$$symbolSyncA = vod(c.symbolSyncA, this.$$symbolMax - 1);
     this.$$symbolSyncB = vod(c.symbolSyncB, this.$$symbolMax - 0);
@@ -33,7 +41,6 @@ PhysicalLayer = function (stateHandler, configuration) {
     this.$$txSymbolQueue = [];
 
     this.$$stateHandler = PhysicalLayer.$$isFunction(stateHandler) ? stateHandler : null;
-    this.$$audioMonoIO = new AudioMonoIO(this.$$fftSize);
     this.$$connectSignalDetector = new ConnectSignalDetector(this.$$samplePerSymbol, this.$$rxSignalThresholdFactor);
     this.$$txSampleRate = PhysicalLayer.DEFAULF_TX_SAMPLE_RATE;
     this.$$smartTimer = new SmartTimer(this.$$sampleTimeMs / 1000);
@@ -123,6 +130,7 @@ PhysicalLayer.prototype.getState = function () {
         symbolDetail: {
             frequency: this.$$fftResult.getFrequency(this.$$symbol),
             signalDecibel: this.$$signalDecibel,
+            // TODO add secondLoudestDecibel
             noiseDecibel: this.$$noiseDecibel
         },
         offset: this.$$offset,

@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// TODO use EditableFloat widget
+
 var
     LIMIT_CANVAS_WIDTH = true,
     FFT_SIZE = 2 * 1024,         // powers of 2 in range: 32, 32768

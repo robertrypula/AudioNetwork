@@ -19,13 +19,13 @@ Correlator = function (skipFactor, code) {
     this.setSkipFactor(skipFactor);
 };
 
-Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
+Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1];
 
 Correlator.CORRELATION_POSITIVE = 'CORRELATION_POSITIVE';
 Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
 Correlator.CORRELATION_NEGATIVE = 'CORRELATION_NEGATIVE';
 
-Correlator.THRESHOLD = 0.8;
+Correlator.THRESHOLD = 0.9;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
 
