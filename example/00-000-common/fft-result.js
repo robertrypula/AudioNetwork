@@ -25,7 +25,7 @@ FFTResult.prototype.downconvert = function (exponent) {  // deprecated
 
 FFTResult.prototype.downconvertScalar = function (factor) {
     var
-        result = [],
+        newFftData = [],
         factorHalf = Math.floor(factor / 2),
         sampleRateCorrection,
         max,
@@ -37,13 +37,13 @@ FFTResult.prototype.downconvertScalar = function (factor) {
         for (j = Math.max(0, i - factorHalf); j < Math.min(i - factorHalf + factor, this.$$fftData.length); j++) {
             max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
         }
-        result.push(max);
+        newFftData.push(max);
     }
 
-    sampleRateCorrection = factor * result.length / this.$$fftData.length;
+    sampleRateCorrection = factor * newFftData.length / this.$$fftData.length;
     this.$$sampleRate *= sampleRateCorrection;
 
-    this.$$fftData = result;
+    this.$$fftData = newFftData;
 };
 
 FFTResult.prototype.getLoudestBinIndex = function (frequencyStart, frequencyEnd) {

@@ -51,12 +51,13 @@ PhysicalLayer.DEFAULF_TX_SAMPLE_RATE = 48000;
 PhysicalLayer.NULL_SYMBOL = null;
 PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
-PhysicalLayer.prototype.txConnect = function (sampleRate) {
-    var i, codeValue, symbol;
+PhysicalLayer.prototype.txConnect = function (sampleRate) {   // sendConnectSequence
+    var i, correlatorCode, codeValue, symbol;
 
+    correlatorCode = this.$$connectSignalDetector.getCorrelatorCode();
     this.$$txSampleRate = sampleRate;
-    for (i = 0; i < this.$$connectSignalDetector.$$correlator.getCodeLength(); i++) {  // TODO refactor this
-        codeValue = this.$$connectSignalDetector.$$correlator.getCodeValue(i);
+    for (i = 0; i < correlatorCode.length; i++) {
+        codeValue = correlatorCode[i];
         symbol = codeValue === -1
             ? this.$$symbolSyncA
             : this.$$symbolSyncB;
@@ -64,11 +65,11 @@ PhysicalLayer.prototype.txConnect = function (sampleRate) {
     }
 };
 
-PhysicalLayer.prototype.txSymbol = function (symbol) {
+PhysicalLayer.prototype.txSymbol = function (symbol) {         // sendSymbol
     var isNumber, symbolParsed, isValid;
 
     if (symbol === PhysicalLayer.NULL_SYMBOL) {
-        this.$$txSymbolQueue.push(symbol);
+        this.$$txSymbolQueue.push(PhysicalLayer.NULL_SYMBOL);
     } else {
         symbolParsed = parseInt(symbol);
         isNumber = typeof symbolParsed === 'number';
@@ -96,9 +97,10 @@ PhysicalLayer.prototype.getTxSymbolQueue = function () {
 
 PhysicalLayer.prototype.setTxSampleRate = function (sampleRate) {
     this.$$txSampleRate = sampleRate;
+    this.$$txSymbolQueue.length = 0;
 };
 
-PhysicalLayer.prototype.getState = function () {
+PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, getGeneralState
     var state, cd;
 
     cd = this.$$connectSignalDetector.isConnected()
@@ -130,7 +132,8 @@ PhysicalLayer.prototype.getState = function () {
         symbolDetail: {
             frequency: this.$$fftResult.getFrequency(this.$$symbol),
             signalDecibel: this.$$signalDecibel,
-            // TODO add secondLoudestDecibel
+            signalNextCandidateDecibel: 0, // TODO compute those values
+            signalQuality: 3,              // TODO compute those values
             noiseDecibel: this.$$noiseDecibel
         },
         offset: this.$$offset,
@@ -140,7 +143,7 @@ PhysicalLayer.prototype.getState = function () {
         connectionDetail: !cd ? null : {
             offset: cd.offset,
             correlationValue: cd.correlationValue,
-            correlationValueMax: cd.correlationValueMax,
+            correlationCodeLength: cd.correlationCodeLength,
             signalDecibel: cd.signalDecibel,
             noiseDecibel: cd.noiseDecibel,
             signalToNoiseRatio: cd.signalToNoiseRatio,
@@ -159,7 +162,7 @@ PhysicalLayer.$$getValueOrDefault = function (value, defaultValue) {
     return typeof value !== 'undefined' ? value : defaultValue;
 };
 
-PhysicalLayer.prototype.$$setTxSound = function () {
+PhysicalLayer.prototype.$$updateOscillator = function () {
     var frequency;
 
     if (this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL) {
@@ -216,10 +219,32 @@ PhysicalLayer.prototype.$$smartTimerHandler = function () {
     this.$$sampleNumber++;
 };
 
-PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
+PhysicalLayer.prototype.$$getConnectionSignalValue = function (symbol) {
     var
         allowedToListenConnectSignal,
-        signalValue,
+        connectSignalValue = 0;
+
+    allowedToListenConnectSignal =
+        this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
+        this.$$audioMonoIO.isLoopbackEnabled();
+
+    if (allowedToListenConnectSignal) {
+        switch (symbol) {
+            case this.$$symbolSyncA:
+                connectSignalValue = -1;
+                break;
+            case this.$$symbolSyncB:
+                connectSignalValue = 1;
+                break;
+        }
+    }
+
+    return connectSignalValue;
+};
+
+PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
+    var
+        connectSignalValue,
         frequencyData,
         connectionDetail,
         isSymbolAboveThreshold;
@@ -232,22 +257,10 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     this.$$noiseDecibel = this.$$fftResult.getDecibelAverage(this.$$symbolMin, this.$$symbolMax, this.$$symbol);
     this.$$frequencyDataReceiveBand = this.$$fftResult.getDecibelRange(this.$$symbolMin, this.$$symbolMax);
 
-    allowedToListenConnectSignal =
-        this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
-        this.$$audioMonoIO.isLoopbackEnabled();
-
-    signalValue = 0;
-    if (allowedToListenConnectSignal) {
-        switch (this.$$symbol) {
-            case this.$$symbolSyncA:
-                signalValue = -1;
-                break;
-            case this.$$symbolSyncB:
-                signalValue = 1;
-                break;
-        }
-    }
-    this.$$connectSignalDetector.handle(this.$$sampleNumber, signalValue, this.$$signalDecibel, this.$$noiseDecibel);
+    connectSignalValue = this.$$getConnectionSignalValue(this.$$symbol);
+    this.$$connectSignalDetector.handle(
+        this.$$sampleNumber, connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
+    );
 
     connectionDetail = this.$$connectSignalDetector.getConnectionDetail();
 
@@ -270,5 +283,5 @@ PhysicalLayer.prototype.$$txSmartTimerHandler = function () {
             ? this.$$txSymbolQueue.shift()
             : PhysicalLayer.NULL_SYMBOL;
     }
-    this.$$setTxSound();
+    this.$$updateOscillator();
 };

@@ -74,7 +74,6 @@ function refreshTxSymbolQueue() {
 function stateHandler(state) {
     if (state.isSymbolReadyToTake) {
         rxSymbolList.push(state.symbol);
-        console.log(state);
     }
     updateView(state);
 }
@@ -99,7 +98,7 @@ function updateView(state) {
                 '#rx-log-connect',
                 'Connected!<br/>' +
                 '- offset ' + cd.offset + '<br/>' +
-                '- correlation ' + cd.correlationValue + '/' + cd.correlationValueMax + '<br/>' +
+                '- correlation ' + Math.abs(cd.correlationValue) + '/' + cd.correlationCodeLength + '<br/>' +
                 '- signal ' + cd.signalDecibel.toFixed(2) + ' dB' + '<br/>' +
                 '- noise ' + cd.noiseDecibel.toFixed(2) + ' dB' + '<br/>' +
                 '- SNR ' + cd.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +

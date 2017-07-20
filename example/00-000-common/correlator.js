@@ -1,12 +1,19 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+/*
+TODO:
+    - add barker code as default to correlator class
+    - make private methods: setSkipFactor, getCorrelationThresgold
+    - move similar methods closer each other
+ */
+
 var Correlator;
 
 Correlator = function (skipFactor, code) {
     this.$$code = code
         ? code.slice(0)
-        : Correlator.SYNC_CODE.slice(0);
+        : Correlator.DEFAULT_SYNC_CODE.slice(0);
 
     this.$$skipFactor = undefined;
     this.$$dataBuffer = undefined;
@@ -19,7 +26,7 @@ Correlator = function (skipFactor, code) {
     this.setSkipFactor(skipFactor);
 };
 
-Correlator.SYNC_CODE = [1, -1, 1, -1, 1, -1];
+Correlator.DEFAULT_SYNC_CODE = [1, -1, 1, -1, 1, -1];
 
 Correlator.CORRELATION_POSITIVE = 'CORRELATION_POSITIVE';
 Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
@@ -31,16 +38,12 @@ Correlator.NO_DATA = 0;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
 
-Correlator.prototype.getCodeLength = function () {
-    return this.$$code.length;
+Correlator.prototype.getCode = function () {
+    return this.$$code.slice(0);
 };
 
-Correlator.prototype.getCodeValue = function (position) {
-    if (position < 0 || position >= this.getCodeLength()) {
-        throw Correlator.POSITION_OUT_OF_RANGE_EXCEPTION;
-    }
-
-    return this.$$code[position];
+Correlator.prototype.getCodeLength = function () {
+    return this.$$code.length;
 };
 
 Correlator.prototype.reset = function () {
@@ -48,19 +51,20 @@ Correlator.prototype.reset = function () {
 };
 
 Correlator.prototype.setSkipFactor = function (skipFactor) {
-    var i;
+    var i, bufferMaxSize;
 
     skipFactor = skipFactor || 1;
+    bufferMaxSize = this.$$code.length * skipFactor;
 
     this.$$skipFactor = skipFactor;
-    this.$$dataBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
-    this.$$signalDecibelBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
-    this.$$noiseDecibelBuffer = new Buffer(this.getCodeLength() * this.$$skipFactor);
+    this.$$dataBuffer = new Buffer(bufferMaxSize);
+    this.$$signalDecibelBuffer = new Buffer(bufferMaxSize);
+    this.$$noiseDecibelBuffer = new Buffer(bufferMaxSize);
     this.$$cacheCorrelactionValue = undefined;
     this.$$cacheSignalDecibelAverage = undefined;
     this.$$cacheNoiseDecibelAverage = undefined;
 
-    for (i = 0; i < this.getCodeLength() * this.$$skipFactor; i++) {
+    for (i = 0; i < bufferMaxSize; i++) {
         this.$$dataBuffer.pushEvenIfFull(Correlator.NO_DATA);
         this.$$signalDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
         this.$$noiseDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
@@ -88,14 +92,11 @@ Correlator.prototype.handle = function (signalValue, signalDecibel, noiseDecibel
         isValidDecibel ? noiseDecibel : Correlator.NO_DECIBEL
     );
 
-    // clear cache
-    this.$$cacheCorrelactionValue = undefined;
-    this.$$cacheSignalDecibelAverage = undefined;
-    this.$$cacheNoiseDecibelAverage = undefined;
+    this.$$clearCache();
 };
 
 Correlator.prototype.getCorrelationValueThreshold = function () {
-    return Math.floor(Correlator.THRESHOLD * this.getCodeLength());
+    return Math.floor(Correlator.THRESHOLD * this.$$code.length);
 };
 
 Correlator.prototype.isCorrelated = function () {
@@ -115,7 +116,6 @@ Correlator.prototype.getCorrelation = function () {
     if (correlationValue >= correlationValueThreshold) {
         return Correlator.CORRELATION_POSITIVE;
     }
-
     if (correlationValue > -correlationValueThreshold) {
         return Correlator.CORRELATION_NONE;
     }
@@ -123,14 +123,20 @@ Correlator.prototype.getCorrelation = function () {
     return Correlator.CORRELATION_NEGATIVE;
 };
 
+Correlator.prototype.$$clearCache = function () {
+    this.$$cacheCorrelactionValue = undefined;
+    this.$$cacheSignalDecibelAverage = undefined;
+    this.$$cacheNoiseDecibelAverage = undefined;
+};
+
 Correlator.prototype.$$getDecibelAverage = function (buffer) {
-    var i, offset, bufferIndex, value, sum, sumLength, average;
+    var i, lastIndexInSkipBlock, bufferIndex, value, sum, sumLength, average;
 
     sum = 0;
     sumLength = 0;
-    offset = this.$$skipFactor - 1;
-    for (i = 0; i < this.getCodeLength(); i++) {
-        bufferIndex = i * this.$$skipFactor + offset;
+    lastIndexInSkipBlock = this.$$skipFactor - 1;
+    for (i = 0; i < this.$$code.length; i++) {
+        bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
         value = buffer.getItem(bufferIndex);
         if (value !== Correlator.NO_DECIBEL) {
             sum += value;
@@ -165,12 +171,13 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
     var
         signalDecibelAverage = this.getSignalDecibelAverage(),
         noiseDecibelAverage = this.getNoiseDecibelAverage(),
-        isAbleToCompute,
-        signalToNoiseRatio;
+        signalToNoiseRatio = 0,
+        isAbleToCompute;
 
-    signalToNoiseRatio = 0;
-    isAbleToCompute = signalDecibelAverage !== Correlator.NO_DECIBEL &&
+    isAbleToCompute =
+        signalDecibelAverage !== Correlator.NO_DECIBEL &&
         noiseDecibelAverage !== Correlator.NO_DECIBEL;
+
     if (isAbleToCompute) {
         signalToNoiseRatio = signalDecibelAverage - noiseDecibelAverage;
     }
@@ -179,19 +186,19 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
 };
 
 Correlator.prototype.getCorrelationValue = function () {
-    var i, offset, bufferIndex, data, code, result;
+    var i, lastIndexInSkipBlock, bufferIndex, data, code, result;
 
     if (this.$$cacheCorrelactionValue !== undefined) {
         return this.$$cacheCorrelactionValue;
     }
 
     result = 0;
-    offset = this.$$skipFactor - 1;
-    for (i = 0; i < this.getCodeLength(); i++) {
-        bufferIndex = i * this.$$skipFactor + offset;
+    lastIndexInSkipBlock = this.$$skipFactor - 1;
+    for (i = 0; i < this.$$code.length; i++) {
+        bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
         data = this.$$dataBuffer.getItem(bufferIndex);
-        if (data) {
-            code = this.getCodeValue(i);
+        if (data !== Correlator.NO_DATA) {
+            code = this.$$code[i];
             result += data * code;
         }
     }

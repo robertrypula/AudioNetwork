@@ -1,13 +1,34 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+/*
+TODO:
+    - rename to ConnectSequenceDetector
+    - remove sampleNumber
+    - remove threshold
+    - add connection counter
+    - rename signalDecibel to decibelAverageSignal
+    - rename noiseDecibel to decibelAverageNoise
+    - add code to constructor and remove getCorrelatorCode
+    - move public methods to top
+    - remove code length from connection details
+ */
+
 var ConnectSignalDetector = function (samplePerSymbol, signalThresholdFactor) {
     this.$$samplePerSymbol = samplePerSymbol;
     this.$$connectionInProgress = false;
     this.$$connectionDetail = null;
     this.$$correlator = new Correlator(samplePerSymbol);
     this.$$signalThresholdFactor = signalThresholdFactor;
-    this.$$samplingBlock = [];
+    this.$$blockHistory = undefined;
+
+    this.$$initializeBlockHistory();
+};
+
+ConnectSignalDetector.$$_FIRST_ELEMENT = 0;
+
+ConnectSignalDetector.prototype.getCorrelatorCode = function () {
+    return this.$$correlator.getCode();
 };
 
 ConnectSignalDetector.prototype.isConnectionInProgress = function () {
@@ -22,110 +43,146 @@ ConnectSignalDetector.prototype.getConnectionDetail = function () {
     return this.$$connectionDetail;
 };
 
-ConnectSignalDetector.prototype.$$sortConnectionDetail = function (data) {
+ConnectSignalDetector.prototype.$$sortByCorrelationValue = function (a, b) {
+    var
+        cvA = a.correlationValue,
+        cvB = b.correlationValue;
+
+    return cvA < cvB ? 1 : cvA > cvB ? -1 : 0;
+};
+
+ConnectSignalDetector.prototype.$$sortBySignalDecibel = function (a, b) {
+    var
+        sdA = a.signalDecibel,
+        sdB = b.signalDecibel;
+
+    return sdA < sdB ? 1 : sdA > sdB ? -1 : 0;
+};
+
+ConnectSignalDetector.prototype.$$sortDecisionList = function (data) {
+    var self = this;
+
     data.sort(function (a, b) {
         return 0 ||
-            a.correlationValue < b.correlationValue ? 1 : a.correlationValue > b.correlationValue ? -1 : 0 ||
-            a.signalDecibel < b.signalDecibel ? 1 : a.signalDecibel > b.signalDecibel ? -1 : 0;
+            self.$$sortByCorrelationValue(a, b) ||
+            self.$$sortBySignalDecibel(a, b);
     });
 };
 
-ConnectSignalDetector.prototype.$$findStrongestConnectionDetail = function () {
-    var offset, decisionList, innerDecisionList;
+ConnectSignalDetector.prototype.$$initializeBlockHistory = function () {
+    var offset;
 
-    if (false && JSON) {
-        console.log(
-            JSON.stringify(
-                this.$$samplingBlock,
-                true,
-                2
-            )
-        );
+    this.$$blockHistory = [];
+    for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
+        this.$$blockHistory.push({
+            decisionList: [],
+            connectSignalJustLost: undefined,
+            connectSignalDetected: undefined
+        });
     }
+};
+
+ConnectSignalDetector.prototype.$$resetBlockHistory = function () {
+    var offset, blockHistoryEntry;
+
+    for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
+        blockHistoryEntry = this.$$blockHistory[offset];
+        blockHistoryEntry.decisionList.length = 0;
+        blockHistoryEntry.connectSignalJustLost = undefined;
+        blockHistoryEntry.connectSignalDetected = undefined;
+    }
+};
+
+ConnectSignalDetector.prototype.$$getStrongestConnectionDetail = function () {
+    var offset, decisionList, innerDecisionList, strongestConnectionDetail;
 
     decisionList = [];
-    for (offset = 0; offset < this.$$samplingBlock.length; offset++) {
-        innerDecisionList = this.$$samplingBlock[offset].decisionList;
+    for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
+        innerDecisionList = this.$$blockHistory[offset].decisionList;
         if (innerDecisionList.length > 0) {
-            this.$$sortConnectionDetail(innerDecisionList);
-            decisionList.push(innerDecisionList[0]);
+            this.$$sortDecisionList(innerDecisionList);
+            decisionList.push(innerDecisionList[ConnectSignalDetector.$$_FIRST_ELEMENT]);
+        }
+    }
+    this.$$sortDecisionList(decisionList);
+    strongestConnectionDetail = decisionList[ConnectSignalDetector.$$_FIRST_ELEMENT];
+
+    return strongestConnectionDetail;
+};
+
+ConnectSignalDetector.prototype.$$updateConnectionDetail = function () {
+    this.$$connectionDetail = this.$$getStrongestConnectionDetail();
+    this.$$connectionDetail.signalThresholdDecibel =
+        this.$$connectionDetail.noiseDecibel +
+        this.$$signalThresholdFactor * this.$$connectionDetail.signalToNoiseRatio;
+    this.$$resetBlockHistory();
+    this.$$correlator.reset();
+};
+
+ConnectSignalDetector.prototype.$$tryToUpdateConnectionDetail = function () {
+    var offset;
+
+    for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
+        if (this.$$blockHistory[offset].connectSignalJustLost) {
+            this.$$updateConnectionDetail();
+            return true;
         }
     }
 
-    this.$$sortConnectionDetail(decisionList);
+    return false;
+};
 
-    this.$$connectionDetail = decisionList[0];
+ConnectSignalDetector.prototype.$$isOngoingConnectionInHistoryBlock = function () {
+    var offset, blockHistoryEntry;
 
-    if (false && JSON) {
-        console.log(
-            JSON.stringify(
-                this.$$connectionDetail,
-                true,
-                2
-            )
-        );
+    for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
+        blockHistoryEntry = this.$$blockHistory[offset];
+        if (blockHistoryEntry.connectSignalDetected || blockHistoryEntry.connectSignalJustLost) {
+            return true;
+        }
     }
+
+    return false;
 };
 
 ConnectSignalDetector.prototype.handle = function (sampleNumber, signalValue, signalDecibel, noiseDecibel) {
     var
         offset,
+        blockHistoryEntry,
         isLastOffsetInSamplingBlock,
         connectSignalDetected,
+        connectionDetailJustUpdated,
         lastConnectSignalDetected;
 
     offset = sampleNumber % this.$$samplePerSymbol;
+    blockHistoryEntry = this.$$blockHistory[offset];
     isLastOffsetInSamplingBlock = offset === (this.$$samplePerSymbol - 1);
-    
+
     this.$$correlator.handle(signalValue, signalDecibel, noiseDecibel);
     connectSignalDetected = this.$$correlator.isCorrelated();
 
-    if (!this.$$samplingBlock[offset]) {
-        // TODO move this initialization to dedicated place
-        this.$$samplingBlock[offset] = {
-            decisionList: [],
-            connectSignalJustLost: undefined,
-            connectSignalDetected: undefined
-        };
-    }
-
     if (connectSignalDetected) {
-        this.$$samplingBlock[offset].decisionList.push({
+        blockHistoryEntry.decisionList.push({
             offset: offset,
-            correlationValue: Math.abs(this.$$correlator.getCorrelationValue()),
-            correlationValueMax: this.$$correlator.getCodeLength(),
+            correlationValue: this.$$correlator.getCorrelationValue(),
+            correlationCodeLength: this.$$correlator.getCodeLength(),
             signalDecibel: this.$$correlator.getSignalDecibelAverage(),
             noiseDecibel: this.$$correlator.getNoiseDecibelAverage(),
             signalToNoiseRatio: this.$$correlator.getSignalToNoiseRatio(),
-            signalThresholdDecibel: undefined
+            signalThresholdDecibel: undefined   // will be set at $$updateConnectionDetail()
         });
     }
-    lastConnectSignalDetected = this.$$samplingBlock[offset].connectSignalDetected;
-    this.$$samplingBlock[offset].connectSignalJustLost = lastConnectSignalDetected === true && !connectSignalDetected;
-    this.$$samplingBlock[offset].connectSignalDetected = connectSignalDetected;
+    lastConnectSignalDetected = blockHistoryEntry.connectSignalDetected;
+    blockHistoryEntry.connectSignalJustLost = lastConnectSignalDetected && !connectSignalDetected;
+    blockHistoryEntry.connectSignalDetected = connectSignalDetected;
 
     if (isLastOffsetInSamplingBlock) {
-        for (offset = 0; offset < this.$$samplingBlock.length; offset++) {
-            if (this.$$samplingBlock[offset].connectSignalJustLost === true) {
-                this.$$findStrongestConnectionDetail();
-                this.$$connectionDetail.signalThresholdDecibel =
-                    this.$$connectionDetail.noiseDecibel +
-                    this.$$signalThresholdFactor * this.$$connectionDetail.signalToNoiseRatio;
-                this.$$samplingBlock.length = 0;        // TODO bad reset, refactor
-                this.$$correlator.reset();
-                break;
-            }
-        }
+        connectionDetailJustUpdated = this.$$tryToUpdateConnectionDetail();
     }
 
-    this.$$connectionInProgress = false;
-    for (offset = 0; offset < this.$$samplingBlock.length; offset++) {
-        if (this.$$samplingBlock[offset].connectSignalDetected === true || this.$$samplingBlock[offset].connectSignalJustLost === true) {
-            this.$$connectionInProgress = true;
-            // this.$$connectionDetail = null;
-            break;
-        }
-    }
+    this.$$connectionInProgress =
+        !connectionDetailJustUpdated &&
+        this.$$isOngoingConnectionInHistoryBlock();
 };
 
 /*
