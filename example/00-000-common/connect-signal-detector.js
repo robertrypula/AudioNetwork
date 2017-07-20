@@ -67,7 +67,7 @@ ConnectSignalDetector.prototype.$$findStrongestConnectionDetail = function () {
     }
 };
 
-ConnectSignalDetector.prototype.handle = function (sampleNumber, dataLogicValue, signalDecibel, noiseDecibel) {
+ConnectSignalDetector.prototype.handle = function (sampleNumber, signalValue, signalDecibel, noiseDecibel) {
     var
         offset,
         isLastOffsetInSamplingBlock,
@@ -77,7 +77,7 @@ ConnectSignalDetector.prototype.handle = function (sampleNumber, dataLogicValue,
     offset = sampleNumber % this.$$samplePerSymbol;
     isLastOffsetInSamplingBlock = offset === (this.$$samplePerSymbol - 1);
     
-    this.$$correlator.handle(dataLogicValue, signalDecibel, noiseDecibel);
+    this.$$correlator.handle(signalValue, signalDecibel, noiseDecibel);
     connectSignalDetected = this.$$correlator.isCorrelated();
 
     if (!this.$$samplingBlock[offset]) {

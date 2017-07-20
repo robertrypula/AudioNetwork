@@ -26,6 +26,8 @@ Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
 Correlator.CORRELATION_NEGATIVE = 'CORRELATION_NEGATIVE';
 
 Correlator.THRESHOLD = 0.9;
+Correlator.NO_DECIBEL = null;
+Correlator.NO_DATA = 0;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
 
@@ -59,31 +61,34 @@ Correlator.prototype.setSkipFactor = function (skipFactor) {
     this.$$cacheNoiseDecibelAverage = undefined;
 
     for (i = 0; i < this.getCodeLength() * this.$$skipFactor; i++) {
-        this.$$dataBuffer.pushEvenIfFull(null);
-        this.$$signalDecibelBuffer.pushEvenIfFull(null);
-        this.$$noiseDecibelBuffer.pushEvenIfFull(null);
+        this.$$dataBuffer.pushEvenIfFull(Correlator.NO_DATA);
+        this.$$signalDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
+        this.$$noiseDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
     }
 };
 
-Correlator.prototype.handle = function (dataLogicValue, signalDecibel, noiseDecibel) {
-    var data;
+Correlator.prototype.handle = function (signalValue, signalDecibel, noiseDecibel) {
+    var data, isValidDecibel;
 
-    data = null;
-    switch (dataLogicValue) {
-        case true:
-            data = 1;
-            break;
-        case false:
-            data = -1;
-            break;
+    data = Correlator.NO_DATA;
+    switch (signalValue) {
+        case -1:
+        case 1:
+            data = signalValue;
     }
     this.$$dataBuffer.pushEvenIfFull(data);
+
+    isValidDecibel = data && (signalDecibel || signalDecibel === 0);
     this.$$signalDecibelBuffer.pushEvenIfFull(
-        data === null ? null : signalDecibel
+        isValidDecibel ? signalDecibel : Correlator.NO_DECIBEL
     );
+
+    isValidDecibel = data && (noiseDecibel || noiseDecibel === 0);
     this.$$noiseDecibelBuffer.pushEvenIfFull(
-        data === null ? null : noiseDecibel
+        isValidDecibel ? noiseDecibel : Correlator.NO_DECIBEL
     );
+
+    // clear cache
     this.$$cacheCorrelactionValue = undefined;
     this.$$cacheSignalDecibelAverage = undefined;
     this.$$cacheNoiseDecibelAverage = undefined;
@@ -118,7 +123,7 @@ Correlator.prototype.getCorrelation = function () {
     return Correlator.CORRELATION_NEGATIVE;
 };
 
-Correlator.prototype.$$getAverage = function (buffer) {
+Correlator.prototype.$$getDecibelAverage = function (buffer) {
     var i, offset, bufferIndex, value, sum, sumLength, average;
 
     sum = 0;
@@ -127,7 +132,7 @@ Correlator.prototype.$$getAverage = function (buffer) {
     for (i = 0; i < this.getCodeLength(); i++) {
         bufferIndex = i * this.$$skipFactor + offset;
         value = buffer.getItem(bufferIndex);
-        if (value !== null) {
+        if (value !== Correlator.NO_DECIBEL) {
             sum += value;
             sumLength++;
         }
@@ -135,14 +140,14 @@ Correlator.prototype.$$getAverage = function (buffer) {
 
     average = (sumLength > 0)
         ? sum / sumLength
-        : null;
+        : Correlator.NO_DECIBEL;
 
     return average;
 };
 
 Correlator.prototype.getSignalDecibelAverage = function () {
     if (this.$$cacheSignalDecibelAverage === undefined) {
-        this.$$cacheSignalDecibelAverage = this.$$getAverage(this.$$signalDecibelBuffer);
+        this.$$cacheSignalDecibelAverage = this.$$getDecibelAverage(this.$$signalDecibelBuffer);
     }
 
     return this.$$cacheSignalDecibelAverage;
@@ -150,7 +155,7 @@ Correlator.prototype.getSignalDecibelAverage = function () {
 
 Correlator.prototype.getNoiseDecibelAverage = function () {
     if (this.$$cacheNoiseDecibelAverage === undefined) {
-        this.$$cacheNoiseDecibelAverage = this.$$getAverage(this.$$noiseDecibelBuffer);
+        this.$$cacheNoiseDecibelAverage = this.$$getDecibelAverage(this.$$noiseDecibelBuffer);
     }
 
     return this.$$cacheNoiseDecibelAverage;
@@ -160,10 +165,13 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
     var
         signalDecibelAverage = this.getSignalDecibelAverage(),
         noiseDecibelAverage = this.getNoiseDecibelAverage(),
+        isAbleToCompute,
         signalToNoiseRatio;
 
     signalToNoiseRatio = 0;
-    if (signalDecibelAverage !== null && noiseDecibelAverage !== null) {
+    isAbleToCompute = signalDecibelAverage !== Correlator.NO_DECIBEL &&
+        noiseDecibelAverage !== Correlator.NO_DECIBEL;
+    if (isAbleToCompute) {
         signalToNoiseRatio = signalDecibelAverage - noiseDecibelAverage;
     }
 
@@ -182,7 +190,7 @@ Correlator.prototype.getCorrelationValue = function () {
     for (i = 0; i < this.getCodeLength(); i++) {
         bufferIndex = i * this.$$skipFactor + offset;
         data = this.$$dataBuffer.getItem(bufferIndex);
-        if (data !== null) {
+        if (data) {
             code = this.getCodeValue(i);
             result += data * code;
         }

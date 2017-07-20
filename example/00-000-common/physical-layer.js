@@ -219,7 +219,7 @@ PhysicalLayer.prototype.$$smartTimerHandler = function () {
 PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     var
         allowedToListenConnectSignal,
-        dataLogicValue = null,
+        signalValue,
         frequencyData,
         connectionDetail,
         isSymbolAboveThreshold;
@@ -236,17 +236,18 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
         this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
         this.$$audioMonoIO.isLoopbackEnabled();
 
+    signalValue = 0;
     if (allowedToListenConnectSignal) {
         switch (this.$$symbol) {
             case this.$$symbolSyncA:
-                dataLogicValue = false;
+                signalValue = -1;
                 break;
             case this.$$symbolSyncB:
-                dataLogicValue = true;
+                signalValue = 1;
                 break;
         }
     }
-    this.$$connectSignalDetector.handle(this.$$sampleNumber, dataLogicValue, this.$$signalDecibel, this.$$noiseDecibel);
+    this.$$connectSignalDetector.handle(this.$$sampleNumber, signalValue, this.$$signalDecibel, this.$$noiseDecibel);
 
     connectionDetail = this.$$connectSignalDetector.getConnectionDetail();
 
