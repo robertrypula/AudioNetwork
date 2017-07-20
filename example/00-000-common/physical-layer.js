@@ -39,25 +39,28 @@ PhysicalLayer = function (stateHandler, configuration) {
     this.$$isSymbolReadyToTake = undefined;
     this.$$txCurrentSymbol = PhysicalLayer.NULL_SYMBOL;
     this.$$txSymbolQueue = [];
+    this.$$signalThresholdDecibel = 0;
+    this.$$connectionDetailLastId = undefined;
 
     this.$$stateHandler = PhysicalLayer.$$isFunction(stateHandler) ? stateHandler : null;
-    this.$$connectSignalDetector = new ConnectSignalDetector(this.$$samplePerSymbol, this.$$rxSignalThresholdFactor);
+    this.$$connectCodeDetector = new ConnectCodeDetector(this.$$samplePerSymbol, PhysicalLayer.CONNECT_CODE);
     this.$$txSampleRate = PhysicalLayer.DEFAULF_TX_SAMPLE_RATE;
     this.$$smartTimer = new SmartTimer(this.$$sampleTimeMs / 1000);
     this.$$smartTimer.setHandler(this.$$smartTimerHandler.bind(this));
 };
 
+PhysicalLayer.CONNECT_CODE = [1, -1, 1, -1, 1, -1];
 PhysicalLayer.DEFAULF_TX_SAMPLE_RATE = 48000;
 PhysicalLayer.NULL_SYMBOL = null;
 PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
-PhysicalLayer.prototype.txConnect = function (sampleRate) {   // sendConnectSequence
-    var i, correlatorCode, codeValue, symbol;
+PhysicalLayer.prototype.txConnect = function (sampleRate) {   // sendconnectCode
+    var i, connectCode, codeValue, symbol;
 
-    correlatorCode = this.$$connectSignalDetector.getCorrelatorCode();
+    connectCode = PhysicalLayer.CONNECT_CODE;
     this.$$txSampleRate = sampleRate;
-    for (i = 0; i < correlatorCode.length; i++) {
-        codeValue = correlatorCode[i];
+    for (i = 0; i < connectCode.length; i++) {
+        codeValue = connectCode[i];
         symbol = codeValue === -1
             ? this.$$symbolSyncA
             : this.$$symbolSyncB;
@@ -103,8 +106,8 @@ PhysicalLayer.prototype.setTxSampleRate = function (sampleRate) {
 PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, getGeneralState
     var state, cd;
 
-    cd = this.$$connectSignalDetector.isConnected()
-        ? this.$$connectSignalDetector.getConnectionDetail()
+    cd = this.$$connectCodeDetector.isConnected()
+        ? this.$$connectCodeDetector.getConnectionDetail()
         : null;
 
     state = {
@@ -138,16 +141,17 @@ PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, get
         },
         offset: this.$$offset,
         sampleNumber: this.$$sampleNumber,
-        isConnected: this.$$connectSignalDetector.isConnected(),
-        isConnectionInProgress: this.$$connectSignalDetector.isConnectionInProgress(),
+        isConnected: this.$$connectCodeDetector.isConnected(),
+        isConnectionInProgress: this.$$connectCodeDetector.isConnectionInProgress(),
+        signalThresholdDecibel: this.$$signalThresholdDecibel,
+        connectCodeLength: PhysicalLayer.CONNECT_CODE.length,
         connectionDetail: !cd ? null : {
+            id: cd.id,
             offset: cd.offset,
             correlationValue: cd.correlationValue,
-            correlationCodeLength: cd.correlationCodeLength,
-            signalDecibel: cd.signalDecibel,
-            noiseDecibel: cd.noiseDecibel,
-            signalToNoiseRatio: cd.signalToNoiseRatio,
-            signalThresholdDecibel: cd.signalThresholdDecibel
+            decibelAverageSignal: cd.decibelAverageSignal,
+            decibelAverageNoise: cd.decibelAverageNoise,
+            signalToNoiseRatio: cd.signalToNoiseRatio
         }
     };
 
@@ -247,7 +251,7 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
         connectSignalValue,
         frequencyData,
         connectionDetail,
-        isSymbolAboveThreshold;
+        isSignalAboveThreshold;
 
     frequencyData = this.$$audioMonoIO.getFrequencyData();
     this.$$fftResult = new FFTResult(frequencyData, this.$$audioMonoIO.getSampleRate());
@@ -258,21 +262,26 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     this.$$frequencyDataReceiveBand = this.$$fftResult.getDecibelRange(this.$$symbolMin, this.$$symbolMax);
 
     connectSignalValue = this.$$getConnectionSignalValue(this.$$symbol);
-    this.$$connectSignalDetector.handle(
-        this.$$sampleNumber, connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
+    this.$$connectCodeDetector.handle(
+        connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
     );
 
-    connectionDetail = this.$$connectSignalDetector.getConnectionDetail();
+    connectionDetail = this.$$connectCodeDetector.getConnectionDetail();
+    if (connectionDetail && connectionDetail.id !== this.$$connectionDetailLastId) {
+        this.$$signalThresholdDecibel = connectionDetail.decibelAverageNoise +
+            this.$$rxSignalThresholdFactor * connectionDetail.signalToNoiseRatio;
+        this.$$connectionDetailLastId = connectionDetail.id;
+    }
 
-    this.$$isSymbolSamplingPoint = this.$$connectSignalDetector.isConnected()
+    this.$$isSymbolSamplingPoint = this.$$connectCodeDetector.isConnected()
         ? (this.$$sampleNumber % this.$$samplePerSymbol) === connectionDetail.offset
         : false;
 
-    isSymbolAboveThreshold = this.$$connectSignalDetector.isConnected()
-        ? this.$$signalDecibel > connectionDetail.signalThresholdDecibel
+    isSignalAboveThreshold = this.$$connectCodeDetector.isConnected()
+        ? this.$$signalDecibel > this.$$signalThresholdDecibel
         : false;
 
-    this.$$isSymbolReadyToTake = this.$$isSymbolSamplingPoint && isSymbolAboveThreshold;
+    this.$$isSymbolReadyToTake = this.$$isSymbolSamplingPoint && isSignalAboveThreshold;
 };
 
 PhysicalLayer.prototype.$$txSmartTimerHandler = function () {

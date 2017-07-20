@@ -1,19 +1,12 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-/*
-TODO:
-    - add barker code as default to correlator class
-    - make private methods: setSkipFactor, getCorrelationThresgold
-    - move similar methods closer each other
- */
-
 var Correlator;
 
 Correlator = function (skipFactor, code) {
     this.$$code = code
         ? code.slice(0)
-        : Correlator.DEFAULT_SYNC_CODE.slice(0);
+        : Correlator.DEFAULT_CODE.slice(0);
 
     this.$$skipFactor = undefined;
     this.$$dataBuffer = undefined;
@@ -23,52 +16,23 @@ Correlator = function (skipFactor, code) {
     this.$$cacheSignalDecibelAverage = undefined;
     this.$$cacheNoiseDecibelAverage = undefined;
 
-    this.setSkipFactor(skipFactor);
+    this.$$setSkipFactor(skipFactor);
 };
 
-Correlator.DEFAULT_SYNC_CODE = [1, -1, 1, -1, 1, -1];
+Correlator.DEFAULT_CODE = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1]; // Barker Code 11
 
 Correlator.CORRELATION_POSITIVE = 'CORRELATION_POSITIVE';
 Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
 Correlator.CORRELATION_NEGATIVE = 'CORRELATION_NEGATIVE';
 
-Correlator.THRESHOLD = 0.9;
+Correlator.THRESHOLD_UNIT = 0.9;
 Correlator.NO_DECIBEL = null;
 Correlator.NO_DATA = 0;
 
 Correlator.POSITION_OUT_OF_RANGE_EXCEPTION = 'Position out of range';
 
-Correlator.prototype.getCode = function () {
-    return this.$$code.slice(0);
-};
-
-Correlator.prototype.getCodeLength = function () {
-    return this.$$code.length;
-};
-
 Correlator.prototype.reset = function () {
-    this.setSkipFactor(this.$$skipFactor);     // setting skip factor is like reset
-};
-
-Correlator.prototype.setSkipFactor = function (skipFactor) {
-    var i, bufferMaxSize;
-
-    skipFactor = skipFactor || 1;
-    bufferMaxSize = this.$$code.length * skipFactor;
-
-    this.$$skipFactor = skipFactor;
-    this.$$dataBuffer = new Buffer(bufferMaxSize);
-    this.$$signalDecibelBuffer = new Buffer(bufferMaxSize);
-    this.$$noiseDecibelBuffer = new Buffer(bufferMaxSize);
-    this.$$cacheCorrelactionValue = undefined;
-    this.$$cacheSignalDecibelAverage = undefined;
-    this.$$cacheNoiseDecibelAverage = undefined;
-
-    for (i = 0; i < bufferMaxSize; i++) {
-        this.$$dataBuffer.pushEvenIfFull(Correlator.NO_DATA);
-        this.$$signalDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
-        this.$$noiseDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
-    }
+    this.$$setSkipFactor(this.$$skipFactor);     // setting skip factor is like reset
 };
 
 Correlator.prototype.handle = function (signalValue, signalDecibel, noiseDecibel) {
@@ -95,10 +59,6 @@ Correlator.prototype.handle = function (signalValue, signalDecibel, noiseDecibel
     this.$$clearCache();
 };
 
-Correlator.prototype.getCorrelationValueThreshold = function () {
-    return Math.floor(Correlator.THRESHOLD * this.$$code.length);
-};
-
 Correlator.prototype.isCorrelated = function () {
     var correlation = this.getCorrelation();
 
@@ -111,44 +71,39 @@ Correlator.prototype.isCorrelated = function () {
 Correlator.prototype.getCorrelation = function () {
     var
         correlationValue = this.getCorrelationValue(),
-        correlationValueThreshold = this.getCorrelationValueThreshold();
+        threshold = Math.floor(Correlator.THRESHOLD_UNIT * this.$$code.length);
 
-    if (correlationValue >= correlationValueThreshold) {
+    if (correlationValue >= threshold) {
         return Correlator.CORRELATION_POSITIVE;
     }
-    if (correlationValue > -correlationValueThreshold) {
+    if (correlationValue > -threshold) {
         return Correlator.CORRELATION_NONE;
     }
 
     return Correlator.CORRELATION_NEGATIVE;
 };
 
-Correlator.prototype.$$clearCache = function () {
-    this.$$cacheCorrelactionValue = undefined;
-    this.$$cacheSignalDecibelAverage = undefined;
-    this.$$cacheNoiseDecibelAverage = undefined;
-};
+Correlator.prototype.getCorrelationValue = function () {
+    var i, lastIndexInSkipBlock, bufferIndex, data, code, result;
 
-Correlator.prototype.$$getDecibelAverage = function (buffer) {
-    var i, lastIndexInSkipBlock, bufferIndex, value, sum, sumLength, average;
+    if (this.$$cacheCorrelactionValue !== undefined) {
+        return this.$$cacheCorrelactionValue;
+    }
 
-    sum = 0;
-    sumLength = 0;
+    result = 0;
     lastIndexInSkipBlock = this.$$skipFactor - 1;
     for (i = 0; i < this.$$code.length; i++) {
         bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
-        value = buffer.getItem(bufferIndex);
-        if (value !== Correlator.NO_DECIBEL) {
-            sum += value;
-            sumLength++;
+        data = this.$$dataBuffer.getItem(bufferIndex);
+        if (data !== Correlator.NO_DATA) {
+            code = this.$$code[i];
+            result += data * code;
         }
     }
 
-    average = (sumLength > 0)
-        ? sum / sumLength
-        : Correlator.NO_DECIBEL;
+    this.$$cacheCorrelactionValue = result;
 
-    return average;
+    return result;
 };
 
 Correlator.prototype.getSignalDecibelAverage = function () {
@@ -185,25 +140,51 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
     return signalToNoiseRatio;
 };
 
-Correlator.prototype.getCorrelationValue = function () {
-    var i, lastIndexInSkipBlock, bufferIndex, data, code, result;
+Correlator.prototype.$$clearCache = function () {
+    this.$$cacheCorrelactionValue = undefined;
+    this.$$cacheSignalDecibelAverage = undefined;
+    this.$$cacheNoiseDecibelAverage = undefined;
+};
 
-    if (this.$$cacheCorrelactionValue !== undefined) {
-        return this.$$cacheCorrelactionValue;
-    }
+Correlator.prototype.$$getDecibelAverage = function (buffer) {
+    var i, lastIndexInSkipBlock, bufferIndex, value, sum, sumLength, average;
 
-    result = 0;
+    sum = 0;
+    sumLength = 0;
     lastIndexInSkipBlock = this.$$skipFactor - 1;
     for (i = 0; i < this.$$code.length; i++) {
         bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
-        data = this.$$dataBuffer.getItem(bufferIndex);
-        if (data !== Correlator.NO_DATA) {
-            code = this.$$code[i];
-            result += data * code;
+        value = buffer.getItem(bufferIndex);
+        if (value !== Correlator.NO_DECIBEL) {
+            sum += value;
+            sumLength++;
         }
     }
 
-    this.$$cacheCorrelactionValue = result;
+    average = (sumLength > 0)
+        ? sum / sumLength
+        : Correlator.NO_DECIBEL;
 
-    return result;
+    return average;
+};
+
+Correlator.prototype.$$setSkipFactor = function (skipFactor) {
+    var i, bufferMaxSize;
+
+    skipFactor = skipFactor || 1;
+    bufferMaxSize = this.$$code.length * skipFactor;
+
+    this.$$skipFactor = skipFactor;
+    this.$$dataBuffer = new Buffer(bufferMaxSize);
+    this.$$signalDecibelBuffer = new Buffer(bufferMaxSize);
+    this.$$noiseDecibelBuffer = new Buffer(bufferMaxSize);
+    this.$$cacheCorrelactionValue = undefined;
+    this.$$cacheSignalDecibelAverage = undefined;
+    this.$$cacheNoiseDecibelAverage = undefined;
+
+    for (i = 0; i < bufferMaxSize; i++) {
+        this.$$dataBuffer.pushEvenIfFull(Correlator.NO_DATA);
+        this.$$signalDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
+        this.$$noiseDecibelBuffer.pushEvenIfFull(Correlator.NO_DECIBEL);
+    }
 };

@@ -98,11 +98,11 @@ function updateView(state) {
                 '#rx-log-connect',
                 'Connected!<br/>' +
                 '- offset ' + cd.offset + '<br/>' +
-                '- correlation ' + Math.abs(cd.correlationValue) + '/' + cd.correlationCodeLength + '<br/>' +
-                '- signal ' + cd.signalDecibel.toFixed(2) + ' dB' + '<br/>' +
-                '- noise ' + cd.noiseDecibel.toFixed(2) + ' dB' + '<br/>' +
+                '- correlation ' + Math.abs(cd.correlationValue) + '/' + state.connectCodeLength + '<br/>' +
+                '- signalAvg ' + cd.decibelAverageSignal.toFixed(2) + ' dB' + '<br/>' +
+                '- noiseAvg ' + cd.decibelAverageNoise.toFixed(2) + ' dB' + '<br/>' +
                 '- SNR ' + cd.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +
-                '- threshold ' + cd.signalThresholdDecibel.toFixed() + ' dB'
+                '- threshold ' + state.signalThresholdDecibel.toFixed() + ' dB'
             );
         } else {
             html('#rx-log-connect', 'not connected');
