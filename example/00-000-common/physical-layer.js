@@ -15,7 +15,7 @@ PhysicalLayer = function (stateHandler, configuration) {
     // 258 symbols, skip factor 3
     // 44.1 kHz -> 16.14990234375 Hz -> start 1841 Hz, stop 6008 Hz, bandwidth 4167 Hz -> symbolMin 114
     // 48.0 kHz -> 17.578125 Hz      -> start 1458 Hz, stop 5994 Hz, bandwidth 4535 Hz -> symbolMin 83
-    symbolMin = this.$$audioMonoIO.getSampleRate() === 44100 ? 114 : 83;
+    symbolMin = 98; // TODO fix this bug: this.$$audioMonoIO.getSampleRate() === 44100 ? 114 : 83;
 
     // TODO implement builder class that will replace configuration object
     this.$$sampleTimeMs = vod(c.sampleTimeMs, 250);
