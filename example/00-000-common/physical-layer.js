@@ -90,17 +90,70 @@ PhysicalLayer.prototype.setLoopback = function (state) {
     this.$$audioMonoIO.setLoopback(state);
 };
 
-PhysicalLayer.prototype.getTxSampleRate = function () {
+PhysicalLayer.prototype.getTxSampleRate = function () {   // remove
     return this.$$txSampleRate;
 };
 
-PhysicalLayer.prototype.getTxSymbolQueue = function () {
+PhysicalLayer.prototype.getTxSymbolQueue = function () {   // remove
     return this.$$txSymbolQueue;
 };
 
 PhysicalLayer.prototype.setTxSampleRate = function (sampleRate) {
     this.$$txSampleRate = sampleRate;
     this.$$txSymbolQueue.length = 0;
+};
+
+
+PhysicalLayer.prototype.getRxRealTimeState = function () {
+    return {
+        symbolNumber: 0,
+        symbol: 0,
+        signalQuality: 0,
+        isConnected: 0,
+        isConnectionInProgress: 0,
+        isSymbolReadyToTake: 0,    // not needed ?
+        processingDetail: {
+            sampleNumber: 0,
+            offset: 0,
+            symbol: 0,
+            symbolFrequency: 0,
+            isSymbolSamplingPoint: 0,
+            symbolDecibelList: [],
+            signalDecibel: 0,
+            signalNextCandidateDecibel: 0,
+            noiseDecibel: 0
+        }
+    }
+};
+
+PhysicalLayer.prototype.getRxState = function () {
+    return {
+        sampleRate: 0,
+        samplePerSymbol: 0,
+        fftSize: 0,
+        fftWindowTime: 0,
+        fftFrequencyBinSkipFactor: 0,
+        symbolFrequencySpacing: 0,
+        symbolMin: 0,
+        symbolMax: 0,
+        signalDecibelThreshold: 0,
+        correlationCodeLength: 0,
+        connectionDetail: {
+            id: 0,
+            offset: undefined,
+            correlationValue: undefined,
+            decibelAverageSignal: undefined,
+            decibelAverageNoise: undefined,
+            signalToNoiseRatio: undefined
+        }
+    }
+};
+
+PhysicalLayer.prototype.getState = function () {
+    return {
+        samplePerSymbol: 0,
+        connectCodeLength: 0
+    }
 };
 
 PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, getGeneralState
