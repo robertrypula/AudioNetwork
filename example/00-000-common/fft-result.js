@@ -23,24 +23,24 @@ FFTResult.prototype.downconvert = function (exponent) {  // deprecated
     this.downconvertScalar(factor);
 };
 
-FFTResult.prototype.downconvertScalar = function (factor) {
+FFTResult.prototype.downconvertScalar = function (skipFactor) {
     var
         newFftData = [],
-        factorHalf = Math.floor(factor / 2),
+        factorHalf = Math.floor(skipFactor / 2),
         sampleRateCorrection,
         max,
         i,
         j;
 
-    for (i = 0; i < this.$$fftData.length; i += factor) {
+    for (i = 0; i < this.$$fftData.length; i += skipFactor) {
         max = this.$$fftData[i];
-        for (j = Math.max(0, i - factorHalf); j < Math.min(i - factorHalf + factor, this.$$fftData.length); j++) {
+        for (j = Math.max(0, i - factorHalf); j < Math.min(i - factorHalf + skipFactor, this.$$fftData.length); j++) {
             max = this.$$fftData[j] > max ? this.$$fftData[j] : max;
         }
         newFftData.push(max);
     }
 
-    sampleRateCorrection = factor * newFftData.length / this.$$fftData.length;
+    sampleRateCorrection = skipFactor * newFftData.length / this.$$fftData.length;
     this.$$sampleRate *= sampleRateCorrection;
 
     this.$$fftData = newFftData;

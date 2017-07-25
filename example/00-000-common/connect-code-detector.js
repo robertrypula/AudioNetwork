@@ -4,8 +4,8 @@
 var ConnectCodeDetector = function (samplePerSymbol, code) {
     this.$$samplePerSymbol = samplePerSymbol;
     this.$$connectionInProgress = false;
-    this.$$connectionDetail = null;
-    this.$$connectionDetailId = 1;
+    this.$$connection = null;
+    this.$$connectionId = 1;
     this.$$correlator = new Correlator(samplePerSymbol, code);
     this.$$blockHistory = undefined;
     this.$$sampleNumber = 0;
@@ -20,11 +20,11 @@ ConnectCodeDetector.prototype.isConnectionInProgress = function () {
 };
 
 ConnectCodeDetector.prototype.isConnected = function () {
-    return !!this.$$connectionDetail;
+    return !!this.$$connection;
 };
 
-ConnectCodeDetector.prototype.getConnectionDetail = function () {
-    return this.$$connectionDetail;
+ConnectCodeDetector.prototype.getConnection = function () {
+    return this.$$connection;
 };
 
 ConnectCodeDetector.prototype.handle = function (signalValue, signalDecibel, noiseDecibel) {
@@ -33,7 +33,7 @@ ConnectCodeDetector.prototype.handle = function (signalValue, signalDecibel, noi
         blockHistoryEntry,
         isLastOffsetInSamplingBlock,
         connectSignalDetected,
-        connectionDetailJustUpdated,
+        connectionJustUpdated,
         lastConnectSignalDetected;
 
     offset = this.$$sampleNumber % this.$$samplePerSymbol;
@@ -46,7 +46,7 @@ ConnectCodeDetector.prototype.handle = function (signalValue, signalDecibel, noi
     if (connectSignalDetected) {
         blockHistoryEntry.decisionList.push({
             id: undefined,         // will be set later
-            offset: offset,
+            symbolSamplingPointOffset: offset,
             correlationValue: this.$$correlator.getCorrelationValue(),
             decibelAverageSignal: this.$$correlator.getSignalDecibelAverage(),
             decibelAverageNoise: this.$$correlator.getNoiseDecibelAverage(),
@@ -58,11 +58,11 @@ ConnectCodeDetector.prototype.handle = function (signalValue, signalDecibel, noi
     blockHistoryEntry.connectSignalDetected = connectSignalDetected;
 
     if (isLastOffsetInSamplingBlock) {
-        connectionDetailJustUpdated = this.$$tryToUpdateConnectionDetail();
+        connectionJustUpdated = this.$$tryToUpdateConnection();
     }
 
     this.$$connectionInProgress =
-        !connectionDetailJustUpdated &&
+        !connectionJustUpdated &&
         this.$$isOngoingConnectionInHistoryBlock();
 
     this.$$sampleNumber++;
@@ -114,8 +114,8 @@ ConnectCodeDetector.prototype.$$resetBlockHistory = function () {
     }
 };
 
-ConnectCodeDetector.prototype.$$getStrongestConnectionDetail = function () {
-    var offset, decisionList, innerDecisionList, strongestConnectionDetail;
+ConnectCodeDetector.prototype.$$getStrongestConnection = function () {
+    var offset, decisionList, innerDecisionList, strongestConnection;
 
     decisionList = [];
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
@@ -126,24 +126,24 @@ ConnectCodeDetector.prototype.$$getStrongestConnectionDetail = function () {
         }
     }
     this.$$sortDecisionList(decisionList);
-    strongestConnectionDetail = decisionList[ConnectCodeDetector.$$_FIRST_ELEMENT];
+    strongestConnection = decisionList[ConnectCodeDetector.$$_FIRST_ELEMENT];
 
-    return strongestConnectionDetail;
+    return strongestConnection;
 };
 
-ConnectCodeDetector.prototype.$$updateConnectionDetail = function () {
-    this.$$connectionDetail = this.$$getStrongestConnectionDetail();
-    this.$$connectionDetail.id = this.$$connectionDetailId++;
+ConnectCodeDetector.prototype.$$updateConnection = function () {
+    this.$$connection = this.$$getStrongestConnection();
+    this.$$connection.id = this.$$connectionId++;
     this.$$resetBlockHistory();
     this.$$correlator.reset();
 };
 
-ConnectCodeDetector.prototype.$$tryToUpdateConnectionDetail = function () {
+ConnectCodeDetector.prototype.$$tryToUpdateConnection = function () {
     var offset;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
         if (this.$$blockHistory[offset].connectSignalJustLost) {
-            this.$$updateConnectionDetail();
+            this.$$updateConnection();
             return true;
         }
     }

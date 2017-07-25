@@ -40,7 +40,7 @@ PhysicalLayer = function (stateHandler, configuration) {
     this.$$txCurrentSymbol = PhysicalLayer.NULL_SYMBOL;
     this.$$txSymbolQueue = [];
     this.$$signalThresholdDecibel = 0;
-    this.$$connectionDetailLastId = undefined;
+    this.$$connectionLastId = undefined;
 
     this.$$stateHandler = PhysicalLayer.$$isFunction(stateHandler) ? stateHandler : null;
     this.$$connectCodeDetector = new ConnectCodeDetector(this.$$samplePerSymbol, PhysicalLayer.CONNECT_CODE);
@@ -108,7 +108,7 @@ PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, get
     var state, cd;
 
     cd = this.$$connectCodeDetector.isConnected()
-        ? this.$$connectCodeDetector.getConnectionDetail()
+        ? this.$$connectCodeDetector.getConnection()
         : null;
 
     state = {
@@ -146,7 +146,7 @@ PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, get
         isConnectionInProgress: this.$$connectCodeDetector.isConnectionInProgress(),
         signalThresholdDecibel: this.$$signalThresholdDecibel,
         connectCodeLength: PhysicalLayer.CONNECT_CODE.length,
-        connectionDetail: !cd ? null : {
+        connection: !cd ? null : {
             id: cd.id,
             offset: cd.offset,
             correlationValue: cd.correlationValue,
@@ -251,7 +251,7 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
     var
         connectSignalValue,
         frequencyData,
-        connectionDetail,
+        connection,
         isSignalAboveThreshold;
 
     frequencyData = this.$$audioMonoIO.getFrequencyData();
@@ -267,15 +267,15 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
         connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
     );
 
-    connectionDetail = this.$$connectCodeDetector.getConnectionDetail();
-    if (connectionDetail && connectionDetail.id !== this.$$connectionDetailLastId) {
-        this.$$signalThresholdDecibel = connectionDetail.decibelAverageNoise +
-            this.$$rxSignalThresholdFactor * connectionDetail.signalToNoiseRatio;
-        this.$$connectionDetailLastId = connectionDetail.id;
+    connection = this.$$connectCodeDetector.getConnection();
+    if (connection && connection.id !== this.$$connectionLastId) {
+        this.$$signalThresholdDecibel = connection.decibelAverageNoise +
+            this.$$rxSignalThresholdFactor * connection.signalToNoiseRatio;
+        this.$$connectionLastId = connection.id;
     }
 
     this.$$isSymbolSamplingPoint = this.$$connectCodeDetector.isConnected()
-        ? (this.$$sampleNumber % this.$$samplePerSymbol) === connectionDetail.offset
+        ? (this.$$offset) === connection.symbolSamplingPointOffset
         : false;
 
     isSignalAboveThreshold = this.$$connectCodeDetector.isConnected()

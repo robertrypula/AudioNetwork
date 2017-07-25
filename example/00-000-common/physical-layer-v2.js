@@ -2,11 +2,7 @@
 'use strict';
 
 var PhysicalLayerV2Builder = function () {
-
     this._stateRxRealTimeListener = undefined;
-    this._stateRxListener = undefined;
-    this._stateTxRealTimeListener = undefined;
-    this._stateTxListener = undefined;
 };
 
 PhysicalLayerV2Builder.FFT_SIZE = 8192;
@@ -20,21 +16,6 @@ PhysicalLayerV2Builder.prototype.stateRxRealTimeListener = function (listener) {
     return this;
 };
 
-PhysicalLayerV2Builder.prototype.stateRxListener = function (listener) {
-    this._stateRxListener = listener;
-    return this;
-};
-
-PhysicalLayerV2Builder.prototype.stateTxRealTimeListener = function (listener) {
-    this._stateTxRealTimeListener = listener;
-    return this;
-};
-
-PhysicalLayerV2Builder.prototype.stateTxListener = function (listener) {
-    this._stateTxListener = listener;
-    return this;
-};
-
 PhysicalLayerV2Builder.prototype.build = function () {
     return new PhysicalLayerV2(this);
 };
@@ -43,93 +24,98 @@ PhysicalLayerV2Builder.$$getValueOrDefault = function (value, defaultValue) {
     return typeof value !== 'undefined' ? value : defaultValue;
 };
 
+/*
+var pl = PlBuilder
+  .rrSymbolListener(listenerA)
+  .rxRawListener(listenerB)
+  .rxConfigListener()
+  .txListener
+  .txConfigListener
+  .build();
+ */
+
 // -----------
 
 var PhysicalLayerV2;
 
 PhysicalLayerV2 = function (builder) {
     this.$$stateRxRealTimeHandler = [];
-    this.$$stateRxListener = [];
-    this.$$stateTxRealTimeHandler = [];
-    this.$$stateTxHandler = [];
-
     this.addStateRxRealTimeListener(builder._stateRxRealTimeListener);
-    this.addStateRxListener(builder._stateRxListener);
-    this.addStateTxRealTimeListener(builder._stateTxRealTimeListener);
-    this.addStateTxListener(builder._stateTxListener);
 };
 
 PhysicalLayerV2.prototype.addStateRxRealTimeListener = function (listener) {
     PhysicalLayerV2.$$isFunction(listener) ? this.$$stateRxRealTimeHandler.push(listener) : undefined;
 };
 
-PhysicalLayerV2.prototype.addStateRxListener = function (listener) {
-    PhysicalLayerV2.$$isFunction(listener) ? this.$$stateRxListener.push(listener) : undefined;
-};
+// -----------------------------------------
 
-PhysicalLayerV2.prototype.addStateTxRealTimeListener = function (listener) {
-    PhysicalLayerV2.$$isFunction(listener) ? this.$$stateTxRealTimeHandler.push(listener) : undefined;
-};
-
-PhysicalLayerV2.prototype.addStateTxListener = function (listener) {
-    PhysicalLayerV2.$$isFunction(listener) ? this.$$stateTxHandler.push(listener) : undefined;
-};
-
-PhysicalLayerV2.prototype.getStateRxRealTime = function () {
+PhysicalLayerV2.prototype.getRxSymbol = function () {
     return {
-        symbolNumber: 0,
+        id: 0,
         symbol: 0,
-        quality: 0,
-        isSymbolSamplingPoint: 0,
+        sampleId: 0
+    };
+};
+
+PhysicalLayerV2.prototype.getRxSample = function () {
+    return {
+        id: 0,
+        offset: 0,
+        symbolRaw: 0,
+        signalDecibel: 0,
+        signalNextCandidateDecibel: 0,
+        signalFrequency: 0,
+        noiseDecibel: 0,
+        frequencyData: [],
         isConnected: 0,
         isConnectionInProgress: 0,
-        realTimeDetail: {
-            sampleNumber: 0,
-            offset: 0,
-            symbol: 0,
-            frequency: 0,
-            decibelSignal: 0,
-            decibelSignalNextCandidate: 0,
-            decibelNoise: 0,
-            decibelList: []
-        }
-    }
+        isSymbolSamplingPoint: 0
+    };
 };
 
-PhysicalLayerV2.prototype.getStateRx = function () {
+PhysicalLayerV2.prototype.getRxConnection = function () {
+    return {
+        id: 0,
+        symbolSamplingPointOffset: undefined,
+        correlationValue: undefined,
+        decibelAverageSignal: undefined,
+        decibelAverageNoise: undefined,
+        signalToNoiseRatio: undefined,
+        sampleId: 0
+    };
+};
+
+PhysicalLayerV2.prototype.getRxConfig = function () {
     return {
         sampleRate: 0,
-        samplePerSymbol: 0,
-        fftSize: 0,
-        fftWindowTime: 0,
-        fftFrequencyBinSkipFactor: 0,
         symbolFrequencySpacing: 0,
         symbolMin: 0,
         symbolMax: 0,
-        decibelSignalThreshold: 0,
-        correlationCodeLength: 0,
-        connectionDetail: {
-            id: undefined,
-            offset: undefined,
-            correlationValue: undefined,
-            decibelAverageSignal: undefined,
-            decibelAverageNoise: undefined,
-            signalToNoiseRatio: undefined
-        }
-    }
+        signalDecibelThreshold: 0
+    };
 };
 
-PhysicalLayerV2.prototype.getStateTxRealTime = function () {
+PhysicalLayerV2.prototype.getConfig = function () {
     return {
-        queue: [],
+        fftSkipFactor: 0,
+        fftSize: 0,
+        samplePerSymbol: 0,
+        unitTime: 0,
+        correlationCodeLength: 0
+    };
+};
+
+PhysicalLayerV2.prototype.getTx = function () {
+    return {
         symbol: 0,
-        isTransmitting: 0
+        queue: []
     }
 };
 
-PhysicalLayerV2.prototype.getStateTx = function () {
+PhysicalLayerV2.prototype.getTxConfig = function () {
     return {
         sampleRate: 0,
+        symbolFrequencySpacing: 0,
         symbolMin: 0,
         symbolMax: 0,
         amplitude: 0
