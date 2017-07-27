@@ -35,14 +35,14 @@ Correlator.prototype.reset = function () {
     this.$$setSkipFactor(this.$$skipFactor);     // setting skip factor is like reset
 };
 
-Correlator.prototype.handle = function (signalValue, signalDecibel, noiseDecibel) {
+Correlator.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
     var data, isValidDecibel;
 
     data = Correlator.NO_DATA;
-    switch (signalValue) {
+    switch (codeValue) {
         case -1:
         case 1:
-            data = signalValue;
+            data = codeValue;
     }
     this.$$dataBuffer.pushEvenIfFull(data);
 

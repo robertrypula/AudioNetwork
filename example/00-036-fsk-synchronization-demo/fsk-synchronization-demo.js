@@ -99,8 +99,8 @@ function updateView(state) {
                 'Connected!<br/>' +
                 '- offset ' + cd.offset + '<br/>' +
                 '- correlation ' + Math.abs(cd.correlationValue) + '/' + state.connectCodeLength + '<br/>' +
-                '- signalAvg ' + cd.decibelAverageSignal.toFixed(2) + ' dB' + '<br/>' +
-                '- noiseAvg ' + cd.decibelAverageNoise.toFixed(2) + ' dB' + '<br/>' +
+                '- signalAvg ' + cd.signalDecibelAverage.toFixed(2) + ' dB' + '<br/>' +
+                '- noiseAvg ' + cd.noiseDecibelAverage.toFixed(2) + ' dB' + '<br/>' +
                 '- SNR ' + cd.signalToNoiseRatio.toFixed(2) + ' dB' + '<br/>' +
                 '- threshold ' + state.signalThresholdDecibel.toFixed() + ' dB'
             );

@@ -150,8 +150,8 @@ PhysicalLayer.prototype.getState = function () { /// getRxState, getTxState, get
             id: cd.id,
             offset: cd.offset,
             correlationValue: cd.correlationValue,
-            decibelAverageSignal: cd.decibelAverageSignal,
-            decibelAverageNoise: cd.decibelAverageNoise,
+            signalDecibelAverage: cd.signalDecibelAverage,
+            noiseDecibelAverage: cd.noiseDecibelAverage,
             signalToNoiseRatio: cd.signalToNoiseRatio
         }
     };
@@ -269,7 +269,7 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
 
     connection = this.$$syncCodeDetector.getConnection();
     if (connection && connection.id !== this.$$connectionLastId) {
-        this.$$signalThresholdDecibel = connection.decibelAverageNoise +
+        this.$$signalThresholdDecibel = connection.noiseDecibelAverage +
             this.$$rxSignalThresholdFactor * connection.signalToNoiseRatio;
         this.$$connectionLastId = connection.id;
     }

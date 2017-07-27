@@ -8,9 +8,12 @@ SmartTimer = function (interval) {
     this.$$intervalCounter = null;
     this.$$timeRefference = null;
     this.$$timeoutId = null;
+    this.$$listener = undefined;
 
     this.setInterval(interval);
 };
+
+SmartTimer.$$_MILISECOND_IN_SECOND = 1000;
 
 SmartTimer.$$isFunction = function (variable) {
     return typeof variable === 'function';
@@ -26,11 +29,11 @@ SmartTimer.prototype.setInterval = function (interval) {
     this.$$scheduleNext();
 };
 
-SmartTimer.prototype.setHandler = function (handler) {
-    if (SmartTimer.$$isFunction(handler)) {
-        this.$$handler = handler.bind(handler);
+SmartTimer.prototype.setListener = function (listener) {
+    if (SmartTimer.$$isFunction(listener)) {
+        this.$$listener = listener.bind(listener);
     } else {
-        this.$$handler = null;
+        this.$$listener = null;
     }
 };
 
@@ -42,21 +45,21 @@ SmartTimer.prototype.$$scheduleNext = function () {
         difference;
 
     this.$$intervalCounter++;
-    millisecondsToAdd = 1000 * this.$$interval * this.$$intervalCounter;
+    millisecondsToAdd = SmartTimer.$$_MILISECOND_IN_SECOND * this.$$interval * this.$$intervalCounter;
     scheduleDate.setMilliseconds(
         scheduleDate.getMilliseconds() + millisecondsToAdd
     );
     difference = scheduleDate.getTime() - now.getTime();
 
     this.$$timeoutId = setTimeout(
-        this.$$notifyHandler.bind(this),
+        this.$$notifyListener.bind(this),
         difference
     );
 };
 
-SmartTimer.prototype.$$notifyHandler = function () {
-    if (this.$$handler) {
-        this.$$handler();
+SmartTimer.prototype.$$notifyListener = function () {
+    if (this.$$listener) {
+        this.$$listener();
     }
     this.$$scheduleNext();
 };

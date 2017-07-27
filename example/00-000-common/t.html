@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table {
+            border: 1px solid lightgray;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        table td {
+            vertical-align: top;
+            border: 1px solid lightgray;
+            padding: 10px;
+        }
+        table td h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body onLoad="onLoad()">
+    <script src="audio-mono-io.js"></script>
+    <script src="fft-result.js"></script>
+    <script src="smart-timer.js"></script>
+    <script src="buffer.js"></script>
+    <script src="correlator.js"></script>
+    <script src="sync-code-detector.js"></script>
+    <script src="physical-layer-v2.js"></script>
+
+    <script>
+        var
+            plb = new PhysicalLayerV2Builder(),
+            pl;
+
+        plb
+            .rxSymbolListener(function (data) {
+                log('log-rx-symbol', data);
+            })
+            .rxSampleListener(function (data) {
+                data.frequencyData = data.frequencyData.slice(0, 3);
+                log('log-rx-sample', data);
+            })
+            .rxSyncListener(function (data) {
+                log('log-rx-sync', data);
+            })
+            .rxConfigListener(function (data) {
+                log('log-rx-config', data);
+            })
+            .configListener(function (data) {
+                log('log-config', data);
+            })
+            .txListener(function (data) {
+                log('log-tx', data);
+            })
+            .txConfigListener(function (data) {
+                log('log-tx-config', data);
+            });
+
+        function log(elementId, object) {
+            document.getElementById(elementId).innerHTML = JSON.stringify(object, null, 2);
+        }
+
+        function onLoad() {
+            pl = plb.build();
+        }
+
+    </script>
+
+    <button type="button" onClick="pl.setLoopback(true)">Loopback Enable</button>
+    <button type="button" onClick="pl.setLoopback(false)">Loopback Disable</button>
+    <br/>
+
+    <button type="button" onClick="pl.setAmplitude(0.1)">Amplitude 10%</button>
+    <button type="button" onClick="pl.setAmplitude(0.5)">Amplitude 50%</button>
+    <button type="button" onClick="pl.setAmplitude(1.0)">Amplitude 100%</button>
+    <br/>
+    <button type="button" onClick="pl.sendSyncCode(44100)">sync 44.1 kHz</button>
+    <button type="button" onClick="pl.sendSyncCode(48000)">sync 48.0 kHz</button>
+    <br/>
+    <button type="button" onClick="pl.sendSymbol(200)">200</button>
+    <button type="button" onClick="pl.sendSymbol(201)">201</button>
+    <button type="button" onClick="pl.clearQueue()">Clear queue</button>
+
+    <table>
+        <tr>
+            <td>
+                <h2>RxSymbol</h2>
+                <pre id="log-rx-symbol"></pre>
+            </td>
+            <td>
+                <h2>RxSample</h2>
+                <pre id="log-rx-sample"></pre>
+            </td>
+            <td>
+                <h2>RxSync</h2>
+                <pre id="log-rx-sync"></pre>
+            </td>
+            <td>
+                <h2>Tx</h2>
+                <pre id="log-tx"></pre>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td>
+                <h2>RxConfig</h2>
+                <pre id="log-rx-config"></pre>
+            </td>
+            <td>
+                <h2>Config</h2>
+                <pre id="log-config"></pre>
+            </td>
+            <td>
+                <h2>TxConfig</h2>
+                <pre id="log-tx-config"></pre>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

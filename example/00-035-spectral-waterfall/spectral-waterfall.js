@@ -29,7 +29,7 @@ function init() {
 
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     smartTimer = new SmartTimer(SAMPLE_TIME_MS / 1000);
-    smartTimer.setHandler(smartTimerHandler);
+    smartTimer.setListener(smartTimerListener);
 
     onLoopbackCheckboxChange();
 }
@@ -193,7 +193,7 @@ function updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fft
     );
 }
 
-function smartTimerHandler() {
+function smartTimerListener() {
     var
         frequencyData,
         fftResult,

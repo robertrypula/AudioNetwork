@@ -25,7 +25,7 @@ SyncCodeDetector.prototype.getSync = function () {
     return this.$$sync;
 };
 
-SyncCodeDetector.prototype.handle = function (signalValue, signalDecibel, noiseDecibel) {
+SyncCodeDetector.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
     var
         offset,
         blockHistoryEntry,
@@ -39,15 +39,15 @@ SyncCodeDetector.prototype.handle = function (signalValue, signalDecibel, noiseD
     blockHistoryEntry = this.$$blockHistory[offset];
     isLastOffsetInSamplingBlock = offset === (this.$$samplePerSymbol - 1);
 
-    this.$$correlator.handle(signalValue, signalDecibel, noiseDecibel);
+    this.$$correlator.handle(codeValue, signalDecibel, noiseDecibel);
     syncCodeDetected = this.$$correlator.isCorrelated();
 
     if (syncCodeDetected) {
         syncCandidate = this.$$getEmptySync();
         syncCandidate.symbolSamplingPointOffset = offset;
         syncCandidate.correlationValue = this.$$correlator.getCorrelationValue();
-        syncCandidate.decibelAverageSignal = this.$$correlator.getSignalDecibelAverage();
-        syncCandidate.decibelAverageNoise = this.$$correlator.getNoiseDecibelAverage();
+        syncCandidate.signalDecibelAverage = this.$$correlator.getSignalDecibelAverage();
+        syncCandidate.noiseDecibelAverage = this.$$correlator.getNoiseDecibelAverage();
         syncCandidate.signalToNoiseRatio = this.$$correlator.getSignalToNoiseRatio();
         
         blockHistoryEntry.decisionList.push(syncCandidate);
@@ -168,8 +168,8 @@ SyncCodeDetector.prototype.$$getEmptySync = function () {
         id: null,
         symbolSamplingPointOffset: undefined,
         correlationValue: undefined,
-        decibelAverageSignal: undefined,
-        decibelAverageNoise: undefined,
+        signalDecibelAverage: undefined,
+        noiseDecibelAverage: undefined,
         signalToNoiseRatio: undefined
     };
 };

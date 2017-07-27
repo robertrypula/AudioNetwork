@@ -14,6 +14,49 @@ var PhysicalLayerV2Builder = function () {
     this._amplitude = 0.1;
     this._syncCode = [1, -1, 1, -1, 1, -1];
     this._signalDecibelThresholdFactor = 0.85;
+
+    this._rxSymbolListener = undefined;
+    this._rxSampleListener = undefined;
+    this._rxSyncListener = undefined;
+    this._rxConfigListener = undefined;
+    this._configListener = undefined;
+    this._txListener = undefined;
+    this._txConfigListener = undefined;
+};
+
+PhysicalLayerV2Builder.prototype.rxSymbolListener = function (listener) {
+    this._rxSymbolListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.rxSampleListener = function (listener) {
+    this._rxSampleListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.rxSyncListener = function (listener) {
+    this._rxSyncListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.rxConfigListener = function (listener) {
+    this._rxConfigListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.configListener = function (listener) {
+    this._configListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.txListener = function (listener) {
+    this._txListener = listener;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.txConfigListener = function (listener) {
+    this._txConfigListener = listener;
+    return this;
 };
 
 PhysicalLayerV2Builder.prototype.build = function () {
@@ -23,7 +66,7 @@ PhysicalLayerV2Builder.prototype.build = function () {
 /*
 var pl = PlBuilder
   .rrSymbolListener(listenerA)
-  .rxRawListener(listenerB)
+  .-rxRawListener(listenerB)
   .rxConfigListener()
   .txListener
   .txConfigListener
@@ -39,10 +82,8 @@ PhysicalLayerV2 = function (builder) {
     this.$$fftSize = builder._fftSize;
     this.$$audioMonoIO = new AudioMonoIO(this.$$fftSize);
     this.$$unitTime = builder._unitTime;
-    this.$$smartTimer = new SmartTimer(
-        Math.round(PhysicalLayerV2.$$_MILISECOND_IN_SECOND * this.$$unitTime)
-    );
-    this.$$smartTimer.setHandler(this.$$smartTimerListener.bind(this));
+    this.$$smartTimer = new SmartTimer(this.$$unitTime);
+    this.$$smartTimer.setListener(this.$$smartTimerListener.bind(this));
     this.$$fftSkipFactor = builder._fftSkipFactor;
     this.$$samplePerSymbol = builder._samplePerSymbol;
     this.$$symbolMin44100 = builder._symbolMin44100;
@@ -52,10 +93,7 @@ PhysicalLayerV2 = function (builder) {
     this.$$rxSampleRate = this.$$audioMonoIO.getSampleRate();
     this.$$amplitude = builder._amplitude;
     this.$$syncCode = builder._syncCode.slice(0);
-    this.$$syncCodeDetector = new SyncCodeDetector(
-        this.$$samplePerSymbol,
-        this.$$syncCode
-    );
+    this.$$syncCodeDetector = new SyncCodeDetector(this.$$samplePerSymbol, this.$$syncCode);
     this.$$signalDecibelThresholdFactor = builder._signalDecibelThresholdFactor;
 
     // state variables
@@ -66,78 +104,110 @@ PhysicalLayerV2 = function (builder) {
     this.$$symbol = undefined;
     this.$$symbolRaw = undefined;
     this.$$signalDecibel = undefined;
-    this.$$signalNextCandidateDecibel = undefined;
+    this.$$signalDecibelNextCandidate = undefined;
     this.$$signalFrequency = undefined;
     this.$$noiseDecibel = undefined;
     this.$$frequencyData = undefined;
     this.$$isSyncInProgress = undefined;
     this.$$isSymbolSamplingPoint = undefined;
     this.$$signalDecibelThreshold = PhysicalLayerV2.$$_INITIAL_SIGNAL_DECIBEL_THRESHOLD;
-
-    this.$$txSymbol = PhysicalLayerV2.$$_TX_SYMBOL_NULL;
+    this.$$syncLastId = undefined;
+    this.$$txSymbol = PhysicalLayerV2.$$_SYMBOL_IDLE;
     this.$$txSymbolQueue = [];
 
+    // symbol ranges depends on sampleRate
     this.$$rxSymbolMin = this.$$getSymbolMin(this.$$rxSampleRate);
     this.$$rxSymbolMax = this.$$getSymbolMax(this.$$rxSampleRate);
+    this.$$txSampleRate = undefined;
+    this.$$txSymbolMin = undefined;
+    this.$$txSymbolMax = undefined;
     this.setTxSampleRate(builder._txSampleRate);
 
     // setup listeners
+    this.$$rxSymbolListener = PhysicalLayerV2.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
+    this.$$rxSampleListener = PhysicalLayerV2.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
+    this.$$rxSyncListener = PhysicalLayerV2.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
+    this.$$rxConfigListener = PhysicalLayerV2.$$isFunction(builder._rxConfigListener) ? builder._rxConfigListener : null;
+    this.$$configListener = PhysicalLayerV2.$$isFunction(builder._configListener) ? builder._configListener : null;
+    this.$$txListener = PhysicalLayerV2.$$isFunction(builder._txListener) ? builder._txListener : null;
+    this.$$txConfigListener = PhysicalLayerV2.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
 
+    // call config listeners
+    this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
+    this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
+    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
 };
 
-PhysicalLayerV2.$$_MILISECOND_IN_SECOND = 1000;
 PhysicalLayerV2.$$_INITIAL_SAMPLE_NUMER = 0;
-PhysicalLayerV2.$$_INITIAL_ID = 1;
+PhysicalLayerV2.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayerV2.$$_INITIAL_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
-PhysicalLayerV2.$$_TX_SYMBOL_NULL = null;
+PhysicalLayerV2.$$_SYMBOL_IDLE = null;
 PhysicalLayerV2.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayerV2.$$_FIRST_SYMBOL = 1;
+PhysicalLayerV2.$$_SYNC_SYMBOL_A_OFFSET = 1;
+PhysicalLayerV2.$$_SYNC_SYMBOL_B_OFFSET = 0;
+PhysicalLayerV2.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
 // -----------------------------------------
 
-/*
-PhysicalLayer.prototype.sendSyncCode = function (sampleRate) {   // sendconnectCode
-    var i, connectCode, codeValue, symbol;
+PhysicalLayerV2.prototype.sendSyncCode = function (sampleRate) {
+    var i, codeValue, symbol;
 
-    connectCode = PhysicalLayer.CONNECT_CODE;
-    this.$$txSampleRate = sampleRate;
-    for (i = 0; i < connectCode.length; i++) {
-        codeValue = connectCode[i];
+    if (this.$$txSampleRate !== sampleRate) {
+        this.setTxSampleRate(sampleRate);
+    }
+    for (i = 0; i < this.$$syncCode.length; i++) {
+        codeValue = this.$$syncCode[i];
         symbol = codeValue === -1
-            ? this.$$symbolSyncA
-            : this.$$symbolSyncB;
+            ? this.$$txSymbolMax - PhysicalLayerV2.$$_SYNC_SYMBOL_A_OFFSET
+            : this.$$txSymbolMax - PhysicalLayerV2.$$_SYNC_SYMBOL_B_OFFSET;
         this.$$txSymbolQueue.push(symbol);
     }
+    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
-PhysicalLayer.prototype.sendSymbol = function (symbol) {         // sendSymbol
-    var isNumber, symbolParsed, isValid;
+PhysicalLayerV2.prototype.sendSymbol = function (symbol) {
+    var isNumber, symbolParsed, inRange, isValid;
 
-    if (symbol === PhysicalLayer.NULL_SYMBOL) {
-        this.$$txSymbolQueue.push(PhysicalLayer.NULL_SYMBOL);
+    if (symbol === PhysicalLayerV2.$$_SYMBOL_IDLE) {
+        this.$$txSymbolQueue.push(PhysicalLayerV2.$$_SYMBOL_IDLE);
     } else {
         symbolParsed = parseInt(symbol);
         isNumber = typeof symbolParsed === 'number';
-        isValid = isNumber && this.$$symbolMin <= symbolParsed && symbolParsed <= this.$$symbolMax;
+        inRange = this.$$txSymbolMin <= symbolParsed && symbolParsed <= this.$$txSymbolMax;
+        isValid = isNumber && inRange;
 
         if (!isValid) {
-            throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
+            throw PhysicalLayerV2.SYMBOL_IS_NOT_VALID_EXCEPTION;
         }
 
         this.$$txSymbolQueue.push(symbolParsed);
     }
+    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
-*/
 
 PhysicalLayerV2.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$txSampleRate = txSampleRate;
     this.$$txSymbolMin = this.$$getSymbolMin(this.$$txSampleRate);
     this.$$txSymbolMax = this.$$getSymbolMax(this.$$txSampleRate);
     this.$$txSymbolQueue.length = 0;
+    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
+    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
 };
 
 PhysicalLayerV2.prototype.setLoopback = function (state) {
     this.$$audioMonoIO.setLoopback(state);
+    this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
+};
+
+PhysicalLayerV2.prototype.setAmplitude = function (amplitude) {
+    this.$$amplitude = amplitude;
+    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+};
+
+PhysicalLayerV2.prototype.clearQueue = function () {
+    this.$$txSymbolQueue.length = 0;
+    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
 // -----------------------------------------
@@ -155,15 +225,16 @@ PhysicalLayerV2.prototype.getRxSample = function () {
 
     return {
         id: this.$$sampleId,
-        offset: this.$$offset,
         symbolRaw: this.$$symbolRaw,
         signalDecibel: this.$$signalDecibel,
-        signalNextCandidateDecibel: this.$$signalNextCandidateDecibel,
+        signalDecibelNextCandidate: this.$$signalDecibelNextCandidate,
         signalFrequency: this.$$signalFrequency,
         noiseDecibel: this.$$noiseDecibel,
         frequencyData: this.$$frequencyData.slice(0),
         isSyncInProgress: this.$$isSyncInProgress,
         isSymbolSamplingPoint: this.$$isSymbolSamplingPoint,
+        sampleNumber: this.$$sampleNumber,
+        offset: this.$$offset,
         syncId: sync.id
     };
 };
@@ -175,8 +246,8 @@ PhysicalLayerV2.prototype.getRxSync = function () {
         id: sync.id,
         symbolSamplingPointOffset: sync.symbolSamplingPointOffset,
         correlationValue: sync.correlationValue,
-        decibelAverageSignal: sync.decibelAverageSignal,
-        decibelAverageNoise: sync.decibelAverageNoise,
+        signalDecibelAverage: sync.signalDecibelAverage,
+        noiseDecibelAverage: sync.noiseDecibelAverage,
         signalToNoiseRatio: sync.signalToNoiseRatio
     };
 };
@@ -192,7 +263,8 @@ PhysicalLayerV2.prototype.getRxConfig = function () {
         symbolFrequencySpacing: symbolFrequencySpacing,
         symbolMin: this.$$rxSymbolMin,
         symbolMax: this.$$rxSymbolMax,
-        signalDecibelThreshold: this.$$signalDecibelThreshold
+        signalDecibelThreshold: this.$$signalDecibelThreshold,
+        signalDecibelThresholdFactor: this.$$signalDecibelThresholdFactor
     };
 };
 
@@ -203,14 +275,14 @@ PhysicalLayerV2.prototype.getConfig = function () {
         samplePerSymbol: this.$$samplePerSymbol,
         unitTime: this.$$unitTime,
         correlationCodeLength: this.$$syncCode.length,
-        loopback: this.$$audioMonoIO.isLoopbackEnabled()
+        isLoopbackEnabled: this.$$audioMonoIO.isLoopbackEnabled()
     };
 };
 
 PhysicalLayerV2.prototype.getTx = function () {
     return {
         symbol: this.$$txSymbol,
-        symbolQueue: this.$$txSymbolQueue.split(0)
+        symbolQueue: this.$$txSymbolQueue.slice(0)
     }
 };
 
@@ -236,84 +308,99 @@ PhysicalLayerV2.prototype.$$smartTimerListener = function () {
     this.$$rx();
     this.$$tx();
 
-    console.log('tes');
-
     this.$$sampleNumber++;
+    this.$$sampleId++;
 };
 
 PhysicalLayerV2.prototype.$$rx = function () {
-    var fftResult;
+    var
+        isAllowedToListen,
+        fftResult,
+        sync,
+        isNewSyncAvailable = false,
+        isNewSymbolReadyToTake;
 
-    this.$$frequencyData = this.$$audioMonoIO.getFrequencyData();
-    fftResult = new FFTResult(this.$$frequencyData, this.$$rxSampleRate);
-    fftResult.downconvertScalar(this.$$fftSkipFactor);
-    this.$$symbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSampleRate);
-    this.$$signalDecibel = fftResult.getDecibel(this.$$symbolRaw);
-    this.$$signalNextCandidateDecibel = undefined; // TODO add this
-    this.$$noiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$symbolRaw);
+    isAllowedToListen =
+        this.$$txSymbol === PhysicalLayerV2.$$_SYMBOL_IDLE ||
+        this.$$audioMonoIO.isLoopbackEnabled();
 
-    /*
-    connectSignalValue = this.$$getConnectionSignalValue(this.$$symbol);
-    this.$$syncCodeDetector.handle(
-        connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
-    );
-
-    connection = this.$$syncCodeDetector.getConnection();
-    if (connection && connection.id !== this.$$connectionLastId) {
-        this.$$signalThresholdDecibel = connection.decibelAverageNoise +
-            this.$$rxSignalThresholdFactor * connection.signalToNoiseRatio;
-        this.$$connectionLastId = connection.id;
+    if (isAllowedToListen) {
+        this.$$frequencyData = this.$$audioMonoIO.getFrequencyData();
+        fftResult = new FFTResult(this.$$frequencyData, this.$$rxSampleRate);
+        fftResult.downconvertScalar(this.$$fftSkipFactor);
+        this.$$symbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
+        this.$$signalDecibel = fftResult.getDecibel(this.$$symbolRaw);
+        this.$$signalDecibelNextCandidate = -Infinity; // TODO add this
+        this.$$signalFrequency = fftResult.getFrequency(this.$$symbolRaw);
+        this.$$noiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$symbolRaw);
+    } else {
+        this.$$frequencyData = [];
+        this.$$symbolRaw = this.$$rxSymbolMin;
+        this.$$signalDecibel = -Infinity;
+        this.$$signalDecibelNextCandidate = -Infinity;
+        this.$$signalFrequency = 0;
+        this.$$noiseDecibel = -Infinity;
     }
 
-    this.$$isSymbolSamplingPoint = this.$$syncCodeDetector.isConnected()
-        ? (this.$$offset) === connection.symbolSamplingPointOffset
-        : false;
+    this.$$handleSyncCode();
 
-    isSignalAboveThreshold = this.$$syncCodeDetector.isConnected()
-        ? this.$$signalDecibel > this.$$signalThresholdDecibel
-        : false;
+    this.$$isSyncInProgress = this.$$syncCodeDetector.isSyncInProgress();
+    sync = this.$$syncCodeDetector.getSync();
+    if (sync.id && sync.id !== this.$$syncLastId) {
+        this.$$signalDecibelThreshold = sync.noiseDecibelAverage +
+            this.$$signalDecibelThresholdFactor * sync.signalToNoiseRatio;
+        this.$$syncLastId = sync.id;
+        isNewSyncAvailable = true;
+    }
 
-    this.$$isSymbolReadyToTake = this.$$isSymbolSamplingPoint && isSignalAboveThreshold;
-    */
+    this.$$isSymbolSamplingPoint = sync.id && this.$$offset === sync.symbolSamplingPointOffset;
+    isNewSymbolReadyToTake = this.$$isSymbolSamplingPoint && this.$$signalDecibel > this.$$signalDecibelThreshold;
+    this.$$symbol = isNewSymbolReadyToTake ? this.$$symbolRaw : PhysicalLayerV2.$$_SYMBOL_IDLE;
+
+    // call listeners
+    if (isNewSyncAvailable) {
+        this.$$rxSyncListener ? this.$$rxSyncListener(this.getRxSync()) : undefined;
+        this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
+    }
+    this.$$rxSampleListener ? this.$$rxSampleListener(this.getRxSample()) : undefined;
+    if (this.$$isSymbolSamplingPoint) {
+        this.$$symbolId++;
+        this.$$rxSymbolListener ? this.$$rxSymbolListener(this.getRxSymbol()) : undefined;
+    }
 };
 
 PhysicalLayerV2.prototype.$$tx = function () {
-    var isFirstSampleOfBlock = this.$$offset === 0;
+    var
+        newSymbolReady,
+        isFirstSampleOfBlock = this.$$offset === 0;
 
     if (isFirstSampleOfBlock) {
-        this.$$txSymbol = this.$$txQueue.length > 0
-            ? this.$$txQueue.shift()
-            : PhysicalLayerV2.$$_TX_SYMBOL_NULL;
+        newSymbolReady = this.$$txSymbolQueue.length > 0;
+        this.$$txSymbol = newSymbolReady
+            ? this.$$txSymbolQueue.shift()
+            : PhysicalLayerV2.$$_SYMBOL_IDLE;
+        this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
     }
     this.$$updateOscillator();
 };
 
 // -------
 
-/*
-PhysicalLayer.prototype.$$getConnectionSignalValue = function (symbol) {
-    var
-        allowedToListenConnectSignal,
-        connectSignalValue = 0;
+PhysicalLayerV2.prototype.$$handleSyncCode = function () {
+    var codeValue;
 
-    allowedToListenConnectSignal =
-        this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
-        this.$$audioMonoIO.isLoopbackEnabled();
-
-    if (allowedToListenConnectSignal) {
-        switch (symbol) {
-            case this.$$symbolSyncA:
-                connectSignalValue = -1;
-                break;
-            case this.$$symbolSyncB:
-                connectSignalValue = 1;
-                break;
-        }
+    switch (this.$$symbolRaw) {
+        case this.$$rxSymbolMax - PhysicalLayerV2.$$_SYNC_SYMBOL_A_OFFSET:
+            codeValue = -1;
+            break;
+        case this.$$rxSymbolMax - PhysicalLayerV2.$$_SYNC_SYMBOL_B_OFFSET:
+            codeValue = 1;
+            break;
     }
-
-    return connectSignalValue;
+    this.$$syncCodeDetector.handle(
+        codeValue, this.$$signalDecibel, this.$$noiseDecibel
+    );
 };
-*/
 
 PhysicalLayerV2.prototype.$$getSymbolMin = function (sampleRate) {
     switch (sampleRate) {
@@ -335,19 +422,21 @@ PhysicalLayerV2.prototype.$$getSymbolMax = function (sampleRate) {
 PhysicalLayerV2.prototype.$$updateOscillator = function () {
     var frequency, amplitude;
 
-    if (this.$$txCurrentSymbol === PhysicalLayerV2.$$_TX_SYMBOL_NULL) {
-        frequency = PhysicalLayerV2.$$_TX_SYMBOL_NULL;
+    if (this.$$txSymbol === PhysicalLayerV2.$$_SYMBOL_IDLE) {
+        frequency = PhysicalLayerV2.$$_SYMBOL_IDLE;
         amplitude = PhysicalLayerV2.$$_TX_AMPLITUDE_SILENT;
     } else {
         frequency = this.$$getFrequency(this.$$txSymbol, this.$$txSampleRate);
-        amplitude = this.$$txAmplitude;
+        amplitude = this.$$amplitude;
     }
 
     this.$$audioMonoIO.setPeriodicWave(frequency, amplitude);
 };
 
 PhysicalLayerV2.prototype.$$getFrequency = function (symbol, sampleRate) {
-    return (this.$$fftSkipFactor * symbol * sampleRate) / this.$$fftSize;
+    var nativeFrequency = FFTResult.getFrequency(symbol, sampleRate, this.$$fftSize);
+
+    return this.$$fftSkipFactor * nativeFrequency;
 };
 
 PhysicalLayerV2.$$isFunction = function (variable) {
