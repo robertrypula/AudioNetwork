@@ -63,7 +63,6 @@ PhysicalLayerV2 = function (builder) {
     this.$$offset = undefined;
     this.$$symbolId = PhysicalLayerV2.$$_INITIAL_ID;
     this.$$sampleId = PhysicalLayerV2.$$_INITIAL_ID;
-
     this.$$symbol = undefined;
     this.$$symbolRaw = undefined;
     this.$$signalDecibel = undefined;
@@ -82,6 +81,8 @@ PhysicalLayerV2 = function (builder) {
     this.$$rxSymbolMax = this.$$getSymbolMax(this.$$rxSampleRate);
     this.setTxSampleRate(builder._txSampleRate);
 
+    // setup listeners
+
 };
 
 PhysicalLayerV2.$$_MILISECOND_IN_SECOND = 1000;
@@ -93,6 +94,40 @@ PhysicalLayerV2.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayerV2.$$_FIRST_SYMBOL = 1;
 
 // -----------------------------------------
+
+/*
+PhysicalLayer.prototype.sendSyncCode = function (sampleRate) {   // sendconnectCode
+    var i, connectCode, codeValue, symbol;
+
+    connectCode = PhysicalLayer.CONNECT_CODE;
+    this.$$txSampleRate = sampleRate;
+    for (i = 0; i < connectCode.length; i++) {
+        codeValue = connectCode[i];
+        symbol = codeValue === -1
+            ? this.$$symbolSyncA
+            : this.$$symbolSyncB;
+        this.$$txSymbolQueue.push(symbol);
+    }
+};
+
+PhysicalLayer.prototype.sendSymbol = function (symbol) {         // sendSymbol
+    var isNumber, symbolParsed, isValid;
+
+    if (symbol === PhysicalLayer.NULL_SYMBOL) {
+        this.$$txSymbolQueue.push(PhysicalLayer.NULL_SYMBOL);
+    } else {
+        symbolParsed = parseInt(symbol);
+        isNumber = typeof symbolParsed === 'number';
+        isValid = isNumber && this.$$symbolMin <= symbolParsed && symbolParsed <= this.$$symbolMax;
+
+        if (!isValid) {
+            throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
+        }
+
+        this.$$txSymbolQueue.push(symbolParsed);
+    }
+};
+*/
 
 PhysicalLayerV2.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$txSampleRate = txSampleRate;
@@ -201,6 +236,8 @@ PhysicalLayerV2.prototype.$$smartTimerListener = function () {
     this.$$rx();
     this.$$tx();
 
+    console.log('tes');
+
     this.$$sampleNumber++;
 };
 
@@ -220,6 +257,23 @@ PhysicalLayerV2.prototype.$$rx = function () {
     this.$$syncCodeDetector.handle(
         connectSignalValue, this.$$signalDecibel, this.$$noiseDecibel
     );
+
+    connection = this.$$syncCodeDetector.getConnection();
+    if (connection && connection.id !== this.$$connectionLastId) {
+        this.$$signalThresholdDecibel = connection.decibelAverageNoise +
+            this.$$rxSignalThresholdFactor * connection.signalToNoiseRatio;
+        this.$$connectionLastId = connection.id;
+    }
+
+    this.$$isSymbolSamplingPoint = this.$$syncCodeDetector.isConnected()
+        ? (this.$$offset) === connection.symbolSamplingPointOffset
+        : false;
+
+    isSignalAboveThreshold = this.$$syncCodeDetector.isConnected()
+        ? this.$$signalDecibel > this.$$signalThresholdDecibel
+        : false;
+
+    this.$$isSymbolReadyToTake = this.$$isSymbolSamplingPoint && isSignalAboveThreshold;
     */
 };
 
@@ -235,6 +289,31 @@ PhysicalLayerV2.prototype.$$tx = function () {
 };
 
 // -------
+
+/*
+PhysicalLayer.prototype.$$getConnectionSignalValue = function (symbol) {
+    var
+        allowedToListenConnectSignal,
+        connectSignalValue = 0;
+
+    allowedToListenConnectSignal =
+        this.$$txCurrentSymbol === PhysicalLayer.NULL_SYMBOL ||
+        this.$$audioMonoIO.isLoopbackEnabled();
+
+    if (allowedToListenConnectSignal) {
+        switch (symbol) {
+            case this.$$symbolSyncA:
+                connectSignalValue = -1;
+                break;
+            case this.$$symbolSyncB:
+                connectSignalValue = 1;
+                break;
+        }
+    }
+
+    return connectSignalValue;
+};
+*/
 
 PhysicalLayerV2.prototype.$$getSymbolMin = function (sampleRate) {
     switch (sampleRate) {
