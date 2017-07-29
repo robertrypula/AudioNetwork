@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Physical Layer demo</title>
     <style>
         table {
             border: 1px solid lightgray;
@@ -17,6 +17,15 @@
         table td h2 {
             margin-top: 0;
         }
+        #received-symbol-container span {
+            display: inline-block;
+            border: 1px solid lightgray;
+            padding: 2px;
+            line-height: 1em;
+        }
+        #received-symbol-container span.active {
+            background-color: lightgreen;
+        }
     </style>
 </head>
 <body onLoad="onLoad()">
@@ -30,11 +39,27 @@
 
     <script>
         var
-            plb = new PhysicalLayerV2Builder(),
-            pl;
+            physicalLayerBuilder = new PhysicalLayerV2Builder(),
+            physicalLayer,
+            receivedSymbol = [];
 
-        plb
+        physicalLayerBuilder
             .rxSymbolListener(function (data) {
+                var
+                    i,
+                    rxSymbolElementList = document.querySelectorAll('#received-symbol-container > span');
+
+                for (i = 0; i < rxSymbolElementList.length; i++) {
+                    rxSymbolElementList[i].classList.remove('active');
+                }
+                if (data.symbol) {
+                    document.getElementById('rx-symbol-' + data.symbol).classList.add('active');
+                }
+                receivedSymbol.push(data.symbol ? byteToText(data.symbol - physicalLayer.getRxConfig().symbolMin) : '---');
+                if (receivedSymbol.length > 10) {
+                    receivedSymbol.shift();
+                }
+                document.getElementById('received-symbol-row').innerHTML = receivedSymbol.join(' ');
                 log('log-rx-symbol', data);
             })
             .rxSampleListener(function (data) {
@@ -45,6 +70,17 @@
                 log('log-rx-sync', data);
             })
             .rxConfigListener(function (data) {
+                var symbol, container, html, byte;
+
+                container = document.getElementById('received-symbol-container');
+                if (container.innerHTML === '') {
+                    html = '';
+                    for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
+                        byte = symbol - data.symbolMin;
+                        html += '<span id="rx-symbol-' + symbol + '">' + byteToText(byte) +'</span>';
+                    }
+                    container.innerHTML = html;
+                }
                 log('log-rx-config', data);
             })
             .configListener(function (data) {
@@ -54,6 +90,13 @@
                 log('log-tx', data);
             })
             .txConfigListener(function (data) {
+                var symbol, byte, html = '';
+
+                for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
+                    byte = symbol - data.symbolMin;
+                    html += '<button onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</button>';
+                }
+                document.getElementById('send-symbol-button-container').innerHTML = html;
                 log('log-tx-config', data);
             });
 
@@ -61,61 +104,57 @@
             document.getElementById(elementId).innerHTML = JSON.stringify(object, null, 2);
         }
 
+        function byteToText(byte) {
+            var text;
+
+            if (byte === 32) {
+                return '&nbsp;';
+            }
+
+            text = (byte >= 32 && byte < 128)
+                ? ('&#' + byte + ';')
+                : '0x' + byte.toString(16);
+
+            return text;
+        }
+
         function onLoad() {
-            pl = plb.build();
+            physicalLayer = physicalLayerBuilder.build();
         }
 
     </script>
 
-    <button type="button" onClick="pl.setLoopback(true)">Loopback Enable</button>
-    <button type="button" onClick="pl.setLoopback(false)">Loopback Disable</button>
+    <button type="button" onClick="physicalLayer.setLoopback(true)">Loopback Enable</button>
+    <button type="button" onClick="physicalLayer.setLoopback(false)">Loopback Disable</button>
     <br/>
 
-    <button type="button" onClick="pl.setAmplitude(0.1)">Amplitude 10%</button>
-    <button type="button" onClick="pl.setAmplitude(0.5)">Amplitude 50%</button>
-    <button type="button" onClick="pl.setAmplitude(1.0)">Amplitude 100%</button>
+    <button type="button" onClick="physicalLayer.setAmplitude(0.1)">Amplitude 10%</button>
+    <button type="button" onClick="physicalLayer.setAmplitude(0.5)">Amplitude 50%</button>
+    <button type="button" onClick="physicalLayer.setAmplitude(1.0)">Amplitude 100%</button>
     <br/>
-    <button type="button" onClick="pl.sendSyncCode(44100)">sync 44.1 kHz</button>
-    <button type="button" onClick="pl.sendSyncCode(48000)">sync 48.0 kHz</button>
+    <button type="button" onClick="physicalLayer.setTxSampleRate(44100)">Second device @ 44.1 kHz</button>
+    <button type="button" onClick="physicalLayer.setTxSampleRate(48000)">Second device @ 48.0 kHz</button>
     <br/>
-    <button type="button" onClick="pl.sendSymbol(200)">200</button>
-    <button type="button" onClick="pl.sendSymbol(201)">201</button>
-    <button type="button" onClick="pl.clearQueue()">Clear queue</button>
+    <button type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
+    <button type="button" onClick="physicalLayer.clearQueue()">Clear Tx queue</button>
+    <br/>
+    <div id="send-symbol-button-container"></div>
+    <div id="received-symbol-container"></div>
+    <div id="received-symbol-row"></div>
 
     <table>
         <tr>
-            <td>
-                <h2>RxSymbol</h2>
-                <pre id="log-rx-symbol"></pre>
-            </td>
-            <td>
-                <h2>RxSample</h2>
-                <pre id="log-rx-sample"></pre>
-            </td>
-            <td>
-                <h2>RxSync</h2>
-                <pre id="log-rx-sync"></pre>
-            </td>
-            <td>
-                <h2>Tx</h2>
-                <pre id="log-tx"></pre>
-            </td>
+            <td><h2>RxSymbol</h2><pre id="log-rx-symbol"></pre></td>
+            <td><h2>RxSample</h2><pre id="log-rx-sample"></pre></td>
+            <td><h2>RxSync</h2><pre id="log-rx-sync"></pre></td>
+            <td><h2>Tx</h2><pre id="log-tx"></pre></td>
         </tr>
     </table>
     <table>
         <tr>
-            <td>
-                <h2>RxConfig</h2>
-                <pre id="log-rx-config"></pre>
-            </td>
-            <td>
-                <h2>Config</h2>
-                <pre id="log-config"></pre>
-            </td>
-            <td>
-                <h2>TxConfig</h2>
-                <pre id="log-tx-config"></pre>
-            </td>
+            <td><h2>RxConfig</h2><pre id="log-rx-config"></pre></td>
+            <td><h2>Config</h2><pre id="log-config"></pre></td>
+            <td><h2>TxConfig</h2><pre id="log-tx-config"></pre></td>
         </tr>
     </table>
 

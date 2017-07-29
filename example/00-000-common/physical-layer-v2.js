@@ -13,7 +13,7 @@ var PhysicalLayerV2Builder = function () {
     this._txSampleRate = 44100;
     this._amplitude = 0.1;
     this._syncCode = [1, -1, 1, -1, 1, -1];
-    this._signalDecibelThresholdFactor = 0.85;
+    this._signalDecibelThresholdFactor = 0.6;
 
     this._rxSymbolListener = undefined;
     this._rxSampleListener = undefined;
@@ -22,6 +22,46 @@ var PhysicalLayerV2Builder = function () {
     this._configListener = undefined;
     this._txListener = undefined;
     this._txConfigListener = undefined;
+};
+
+PhysicalLayerV2Builder.prototype.fftSize = function (fftSize) {
+    this._fftSize = fftSize;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.unitTime = function (unitTime) {
+    this._unitTime = unitTime;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.fftSkipFactor = function (fftSkipFactor) {
+    this._fftSkipFactor = fftSkipFactor;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.samplePerSymbol = function (samplePerSymbol) {
+    this._samplePerSymbol = samplePerSymbol;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.symbolMin44100 = function (symbolMin44100) {
+    this._symbolMin44100 = symbolMin44100;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.symbolMin48000 = function (symbolMin48000) {
+    this._symbolMin48000 = symbolMin48000;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.symbolMinDefault = function (symbolMinDefault) {
+    this._symbolMinDefault = symbolMinDefault;
+    return this;
+};
+
+PhysicalLayerV2Builder.prototype.symbolRange = function (symbolRange) {
+    this._symbolRange = symbolRange;
+    return this;
 };
 
 PhysicalLayerV2Builder.prototype.rxSymbolListener = function (listener) {
@@ -63,17 +103,7 @@ PhysicalLayerV2Builder.prototype.build = function () {
     return new PhysicalLayerV2(this);
 };
 
-/*
-var pl = PlBuilder
-  .rrSymbolListener(listenerA)
-  .-rxRawListener(listenerB)
-  .rxConfigListener()
-  .txListener
-  .txConfigListener
-  .build();
- */
-
-// -----------
+// -----------------------------------------------------------------------------------------
 
 var PhysicalLayerV2;
 
@@ -105,7 +135,6 @@ PhysicalLayerV2 = function (builder) {
     this.$$symbolRaw = undefined;
     this.$$signalDecibel = undefined;
     this.$$signalDecibelNextCandidate = undefined;
-    this.$$signalFrequency = undefined;
     this.$$noiseDecibel = undefined;
     this.$$frequencyData = undefined;
     this.$$isSyncInProgress = undefined;
@@ -150,12 +179,9 @@ PhysicalLayerV2.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pas
 
 // -----------------------------------------
 
-PhysicalLayerV2.prototype.sendSyncCode = function (sampleRate) {
+PhysicalLayerV2.prototype.sendSyncCode = function () {
     var i, codeValue, symbol;
 
-    if (this.$$txSampleRate !== sampleRate) {
-        this.setTxSampleRate(sampleRate);
-    }
     for (i = 0; i < this.$$syncCode.length; i++) {
         codeValue = this.$$syncCode[i];
         symbol = codeValue === -1
@@ -228,7 +254,6 @@ PhysicalLayerV2.prototype.getRxSample = function () {
         symbolRaw: this.$$symbolRaw,
         signalDecibel: this.$$signalDecibel,
         signalDecibelNextCandidate: this.$$signalDecibelNextCandidate,
-        signalFrequency: this.$$signalFrequency,
         noiseDecibel: this.$$noiseDecibel,
         frequencyData: this.$$frequencyData.slice(0),
         isSyncInProgress: this.$$isSyncInProgress,
@@ -331,14 +356,12 @@ PhysicalLayerV2.prototype.$$rx = function () {
         this.$$symbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
         this.$$signalDecibel = fftResult.getDecibel(this.$$symbolRaw);
         this.$$signalDecibelNextCandidate = -Infinity; // TODO add this
-        this.$$signalFrequency = fftResult.getFrequency(this.$$symbolRaw);
         this.$$noiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$symbolRaw);
     } else {
         this.$$frequencyData = [];
         this.$$symbolRaw = this.$$rxSymbolMin;
         this.$$signalDecibel = -Infinity;
         this.$$signalDecibelNextCandidate = -Infinity;
-        this.$$signalFrequency = 0;
         this.$$noiseDecibel = -Infinity;
     }
 
@@ -353,7 +376,7 @@ PhysicalLayerV2.prototype.$$rx = function () {
         isNewSyncAvailable = true;
     }
 
-    this.$$isSymbolSamplingPoint = sync.id && this.$$offset === sync.symbolSamplingPointOffset;
+    this.$$isSymbolSamplingPoint = !!(sync.id && this.$$offset === sync.symbolSamplingPointOffset);
     isNewSymbolReadyToTake = this.$$isSymbolSamplingPoint && this.$$signalDecibel > this.$$signalDecibelThreshold;
     this.$$symbol = isNewSymbolReadyToTake ? this.$$symbolRaw : PhysicalLayerV2.$$_SYMBOL_IDLE;
 
