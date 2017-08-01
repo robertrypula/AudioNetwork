@@ -2,17 +2,27 @@
 'use strict';
 
 var
-    BUFFER_SIZE = 20,
+    BUFFER_SIZE = 16,
     ASCII_NULL = 0x00,
     SYMBOL_ZERO_PADDING = 3,
+    INITIAL_AMPLITUDE = 0.2,
     UNICODE_UNKNOWN = '�',
+    physicalLayerBuilder,
     physicalLayer,
-    physicalLayerState,
     rxSymbolList,
     rxAsciiList;
 
 function init() {
-    physicalLayer = new PhysicalLayer(stateHandler);
+    physicalLayerBuilder = new PhysicalLayerV2Builder();
+    physicalLayer = physicalLayerBuilder
+        .amplitude(INITIAL_AMPLITUDE)
+        .rxSymbolListener(rxSymbolListener)
+        .rxSampleListener(rxSampleListener)
+        .rxSyncListener(rxSyncListener)
+        .rxConfigListener(rxConfigListener)
+        .txConfigListener(txConfigListener)
+        .txListener(txListener)
+        .build();
     rxSymbolList = new Buffer(BUFFER_SIZE);
     rxAsciiList = new Buffer(BUFFER_SIZE);
 
@@ -25,86 +35,124 @@ function onLoopbackCheckboxChange() {
     );
 }
 
-function stateHandler(state) {
-    var charCode, char;
+function formatSymbolRange(state) {
+    var s;
 
-    if (state.isSymbolReadyToTake) {
-        rxSymbolList.pushEvenIfFull(state.symbol);
-        charCode = state.symbol - state.band.symbolMin;
-        char = String.fromCharCode(charCode);
-        rxAsciiList.pushEvenIfFull(
-            isPrintableAscii(char) ? char : UNICODE_UNKNOWN
-        );
-    }
-    updateView(state);
-    physicalLayerState = state;
-}
+    s = 'SymbolMin: ' + state.symbolMin + '&nbsp;(' + (state.symbolMin * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolMax: ' + state.symbolMax + '&nbsp;(' + (state.symbolMax * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolSpacing: ' + state.symbolFrequencySpacing.toFixed(2) + ' Hz';
 
-function refreshTxSymbolQueue() {
-    var txSymbolQueue = physicalLayer.getTxSymbolQueue();
-
-    html('#tx-symbol-queue', getStringFromSymbolList(txSymbolQueue));
-}
-
-function updateView(state) {
-    html('#rx-sample-rate', (state.dsp.sampleRateReceive / 1000).toFixed(1) + '&nbsp;kHz');
-    html('#symbol-range', '<' + state.band.symbolMin + ',&nbsp;' + state.band.symbolMax + '>');
-
-    if (state.isConnectionInProgress) {
-        html('#rx-log-connect', 'connecting...');
-    } else {
-        html('#rx-log-connect', state.isConnected ? 'Connected!' : 'not connected');
-    }
-
-    if (state.isConnected) {
-        if (state.isSymbolSamplingPoint) {
-            if (state.isSymbolReadyToTake) {
-                html('#rx-symbol-synchronized', state.symbol + ' (' + state.symbolDetail.signalDecibel.toFixed(2) + ' dB)');
-                html('#rx-symbol-list', getStringFromSymbolList(rxSymbolList.getAll()) + '<br/>' + rxAsciiList.getAll().join(''));
-            } else {
-                html('#rx-symbol-synchronized', 'idle');
-            }
-        }
-    } else {
-        html('#rx-symbol-synchronized', '&nbsp;');
-    }
-
-    refreshTxSymbolQueue();
-}
-
-function onConnectClick(sampleRate) {
-    physicalLayer.txConnect(sampleRate);
-    refreshTxSymbolQueue();
+    return s;
 }
 
 // ----------------------------------
+
+function rxConfigListener(state) {
+    var config = physicalLayer.getConfig();
+
+    html(
+        '#rx-config',
+        '<strong>SampleRate: ' + (state.sampleRate / 1000).toFixed(1) + '&nbsp;kHz</strong><br/>' +
+        formatSymbolRange(state) + '<br/>' +
+        'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
+        'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
+    );
+}
+
+function txConfigListener(state) {
+    html('#tx-config', formatSymbolRange(state));
+
+    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+}
+
+function rxSymbolListener(state) {
+    var
+        rxConfig = physicalLayer.getRxConfig(),
+        charCode,
+        char;
+
+    rxSymbolList.pushEvenIfFull(state.symbol ? state.symbol : '---');
+    charCode = state.symbol - rxConfig.symbolMin;
+    char = String.fromCharCode(charCode);
+    rxAsciiList.pushEvenIfFull(
+        isPrintableAscii(char) ? char : UNICODE_UNKNOWN
+    );
+
+    html('#rx-symbol', 'Symbol: ' + (state.symbol ? state.symbol : 'idle'));
+    html(
+        '#rx-symbol-list',
+        'Symbol list: ' + getStringFromSymbolList(rxSymbolList.getAll()) + '<br/>' +
+        'ASCII: ' + rxAsciiList.getAll().join('')
+    );
+}
+
+function rxSampleListener(state) {
+    var
+        rxConfig = physicalLayer.getRxConfig(),
+        s;
+
+    s = state.isSyncInProgress
+        ? 'Sync in progress...'
+        : (state.syncId ? 'Synchronized!' : 'Not synchronized yet');
+
+    html('#rx-sync-simple', s);
+    html(
+        '#rx-sample',
+        'SymbolRaw: ' + state.symbolRaw + ' (' + state.signalDecibel.toFixed(1) + ' dB)<br/>' +
+        state.offset + '/' + state.sampleNumber + ', ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+    );
+}
+
+function rxSyncListener(state) {
+
+}
+
+function txListener(state) {
+    html(
+        '#tx-symbol-queue',
+        'Now transmistting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
+        getStringFromSymbolList(state.symbolQueue)
+    );
+}
+
+// ----------------------------------
+
+function onSampleRateClick(sampleRate) {
+    physicalLayer.setTxSampleRate(sampleRate);
+}
+
+function onAmplitudeClick(amplitude) {
+    physicalLayer.setAmplitude(amplitude);
+}
+
+function onSendSyncClick() {
+    physicalLayer.sendSyncCode();
+}
 
 function onSendSymbolClick() {
     var symbol = document.getElementById('tx-symbol-field').value;
 
     try {
-        physicalLayer.txSymbol(symbol);
+        physicalLayer.sendSymbol(symbol);
     } catch (e) {
         alert(e);
     }
-
-    refreshTxSymbolQueue();
 }
 
 function onSendTextClick() {
     var
         text = document.getElementById('tx-text-field').value,
+        txConfig = physicalLayer.getTxConfig(),
         charCode,
         symbol,
         i;
 
     for (i = 0; i < text.length; i++) {
         charCode = isPrintableAscii(text[i]) ? text.charCodeAt(i) : ASCII_NULL;
-        symbol = physicalLayerState.band.symbolMin + charCode;
-        physicalLayer.txSymbol(symbol);
+        symbol = txConfig.symbolMin + charCode;
+        physicalLayer.sendSymbol(symbol);
     }
-
-    refreshTxSymbolQueue();
 }
 
 // ----------------------------------

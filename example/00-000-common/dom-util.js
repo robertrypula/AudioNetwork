@@ -32,6 +32,20 @@ function getValue(selector, parseAs) {
     return result;
 }
 
+function setActive(containerId, activeId) {
+    var
+        list = select(containerId + ' > *'),
+        active = select(activeId),
+        i;
+
+    for (i = 0; i < list.length; i++) {
+        list[i].classList.remove('active');
+    }
+    if (active.length === 1) {
+        select(activeId)[0].classList.add('active');
+    }
+}
+
 function select(selector) {
     return document.querySelectorAll(selector);
 }

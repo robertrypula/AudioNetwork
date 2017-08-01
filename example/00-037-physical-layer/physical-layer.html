@@ -74,33 +74,34 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Sample&nbsp;rate
+                                Rx Config
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-sample-rate" class="log-container"></div>
+                            <div id="rx-config" class="log-container"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Status
+                                Real-time status
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-log-connect" class="log-container"></div>
+                            <div id="rx-sync-simple" class="log-container"></div>
+                            <div id="rx-sample" class="log-container"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                RX data
+                                Data
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol-synchronized" class="margin-bottom"></div>
+                            <div id="rx-symbol" class="margin-bottom">-</div>
                             <div id="rx-symbol-list" class="log-container"></div>
                         </div>
                     </div>
@@ -112,49 +113,35 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Connect
+                                Send...
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <button class="btn btn-default" onClick="onConnectClick(44100)">44.1 kHz</button>
-                            <button class="btn btn-default" onClick="onConnectClick(48000)">48.0 kHz</button>
-                        </div>
-                    </div>
+                            <div class="clearfix margin-bottom">
+                                <button class="btn btn-default" onClick="onSendSyncClick()">Sync</button>
+                            </div>
 
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Symbol
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom">
                                 <input type="text" class="pull-left margin-right" id="tx-symbol-field" />
                                 <button
                                     class="btn btn-default pull-left"
                                     onClick="onSendSymbolClick()">
-                                    Send
+                                    Symbol
                                 </button>
                             </div>
-                            <div id="symbol-range" class="log-container"></div>
-                        </div>
-                    </div>
 
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Text
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="tx-config" class="log-container margin-bottom"></div>
+
                             <div class="clearfix margin-bottom">
-                                <textarea id="tx-text-field"></textarea>
+                                <div class="clearfix margin-bottom">
+                                    <textarea id="tx-text-field"></textarea>
+                                </div>
+                                <button
+                                    class="btn btn-default"
+                                    onClick="onSendTextClick()">
+                                    ASCII
+                                </button>
                             </div>
-                            <button
-                                class="btn btn-default"
-                                onClick="onSendTextClick()">
-                                Send
-                            </button>
                         </div>
                     </div>
 
@@ -165,7 +152,43 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-symbol-queue"></div>
+                            <div id="tx-symbol-queue" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Sample Rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-sample-rate-container">
+                            <div class="clearfix margin-bottom">
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSampleRateClick(48000)">48.0 kHz</button>
+                            </div>
+                            <span>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                <br/>
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Amplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
+                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onAmplitudeClick(0.2)">0.2</button>
+                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onAmplitudeClick(0.4)">0.4</button>
+                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onAmplitudeClick(0.6)">0.6</button>
+                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onAmplitudeClick(0.8)">0.8</button>
+                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onAmplitudeClick(1.0)">1.0</button>
                         </div>
                     </div>
 
@@ -197,7 +220,7 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/sync-code-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer-v2.js"></script>
     <script src="physical-layer.js"></script>
 
     <!--

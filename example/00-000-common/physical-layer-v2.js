@@ -64,6 +64,11 @@ PhysicalLayerV2Builder.prototype.symbolRange = function (symbolRange) {
     return this;
 };
 
+PhysicalLayerV2Builder.prototype.amplitude = function (amplitude) {
+    this._amplitude = amplitude;
+    return this;
+};
+
 PhysicalLayerV2Builder.prototype.rxSymbolListener = function (listener) {
     this._rxSymbolListener = listener;
     return this;
@@ -161,10 +166,7 @@ PhysicalLayerV2 = function (builder) {
     this.$$txListener = PhysicalLayerV2.$$isFunction(builder._txListener) ? builder._txListener : null;
     this.$$txConfigListener = PhysicalLayerV2.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
 
-    // call config listeners
-    this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
-    this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
-    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+    this.$$firstSmartTimerCall = true;
 };
 
 PhysicalLayerV2.$$_INITIAL_SAMPLE_NUMER = 0;
@@ -329,12 +331,20 @@ PhysicalLayerV2.prototype.getTxConfig = function () {
 // -----------------------------------------
 
 PhysicalLayerV2.prototype.$$smartTimerListener = function () {
+    if (this.$$firstSmartTimerCall) {
+        this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
+        this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
+        this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+    }
+
     this.$$offset = this.$$sampleNumber % this.$$samplePerSymbol;
     this.$$rx();
     this.$$tx();
 
     this.$$sampleNumber++;
     this.$$sampleId++;
+
+    this.$$firstSmartTimerCall = false;
 };
 
 PhysicalLayerV2.prototype.$$rx = function () {
