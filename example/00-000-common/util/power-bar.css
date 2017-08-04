@@ -1,0 +1,45 @@
+.power-bar {
+    height: 16px;
+    position: relative;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    background-color: #c0cdd7;
+}
+
+.power-bar > div {
+    right: 0;
+    top: 0;
+    height: 16px;
+    position: absolute;
+    min-width: 120px;
+    text-align: right;
+    font-size: 10px;
+    line-height: 1em;
+    padding: 3px 3px 0 0;
+}
+
+.power-bar > div:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 16px;
+    background-color: black;
+    right: 0;
+    top: 0;
+}
+
+.power-bar > div.above-1 { top: -16px; }
+.power-bar > div.above-1:after { height: 32px; }
+.power-bar > div.above-2 { top: -32px; }
+.power-bar > div.above-2:after { height: 48px; }
+
+.power-bar > div.inside { top: 0px; }
+.power-bar > div.inside:after { height: 16px; }
+
+.power-bar > div.below-1 { top: 16px; }
+.power-bar > div.below-1:after { top: -16px; height: 32px; }
+.power-bar > div.below-2 { top: 32px; }
+.power-bar > div.below-2:after { top: -32px; height: 48px; }
+.power-bar > div.below-3 { top: 48px; }
+.power-bar > div.below-3:after { top: -48px; height: 64px; }

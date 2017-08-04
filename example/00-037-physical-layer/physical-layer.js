@@ -7,12 +7,14 @@ var
     SYMBOL_ZERO_PADDING = 3,
     INITIAL_AMPLITUDE = 0.2,
     UNICODE_UNKNOWN = '�',
+    powerBar,
     physicalLayerBuilder,
     physicalLayer,
     rxSymbolList,
     rxAsciiList;
 
 function init() {
+    powerBar = new PowerBar(document.getElementById('power-bar'));
     physicalLayerBuilder = new PhysicalLayerV2Builder();
     physicalLayer = physicalLayerBuilder
         .amplitude(INITIAL_AMPLITUDE)
@@ -57,6 +59,8 @@ function rxConfigListener(state) {
         'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
         'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
     );
+
+    powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
 }
 
 function txConfigListener(state) {
@@ -102,16 +106,20 @@ function rxSampleListener(state) {
         'SymbolRaw: ' + state.symbolRaw + ' (' + state.signalDecibel.toFixed(1) + ' dB)<br/>' +
         state.offset + '/' + state.sampleNumber + ', ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
+
+    powerBar.setSignalDecibel(state.signalDecibel);
+    powerBar.setNoiseDecibel(state.noiseDecibel);
 }
 
 function rxSyncListener(state) {
-
+    powerBar.setSignalDecibelAverage(state.signalDecibelAverage);
+    powerBar.setNoiseDecibelAverage(state.noiseDecibelAverage);
 }
 
 function txListener(state) {
     html(
         '#tx-symbol-queue',
-        'Now transmistting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
+        'Now transmitting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
         getStringFromSymbolList(state.symbolQueue)
     );
 }

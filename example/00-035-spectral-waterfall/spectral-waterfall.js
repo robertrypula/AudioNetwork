@@ -160,10 +160,13 @@ function onTxPlayChange() {
 
 // ----------------------
 
-function updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fftResult) {
-    var fftNominalResolution;
+function updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex) {
+    var
+        fftNominalResolution,
+        fltSkippedResolution;
 
     fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
+    fltSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
     html(
         '#rx-dsp-detail',
@@ -171,17 +174,18 @@ function updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fft
         'FFT size: ' + getFftSize() + '<br/>' +
         'FFT time: ' + (getFftSize() / audioMonoIO.getSampleRate()).toFixed(3) + ' sec<br/>' +
         'FFT native resolution: ' + fftNominalResolution.toFixed(2) + ' Hz<br/>' +
-        'FFT skipped resolution: ' + (fftNominalResolution * fftFrequencyBinSkipFactor.getValue()).toFixed(2) + ' Hz'
+        'FFT skipped resolution: ' + fltSkippedResolution.toFixed(2) + ' Hz'
     );
 
     rxSpectrogram.add(
-        frequencyDataInner,
-        document.getElementById('loudest-marker').checked
-            ? loudestBinIndex - rxBinMin
-            : -1,
+        fftResult.getFrequencyData(),
         rxBinMin,
-        1,
-        rxSampleCount % 2
+        rxBinMax,
+        fltSkippedResolution,
+        document.getElementById('loudest-marker').checked
+            ? loudestBinIndex
+            : Spectrogram.INDEX_MARKER_DISABLED,
+        Spectrogram.ROW_MARKER_DISABLED
     );
 
     html('#rx-symbol', loudestBinIndex + ' (' + fftResult.getFrequency(loudestBinIndex).toFixed(2) + ' Hz, ' + fftResult.getDecibel(loudestBinIndex).toFixed(2) + ' dB)');
@@ -199,9 +203,7 @@ function smartTimerListener() {
         fftResult,
         rxBinMin,
         rxBinMax,
-        loudestBinIndex,
-        frequencyDataInner = [],
-        i;
+        loudestBinIndex;
 
     if (!document.getElementById('rx-active').checked) {
         return;
@@ -214,11 +216,7 @@ function smartTimerListener() {
     rxBinMax = fftResult.getBinIndex(rxFrequencyMax.getValue());
     loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(rxBinMin, rxBinMax);
 
-    for (i = rxBinMin; i <= rxBinMax; i++) {
-        frequencyDataInner.push(fftResult.getDecibel(i));
-    }
-
-    updateView(frequencyDataInner, loudestBinIndex, rxBinMin, rxBinMax, fftResult);
+    updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex);
 
     rxSampleCount++;
 }

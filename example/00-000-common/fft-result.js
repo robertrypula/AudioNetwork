@@ -149,6 +149,10 @@ FFTResult.prototype.getDecibelFromFrequency = function (frequency) {
     return this.$$fftData[binIndex];
 };
 
+FFTResult.prototype.getFrequencyData = function () {
+    return this.$$fftData;
+};
+
 FFTResult.prototype.getFrequency = function (frequencyBinIndex) {
     return FFTResult.getFrequency(
         frequencyBinIndex,

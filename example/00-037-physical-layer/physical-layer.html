@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
+    <link rel="stylesheet" type="text/css" href="../00-000-common/util/power-bar.css">
     <link rel="stylesheet" type="text/css" href="physical-layer.css">
     <!--<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>-->
     <!--<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
@@ -89,8 +90,11 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-sync-simple" class="log-container"></div>
-                            <div id="rx-sample" class="log-container"></div>
+                            <div class="margin-bottom">
+                                <div id="rx-sync-simple" class="log-container"></div>
+                                <div id="rx-sample" class="log-container"></div>
+                            </div>
+                            <div id="power-bar" class="clearfix"></div>
                         </div>
                     </div>
 
@@ -216,6 +220,7 @@
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="../00-000-common/dom-util.js"></script>
     <script src="../00-000-common/smart-timer.js"></script>
+    <script src="../00-000-common/util/power-bar.js"></script>
     <script src="../00-000-common/fft-result.js"></script>
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>

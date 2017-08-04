@@ -6,6 +6,7 @@ var
     DIGIT_ZERO_SYMBOL = 100,
     INITIAL_AMPLITUDE = 0.2,
     SYMBOL_ZERO_PADDING = 3,
+    powerBar,
     physicalLayerBuilder,
     physicalLayer,
     rxSpectrogram,
@@ -13,6 +14,7 @@ var
     txSampleRateWidget;
 
 function init() {
+    powerBar = new PowerBar(document.getElementById('power-bar'));
     physicalLayerBuilder = new PhysicalLayerV2Builder();
     physicalLayer = physicalLayerBuilder
         .amplitude(INITIAL_AMPLITUDE)
@@ -90,6 +92,8 @@ function rxConfigListener(state) {
         'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
         'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
     );
+
+    powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
 }
 
 function txConfigListener(state) {
@@ -128,16 +132,21 @@ function rxSampleListener(state) {
         state.offset + '/' + state.sampleNumber + ', ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
-    // TODO update spectrogram
-    if (false && document.getElementById('rx-active').checked) {
+    if (document.getElementById('spectrogram-active').checked) {
         rxSpectrogram.add(
-            state.band.frequencyData,
-            document.getElementById('loudest-marker').checked ? state.band.frequencyDataLoudestIndex : -1,
-            state.band.symbolMin,
-            1,
-            state.isSymbolReadyToTake
+            state.frequencyData,
+            rxConfig.symbolMin,
+            rxConfig.symbolMax,
+            rxConfig.symbolFrequencySpacing,
+            document.getElementById('symbol-marker-active').checked && state.isSymbolSamplingPoint
+                ? state.symbolRaw
+                : Spectrogram.INDEX_MARKER_DISABLED,
+            state.isSymbolSamplingPoint
         );
     }
+
+    powerBar.setSignalDecibel(state.signalDecibel);
+    powerBar.setNoiseDecibel(state.noiseDecibel);
 }
 
 function rxSyncListener(state) {
@@ -152,12 +161,15 @@ function rxSyncListener(state) {
         'NoiseDecibelAverage: ' + state.noiseDecibelAverage.toFixed(2) + ' dB<br/>' +
         'SignalToNoiseRatio: ' + state.signalToNoiseRatio.toFixed(2) + ' dB'
     );
+
+    powerBar.setSignalDecibelAverage(state.signalDecibelAverage);
+    powerBar.setNoiseDecibelAverage(state.noiseDecibelAverage);
 }
 
 function txListener(state) {
     html(
         '#tx-symbol-queue',
-        'Now transmistting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
+        'Now transmitting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
         getStringFromSymbolList(state.symbolQueue)
     );
 }
