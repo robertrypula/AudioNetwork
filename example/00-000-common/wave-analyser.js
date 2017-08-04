@@ -8,12 +8,12 @@
 
 var WaveAnalyser;
 
-WaveAnalyser = function (samplePerPeriod, windowSize, windowFunction) {
+WaveAnalyser = function (samplePerPeriod, windowSize, applyWindowFunction) {
     this.$$cyclePerSample = null;
     this.$$firstSampleOfBufferNumber = null;
     this.setSamplePerPeriod(samplePerPeriod);
     this.$$sampleBuffer = new Buffer(windowSize);
-    this.$$windowFunction = !!windowFunction;
+    this.$$applyWindowFunction = !!applyWindowFunction;
     this.$$frequencyBin = null;
 };
 
@@ -43,8 +43,8 @@ WaveAnalyser.prototype.$$computeFrequencyBin = function () {
         sampleValue = this.$$sampleBuffer.getItem(i);
         complex.multiplyScalar(sampleValue);
 
-        if (this.$$windowFunction) {
-            windowFunctionValue = WaveAnalyser.blackmanNuttall(i, size);
+        if (this.$$applyWindowFunction) {
+            windowFunctionValue = WaveAnalyser.blackman(i, size);
             complex.multiplyScalar(windowFunctionValue);
         }
 
@@ -64,8 +64,13 @@ WaveAnalyser.prototype.setWindowSize = function (windowSize) {
     this.$$frequencyBin = null;
 };
 
-WaveAnalyser.prototype.setWindowFunction = function (windowFunction) {
-    this.$$windowFunction = !!windowFunction;
+WaveAnalyser.prototype.enableWindowFunction = function () {
+    this.$$applyWindowFunction = true;
+    this.$$frequencyBin = null;
+};
+
+WaveAnalyser.prototype.disableWindowFunction = function () {
+    this.$$applyWindowFunction = false;
     this.$$frequencyBin = null;
 };
 
@@ -148,4 +153,17 @@ WaveAnalyser.blackmanNuttall = function (n, N) {
         - 0.4891775 * Math.cos(2 * Math.PI * n / (N - 1))
         + 0.1365995 * Math.cos(4 * Math.PI * n / (N - 1))
         - 0.0106411 * Math.cos(6 * Math.PI * n / (N - 1));
+};
+
+// https://www.w3.org/TR/webaudio/#fft-windowing-and-smoothing-over-time
+WaveAnalyser.blackman = function (n, N) {
+    var
+        alpha = 0.16,
+        a0 = 0.5 * (1 - alpha),
+        a1 = 0.5,
+        a2 = 0.5 * alpha;
+
+    return a0
+        - a1 * Math.cos(2 * Math.PI * n / (N - 1))
+        + a2 * Math.cos(4 * Math.PI * n / (N - 1));
 };

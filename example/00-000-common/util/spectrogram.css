@@ -1,3 +1,8 @@
+.spectrogram-container {
+    min-height: 204px; /* Spectrogram.RENDERED_ROW_MAX * 5px + Spectrogram.RENDERED_ROW_MAX */
+    /*opacity: 0.1;*/
+}
+
 .spectrogram {
     display: table;
     table-layout: fixed;
@@ -8,6 +13,7 @@
 
 .spectrogram .s-row {
     display: table-row;
+    height: 5px;
 }
 
 .spectrogram .s-cell {
@@ -16,6 +22,6 @@
     height: 5px;
 }
 
-.spectrogram .s-cell.mark {
+.spectrogram .s-cell.s-cell-mark {
     border: 1px solid white;
 }

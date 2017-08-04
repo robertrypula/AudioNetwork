@@ -169,9 +169,11 @@ function onRxWindowSizeChange(windowSize) {
 }
 
 function onRxWindowFunctionChange() {
-    waveAnalyser.setWindowFunction(
-        domRxWindowFunctionCheckbox.checked
-    );
+    if (domRxWindowFunctionCheckbox.checked) {
+        waveAnalyser.enableWindowFunction();
+    } else {
+        waveAnalyser.disableWindowFunction();
+    }
 }
 
 // ------------------------

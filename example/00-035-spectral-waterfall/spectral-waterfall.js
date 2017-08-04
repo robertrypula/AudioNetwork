@@ -211,7 +211,7 @@ function smartTimerListener() {
 
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
-    fftResult.downconvertScalar(fftFrequencyBinSkipFactor.getValue());
+    fftResult.downconvert(fftFrequencyBinSkipFactor.getValue());
     rxBinMin = fftResult.getBinIndex(rxFrequencyMin.getValue());
     rxBinMax = fftResult.getBinIndex(rxFrequencyMax.getValue());
     loudestBinIndex = fftResult.getLoudestBinIndexInBinRange(rxBinMin, rxBinMax);

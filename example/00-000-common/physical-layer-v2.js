@@ -360,9 +360,9 @@ PhysicalLayerV2.prototype.$$rx = function () {
         this.$$audioMonoIO.isLoopbackEnabled();
 
     if (isAllowedToListen) {
-        this.$$frequencyData = this.$$audioMonoIO.getFrequencyData();
-        fftResult = new FFTResult(this.$$frequencyData, this.$$rxSampleRate);
-        fftResult.downconvertScalar(this.$$fftSkipFactor);
+        fftResult = new FFTResult(this.$$audioMonoIO.getFrequencyData(), this.$$rxSampleRate);
+        fftResult.downconvert(this.$$fftSkipFactor);
+        this.$$frequencyData = fftResult.getFrequencyData();
         this.$$symbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
         this.$$signalDecibel = fftResult.getDecibel(this.$$symbolRaw);
         this.$$signalDecibelNextCandidate = -Infinity; // TODO add this

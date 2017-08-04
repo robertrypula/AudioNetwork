@@ -116,6 +116,9 @@ function compareWithAnalyserNode() {
     drawTimeDomainData(ctxTimeDomain, timeDomainData);
     drawFrequencyDomainData(ctxAnalyserNode, frequencyDataAnalyserNode);
     drawFrequencyDomainData(ctxWaveAnalyser, frequencyDataWaveAnalyser);
+
+    console.log(frequencyDataAnalyserNode);
+    console.log(frequencyDataWaveAnalyser);
 }
 
 function getDiscreteFourierTransform(timeDomainData) {

@@ -256,7 +256,7 @@ PhysicalLayer.prototype.$$rxSmartTimerHandler = function () {
 
     frequencyData = this.$$audioMonoIO.getFrequencyData();
     this.$$fftResult = new FFTResult(frequencyData, this.$$audioMonoIO.getSampleRate());
-    this.$$fftResult.downconvertScalar(this.$$fftFrequencyBinSkipFactor);
+    this.$$fftResult.downconvert(this.$$fftFrequencyBinSkipFactor);
     this.$$symbol = this.$$fftResult.getLoudestBinIndexInBinRange(this.$$symbolMin, this.$$symbolMax);
     this.$$signalDecibel = this.$$fftResult.getDecibel(this.$$symbol);
     this.$$noiseDecibel = this.$$fftResult.getDecibelAverage(this.$$symbolMin, this.$$symbolMax, this.$$symbol);

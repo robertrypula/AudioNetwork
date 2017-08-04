@@ -119,6 +119,7 @@ function rxSymbolListener(state) {
 function rxSampleListener(state) {
     var
         rxConfig = physicalLayer.getRxConfig(),
+        rxSymbol = physicalLayer.getRxSymbol(),
         s;
 
     s = state.isSyncInProgress
@@ -138,8 +139,8 @@ function rxSampleListener(state) {
             rxConfig.symbolMin,
             rxConfig.symbolMax,
             rxConfig.symbolFrequencySpacing,
-            document.getElementById('symbol-marker-active').checked && state.isSymbolSamplingPoint
-                ? state.symbolRaw
+            document.getElementById('symbol-marker-active').checked && rxSymbol.symbol
+                ? rxSymbol.symbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
             state.isSymbolSamplingPoint
         );
