@@ -4,29 +4,17 @@
 var DataLinkLayer;
 
 DataLinkLayer = function (stateHandler) {
-    this.$$physicalLayer = new PhysicalLayer(this.$$physicalLayerStateHandler.bind(this));
+    var physicalLayerBuilder = new PhysicalLayerV2Builder();
+
+    this.$$physicalLayer = physicalLayerBuilder
+        .rxSymbolListener(this.$$rxSampleListener.bind(this))
+        .build();
     this.$$physicalLayerState = undefined;
     this.$$dataLimit = 15;
     this.$$byteBuffer = new Buffer(this.$$dataLimit + 2);
     this.$$byteBuffer.fillWith(0);
     this.$$stateHandler = DataLinkLayer.$$isFunction(stateHandler) ? stateHandler : null;
     this.$$validFrameList = [];
-    
-    /*
-    {
-        isPacketReadyToTake:
-        packet: {
-            data: [],
-
-        },
-        packetCandidates: [
-            {
-                data: [32, 245, 243],
-                checksumValid
-            }
-        ]
-    }
-    */
 };
 
 DataLinkLayer.prototype.setLoopback = function (state) {
@@ -108,7 +96,9 @@ DataLinkLayer.prototype.$$tryToFindValidFrame = function () {
     }
 };
 
-DataLinkLayer.prototype.$$physicalLayerStateHandler = function (physicalLayerState) {
+DataLinkLayer.prototype.$$rxSampleListener = function (physicalLayerState) {
+
+    return;
     var byte, state;
 
     this.$$physicalLayerState = physicalLayerState;

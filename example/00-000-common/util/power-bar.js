@@ -24,8 +24,8 @@ PowerBar.prototype.$$initializeHtml = function () {
         '    <div class="above-2 power-bar-signal"></div>' +
         '    <div class="above-1 power-bar-noise"></div>' +
         '    <div class="inside power-bar-signal-threshold"></div>' +
-        '    <div class="below-1 power-bar-signal-average"></div>' +
         '    <div class="below-2 power-bar-noise-average"></div>' +
+        '    <div class="below-1 power-bar-signal-average"></div>' +
         '</div>';
 
     this.$$domElement.innerHTML = html;
