@@ -108,7 +108,7 @@ function compareWithAnalyserNode() {
         time;
 
     start = new Date().getTime();
-    frequencyDataWaveAnalyser = getDiscreteFourierTransform(timeDomainData);
+    frequencyDataWaveAnalyser = getFrequencyData(timeDomainData);
     end = new Date().getTime();
     time = end - start;
     alert('Execution time: ' + time + ' ms');
@@ -121,30 +121,31 @@ function compareWithAnalyserNode() {
     console.log(frequencyDataWaveAnalyser);
 }
 
-function getDiscreteFourierTransform(timeDomainData) {
+function getFrequencyData(timeDomainData) {
     var
-        dummySamplePerPeriod = 1,     // just for initialization
+        dummySamplePerPeriod = 1,   // just for initialization
         windowSize = timeDomainData.length,
+        frequencyBinCount = 0.5 * windowSize,
         windowFunction = true,
         waveAnalyser = new WaveAnalyser(dummySamplePerPeriod, windowSize, windowFunction),
-        frequencyData = [],
-        i,
         N = timeDomainData.length,
+        frequencyData = [],
         samplePerPeriod,
+        decibel,
+        i,
         k;
 
     for (i = 0; i < timeDomainData.length; i++) {
         waveAnalyser.handle(timeDomainData[i]);
     }
 
-    for (k = 0; k < 0.5 * N; k++) {
+    for (k = 0; k < frequencyBinCount; k++) {
         samplePerPeriod = (k === 0)
-            ? Infinity               // DC-offset
+            ? Infinity       // DC-offset (0 Hz)
             : N / k;
         waveAnalyser.setSamplePerPeriod(samplePerPeriod);
-        frequencyData.push(
-            waveAnalyser.getDecibel()
-        );
+        decibel = waveAnalyser.getDecibel();
+        frequencyData.push(decibel);
     }
 
     return frequencyData;

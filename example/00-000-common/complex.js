@@ -69,6 +69,14 @@ Complex.prototype.divideScalar = function (b) {
     this.$$imag /= b;
 };
 
+Complex.prototype.getReal = function () {
+    return this.$$real;
+};
+
+Complex.prototype.getImaginary = function () {
+    return this.$$imag;
+};
+
 Complex.prototype.getMagnitude = function () {
     return Math.sqrt(
         this.$$real * this.$$real +

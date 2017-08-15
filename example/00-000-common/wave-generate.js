@@ -3,6 +3,8 @@
 var WaveGenerate;
 
 WaveGenerate = function (samplePerPeriod) {
+    samplePerPeriod = samplePerPeriod || WaveGenerate.$$_DEFAULT_SAMPLE_PER_PERIOD;
+
     this.$$omega = null;
     this.$$sampleNumber = null;
     this.setSamplePerPeriod(samplePerPeriod);
@@ -13,6 +15,7 @@ WaveGenerate = function (samplePerPeriod) {
 
 WaveGenerate.UNIT_AMPLITUDE = 1;
 WaveGenerate.NO_PHASE_SHIFT = 0;
+WaveGenerate.$$_DEFAULT_SAMPLE_PER_PERIOD = 32;
 
 WaveGenerate.prototype.$$computeSample = function () {
     var x;

@@ -9,6 +9,9 @@
 var WaveAnalyser;
 
 WaveAnalyser = function (samplePerPeriod, windowSize, applyWindowFunction) {
+    samplePerPeriod = samplePerPeriod || WaveAnalyser.$$_DEFAULT_SAMPLE_PER_PERIOD;
+    windowSize = windowSize || WaveAnalyser.$$_DEFAULT_WINDOW_SIZE;
+
     this.$$cyclePerSample = null;
     this.$$firstSampleOfBufferNumber = null;
     this.setSamplePerPeriod(samplePerPeriod);
@@ -21,6 +24,8 @@ WaveAnalyser.$$_UNIT_PHASE = 1;
 WaveAnalyser.$$_NEGATIVE_FREQUENCIES_AMPLITUDE_FIX = 2;
 WaveAnalyser.$$_PHASE_CORRECTION = 0.75;
 WaveAnalyser.$$_DECIBEL_POWER_FROM_AMPLITUDE_FACTOR = 20;
+WaveAnalyser.$$_DEFAULT_SAMPLE_PER_PERIOD = 32;
+WaveAnalyser.$$_DEFAULT_WINDOW_SIZE = 1024;
 
 WaveAnalyser.prototype.$$computeFrequencyBin = function () {
     var
