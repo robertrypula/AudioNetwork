@@ -1,6 +1,11 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// UPDATE 2017.08.16
+// if you are looking for object oriented solution plase look at:
+// - http://audio-network.rypula.pl/wave-analyser-class
+// - http://audio-network.rypula.pl/wave-generator-class
+
 var
     SAMPLE_RATE = 44100;
 
@@ -59,7 +64,7 @@ function computeDFT(timeDomain) {
 
     for (k = 0; k < N; k++) {
         samplePerPeriod = (k === 0)
-            ? Infinity               // DC-offset
+            ? Infinity               // DC-offset (0 Hz)
             : N / k;
         frequencyBin = getFrequencyBin(timeDomain, samplePerPeriod);
         frequencyDomain.push(frequencyBin);
