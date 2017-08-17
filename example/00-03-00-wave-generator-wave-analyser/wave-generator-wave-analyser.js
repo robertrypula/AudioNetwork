@@ -15,7 +15,7 @@ var
     audioMonoIO,
     frequencyCalculator,
     waveAnalyser,
-    waveGenerate,
+    waveGenerator,
     txFrequencyHertz,
     txFrequencySamplePerPeriod,
     txAmplitude,
@@ -48,11 +48,11 @@ function init(useLite, bufferSize) {
 
     initFloatWidget();
 
-    waveGenerate = new WaveGenerate(
+    waveGenerator = new WaveGenerator(
         txFrequencySamplePerPeriod.getValue()
     );
-    waveGenerate.setAmplitude(txAmplitude.getValue());
-    waveGenerate.setUnitPhase(txPhase.getValue());
+    waveGenerator.setAmplitude(txAmplitude.getValue());
+    waveGenerator.setUnitPhase(txPhase.getValue());
 
     waveAnalyser = new WaveAnalyser(
         rxFrequencySamplePerPeriod.getValue(),
@@ -119,12 +119,12 @@ function onLoopbackCheckboxChange() {
 
 function onTxFrequencyHertzChange(hertz) {
     txFrequencySamplePerPeriod.setValue(frequencyCalculator.getSamplePerPeriodFromHertz(hertz));
-    waveGenerate.setSamplePerPeriod(txFrequencySamplePerPeriod.getValue());
+    waveGenerator.setSamplePerPeriod(txFrequencySamplePerPeriod.getValue());
 }
 
 function onTxFrequencySamplePerPeriodChange(samplePerPeriod) {
     txFrequencyHertz.setValue(frequencyCalculator.getHertzFromSamplePerPeriod(samplePerPeriod));
-    waveGenerate.setSamplePerPeriod(txFrequencySamplePerPeriod.getValue());
+    waveGenerator.setSamplePerPeriod(txFrequencySamplePerPeriod.getValue());
 }
 
 function onTxActivatedCheckboxChange() {
@@ -134,11 +134,11 @@ function onTxActivatedCheckboxChange() {
 }
 
 function onTxAmplitudeChange(value) {
-    waveGenerate.setAmplitude(value)
+    waveGenerator.setAmplitude(value)
 }
 
 function onTxPhaseChange(value) {
-    waveGenerate.setUnitPhase(value)
+    waveGenerator.setUnitPhase(value)
 }
 
 function onRxFrequencyHertzChange(hertz) {
@@ -196,8 +196,8 @@ function sampleOutHandler(monoOut) {
     }
 
     for (i = 0; i < monoOut.length; i++) {
-        sample = waveGenerate.getSample();
-        waveGenerate.nextSample();
+        sample = waveGenerator.getSample();
+        waveGenerator.nextSample();
 
         monoOut[i] = sample;
     }
