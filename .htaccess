@@ -41,3 +41,30 @@ Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwo
 Redirect 301 /piano /example/00-028-piano/piano.html
 Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-028-piano
 
+# Article 3 aliases:
+
+Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/wave-analyser.js
+Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/wave-generator.js
+Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/buffer.js
+Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/complex.js
+
+Redirect 301 /wave-generator-wave-analyser /example/00-03-00-wave-generator-wave-analyser/wave-generator-wave-analyser.html
+Redirect 301 /wave-generator-wave-analyser-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-00-wave-generator-wave-analyser
+
+Redirect 301 /wave-analyser-vs-analyser-node /example/00-03-01-wave-analyser-vs-analyser-node/wave-analyser-vs-analyser-node.html
+Redirect 301 /wave-analyser-vs-analyser-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-01-wave-analyser-vs-analyser-node
+
+Redirect 301 /wave-analyser-performance /example/00-03-02-wave-analyser-performance/wave-analyser-performance.html
+Redirect 301 /wave-analyser-performance-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-02-wave-analyser-performance
+
+Redirect 301 /wav-file-recorder /example/00-03-03-wav-file-recorder/wav-file-recorder.html
+Redirect 301 /wav-file-recorder-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-03-wav-file-recorder
+
+Redirect 301 /modulation-types /example/00-03-04-modulation-types/modulation-types.html
+Redirect 301 /modulation-types-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-04-modulation-types
+
+Redirect 301 /analyser-node-performance /example/00-03-05-analyser-node-performance/analyser-node-performance.html
+Redirect 301 /analyser-node-performance-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-05-analyser-node-performance
+
+Redirect 301 /spectral-waterfall /example/00-03-06-spectral-waterfall/spectral-waterfall.html
+Redirect 301 /spectral-waterfall-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall

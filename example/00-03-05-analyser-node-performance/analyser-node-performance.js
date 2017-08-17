@@ -65,7 +65,7 @@ function getIndex(data, type) {
 }
 
 function getFps(timeInMs) {
-    // fps -> Ffts Per Second :)
+    // fps -> FFTs Per Second :)
     return 1000 / timeInMs;
 }
 

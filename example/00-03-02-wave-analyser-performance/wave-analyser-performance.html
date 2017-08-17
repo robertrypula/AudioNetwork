@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="wave-analyser-vs-analyser-node.css">
+    <link rel="stylesheet" type="text/css" href="wave-analyser-performance.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -29,6 +29,7 @@
             }(document, 'script', 'facebook-jssdk'));
         }
     </script>
+
 
     <div class="wrapper">
 
@@ -60,33 +61,29 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to compare AnalyserNode and WaveAnalyser output.
+                                This example allows to check overall performance of WaveAnaluser class.
                             </p>
                         </div>
                     </div>
+
+                    <h2>WaveAnalyser performance</h2>
 
                     <div class="row margin-bottom">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
                             Actions
                         </div>
                         <div class="col col-xs-7 col-sm-7 col-md-6">
-                            <button onClick="compareWithAnalyserNode()" class="btn btn-default">Compare!</button>
+                            <button onClick="checkWaveAnalyserPerformance()" class="btn btn-default">Run test</button>
                         </div>
                     </div>
 
-                    <h2>Time domain (taken from AnalyserNode)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-time-domain"></canvas>
-                    </div>
-
-                    <h2>Frequency domain (AnalyserNode from WebAudio API)</h2>
-                    <div class="scroll-container margin-bottom">
-                        <canvas id="canvas-analyser-node"></canvas>
-                    </div>
-
-                    <h2>Frequency domain (WaveAnalyser, our own class)</h2>
-                    <div class="scroll-container margin-bottom">
-                        <canvas id="canvas-wave-analyser"></canvas>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            Log
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-6">
+                            <div id="log-performance"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -118,7 +115,7 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/complex.js"></script>
     <script src="../00-000-common/wave-analyser.js"></script>
-    <script src="wave-analyser-vs-analyser-node.js"></script>
+    <script src="wave-analyser-performance.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
