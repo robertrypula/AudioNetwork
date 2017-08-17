@@ -43,10 +43,17 @@ Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master
 
 # Article 3 aliases:
 
+Redirect 301 /internet-sources https://github.com/robertrypula/AudioNetwork/tree/master/example/internet-sources.md
+
 Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/wave-analyser.js
 Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/wave-generator.js
 Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/buffer.js
 Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/complex.js
+Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/correlator.js
+Redirect 301 /sync-code-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/sync-code-detector.js
+Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/physical-layer-v2.js
+Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/data-link-layer.js
+Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/transport-layer.js
 
 Redirect 301 /wave-generator-wave-analyser /example/00-03-00-wave-generator-wave-analyser/wave-generator-wave-analyser.html
 Redirect 301 /wave-generator-wave-analyser-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-00-wave-generator-wave-analyser
@@ -68,3 +75,41 @@ Redirect 301 /analyser-node-performance-src https://github.com/robertrypula/Audi
 
 Redirect 301 /spectral-waterfall /example/00-03-06-spectral-waterfall/spectral-waterfall.html
 Redirect 301 /spectral-waterfall-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall
+
+Redirect 301 /fsk-synchronization-demo /example/00-03-07-fsk-synchronization-demo/fsk-synchronization-demo.html
+Redirect 301 /fsk-synchronization-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-07-fsk-synchronization-demo
+
+Redirect 301 /physical-layer-simple /example/00-03-08-physical-layer-simple/fsk-synchronization-demo.html
+Redirect 301 /physical-layer-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-08-physical-layer-simple
+
+Redirect 301 /physical-layer-listeners-demo /example/00-03-09-physical-layer-listeners-demo/physical-layer-listeners-demo.html
+Redirect 301 /physical-layer-listeners-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-09-physical-layer-listeners-demo
+
+Redirect 301 /physical-layer-ascii-demo /example/00-03-10-physical-layer-ascii-demo/physical-layer-ascii-demo.html
+Redirect 301 /physical-layer-ascii-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-10-physical-layer-ascii-demo
+
+Redirect 301 /data-link-layer /example/00-03-11-data-link-layer/data-link-layer.html
+Redirect 301 /data-link-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-11-data-link-layer
+
+Redirect 301 /transport-layer /example/00-03-12-transport-layer/transport-layer.html
+Redirect 301 /transport-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-12-transport-layer
+
+Redirect 301 /chat /example/00-03-13-chat/chat.html
+Redirect 301 /chat-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-13-chat
+
+Redirect 301 /fir-filter /example/00-03-14-fir-filter/fir-filter.html
+Redirect 301 /fir-filter-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-14-fir-filter
+
+Redirect 301 /fft /example/00-03-15-fft/fft.html
+Redirect 301 /fft-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-15-fft
+
+Redirect 301 /iq-mixer /example/00-03-16-iq-mixer/iq-mixer.html
+Redirect 301 /iq-mixer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-16-iq-mixer
+
+
+
+
+
+
+
+

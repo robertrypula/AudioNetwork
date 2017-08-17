@@ -9,7 +9,8 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="data-link-layer.css">
+    <link rel="stylesheet" type="text/css" href="../00-000-common/util/power-bar.css">
+    <link rel="stylesheet" type="text/css" href="physical-layer-simple.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -29,7 +30,6 @@
             }(document, 'script', 'facebook-jssdk'));
         }
     </script>
-
 
     <div class="wrapper">
 
@@ -75,92 +75,10 @@
 
                     <h2>Receive</h2>
 
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample&nbsp;rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-sample-rate" class="log-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Status
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-connect-status" class="log-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Frame
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-byte-buffer" class="log-container margin-bottom"></div>
-                            <div id="rx-frame-list" class="log-container margin-bottom"></div>
-                            <div id="rx-ascii-list" class="log-container"></div>
-                        </div>
-                    </div>
 
                     <!-- ----- -->
 
                     <h2>Transmit</h2>
-
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Bytes (HEX)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom">
-                                <textarea id="tx-byte-hex-field"></textarea>
-                            </div>
-                            <button
-                                class="btn btn-default"
-                                onClick="onSendByteHexClick()">
-                                Send
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Text
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom">
-                                <textarea id="tx-text-field"></textarea>
-                            </div>
-                            <button
-                                class="btn btn-default"
-                                onClick="onSendTextClick()">
-                                Send
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Queue
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-byte-hex-queue"></div>
-                        </div>
-                    </div>
 
                 </div>
             </div>
@@ -193,8 +111,7 @@
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/sync-code-detector.js"></script>
     <script src="../00-000-common/physical-layer-v2.js"></script>
-    <script src="../00-000-common/data-link-layer.js"></script>
-    <script src="data-link-layer.js"></script>
+    <script src="physical-layer-simple.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
