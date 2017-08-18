@@ -51,7 +51,7 @@ Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/mas
 Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/complex.js
 Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/correlator.js
 Redirect 301 /sync-code-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/sync-code-detector.js
-Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/physical-layer-v2.js
+Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/physical-layer.js
 Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/data-link-layer.js
 Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/transport-layer.js
 

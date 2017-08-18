@@ -24,6 +24,7 @@ Spectrogram.RENDERED_ROW_MAX = 2 + 32;   // 2 for header, 30 for data
 Spectrogram.LEFT_COLUMN_MODE_HEADER = 'LEFT_COLUMN_MODE_HEADER';
 Spectrogram.LEFT_COLUMN_MODE_COLOR_LIGHT = 'LEFT_COLUMN_MODE_COLOR_LIGHT';
 Spectrogram.LEFT_COLUMN_MODE_COLOR_DARK = 'LEFT_COLUMN_MODE_COLOR_DARK';
+Spectrogram.ARRAY_INDEX_OUT_OF_RANGE_EXCEPTION = 'Array index out of range';
 
 Spectrogram.prototype.add = function (frequencyData, indexMin, indexMax, frequencySpacing, indexMarker, rowMarker) {
     var
@@ -33,6 +34,10 @@ Spectrogram.prototype.add = function (frequencyData, indexMin, indexMax, frequen
         data,
         lastRowNeedsToBeRemoved,
         lastRow;
+
+    if (frequencyData.length === 0) {
+        return;
+    }
 
     if (reinitializationNeeded) {
         this.$$reset();
@@ -131,6 +136,7 @@ Spectrogram.prototype.$$insertRow = function (leftColumnMode, data, indexMarker)
         color = 'transparent',
         title = '',
         secondRow,
+        decibel,
         cell,
         i;
 
@@ -146,11 +152,15 @@ Spectrogram.prototype.$$insertRow = function (leftColumnMode, data, indexMarker)
     row.appendChild(cell);
 
     for (i = this.$$indexMin; i <= this.$$indexMax; i++) {
+        decibel = data[i];
+        if (typeof decibel === 'undefined') {
+            throw Spectrogram.ARRAY_INDEX_OUT_OF_RANGE_EXCEPTION;
+        }
         cssClass = indexMarker === i ? 's-cell-mark' : '';
-        color = Spectrogram.$$getColor(data[i]);
+        color = Spectrogram.$$getColor(decibel);
         title = '[' + i + '] ' + (i * this.$$frequencySpacing).toFixed(2) + ' Hz';
         if (!isHeader) {
-            title += ', ' + data[i].toFixed(1) + ' dB';
+            title += ', ' + decibel.toFixed(1) + ' dB';
         }
         cell = Spectrogram.$$getCell(cssClass, color, title);
         row.appendChild(cell);
