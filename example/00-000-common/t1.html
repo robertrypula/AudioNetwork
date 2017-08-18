@@ -17,11 +17,36 @@
         table td h2 {
             margin-top: 0;
         }
-        #received-symbol-container span {
-            display: inline-block;
-            border: 1px solid lightgray;
-            padding: 2px;
+        #send-symbol-button-container, #received-symbol-container {
+            width: 256px;
+            height: 272px;
+            float: left;
+        }
+        #send-symbol-button-container a, #received-symbol-container span {
+            box-sizing: border-box;
+            display: block;
+            float: left;
+            padding: 3px 0 0 0;
+            text-align: center;
+            font-size: 10px;
             line-height: 1em;
+            width: 16px;
+            height: 16px;
+            background-color: #eee;
+            border: solid white;
+            border-width: 0 1px 1px 0;
+            color: black;
+            font-family: "Tahoma", sans-serif;
+        }
+        #send-symbol-button-container a {
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #send-symbol-button-container a:hover {
+            background-color: #222;
+            color: white;
+        }
+        #received-symbol-container span {
         }
         #received-symbol-container span.active {
             background-color: lightgreen;
@@ -41,81 +66,85 @@
         var
             physicalLayerBuilder = new PhysicalLayerV2Builder(),
             physicalLayer,
-            receivedSymbol = [];
+            receivedBytes = [];
 
         physicalLayerBuilder
-            .rxSymbolListener(function (data) {
-                var
-                    i,
-                    rxSymbolElementList = document.querySelectorAll('#received-symbol-container > span');
+            .rxSymbolListener(rxSymbolListener)
+            .rxSampleListener(rxSampleListener)
+            .rxSyncListener(rxSyncListener)
+            .rxConfigListener(rxConfigListener)
+            .configListener(configListener)
+            .txListener(txListener)
+            .txConfigListener(txConfigListener);
 
-                for (i = 0; i < rxSymbolElementList.length; i++) {
-                    rxSymbolElementList[i].classList.remove('active');
-                }
-                if (data.symbol) {
-                    document.getElementById('rx-symbol-' + data.symbol).classList.add('active');
-                }
-                receivedSymbol.push(data.symbol ? byteToText(data.symbol - physicalLayer.getRxConfig().symbolMin) : '---');
-                if (receivedSymbol.length > 10) {
-                    receivedSymbol.shift();
-                }
-                document.getElementById('received-symbol-row').innerHTML = receivedSymbol.join(' ');
-                log('log-rx-symbol', data);
-            })
-            .rxSampleListener(function (data) {
-                data.frequencyData = data.frequencyData.slice(0, 3);
-                log('log-rx-sample', data);
-            })
-            .rxSyncListener(function (data) {
-                log('log-rx-sync', data);
-            })
-            .rxConfigListener(function (data) {
-                var symbol, container, html, byte;
+        function rxSymbolListener(data) {
+            var
+                rxSymbolElementList = document.querySelectorAll('#received-symbol-container > span'),
+                i;
 
-                container = document.getElementById('received-symbol-container');
-                if (container.innerHTML === '') {
-                    html = '';
-                    for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
-                        byte = symbol - data.symbolMin;
-                        html += '<span id="rx-symbol-' + symbol + '">' + byteToText(byte) +'</span>';
-                    }
-                    container.innerHTML = html;
-                }
-                log('log-rx-config', data);
-            })
-            .configListener(function (data) {
-                log('log-config', data);
-            })
-            .txListener(function (data) {
-                log('log-tx', data);
-            })
-            .txConfigListener(function (data) {
-                var symbol, byte, html = '';
+            for (i = 0; i < rxSymbolElementList.length; i++) {
+                rxSymbolElementList[i].classList.remove('active');
+            }
+            if (data.symbol) {
+                document.getElementById('rx-symbol-' + data.symbol).classList.add('active');
+            }
+            receivedBytes.push(data.symbol ? byteToText(data.symbol - physicalLayer.getRxConfig().symbolMin) : '--');
+            if (receivedBytes.length > 10) {
+                receivedBytes.shift();
+            }
+            document.getElementById('received-bytes-row').innerHTML = receivedBytes.join(' ');
+            log('log-rx-symbol', data);
+        }
 
+        function rxSampleListener(data) {
+            data.frequencyData = '[spectrogram array]';
+            log('log-rx-sample', data);
+        }
+
+        function rxSyncListener(data) {
+            log('log-rx-sync', data);
+        }
+
+        function rxConfigListener(data) {
+            var symbol, container, html, byte;
+
+            container = document.getElementById('received-symbol-container');
+            if (container.innerHTML === '') {
+                html = '';
                 for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
                     byte = symbol - data.symbolMin;
-                    html += '<button onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</button>';
+                    html += '<span id="rx-symbol-' + symbol + '">' + byteToText(byte) +'</span>';
                 }
-                document.getElementById('send-symbol-button-container').innerHTML = html;
-                log('log-tx-config', data);
-            });
+                container.innerHTML = html;
+            }
+            log('log-rx-config', data);
+        }
+
+        function configListener(data) {
+            log('log-config', data);
+        }
+
+        function txListener(data) {
+            log('log-tx', data);
+        }
+
+        function txConfigListener(data) {
+            var symbol, byte, html = '';
+
+            for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
+                byte = symbol - data.symbolMin;
+                html += '<a href="javascript:void(0)" onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</a>';
+            }
+            document.getElementById('send-symbol-button-container').innerHTML = html;
+            log('log-tx-config', data);
+        }
 
         function log(elementId, object) {
             document.getElementById(elementId).innerHTML = JSON.stringify(object, null, 2);
         }
 
         function byteToText(byte) {
-            var text;
-
-            if (byte === 32) {
-                return '&nbsp;';
-            }
-
-            text = (byte >= 32 && byte < 128)
-                ? ('&#' + byte + ';')
-                : '0x' + byte.toString(16);
-
-            return text;
+            return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
         }
 
         function onLoad() {
@@ -138,9 +167,11 @@
     <button type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
     <button type="button" onClick="physicalLayer.clearQueue()">Clear Tx queue</button>
     <br/>
-    <div id="send-symbol-button-container"></div>
-    <div id="received-symbol-container"></div>
-    <div id="received-symbol-row"></div>
+    <div style="height: 300px;">
+        <div id="send-symbol-button-container"></div>
+        <div id="received-symbol-container"></div>
+    </div>
+    <div id="received-bytes-row"></div>
 
     <table>
         <tr>

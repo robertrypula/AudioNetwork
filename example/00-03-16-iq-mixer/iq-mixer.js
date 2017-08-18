@@ -12,7 +12,7 @@ var
     BUFFER_SIZE = 1 * 1024,
     CANVAS_HEIGHT = 201,
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
-    DECIBEL_MIN = -100,
+    DECIBEL_MIN = -160,
     ZOOM_SIZE = 256,
     domLowCpuUsage,
     domLocalOscillatorHertzFrequency,
