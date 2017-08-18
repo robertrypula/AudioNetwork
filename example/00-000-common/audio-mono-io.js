@@ -7,6 +7,7 @@ var AudioMonoIO;
 
 AudioMonoIO = function (fftSize, bufferSize, smoothingTimeConstant) {
     this.$$audioContext = null;
+    this.$$microphoneStream = null;
     this.$$microphone = null;
     this.$$microphoneVirtual = null;
     this.$$masterIn = null;
@@ -224,6 +225,7 @@ AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
+            self.$$microphoneStream = stream;
             self.$$microphone = self.$$audioContext.createMediaStreamSource(stream);
             self.$$microphone.connect(node);
         })
@@ -277,10 +279,21 @@ AudioMonoIO.$$getValueOrDefault = function (value, defaultValue) {
 };
 
 AudioMonoIO.prototype.microphoneDisable = function () {
+    var tracks;
+
     // NOTE: experimental feature
     if (this.$$microphone) {
         this.$$microphone.disconnect(this.$$microphoneVirtual);
         this.$$microphone = null;
+        if (this.$$microphoneStream && (typeof this.$$microphoneStream.getTracks === 'function')) {
+            tracks = this.$$microphoneStream.getTracks();
+            if (tracks && tracks.length > 0) {
+                if (typeof tracks[0].stop === 'function') {
+                    tracks[0].stop();
+                    this.$$microphoneStream = null;
+                }
+            }
+        }
     }
 };
 
