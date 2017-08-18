@@ -276,6 +276,19 @@ AudioMonoIO.$$getValueOrDefault = function (value, defaultValue) {
     return typeof value !== 'undefined' ? value : defaultValue;
 };
 
+AudioMonoIO.prototype.microphoneDisable = function () {
+    // NOTE: experimental feature
+    if (this.$$microphone) {
+        this.$$microphone.disconnect(this.$$microphoneVirtual);
+        this.$$microphone = null;
+    }
+};
+
+AudioMonoIO.prototype.microphoneEnable = function () {
+    // NOTE: experimental feature
+    this.$$connectMicrophoneTo(this.$$microphoneVirtual);
+};
+
 AudioMonoIO.prototype.setVolume = function (volume) {
     this.$$setImmediately(this.$$masterOutVolume.gain, volume);
 };

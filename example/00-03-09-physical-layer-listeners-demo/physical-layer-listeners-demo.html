@@ -73,12 +73,56 @@
                         </div>
                     </div>
 
+                    <h2>Common</h2>
+
+
+                    <!-- ----- -->
+
                     <h2>Receive</h2>
 
 
                     <!-- ----- -->
 
                     <h2>Transmit</h2>
+
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneEnable()">Microphone Enable</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneDisable()">Microphone Disable</button>
+
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true)">Loopback Enable</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false)">Loopback Disable</button>
+                    <br/>
+
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.1)">Amplitude 10%</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.5)">Amplitude 50%</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(1.0)">Amplitude 100%</button>
+                    <br/>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Second device @ 44.1 kHz</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Second device @ 48.0 kHz</button>
+                    <br/>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
+                    <button class="btn btn-default" type="button" onClick="physicalLayer.clearQueue()">Clear Tx queue</button>
+                    <br/>
+                    <div style="height: 300px;">
+                        <div id="send-symbol-button-container"></div>
+                        <div id="received-symbol-container"></div>
+                    </div>
+                    <div id="received-bytes-row"></div>
+
+                    <table>
+                        <tr>
+                            <td><h3>RxSymbol</h3><pre id="log-rx-symbol"></pre></td>
+                            <td><h3>RxSample</h3><pre id="log-rx-sample"></pre></td>
+                            <td><h3>RxSync</h3><pre id="log-rx-sync"></pre></td>
+                            <td><h3>Tx</h3><pre id="log-tx"></pre></td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <td><h3>RxConfig</h3><pre id="log-rx-config"></pre></td>
+                            <td><h3>Config</h3><pre id="log-config"></pre></td>
+                            <td><h3>TxConfig</h3><pre id="log-tx-config"></pre></td>
+                        </tr>
+                    </table>
 
                 </div>
             </div>

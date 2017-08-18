@@ -1,0 +1,55 @@
+table {
+    border: 1px solid lightgray;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+table td {
+    vertical-align: top;
+    border: 1px solid lightgray;
+    padding: 10px;
+}
+
+table td h2 {
+    margin-top: 0;
+}
+
+#send-symbol-button-container, #received-symbol-container {
+    width: 256px;
+    height: 272px;
+    float: left;
+}
+
+#send-symbol-button-container a, #received-symbol-container span {
+    box-sizing: border-box;
+    display: block;
+    float: left;
+    padding: 3px 0 0 0;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1em;
+    width: 16px;
+    height: 16px;
+    background-color: #eee;
+    border: solid white;
+    border-width: 0 1px 1px 0;
+    color: black;
+    font-family: "Tahoma", sans-serif;
+}
+
+#send-symbol-button-container a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#send-symbol-button-container a:hover {
+    background-color: #222;
+    color: white;
+}
+
+#received-symbol-container span {
+}
+
+#received-symbol-container span.active {
+    background-color: lightgreen;
+}
