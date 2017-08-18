@@ -15,7 +15,7 @@ var
 
 function init() {
     powerBar = new PowerBar(document.getElementById('power-bar'));
-    physicalLayerBuilder = new PhysicalLayerV2Builder();
+    physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
         .amplitude(INITIAL_AMPLITUDE)
         .symbolMin44100(100)

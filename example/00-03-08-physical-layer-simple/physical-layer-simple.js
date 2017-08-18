@@ -6,7 +6,7 @@ var
     physicalLayer;
 
 function init() {
-    physicalLayerBuilder = new PhysicalLayerV2Builder();
+    physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
         .build();
 

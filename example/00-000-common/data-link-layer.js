@@ -4,7 +4,7 @@
 var DataLinkLayer;
 
 DataLinkLayer = function (stateHandler) {
-    var physicalLayerBuilder = new PhysicalLayerV2Builder();
+    var physicalLayerBuilder = new PhysicalLayerBuilder();
 
     this.$$physicalLayer = physicalLayerBuilder
         .rxSymbolListener(this.$$rxSampleListener.bind(this))
