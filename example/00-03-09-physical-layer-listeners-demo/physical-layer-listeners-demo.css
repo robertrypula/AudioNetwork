@@ -1,35 +1,22 @@
-table {
-    border: 1px solid lightgray;
-    border-spacing: 0;
-    border-collapse: collapse;
+pre {
+    font-size: 11px;
 }
 
-table td {
-    vertical-align: top;
-    border: 1px solid lightgray;
-    padding: 10px;
-}
-
-table td h2 {
-    margin-top: 0;
-}
-
-#send-symbol-button-container, #received-symbol-container {
+#send-byte-button-container, #received-byte-container {
     width: 256px;
-    height: 272px;
-    float: left;
+    height: 238px;
 }
 
-#send-symbol-button-container a, #received-symbol-container span {
+#send-byte-button-container a, #received-byte-container span {
     box-sizing: border-box;
     display: block;
     float: left;
-    padding: 3px 0 0 0;
+    padding: 2px 0 0 0;
     text-align: center;
     font-size: 10px;
     line-height: 1em;
     width: 16px;
-    height: 16px;
+    height: 14px;
     background-color: #eee;
     border: solid white;
     border-width: 0 1px 1px 0;
@@ -37,19 +24,20 @@ table td h2 {
     font-family: "Tahoma", sans-serif;
 }
 
-#send-symbol-button-container a {
+#send-byte-button-container a {
     text-decoration: none;
     cursor: pointer;
 }
 
-#send-symbol-button-container a:hover {
+#send-byte-button-container a:hover {
     background-color: #222;
     color: white;
 }
 
-#received-symbol-container span {
+#received-byte-container span {
+    cursor: default;
 }
 
-#received-symbol-container span.active {
+#received-byte-container span.active {
     background-color: lightgreen;
 }

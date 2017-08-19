@@ -17,19 +17,11 @@ function init() {
         .txListener(txListener)
         .txConfigListener(txConfigListener)
         .build();
-
-    onLoopbackCheckboxChange();
-}
-
-function onLoopbackCheckboxChange() {
-    physicalLayer.setLoopback(
-        document.getElementById('loopback-checkbox').checked
-    );
 }
 
 function rxSymbolListener(data) {
     var
-        rxSymbolElementList = document.querySelectorAll('#received-symbol-container > span'),
+        rxSymbolElementList = document.querySelectorAll('#received-byte-container > span'),
         i;
 
     for (i = 0; i < rxSymbolElementList.length; i++) {
@@ -42,7 +34,7 @@ function rxSymbolListener(data) {
     if (receivedBytes.length > 10) {
         receivedBytes.shift();
     }
-    document.getElementById('received-bytes-row').innerHTML = receivedBytes.join(' ');
+    html('#received-byte-history', receivedBytes.join(' '));
     log('log-rx-symbol', data);
 }
 
@@ -58,7 +50,7 @@ function rxSyncListener(data) {
 function rxConfigListener(data) {
     var symbol, container, html, byte;
 
-    container = document.getElementById('received-symbol-container');
+    container = document.getElementById('received-byte-container');
     if (container.innerHTML === '') {
         html = '';
         for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
@@ -79,18 +71,18 @@ function txListener(data) {
 }
 
 function txConfigListener(data) {
-    var symbol, byte, html = '';
+    var symbol, byte, htmlContent = '';
 
     for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
         byte = symbol - data.symbolMin;
-        html += '<a href="javascript:void(0)" onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</a>';
+        htmlContent += '<a href="javascript:void(0)" onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</a>';
     }
-    document.getElementById('send-symbol-button-container').innerHTML = html;
+    html('#send-byte-button-container', htmlContent);
     log('log-tx-config', data);
 }
 
 function log(elementId, object) {
-    document.getElementById(elementId).innerHTML = JSON.stringify(object, null, 2);
+    html('#' + elementId, JSON.stringify(object, null, 2));
 }
 
 function byteToText(byte) {
