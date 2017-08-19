@@ -2,6 +2,7 @@
 'use strict';
 
 var
+    BYTE_HISTORY_MAX = 8,
     receivedByteContainerRendered = false,
     physicalLayerBuilder,
     receivedBytes = [],
@@ -31,12 +32,12 @@ function rxSymbolListener(data) {
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     receivedBytes.push(byteText);
-    if (receivedBytes.length > 10) {
+    if (receivedBytes.length > BYTE_HISTORY_MAX) {
         receivedBytes.shift();
     }
 
     html('#received-byte-history', receivedBytes.join(' '));
-    html('#rx-symbol', data.symbol ? data.symbol : 'null');
+    html('#rx-symbol', data.symbol ? data.symbol : 'idle');
     html('#rx-byte', byteText);
     setActive('#received-byte-container', '#rx-symbol-' + (data.symbol ? data.symbol : ''));
     log('log-rx-symbol', data);
@@ -44,7 +45,7 @@ function rxSymbolListener(data) {
 
 function rxSampleListener(data) {
     data.frequencyData = '[spectrogram array]';
-    html('#sync', data.syncId === null ? 'waiting for first sync...' : 'OK');
+    html('#sync', data.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', data.isSyncInProgress ? '[sync in progress]' : '');
     log('log-rx-sample', data);
 }

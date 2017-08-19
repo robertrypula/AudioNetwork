@@ -2,6 +2,10 @@ pre {
     font-size: 11px;
 }
 
+#sync-in-progress {
+    white-space: nowrap;
+}
+
 #send-byte-button-container, #received-byte-container {
     width: 256px;
     height: 238px;
