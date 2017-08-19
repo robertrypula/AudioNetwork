@@ -255,7 +255,7 @@ PhysicalLayer.prototype.getRxSample = function () {
         id: this.$$sampleId,
         symbolRaw: this.$$symbolRaw,
         signalDecibel: this.$$signalDecibel,
-        signalDecibelNextCandidate: this.$$signalDecibelNextCandidate,
+        // signalDecibelNextCandidate: this.$$signalDecibelNextCandidate,  // TODO add this at some point
         noiseDecibel: this.$$noiseDecibel,
         frequencyData: this.$$frequencyData.slice(0),
         isSyncInProgress: this.$$isSyncInProgress,

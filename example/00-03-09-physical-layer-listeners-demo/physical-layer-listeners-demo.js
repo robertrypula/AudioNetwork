@@ -2,6 +2,7 @@
 'use strict';
 
 var
+    receivedByteContainerRendered = false,
     physicalLayerBuilder,
     receivedBytes = [],
     physicalLayer;
@@ -21,25 +22,30 @@ function init() {
 
 function rxSymbolListener(data) {
     var
-        rxSymbolElementList = document.querySelectorAll('#received-byte-container > span'),
-        i;
+        rxConfig = physicalLayer.getRxConfig(),
+        byte,
+        byteText;
 
-    for (i = 0; i < rxSymbolElementList.length; i++) {
-        rxSymbolElementList[i].classList.remove('active');
-    }
-    if (data.symbol) {
-        document.getElementById('rx-symbol-' + data.symbol).classList.add('active');
-    }
-    receivedBytes.push(data.symbol ? byteToText(data.symbol - physicalLayer.getRxConfig().symbolMin) : '--');
+    byte = data.symbol
+        ? data.symbol - rxConfig.symbolMin
+        : null;
+    byteText = byte !== null ? byteToText(byte) : '---';
+    receivedBytes.push(byteText);
     if (receivedBytes.length > 10) {
         receivedBytes.shift();
     }
+
     html('#received-byte-history', receivedBytes.join(' '));
+    html('#rx-symbol', data.symbol ? data.symbol : 'null');
+    html('#rx-byte', byteText);
+    setActive('#received-byte-container', '#rx-symbol-' + (data.symbol ? data.symbol : ''));
     log('log-rx-symbol', data);
 }
 
 function rxSampleListener(data) {
     data.frequencyData = '[spectrogram array]';
+    html('#sync', data.syncId === null ? 'waiting for first sync...' : 'OK');
+    html('#sync-in-progress', data.isSyncInProgress ? '[sync in progress]' : '');
     log('log-rx-sample', data);
 }
 
@@ -48,21 +54,26 @@ function rxSyncListener(data) {
 }
 
 function rxConfigListener(data) {
-    var symbol, container, html, byte;
+    var symbol, htmlContent, byte;
 
-    container = document.getElementById('received-byte-container');
-    if (container.innerHTML === '') {
-        html = '';
+    if (!receivedByteContainerRendered) {
+        htmlContent = '';
         for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
             byte = symbol - data.symbolMin;
-            html += '<span id="rx-symbol-' + symbol + '">' + byteToText(byte) +'</span>';
+            htmlContent +=
+                '<span id="rx-symbol-' + symbol + '">' +
+                byteToText(byte) +
+                '</span>';
         }
-        container.innerHTML = html;
+        html('#received-byte-container', htmlContent);
+        receivedByteContainerRendered = true;
     }
+    html('#rx-sample-rate', (data.sampleRate / 1000).toFixed(1));
     log('log-rx-config', data);
 }
 
 function configListener(data) {
+    html('#loopback', data.isLoopbackEnabled ? 'enabled' : 'disabled');
     log('log-config', data);
 }
 
@@ -75,9 +86,14 @@ function txConfigListener(data) {
 
     for (symbol = data.symbolMin; symbol <= data.symbolMax; symbol++) {
         byte = symbol - data.symbolMin;
-        htmlContent += '<a href="javascript:void(0)" onClick="physicalLayer.sendSymbol(' + symbol + ')">' + byteToText(byte) + '</a>';
+        htmlContent +=
+            '<a href="javascript:void(0)" onClick="onSendByteClick(' + byte + ')">' +
+            byteToText(byte) +
+            '</a>';
     }
     html('#send-byte-button-container', htmlContent);
+    html('#tx-sample-rate', (data.sampleRate / 1000).toFixed(1));
+    html('#amplitude', (data.amplitude * 100).toFixed(0));
     log('log-tx-config', data);
 }
 
@@ -87,4 +103,12 @@ function log(elementId, object) {
 
 function byteToText(byte) {
     return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
+}
+
+function onSendByteClick(byte) {
+    var
+        txConfig = physicalLayer.getTxConfig(),
+        symbol = txConfig.symbolMin + byte;
+
+    physicalLayer.sendSymbol(symbol);
 }

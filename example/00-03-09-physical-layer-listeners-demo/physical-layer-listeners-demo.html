@@ -58,16 +58,21 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    <h2>Common</h2>
-
                     <div class="margin-bottom">
+                        TODO remove me - experiments only<br/>
                         <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneEnable()">Microphone Enable</button>
                         <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneDisable()">Microphone Disable</button>
                     </div>
 
+                    <h2>Common</h2>
+
                     <div class="margin-bottom">
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true)">Loopback Enable</button>
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false)">Loopback Disable</button>
+                        <strong>Loopback: <span id="loopback">?</span></strong>
+                    </div>
+
+                    <div class="margin-bottom">
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true)">Enable</button>
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false)">Disable</button>
                     </div>
 
                     <div class="margin-bottom">
@@ -81,7 +86,21 @@
 
                     <div class="row">
                         <div class="col col-md-4 margin-bottom">
-                            <div class="margin-bottom" id="received-byte-history">Wainting for "sync"...</div>
+                            <div class="margin-bottom">
+                                <strong>SampleRate: <span id="rx-sample-rate"></span> kHz</strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Status: <span id="sync"></span> <span id="sync-in-progress"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Symbol: <span id="rx-symbol"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Byte: <span id="rx-byte"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong id="received-byte-history">&nbsp;</strong>
+                            </div>
                             <div id="received-byte-container"></div>
                         </div>
 
@@ -114,6 +133,16 @@
 
                     <div class="row">
                         <div class="col col-md-4 margin-bottom">
+                            <div class="margin-bottom">
+                                <strong>Receiver's SampleRate: <span id="tx-sample-rate">?</span> kHz</strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Set 44.1 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Set 48.0 kHz</button>
+                            </div>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
+                            </div>
                             <div class="margin-bottom" id="send-byte-button-container"></div>
                         </div>
 
@@ -123,7 +152,6 @@
                                 <pre id="log-tx"></pre>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
                                 <button class="btn btn-default" type="button" onClick="physicalLayer.clearQueue()">Clear Tx queue</button>
                             </div>
                         </div>
@@ -135,14 +163,15 @@
                             </div>
 
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.1)">Amplitude 10%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.5)">Amplitude 50%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(1.0)">Amplitude 100%</button>
+                                <strong>Amplitude: <span id="amplitude">?</span>%</strong>
                             </div>
 
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Second device @ 44.1 kHz</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Second device @ 48.0 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.2)">20%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.4)">40%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.6)">60%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.8)">80%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(1.0)">100%</button>
                             </div>
                         </div>
                     </div>

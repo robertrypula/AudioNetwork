@@ -32,17 +32,19 @@ function getValue(selector, parseAs) {
     return result;
 }
 
-function setActive(containerId, activeId) {
+function setActive(containerId, activeId, activeCssClass) {
     var
         list = select(containerId + ' > *'),
         active = select(activeId),
         i;
 
+    activeCssClass = activeCssClass || 'active';
+
     for (i = 0; i < list.length; i++) {
-        list[i].classList.remove('active');
+        list[i].classList.remove(activeCssClass);
     }
     if (active.length === 1) {
-        select(activeId)[0].classList.add('active');
+        select(activeId)[0].classList.add(activeCssClass);
     }
 }
 
