@@ -58,27 +58,63 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
-                                Loopback
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                onChange="onLoopbackCheckboxChange()"
-                                id="loopback-checkbox"
-                                value="1" />
-                        </div>
+                    <div class="margin-bottom">
+                        TODO remove me - experiments only<br/>
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneEnable()">Microphone Enable</button>
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneDisable()">Microphone Disable</button>
                     </div>
 
-                    <h2>Receive</h2>
+                    <div class="margin-bottom">
+                        <strong>Loopback: <span id="loopback">?</span></strong>
+                    </div>
 
+                    <div class="margin-bottom">
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true)">Enable</button>
+                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false)">Disable</button>
+                    </div>
 
                     <!-- ----- -->
 
-                    <h2>Transmit</h2>
+                    <div class="row">
+                        <div class="col col-sm-6">
+                            <h2>Receive</h2>
+                            <div class="margin-bottom">
+                                <strong>SampleRate: <span id="rx-sample-rate"></span> kHz</strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Status: <span id="sync"></span> <span id="sync-in-progress"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Symbol: <span id="rx-symbol"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong>Byte: <span id="rx-byte"></span></strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <strong id="received-byte-history">&nbsp;</strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <div id="received-byte-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="col col-sm-6">
+                            <h2>Transmit</h2>
+                            <div class="margin-bottom">
+                                <strong>Receiver's SampleRate: <span id="tx-sample-rate">?</span> kHz</strong>
+                            </div>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Set 44.1 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Set 48.0 kHz</button>
+                            </div>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
+                            </div>
+                            <div class="margin-bottom">
+                                <div id="send-byte-button-container"></div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
