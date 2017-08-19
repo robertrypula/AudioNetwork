@@ -92,3 +92,11 @@ function onSendByteClick(byte) {
 
     physicalLayer.sendSymbol(symbol);
 }
+
+function onSetTxSampleRateClick(txSampleRate) {
+    physicalLayer.setTxSampleRate(txSampleRate);
+}
+
+function onSendSyncClick() {
+    physicalLayer.sendSync();
+}

@@ -135,7 +135,7 @@ function onAmplitudeClick(amplitude) {
 }
 
 function onSendSyncClick() {
-    physicalLayer.sendSyncCode();
+    physicalLayer.sendSync();
 }
 
 function onSendSymbolClick() {

@@ -181,7 +181,7 @@ PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass 
 
 // -----------------------------------------
 
-PhysicalLayer.prototype.sendSyncCode = function () {
+PhysicalLayer.prototype.sendSync = function () {
     var i, codeValue, symbol;
 
     for (i = 0; i < this.$$syncCode.length; i++) {

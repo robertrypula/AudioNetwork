@@ -104,11 +104,11 @@
                                 <strong>Receiver's SampleRate: <span id="tx-sample-rate">?</span> kHz</strong>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Set 44.1 kHz</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Set 48.0 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(44100)">Set 44.1 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(48000)">Set 48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.sendSyncCode()">Send sync</button>
+                                <button class="btn btn-default" type="button" onClick="onSendSyncClick()">Send sync</button>
                             </div>
                             <div class="margin-bottom">
                                 <div id="send-byte-button-container"></div>
