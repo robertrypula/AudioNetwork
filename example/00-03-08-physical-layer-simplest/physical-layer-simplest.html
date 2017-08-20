@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
     <link rel="stylesheet" type="text/css" href="../00-000-common/ui/power-bar.css">
-    <link rel="stylesheet" type="text/css" href="chat.css">
+    <link rel="stylesheet" type="text/css" href="physical-layer-simplest.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -55,10 +55,29 @@
 
             <!-- ---------------- -->
 
-            <div class="row margin-bottom">
-                <div class="col col-xs-12">
+            <h2>Receive</h2>
+            <div class="margin-bottom">
+                <strong>Rx Sample Rate: <span id="rx-sample-rate"></span> Hz</strong>
+            </div>
+            <div class="margin-bottom">
+                <strong>Status: <span id="sync"></span> <span id="sync-in-progress"></span></strong>
+            </div>
+            <div class="margin-bottom">
+                <strong>Received byte: <span id="rx-byte"></span></strong>
+            </div>
+            <div class="margin-bottom">
+                <strong>Received symbol: <span id="rx-symbol"></span></strong>
+            </div>
 
-                </div>
+            <h2>Transmit</h2>
+            <div class="margin-bottom">
+                <input id="tx-sample-rate" type="number" value="44100" />
+                <button class="btn btn-default" onClick="onSetTxSampleRateClick()">Set Tx Sample Rate</button>
+                <button class="btn btn-default" onClick="onSendSyncClick()">Send Sync</button>
+            </div>
+            <div class="margin-bottom">
+                <input id="tx-byte" type="number" value="0" />
+                <button class="btn btn-default" onClick="onSendByteClick()">Send Byte</button>
             </div>
 
             <!-- ---------------- -->
@@ -89,9 +108,7 @@
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/sync-code-detector.js"></script>
     <script src="../00-000-common/physical-layer.js"></script>
-    <script src="../00-000-common/data-link-layer.js"></script>
-    <script src="../00-000-common/transport-layer.js"></script>
-    <script src="chat.js"></script>
+    <script src="physical-layer-simplest.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
