@@ -15,7 +15,7 @@ function init() {
 }
 
 function onSetTxSampleRateClick() {
-    var txSampleRate = getValue('#tx-sample-rate', 'int');
+    var txSampleRate = getInputValue('#tx-sample-rate', 'int');
 
     physicalLayer.setTxSampleRate(txSampleRate);
     alert('Tx Sample Rate set!');
@@ -27,7 +27,7 @@ function onSendSyncClick() {
 
 function onSendByteClick() {
     var
-        byte = getValue('#tx-byte', 'int'),
+        byte = getInputValue('#tx-byte', 'int'),
         txConfig = physicalLayer.getTxConfig(),
         symbol = txConfig.symbolMin + byte;
     physicalLayer.sendSymbol(symbol);

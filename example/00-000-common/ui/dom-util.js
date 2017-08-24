@@ -3,7 +3,7 @@
 
 // TODO move to class
 
-function getValue(selector, parseAs) {
+function getInputValue(selector, parseAs) {
     var element, resultRaw, result;
 
     element = document.querySelectorAll(selector);
