@@ -4,10 +4,23 @@
 var
     ASCII_NULL = 0,
     UNICODE_UNKNOWN = '�',
+    dataLinkLayerBuilder,
     dataLinkLayer,
     receivedPacketList = [],
     asciiList;
 
+
+function init() {
+    dataLinkLayerBuilder = new DataLinkLayerBuilder();
+    dataLinkLayer = dataLinkLayerBuilder
+        .build();
+
+
+}
+
+// ----------------------------------------------------------
+
+/*
 function init() {
     dataLinkLayer = new DataLinkLayer(stateHandler);
     asciiList = new Buffer(20);
@@ -116,3 +129,4 @@ function getStringFromByteList(byteList) {
 
     return formatted.join(' ');
 }
+*/

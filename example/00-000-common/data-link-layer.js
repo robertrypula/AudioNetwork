@@ -1,10 +1,121 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+
+var DataLinkLayerBuilder = function () {
+    this._rxSymbolListener = undefined;
+    this._rxSampleListener = undefined;
+    this._rxSyncListener = undefined;
+    this._rxConfigListener = undefined;
+    this._configListener = undefined;
+    this._txListener = undefined;
+    this._txConfigListener = undefined;
+};
+
+DataLinkLayerBuilder.prototype.rxSymbolListener = function (listener) {
+    this._rxSymbolListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.rxSampleListener = function (listener) {
+    this._rxSampleListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.rxSyncListener = function (listener) {
+    this._rxSyncListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.rxConfigListener = function (listener) {
+    this._rxConfigListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.configListener = function (listener) {
+    this._configListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.txListener = function (listener) {
+    this._txListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.txConfigListener = function (listener) {
+    this._txConfigListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.build = function () {
+    return new DataLinkLayer(this);
+};
+
+// -----------------------------------------------------------------------------------------
+
+var DataLinkLayer;
+
+DataLinkLayer = function (builder) {
+    this.$$physicalLayer = (new PhysicalLayerBuilder())
+        .rxSymbolListener(this.$$rxSymbolListener.bind(this))
+        .rxSampleListener(this.$$rxSampleListener.bind(this))
+        .rxSyncListener(this.$$rxSyncListener.bind(this))
+        .rxConfigListener(this.$$rxConfigListener.bind(this))
+        .configListener(this.$$configListener.bind(this))
+        .txListener(this.$$txListener.bind(this))
+        .txConfigListener(this.$$txConfigListener.bind(this))
+        .build();
+
+    // setup listeners
+    this.$$rxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
+    this.$$rxSampleListener = DataLinkLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
+    this.$$rxSyncListener = DataLinkLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
+    this.$$rxConfigListener = DataLinkLayer.$$isFunction(builder._rxConfigListener) ? builder._rxConfigListener : null;
+    this.$$configListener = DataLinkLayer.$$isFunction(builder._configListener) ? builder._configListener : null;
+    this.$$txListener = DataLinkLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
+    this.$$txConfigListener = DataLinkLayer.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
+};
+
+DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
+    this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$rxSampleListener = function (data) {
+    this.$$rxSampleListener ? this.$$rxSampleListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$rxSyncListener = function (data) {
+    this.$$rxSyncListener ? this.$$rxSyncListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$rxConfigListener = function (data) {
+    this.$$rxConfigListener ? this.$$rxConfigListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$configListener = function (data) {
+    this.$$configListener ? this.$$configListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$txListener = function (data) {
+    this.$$txListener ? this.$$txListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$txConfigListener = function (data) {
+    this.$$txConfigListener ? this.$$txConfigListener(data) : undefined;
+};
+
+
+
+DataLinkLayer.$$isFunction = function (variable) {
+    return typeof variable === 'function';
+};
+
+
+/*
 var DataLinkLayer;
 
 DataLinkLayer = function (stateHandler) {
-    var physicalLayerBuilder = new PhysicalLayerBuilder();
+    var physicalLayerBuilder = new DataLinkLayerBuilder();
 
     this.$$physicalLayer = physicalLayerBuilder
         .rxSymbolListener(this.$$rxSampleListener.bind(this))
@@ -148,3 +259,4 @@ DataLinkLayer.prototype.$$computeChecksum = function (data) {
 
     return (sum2 << 4) | sum1;
 };
+*/
