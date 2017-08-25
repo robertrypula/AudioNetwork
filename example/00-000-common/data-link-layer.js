@@ -3,6 +3,8 @@
 
 
 var DataLinkLayerBuilder = function () {
+    this._framePayloadLengthMax = 7;
+
     this._rxSymbolListener = undefined;
     this._rxSampleListener = undefined;
     this._rxSyncListener = undefined;
@@ -10,6 +12,11 @@ var DataLinkLayerBuilder = function () {
     this._configListener = undefined;
     this._txListener = undefined;
     this._txConfigListener = undefined;
+};
+
+DataLinkLayerBuilder.prototype.framePayloadLengthMax = function (framePayloadLengthMax) {
+    this._framePayloadLengthMax = framePayloadLengthMax;
+    return this;
 };
 
 DataLinkLayerBuilder.prototype.rxSymbolListener = function (listener) {
@@ -66,6 +73,8 @@ DataLinkLayer = function (builder) {
         .txConfigListener(this.$$txConfigListener.bind(this))
         .build();
 
+    this.$$framePayloadLengthMax = builder._framePayloadLengthMax;
+
     // setup listeners
     this.$$rxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
     this.$$rxSampleListener = DataLinkLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
@@ -75,6 +84,17 @@ DataLinkLayer = function (builder) {
     this.$$txListener = DataLinkLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
     this.$$txConfigListener = DataLinkLayer.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
 };
+
+DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION = 'Payload is too big!';
+
+DataLinkLayer.$$_HEADER_FRAME_START_MARKER = 0xE0;
+DataLinkLayer.$$_HEADER_COMMAND_BIT_SET = 0x10;
+DataLinkLayer.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
+DataLinkLayer.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
+DataLinkLayer.$$_HEADER_PAYLOAD_BYTE_MASK = 0xFF;
+
+DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND = 'PAYLOAD_TYPE_COMMAND';
+DataLinkLayer.$$_PAYLOAD_TYPE_DATA = 'PAYLOAD_TYPE_DATA';
 
 DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
     this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
@@ -104,7 +124,90 @@ DataLinkLayer.prototype.$$txConfigListener = function (data) {
     this.$$txConfigListener ? this.$$txConfigListener(data) : undefined;
 };
 
+DataLinkLayer.prototype.getPhysicalLayer = function () {
+    return this.$$physicalLayer;
+};
 
+DataLinkLayer.prototype.getRxSampleRate = function () {
+    return this.$$physicalLayer.getRxSampleRate();  // alias for easier access
+};
+
+DataLinkLayer.prototype.setTxSampleRate = function (txSampleRate) {
+    return this.$$physicalLayer.setTxSampleRate(txSampleRate);  // alias for easier access
+};
+
+DataLinkLayer.prototype.sendSync = function () {
+    return this.$$physicalLayer.sendSync();  // alias for easier access
+};
+
+DataLinkLayer.prototype.setLoopback = function (state) {
+    return this.$$physicalLayer.setLoopback(state);  // alias for easier access
+};
+
+DataLinkLayer.prototype.sendFrame = function (payload) {
+    var payloadType, frame, txConfig, symbolMin, i, byte, symbol;
+
+    if (payload.length > this.$$framePayloadLengthMax) {
+        throw DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION;
+    }
+    payloadType = DataLinkLayer.$$_PAYLOAD_TYPE_DATA;
+    frame = DataLinkLayer.$$buildFrame(payloadType, payload);
+
+    txConfig = this.$$physicalLayer.getTxConfig();
+    symbolMin = txConfig.symbolMin;
+    for (i = 0; i < frame.length; i++) {
+        byte = frame[i];
+        symbol = symbolMin + byte;
+        this.$$physicalLayer.sendSymbol(symbol);
+    }
+};
+
+DataLinkLayer.$$buildFrame = function (payloadType, payload) {
+    var frame, isCommand, header, checksum, i, byte;
+
+    frame = [];
+    isCommand = payloadType === DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND;
+    header = DataLinkLayer.$$getHeader(isCommand, payload.length);
+    frame.push(header);
+    for (i = 0; i < payload.length; i++) {
+        byte = payload[i] & DataLinkLayer.$$_HEADER_PAYLOAD_BYTE_MASK;
+        frame.push(byte);
+    }
+    checksum = DataLinkLayer.$$computeChecksum(frame);
+    frame.push(checksum);
+
+    return frame;
+};
+
+DataLinkLayer.$$getHeader = function (isCommand, payloadLength) {
+    var header, frameStartMarker, commandBit;
+
+    frameStartMarker = DataLinkLayer.$$_HEADER_FRAME_START_MARKER;
+    commandBit = isCommand
+        ? DataLinkLayer.$$_HEADER_COMMAND_BIT_SET
+        : DataLinkLayer.$$_HEADER_COMMAND_BIT_NOT_SET;
+    payloadLength = DataLinkLayer.$$_HEADER_PAYLOAD_LENGTH_MASK & payloadLength;
+
+    header = frameStartMarker | commandBit | payloadLength;
+
+    return header;
+};
+
+DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
+    var sum1, sum2, i, value;
+
+    sum1 = 0;
+    sum2 = 0;
+    for (i = 0; i < 2 * frameWithoutChecksum.length; i++) {
+        value = i % 2 === 0
+            ? (frameWithoutChecksum[i >>> 1] >>> 4) & 0xF
+            : frameWithoutChecksum[i >>> 1] & 0xF;
+        sum1 = (sum1 + value) % 15;
+        sum2 = (sum2 + sum1) % 15;
+    }
+
+    return (sum2 << 4) | sum1;
+};
 
 DataLinkLayer.$$isFunction = function (variable) {
     return typeof variable === 'function';
@@ -227,36 +330,9 @@ DataLinkLayer.prototype.$$rxSampleListener = function (physicalLayerState) {
     }
 };
 
-DataLinkLayer.$$isFunction = function (variable) {
-    return typeof variable === 'function';
-};
-
 DataLinkLayer.$$getValueOrDefault = function (value, defaultValue) {
     return typeof value !== 'undefined' ? value : defaultValue;
 };
 
-DataLinkLayer.prototype.$$computeChecksum = function (data) {
-    var
-        sum1 = 0,
-        sum2 = 0,
-        i,
-        value;
 
-    // console.log(data.length);
-
-    for (i = 0; i < 2 * data.length; i++) {
-        value = i % 2 === 0
-            ? (data[i >>> 1] >>> 4) & 0xF
-            : data[i >>> 1] & 0xF;
-
-        // console.log(i, value.toString(16));
-
-        sum1 = (sum1 + value) % 15;
-        sum2 = (sum2 + sum1) % 15;
-    }
-
-    // console.log(sum2.toString(16), sum1.toString(16));
-
-    return (sum2 << 4) | sum1;
-};
 */

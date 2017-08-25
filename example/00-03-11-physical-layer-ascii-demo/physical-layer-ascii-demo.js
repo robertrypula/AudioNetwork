@@ -24,17 +24,10 @@ function init() {
         .rxConfigListener(rxConfigListener)
         .txConfigListener(txConfigListener)
         .txListener(txListener)
+        .configListener(configListener)
         .build();
     rxSymbolList = new Buffer(BUFFER_SIZE);
     rxAsciiList = new Buffer(BUFFER_SIZE);
-
-    onLoopbackCheckboxChange();
-}
-
-function onLoopbackCheckboxChange() {
-    physicalLayer.setLoopback(
-        document.getElementById('loopback-checkbox').checked
-    );
 }
 
 function formatSymbolRange(state) {
@@ -52,9 +45,9 @@ function formatSymbolRange(state) {
 function rxConfigListener(state) {
     var config = physicalLayer.getConfig();
 
+    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html(
         '#rx-config',
-        '<strong>SampleRate: ' + (state.sampleRate / 1000).toFixed(1) + '&nbsp;kHz</strong><br/>' +
         formatSymbolRange(state) + '<br/>' +
         'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
         'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
@@ -123,11 +116,21 @@ function txListener(state) {
         getStringFromSymbolList(state.symbolQueue)
     );
 }
+function configListener(state) {
+    setActive(
+        '#loopback-container',
+        '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
+    );
+}
 
 // ----------------------------------
 
-function onSampleRateClick(sampleRate) {
-    physicalLayer.setTxSampleRate(sampleRate);
+function onLoopbackClick(state) {
+    physicalLayer.setLoopback(state);
+}
+
+function onTxSampleRateClick(txSampleRate) {
+    physicalLayer.setTxSampleRate(txSampleRate);
 }
 
 function onAmplitudeClick(amplitude) {
@@ -139,26 +142,29 @@ function onSendSyncClick() {
 }
 
 function onSendSymbolClick() {
-    var symbol = document.getElementById('tx-symbol-field').value;
+    var symbol = getFormFieldValue('#tx-symbol-field');
 
     try {
         physicalLayer.sendSymbol(symbol);
     } catch (e) {
-        alert(e);
+        alert(e); // it's because user may enter symbol out of range
     }
 }
 
 function onSendTextClick() {
     var
-        text = document.getElementById('tx-text-field').value,
+        text = getFormFieldValue('#tx-text-field'),
         txConfig = physicalLayer.getTxConfig(),
-        charCode,
+        symbolMin = txConfig.symbolMin,
+        byte,
         symbol,
         i;
 
     for (i = 0; i < text.length; i++) {
-        charCode = isPrintableAscii(text[i]) ? text.charCodeAt(i) : ASCII_NULL;
-        symbol = txConfig.symbolMin + charCode;
+        byte = isPrintableAscii(text[i])
+            ? text.charCodeAt(i)
+            : ASCII_NULL;
+        symbol = symbolMin + byte;
         physicalLayer.sendSymbol(symbol);
     }
 }

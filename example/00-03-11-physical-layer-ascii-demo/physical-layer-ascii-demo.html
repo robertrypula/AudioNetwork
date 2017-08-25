@@ -60,20 +60,30 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
+                            <label>
                                 Loopback
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                onChange="onLoopbackCheckboxChange()"
-                                id="loopback-checkbox"
-                                value="1" />
+                            <div class="clearfix margin-bottom" id="loopback-container">
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                            </div>
                         </div>
                     </div>
 
                     <h2>Receive</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample&nbsp;rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="rx-sample-rate">-</span> kHz
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
@@ -120,6 +130,26 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
+                                Sample Rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
+                            </div>
+                            <p>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
                                 Send...
                             </label>
                         </div>
@@ -160,27 +190,6 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="tx-symbol-queue" class="log-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Sample Rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
-                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSampleRateClick(44100)">44.1 kHz</button>
-                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSampleRateClick(48000)">48.0 kHz</button>
-                            </div>
-                            <span>
-                                This value should match sample rate that is displayed on the receiver's side.
-                                <br/>
-                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </span>
                         </div>
                     </div>
 

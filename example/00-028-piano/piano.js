@@ -23,7 +23,7 @@ function generateHtml() {
 
 function generatePianoOctave() {
     var
-        octaveNumber = getInputValue('#octave-number', 'int'),
+        octaveNumber = getFormFieldValue('#octave-number', 'int'),
         semitoneNumberStart = musicCalculator.getFirstSemitoneNumber(octaveNumber),
         semitoneNumber,
         noteName,
@@ -49,7 +49,7 @@ function generatePianoOctave() {
 
 function generateInfoTable() {
     var
-        octaveNumber = getInputValue('#octave-number', 'int'),
+        octaveNumber = getFormFieldValue('#octave-number', 'int'),
         semitoneNumberStart = musicCalculator.getFirstSemitoneNumber(octaveNumber),
         semitoneNumber,
         table,
@@ -130,7 +130,7 @@ function updatePhaseAndFrequencyClicked() {
 }
 
 function octaveNumberChanged() {
-    octaveNumber = getInputValue('#octave-number', 'int');
+    octaveNumber = getFormFieldValue('#octave-number', 'int');
 
     if (octaveNumber !== 0 && !octaveNumber) {
         octaveNumber = DEFAULT_OCTAVE;
@@ -151,8 +151,8 @@ function octaveNumberChanged() {
 function setPeriodicWave() {
     var frequency, phase;
 
-    frequency = getInputValue('#tx-frequency', 'float');
-    phase = getInputValue('#tx-phase', 'float');
+    frequency = getFormFieldValue('#tx-frequency', 'float');
+    phase = getFormFieldValue('#tx-phase', 'float');
     audioMonoIO.setPeriodicWave(frequency, 0.1, phase);
 }
 

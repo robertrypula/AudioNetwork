@@ -13,25 +13,104 @@ var
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
     dataLinkLayer = dataLinkLayerBuilder
+        .txListener(txListener)
+        .rxSampleListener(rxSampleListener)
+        .configListener(configListener)
+        .txConfigListener(txConfigListener)
+        .rxConfigListener(rxConfigListener)
         .build();
-
-
 }
+
+function txListener(state) {
+    // console.log(state);
+}
+
+function rxSampleListener(state) {
+    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
+    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+}
+
+function configListener(state) {
+    setActive(
+        '#loopback-container',
+        '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
+    );
+}
+
+function txConfigListener(state) {
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+}
+
+function rxConfigListener(state) {
+    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+}
+
+// ---------
+
+function onTxSampleRateClick(txSampleRate) {
+    dataLinkLayer.setTxSampleRate(txSampleRate);
+}
+
+function onLoopbackClick(state) {
+    dataLinkLayer.setLoopback(state);
+}
+
+function onSendSyncClick() {
+    dataLinkLayer.sendSync();
+}
+
+function onSendHexClick() {
+    var
+        text = getFormFieldValue('#tx-hex'),
+        textCleaned = text.trim().replace(/ +(?= )/g, ''),
+        textSplit = textCleaned.split(' '),
+        payload = [],
+        byte,
+        i;
+
+    for (i = 0; i < textSplit.length; i++) {
+        byte = parseInt(textSplit[i], 16);
+        if (0 <= byte && byte <= 255) {
+            payload.push(byte);
+        }
+    }
+    sendFrame(payload);
+}
+
+function onSendAsciiClick() {
+    var
+        text = document.getElementById('tx-ascii').value,
+        payload = [],
+        byte,
+        i;
+
+    for (i = 0; i < text.length; i++) {
+        byte = isPrintableAscii(text[i])
+            ? text.charCodeAt(i)
+            : ASCII_NULL;
+        payload.push(byte);
+    }
+    sendFrame(payload);
+}
+
+function sendFrame(payload) {
+    try {
+        dataLinkLayer.sendFrame(payload);
+    } catch (e) {
+        alert(e);
+    }
+}
+
+// ---------
+
+function isPrintableAscii(char) {
+    return char >= ' ' && char <= '~';
+}
+
 
 // ----------------------------------------------------------
 
 /*
-function init() {
-    dataLinkLayer = new DataLinkLayer(stateHandler);
-    asciiList = new Buffer(20);
-    onLoopbackCheckboxChange();
-}
-
-function onLoopbackCheckboxChange() {
-    dataLinkLayer.setLoopback(
-        document.getElementById('loopback-checkbox').checked
-    );
-}
 
 function updateView(state) {
     var plState = state.physicalLayerState;
@@ -66,51 +145,6 @@ function stateHandler(state) {
     }
 
     updateView(state);
-}
-
-function onConnectClick(sampleRate) {
-    dataLinkLayer.connect(sampleRate);
-    // refreshTxSymbolQueue();
-}
-
-function onSendByteHexClick() {
-    var
-        data = document.getElementById('tx-byte-hex-field').value,
-        dataSplit = data.split(' '),
-        byteList = [],
-        byteHex,
-        i;
-
-    for (i = 0; i < dataSplit.length; i++) {
-        byteHex = parseInt(dataSplit[i], 16);
-        if (0 <= byteHex && byteHex <= 255) {
-            byteList.push(byteHex);
-        }
-    }
-
-    dataLinkLayer.send(byteList);
-}
-
-function onSendTextClick() {
-    var
-        text = document.getElementById('tx-text-field').value,
-        data = [],
-        byte,
-        i;
-
-    for (i = 0; i < text.length; i++) {
-        byte = isPrintableAscii(text[i]) ? text.charCodeAt(i) : ASCII_NULL;
-        if (0 <= byte && byte <= 255) {
-            data.push(byte);
-        }
-    }
-    dataLinkLayer.send(data);
-}
-
-// ---------------------------------------
-
-function isPrintableAscii(char) {
-    return char >= ' ' && char <= '~';
 }
 
 function pad(num, size) {

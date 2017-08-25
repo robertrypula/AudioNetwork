@@ -60,16 +60,15 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
+                            <label>
                                 Loopback
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                onChange="onLoopbackCheckboxChange()"
-                                id="loopback-checkbox"
-                                value="1" />
+                            <div class="clearfix margin-bottom" id="loopback-container">
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                            </div>
                         </div>
                     </div>
 
@@ -82,7 +81,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-sample-rate" class="log-container"></div>
+                            <span id="rx-sample-rate">-</span> kHz
                         </div>
                     </div>
 
@@ -93,7 +92,8 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-connect-status" class="log-container"></div>
+                            <span id="sync"></span>
+                            <span id="sync-in-progress"></span>
                         </div>
                     </div>
 
@@ -114,40 +114,58 @@
 
                     <h2>Transmit</h2>
 
-
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Bytes (HEX)
+                                Sample Rate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom">
-                                <textarea id="tx-byte-hex-field"></textarea>
+                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
-                            <button
-                                class="btn btn-default"
-                                onClick="onSendByteHexClick()">
-                                Send
-                            </button>
+                            <p>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </p>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Text
+                                Send...
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom">
-                                <textarea id="tx-text-field"></textarea>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onSendSyncClick()">Sync</button>
                             </div>
-                            <button
-                                class="btn btn-default"
-                                onClick="onSendTextClick()">
-                                Send
-                            </button>
+
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-hex"></textarea>
+                                </div>
+                                <button
+                                    class="btn btn-default"
+                                    onClick="onSendHexClick()">
+                                    Send bytes in HEX
+                                </button>
+                            </div>
+
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-ascii"></textarea>
+                                </div>
+                                <button
+                                    class="btn btn-default"
+                                    onClick="onSendAsciiClick()">
+                                    Send ASCII
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -158,7 +176,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-byte-hex-queue"></div>
+                            <div id="tx-hex-queue"></div>
                         </div>
                     </div>
 

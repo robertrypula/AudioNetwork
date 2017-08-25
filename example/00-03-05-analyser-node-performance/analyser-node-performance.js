@@ -17,8 +17,8 @@ var
 
 function init() {
 
-    fftSize = getInputValue('#fft-size', 'int');
-    timestep = getInputValue('#timestep', 'int');
+    fftSize = getFormFieldValue('#fft-size', 'int');
+    timestep = getFormFieldValue('#timestep', 'int');
 
     equalHistory = [];
     fftResultPrevious = null;

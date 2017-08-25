@@ -15,7 +15,7 @@ function init() {
 }
 
 function onSetTxSampleRateClick() {
-    var txSampleRate = getInputValue('#tx-sample-rate', 'int');
+    var txSampleRate = getFormFieldValue('#tx-sample-rate', 'int');
 
     physicalLayer.setTxSampleRate(txSampleRate);
     alert('Tx Sample Rate set!');
@@ -27,20 +27,20 @@ function onSendSyncClick() {
 
 function onSendByteClick() {
     var
-        byte = getInputValue('#tx-byte', 'int'),
+        byte = getFormFieldValue('#tx-byte', 'int'),
         txConfig = physicalLayer.getTxConfig(),
         symbol = txConfig.symbolMin + byte;
     physicalLayer.sendSymbol(symbol);
 }
 
-function rxSymbolListener(data) {
+function rxSymbolListener(state) {
     var rxConfig, byte;
 
     rxConfig = physicalLayer.getRxConfig();
-    byte = data.symbol !== null
-        ? data.symbol - rxConfig.symbolMin
+    byte = state.symbol !== null
+        ? state.symbol - rxConfig.symbolMin
         : null;
-    html('#rx-symbol', data.symbol !== null ? data.symbol : 'idle');
+    html('#rx-symbol', state.symbol !== null ? state.symbol : 'idle');
     html('#rx-byte', byte !== null ? byte : '---');
 }
 
