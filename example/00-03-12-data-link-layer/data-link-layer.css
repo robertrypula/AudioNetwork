@@ -6,3 +6,8 @@
 #tx-hex-queue {
     min-height: 36px;
 }
+
+#tx-frame-candidates {
+    height: 50px;
+    overflow-y: auto;
+}

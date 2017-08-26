@@ -5,6 +5,8 @@
 var DataLinkLayerBuilder = function () {
     this._framePayloadLengthMax = 7;
 
+    this._frameCandidateListener = undefined;
+
     this._rxSymbolListener = undefined;
     this._rxSampleListener = undefined;
     this._rxSyncListener = undefined;
@@ -16,6 +18,11 @@ var DataLinkLayerBuilder = function () {
 
 DataLinkLayerBuilder.prototype.framePayloadLengthMax = function (framePayloadLengthMax) {
     this._framePayloadLengthMax = framePayloadLengthMax;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.frameCandidateListener = function (frameCandidateListener) {
+    this._frameCandidateListener = frameCandidateListener;
     return this;
 };
 
@@ -75,6 +82,9 @@ DataLinkLayer = function (builder) {
 
     this.$$framePayloadLengthMax = builder._framePayloadLengthMax;
 
+    // data link listeners
+    this.$$frameCandidateListener = DataLinkLayer.$$isFunction(builder._frameCandidateListener) ? builder._frameCandidateListener : null;
+
     // setup listeners
     this.$$rxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
     this.$$rxSampleListener = DataLinkLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
@@ -97,6 +107,11 @@ DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND = 'PAYLOAD_TYPE_COMMAND';
 DataLinkLayer.$$_PAYLOAD_TYPE_DATA = 'PAYLOAD_TYPE_DATA';
 
 DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
+    var
+        rxSample = this.$$physicalLayer.getRxSample(),
+        symbolId = data.id;
+
+    this.$$handleSymbolRaw(rxSample.symbolRaw, symbolId);
     this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
 };
 
@@ -160,6 +175,15 @@ DataLinkLayer.prototype.sendFrame = function (payload) {
         symbol = symbolMin + byte;
         this.$$physicalLayer.sendSymbol(symbol);
     }
+};
+
+DataLinkLayer.prototype.$$handleSymbolRaw = function (symbolRaw, symbolId) {
+
+    /*
+    marker check
+     */
+
+    // this.$$frameCandidateListener ? this.$$frameCandidateListener(data) : undefined;
 };
 
 DataLinkLayer.$$buildFrame = function (payloadType, payload) {

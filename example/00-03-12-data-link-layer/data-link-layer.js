@@ -12,12 +12,17 @@ var
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
     dataLinkLayer = dataLinkLayerBuilder
+        .frameCandidateListener(frameCandidateListener)
         .txListener(txListener)
         .rxSampleListener(rxSampleListener)
         .configListener(configListener)
         .txConfigListener(txConfigListener)
         .rxConfigListener(rxConfigListener)
         .build();
+}
+
+function frameCandidateListener(data) {
+    console.log(data);
 }
 
 function txListener(state) {
