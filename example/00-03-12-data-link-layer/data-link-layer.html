@@ -100,13 +100,33 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Frame
+                                Raw data (hex)
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-byte-buffer" class="log-container margin-bottom"></div>
-                            <div id="rx-frame-list" class="log-container margin-bottom"></div>
-                            <div id="rx-ascii-list" class="log-container"></div>
+                            <div id="rx-raw-data">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Frame candidates
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="tx-frame-candidates"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Last valid frame
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="tx-frame"></div>
                         </div>
                     </div>
 
@@ -152,7 +172,7 @@
                                 <button
                                     class="btn btn-default"
                                     onClick="onSendHexClick()">
-                                    Send bytes in HEX
+                                    Send frame - bytes in HEX
                                 </button>
                             </div>
 
@@ -163,7 +183,7 @@
                                 <button
                                     class="btn btn-default"
                                     onClick="onSendAsciiClick()">
-                                    Send ASCII
+                                    Send frame - ASCII
                                 </button>
                             </div>
                         </div>
@@ -172,10 +192,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Queue
+                                Queue (hex)
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
+                            Now transmitting: <span id="tx-hex-current"></span>
                             <div id="tx-hex-queue"></div>
                         </div>
                     </div>

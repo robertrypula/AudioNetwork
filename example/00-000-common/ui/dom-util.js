@@ -25,6 +25,12 @@ function getFormFieldValue(selector, parseAs) {
         case 'float':
             result = parseFloat(resultRaw);
             break;
+        case 'split':
+            result = resultRaw
+                .trim()
+                .replace(/ +(?= )/g, '')
+                .split(' ');
+            break;
         default:
             result = resultRaw;
     }

@@ -4,11 +4,10 @@
 var
     ASCII_NULL = 0,
     UNICODE_UNKNOWN = '�',
+    RAW_SYMBOL_MAX = 10,
     dataLinkLayerBuilder,
     dataLinkLayer,
-    receivedPacketList = [],
-    asciiList;
-
+    rawSymbolBuffer = new Buffer(RAW_SYMBOL_MAX);
 
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
@@ -22,12 +21,30 @@ function init() {
 }
 
 function txListener(state) {
-    // console.log(state);
+    var
+        txConfig = dataLinkLayer.getPhysicalLayer().getTxConfig(),
+        symbolMin = txConfig.symbolMin,
+        txCurrent = state.symbol
+            ? getHexFromSymbol(state.symbol, symbolMin)
+            : 'idle',
+        txQueue = getHexFromList(state.symbolQueue, symbolMin);
+
+    html('#tx-hex-current', txCurrent);
+    html('#tx-hex-queue', txQueue);
 }
 
 function rxSampleListener(state) {
+    var
+        rxConfig = dataLinkLayer.getPhysicalLayer().getRxConfig(),
+        symbolMin = rxConfig.symbolMin;
+
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+
+    if (state.isSymbolSamplingPoint) {
+        rawSymbolBuffer.pushEvenIfFull(state.symbolRaw);
+        html('#rx-raw-data', getHexFromList(rawSymbolBuffer.getAll(), symbolMin));
+    }
 }
 
 function configListener(state) {
@@ -61,9 +78,7 @@ function onSendSyncClick() {
 
 function onSendHexClick() {
     var
-        text = getFormFieldValue('#tx-hex'),
-        textCleaned = text.trim().replace(/ +(?= )/g, ''),
-        textSplit = textCleaned.split(' '),
+        textSplit = getFormFieldValue('#tx-hex', 'split'),
         payload = [],
         byte,
         i;
@@ -79,7 +94,7 @@ function onSendHexClick() {
 
 function onSendAsciiClick() {
     var
-        text = document.getElementById('tx-ascii').value,
+        text = getFormFieldValue('#tx-ascii'),
         payload = [],
         byte,
         i;
@@ -107,44 +122,30 @@ function isPrintableAscii(char) {
     return char >= ' ' && char <= '~';
 }
 
+function getHexFromSymbol(symbol, symbolMin) {
+    var
+        byte = symbol - symbolMin,
+        byteHex = byte.toString(16);
 
-// ----------------------------------------------------------
-
-/*
-
-function updateView(state) {
-    var plState = state.physicalLayerState;
-
-    if (plState.isConnectionInProgress) {
-        html('#rx-connect-status', 'connecting...');
-    } else {
-        html('#rx-connect-status', plState.isConnected ? 'Connected!' : 'not connected');
+    if (byte > 255) {
+        // two symbols at the end of the range are 'sync' symbols
+        return '[' + pad(byteHex, 3) + ' sync]';
     }
 
-    html('#rx-byte-buffer', getStringFromByteList(state.byteBuffer));
-    html('#rx-frame-list', receivedPacketList.join('<br/>'));
-    html('#rx-ascii-list', asciiList.getAll().join(''));
+    return pad(byteHex, 2)
 }
 
-function stateHandler(state) {
-    var i, j, str, char, charCode;
+function getHexFromList(symbolList, symbolMin) {
+    var i, symbol, result = [];
 
-    if (state.isFrameReadyToTake) {
-        for (i = 0; i < state.validFrameList.length; i++) {
-            str = getStringFromByteList(state.validFrameList[i].data);
-
-            for (j = 0; j < state.validFrameList[i].data.length; j++) {
-                charCode = state.validFrameList[i].data[j];
-                char = String.fromCharCode(charCode);
-                asciiList.pushEvenIfFull(
-                    isPrintableAscii(char) ? char : UNICODE_UNKNOWN
-                );
-            }
-            receivedPacketList.unshift(str);
-        }
+    for (i = 0; i < symbolList.length; i++) {
+        symbol = symbolList[i];
+        result.push(
+            getHexFromSymbol(symbol, symbolMin)
+        );
     }
 
-    updateView(state);
+    return result.join(' ');
 }
 
 function pad(num, size) {
@@ -152,15 +153,3 @@ function pad(num, size) {
 
     return s.substr(s.length - size);
 }
-
-function getStringFromByteList(byteList) {
-    var i, tmp, formatted = [];
-
-    for (i = 0; i < byteList.length; i++) {
-        tmp = pad(byteList[i].toString(16), 2);
-        formatted.push(tmp);
-    }
-
-    return formatted.join(' ');
-}
-*/
