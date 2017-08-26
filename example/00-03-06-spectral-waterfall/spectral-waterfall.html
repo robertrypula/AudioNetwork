@@ -116,41 +116,22 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
+                                Sample&nbsp;rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="rx-sample-rate">-</span> kHz
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
                                 DSP details
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="rx-dsp-detail" class="log-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label for="rx-active" class="label-for-checkbox">
-                                Active
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                id="rx-active"
-                                checked="checked"
-                                value="1" />
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label for="loudest-marker" class="label-for-checkbox">
-                                Show loudest
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                id="loudest-marker"
-                                checked="checked"
-                                value="1" />
                         </div>
                     </div>
 
@@ -190,9 +171,56 @@
                         </div>
                     </div>
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="rx-active" class="label-for-checkbox">
+                                Spectrogram
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="rx-active"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="loudest-marker" class="label-for-checkbox">
+                                Show loudest
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="loudest-marker"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
                     <!-- ----- -->
 
                     <h2>Transmitter</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
+                            <p>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </p>
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
@@ -221,23 +249,6 @@
                                 id="tx-play"
                                 onChange="onTxPlayChange()"
                             />
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
-                            <p>
-                                This value should match sample rate that is displayed on the receiver's side.
-                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </p>
                         </div>
                     </div>
 

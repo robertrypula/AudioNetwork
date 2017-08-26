@@ -168,9 +168,10 @@ function updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex) {
     fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
     fltSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
+    html('#rx-sample-rate', (audioMonoIO.getSampleRate() / 1000).toFixed(1));
+
     html(
         '#rx-dsp-detail',
-        'Sample rate: ' + (audioMonoIO.getSampleRate() / 1000).toFixed(1) + ' kHz<br/>' +
         'FFT size: ' + getFftSize() + '<br/>' +
         'FFT time: ' + (getFftSize() / audioMonoIO.getSampleRate()).toFixed(3) + ' sec<br/>' +
         'FFT native resolution: ' + fftNominalResolution.toFixed(2) + ' Hz<br/>' +
