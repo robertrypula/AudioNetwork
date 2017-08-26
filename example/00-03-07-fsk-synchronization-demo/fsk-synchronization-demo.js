@@ -2,22 +2,20 @@
 'use strict';
 
 var
-    BUFFER_SIZE = 16,
+    RX_SYMBOL_HISTORY = 16,
     DIGIT_ZERO_SYMBOL = 100,
-    INITIAL_AMPLITUDE = 0.2,
     SYMBOL_ZERO_PADDING = 3,
     powerBar,
     physicalLayerBuilder,
     physicalLayer,
     rxSpectrogram,
-    rxSymbolList,
+    rxSymbolHistory,
     txSampleRateWidget;
 
 function init() {
     powerBar = new PowerBar(document.getElementById('power-bar'));
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
-        .amplitude(INITIAL_AMPLITUDE)
         .symbolMin44100(100)
         .symbolMin48000(100)
         .symbolMinDefault(100)
@@ -31,7 +29,7 @@ function init() {
         .txListener(txListener)
         .build();
 
-    rxSymbolList = new Buffer(BUFFER_SIZE);
+    rxSymbolHistory = new Buffer(RX_SYMBOL_HISTORY);
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
         document.getElementById('tx-sample-rate'),
@@ -48,14 +46,6 @@ function init() {
             }
         },
         true
-    );
-
-    onLoopbackCheckboxChange();
-}
-
-function onLoopbackCheckboxChange() {
-    physicalLayer.setLoopback(
-        document.getElementById('loopback-checkbox').checked
     );
 }
 
@@ -80,14 +70,18 @@ function configListener(state) {
         'UnitTime: ' + state.unitTime + ' s<br/>' +
         'CorrelationCodeLength: ' + state.correlationCodeLength
     );
+    setActive(
+        '#loopback-container',
+        '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
+    );
 }
 
 function rxConfigListener(state) {
     var config = physicalLayer.getConfig();
 
+    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html(
         '#rx-config',
-        '<strong>SampleRate: ' + (state.sampleRate / 1000).toFixed(1) + '&nbsp;kHz</strong><br/>' +
         formatSymbolRange(state) + '<br/>' +
         'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
         'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
@@ -108,29 +102,26 @@ function txConfigListener(state) {
 }
 
 function rxSymbolListener(state) {
-    rxSymbolList.pushEvenIfFull(state.symbol ? state.symbol : '---');
-    html('#rx-symbol', 'Symbol: ' + (state.symbol ? state.symbol : 'idle'));
-    html(
-        '#rx-symbol-list',
-        'Symbol list: ' + getStringFromSymbolList(rxSymbolList.getAll())
-    );
+    rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
+    html('#rx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
 }
 
 function rxSampleListener(state) {
     var
         rxConfig = physicalLayer.getRxConfig(),
-        rxSymbol = physicalLayer.getRxSymbol(),
-        s;
+        rxSymbol = physicalLayer.getRxSymbol();
 
-    s = state.isSyncInProgress
-        ? 'Sync in progress...'
-        : (state.syncId ? 'Synchronized!' : 'Not synchronized yet');
+    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
+    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 
-    html('#rx-sync-simple', s);
     html(
         '#rx-sample',
-        'SymbolRaw: ' + state.symbolRaw + ' (' + state.signalDecibel.toFixed(1) + ' dB)<br/>' +
-        state.offset + '/' + state.sampleNumber + ', ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SampleNumber: ' + state.sampleNumber + '<br/>' +
+        'Offset: ' + state.offset + '<br/>' +
+        'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
+        'SymbolRaw: ' + state.symbolRaw + '<br/>' +
+        'SignalFrequency: ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     if (document.getElementById('spectrogram-active').checked) {
@@ -168,14 +159,15 @@ function rxSyncListener(state) {
 }
 
 function txListener(state) {
-    html(
-        '#tx-symbol-queue',
-        'Now transmitting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
-        getStringFromSymbolList(state.symbolQueue)
-    );
+    html('#tx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
 }
 
 // ----------------------------------
+
+function onLoopbackClick(state) {
+    physicalLayer.setLoopback(state);
+}
 
 function onTxSampleRateWidgetChange() {
     physicalLayer.setTxSampleRate(txSampleRateWidget.getValue());
@@ -210,11 +202,11 @@ function pad(num, size) {
     return s.substr(s.length - size);
 }
 
-function getStringFromSymbolList(symbolList) {
+function getStringFromSymbolArray(symbolArray) {
     var i, tmp, formatted = [];
 
-    for (i = 0; i < symbolList.length; i++) {
-        tmp = pad(symbolList[i], SYMBOL_ZERO_PADDING);
+    for (i = 0; i < symbolArray.length; i++) {
+        tmp = pad(symbolArray[i], SYMBOL_ZERO_PADDING);
         formatted.push(tmp);
     }
 
