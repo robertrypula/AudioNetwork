@@ -5,6 +5,7 @@
 var DataLinkLayerBuilder = function () {
     this._framePayloadLengthMax = 7;
 
+    this._frameListener = undefined;
     this._frameCandidateListener = undefined;
 
     this._rxSymbolListener = undefined;
@@ -18,6 +19,11 @@ var DataLinkLayerBuilder = function () {
 
 DataLinkLayerBuilder.prototype.framePayloadLengthMax = function (framePayloadLengthMax) {
     this._framePayloadLengthMax = framePayloadLengthMax;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.frameListener = function (frameListener) {
+    this._frameListener = frameListener;
     return this;
 };
 
@@ -70,6 +76,8 @@ DataLinkLayerBuilder.prototype.build = function () {
 var DataLinkLayer;
 
 DataLinkLayer = function (builder) {
+    // let's create network stack!
+    // Data Link Layer hides Physical Layer inside
     this.$$physicalLayer = (new PhysicalLayerBuilder())
         .rxSymbolListener(this.$$rxSymbolListener.bind(this))
         .rxSampleListener(this.$$rxSampleListener.bind(this))
@@ -80,12 +88,19 @@ DataLinkLayer = function (builder) {
         .txConfigListener(this.$$txConfigListener.bind(this))
         .build();
 
+    // general config
     this.$$framePayloadLengthMax = builder._framePayloadLengthMax;
 
-    // data link listeners
+    // state variables
+    this.$$frame = undefined;
+    this.$$frameLastId = undefined;
+    this.$$frameCandidateList = [];
+
+    // setup listeners - data link layer
+    this.$$frameListener = DataLinkLayer.$$isFunction(builder._frameListener) ? builder._frameListener : null;
     this.$$frameCandidateListener = DataLinkLayer.$$isFunction(builder._frameCandidateListener) ? builder._frameCandidateListener : null;
 
-    // setup listeners
+    // setup listeners - physical layer
     this.$$rxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
     this.$$rxSampleListener = DataLinkLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
     this.$$rxSyncListener = DataLinkLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
@@ -105,39 +120,6 @@ DataLinkLayer.$$_HEADER_PAYLOAD_BYTE_MASK = 0xFF;
 
 DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND = 'PAYLOAD_TYPE_COMMAND';
 DataLinkLayer.$$_PAYLOAD_TYPE_DATA = 'PAYLOAD_TYPE_DATA';
-
-DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
-    var
-        rxSample = this.$$physicalLayer.getRxSample(),
-        symbolId = data.id;
-
-    this.$$handleSymbolRaw(rxSample.symbolRaw, symbolId);
-    this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$rxSampleListener = function (data) {
-    this.$$rxSampleListener ? this.$$rxSampleListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$rxSyncListener = function (data) {
-    this.$$rxSyncListener ? this.$$rxSyncListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$rxConfigListener = function (data) {
-    this.$$rxConfigListener ? this.$$rxConfigListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$configListener = function (data) {
-    this.$$configListener ? this.$$configListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$txListener = function (data) {
-    this.$$txListener ? this.$$txListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$txConfigListener = function (data) {
-    this.$$txConfigListener ? this.$$txConfigListener(data) : undefined;
-};
 
 DataLinkLayer.prototype.getPhysicalLayer = function () {
     return this.$$physicalLayer;
@@ -177,14 +159,105 @@ DataLinkLayer.prototype.sendFrame = function (payload) {
     }
 };
 
-DataLinkLayer.prototype.$$handleSymbolRaw = function (symbolRaw, symbolId) {
-
-    /*
-    marker check
-     */
-
-    // this.$$frameCandidateListener ? this.$$frameCandidateListener(data) : undefined;
+DataLinkLayer.prototype.getFrame = function () {
+    // TODO implement
+    return {
+        id: 0,
+        header: 0xF5,
+        payload: [0x61, 0x62, 0x63, 0x54, 0x34],
+        checksum: 0x23,
+        isCommand: false,
+        frameCandidateId: 3
+    };
 };
+
+DataLinkLayer.prototype.getFrameCandidate = function () {
+    // TODO implement
+    var tmp = {
+        id: 4,
+        received: [32, 32],
+        expected: 8,
+        isValid: false,
+        symbolId: [3, 4]
+    };
+
+    return [tmp, tmp];
+};
+
+// -----------------------------------------------------
+
+DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
+    var
+        rxSample = this.$$physicalLayer.getRxSample(),
+        symbolId = data.id;
+
+    this.$$handleSymbolRaw(rxSample.symbolRaw, symbolId);
+    this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$handleSymbolRaw = function (symbolRaw, symbolId) {
+    var isNewFrameAvailable = false;
+
+    this.$$cleanUpFrameCandidateList();
+    this.$$addSymbolRawToFrameCandidateList(symbolRaw, symbolId);
+    this.$$tryToCreateNewFrameCandidate(symbolRaw, symbolId);
+    this.$$tryToFindNewFrame();
+
+    if (this.$$frame && this.$$frame.id !== this.$$frameLastId) {
+        this.$$frameLastId = this.$$frame.id;
+        isNewFrameAvailable = true;
+    }
+
+    // call listeners
+    this.$$frameCandidateListener ? this.$$frameCandidateListener(this.getFrameCandidate()) : undefined;
+    if (true || isNewFrameAvailable) {
+        this.$$frameListener ? this.$$frameListener(this.getFrame()) : undefined;
+    }
+};
+
+DataLinkLayer.prototype.$$cleanUpFrameCandidateList = function () {
+    // TODO implement
+};
+
+DataLinkLayer.prototype.$$addSymbolRawToFrameCandidateList = function (symbolRaw, symbolId) {
+    // TODO implement
+};
+
+DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (symbolRaw, symbolId) {
+    // TODO implement
+};
+
+DataLinkLayer.prototype.$$tryToFindNewFrame = function () {
+    // TODO implement
+};
+
+// -----------------------------------------------------
+
+DataLinkLayer.prototype.$$rxSampleListener = function (data) {
+    this.$$rxSampleListener ? this.$$rxSampleListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$rxSyncListener = function (data) {
+    this.$$rxSyncListener ? this.$$rxSyncListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$rxConfigListener = function (data) {
+    this.$$rxConfigListener ? this.$$rxConfigListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$configListener = function (data) {
+    this.$$configListener ? this.$$configListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$txListener = function (data) {
+    this.$$txListener ? this.$$txListener(data) : undefined;
+};
+
+DataLinkLayer.prototype.$$txConfigListener = function (data) {
+    this.$$txConfigListener ? this.$$txConfigListener(data) : undefined;
+};
+
+// -----------------------------------------------------
 
 DataLinkLayer.$$buildFrame = function (payloadType, payload) {
     var frame, isCommand, header, checksum, i, byte;
@@ -218,15 +291,18 @@ DataLinkLayer.$$getHeader = function (isCommand, payloadLength) {
 };
 
 DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
-    var sum1, sum2, i, value;
+    var sum1, sum2, i, isLeftHalfOfByte, byteNumber, byte, halfOfByte;
 
     sum1 = 0;
     sum2 = 0;
     for (i = 0; i < 2 * frameWithoutChecksum.length; i++) {
-        value = i % 2 === 0
-            ? (frameWithoutChecksum[i >>> 1] >>> 4) & 0xF
-            : frameWithoutChecksum[i >>> 1] & 0xF;
-        sum1 = (sum1 + value) % 15;
+        isLeftHalfOfByte = i % 2 === 0;
+        byteNumber = i >>> 1;
+        byte = frameWithoutChecksum[byteNumber];
+        halfOfByte = isLeftHalfOfByte
+            ? ((byte & 0xF0) >>> 4)
+            : byte & 0x0F;
+        sum1 = (sum1 + halfOfByte) % 15;
         sum2 = (sum2 + sum1) % 15;
     }
 

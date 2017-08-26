@@ -76,28 +76,25 @@ function rxSymbolListener(state) {
         isPrintableAscii(char) ? char : UNICODE_UNKNOWN
     );
 
-    html('#rx-symbol', 'Symbol: ' + (state.symbol ? state.symbol : 'idle'));
-    html(
-        '#rx-symbol-list',
-        'Symbol list: ' + getStringFromSymbolList(rxSymbolList.getAll()) + '<br/>' +
-        'ASCII: ' + rxAsciiList.getAll().join('')
-    );
+    html('#rx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#rx-symbol-list', getStringFromSymbolList(rxSymbolList.getAll()));
+    html('#rx-symbol-as-ascii', rxAsciiList.getAll().join(''));
 }
 
 function rxSampleListener(state) {
-    var
-        rxConfig = physicalLayer.getRxConfig(),
-        s;
+    var rxConfig = physicalLayer.getRxConfig();
 
-    s = state.isSyncInProgress
-        ? 'Sync in progress...'
-        : (state.syncId ? 'Synchronized!' : 'Not synchronized yet');
+    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
+    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 
-    html('#rx-sync-simple', s);
     html(
         '#rx-sample',
-        'SymbolRaw: ' + state.symbolRaw + ' (' + state.signalDecibel.toFixed(1) + ' dB)<br/>' +
-        state.offset + '/' + state.sampleNumber + ', ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SampleNumber: ' + state.sampleNumber + '<br/>' +
+        'Offset: ' + state.offset + '<br/>' +
+        'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
+        'SymbolRaw: ' + state.symbolRaw + '<br/>' +
+        'SignalDecibel: ' + state.signalDecibel.toFixed(1) + ' dB<br/>' +
+        'SignalFrequency: ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     powerBar.setSignalDecibel(state.signalDecibel);
@@ -110,11 +107,8 @@ function rxSyncListener(state) {
 }
 
 function txListener(state) {
-    html(
-        '#tx-symbol-queue',
-        'Now transmitting: ' + (state.symbol ? state.symbol : 'idle') + '<br/>' +
-        getStringFromSymbolList(state.symbolQueue)
-    );
+    html('#tx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#tx-symbol-queue', getStringFromSymbolList(state.symbolQueue));
 }
 function configListener(state) {
     setActive(

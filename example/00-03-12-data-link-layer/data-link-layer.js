@@ -12,6 +12,7 @@ var
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
     dataLinkLayer = dataLinkLayerBuilder
+        .frameListener(frameListener)
         .frameCandidateListener(frameCandidateListener)
         .txListener(txListener)
         .rxSampleListener(rxSampleListener)
@@ -19,10 +20,56 @@ function init() {
         .txConfigListener(txConfigListener)
         .rxConfigListener(rxConfigListener)
         .build();
+
+    dataLinkLayer.setLoopback(true);
 }
 
-function frameCandidateListener(data) {
-    console.log(data);
+function frameListener(frame) {
+    /*
+        {
+            id: 0,
+            header: 0xF5,
+            payload: [0x32, 0x32, 0x32, 0x32, 0x32],
+            checksum: 0x23,
+            isCommand: false,
+            frameCandidateId: 3
+        }
+    */
+    html('#rx-frame-id', frame.id);
+    html('#rx-frame-header', getHexFromByte(frame.header));
+    html('#rx-frame-payload', getHexFromByteList(frame.payload));
+    html('#rx-frame-checksum', getHexFromByte(frame.checksum));
+    html('#rx-frame-is-command', frame.isCommand ? 'yes' : 'no');
+    html('#rx-frame-candidate-id', frame.frameCandidateId);
+
+    html('#rx-frame-payload-as-ascii', getAsciiFromByteList(frame.payload));
+}
+
+function frameCandidateListener(frameCandidateList) {
+    var i, fc, progress, htmlContent = '';
+    /*
+        {
+            id: 4,
+            received: [32, 32],
+            expected: 8,
+            isValid: false,
+            symbolId: []
+        }
+    */
+    for (i = 0; i < frameCandidateList.length; i++) {
+        fc = frameCandidateList[i];
+        progress = fc.received.length + '/' + fc.expected + ' ' +
+            '(' + (100 * fc.received.length / fc.expected).toFixed(0) + '%)';
+        htmlContent += '<div class="rx-box-with-border">';
+        htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
+        htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
+        htmlContent += '<strong>Received:</strong> ' + getHexFromByteList(fc.received) + '<br/>';
+        htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
+        htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
+        htmlContent += '</div>';
+    }
+
+    html('#rx-frame-candidate', htmlContent);
 }
 
 function txListener(state) {
@@ -32,7 +79,7 @@ function txListener(state) {
         txCurrent = state.symbol
             ? getHexFromSymbol(state.symbol, symbolMin)
             : 'idle',
-        txQueue = getHexFromList(state.symbolQueue, symbolMin);
+        txQueue = getHexFromSymbolList(state.symbolQueue, symbolMin);
 
     html('#tx-hex-current', txCurrent);
     html('#tx-hex-queue', txQueue);
@@ -48,7 +95,7 @@ function rxSampleListener(state) {
 
     if (state.isSymbolSamplingPoint) {
         rawSymbolBuffer.pushEvenIfFull(state.symbolRaw);
-        html('#rx-raw-data', getHexFromList(rawSymbolBuffer.getAll(), symbolMin));
+        html('#rx-raw-data', getHexFromSymbolList(rawSymbolBuffer.getAll(), symbolMin));
     }
 }
 
@@ -127,6 +174,25 @@ function isPrintableAscii(char) {
     return char >= ' ' && char <= '~';
 }
 
+function getHexFromByte(byte) {
+    var byteHex = byte.toString(16);
+
+    return pad(byteHex, 2)
+}
+
+function getHexFromByteList(byteList) {
+    var i, byte, result = [];
+
+    for (i = 0; i < byteList.length; i++) {
+        byte = byteList[i];
+        result.push(
+            getHexFromByte(byte)
+        );
+    }
+
+    return result.join(' ');
+}
+
 function getHexFromSymbol(symbol, symbolMin) {
     var
         byte = symbol - symbolMin,
@@ -140,7 +206,7 @@ function getHexFromSymbol(symbol, symbolMin) {
     return pad(byteHex, 2)
 }
 
-function getHexFromList(symbolList, symbolMin) {
+function getHexFromSymbolList(symbolList, symbolMin) {
     var i, symbol, result = [];
 
     for (i = 0; i < symbolList.length; i++) {
@@ -157,4 +223,15 @@ function pad(num, size) {
     var s = '000000000' + num;
 
     return s.substr(s.length - size);
+}
+
+function getAsciiFromByteList(byteList) {
+    var i, char, result = '';
+
+    for (i = 0; i < byteList.length; i++) {
+        char = String.fromCharCode(byteList[i]);
+        result += isPrintableAscii(char) ? char : UNICODE_UNKNOWN;
+    }
+
+    return result;
 }

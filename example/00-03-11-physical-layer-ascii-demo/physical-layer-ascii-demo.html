@@ -88,6 +88,18 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
+                                Status
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="sync"></span>
+                            <span id="sync-in-progress"></span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
                                 Rx Config
                             </label>
                         </div>
@@ -99,12 +111,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Real-time status
+                                Sample
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="margin-bottom">
-                                <div id="rx-sync-simple" class="log-container"></div>
                                 <div id="rx-sample" class="log-container"></div>
                             </div>
                             <div id="power-bar" class="clearfix"></div>
@@ -114,12 +125,23 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Data
+                                Symbol
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol" class="margin-bottom">-</div>
+                            <div id="rx-symbol" class="margin-bottom log-container">-</div>
                             <div id="rx-symbol-list" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Symbol as ASCII
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-symbol-as-ascii" class="log-container"></div>
                         </div>
                     </div>
 
@@ -188,8 +210,9 @@
                                 Queue
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-symbol-queue" class="log-container"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
+                            <strong>Now transmitting:</strong> <span id="tx-symbol"></span>
+                            <div id="tx-symbol-queue"></div>
                         </div>
                     </div>
 

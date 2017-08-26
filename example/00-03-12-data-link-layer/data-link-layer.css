@@ -7,7 +7,19 @@
     min-height: 36px;
 }
 
-#tx-frame-candidates {
-    height: 50px;
-    overflow-y: auto;
+#rx-frame-candidate-container {
+    min-height: 100px;
+}
+
+.rx-box-with-border {
+    border: 1px solid #ddd;
+    background-color: #eee;
+    margin-left: -5px;
+    margin-right: -5px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+#rx-frame-payload-as-ascii {
+    font-size: 16px;
 }

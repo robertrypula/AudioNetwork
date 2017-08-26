@@ -104,7 +104,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-raw-data">-</div>
+                            <div id="rx-raw-data" class="log-container">-</div>
                         </div>
                     </div>
 
@@ -115,18 +115,38 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-frame-candidates"></div>
+                            <div id="rx-frame-candidate-container" class="log-container">
+                                <div id="rx-frame-candidate" class="clearfix"></div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Last valid frame
+                                Last frame
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
+                            <div class="rx-box-with-border">
+                                <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
+                                <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
+                                <strong>Payload:</strong> <span id="rx-frame-payload">-</span><br/>
+                                <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
+                                <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
+                                <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Last frame (payload as ASCII)
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-frame"></div>
+                            <span id="rx-frame-payload-as-ascii" class="log-container">-</span>
                         </div>
                     </div>
 
@@ -195,8 +215,8 @@
                                 Queue (hex)
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            Now transmitting: <span id="tx-hex-current"></span>
+                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
+                            <strong>Now transmitting:</strong> <span id="tx-hex-current"></span>
                             <div id="tx-hex-queue"></div>
                         </div>
                     </div>
