@@ -2,7 +2,7 @@
 'use strict';
 
 var
-    BUFFER_SIZE = 16,
+    RX_HISTORY_SIZE = 16,
     ASCII_NULL = 0x00,
     SYMBOL_ZERO_PADDING = 3,
     INITIAL_AMPLITUDE = 0.2,
@@ -10,8 +10,8 @@ var
     powerBar,
     physicalLayerBuilder,
     physicalLayer,
-    rxSymbolList,
-    rxAsciiList;
+    rxSymbolHistory,
+    rxAsciiHistory;
 
 function init() {
     powerBar = new PowerBar(document.getElementById('power-bar'));
@@ -26,8 +26,8 @@ function init() {
         .txListener(txListener)
         .configListener(configListener)
         .build();
-    rxSymbolList = new Buffer(BUFFER_SIZE);
-    rxAsciiList = new Buffer(BUFFER_SIZE);
+    rxSymbolHistory = new Buffer(RX_HISTORY_SIZE);
+    rxAsciiHistory = new Buffer(RX_HISTORY_SIZE);
 }
 
 function formatSymbolRange(state) {
@@ -69,16 +69,16 @@ function rxSymbolListener(state) {
         charCode,
         char;
 
-    rxSymbolList.pushEvenIfFull(state.symbol ? state.symbol : '---');
+    rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
     charCode = state.symbol - rxConfig.symbolMin;
     char = String.fromCharCode(charCode);
-    rxAsciiList.pushEvenIfFull(
+    rxAsciiHistory.pushEvenIfFull(
         isPrintableAscii(char) ? char : UNICODE_UNKNOWN
     );
 
     html('#rx-symbol', state.symbol ? state.symbol : 'idle');
-    html('#rx-symbol-list', getStringFromSymbolList(rxSymbolList.getAll()));
-    html('#rx-symbol-as-ascii', rxAsciiList.getAll().join(''));
+    html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
+    html('#rx-ascii-history', rxAsciiHistory.getAll().join(''));
 }
 
 function rxSampleListener(state) {
@@ -93,7 +93,6 @@ function rxSampleListener(state) {
         'Offset: ' + state.offset + '<br/>' +
         'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
         'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalDecibel: ' + state.signalDecibel.toFixed(1) + ' dB<br/>' +
         'SignalFrequency: ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
@@ -108,7 +107,7 @@ function rxSyncListener(state) {
 
 function txListener(state) {
     html('#tx-symbol', state.symbol ? state.symbol : 'idle');
-    html('#tx-symbol-queue', getStringFromSymbolList(state.symbolQueue));
+    html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
 }
 function configListener(state) {
     setActive(
@@ -175,11 +174,11 @@ function pad(num, size) {
     return s.substr(s.length - size);
 }
 
-function getStringFromSymbolList(symbolList) {
+function getStringFromSymbolArray(symbolArray) {
     var i, tmp, formatted = [];
 
-    for (i = 0; i < symbolList.length; i++) {
-        tmp = pad(symbolList[i], SYMBOL_ZERO_PADDING);
+    for (i = 0; i < symbolArray.length; i++) {
+        tmp = pad(symbolArray[i], SYMBOL_ZERO_PADDING);
         formatted.push(tmp);
     }
 

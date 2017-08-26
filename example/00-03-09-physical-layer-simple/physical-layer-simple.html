@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="margin-bottom">
-                        <strong>Loopback: <span id="loopback">?</span></strong>
+                        <strong>Loopback:</strong> <span id="loopback">-</span>
                     </div>
 
                     <div class="margin-bottom">
@@ -77,31 +77,31 @@
 
                     <div class="row">
                         <div class="col col-sm-6">
-                            <h2>Receive</h2>
+                            <h2>Receiver</h2>
                             <div class="margin-bottom">
-                                <strong>SampleRate: <span id="rx-sample-rate"></span> kHz</strong>
+                                <strong>SampleRate:</strong> <span id="rx-sample-rate">-</span> kHz
                             </div>
                             <div class="margin-bottom">
-                                <strong>Status: <span id="sync"></span> <span id="sync-in-progress"></span></strong>
+                                <strong>Status:</strong> <span id="sync"></span> <span id="sync-in-progress">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <strong>Symbol: <span id="rx-symbol"></span></strong>
+                                <strong>Symbol:</strong> <span id="rx-symbol">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <strong>Byte: <span id="rx-byte"></span></strong>
+                                <strong>Byte:</strong> <span id="rx-byte">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <strong id="received-byte-history">&nbsp;</strong>
+                                <span id="rx-byte-history">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <div id="received-byte-container"></div>
+                                <div id="rx-byte-container"></div>
                             </div>
                         </div>
 
                         <div class="col col-sm-6">
-                            <h2>Transmit</h2>
+                            <h2>Transmitter</h2>
                             <div class="margin-bottom">
-                                <strong>Receiver's SampleRate: <span id="tx-sample-rate">?</span> kHz</strong>
+                                <strong>Receiver's SampleRate:</strong> <span id="tx-sample-rate">-</span> kHz
                             </div>
                             <div class="margin-bottom">
                                 <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(44100)">Set 44.1 kHz</button>
@@ -111,7 +111,7 @@
                                 <button class="btn btn-default" type="button" onClick="onSendSyncClick()">Send sync</button>
                             </div>
                             <div class="margin-bottom">
-                                <div id="send-byte-button-container"></div>
+                                <div id="tx-byte-container"></div>
                             </div>
                         </div>
                     </div>

@@ -11,7 +11,7 @@ var PhysicalLayerBuilder = function () {
     this._symbolMinDefault = 1;
     this._symbolRange = 256 + 2;    // 256 for data, 2 for sync code
     this._txSampleRate = 44100;
-    this._amplitude = 0.1;
+    this._amplitude = 0.2;
     this._syncCode = [1, -1, 1, -1, 1, -1];
     this._signalDecibelThresholdFactor = 0.6;
 
@@ -233,7 +233,7 @@ PhysicalLayer.prototype.setAmplitude = function (amplitude) {
     this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
 };
 
-PhysicalLayer.prototype.clearQueue = function () {
+PhysicalLayer.prototype.clearSymbolQueue = function () {
     this.$$txSymbolQueue.length = 0;
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };

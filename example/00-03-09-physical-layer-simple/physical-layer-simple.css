@@ -2,12 +2,12 @@
     white-space: nowrap;
 }
 
-#send-byte-button-container, #received-byte-container {
+#tx-byte-container, #rx-byte-container {
     width: 256px;
     height: 238px;
 }
 
-#send-byte-button-container a, #received-byte-container span {
+#tx-byte-container a, #rx-byte-container span {
     box-sizing: border-box;
     display: block;
     float: left;
@@ -24,20 +24,20 @@
     font-family: "Tahoma", sans-serif;
 }
 
-#send-byte-button-container a {
+#tx-byte-container a {
     text-decoration: none;
     cursor: pointer;
 }
 
-#send-byte-button-container a:hover {
+#tx-byte-container a:hover {
     background-color: #222;
     color: white;
 }
 
-#received-byte-container span {
+#rx-byte-container span {
     cursor: default;
 }
 
-#received-byte-container span.active {
+#rx-byte-container span.active {
     background-color: lightgreen;
 }

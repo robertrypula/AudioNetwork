@@ -133,6 +133,10 @@ DataLinkLayer.prototype.setTxSampleRate = function (txSampleRate) {
     return this.$$physicalLayer.setTxSampleRate(txSampleRate);  // alias for easier access
 };
 
+DataLinkLayer.prototype.setAmplitude = function (amplitude) {
+    return this.$$physicalLayer.setAmplitude(amplitude);  // alias for easier access
+};
+
 DataLinkLayer.prototype.sendSync = function () {
     return this.$$physicalLayer.sendSync();  // alias for easier access
 };

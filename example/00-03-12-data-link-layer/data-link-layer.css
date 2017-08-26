@@ -3,10 +3,6 @@
     font-size: 12px;
 }
 
-#tx-hex-queue {
-    min-height: 36px;
-}
-
 #rx-frame-candidate-container {
     min-height: 100px;
 }

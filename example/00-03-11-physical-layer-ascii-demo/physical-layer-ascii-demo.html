@@ -72,7 +72,7 @@
                         </div>
                     </div>
 
-                    <h2>Receive</h2>
+                    <h2>Receiver</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
@@ -129,25 +129,35 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol" class="margin-bottom log-container">-</div>
-                            <div id="rx-symbol-list" class="log-container"></div>
+                            <div id="rx-symbol">-</div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Symbol as ASCII
+                                Symbol history
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol-as-ascii" class="log-container"></div>
+                            <div id="rx-symbol-history">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                ASCII history
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-ascii-history">-</div>
                         </div>
                     </div>
 
                     <!-- ----- -->
 
-                    <h2>Transmit</h2>
+                    <h2>Transmitter</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
@@ -162,7 +172,7 @@
                             </div>
                             <p>
                                 This value should match sample rate that is displayed on the receiver's side.
-                                The problem is that we cannot fine-tune receiver because in WebAudio API sample
+                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
                                 rate is fixed and depends on device. The solution is to tune the transmitter
                                 to match frequency bins that receiver is looking for.
                             </p>
@@ -207,12 +217,22 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Queue
+                                Symbol
                             </label>
                         </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
-                            <strong>Now transmitting:</strong> <span id="tx-symbol"></span>
-                            <div id="tx-symbol-queue"></div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-symbol">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Symbol Queue
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-symbol-queue">-</span>
                         </div>
                     </div>
 

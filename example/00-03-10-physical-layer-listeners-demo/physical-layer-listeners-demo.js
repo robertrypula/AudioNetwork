@@ -2,10 +2,10 @@
 'use strict';
 
 var
-    BYTE_HISTORY_MAX = 8,
-    receivedByteContainerRendered = false,
+    RX_HISTORY_SIZE = 8,
+    rxByteContainerRendered = false,
     physicalLayerBuilder,
-    receivedBytes = [],
+    rxByteHistory = new Buffer(RX_HISTORY_SIZE),
     physicalLayer;
 
 function init() {
@@ -31,15 +31,12 @@ function rxSymbolListener(state) {
         ? state.symbol - rxConfig.symbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
-    receivedBytes.push(byteText);
-    if (receivedBytes.length > BYTE_HISTORY_MAX) {
-        receivedBytes.shift();
-    }
+    rxByteHistory.pushEvenIfFull(byteText);
 
-    html('#received-byte-history', receivedBytes.join(' '));
+    html('#rx-byte-history', rxByteHistory.getAll().join(' '));
     html('#rx-symbol', state.symbol ? state.symbol : 'idle');
     html('#rx-byte', byteText);
-    setActive('#received-byte-container', '#rx-symbol-' + (state.symbol ? state.symbol : ''));
+    setActive('#rx-byte-container', '#rx-symbol-' + (state.symbol ? state.symbol : ''));
     log('log-rx-symbol', state);
 }
 
@@ -57,7 +54,7 @@ function rxSyncListener(state) {
 function rxConfigListener(state) {
     var symbol, htmlContent, byte;
 
-    if (!receivedByteContainerRendered) {
+    if (!rxByteContainerRendered) {
         htmlContent = '';
         for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
             byte = symbol - state.symbolMin;
@@ -66,8 +63,8 @@ function rxConfigListener(state) {
                 byteToText(byte) +
                 '</span>';
         }
-        html('#received-byte-container', htmlContent);
-        receivedByteContainerRendered = true;
+        html('#rx-byte-container', htmlContent);
+        rxByteContainerRendered = true;
     }
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     log('log-rx-config', state);
@@ -92,7 +89,7 @@ function txConfigListener(state) {
             byteToText(byte) +
             '</a>';
     }
-    html('#send-byte-button-container', htmlContent);
+    html('#tx-byte-container', htmlContent);
     html('#tx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html('#amplitude', (state.amplitude * 100).toFixed(0));
     log('log-tx-config', state);

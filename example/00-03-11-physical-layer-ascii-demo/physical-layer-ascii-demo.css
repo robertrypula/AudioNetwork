@@ -2,14 +2,6 @@
     width: 50px;
 }
 
-#tx-symbol-queue {
-    min-height: 40px;
-}
-
-#rx-symbol, #rx-symbol-as-ascii {
-    font-size: 16px;
-}
-
 .log-container {
     font-family: monospace;
     font-size: 12px;

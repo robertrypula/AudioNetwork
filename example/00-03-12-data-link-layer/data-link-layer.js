@@ -7,7 +7,7 @@ var
     RAW_SYMBOL_MAX = 10,
     dataLinkLayerBuilder,
     dataLinkLayer,
-    rawSymbolBuffer = new Buffer(RAW_SYMBOL_MAX);
+    rxSymbolRawHistory = new Buffer(RAW_SYMBOL_MAX);
 
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
@@ -36,12 +36,12 @@ function frameListener(frame) {
         }
     */
     html('#rx-frame-id', frame.id);
-    html('#rx-frame-header', getHexFromByte(frame.header));
-    html('#rx-frame-payload', getHexFromByteList(frame.payload));
-    html('#rx-frame-checksum', getHexFromByte(frame.checksum));
+    html('#rx-frame-header', getByteHexFromByte(frame.header));
+    html('#rx-frame-checksum', getByteHexFromByte(frame.checksum));
     html('#rx-frame-is-command', frame.isCommand ? 'yes' : 'no');
     html('#rx-frame-candidate-id', frame.frameCandidateId);
 
+    html('#rx-frame-payload', getByteHexFromByteList(frame.payload));
     html('#rx-frame-payload-as-ascii', getAsciiFromByteList(frame.payload));
 }
 
@@ -63,7 +63,7 @@ function frameCandidateListener(frameCandidateList) {
         htmlContent += '<div class="rx-box-with-border">';
         htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
         htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
-        htmlContent += '<strong>Received:</strong> ' + getHexFromByteList(fc.received) + '<br/>';
+        htmlContent += '<strong>Received:</strong> ' + getByteHexFromByteList(fc.received) + '<br/>';
         htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
         htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
         htmlContent += '</div>';
@@ -76,13 +76,13 @@ function txListener(state) {
     var
         txConfig = dataLinkLayer.getPhysicalLayer().getTxConfig(),
         symbolMin = txConfig.symbolMin,
-        txCurrent = state.symbol
-            ? getHexFromSymbol(state.symbol, symbolMin)
+        txByteHex = state.symbol
+            ? getByteHexFromSymbol(state.symbol, symbolMin)
             : 'idle',
-        txQueue = getHexFromSymbolList(state.symbolQueue, symbolMin);
+        txByteHexQueue = getByteHexFromSymbolList(state.symbolQueue, symbolMin);
 
-    html('#tx-hex-current', txCurrent);
-    html('#tx-hex-queue', txQueue);
+    html('#tx-byte-hex', txByteHex);
+    html('#tx-byte-hex-queue', txByteHexQueue);
 }
 
 function rxSampleListener(state) {
@@ -94,8 +94,8 @@ function rxSampleListener(state) {
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 
     if (state.isSymbolSamplingPoint) {
-        rawSymbolBuffer.pushEvenIfFull(state.symbolRaw);
-        html('#rx-raw-data', getHexFromSymbolList(rawSymbolBuffer.getAll(), symbolMin));
+        rxSymbolRawHistory.pushEvenIfFull(state.symbolRaw);
+        html('#rx-byte-raw-history', getByteHexFromSymbolList(rxSymbolRawHistory.getAll(), symbolMin));
     }
 }
 
@@ -107,6 +107,7 @@ function configListener(state) {
 }
 
 function txConfigListener(state) {
+    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
 }
 
@@ -118,6 +119,10 @@ function rxConfigListener(state) {
 
 function onTxSampleRateClick(txSampleRate) {
     dataLinkLayer.setTxSampleRate(txSampleRate);
+}
+
+function onAmplitudeClick(amplitude) {
+    dataLinkLayer.setAmplitude(amplitude);
 }
 
 function onLoopbackClick(state) {
@@ -174,26 +179,26 @@ function isPrintableAscii(char) {
     return char >= ' ' && char <= '~';
 }
 
-function getHexFromByte(byte) {
+function getByteHexFromByte(byte) {
     var byteHex = byte.toString(16);
 
     return pad(byteHex, 2)
 }
 
-function getHexFromByteList(byteList) {
+function getByteHexFromByteList(byteList) {
     var i, byte, result = [];
 
     for (i = 0; i < byteList.length; i++) {
         byte = byteList[i];
         result.push(
-            getHexFromByte(byte)
+            getByteHexFromByte(byte)
         );
     }
 
     return result.join(' ');
 }
 
-function getHexFromSymbol(symbol, symbolMin) {
+function getByteHexFromSymbol(symbol, symbolMin) {
     var
         byte = symbol - symbolMin,
         byteHex = byte.toString(16);
@@ -206,13 +211,13 @@ function getHexFromSymbol(symbol, symbolMin) {
     return pad(byteHex, 2)
 }
 
-function getHexFromSymbolList(symbolList, symbolMin) {
+function getByteHexFromSymbolList(symbolList, symbolMin) {
     var i, symbol, result = [];
 
     for (i = 0; i < symbolList.length; i++) {
         symbol = symbolList[i];
         result.push(
-            getHexFromSymbol(symbol, symbolMin)
+            getByteHexFromSymbol(symbol, symbolMin)
         );
     }
 
