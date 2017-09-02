@@ -38,6 +38,24 @@ function getFormFieldValue(selector, parseAs) {
     return result;
 }
 
+function getCheckboxState(selector) {
+    var element, checked, result;
+
+    element = document.querySelectorAll(selector);
+    switch (element.length) {
+        case 1:
+            checked = element[0].checked;
+            break;
+        case 0:
+            return undefined;
+            break;
+        default:
+            throw 'Selector found more than one element';
+    }
+
+    return checked;
+}
+
 function setActive(containerId, activeId, activeCssClass) {
     var
         list = select(containerId + ' > *'),

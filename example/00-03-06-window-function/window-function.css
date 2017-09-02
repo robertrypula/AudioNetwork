@@ -1,0 +1,12 @@
+#log {
+    font-family: monospace;
+}
+
+canvas {
+    border: 1px solid gray;
+    display: block;
+}
+
+.scroll-container {
+    margin-bottom: 20px;
+}

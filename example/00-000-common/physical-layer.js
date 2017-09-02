@@ -337,12 +337,13 @@ PhysicalLayer.prototype.$$smartTimerListener = function () {
         this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
     }
 
+    this.$$sampleId++;
+
     this.$$offset = this.$$sampleNumber % this.$$samplePerSymbol;
     this.$$rx();
     this.$$tx();
 
     this.$$sampleNumber++;
-    this.$$sampleId++;
 
     this.$$firstSmartTimerCall = false;
 };
