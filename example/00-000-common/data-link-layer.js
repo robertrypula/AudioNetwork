@@ -93,7 +93,8 @@ DataLinkLayer = function (builder) {
 
     // state variables
     this.$$frame = undefined;
-    this.$$frameLastId = undefined;
+    this.$$frameId = DataLinkLayer.$$_INITIAL_ID;
+    this.$$frameCandidateId = DataLinkLayer.$$_INITIAL_ID;
     this.$$frameCandidateList = [];
 
     // setup listeners - data link layer
@@ -113,13 +114,17 @@ DataLinkLayer = function (builder) {
 DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION = 'Payload is too big!';
 
 DataLinkLayer.$$_HEADER_FRAME_START_MARKER = 0xE0;
+DataLinkLayer.$$_HEADER_RESERVED_BIT = 0x08;
 DataLinkLayer.$$_HEADER_COMMAND_BIT_SET = 0x10;
 DataLinkLayer.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
 DataLinkLayer.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
-DataLinkLayer.$$_HEADER_PAYLOAD_BYTE_MASK = 0xFF;
+DataLinkLayer.$$_ONE_BYTE_MASK = 0xFF;
 
 DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND = 'PAYLOAD_TYPE_COMMAND';
 DataLinkLayer.$$_PAYLOAD_TYPE_DATA = 'PAYLOAD_TYPE_DATA';
+
+DataLinkLayer.$$_INITIAL_ID = 1;
+DataLinkLayer.$$_HEADER_AND_CHECKSUM_BYTE_OVERHEAD = 2;
 
 DataLinkLayer.prototype.getPhysicalLayer = function () {
     return this.$$physicalLayer;
@@ -145,6 +150,12 @@ DataLinkLayer.prototype.setLoopback = function (state) {
     return this.$$physicalLayer.setLoopback(state);  // alias for easier access
 };
 
+/*
+DataLinkLayer.prototype.sendCommand = function (commandType, parameter) {
+    console.log(commandType, parameter);
+};
+*/
+
 DataLinkLayer.prototype.sendFrame = function (payload) {
     var payloadType, frame, txConfig, symbolMin, i, byte, symbol;
 
@@ -164,28 +175,42 @@ DataLinkLayer.prototype.sendFrame = function (payload) {
 };
 
 DataLinkLayer.prototype.getFrame = function () {
-    // TODO implement
-    return {
-        id: 0,
-        header: 0xF5,
-        payload: [0x61, 0x62, 0x63, 0x54, 0x34],
-        checksum: 0x23,
-        isCommand: false,
-        frameCandidateId: 3
+    var
+        frame = this.$$frame,
+        frameCopy;
+
+    if (!frame) {
+        return null;
+    }
+
+    frameCopy = {
+        id: frame.id,
+        header: frame.header,
+        payload: frame.payload.slice(0),
+        checksum: frame.checksum,
+        isCommand: frame.isCommand,
+        frameCandidateId: frame.frameCandidateId
     };
+
+    return frameCopy;
 };
 
 DataLinkLayer.prototype.getFrameCandidate = function () {
-    // TODO implement
-    var tmp = {
-        id: 4,
-        received: [32, 32],
-        expected: 8,
-        isValid: false,
-        symbolId: [3, 4]
-    };
+    var i, frameCandidate, frameCandidateCopy, result = [];
 
-    return [tmp, tmp];
+    for (i = 0; i < this.$$frameCandidateList.length; i++) {
+        frameCandidate = this.$$frameCandidateList[i];
+        frameCandidateCopy = {
+            id: frameCandidate.id,
+            received: frameCandidate.received.slice(0),
+            expected: frameCandidate.expected,
+            isValid: frameCandidate.isValid,
+            symbolId: frameCandidate.symbolId.slice(0)
+        };
+        result.push(frameCandidateCopy);
+    }
+
+    return result;
 };
 
 // -----------------------------------------------------
@@ -193,46 +218,102 @@ DataLinkLayer.prototype.getFrameCandidate = function () {
 DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
     var
         rxSample = this.$$physicalLayer.getRxSample(),
+        rxConfig = this.$$physicalLayer.getRxConfig(),
+        symbolMin = rxConfig.symbolMin,
+        byte,
         symbolId = data.id;
 
-    this.$$handleSymbolRaw(rxSample.symbolRaw, symbolId);
+    byte = (rxSample.symbolRaw - symbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK;
+    this.$$handleSymbolRaw(byte, symbolId);
     this.$$rxSymbolListener ? this.$$rxSymbolListener(data) : undefined;
 };
 
-DataLinkLayer.prototype.$$handleSymbolRaw = function (symbolRaw, symbolId) {
-    var isNewFrameAvailable = false;
+DataLinkLayer.prototype.$$handleSymbolRaw = function (byte, symbolId) {
+    var isNewFrameAvailable;
 
     this.$$cleanUpFrameCandidateList();
-    this.$$addSymbolRawToFrameCandidateList(symbolRaw, symbolId);
-    this.$$tryToCreateNewFrameCandidate(symbolRaw, symbolId);
-    this.$$tryToFindNewFrame();
-
-    if (this.$$frame && this.$$frame.id !== this.$$frameLastId) {
-        this.$$frameLastId = this.$$frame.id;
-        isNewFrameAvailable = true;
-    }
+    this.$$addSymbolRawToFrameCandidateList(byte, symbolId);
+    this.$$tryToCreateNewFrameCandidate(byte, symbolId);
+    isNewFrameAvailable = this.$$tryToFindNewFrame();
 
     // call listeners
     this.$$frameCandidateListener ? this.$$frameCandidateListener(this.getFrameCandidate()) : undefined;
-    if (true || isNewFrameAvailable) {
+    if (isNewFrameAvailable) {
         this.$$frameListener ? this.$$frameListener(this.getFrame()) : undefined;
     }
 };
 
 DataLinkLayer.prototype.$$cleanUpFrameCandidateList = function () {
-    // TODO implement
+    var i, frameCandidate, receivedFully;
+
+    for (i = this.$$frameCandidateList.length - 1; i >= 0; i--) {
+        frameCandidate = this.$$frameCandidateList[i];
+        receivedFully = frameCandidate.received.length === frameCandidate.expected;
+        if (receivedFully) {
+            this.$$frameCandidateList.splice(i, 1);
+        }
+    }
 };
 
-DataLinkLayer.prototype.$$addSymbolRawToFrameCandidateList = function (symbolRaw, symbolId) {
-    // TODO implement
+DataLinkLayer.prototype.$$addSymbolRawToFrameCandidateList = function (byte, symbolId) {
+    var i, frameCandidate, readyToComputeChecksum, fullyReceived, notFullyReceived, frameWithoutChecksum, receivedChecksum;
+
+    for (i = 0; i < this.$$frameCandidateList.length; i++) {
+        frameCandidate = this.$$frameCandidateList[i];
+        notFullyReceived = frameCandidate.received.length < frameCandidate.expected;
+        if (notFullyReceived) {
+            frameCandidate.received.push(byte);
+            frameCandidate.symbolId.push(symbolId);
+        }
+
+        readyToComputeChecksum = frameCandidate.received.length === (frameCandidate.expected - 1);
+        if (readyToComputeChecksum) {
+            frameWithoutChecksum = frameCandidate.received;
+            frameCandidate.expectedChecksum = DataLinkLayer.$$computeChecksum(frameWithoutChecksum);
+        }
+
+        fullyReceived = frameCandidate.received.length === frameCandidate.expected;
+        if (fullyReceived) {
+            receivedChecksum = frameCandidate.received[frameCandidate.received.length - 1];
+            frameCandidate.isValid = frameCandidate.expectedChecksum === receivedChecksum;
+        }
+    }
 };
 
-DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (symbolRaw, symbolId) {
-    // TODO implement
+DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (byte, symbolId) {
+    var frameCandidate, header, payloadLength;
+
+    if (!DataLinkLayer.$$isValidHeader(byte)) {
+        return;
+    }
+    header = byte;
+    payloadLength = DataLinkLayer.$$getPayloadLength(header);
+
+    frameCandidate = {
+        id: this.$$frameCandidateId++,
+        received: [header],
+        expected: payloadLength + DataLinkLayer.$$_HEADER_AND_CHECKSUM_BYTE_OVERHEAD,
+        isValid: false,
+        expectedChecksum: null,
+        symbolId: [symbolId]
+    };
+    this.$$frameCandidateList.push(frameCandidate);
 };
 
 DataLinkLayer.prototype.$$tryToFindNewFrame = function () {
-    // TODO implement
+    var i, frameCandidate;
+
+    for (i = 0; i < this.$$frameCandidateList.length; i++) {
+        frameCandidate = this.$$frameCandidateList[i];
+        if (frameCandidate.isValid) {
+            this.$$frame = DataLinkLayer.$$getFrameFromFrameCandidate(frameCandidate);
+            // there is possibility that there are more valid frames
+            // but the assumption is that we are picking the biggest one only
+            return true;
+        }
+    }
+
+    return false;
 };
 
 // -----------------------------------------------------
@@ -263,6 +344,22 @@ DataLinkLayer.prototype.$$txConfigListener = function (data) {
 
 // -----------------------------------------------------
 
+DataLinkLayer.$$getFrameFromFrameCandidate = function (frameCandidate) {
+    var frame, header;
+
+    header = frameCandidate.received[0];
+    frame = {
+        id: this.$$frameId++,
+        header: header,
+        payload: frameCandidate.received.slice(1, frameCandidate.received.length - 1),
+        checksum: frameCandidate.received[frameCandidate.received.length - 1],
+        isCommand: DataLinkLayer.$$getIsCommand(header),
+        frameCandidateId: frameCandidate.id
+    };
+
+    return frame;
+};
+
 DataLinkLayer.$$buildFrame = function (payloadType, payload) {
     var frame, isCommand, header, checksum, i, byte;
 
@@ -271,7 +368,7 @@ DataLinkLayer.$$buildFrame = function (payloadType, payload) {
     header = DataLinkLayer.$$getHeader(isCommand, payload.length);
     frame.push(header);
     for (i = 0; i < payload.length; i++) {
-        byte = payload[i] & DataLinkLayer.$$_HEADER_PAYLOAD_BYTE_MASK;
+        byte = payload[i] & DataLinkLayer.$$_ONE_BYTE_MASK;
         frame.push(byte);
     }
     checksum = DataLinkLayer.$$computeChecksum(frame);
@@ -292,6 +389,23 @@ DataLinkLayer.$$getHeader = function (isCommand, payloadLength) {
     header = frameStartMarker | commandBit | payloadLength;
 
     return header;
+};
+
+DataLinkLayer.$$isValidHeader = function (byte) {
+    var frameStartMarkerAvailable, reservedBitNotSet;
+
+    frameStartMarkerAvailable = (DataLinkLayer.$$_HEADER_FRAME_START_MARKER & byte) === DataLinkLayer.$$_HEADER_FRAME_START_MARKER;
+    reservedBitNotSet = !(DataLinkLayer.$$_HEADER_RESERVED_BIT & byte);
+
+    return frameStartMarkerAvailable && reservedBitNotSet;
+};
+
+DataLinkLayer.$$getPayloadLength = function (header) {
+    return header & DataLinkLayer.$$_HEADER_PAYLOAD_LENGTH_MASK;
+};
+
+DataLinkLayer.$$getIsCommand = function (header) {
+    return !!(header & DataLinkLayer.$$_HEADER_COMMAND_BIT_SET);
 };
 
 DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
@@ -316,127 +430,3 @@ DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
 DataLinkLayer.$$isFunction = function (variable) {
     return typeof variable === 'function';
 };
-
-
-/*
-var DataLinkLayer;
-
-DataLinkLayer = function (stateHandler) {
-    var physicalLayerBuilder = new DataLinkLayerBuilder();
-
-    this.$$physicalLayer = physicalLayerBuilder
-        .rxSymbolListener(this.$$rxSampleListener.bind(this))
-        .build();
-    this.$$physicalLayerState = undefined;
-    this.$$dataLimit = 15;
-    this.$$byteBuffer = new Buffer(this.$$dataLimit + 2);
-    this.$$byteBuffer.fillWith(0);
-    this.$$stateHandler = DataLinkLayer.$$isFunction(stateHandler) ? stateHandler : null;
-    this.$$validFrameList = [];
-};
-
-DataLinkLayer.prototype.setLoopback = function (state) {
-    this.$$physicalLayer.setLoopback(state);
-};
-
-DataLinkLayer.prototype.send = function (data) {
-    var i, byte, symbol, frame;
-
-    if (data.length > this.$$dataLimit) {
-        throw 'Frame cannot have more than ' + this.$$dataLimit + ' bytes';
-    }
-
-    frame = [];
-    frame.push(0xF0 + data.length);
-    for (i = 0; i < data.length; i++) {
-        byte = data[i];
-        frame.push(byte);
-    }
-    frame.push(this.$$computeChecksum(frame));
-
-    for (i = 0; i < frame.length; i++) {
-        byte = frame[i];
-        symbol = this.$$physicalLayerState.band.symbolMin + byte;
-        this.$$physicalLayer.txSymbol(symbol);
-    }
-};
-
-DataLinkLayer.prototype.connect = function (sampleRate) {
-    this.$$physicalLayer.txConnect(sampleRate);
-};
-
-DataLinkLayer.prototype.getState = function () {
-    var state;
-
-    state = {
-        physicalLayerState: this.$$physicalLayerState,
-        byteBuffer: this.$$byteBuffer.getAll(),
-        validFrameList: this.$$validFrameList,
-        isFrameReadyToTake: this.$$physicalLayerState.isSymbolSamplingPoint
-    };
-
-    return state;
-};
-
-DataLinkLayer.prototype.$$tryToFindValidFrame = function () {
-    var i, j, frame, byte, checksumPayload, frameList = [];
-
-    this.$$validFrameList = [];
-    for (i = 0; i <= this.$$dataLimit; i++) {
-        checksumPayload = [];
-        frame = {
-            length: undefined,
-            data: [],
-            checksum: undefined,
-            isValid: false
-        };
-
-        byte = this.$$byteBuffer.getItem(i);
-        frame.length = byte;
-        checksumPayload.push(byte);
-        for (j = i + 1; j <= this.$$dataLimit; j++) {
-            byte = this.$$byteBuffer.getItem(j);
-            frame.data.push(byte);
-            checksumPayload.push(byte);
-        }
-        byte = this.$$byteBuffer.getItem(this.$$dataLimit + 1);
-        frame.checksum = byte;
-        frame.checksumShouldBe = this.$$computeChecksum(checksumPayload);
-        frame.lengthShouldBe = 0xF0 + (this.$$dataLimit - i);
-        frame.isValid = frame.checksumShouldBe === frame.checksum &&
-            frame.lengthShouldBe === frame.length;
-
-        if (frame.isValid) {
-            this.$$validFrameList.push(frame);
-        }
-
-        frameList.push(frame);
-    }
-};
-
-DataLinkLayer.prototype.$$rxSampleListener = function (physicalLayerState) {
-
-    return;
-    var byte, state;
-
-    this.$$physicalLayerState = physicalLayerState;
-
-    if (physicalLayerState.isSymbolSamplingPoint) {
-        byte = physicalLayerState.symbol - physicalLayerState.band.symbolMin;
-        this.$$byteBuffer.pushEvenIfFull(byte);
-        this.$$tryToFindValidFrame();
-    }
-
-    state = this.getState();
-
-    if (this.$$stateHandler) {
-        this.$$stateHandler(state);
-    }
-};
-
-DataLinkLayer.$$getValueOrDefault = function (value, defaultValue) {
-    return typeof value !== 'undefined' ? value : defaultValue;
-};
-
-
-*/
