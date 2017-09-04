@@ -25,20 +25,27 @@ function init() {
 }
 
 function frameListener(frame) {
-    /*
-        {
-            id: 0,
-            header: 0xF5,
-            payload: [0x32, 0x32, 0x32, 0x32, 0x32],
-            checksum: 0x23,
-            isCommand: false,
-            frameCandidateId: 3
+    var commandName = '';
+
+    if (frame.isCommand) {
+        switch (frame.payload[0]) {
+            case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100:
+                commandName = 'COMMAND_SET_TX_SAMPLE_RATE_44100';
+                break;
+            case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
+                commandName = 'COMMAND_SET_TX_SAMPLE_RATE_48000';
+                break;
+            case DataLinkLayer.COMMAND_SYNC:
+                commandName = 'COMMAND_SYNC';
+                break;
         }
-    */
+    }
+
+    addClass('#rx-frame > div', 'visible');
     html('#rx-frame-id', frame.id);
     html('#rx-frame-header', getByteHexFromByte(frame.header));
     html('#rx-frame-checksum', getByteHexFromByte(frame.checksum));
-    html('#rx-frame-is-command', frame.isCommand ? 'yes' : 'no');
+    html('#rx-frame-is-command', frame.isCommand ? ('yes - ' + commandName) : 'no');
     html('#rx-frame-candidate-id', frame.frameCandidateId);
 
     html('#rx-frame-payload', getByteHexFromByteList(frame.payload));
@@ -47,15 +54,7 @@ function frameListener(frame) {
 
 function frameCandidateListener(frameCandidateList) {
     var i, fc, progress, htmlContent = '';
-    /*
-        {
-            id: 4,
-            received: [32, 32],
-            expected: 8,
-            isValid: false,
-            symbolId: []
-        }
-    */
+
     for (i = 0; i < frameCandidateList.length; i++) {
         fc = frameCandidateList[i];
         progress = fc.received.length + '/' + fc.expected + ' ' +
@@ -116,6 +115,18 @@ function rxConfigListener(state) {
 }
 
 // ---------
+
+function onSendCommandSetTxSampleRate44100Click() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100);
+}
+
+function onSendCommandSetTxSampleRate48000Click() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
+}
+
+function onSendCommandSyncClick() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SYNC);
+}
 
 function onTxSampleRateClick(txSampleRate) {
     dataLinkLayer.setTxSampleRate(txSampleRate);

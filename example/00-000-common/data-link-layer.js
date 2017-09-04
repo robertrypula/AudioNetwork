@@ -113,6 +113,10 @@ DataLinkLayer = function (builder) {
 
 DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION = 'Payload is too big!';
 
+DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100 = 0;
+DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000 = 1;
+DataLinkLayer.COMMAND_SYNC = 2;
+
 DataLinkLayer.$$_HEADER_FRAME_START_MARKER = 0xE0;
 DataLinkLayer.$$_HEADER_RESERVED_BIT = 0x08;
 DataLinkLayer.$$_HEADER_COMMAND_BIT_SET = 0x10;
@@ -150,28 +154,22 @@ DataLinkLayer.prototype.setLoopback = function (state) {
     return this.$$physicalLayer.setLoopback(state);  // alias for easier access
 };
 
-/*
-DataLinkLayer.prototype.sendCommand = function (commandType, parameter) {
-    console.log(commandType, parameter);
+DataLinkLayer.prototype.sendCommand = function (command) {
+    var frame;
+
+    frame = DataLinkLayer.$$buildFrame(DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND, [command]);
+    this.$$sendSymbol(frame);
 };
-*/
 
 DataLinkLayer.prototype.sendFrame = function (payload) {
-    var payloadType, frame, txConfig, symbolMin, i, byte, symbol;
+    var payloadType, frame;
 
     if (payload.length > this.$$framePayloadLengthMax) {
         throw DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION;
     }
     payloadType = DataLinkLayer.$$_PAYLOAD_TYPE_DATA;
     frame = DataLinkLayer.$$buildFrame(payloadType, payload);
-
-    txConfig = this.$$physicalLayer.getTxConfig();
-    symbolMin = txConfig.symbolMin;
-    for (i = 0; i < frame.length; i++) {
-        byte = frame[i];
-        symbol = symbolMin + byte;
-        this.$$physicalLayer.sendSymbol(symbol);
-    }
+    this.$$sendSymbol(frame);
 };
 
 DataLinkLayer.prototype.getFrame = function () {
@@ -229,7 +227,7 @@ DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
 };
 
 DataLinkLayer.prototype.$$handleSymbolRaw = function (byte, symbolId) {
-    var isNewFrameAvailable;
+    var isNewFrameAvailable, command;
 
     this.$$cleanUpFrameCandidateList();
     this.$$addSymbolRawToFrameCandidateList(byte, symbolId);
@@ -239,6 +237,10 @@ DataLinkLayer.prototype.$$handleSymbolRaw = function (byte, symbolId) {
     // call listeners
     this.$$frameCandidateListener ? this.$$frameCandidateListener(this.getFrameCandidate()) : undefined;
     if (isNewFrameAvailable) {
+        if (this.$$frame.isCommand) {
+            command = this.$$frame.payload[0];
+            this.$$handleReceivedCommand(command);
+        }
         this.$$frameListener ? this.$$frameListener(this.getFrame()) : undefined;
     }
 };
@@ -306,7 +308,7 @@ DataLinkLayer.prototype.$$tryToFindNewFrame = function () {
     for (i = 0; i < this.$$frameCandidateList.length; i++) {
         frameCandidate = this.$$frameCandidateList[i];
         if (frameCandidate.isValid) {
-            this.$$frame = DataLinkLayer.$$getFrameFromFrameCandidate(frameCandidate);
+            this.$$frame = DataLinkLayer.$$getFrameFromFrameCandidate(frameCandidate, this.$$frameId++);
             // there is possibility that there are more valid frames
             // but the assumption is that we are picking the biggest one only
             return true;
@@ -314,6 +316,34 @@ DataLinkLayer.prototype.$$tryToFindNewFrame = function () {
     }
 
     return false;
+};
+
+DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
+    switch (command) {
+        case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100:
+            this.setTxSampleRate(44100);
+            break;
+        case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
+            this.setTxSampleRate(48000);
+            break;
+        case DataLinkLayer.COMMAND_SYNC:
+            this.sendSync();
+            break;
+    }
+};
+
+// -----------------------------------------------------
+
+DataLinkLayer.prototype.$$sendSymbol = function (frame) {
+    var txConfig, symbolMin, i, byte, symbol;
+
+    txConfig = this.$$physicalLayer.getTxConfig();
+    symbolMin = txConfig.symbolMin;
+    for (i = 0; i < frame.length; i++) {
+        byte = frame[i];
+        symbol = symbolMin + byte;
+        this.$$physicalLayer.sendSymbol(symbol);
+    }
 };
 
 // -----------------------------------------------------
@@ -344,12 +374,12 @@ DataLinkLayer.prototype.$$txConfigListener = function (data) {
 
 // -----------------------------------------------------
 
-DataLinkLayer.$$getFrameFromFrameCandidate = function (frameCandidate) {
+DataLinkLayer.$$getFrameFromFrameCandidate = function (frameCandidate, frameId) {
     var frame, header;
 
     header = frameCandidate.received[0];
     frame = {
-        id: this.$$frameId++,
+        id: frameId,
         header: header,
         payload: frameCandidate.received.slice(1, frameCandidate.received.length - 1),
         checksum: frameCandidate.received[frameCandidate.received.length - 1],

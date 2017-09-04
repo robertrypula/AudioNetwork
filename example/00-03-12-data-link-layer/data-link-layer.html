@@ -128,33 +128,19 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
-                            <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
-                            <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
-                            <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
-                            <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
-                            <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Last frame (payload)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="rx-frame-payload">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Last frame (payload as ASCII)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="rx-frame-payload-as-ascii">-</span>
+                            <div id="rx-frame" class="clearfix">
+                                <div class="rx-box-with-border">
+                                    <div class="margin-bottom">
+                                        <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
+                                        <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
+                                        <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
+                                        <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
+                                        <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
+                                    </div>
+                                    <div id="rx-frame-payload">-</div>
+                                    <div id="rx-frame-payload-as-ascii">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -191,6 +177,12 @@
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="margin-bottom">
                                 <button class="btn btn-default" onClick="onSendSyncClick()">Sync</button>
+                            </div>
+
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate44100Click()">Command - setTxSampleRate(44100)</button>
+                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate48000Click()">Command - setTxSampleRate(48000)</button>
+                                <button class="btn btn-default" onClick="onSendCommandSyncClick()">Command - sendSync()</button>
                             </div>
 
                             <div class="margin-bottom">

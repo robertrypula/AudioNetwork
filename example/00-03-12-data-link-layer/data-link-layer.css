@@ -7,6 +7,18 @@
     min-height: 100px;
 }
 
+#rx-frame {
+    min-height: 150px;
+}
+
+#rx-frame > div {
+    display: none;
+}
+
+#rx-frame > div.visible {
+    display: block;
+}
+
 .rx-box-with-border {
     border: 1px solid #ddd;
     background-color: #eee;
