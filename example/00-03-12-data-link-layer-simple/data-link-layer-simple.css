@@ -1,0 +1,33 @@
+.log-container {
+    font-family: monospace;
+    font-size: 12px;
+}
+
+#rx-frame-candidate-container {
+    min-height: 100px;
+}
+
+#rx-frame {
+    min-height: 50px;
+}
+
+#rx-frame > div {
+    display: none;
+}
+
+#rx-frame > div.visible {
+    display: block;
+}
+
+.rx-box-with-border {
+    border: 1px solid #ddd;
+    background-color: #eee;
+    margin-left: -5px;
+    margin-right: -5px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+#rx-frame-payload-as-ascii {
+    font-size: 16px;
+}

@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="data-link-layer.css">
+    <link rel="stylesheet" type="text/css" href="data-link-layer-simple.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -100,45 +100,14 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Byte raw history (hex)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-byte-raw-history">-</div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Frame candidates
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-frame-candidate-container" class="log-container">
-                                <div id="rx-frame-candidate" class="clearfix"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
                                 Last frame
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
                             <div id="rx-frame" class="clearfix">
                                 <div class="rx-box-with-border">
-                                    <div class="margin-bottom">
-                                        <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
-                                        <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
-                                        <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
-                                        <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
-                                        <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
-                                    </div>
+                                    <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
                                     <div id="rx-frame-payload">-</div>
-                                    <div id="rx-frame-payload-as-ascii">-</div>
                                 </div>
                             </div>
                         </div>
@@ -189,17 +158,6 @@
                                     Send frame - bytes in HEX
                                 </button>
                             </div>
-
-                            <div class="margin-bottom">
-                                <div class="margin-bottom">
-                                    <textarea id="tx-ascii"></textarea>
-                                </div>
-                                <button
-                                    class="btn btn-default"
-                                    onClick="onSendAsciiClick()">
-                                    Send frame - ASCII
-                                </button>
-                            </div>
                         </div>
                     </div>
 
@@ -221,37 +179,11 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Byte (hex)
+                                Status
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Byte Queue (hex)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex-queue">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Amplitude
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
-                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onAmplitudeClick(0.2)">0.2</button>
-                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onAmplitudeClick(0.4)">0.4</button>
-                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onAmplitudeClick(0.6)">0.6</button>
-                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onAmplitudeClick(0.8)">0.8</button>
-                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onAmplitudeClick(1.0)">1.0</button>
+                            <span id="tx-status"></span>
                         </div>
                     </div>
 
@@ -287,7 +219,7 @@
     <script src="../00-000-common/sync-code-detector.js"></script>
     <script src="../00-000-common/physical-layer.js"></script>
     <script src="../00-000-common/data-link-layer.js"></script>
-    <script src="data-link-layer.js"></script>
+    <script src="data-link-layer-simple.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

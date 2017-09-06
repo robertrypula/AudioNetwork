@@ -20,8 +20,6 @@ function init() {
         .txConfigListener(txConfigListener)
         .rxConfigListener(rxConfigListener)
         .build();
-
-    dataLinkLayer.setLoopback(true);
 }
 
 function frameListener(frame) {
@@ -35,8 +33,8 @@ function frameListener(frame) {
             case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
                 commandName = 'COMMAND_SET_TX_SAMPLE_RATE_48000';
                 break;
-            case DataLinkLayer.COMMAND_SYNC:
-                commandName = 'COMMAND_SYNC';
+            case DataLinkLayer.COMMAND_SEND_SYNC:
+                commandName = 'COMMAND_SEND_SYNC';
                 break;
         }
     }
@@ -124,8 +122,8 @@ function onSendCommandSetTxSampleRate48000Click() {
     dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
 }
 
-function onSendCommandSyncClick() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SYNC);
+function onSendCommandSendSyncClick() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SEND_SYNC);
 }
 
 function onTxSampleRateClick(txSampleRate) {
