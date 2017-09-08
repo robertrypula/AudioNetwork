@@ -58,6 +58,181 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Loopback
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom" id="loopback-container">
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>Receiver</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Sample&nbsp;rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="rx-sample-rate">-</span> kHz
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Status
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="sync">-</span>
+                            <span id="sync-in-progress">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Last packet
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
+                            <!--
+                            <div id="rx-frame" class="clearfix">
+                                <div class="rx-box-with-border">
+                                    <div class="margin-bottom">
+                                        <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
+                                        <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
+                                        <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
+                                        <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
+                                        <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
+                                    </div>
+                                    <div id="rx-frame-payload">-</div>
+                                    <div id="rx-frame-payload-as-ascii">-</div>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+
+                    <!-- ----- -->
+
+                    <h2>Transmitter</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Sample Rate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
+                            </div>
+                            <p>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Send...
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onSendSyncClick()">Sync</button>
+                            </div>
+
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-hex"></textarea>
+                                </div>
+                                <button
+                                        class="btn btn-default"
+                                        onClick="onSendHexClick()">
+                                    Send byte block - bytes in HEX
+                                </button>
+                            </div>
+
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-ascii"></textarea>
+                                </div>
+                                <button
+                                        class="btn btn-default"
+                                        onClick="onSendAsciiClick()">
+                                    Send byte block - ASCII
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Remote commands
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate44100Click()">setTxSampleRate(44100)</button>
+                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate48000Click()">setTxSampleRate(48000)</button>
+                                <button class="btn btn-default" onClick="onSendCommandSendSyncClick()">sendSync()</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Byte (hex)
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-byte-hex">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Byte Queue (hex)
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-byte-hex-queue">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Amplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
+                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onAmplitudeClick(0.2)">0.2</button>
+                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onAmplitudeClick(0.4)">0.4</button>
+                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onAmplitudeClick(0.6)">0.6</button>
+                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onAmplitudeClick(0.8)">0.8</button>
+                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onAmplitudeClick(1.0)">1.0</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -92,7 +267,6 @@
     <script src="../00-000-common/data-link-layer.js"></script>
     <script src="../00-000-common/transport-layer.js"></script>
     <script src="transport-layer.js"></script>
-
     <script>
         if (isProduction()) { // TODO refactor this
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

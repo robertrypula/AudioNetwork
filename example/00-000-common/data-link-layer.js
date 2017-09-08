@@ -1,7 +1,6 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-
 var DataLinkLayerBuilder = function () {
     this._framePayloadLengthMax = 7;
 
@@ -79,7 +78,7 @@ DataLinkLayer = function (builder) {
     // let's create network stack!
     // Data Link Layer hides Physical Layer inside
     this.$$physicalLayer = (new PhysicalLayerBuilder())
-        .rxSymbolListener(this.$$rxSymbolListener.bind(this))
+        .rxSymbolListener(this.$$rxSymbolListener.bind(this)) // TODO bug!! we need to have dedicated internal listeners!
         .rxSampleListener(this.$$rxSampleListener.bind(this))
         .rxSyncListener(this.$$rxSyncListener.bind(this))
         .rxConfigListener(this.$$rxConfigListener.bind(this))

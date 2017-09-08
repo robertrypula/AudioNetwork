@@ -233,11 +233,6 @@ PhysicalLayer.prototype.setAmplitude = function (amplitude) {
     this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
 };
 
-PhysicalLayer.prototype.clearSymbolQueue = function () {
-    this.$$txSymbolQueue.length = 0;
-    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
-};
-
 // -----------------------------------------
 
 PhysicalLayer.prototype.getRxSymbol = function () {
