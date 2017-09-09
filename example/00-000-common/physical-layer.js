@@ -7,12 +7,12 @@ var PhysicalLayerBuilder = function () {
     this._fftSkipFactor = 3;
     this._samplePerSymbol = 2;
     this._symbolMin44100 = 114;
-    this._symbolMin48000 = 83;
+    this._symbolMin48000 = 82;
     this._symbolMinDefault = 1;
     this._symbolRange = 256 + 2;    // 256 for data, 2 for sync code
     this._txSampleRate = 44100;
     this._amplitude = 0.2;
-    this._syncCode = [1, -1, 1, -1, 1, -1];
+    this._syncCode = [1, -1, 1, -1];      // [1, -1, 1, -1, 1, -1];
     this._signalDecibelThresholdFactor = 0.6;
 
     this._rxSymbolListener = undefined;
@@ -382,7 +382,7 @@ PhysicalLayer.prototype.$$rx = function () {
         isNewSyncAvailable = true;
     }
 
-    this.$$isSymbolSamplingPoint = !!(sync.id && this.$$offset === sync.symbolSamplingPointOffset);
+    this.$$isSymbolSamplingPoint = sync.id && this.$$offset === sync.symbolSamplingPointOffset;
     isNewSymbolReadyToTake = this.$$isSymbolSamplingPoint && this.$$signalDecibel > this.$$signalDecibelThreshold;
     this.$$symbol = isNewSymbolReadyToTake ? this.$$symbolRaw : PhysicalLayer.$$_SYMBOL_IDLE;
 
@@ -416,7 +416,7 @@ PhysicalLayer.prototype.$$tx = function () {
 // -------
 
 PhysicalLayer.prototype.$$handleSyncCode = function () {
-    var codeValue;
+    var codeValue = null;
 
     switch (this.$$symbolRaw) {
         case this.$$rxSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET:

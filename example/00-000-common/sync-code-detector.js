@@ -74,9 +74,9 @@ SyncCodeDetector.prototype.$$sortByCorrelationValue = function (a, b) {
 };
 
 SyncCodeDetector.prototype.$$sortBySignalDecibel = function (a, b) {
-    return a.signalDecibel < b.signalDecibel
+    return a.signalDecibelAverage < b.signalDecibelAverage
         ? 1
-        : (a.signalDecibel > b.signalDecibel ? -1 : 0);
+        : (a.signalDecibelAverage > b.signalDecibelAverage ? -1 : 0);
 };
 
 SyncCodeDetector.prototype.$$sortDecisionList = function (data) {
