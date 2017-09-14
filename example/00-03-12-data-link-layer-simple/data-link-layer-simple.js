@@ -9,6 +9,7 @@ function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
     dataLinkLayer = dataLinkLayerBuilder
         .frameListener(frameListener)
+        .frameCandidateListener(frameCandidateListener)
         .rxSampleListener(rxSampleListener)
         .configListener(configListener)
         .txConfigListener(txConfigListener)
@@ -21,6 +22,19 @@ function frameListener(frame) {
     addClass('#rx-frame > div', 'visible');
     html('#rx-frame-is-command', frame.isCommand ? 'yes' : 'no');
     html('#rx-frame-payload', getByteHexFromByteList(frame.payload));
+}
+
+function frameCandidateListener(frameCandidateList) {
+    var fc, progress = '';
+
+    if (frameCandidateList.length > 0) {
+        fc = frameCandidateList[0];
+        progress =
+            fc.received.length + '/' + fc.expected + ' ' +
+            '(' + (100 * fc.received.length / fc.expected).toFixed(0) + '%)';
+    }
+
+    html('#rx-frame-candidate-progress', progress);
 }
 
 function rxSampleListener(state) {
@@ -57,8 +71,8 @@ function onSendCommandSetTxSampleRate48000Click() {
     dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
 }
 
-function onSendCommandSendSyncClick() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SEND_SYNC);
+function onSendCommandTxSyncClick() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
 }
 
 function onTxSampleRateClick(txSampleRate) {

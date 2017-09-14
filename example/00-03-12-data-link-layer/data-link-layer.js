@@ -33,8 +33,8 @@ function frameListener(frame) {
             case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
                 commandName = 'COMMAND_SET_TX_SAMPLE_RATE_48000';
                 break;
-            case DataLinkLayer.COMMAND_SEND_SYNC:
-                commandName = 'COMMAND_SEND_SYNC';
+            case DataLinkLayer.COMMAND_TX_SYNC:
+                commandName = 'COMMAND_TX_SYNC';
                 break;
         }
     }
@@ -122,8 +122,8 @@ function onSendCommandSetTxSampleRate48000Click() {
     dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
 }
 
-function onSendCommandSendSyncClick() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SEND_SYNC);
+function onSendCommandTxSyncClick() {
+    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
 }
 
 function onTxSampleRateClick(txSampleRate) {

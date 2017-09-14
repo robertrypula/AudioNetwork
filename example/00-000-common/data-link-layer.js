@@ -114,7 +114,7 @@ DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION = 'Payload is too big!';
 
 DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100 = 0;
 DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000 = 1;
-DataLinkLayer.COMMAND_SEND_SYNC = 2;
+DataLinkLayer.COMMAND_TX_SYNC = 2;
 
 DataLinkLayer.$$_HEADER_FRAME_START_MARKER = 0xE0;
 DataLinkLayer.$$_HEADER_RESERVED_BIT = 0x08;
@@ -325,7 +325,7 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
         case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
             this.setTxSampleRate(48000);
             break;
-        case DataLinkLayer.COMMAND_SEND_SYNC:
+        case DataLinkLayer.COMMAND_TX_SYNC:
             this.sendSync();
             break;
     }
@@ -447,10 +447,10 @@ DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
         byteNumber = i >>> 1;
         byte = frameWithoutChecksum[byteNumber];
         halfOfByte = isLeftHalfOfByte
-            ? ((byte & 0xF0) >>> 4)
+            ? (byte & 0xF0) >>> 4
             : byte & 0x0F;
-        sum1 = (sum1 + halfOfByte) % 15;
-        sum2 = (sum2 + sum1) % 15;
+        sum1 = (sum1 + halfOfByte) % 0x0F;
+        sum2 = (sum2 + sum1) % 0x0F;
     }
 
     return (sum2 << 4) | sum1;

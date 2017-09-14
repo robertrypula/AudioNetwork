@@ -47,8 +47,8 @@ function onSendCommandSetTxSampleRate48000Click() {
     transportLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
 }
 
-function onSendCommandSendSyncClick() {
-    transportLayer.sendCommand(DataLinkLayer.COMMAND_SEND_SYNC);
+function onSendCommandTxSyncClick() {
+    transportLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
 }
 
 function onTxSampleRateClick(txSampleRate) {
