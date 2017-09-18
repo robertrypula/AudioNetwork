@@ -4,12 +4,8 @@
 var FrequencyCalculator;
 
 FrequencyCalculator = function (sampleRateProvider, windowSizeProvider) {
-    this.$$sampleRateProvider = FrequencyCalculator.$$isFunction(sampleRateProvider)
-        ? sampleRateProvider.bind(sampleRateProvider)
-        : null;
-    this.$$windowSizeProvider = FrequencyCalculator.$$isFunction(windowSizeProvider)
-        ? windowSizeProvider.bind(windowSizeProvider)
-        : null;
+    this.$$sampleRateProvider = sampleRateProvider ? sampleRateProvider : null;
+    this.$$windowSizeProvider = windowSizeProvider ? windowSizeProvider : null;
 
     if (!this.$$sampleRateProvider || !this.$$windowSizeProvider) {
         throw FrequencyCalculator.PLEASE_SET_BOTH_PROVIDERS;
@@ -23,25 +19,67 @@ FrequencyCalculator.$$isFunction = function (variable) {
 };
 
 FrequencyCalculator.prototype.getSamplePerPeriodFromHertz = function (hertz) {
-    return this.$$sampleRateProvider() / hertz;
+    var sampleRate;
+
+    sampleRate = FrequencyCalculator.$$isFunction(this.$$sampleRateProvider)
+        ? this.$$sampleRateProvider()
+        : this.$$sampleRateProvider;
+
+    return sampleRate / hertz;
 };
 
 FrequencyCalculator.prototype.getHertzFromSamplePerPeriod = function (samplePerPeriod) {
-    return this.$$sampleRateProvider() / samplePerPeriod;
+    var sampleRate;
+
+    sampleRate = FrequencyCalculator.$$isFunction(this.$$sampleRateProvider)
+        ? this.$$sampleRateProvider()
+        : this.$$sampleRateProvider;
+
+    return sampleRate / samplePerPeriod;
 };
 
 FrequencyCalculator.prototype.getCyclePerWindowFromHertz = function (hertz) {
-    return hertz * this.$$windowSizeProvider() / this.$$sampleRateProvider();
+    var windowSize, sampleRate;
+
+    windowSize = FrequencyCalculator.$$isFunction(this.$$windowSizeProvider)
+        ? this.$$windowSizeProvider()
+        : this.$$windowSizeProvider;
+    sampleRate = FrequencyCalculator.$$isFunction(this.$$sampleRateProvider)
+        ? this.$$sampleRateProvider()
+        : this.$$sampleRateProvider;
+
+    return hertz * windowSize / sampleRate;
 };
 
 FrequencyCalculator.prototype.getHertzFromCyclePerWindow = function (cyclePerWindow) {
-    return cyclePerWindow * this.$$sampleRateProvider() / this.$$windowSizeProvider();
+    var windowSize, sampleRate;
+
+    windowSize = FrequencyCalculator.$$isFunction(this.$$windowSizeProvider)
+        ? this.$$windowSizeProvider()
+        : this.$$windowSizeProvider;
+    sampleRate = FrequencyCalculator.$$isFunction(this.$$sampleRateProvider)
+        ? this.$$sampleRateProvider()
+        : this.$$sampleRateProvider;
+
+    return cyclePerWindow * sampleRate / windowSize;
 };
 
 FrequencyCalculator.prototype.getSamplePerPeriodFromCyclePerWindow = function (cyclePerWindow) {
-    return this.$$windowSizeProvider() / cyclePerWindow;
+    var windowSize;
+
+    windowSize = FrequencyCalculator.$$isFunction(this.$$windowSizeProvider)
+        ? this.$$windowSizeProvider()
+        : this.$$windowSizeProvider;
+
+    return windowSize / cyclePerWindow;
 };
 
 FrequencyCalculator.prototype.getCyclePerWindowFromSamplePerPeriod = function (samplePerPeriod) {
-    return this.$$windowSizeProvider() / samplePerPeriod;
+    var windowSize;
+
+    windowSize = FrequencyCalculator.$$isFunction(this.$$windowSizeProvider)
+        ? this.$$windowSizeProvider()
+        : this.$$windowSizeProvider;
+
+    return windowSize / samplePerPeriod;
 };

@@ -1,6 +1,9 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// TODO extract modulation types to classes
+// TODO use WaveGenerator instead of generateSineWave function
+
 var
     CANVAS_HEIGHT = 201,
     RECORD_TIME = 2,    // seconds
@@ -794,8 +797,8 @@ function getConfiguredCanvasContext(elementId, width, height) {
     element.width = width;
     element.height = height;
     ctx = element.getContext('2d');
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = '#AAA';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#2d4e8a';
     ctx.font = "12px Arial";
 
     return ctx;
