@@ -42,10 +42,6 @@ Capture and decode fm radio
 
 Nice online charts:
     http://fooplot.com/
-    
-OFDM Symbols synchronization
-
-    https://dsp.stackexchange.com/questions/7724/how-is-symbol-synchronization-with-ofdm-done
 
 Frequency response
     https://codepen.io/DonKarlssonSan/post/fun-with-web-audio-api
@@ -99,6 +95,14 @@ Great online book about DSP:
 
 ```
 
+### TCP
+
+```
+https://support.microsoft.com/pl-pl/help/172983/explanation-of-the-three-way-handshake-via-tcp-ip
+http://www.cs.miami.edu/home/burt/learning/Csc524.032/notes/tcp_nutshell.html
+http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch02lev1sec6.html
+```
+
 ### OFDM
 
 ```
@@ -116,6 +120,13 @@ Another great example
 
 Nice articles about OFDM
     http://www.skydsp.com/publications/index.htm
+    
+OFDM Symbols synchronization
+    https://dsp.stackexchange.com/questions/7724/how-is-symbol-synchronization-with-ofdm-done
+    https://dsp.stackexchange.com/questions/360/how-to-demodulate-an-ofdm-signal/368#368
+    
+OFDM pilot tones
+    https://dsp.stackexchange.com/questions/15164/using-pilot-tones-to-estimate-carrier-frequency-offset-in-ofdm
 ```
 
 ## Audio Communication Systems
