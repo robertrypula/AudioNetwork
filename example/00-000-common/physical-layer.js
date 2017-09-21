@@ -3,7 +3,7 @@
 
 var PhysicalLayerBuilder = function () {
     this._fftSize = 8192;
-    this._unitTime = 0.2;
+    this._unitTime = 0.25;
     this._fftSkipFactor = 3;
     this._samplePerSymbol = 2;
     this._symbolMin44100 = 114;
