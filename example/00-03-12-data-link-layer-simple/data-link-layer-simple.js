@@ -58,21 +58,13 @@ function rxConfigListener(state) {
 }
 
 function txListener(state) {
-    html('#tx-status', state.symbol || state.symbolQueue.length ? 'transmitting' : 'idle');
+    html('#tx-status', state.isTxActive ? 'transmitting' : 'idle');
 }
 
 // ---------
 
-function onSendCommandSetTxSampleRate44100Click() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100);
-}
-
-function onSendCommandSetTxSampleRate48000Click() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
-}
-
-function onSendCommandTxSyncClick() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
+function onSendTwoWaySyncClick() {
+    dataLinkLayer.txTwoWaySync();
 }
 
 function onTxSampleRateClick(txSampleRate) {
@@ -81,10 +73,6 @@ function onTxSampleRateClick(txSampleRate) {
 
 function onLoopbackClick(state) {
     dataLinkLayer.setLoopback(state);
-}
-
-function onSendSyncClick() {
-    dataLinkLayer.sendSync();
 }
 
 function onSendHexClick() {

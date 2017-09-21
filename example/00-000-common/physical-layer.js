@@ -3,7 +3,7 @@
 
 var PhysicalLayerBuilder = function () {
     this._fftSize = 8192;
-    this._unitTime = 0.25;
+    this._unitTime = 0.2;
     this._fftSkipFactor = 3;
     this._samplePerSymbol = 2;
     this._symbolMin44100 = 114;
@@ -173,7 +173,9 @@ PhysicalLayer.$$_INITIAL_SAMPLE_NUMER = 0;
 PhysicalLayer.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayer.$$_INITIAL_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
 PhysicalLayer.$$_SYMBOL_IDLE = null;
+PhysicalLayer.$$_SYMBOL_GAP = 0;
 PhysicalLayer.$$_TX_AMPLITUDE_SILENT = 0;
+PhysicalLayer.$$_TX_FREQUENCY_ZERO = 0;
 PhysicalLayer.$$_FIRST_SYMBOL = 1;
 PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET = 1;
 PhysicalLayer.$$_SYNC_SYMBOL_B_OFFSET = 0;
@@ -184,6 +186,8 @@ PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass 
 PhysicalLayer.prototype.sendSync = function () {
     var i, codeValue, symbol;
 
+    this.$$insertGapWhenNeeded();
+
     for (i = 0; i < this.$$syncCode.length; i++) {
         codeValue = this.$$syncCode[i];
         symbol = codeValue === -1
@@ -191,14 +195,26 @@ PhysicalLayer.prototype.sendSync = function () {
             : this.$$txSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_B_OFFSET;
         this.$$txSymbolQueue.push(symbol);
     }
+
+    // TODO actually it should take into account the Correlator.THRESHOLD_UNIT value
+    for (i = 0; i < Math.ceil(this.$$syncCode.length / 2) + 1; i++) {
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+    }
+
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
 PhysicalLayer.prototype.sendSymbol = function (symbol) {
-    var isNumber, symbolParsed, inRange, isValid;
+    var isNumber, symbolParsed, inRange, isValid, isSymbolSpecial;
 
-    if (symbol === PhysicalLayer.$$_SYMBOL_IDLE) {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_IDLE);
+    this.$$insertGapWhenNeeded();
+
+    isSymbolSpecial =
+        symbol === PhysicalLayer.$$_SYMBOL_IDLE ||
+        symbol === PhysicalLayer.$$_SYMBOL_GAP;
+
+    if (isSymbolSpecial) {
+        throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
     } else {
         symbolParsed = parseInt(symbol);
         isNumber = typeof symbolParsed === 'number';
@@ -304,7 +320,8 @@ PhysicalLayer.prototype.getConfig = function () {
 PhysicalLayer.prototype.getTx = function () {
     return {
         symbol: this.$$txSymbol,
-        symbolQueue: this.$$txSymbolQueue.slice(0)
+        symbolQueue: this.$$txSymbolQueue.slice(0),
+        isTxActive: this.$$txSymbolQueue.length || this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
     }
 };
 
@@ -324,6 +341,22 @@ PhysicalLayer.prototype.getTxConfig = function () {
 };
 
 // -----------------------------------------
+
+PhysicalLayer.prototype.$$insertGapWhenNeeded = function () {
+    var tx;
+
+    // When device A sends some data to device B
+    // then device B cannot respond immediately. We
+    // need make sure that device A will have some time
+    // to reinitialize microphone again. This is solved
+    // by adding one extra symbol of gap. When device B
+    // already have something in the queue then gap is
+    // not required.
+    tx = this.getTx();
+    if (!tx.isTxActive) {
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+    }
+};
 
 PhysicalLayer.prototype.$$smartTimerListener = function () {
     if (this.$$firstSmartTimerCall) {
@@ -449,10 +482,14 @@ PhysicalLayer.prototype.$$getSymbolMax = function (sampleRate) {
 };
 
 PhysicalLayer.prototype.$$updateOscillator = function () {
-    var frequency, amplitude;
+    var frequency, amplitude, isSymbolSpecial;
 
-    if (this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE) {
-        frequency = PhysicalLayer.$$_SYMBOL_IDLE;
+    isSymbolSpecial =
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP;
+
+    if (isSymbolSpecial) {
+        frequency = PhysicalLayer.$$_TX_FREQUENCY_ZERO;
         amplitude = PhysicalLayer.$$_TX_AMPLITUDE_SILENT;
     } else {
         frequency = this.$$getFrequency(this.$$txSymbol, this.$$txSampleRate);

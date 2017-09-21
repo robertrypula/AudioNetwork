@@ -27,14 +27,11 @@ function frameListener(frame) {
 
     if (frame.isCommand) {
         switch (frame.payload[0]) {
-            case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100:
-                commandName = 'COMMAND_SET_TX_SAMPLE_RATE_44100';
+            case DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100:
+                commandName = 'COMMAND_TWO_WAY_SYNC_44100';
                 break;
-            case DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000:
-                commandName = 'COMMAND_SET_TX_SAMPLE_RATE_48000';
-                break;
-            case DataLinkLayer.COMMAND_TX_SYNC:
-                commandName = 'COMMAND_TX_SYNC';
+            case DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000:
+                commandName = 'COMMAND_TWO_WAY_SYNC_48000';
                 break;
         }
     }
@@ -104,7 +101,6 @@ function configListener(state) {
 }
 
 function txConfigListener(state) {
-    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
 }
 
@@ -114,32 +110,16 @@ function rxConfigListener(state) {
 
 // ---------
 
-function onSendCommandSetTxSampleRate44100Click() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100);
-}
-
-function onSendCommandSetTxSampleRate48000Click() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
-}
-
-function onSendCommandTxSyncClick() {
-    dataLinkLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
+function onSendTwoWaySyncClick() {
+    dataLinkLayer.txTwoWaySync();
 }
 
 function onTxSampleRateClick(txSampleRate) {
     dataLinkLayer.setTxSampleRate(txSampleRate);
 }
 
-function onAmplitudeClick(amplitude) {
-    dataLinkLayer.setAmplitude(amplitude);
-}
-
 function onLoopbackClick(state) {
     dataLinkLayer.setLoopback(state);
-}
-
-function onSendSyncClick() {
-    dataLinkLayer.sendSync();
 }
 
 function onSendHexClick() {
@@ -212,9 +192,13 @@ function getByteHexFromSymbol(symbol, symbolMin) {
         byte = symbol - symbolMin,
         byteHex = byte.toString(16);
 
+    if (symbol === 0) {
+        return '[gap]';
+    }
+
     if (byte > 255) {
         // two symbols at the end of the range are 'sync' symbols
-        return '[' + pad(byteHex, 3) + ' sync]';
+        return '[sync' + (byte === 256 ? 'A' : 'B') + ']';
     }
 
     return pad(byteHex, 2)

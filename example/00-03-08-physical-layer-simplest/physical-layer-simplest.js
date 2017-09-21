@@ -30,7 +30,12 @@ function onSendByteClick() {
         byte = getFormFieldValue('#tx-byte', 'int'),
         txConfig = physicalLayer.getTxConfig(),
         symbol = txConfig.symbolMin + byte;
-    physicalLayer.sendSymbol(symbol);
+
+    try {
+        physicalLayer.sendSymbol(symbol);
+    } catch (e) {
+        alert(e); // it's because user may enter symbol out of range
+    }
 }
 
 function rxSymbolListener(state) {

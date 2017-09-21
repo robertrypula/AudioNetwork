@@ -13,9 +13,6 @@ function init() {
         .build();
 }
 
-function txListener(state) {
-}
-
 function rxSampleListener(state) {
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
@@ -29,7 +26,6 @@ function configListener(state) {
 }
 
 function txConfigListener(state) {
-    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
 }
 
@@ -39,32 +35,16 @@ function rxConfigListener(state) {
 
 // ---------
 
-function onSendCommandSetTxSampleRate44100Click() {
-    transportLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_44100);
-}
-
-function onSendCommandSetTxSampleRate48000Click() {
-    transportLayer.sendCommand(DataLinkLayer.COMMAND_SET_TX_SAMPLE_RATE_48000);
-}
-
-function onSendCommandTxSyncClick() {
-    transportLayer.sendCommand(DataLinkLayer.COMMAND_TX_SYNC);
+function onSendTwoWaySyncClick() {
+    transportLayer.txTwoWaySync();
 }
 
 function onTxSampleRateClick(txSampleRate) {
     transportLayer.setTxSampleRate(txSampleRate);
 }
 
-function onAmplitudeClick(amplitude) {
-    transportLayer.setAmplitude(amplitude);
-}
-
 function onLoopbackClick(state) {
     transportLayer.setLoopback(state);
-}
-
-function onSendSyncClick() {
-    transportLayer.sendSync();
 }
 
 function onSendHexClick() {
@@ -137,9 +117,13 @@ function getByteHexFromSymbol(symbol, symbolMin) {
         byte = symbol - symbolMin,
         byteHex = byte.toString(16);
 
+    if (symbol === 0) {
+        return '[gap]';
+    }
+
     if (byte > 255) {
         // two symbols at the end of the range are 'sync' symbols
-        return '[' + pad(byteHex, 3) + ' sync]';
+        return '[sync' + (byte === 256 ? 'A' : 'B') + ']';
     }
 
     return pad(byteHex, 2)

@@ -342,10 +342,10 @@ AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harm
         volume, AudioMonoIO.$$_OUTPUT_WAVE_VOLUME
     );
 
-    if (volume !== null || volume !== undefined) {
+    if (volume || volume === 0) {
         this.$$setImmediately(this.$$outOscillatorGain.gain, volume);
     }
-    if (frequency !== null || frequency !== undefined) {
+    if (frequency || frequency === 0) {
         this.$$setImmediately(this.$$outOscillator.frequency, frequency);
     }
 

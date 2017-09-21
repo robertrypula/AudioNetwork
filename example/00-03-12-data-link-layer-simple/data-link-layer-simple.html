@@ -139,12 +139,9 @@
                                 <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
                                 <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
-                            <p>
-                                This value should match sample rate that is displayed on the receiver's side.
-                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </p>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onSendTwoWaySyncClick()">Two Way Sync</button>
+                            </div>
                         </div>
                     </div>
 
@@ -156,33 +153,14 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="margin-bottom">
-                                <button class="btn btn-default" onClick="onSendSyncClick()">Sync</button>
-                            </div>
-
-                            <div class="margin-bottom">
                                 <div class="margin-bottom">
-                                    <textarea id="tx-hex"></textarea>
+                                    <textarea id="tx-hex">61 62 63</textarea>
                                 </div>
                                 <button
                                     class="btn btn-default"
                                     onClick="onSendHexClick()">
                                     Send frame - bytes in HEX
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Remote commands
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="margin-bottom">
-                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate44100Click()">setTxSampleRate(44100)</button>
-                                <button class="btn btn-default" onClick="onSendCommandSetTxSampleRate48000Click()">setTxSampleRate(48000)</button>
-                                <button class="btn btn-default" onClick="onSendCommandTxSyncClick()">sendSync()</button>
                             </div>
                         </div>
                     </div>

@@ -257,14 +257,18 @@ function drawFrequencyDomainData(ctx, data) {
 // -----------------------------------------------------------------------
 // data handlers
 
+var counter = 0;
+
 function sampleInHandler(monoIn) {
     var
         timeDomain,
         frequencyData;
 
     // compute FFT from raw ScriptProcessorNode samples
+    console.time('Function #' + counter);
     timeDomain = convertRealSignalToComplexSignal(monoIn);
     frequencyData = getFrequencyData(timeDomain);
+    console.timeEnd('Function #' + counter++);
     drawFrequencyDomainData(ctxFft, frequencyData);
 }
 
