@@ -434,13 +434,29 @@ PhysicalLayer.prototype.$$rx = function () {
 PhysicalLayer.prototype.$$tx = function () {
     var
         newSymbolReady,
+        txSymbolPrevious,
         isFirstSampleOfBlock = this.$$offset === 0;
 
     if (isFirstSampleOfBlock) {
         newSymbolReady = this.$$txSymbolQueue.length > 0;
+
+        // TODO experimental feature
+        txSymbolPrevious = this.$$txSymbol;
+        if (this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE && newSymbolReady) {
+            this.$$audioMonoIO.microphoneDisable();
+            // console.log('microphone disable');
+        }
+
         this.$$txSymbol = newSymbolReady
             ? this.$$txSymbolQueue.shift()
             : PhysicalLayer.$$_SYMBOL_IDLE;
+
+        // TODO experimental feature
+        if (txSymbolPrevious !== PhysicalLayer.$$_SYMBOL_IDLE && this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE) {
+            this.$$audioMonoIO.microphoneEnable();
+            // console.log('microphone enable');
+        }
+
         this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
     }
     this.$$updateOscillator();

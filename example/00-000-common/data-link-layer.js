@@ -152,11 +152,9 @@ DataLinkLayer.prototype.txTwoWaySync = function () {
     this.sendSync();
     switch (this.getRxSampleRate()) {
         case 44100:
-            console.log('command 44100');
             this.sendCommand(DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100);
             break;
         case 48000:
-            console.log('command 4800');
             this.sendCommand(DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000);
             break;
     }
