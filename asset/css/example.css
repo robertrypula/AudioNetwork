@@ -18,3 +18,24 @@
     position: absolute;
     opacity: 0.7;
 }
+
+.label-box {
+    display: inline-block;
+    padding: 0 10px;
+    height: 30px;
+    font-size: 1em;
+    line-height: 1em;
+    border-radius: 3px;
+    border: 1px solid rgb(46, 49, 54);
+    outline: none;
+    margin-bottom: 3px;
+    background-color: lightgray;
+    color: rgb(46, 49, 54);
+    font-weight: bold;
+}
+
+.label-box > span {
+    display: block;
+    padding-top: 7px;
+
+}

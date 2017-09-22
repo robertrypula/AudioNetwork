@@ -186,7 +186,7 @@ PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass 
 PhysicalLayer.prototype.sendSync = function () {
     var i, codeValue, symbol;
 
-    this.$$insertGapWhenNeeded();
+    this.$$handleGapLogic();
 
     for (i = 0; i < this.$$syncCode.length; i++) {
         codeValue = this.$$syncCode[i];
@@ -207,7 +207,7 @@ PhysicalLayer.prototype.sendSync = function () {
 PhysicalLayer.prototype.sendSymbol = function (symbol) {
     var isNumber, symbolParsed, inRange, isValid, isSymbolSpecial;
 
-    this.$$insertGapWhenNeeded();
+    this.$$handleGapLogic();
 
     isSymbolSpecial =
         symbol === PhysicalLayer.$$_SYMBOL_IDLE ||
@@ -226,6 +226,7 @@ PhysicalLayer.prototype.sendSymbol = function (symbol) {
         }
 
         this.$$txSymbolQueue.push(symbolParsed);
+        // this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);     // will be removed if subsequent symbol will arrive
     }
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
@@ -342,7 +343,7 @@ PhysicalLayer.prototype.getTxConfig = function () {
 
 // -----------------------------------------
 
-PhysicalLayer.prototype.$$insertGapWhenNeeded = function () {
+PhysicalLayer.prototype.$$handleGapLogic = function () {
     var tx;
 
     // When device A sends some data to device B
@@ -433,33 +434,42 @@ PhysicalLayer.prototype.$$rx = function () {
 
 PhysicalLayer.prototype.$$tx = function () {
     var
+        isFirstSampleOfBlock = this.$$offset === 0,
+        txJustStarted = false,
+        txJustEnded = false,
         newSymbolReady,
-        txSymbolPrevious,
-        isFirstSampleOfBlock = this.$$offset === 0;
+        txSymbolPrevious;
 
     if (isFirstSampleOfBlock) {
         newSymbolReady = this.$$txSymbolQueue.length > 0;
 
-        // TODO experimental feature
         txSymbolPrevious = this.$$txSymbol;
-        if (this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE && newSymbolReady) {
-            this.$$audioMonoIO.microphoneDisable();
-            // console.log('microphone disable');
-        }
+        txJustStarted =
+            this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE &&
+            newSymbolReady;
 
         this.$$txSymbol = newSymbolReady
             ? this.$$txSymbolQueue.shift()
             : PhysicalLayer.$$_SYMBOL_IDLE;
 
-        // TODO experimental feature
-        if (txSymbolPrevious !== PhysicalLayer.$$_SYMBOL_IDLE && this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE) {
-            this.$$audioMonoIO.microphoneEnable();
-            // console.log('microphone enable');
-        }
+        txJustEnded =
+            txSymbolPrevious !== PhysicalLayer.$$_SYMBOL_IDLE &&
+            this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE;
 
         this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
     }
+
+    if (txJustStarted) {
+        this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature
+        // console.log('microphone disable');
+    }
+
     this.$$updateOscillator();
+
+    if (txJustEnded) {
+        this.$$audioMonoIO.microphoneEnable();
+        // console.log('microphone enable');
+    }
 };
 
 // -------
