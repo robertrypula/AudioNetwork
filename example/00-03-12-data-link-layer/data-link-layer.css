@@ -3,20 +3,29 @@
     font-size: 12px;
 }
 
-#rx-frame-candidate-container {
-    min-height: 100px;
+.rx-frame-candidate-container {
+    min-height: 50px;
 }
 
-#rx-frame {
-    min-height: 150px;
+.rx-frame-container {
+    overflow-y: scroll;
+    height: 100px;
 }
 
-#rx-frame > div {
-    display: none;
+.rx-process-bar {
+    position: relative;
+    background-color: gray;
+    height: 10px;
+    outline: 1px solid black;
 }
 
-#rx-frame > div.visible {
-    display: block;
+.rx-process-bar > div {
+    position: absolute;
+    background-color: yellow;
+    bottom: 0px;
+    top: 0px;
+    left: 0px;
+    width: 0%;
 }
 
 .rx-box-with-border {
@@ -26,6 +35,7 @@
     margin-right: -5px;
     padding: 5px;
     margin-bottom: 5px;
+    width: 90%;
 }
 
 #rx-frame-payload-as-ascii {

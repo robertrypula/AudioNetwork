@@ -117,7 +117,7 @@ function getByteHexFromSymbol(symbol, symbolMin) {
         byte = symbol - symbolMin,
         byteHex = byte.toString(16);
 
-    if (symbol === 0) {
+    if (symbol <= 0) {
         return '[gap]';
     }
 

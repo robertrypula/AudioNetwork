@@ -23,7 +23,7 @@ function init() {
 }
 
 function frameListener(frame) {
-    var commandName = '';
+    var commandName = '', htmlContent = '';
 
     if (frame.isCommand) {
         switch (frame.payload[0]) {
@@ -36,15 +36,16 @@ function frameListener(frame) {
         }
     }
 
-    addClass('#rx-frame > div', 'visible');
-    html('#rx-frame-id', frame.id);
-    html('#rx-frame-header', getByteHexFromByte(frame.header));
-    html('#rx-frame-checksum', getByteHexFromByte(frame.checksum));
-    html('#rx-frame-is-command', frame.isCommand ? ('yes - ' + commandName) : 'no');
-    html('#rx-frame-candidate-id', frame.frameCandidateId);
+    htmlContent += '<div class="rx-box-with-border">';
+    // htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
+    // htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
+    htmlContent += '<div>' + getByteHexFromByteList(frame.payload) + '</div>';
+    htmlContent += '<div>' + getAsciiFromByteList(frame.payload) + '</div>';
+    // htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
+    // htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
+    htmlContent += '</div>';
 
-    html('#rx-frame-payload', getByteHexFromByteList(frame.payload));
-    html('#rx-frame-payload-as-ascii', getAsciiFromByteList(frame.payload));
+    html('#rx-frame', htmlContent, true);
 }
 
 function frameCandidateListener(frameCandidateList) {
@@ -52,14 +53,15 @@ function frameCandidateListener(frameCandidateList) {
 
     for (i = 0; i < frameCandidateList.length; i++) {
         fc = frameCandidateList[i];
-        progress = fc.received.length + '/' + fc.expected + ' ' +
-            '(' + (100 * fc.received.length / fc.expected).toFixed(0) + '%)';
+        progress = (100 * fc.received.length / fc.expected).toFixed(0);
         htmlContent += '<div class="rx-box-with-border">';
-        htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
-        htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
-        htmlContent += '<strong>Received:</strong> ' + getByteHexFromByteList(fc.received) + '<br/>';
-        htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
-        htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
+        htmlContent += '<div class="rx-process-bar"><div style="width: ' + progress + '%"></div></div>';
+        // htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
+        // htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
+        htmlContent += '<div>' + getByteHexFromByteList(fc.received) + '</div>';
+        htmlContent += '<div>' + getAsciiFromByteList(fc.received) + '</div>';
+        // htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
+        // htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
         htmlContent += '</div>';
     }
 
@@ -192,7 +194,7 @@ function getByteHexFromSymbol(symbol, symbolMin) {
         byte = symbol - symbolMin,
         byteHex = byte.toString(16);
 
-    if (symbol === 0) {
+    if (symbol <= 0) {
         return '[gap]';
     }
 
