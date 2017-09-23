@@ -9,7 +9,7 @@
 
 .rx-frame-container {
     overflow-y: scroll;
-    height: 100px;
+    height: 400px;
 }
 
 .rx-process-bar {
@@ -31,8 +31,6 @@
 .rx-box-with-border {
     border: 1px solid #ddd;
     background-color: #eee;
-    margin-left: -5px;
-    margin-right: -5px;
     padding: 5px;
     margin-bottom: 5px;
     width: 90%;
