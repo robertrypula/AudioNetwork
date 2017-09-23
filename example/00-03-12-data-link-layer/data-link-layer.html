@@ -125,11 +125,23 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Byte raw history (hex)
+                                Rx
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="rx-byte-raw-history">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Tx
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-byte-hex">-</span>
+                            <span id="tx-byte-hex-queue">-</span>
                         </div>
                     </div>
 
@@ -149,7 +161,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Last frame
+                                rxFrame
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
@@ -172,53 +184,25 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Send...
+                                txFrame
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="margin-bottom">
                                 <div class="margin-bottom">
-                                    <textarea id="tx-hex">61 62 63</textarea>
+                                    <textarea id="tx-data"></textarea>
                                 </div>
                                 <button
                                     class="btn btn-default"
                                     onClick="onSendHexClick()">
-                                    Send frame - bytes in HEX
+                                    Bytes in HEX
                                 </button>
-                            </div>
-
-                            <div class="margin-bottom">
-                                <div class="margin-bottom">
-                                    <textarea id="tx-ascii">abc</textarea>
-                                </div>
                                 <button
                                     class="btn btn-default"
                                     onClick="onSendAsciiClick()">
-                                    Send frame - ASCII
+                                    Frame - ASCII
                                 </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Byte (hex)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Byte Queue (hex)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex-queue">-</span>
                         </div>
                     </div>
 

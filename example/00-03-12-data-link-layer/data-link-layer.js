@@ -124,7 +124,7 @@ function onLoopbackClick(state) {
 
 function onSendHexClick() {
     var
-        textSplit = getFormFieldValue('#tx-hex', 'split'),
+        textSplit = getFormFieldValue('#tx-data', 'split'),
         payload = [],
         byte,
         i;
@@ -140,7 +140,7 @@ function onSendHexClick() {
 
 function onSendAsciiClick() {
     var
-        text = getFormFieldValue('#tx-ascii'),
+        text = getFormFieldValue('#tx-data'),
         payload = [],
         byte,
         i;

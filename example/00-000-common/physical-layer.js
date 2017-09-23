@@ -173,7 +173,8 @@ PhysicalLayer.$$_INITIAL_SAMPLE_NUMER = 0;
 PhysicalLayer.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayer.$$_INITIAL_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
 PhysicalLayer.$$_SYMBOL_IDLE = null;
-PhysicalLayer.$$_SYMBOL_GAP = 0;
+PhysicalLayer.$$_SYMBOL_GAP = -1;
+PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT = -2;
 PhysicalLayer.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayer.$$_TX_FREQUENCY_ZERO = 0;
 PhysicalLayer.$$_FIRST_SYMBOL = 1;
@@ -198,36 +199,29 @@ PhysicalLayer.prototype.sendSync = function () {
 
     // TODO actually it should take into account the Correlator.THRESHOLD_UNIT value
     for (i = 0; i < Math.ceil(this.$$syncCode.length / 2) + 1; i++) {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT);
     }
 
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
 PhysicalLayer.prototype.sendSymbol = function (symbol) {
-    var isNumber, symbolParsed, inRange, isValid, isSymbolSpecial;
+    var isNumber, symbolParsed, inRange, isValid;
 
     this.$$handleGapLogic();
 
-    isSymbolSpecial =
-        symbol === PhysicalLayer.$$_SYMBOL_IDLE ||
-        symbol === PhysicalLayer.$$_SYMBOL_GAP;
+    symbolParsed = parseInt(symbol);
+    isNumber = typeof symbolParsed === 'number';
+    inRange = this.$$txSymbolMin <= symbolParsed && symbolParsed <= this.$$txSymbolMax;
+    isValid = isNumber && inRange;
 
-    if (isSymbolSpecial) {
+    if (!isValid) {
         throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
-    } else {
-        symbolParsed = parseInt(symbol);
-        isNumber = typeof symbolParsed === 'number';
-        inRange = this.$$txSymbolMin <= symbolParsed && symbolParsed <= this.$$txSymbolMax;
-        isValid = isNumber && inRange;
-
-        if (!isValid) {
-            throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
-        }
-
-        this.$$txSymbolQueue.push(symbolParsed);
-        // this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);     // will be removed if subsequent symbol will arrive
     }
+
+    this.$$txSymbolQueue.push(symbolParsed);
+    this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);     // will be removed if subsequent symbol will arrive
+
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
@@ -344,18 +338,30 @@ PhysicalLayer.prototype.getTxConfig = function () {
 // -----------------------------------------
 
 PhysicalLayer.prototype.$$handleGapLogic = function () {
-    var tx;
+    var tx, i;
 
     // When device A sends some data to device B
     // then device B cannot respond immediately. We
     // need make sure that device A will have some time
     // to reinitialize microphone again. This is solved
-    // by adding one extra symbol of gap. When device B
-    // already have something in the queue then gap is
-    // not required.
+    // by adding two 'gap' symbols in the beggining
+    // Similar problem we have at the end. If we enable
+    // microphone at the same time as last symbol stops
+    // then we have a glitch. We need to add one 'gap'
+    // symbol after the last symbol.
+    // If symbol is not last we need to remove that
+    // unnessescary gap.
     tx = this.getTx();
     if (!tx.isTxActive) {
         this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+    } else {
+        for (i = this.$$txSymbolQueue.length - 1; i >= 0; i--) {
+            if (this.$$txSymbolQueue[i] !== PhysicalLayer.$$_SYMBOL_GAP) {
+                this.$$txSymbolQueue.length = i + 1;
+                break;
+            }
+        }
     }
 };
 
@@ -457,18 +463,19 @@ PhysicalLayer.prototype.$$tx = function () {
             this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE;
 
         this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
-    }
 
-    if (txJustStarted) {
-        this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature
-        // console.log('microphone disable');
-    }
+        if (txJustStarted) {
+            this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature, this solves volume controll problem on mobile browsers
+            // console.log('microphone disable');
+        }
+        if (txJustEnded) {
+            this.$$audioMonoIO.microphoneEnable();  // TODO experimental feature, this solves volume controll problem on mobile browsers
+            // console.log('microphone enable');
+        }
 
-    this.$$updateOscillator();
+        this.$$updateOscillator();
 
-    if (txJustEnded) {
-        this.$$audioMonoIO.microphoneEnable();
-        // console.log('microphone enable');
+        // console.log('-----');
     }
 };
 
@@ -512,7 +519,8 @@ PhysicalLayer.prototype.$$updateOscillator = function () {
 
     isSymbolSpecial =
         this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP;
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP ||
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT;
 
     if (isSymbolSpecial) {
         frequency = PhysicalLayer.$$_TX_FREQUENCY_ZERO;
@@ -522,6 +530,14 @@ PhysicalLayer.prototype.$$updateOscillator = function () {
         amplitude = this.$$amplitude;
     }
 
+    /*
+    console.log(
+        'setPeriodicWave', frequency, amplitude,
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ? 'IDLE' : '',
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP ? 'GAP' : '',
+        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT ? 'GAP IMPORTANT' : ''
+    );
+    */
     this.$$audioMonoIO.setPeriodicWave(frequency, amplitude);
 };
 
