@@ -25,18 +25,20 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 50%;
+    width: 45%;
     height: 0;
     outline: 1px solid black;
-    transform: rotate(-45deg);
+    transform: rotate(0deg);
     transform-origin: left top;
 }
 
 .constellation-diagram-inner-1 {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 2px;
-    height: 2px;
-    outline: 1px solid black;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    /* outline: 1px solid black; */
+    border-radius: 4px;
+    background-color: #738BD7;
 }

@@ -16,7 +16,7 @@
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body>
+<body onLoad="init(true, 2048)">
 
     <div id="fb-root"></div>
     <script>
@@ -59,7 +59,7 @@
                 <div class="col col-xs-12">
                     <p>
                         This example shows how to use Wave Generator and Wave Analyser classes
-                        <strong>Remeber to click on initialization buttons first!</strong>
+                        <!--<strong>Remeber to click on initialization buttons first!</strong>-->
                     </p>
                 </div>
             </div>
@@ -67,27 +67,27 @@
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
 
-                    <div class="row margin-bottom-double" id="init-button-container">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label>Init AudioMonoIO</label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="init(false, 2048)" class="btn btn-default">2048</button>
-                            <button onClick="init(false, 8192)" class="btn btn-default">8192</button>
-                            <button onClick="init(false, 16384)" class="btn btn-default">16384</button>
-                        </div>
-                    </div>
+                    <!--<div class="row margin-bottom-double" id="init-button-container">-->
+                        <!--<div class="col col-xs-6 col-sm-5 col-md-3">-->
+                            <!--<label>Init AudioMonoIO</label>-->
+                        <!--</div>-->
+                        <!--<div class="col col-xs-6 col-sm-7 col-md-6">-->
+                            <!--<button onClick="init(false, 2048)" class="btn btn-default">2048</button>-->
+                            <!--<button onClick="init(false, 8192)" class="btn btn-default">8192</button>-->
+                            <!--<button onClick="init(false, 16384)" class="btn btn-default">16384</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
 
-                    <div class="row margin-bottom-double" id="init-lite-button-container">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label>Init AudioMonoIOLite (experimental)</label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <button onClick="init(true, 2048)" class="btn btn-default">2048</button>
-                            <button onClick="init(true, 8192)" class="btn btn-default">8192</button>
-                            <button onClick="init(true, 16384)" class="btn btn-default">16384</button>
-                        </div>
-                    </div>
+                    <!--<div class="row margin-bottom-double" id="init-lite-button-container">-->
+                        <!--<div class="col col-xs-6 col-sm-5 col-md-3">-->
+                            <!--<label>Init AudioMonoIOLite (experimental)</label>-->
+                        <!--</div>-->
+                        <!--<div class="col col-xs-6 col-sm-7 col-md-6">-->
+                            <!--<button onClick="init(true, 2048)" class="btn btn-default">2048</button>-->
+                            <!--<button onClick="init(true, 8192)" class="btn btn-default">8192</button>-->
+                            <!--<button onClick="init(true, 16384)" class="btn btn-default">16384</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
