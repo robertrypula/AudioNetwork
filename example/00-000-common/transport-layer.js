@@ -202,6 +202,18 @@ TransportLayer.prototype.serverDisconnect = function () {
     this.$$updateUI();
 };
 
+TransportLayer.prototype.clientStartFakeTransmission = function () {
+    var p;
+
+    if (this.$$clientState === C_ESTABLISHED) {
+        p = [0xFF, 0xEE, 0x61, 0x62, 0x63, 0x64];
+        this.$$dataLinkLayer.sendFrame(p);
+        html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
+        this.$$clientState = 'C_FAKE_ABCD_SENT';
+    }
+    this.$$updateUI();
+};
+
 TransportLayer.prototype.$$handleFramePoc = function (frame) {
     var
         segmentPayload = formatSegment(frame.payload),
@@ -223,6 +235,15 @@ TransportLayer.prototype.$$handleFramePoc = function (frame) {
             if (segmentPayload === '10|c9') {
                 this.$$serverState = S_ESTABLISHED;
             }
+            break;
+        case S_ESTABLISHED:
+            if (segmentPayload === 'ff|ee|61|62|63|64') {
+                p = [0xFF, 0xEE, 0x00];
+                this.$$dataLinkLayer.sendFrame(p);
+                html('#tx-segment', (this.$$c++) +  ' srv: ' + formatSegment(p) + '<br/>', true);
+                this.$$serverState = 'C_FAKE_ABCD_RECEIVED';
+            }
+            break;
     }
 
     // client
@@ -234,6 +255,12 @@ TransportLayer.prototype.$$handleFramePoc = function (frame) {
                 html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
                 this.$$clientState = C_ESTABLISHED;
             }
+            break;
+        case 'C_FAKE_ABCD_SENT':
+            if (segmentPayload === 'ff|ee|00') {
+                this.$$clientState = 'C_FAKE_ABCD_ACK_RECEIVED';
+            }
+            break;
     }
 
     this.$$updateUI();

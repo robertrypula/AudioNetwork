@@ -59,6 +59,10 @@ function clientDisconnect() {
     transportLayer.clientDisconnect();
 }
 
+function clientStartFakeTransmission() {
+    transportLayer.clientStartFakeTransmission();
+}
+
 function serverListen() {
     transportLayer.serverListen();
 }
