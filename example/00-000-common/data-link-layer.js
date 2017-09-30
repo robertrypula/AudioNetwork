@@ -447,10 +447,10 @@ DataLinkLayer.$$getIsCommand = function (header) {
 };
 
 DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
-    var sum1, sum2, i, isLeftHalfOfByte, byteNumber, byte, halfOfByte;
+    var sum0, sum1, i, isLeftHalfOfByte, byteNumber, byte, halfOfByte;
 
+    sum0 = 0;
     sum1 = 0;
-    sum2 = 0;
     for (i = 0; i < 2 * frameWithoutChecksum.length; i++) {
         isLeftHalfOfByte = i % 2 === 0;
         byteNumber = i >>> 1;
@@ -458,11 +458,11 @@ DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
         halfOfByte = isLeftHalfOfByte
             ? (byte & 0xF0) >>> 4
             : byte & 0x0F;
-        sum1 = (sum1 + halfOfByte) % 0x0F;
-        sum2 = (sum2 + sum1) % 0x0F;
+        sum0 = (sum0 + halfOfByte) % 0x0F;
+        sum1 = (sum1 + sum0) % 0x0F;
     }
 
-    return (sum2 << 4) | sum1;
+    return (sum1 << 4) | sum0;
 };
 
 DataLinkLayer.$$isFunction = function (variable) {

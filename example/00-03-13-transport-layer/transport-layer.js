@@ -2,14 +2,16 @@
 'use strict';
 
 var
-    ASCII_NULL = 0,
-    UNICODE_UNKNOWN = '�',
     transportLayerBuilder,
     transportLayer;
 
 function init() {
     transportLayerBuilder = new TransportLayerBuilder();
     transportLayer = transportLayerBuilder
+        .rxConfigListener(rxConfigListener)
+        .txConfigListener(txConfigListener)
+        .configListener(configListener)
+        .rxSampleListener(rxSampleListener)
         .build();
 }
 
@@ -47,114 +49,20 @@ function onLoopbackClick(state) {
     transportLayer.setLoopback(state);
 }
 
-function onSendHexClick() {
-    var
-        textSplit = getFormFieldValue('#tx-hex', 'split'),
-        payload = [],
-        byte,
-        i;
+// --------- TODO remove code below - only tests
 
-    for (i = 0; i < textSplit.length; i++) {
-        byte = parseInt(textSplit[i], 16);
-        if (0 <= byte && byte <= 255) {
-            payload.push(byte);
-        }
-    }
-    txByteBlock(payload);
+function clientConnect() {
+    transportLayer.clientConnect();
 }
 
-function onSendAsciiClick() {
-    var
-        text = getFormFieldValue('#tx-ascii'),
-        payload = [],
-        byte,
-        i;
-
-    for (i = 0; i < text.length; i++) {
-        byte = isPrintableAscii(text[i])
-            ? text.charCodeAt(i)
-            : ASCII_NULL;
-        payload.push(byte);
-    }
-    txByteBlock(payload);
+function clientDisconnect() {
+    transportLayer.clientDisconnect();
 }
 
-function txByteBlock(payload) {
-    try {
-        // transportLayer.
-    } catch (e) {
-        alert(e);
-    }
+function serverListen() {
+    transportLayer.serverListen();
 }
 
-// ---------
-
-function isPrintableAscii(char) {
-    return char >= ' ' && char <= '~';
-}
-
-function getByteHexFromByte(byte) {
-    var byteHex = byte.toString(16);
-
-    return pad(byteHex, 2)
-}
-
-function getByteHexFromByteList(byteList) {
-    var i, byte, result = [];
-
-    for (i = 0; i < byteList.length; i++) {
-        byte = byteList[i];
-        result.push(
-            getByteHexFromByte(byte)
-        );
-    }
-
-    return result.join(' ');
-}
-
-function getByteHexFromSymbol(symbol, symbolMin) {
-    var
-        byte = symbol - symbolMin,
-        byteHex = byte.toString(16);
-
-    if (symbol <= 0) {
-        return '[gap]';
-    }
-
-    if (byte > 255) {
-        // two symbols at the end of the range are 'sync' symbols
-        return '[sync' + (byte === 256 ? 'A' : 'B') + ']';
-    }
-
-    return pad(byteHex, 2)
-}
-
-function getByteHexFromSymbolList(symbolList, symbolMin) {
-    var i, symbol, result = [];
-
-    for (i = 0; i < symbolList.length; i++) {
-        symbol = symbolList[i];
-        result.push(
-            getByteHexFromSymbol(symbol, symbolMin)
-        );
-    }
-
-    return result.join(' ');
-}
-
-function pad(num, size) {
-    var s = '000000000' + num;
-
-    return s.substr(s.length - size);
-}
-
-function getAsciiFromByteList(byteList) {
-    var i, char, result = '';
-
-    for (i = 0; i < byteList.length; i++) {
-        char = String.fromCharCode(byteList[i]);
-        result += isPrintableAscii(char) ? char : UNICODE_UNKNOWN;
-    }
-
-    return result;
+function serverDisconnect() {
+    transportLayer.serverDisconnect();
 }

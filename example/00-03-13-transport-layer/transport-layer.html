@@ -72,23 +72,29 @@
                         </div>
                     </div>
 
-                    <h2>Receiver</h2>
+                    <!-- ----- -->
+
+                    <h2>Synchronization</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Sample&nbsp;rate
+                            <label>
+                                RxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="rx-sample-rate">-</span> kHz
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sample-rate">-</span> kHz
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Status
+                                SyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -99,37 +105,8 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Last packet
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
-                            <!--
-                            <div id="rx-frame" class="clearfix">
-                                <div class="rx-box-with-border">
-                                    <div class="margin-bottom">
-                                        <strong>Id:</strong> <span id="rx-frame-id">-</span><br/>
-                                        <strong>Header:</strong> <span id="rx-frame-header">-</span><br/>
-                                        <strong>Checksum:</strong> <span id="rx-frame-checksum">-</span><br/>
-                                        <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
-                                        <strong>FrameCandidateId:</strong> <span id="rx-frame-candidate-id">-</span>
-                                    </div>
-                                    <div id="rx-frame-payload">-</div>
-                                    <div id="rx-frame-payload-as-ascii">-</div>
-                                </div>
-                            </div>
-                            -->
-                        </div>
-                    </div>
-
-                    <!-- ----- -->
-
-                    <h2>Transmitter</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Sample Rate
+                                TxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -143,56 +120,57 @@
                         </div>
                     </div>
 
+                    <h2>Client</h2>
+
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Send...
+                            <label class="label-for-checkbox">
+                                State
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="margin-bottom">
-                                <div class="margin-bottom">
-                                    <textarea id="tx-hex"></textarea>
-                                </div>
-                                <button
-                                        class="btn btn-default"
-                                        onClick="onSendHexClick()">
-                                    Send byte block - bytes in HEX
-                                </button>
-                            </div>
+                            <div id="client-state" class="margin-bottom">-</div>
+                            <button class="btn btn-default" onClick="clientConnect()">Connect</button>
+                            <button class="btn btn-default" onClick="clientDisconnect()">Disconnect</button>
+                        </div>
+                    </div>
 
-                            <div class="margin-bottom">
-                                <div class="margin-bottom">
-                                    <textarea id="tx-ascii"></textarea>
-                                </div>
-                                <button
-                                        class="btn btn-default"
-                                        onClick="onSendAsciiClick()">
-                                    Send byte block - ASCII
-                                </button>
-                            </div>
+                    <h2>Server</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                State
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="server-state" class="margin-bottom">-</div>
+                            <button class="btn btn-default" onClick="serverListen()">Listen</button>
+                            <button class="btn btn-default" onClick="serverDisconnect()">Disconnect</button>
+                        </div>
+                    </div>
+
+                    <h2>Segments</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-for-checkbox">
+                                Received
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-segment" style="font-family: monospace;"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-for-checkbox">
-                                Byte (hex)
+                                Transmited
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
-                                Byte Queue (hex)
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-byte-hex-queue">-</span>
+                            <div id="tx-segment" style="font-family: monospace;"></div>
                         </div>
                     </div>
 

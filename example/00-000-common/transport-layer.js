@@ -136,8 +136,110 @@ TransportLayer = function (builder) {
     this.$$externalConfigListener = TransportLayer.$$isFunction(builder._configListener) ? builder._configListener : null;
     this.$$externalTxListener = TransportLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
     this.$$externalTxConfigListener = TransportLayer.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
+
+    // TODO code below is proof of concept
+    this.$$serverState = S_CLOSED;
+    this.$$clientState = C_CLOSED;
+    this.$$c = 1000;
+    this.$$updateUI();
 };
 
+var
+    C_CLOSED = 'C_CLOSED',
+    C_SYN_SENT = 'C_SYN_SENT',
+    C_ESTABLISHED = 'C_ESTABLISHED',
+    C_HI_SENT = 'C_HI_SENT',
+    C_HI_ACT_RECEIEVD = 'C_HI_ACT_RECEIEVD',
+    C_HEY_RECEIEVD = 'C_HEY_RECEIEVD',
+    C_HEY_ACK_SENT = 'C_HEY_ACK_SENT',
+
+    S_CLOSED = 'S_CLOSED',
+    S_LISTEN = 'S_LISTEN',
+    S_SYN_RECEIVED = 'S_SYN_RECEIVED',
+    S_ESTABLISHED = 'S_ESTABLISHED',
+    S_HI_ACT_SENT = 'S_HI_ACT_SENT',
+    S_HEY_SENT = 'S_HEY_SENT',
+    S_HEY_ACT_RECEIVED = 'S_HEY_ACT_RECEIVED';
+
+// -------------------------------------- TODO code below is just quick Proof Of Concept
+
+function formatSegment(payload) {
+    return payload.map(function (byte) { return (byte < 16 ? '0' : '') + byte.toString(16); }).join('|');
+}
+
+TransportLayer.prototype.$$updateUI = function () {
+    document.getElementById('server-state').innerHTML = this.$$serverState;
+    document.getElementById('client-state').innerHTML = this.$$clientState;
+};
+
+TransportLayer.prototype.clientConnect = function () {
+    var p;
+
+    switch (this.$$clientState) {
+        case C_CLOSED:
+            p = [0x8f, 0];
+            this.$$dataLinkLayer.sendFrame(p);
+            html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
+            this.$$clientState = C_SYN_SENT;
+            break;
+    }
+
+    this.$$updateUI();
+};
+
+TransportLayer.prototype.clientDisconnect = function () {
+    this.$$clientState = C_CLOSED;
+    this.$$updateUI();
+};
+
+TransportLayer.prototype.serverListen = function () {
+    this.$$serverState = S_LISTEN;
+    this.$$updateUI();
+};
+
+TransportLayer.prototype.serverDisconnect = function () {
+    this.$$serverState = S_CLOSED;
+    this.$$updateUI();
+};
+
+TransportLayer.prototype.$$handleFramePoc = function (frame) {
+    var
+        segmentPayload = formatSegment(frame.payload),
+        p;
+
+    html('#rx-segment', (this.$$c++) + ' ???: ' + segmentPayload + '<br/>', true);
+
+    // server
+    switch (this.$$serverState) {
+        case S_LISTEN:
+            if (segmentPayload === '8f|00') {
+                p = [0xc8, 0x90];
+                this.$$dataLinkLayer.sendFrame(p);
+                html('#tx-segment', (this.$$c++) +  ' srv: ' + formatSegment(p) + '<br/>', true);
+                this.$$serverState = S_SYN_RECEIVED;
+            }
+            break;
+        case S_SYN_RECEIVED:
+            if (segmentPayload === '10|c9') {
+                this.$$serverState = S_ESTABLISHED;
+            }
+    }
+
+    // client
+    switch (this.$$clientState) {
+        case C_SYN_SENT:
+            if (segmentPayload === 'c8|90') {
+                p = [0x10, 0xc9];
+                this.$$dataLinkLayer.sendFrame(p);
+                html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
+                this.$$clientState = C_ESTABLISHED;
+            }
+    }
+
+    this.$$updateUI();
+};
+
+// --------------------------------------
 
 TransportLayer.prototype.getDataLinkLayer = function () {
     return this.$$dataLinkLayer;
@@ -165,19 +267,20 @@ TransportLayer.prototype.setLoopback = function (state) {
 
 // -----------------------------------------------------
 
-TransportLayer.prototype.$$handleFrame = function () {
-    console.log('transport layer rx frame handler');
+TransportLayer.prototype.$$handleFrame = function (frame) {
+    this.$$handleFramePoc(frame);
+    // console.log('transport layer rx frame handler');
 };
 
 TransportLayer.prototype.$$handleTx = function () {
-    console.log('transport layer tx listener');
+    // console.log('transport layer tx listener');
 };
 
 // -----------------------------------------------------
 
 TransportLayer.prototype.$$frameListener = function (data) {
     this.$$externalFrameListener ? this.$$externalFrameListener(data) : undefined;
-    this.$$handleFrame();
+    this.$$handleFrame(data);
 };
 
 TransportLayer.prototype.$$frameCandidateListener = function (data) {
@@ -214,3 +317,7 @@ TransportLayer.prototype.$$txConfigListener = function (data) {
 };
 
 // -----------------------------------------------------
+
+TransportLayer.$$isFunction = function (variable) {
+    return typeof variable === 'function';
+};
