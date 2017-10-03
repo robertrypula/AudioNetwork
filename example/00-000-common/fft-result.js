@@ -192,6 +192,10 @@ FFTResult.prototype.getNyquistFrequency = function () {
     return FFTResult.$$_HALF * this.$$sampleRate;
 };
 
+FFTResult.prototype.getSampleRate = function () {
+    return this.$$sampleRate;
+};
+
 FFTResult.prototype.getFFTSize = function () {
     return this.$$fftData.length * 2;
 };

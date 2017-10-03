@@ -78,16 +78,16 @@ function onFftSizeExponentChange() {
 function updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex) {
     var
         fftNominalResolution,
-        fltSkippedResolution;
+        fftSkippedResolution;
 
     fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
-    fltSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
+    fftSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
     rxSpectrogram.add(
         fftResult.getFrequencyData(),
         rxBinMin,
         rxBinMax,
-        fltSkippedResolution,
+        fftSkippedResolution,
         document.getElementById('loudest-marker').checked
             ? loudestBinIndex
             : Spectrogram.INDEX_MARKER_DISABLED,

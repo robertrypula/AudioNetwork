@@ -163,10 +163,10 @@ function onTxPlayChange() {
 function updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex) {
     var
         fftNominalResolution,
-        fltSkippedResolution;
+        fftSkippedResolution;
 
     fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
-    fltSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
+    fftSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
     html('#rx-sample-rate', (audioMonoIO.getSampleRate() / 1000).toFixed(1));
 
@@ -175,14 +175,14 @@ function updateView(fftResult, rxBinMin, rxBinMax, loudestBinIndex) {
         'FFT size: ' + getFftSize() + '<br/>' +
         'FFT time: ' + (getFftSize() / audioMonoIO.getSampleRate()).toFixed(3) + ' sec<br/>' +
         'FFT native resolution: ' + fftNominalResolution.toFixed(2) + ' Hz<br/>' +
-        'FFT skipped resolution: ' + fltSkippedResolution.toFixed(2) + ' Hz'
+        'FFT skipped resolution: ' + fftSkippedResolution.toFixed(2) + ' Hz'
     );
 
     rxSpectrogram.add(
         fftResult.getFrequencyData(),
         rxBinMin,
         rxBinMax,
-        fltSkippedResolution,
+        fftSkippedResolution,
         document.getElementById('loudest-marker').checked
             ? loudestBinIndex
             : Spectrogram.INDEX_MARKER_DISABLED,

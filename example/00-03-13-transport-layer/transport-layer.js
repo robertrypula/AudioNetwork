@@ -3,7 +3,8 @@
 
 var
     transportLayerBuilder,
-    transportLayer;
+    transportLayer,
+    log = [];
 
 function init() {
     transportLayerBuilder = new TransportLayerBuilder();
@@ -15,7 +16,19 @@ function init() {
         .build();
 }
 
+function logDump() {
+    var i, j;
+
+    for (i = 0; i < log.length; i++) {
+        for (j = 0; j < log[i].frequencyData.length; j++) {
+            log[i].frequencyData[j] = parseFloat(log[i].frequencyData[j].toFixed(1));
+        }
+    }
+    document.getElementById('log').value = JSON.stringify(log);
+}
+
 function rxSampleListener(state) {
+    log.push(state);
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 }
