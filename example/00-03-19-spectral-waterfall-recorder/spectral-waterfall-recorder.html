@@ -60,21 +60,6 @@
                 <div class="col col-xs-12">
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-for-checkbox">
-                                Loopback
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <input
-                                type="checkbox"
-                                onChange="onLoopbackCheckboxChange()"
-                                id="loopback-checkbox"
-                                value="1" />
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
                                 FFT Size exponent
@@ -133,6 +118,21 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label for="rx-draw-spectrogram" class="label-for-checkbox">
+                                Draw spectrogram
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="rx-draw-spectrogram"
+                                checked="checked"
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label for="loudest-marker" class="label-for-checkbox">
                                 Show loudest
                             </label>
@@ -143,6 +143,14 @@
                                 id="loudest-marker"
                                 checked="checked"
                                 value="1" />
+                        </div>
+                    </div>
+
+                    <h2>Recorded Spectrogram</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+                            <div id="rx-spectrogram-recorded"></div>
                         </div>
                     </div>
 

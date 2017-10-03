@@ -3,11 +3,12 @@
 
 var Spectrogram;
 
-Spectrogram = function (domElement) {
+Spectrogram = function (domElement, rowLimit) {
     this.$$id = 'spectrogram-' + Math.round(Math.random() * 1000000);
     this.$$domElement = domElement;
     this.$$keyLast = null;
     this.$$renderedRowCounter = 0;
+    this.$$rowLimit = rowLimit ? rowLimit : Spectrogram.ROW_LIMIT;
     this.$$indexMin = null;
     this.$$indexMax = null;
     this.$$frequencySpacing = null;
@@ -20,7 +21,7 @@ Spectrogram.ROW_MARKER_DISABLED = false;
 Spectrogram.DECIBEL_MIN = -160;
 Spectrogram.DECIBEL_FOR_COLOR_LIGHT = -36;
 Spectrogram.DECIBEL_FOR_COLOR_DARK = -160;
-Spectrogram.RENDERED_ROW_MAX = 2 + 32;   // 2 for header, 30 for data
+Spectrogram.ROW_LIMIT = 2 + 32;   // 2 for header, 30 for data
 Spectrogram.LEFT_COLUMN_MODE_HEADER = 'LEFT_COLUMN_MODE_HEADER';
 Spectrogram.LEFT_COLUMN_MODE_COLOR_LIGHT = 'LEFT_COLUMN_MODE_COLOR_LIGHT';
 Spectrogram.LEFT_COLUMN_MODE_COLOR_DARK = 'LEFT_COLUMN_MODE_COLOR_DARK';
@@ -58,7 +59,7 @@ Spectrogram.prototype.add = function (frequencyData, indexMin, indexMax, frequen
         : Spectrogram.LEFT_COLUMN_MODE_COLOR_DARK;
     this.$$insertRow(leftColumnMode, frequencyData, indexMarker);
 
-    lastRowNeedsToBeRemoved = this.$$renderedRowCounter > Spectrogram.RENDERED_ROW_MAX;
+    lastRowNeedsToBeRemoved = this.$$renderedRowCounter > this.$$rowLimit;
     if (lastRowNeedsToBeRemoved) {
         lastRow = document.querySelectorAll('#' + this.$$id + ' > .s-row:last-child')[0];
         lastRow.parentNode.removeChild(lastRow);
