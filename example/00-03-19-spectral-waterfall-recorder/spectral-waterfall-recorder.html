@@ -97,15 +97,12 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label>
-                                Record
+                                Record actions
                             </label>
                         </div>
                         <div class="col col-xs-7 col-sm-7 col-md-9">
                             <button class="btn btn-default" onClick="onRecordStartClick()">Start</button>
                             <button class="btn btn-default" onClick="onRecordStopClick()">Stop</button>
-                            <button class="btn btn-default" onClick="onDrawClick()">Draw</button>
-
-                            <textarea id="recording"></textarea>
                         </div>
                     </div>
 
@@ -131,6 +128,19 @@
                         </div>
                     </div>
 
+                    <h2>Recorded Spectrogram</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label>
+                                Recorded data
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <textarea id="recorded-data"></textarea>
+                        </div>
+                    </div>
+
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
                             <label for="loudest-marker" class="label-for-checkbox">
@@ -146,7 +156,13 @@
                         </div>
                     </div>
 
-                    <h2>Recorded Spectrogram</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="onDrawClick()">Draw</button>
+                        </div>
+                    </div>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-12">

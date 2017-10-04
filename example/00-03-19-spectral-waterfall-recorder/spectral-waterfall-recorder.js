@@ -20,7 +20,7 @@ var
     rxFrequencyMin,
     rxFrequencyMax,
     isRecording = false,
-    recordData = [];
+    recordedData = [];
 
 function init() {
     audioMonoIO = new AudioMonoIO(Math.pow(2, FFT_SIZE_EXPONENT));
@@ -76,25 +76,25 @@ function onRecordStartClick() {
 }
 
 function onRecordStopClick() {
-    var recordString, i, j, array;
+    var recordedDataString, i, j, array;
 
     isRecording = false;
-    for (i = 0; i < recordData.length; i++) {
+    for (i = 0; i < recordedData.length; i++) {
         array = [];
-        for (j = 0; j < recordData[i].frequencyData.length; j++) {
-            array.push(parseFloat(recordData[i].frequencyData[j].toFixed(1)));
+        for (j = 0; j < recordedData[i].frequencyData.length; j++) {
+            array.push(parseFloat(recordedData[i].frequencyData[j].toFixed(1)));
         }
-        recordData[i].frequencyData = array;
+        recordedData[i].frequencyData = array;
     }
-    recordString = JSON.stringify(recordData);
-    recordData.length = 0;
+    recordedDataString = JSON.stringify(recordedData);
+    recordedData.length = 0;
 
-    document.getElementById('recording').value = recordString;
+    document.getElementById('recorded-data').value = recordedDataString;
 }
 
 function onDrawClick() {
     var
-        drawDataString = getFormFieldValue('#recording'),
+        drawDataString = getFormFieldValue('#recorded-data'),
         drawData,
         drawDataRow,
         i;
@@ -126,7 +126,9 @@ function smartTimerListener() {
         rxBinMax,
         loudestBinIndex,
         fftNominalResolution,
-        fftSkippedResolution;
+        fftSkippedResolution,
+        frequencyDataPart,
+        i;
 
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
@@ -138,9 +140,15 @@ function smartTimerListener() {
     fftSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
     if (isRecording) {
-        recordData.push({
+        // frequencyDataPart = [];
+        // for (i = 0; i < fftResult.getFrequencyData().length; i++) {
+        //     frequencyDataPart.push()
+        // }
+
+        recordedData.push({
             dateTime: new Date(),
-            frequencyData: frequencyData,
+            frequencyData: fftResult.getFrequencyData(),
+            // frequencyDataLength: fftResult.getFrequencyData().length,
             indexMin: rxBinMin,
             indexMax: rxBinMax,
             indexMarker: loudestBinIndex,
