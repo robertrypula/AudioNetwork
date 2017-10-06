@@ -77,6 +77,9 @@ Redirect 301 /analyser-node-performance-src https://github.com/robertrypula/Audi
 Redirect 301 /spectral-waterfall /example/00-03-06-spectral-waterfall/spectral-waterfall.html
 Redirect 301 /spectral-waterfall-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall
 
+Redirect 301 /spectral-waterfall-recorder /example/00-03-06-spectral-waterfall-recorder/spectral-waterfall-recorder.html
+Redirect 301 /spectral-waterfall-recorder-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall-recorder
+
 Redirect 301 /window-function /example/00-03-06-window-function/window-function.html
 Redirect 301 /window-function-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-window-function
 

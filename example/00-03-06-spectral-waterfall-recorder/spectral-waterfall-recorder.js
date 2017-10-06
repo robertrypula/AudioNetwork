@@ -20,7 +20,7 @@ var
     rxFrequencyMin,
     rxFrequencyMax,
     isRecording = false,
-    recordedData = [];
+    recordedData = {};
 
 function init() {
     audioMonoIO = new AudioMonoIO(Math.pow(2, FFT_SIZE_EXPONENT));
@@ -73,23 +73,27 @@ function onFftSizeExponentChange() {
 
 function onRecordStartClick() {
     isRecording = true;
+    html('#recording-status', 'Recording...');
 }
 
 function onRecordStopClick() {
     var recordedDataString, i, j, array;
 
     isRecording = false;
-    for (i = 0; i < recordedData.length; i++) {
+    for (i = 0; i < recordedData.history.length; i++) {
         array = [];
-        for (j = 0; j < recordedData[i].frequencyData.length; j++) {
-            array.push(parseFloat(recordedData[i].frequencyData[j].toFixed(1)));
+        for (j = 0; j < recordedData.history[i].frequencyData.length; j++) {
+            array.push(parseFloat(recordedData.history[i].frequencyData[j].toFixed(1)));
         }
-        recordedData[i].frequencyData = array;
+        recordedData.history[i].frequencyData = array;
     }
     recordedDataString = JSON.stringify(recordedData);
-    recordedData.length = 0;
+    recordedData = {};
 
-    document.getElementById('recorded-data').value = recordedDataString;
+    html('#recording-status', 'Recording stopped');
+    setTimeout(function () {
+        document.getElementById('recorded-data').value = recordedDataString;
+    }, 0)
 }
 
 function onDrawClick() {
@@ -100,18 +104,23 @@ function onDrawClick() {
         i;
 
     drawData = JSON.parse(drawDataString);
-
-    for (i = 0; i < drawData.length; i++) {
-        drawDataRow = drawData[i];
+    rxSpectrogramRecorded.clear();
+    for (i = 0; i < drawData.history.length; i++) {
+        drawDataRow = drawData.history[i];
+        if (i === 0) {
+            html('#recorded-data-rendered-frequency-bin', drawData.indexMax - drawData.indexMin + 1);
+        }
         rxSpectrogramRecorded.add(
             drawDataRow.frequencyData,
-            drawDataRow.indexMin,
-            drawDataRow.indexMax,
-            drawDataRow.frequencySpacing,
-            document.getElementById('loudest-marker').checked
+            drawData.indexMin,
+            drawData.indexMax,
+            drawData.frequencySpacing,
+            document.getElementById('recorded-loudest-marker').checked
                 ? drawDataRow.indexMarker
                 : Spectrogram.INDEX_MARKER_DISABLED,
-            Spectrogram.ROW_MARKER_DISABLED
+            drawDataRow.rowMarker
+                ? Spectrogram.ROW_MARKER_ENABLED
+                : Spectrogram.ROW_MARKER_DISABLED
         );
     }
 }
@@ -126,9 +135,7 @@ function smartTimerListener() {
         rxBinMax,
         loudestBinIndex,
         fftNominalResolution,
-        fftSkippedResolution,
-        frequencyDataPart,
-        i;
+        fftSkippedResolution;
 
     frequencyData = audioMonoIO.getFrequencyData();
     fftResult = new FFTResult(frequencyData, audioMonoIO.getSampleRate());
@@ -139,20 +146,17 @@ function smartTimerListener() {
     fftNominalResolution = audioMonoIO.getSampleRate() / getFftSize();
     fftSkippedResolution = fftNominalResolution * fftFrequencyBinSkipFactor.getValue();
 
-    if (isRecording) {
-        // frequencyDataPart = [];
-        // for (i = 0; i < fftResult.getFrequencyData().length; i++) {
-        //     frequencyDataPart.push()
-        // }
+    html('#rx-sample-rate', (audioMonoIO.getSampleRate() / 1000).toFixed(1));
 
-        recordedData.push({
+    if (isRecording) {
+        recordedData.indexMin = rxBinMin;
+        recordedData.indexMax = rxBinMax;
+        recordedData.frequencySpacing = fftSkippedResolution;
+        recordedData.history = recordedData.history ? recordedData.history : [];
+        recordedData.history.push({
             dateTime: new Date(),
             frequencyData: fftResult.getFrequencyData(),
-            // frequencyDataLength: fftResult.getFrequencyData().length,
-            indexMin: rxBinMin,
-            indexMax: rxBinMax,
-            indexMarker: loudestBinIndex,
-            frequencySpacing: fftSkippedResolution
+            indexMarker: loudestBinIndex
         });
     }
 

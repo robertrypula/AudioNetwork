@@ -322,7 +322,9 @@ PhysicalLayer.prototype.getTx = function () {
     return {
         symbol: this.$$txSymbol,
         symbolQueue: this.$$txSymbolQueue.slice(0),
-        isTxActive: this.$$txSymbolQueue.length || this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
+        isTxActive:
+            this.$$txSymbolQueue.length > 0 ||
+            this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
     }
 };
 
@@ -395,7 +397,9 @@ PhysicalLayer.prototype.$$rx = function () {
         fftResult,
         sync,
         isNewSyncAvailable = false,
-        isNewSymbolReadyToTake;
+        isNewSymbolReadyToTake,
+        fakeFrequencyData,
+        i;
 
     isAllowedToListen =
         this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
@@ -410,7 +414,13 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$signalDecibelNextCandidate = -Infinity; // TODO add this
         this.$$noiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$symbolRaw);
     } else {
-        this.$$frequencyData = [];
+        fakeFrequencyData = [];
+        for (i = 0; i < this.$$fftSize * 0.5; i++) {
+            fakeFrequencyData.push(-160);
+        }
+        fftResult = new FFTResult(fakeFrequencyData, this.$$rxSampleRate);
+        fftResult.downconvert(this.$$fftSkipFactor);
+        this.$$frequencyData = fftResult.getFrequencyData();
         this.$$symbolRaw = this.$$rxSymbolMin;
         this.$$signalDecibel = -Infinity;
         this.$$signalDecibelNextCandidate = -Infinity;

@@ -4,7 +4,8 @@
 var
     transportLayerBuilder,
     transportLayer,
-    log = [];
+    recordedData = {},
+    isRecording = false;
 
 function init() {
     transportLayerBuilder = new TransportLayerBuilder();
@@ -16,19 +17,46 @@ function init() {
         .build();
 }
 
-function logDump() {
-    var i, j;
 
-    for (i = 0; i < log.length; i++) {
-        for (j = 0; j < log[i].frequencyData.length; j++) {
-            log[i].frequencyData[j] = parseFloat(log[i].frequencyData[j].toFixed(1));
+function onRecordStartClick() {
+    isRecording = true;
+    html('#recording-status', 'Recording...');
+}
+
+function onRecordStopClick() {
+    var recordedDataString, i, j, array;
+
+    isRecording = false;
+    for (i = 0; i < recordedData.history.length; i++) {
+        array = [];
+        for (j = 0; j < recordedData.history[i].frequencyData.length; j++) {
+            array.push(parseFloat(recordedData.history[i].frequencyData[j].toFixed(1)));
         }
+        recordedData.history[i].frequencyData = array;
     }
-    document.getElementById('log').value = JSON.stringify(log);
+    recordedDataString = JSON.stringify(recordedData);
+    recordedData = {};
+
+    html('#recording-status', 'Recording stopped');
+    setTimeout(function () {
+        document.getElementById('recorded-data').value = recordedDataString;
+    }, 0);
 }
 
 function rxSampleListener(state) {
-    log.push(state);
+    var rxConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxConfig();
+
+    recordedData.indexMin = rxConfig.symbolMin;
+    recordedData.indexMax = rxConfig.symbolMax;
+    recordedData.frequencySpacing = rxConfig.symbolMin;
+    recordedData.history = recordedData.history ? recordedData.history : [];
+    recordedData.history.push({
+        dateTime: new Date(),
+        frequencyData: state.frequencyData,
+        indexMarker: state.symbolRaw,
+        rowMarker: state.isSymbolSamplingPoint
+    });
+
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 }

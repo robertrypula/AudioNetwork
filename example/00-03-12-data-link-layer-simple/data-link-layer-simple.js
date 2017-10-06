@@ -94,30 +94,3 @@ function onSendHexClick() {
         alert(e);
     }
 }
-
-// ---------
-
-function getByteHexFromByte(byte) {
-    var byteHex = byte.toString(16);
-
-    return pad(byteHex, 2)
-}
-
-function getByteHexFromByteList(byteList) {
-    var i, byte, result = [];
-
-    for (i = 0; i < byteList.length; i++) {
-        byte = byteList[i];
-        result.push(
-            getByteHexFromByte(byte)
-        );
-    }
-
-    return result.join(' ');
-}
-
-function pad(num, size) {
-    var s = '000000000' + num;
-
-    return s.substr(s.length - size);
-}

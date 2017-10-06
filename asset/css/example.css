@@ -39,3 +39,22 @@
     padding-top: 7px;
 
 }
+
+.box-rx, .box-tx {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    max-width: 280px;
+    box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.14);
+}
+
+.box-rx {
+    background-color: #afbde9;
+    color: #eee;
+    float: left;
+}
+
+.box-tx {
+    background-color: white;
+    float: right;
+}

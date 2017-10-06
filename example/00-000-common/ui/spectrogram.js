@@ -17,7 +17,9 @@ Spectrogram = function (domElement, rowLimit) {
 };
 
 Spectrogram.INDEX_MARKER_DISABLED = false;
+Spectrogram.INDEX_MARKER_ENABLED = true;
 Spectrogram.ROW_MARKER_DISABLED = false;
+Spectrogram.ROW_MARKER_ENABLED = true;
 Spectrogram.DECIBEL_MIN = -160;
 Spectrogram.DECIBEL_FOR_COLOR_LIGHT = -36;
 Spectrogram.DECIBEL_FOR_COLOR_DARK = -160;
@@ -65,6 +67,11 @@ Spectrogram.prototype.add = function (frequencyData, indexMin, indexMax, frequen
         lastRow.parentNode.removeChild(lastRow);
         this.$$renderedRowCounter--;
     }
+};
+
+Spectrogram.prototype.clear = function () {
+    // TODO this is temporary code and acctually it's not clearing anything... REFACTOR!
+    this.add([0, 1, 2], 0, 1, 1, 0, 0);
 };
 
 Spectrogram.prototype.$$initializeHtml = function () {

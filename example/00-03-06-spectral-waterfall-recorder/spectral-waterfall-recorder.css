@@ -6,3 +6,7 @@
 .log-container {
     font-family: monospace;
 }
+
+#recorded-data {
+    height: 300px;
+}

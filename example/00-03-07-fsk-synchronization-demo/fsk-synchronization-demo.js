@@ -134,6 +134,8 @@ function rxSampleListener(state) {
                 ? rxSymbol.symbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
             state.isSymbolSamplingPoint
+                ? Spectrogram.ROW_MARKER_ENABLED
+                : Spectrogram.ROW_MARKER_DISABLED
         );
     }
 

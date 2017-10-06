@@ -93,7 +93,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
+                            <label class="label-compact">
                                 SyncStatus
                             </label>
                         </div>
@@ -124,7 +124,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
+                            <label class="label-compact">
                                 State
                             </label>
                         </div>
@@ -141,7 +141,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
+                            <label class="label-compact">
                                 State
                             </label>
                         </div>
@@ -156,7 +156,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
+                            <label class="label-compact">
                                 Received
                             </label>
                         </div>
@@ -167,7 +167,7 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-for-checkbox">
+                            <label class="label-compact">
                                 Transmited
                             </label>
                         </div>
@@ -176,12 +176,30 @@
                         </div>
                     </div>
 
-                    <h2>Debug</h2>
-                    <div>
-                        <div class="margin-bottom">
-                            <button class="btn btn-default" onClick="logDump()">Dump</button>
+                    <h2>Recording</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label>
+                                Record actions
+                            </label>
                         </div>
-                        <textarea id="log" style="height: 200px;"></textarea>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="onRecordStartClick()">Start</button>
+                            <button class="btn btn-default" onClick="onRecordStopClick()">Stop</button>
+                            <div id="recording-status">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-5 col-sm-5 col-md-3">
+                            <label>
+                                Record data
+                            </label>
+                        </div>
+                        <div class="col col-xs-7 col-sm-7 col-md-9">
+                            <textarea id="recorded-data" style="height: 200px;"></textarea>
+                        </div>
                     </div>
 
                 </div>
@@ -217,6 +235,7 @@
     <script src="../00-000-common/physical-layer.js"></script>
     <script src="../00-000-common/data-link-layer.js"></script>
     <script src="../00-000-common/transport-layer.js"></script>
+    <script src="../00-000-common/ui/convert-util.js"></script>
     <script src="transport-layer.js"></script>
     <script>
         if (isProduction()) { // TODO refactor this

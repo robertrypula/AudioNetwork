@@ -4,9 +4,7 @@
 var
     RX_HISTORY_SIZE = 16,
     ASCII_NULL = 0x00,
-    SYMBOL_ZERO_PADDING = 3,
     INITIAL_AMPLITUDE = 0.2,
-    UNICODE_UNKNOWN = '�',
     powerBar,
     physicalLayerBuilder,
     physicalLayer,
@@ -160,27 +158,4 @@ function onSendTextClick() {
         symbol = symbolMin + byte;
         physicalLayer.sendSymbol(symbol);
     }
-}
-
-// ----------------------------------
-
-function isPrintableAscii(char) {
-    return char >= ' ' && char <= '~';
-}
-
-function pad(num, size) {
-    var s = '000000000' + num;
-
-    return s.substr(s.length - size);
-}
-
-function getStringFromSymbolArray(symbolArray) {
-    var i, tmp, formatted = [];
-
-    for (i = 0; i < symbolArray.length; i++) {
-        tmp = pad(symbolArray[i], SYMBOL_ZERO_PADDING);
-        formatted.push(tmp);
-    }
-
-    return formatted.join(' ');
 }
