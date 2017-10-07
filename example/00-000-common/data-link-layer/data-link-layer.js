@@ -71,12 +71,12 @@ DataLinkLayer.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$physicalLayer.setTxSampleRate(txSampleRate);  // alias for easier access
 };
 
-DataLinkLayer.prototype.sendSync = function () {
-    this.$$physicalLayer.sendSync();  // alias for easier access
+DataLinkLayer.prototype.txSync = function () {
+    this.$$physicalLayer.txSync();  // alias for easier access
 };
 
 DataLinkLayer.prototype.txTwoWaySync = function () {
-    this.sendSync();
+    this.txSync();
     switch (this.getRxSampleRate()) {
         case 44100:
             this.sendCommand(DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100);
@@ -253,11 +253,11 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
     switch (command) {
         case DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100:
             this.setTxSampleRate(44100);
-            this.sendSync();
+            this.txSync();
             break;
         case DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000:
             this.setTxSampleRate(48000);
-            this.sendSync();
+            this.txSync();
             break;
     }
 };
@@ -265,14 +265,14 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
 // -----------------------------------------------------
 
 DataLinkLayer.prototype.$$sendFrame = function (frame) {
-    var txDspConfig, txSymbolMin, i, byte, symbol;
+    var txDspConfig, txSymbolMin, i, byte, txSymbol;
 
     txDspConfig = this.$$physicalLayer.getTxDspConfig();
     txSymbolMin = txDspConfig.txSymbolMin;
     for (i = 0; i < frame.length; i++) {
         byte = frame[i];
-        symbol = txSymbolMin + byte;
-        this.$$physicalLayer.sendSymbol(symbol);
+        txSymbol = txSymbolMin + byte;
+        this.$$physicalLayer.txSymbol(txSymbol);
     }
 };
 

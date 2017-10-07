@@ -173,8 +173,8 @@ PhysicalLayer.$$_INITIAL_SAMPLE_NUMER = 0;
 PhysicalLayer.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayer.$$_INITIAL_RX_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
 PhysicalLayer.$$_SYMBOL_IDLE = null;
-PhysicalLayer.$$_SYMBOL_GAP = -1;
-PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT = -2;
+PhysicalLayer.$$_TX_SYMBOL_GAP = -1;
+PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT = -2;
 PhysicalLayer.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayer.$$_TX_FREQUENCY_ZERO = 0;
 PhysicalLayer.$$_FIRST_SYMBOL = 1;
@@ -190,7 +190,7 @@ PhysicalLayer.prototype.getRxSampleRate = function () {
     return rxDspConfig.rxSampleRate;
 };
 
-PhysicalLayer.prototype.sendSync = function () {
+PhysicalLayer.prototype.txSync = function () {
     var i, codeValue, symbol, halfOfSyncCodePlusOne;
 
     this.$$handleGapLogic();
@@ -206,28 +206,28 @@ PhysicalLayer.prototype.sendSync = function () {
     // TODO actually it should take into account the Correlator.THRESHOLD_UNIT value
     halfOfSyncCodePlusOne = Math.ceil(this.$$syncCode.length / 2) + 1;
     for (i = 0; i < halfOfSyncCodePlusOne; i++) {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT);
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT);
     }
 
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
 
-PhysicalLayer.prototype.sendSymbol = function (symbol) {
-    var isNumber, symbolParsed, inRange, isValid;
+PhysicalLayer.prototype.txSymbol = function (txSymbol) {
+    var isNumber, txSymbolParsed, inRange, isValid;
 
     this.$$handleGapLogic();
 
-    symbolParsed = parseInt(symbol);
-    isNumber = typeof symbolParsed === 'number';
-    inRange = this.$$txSymbolMin <= symbolParsed && symbolParsed <= this.$$txSymbolMax;
+    txSymbolParsed = parseInt(txSymbol);
+    isNumber = typeof txSymbolParsed === 'number';
+    inRange = this.$$txSymbolMin <= txSymbolParsed && txSymbolParsed <= this.$$txSymbolMax;
     isValid = isNumber && inRange;
 
     if (!isValid) {
         throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
     }
 
-    this.$$txSymbolQueue.push(symbolParsed);
-    this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);     // will be removed if subsequent symbol will arrive
+    this.$$txSymbolQueue.push(txSymbolParsed);
+    this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);     // will be removed if subsequent txSymbol will arrive
 
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
 };
@@ -364,8 +364,8 @@ PhysicalLayer.prototype.$$handleGapLogic = function () {
     if (tx.isTxBusy) {
         this.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue();
     } else {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);
+        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);
     }
 };
 
@@ -373,7 +373,7 @@ PhysicalLayer.prototype.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue = function
     var i;
 
     for (i = this.$$txSymbolQueue.length - 1; i >= 0; i--) {
-        if (this.$$txSymbolQueue[i] !== PhysicalLayer.$$_SYMBOL_GAP) {
+        if (this.$$txSymbolQueue[i] !== PhysicalLayer.$$_TX_SYMBOL_GAP) {
             this.$$txSymbolQueue.length = i + 1;
             break;
         }
@@ -542,8 +542,8 @@ PhysicalLayer.prototype.$$updateOscillator = function () {
 
     isSymbolSpecial =
         this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP ||
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT;
+        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP ||
+        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT;
 
     if (isSymbolSpecial) {
         frequency = PhysicalLayer.$$_TX_FREQUENCY_ZERO;
@@ -557,8 +557,8 @@ PhysicalLayer.prototype.$$updateOscillator = function () {
     console.log(
         'setPeriodicWave', frequency, amplitude,
         this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ? 'IDLE' : '',
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP ? 'GAP' : '',
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_GAP_IMPORTANT ? 'GAP IMPORTANT' : ''
+        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP ? 'GAP' : '',
+        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT ? 'GAP IMPORTANT' : ''
     );
     */
     this.$$audioMonoIO.setPeriodicWave(frequency, amplitude);

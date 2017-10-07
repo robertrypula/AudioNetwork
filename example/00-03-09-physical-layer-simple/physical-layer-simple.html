@@ -57,13 +57,6 @@
 
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-
-                    <div class="margin-bottom">
-                        TODO remove me - experiments only<br/>
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneEnable()">Microphone Enable</button>
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.$$audioMonoIO.microphoneDisable()">Microphone Disable</button>
-                    </div>
-
                     <div class="margin-bottom">
                         <strong>Loopback:</strong> <span id="loopback">-</span>
                     </div>
@@ -114,7 +107,7 @@
                                 <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(48000)">Set 48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="onSendSyncClick()">Send sync</button>
+                                <button class="btn btn-default" type="button" onClick="onTxSyncClick()">Sync</button>
                             </div>
                             <div class="margin-bottom">
                                 <div id="tx-byte-container"></div>

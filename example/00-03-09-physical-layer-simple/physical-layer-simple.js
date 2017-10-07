@@ -84,10 +84,10 @@ function txDspConfigListener(state) {
 function onSendByteClick(byte) {
     var
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.txSymbolMin + byte;
+        txSymbol = txDspConfig.txSymbolMin + byte;
 
     try {
-        physicalLayer.sendSymbol(symbol);
+        physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e); // it's because user may enter symbol out of range
     }
@@ -97,6 +97,6 @@ function onSetTxSampleRateClick(txSampleRate) {
     physicalLayer.setTxSampleRate(txSampleRate);
 }
 
-function onSendSyncClick() {
-    physicalLayer.sendSync();
+function onTxSyncClick() {
+    physicalLayer.txSync();
 }

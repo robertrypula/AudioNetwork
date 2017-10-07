@@ -21,18 +21,18 @@ function onSetTxSampleRateClick() {
     alert('Tx Sample Rate set!');
 }
 
-function onSendSyncClick() {
-    physicalLayer.sendSync();
+function onTxSyncClick() {
+    physicalLayer.txSync();
 }
 
 function onSendByteClick() {
     var
         byte = getFormFieldValue('#tx-byte', 'int'),
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.txSymbolMin + byte;
+        txSymbol = txDspConfig.txSymbolMin + byte;
 
     try {
-        physicalLayer.sendSymbol(symbol);
+        physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e); // it's because user may enter symbol out of range
     }

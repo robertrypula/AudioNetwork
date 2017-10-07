@@ -38,10 +38,13 @@ function init() {
     document.addEventListener(
         'keyup',
         function(e) {
-            var digit = getDigitFromKeyCode(e.keyCode);
+            var
+                digit = getDigitFromKeyCode(e.keyCode),
+                txSymbol;
 
             if (digit !== null) {
-                physicalLayer.sendSymbol(DIGIT_ZERO_SYMBOL + digit);
+                txSymbol = DIGIT_ZERO_SYMBOL + digit;
+                physicalLayer.txSymbol(txSymbol);
             }
         },
         true
@@ -192,13 +195,13 @@ function onAmplitudeClick(txAmplitude) {
     physicalLayer.setTxAmplitude(txAmplitude);
 }
 
-function onSendSyncClick() {
-    physicalLayer.sendSync();
+function onTxSyncClick() {
+    physicalLayer.txSync();
 }
 
-function onSendSymbolClick(symbol) {
+function onTxSymbolClick(txSymbol) {
     try {
-        physicalLayer.sendSymbol(symbol);
+        physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e);
     }

@@ -139,15 +139,15 @@ function onAmplitudeClick(txAmplitude) {
     physicalLayer.setTxAmplitude(txAmplitude);
 }
 
-function onSendSyncClick() {
-    physicalLayer.sendSync();
+function onTxSyncClick() {
+    physicalLayer.txSync();
 }
 
-function onSendSymbolClick() {
-    var symbol = getFormFieldValue('#tx-symbol-field');
+function onTxSymbolClick() {
+    var txSymbol = getFormFieldValue('#tx-symbol-field');
 
     try {
-        physicalLayer.sendSymbol(symbol);
+        physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e); // it's because user may enter symbol out of range
     }
@@ -159,14 +159,14 @@ function onSendTextClick() {
         txDspConfig = physicalLayer.getTxDspConfig(),
         txSymbolMin = txDspConfig.txSymbolMin,
         byte,
-        symbol,
+        txSymbol,
         i;
 
     for (i = 0; i < text.length; i++) {
         byte = isPrintableAscii(text[i])
             ? text.charCodeAt(i)
             : ASCII_NULL;
-        symbol = txSymbolMin + byte;
-        physicalLayer.sendSymbol(symbol);
+        txSymbol = txSymbolMin + byte;
+        physicalLayer.txSymbol(txSymbol);
     }
 }

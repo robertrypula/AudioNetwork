@@ -102,10 +102,10 @@ function log(elementId, object) {
 function onSendByteClick(byte) {
     var
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.txSymbolMin + byte;
+        txSymbol = txDspConfig.txSymbolMin + byte;
 
     try {
-        physicalLayer.sendSymbol(symbol);
+        physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e); // it's because user may enter symbol out of range
     }
