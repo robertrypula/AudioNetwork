@@ -14,21 +14,21 @@ function init() {
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
         .rxSyncListener(rxSyncListener)
-        .rxConfigListener(rxConfigListener)
-        .configListener(configListener)
+        .rxDspConfigListener(rxDspConfigListener)
+        .dspConfigListener(dspConfigListener)
         .txListener(txListener)
-        .txConfigListener(txConfigListener)
+        .txDspConfigListener(txDspConfigListener)
         .build();
 }
 
 function rxSymbolListener(state) {
     var
-        rxConfig = physicalLayer.getRxConfig(),
+        rxDspConfig = physicalLayer.getRxDspConfig(),
         byte,
         byteText;
 
     byte = state.symbol
-        ? state.symbol - rxConfig.symbolMin
+        ? state.symbol - rxDspConfig.symbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     rxByteHistory.pushEvenIfFull(byteText);
@@ -51,7 +51,7 @@ function rxSyncListener(state) {
     log('log-rx-sync', state);
 }
 
-function rxConfigListener(state) {
+function rxDspConfigListener(state) {
     var symbol, htmlContent, byte;
 
     if (!rxByteContainerRendered) {
@@ -67,19 +67,19 @@ function rxConfigListener(state) {
         rxByteContainerRendered = true;
     }
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
-    log('log-rx-config', state);
+    log('log-rx-dsp-config', state);
 }
 
-function configListener(state) {
+function dspConfigListener(state) {
     html('#loopback', state.isLoopbackEnabled ? 'enabled' : 'disabled');
-    log('log-config', state);
+    log('log-dsp-config', state);
 }
 
 function txListener(state) {
     log('log-tx', state);
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     var symbol, byte, htmlContent = '';
 
     for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
@@ -92,7 +92,7 @@ function txConfigListener(state) {
     html('#tx-byte-container', htmlContent);
     html('#tx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html('#amplitude', (state.amplitude * 100).toFixed(0));
-    log('log-tx-config', state);
+    log('log-tx-dsp-config', state);
 }
 
 function log(elementId, object) {
@@ -105,8 +105,8 @@ function byteToText(byte) {
 
 function onSendByteClick(byte) {
     var
-        txConfig = physicalLayer.getTxConfig(),
-        symbol = txConfig.symbolMin + byte;
+        txDspConfig = physicalLayer.getTxDspConfig(),
+        symbol = txDspConfig.symbolMin + byte;
 
     try {
         physicalLayer.sendSymbol(symbol);

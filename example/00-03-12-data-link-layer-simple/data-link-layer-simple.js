@@ -11,9 +11,9 @@ function init() {
         .frameListener(frameListener)
         .frameCandidateListener(frameCandidateListener)
         .rxSampleListener(rxSampleListener)
-        .configListener(configListener)
-        .txConfigListener(txConfigListener)
-        .rxConfigListener(rxConfigListener)
+        .dspConfigListener(dspConfigListener)
+        .txDspConfigListener(txDspConfigListener)
+        .rxDspConfigListener(rxDspConfigListener)
         .txListener(txListener)
         .build();
 }
@@ -42,23 +42,23 @@ function rxSampleListener(state) {
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 }
 
-function configListener(state) {
+function dspConfigListener(state) {
     setActive(
         '#loopback-container',
         '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
     );
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
 }
 
-function rxConfigListener(state) {
+function rxDspConfigListener(state) {
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
 }
 
 function txListener(state) {
-    html('#tx-status', state.isTxActive ? 'transmitting' : 'idle');
+    html('#tx-status', state.isTxBusy ? 'transmitting' : 'idle');
 }
 
 // ---------

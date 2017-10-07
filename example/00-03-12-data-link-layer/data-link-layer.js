@@ -15,9 +15,9 @@ function init() {
         .frameCandidateListener(frameCandidateListener)
         .txListener(txListener)
         .rxSampleListener(rxSampleListener)
-        .configListener(configListener)
-        .txConfigListener(txConfigListener)
-        .rxConfigListener(rxConfigListener)
+        .dspConfigListener(dspConfigListener)
+        .txDspConfigListener(txDspConfigListener)
+        .rxDspConfigListener(rxDspConfigListener)
         .build();
 }
 
@@ -69,8 +69,8 @@ function frameCandidateListener(frameCandidateList) {
 
 function txListener(state) {
     var
-        txConfig = dataLinkLayer.getPhysicalLayer().getTxConfig(),
-        symbolMin = txConfig.symbolMin,
+        txDspConfig = dataLinkLayer.getPhysicalLayer().getTxDspConfig(),
+        symbolMin = txDspConfig.symbolMin,
         txByteHex = state.symbol
             ? getByteHexFromSymbol(state.symbol, symbolMin)
             : 'idle',
@@ -82,8 +82,8 @@ function txListener(state) {
 
 function rxSampleListener(state) {
     var
-        rxConfig = dataLinkLayer.getPhysicalLayer().getRxConfig(),
-        symbolMin = rxConfig.symbolMin;
+        rxDspConfig = dataLinkLayer.getPhysicalLayer().getRxDspConfig(),
+        symbolMin = rxDspConfig.symbolMin;
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
@@ -94,18 +94,18 @@ function rxSampleListener(state) {
     }
 }
 
-function configListener(state) {
+function dspConfigListener(state) {
     setActive(
         '#loopback-container',
         '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
     );
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
 }
 
-function rxConfigListener(state) {
+function rxDspConfigListener(state) {
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
 }
 

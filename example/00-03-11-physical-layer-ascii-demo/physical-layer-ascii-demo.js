@@ -19,10 +19,10 @@ function init() {
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
         .rxSyncListener(rxSyncListener)
-        .rxConfigListener(rxConfigListener)
-        .txConfigListener(txConfigListener)
+        .rxDspConfigListener(rxDspConfigListener)
+        .txDspConfigListener(txDspConfigListener)
         .txListener(txListener)
-        .configListener(configListener)
+        .dspConfigListener(dspConfigListener)
         .build();
     rxSymbolHistory = new Buffer(RX_HISTORY_SIZE);
     rxAsciiHistory = new Buffer(RX_HISTORY_SIZE);
@@ -40,8 +40,8 @@ function formatSymbolRange(state) {
 
 // ----------------------------------
 
-function rxConfigListener(state) {
-    var config = physicalLayer.getConfig();
+function rxDspConfigListener(state) {
+    var config = physicalLayer.getDspConfig();
 
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html(
@@ -54,7 +54,7 @@ function rxConfigListener(state) {
     powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     html('#tx-config', formatSymbolRange(state));
 
     setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
@@ -63,12 +63,12 @@ function txConfigListener(state) {
 
 function rxSymbolListener(state) {
     var
-        rxConfig = physicalLayer.getRxConfig(),
+        rxDspConfig = physicalLayer.getRxDspConfig(),
         charCode,
         char;
 
     rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
-    charCode = state.symbol - rxConfig.symbolMin;
+    charCode = state.symbol - rxDspConfig.symbolMin;
     char = String.fromCharCode(charCode);
     rxAsciiHistory.pushEvenIfFull(
         isPrintableAscii(char) ? char : UNICODE_UNKNOWN
@@ -80,7 +80,7 @@ function rxSymbolListener(state) {
 }
 
 function rxSampleListener(state) {
-    var rxConfig = physicalLayer.getRxConfig();
+    var rxDspConfig = physicalLayer.getRxDspConfig();
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
@@ -91,7 +91,7 @@ function rxSampleListener(state) {
         'Offset: ' + state.offset + '<br/>' +
         'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
         'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalFrequency: ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     powerBar.setSignalDecibel(state.signalDecibel);
@@ -107,7 +107,8 @@ function txListener(state) {
     html('#tx-symbol', state.symbol ? state.symbol : 'idle');
     html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
 }
-function configListener(state) {
+
+function dspConfigListener(state) {
     setActive(
         '#loopback-container',
         '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
@@ -145,8 +146,8 @@ function onSendSymbolClick() {
 function onSendTextClick() {
     var
         text = getFormFieldValue('#tx-text-field'),
-        txConfig = physicalLayer.getTxConfig(),
-        symbolMin = txConfig.symbolMin,
+        txDspConfig = physicalLayer.getTxDspConfig(),
+        symbolMin = txDspConfig.symbolMin,
         byte,
         symbol,
         i;

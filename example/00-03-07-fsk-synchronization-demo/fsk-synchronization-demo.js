@@ -20,12 +20,12 @@ function init() {
         .symbolMin48000(100)
         .symbolMinDefault(100)
         .symbolRange(10)
-        .configListener(configListener)
+        .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
         .rxSyncListener(rxSyncListener)
-        .rxConfigListener(rxConfigListener)
-        .txConfigListener(txConfigListener)
+        .rxDspConfigListener(rxDspConfigListener)
+        .txDspConfigListener(txDspConfigListener)
         .txListener(txListener)
         .build();
 
@@ -33,7 +33,7 @@ function init() {
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
         document.getElementById('tx-sample-rate'),
-        physicalLayer.getTxConfig().sampleRate, 5, 0,
+        physicalLayer.getTxDspConfig().sampleRate, 5, 0,
         onTxSampleRateWidgetChange
     );
     document.addEventListener(
@@ -61,7 +61,7 @@ function formatSymbolRange(state) {
 
 // ----------------------------------
 
-function configListener(state) {
+function dspConfigListener(state) {
     html(
         '#config',
         'FftSkipFactor: ' + state.fftSkipFactor + '<br/>' +
@@ -76,8 +76,8 @@ function configListener(state) {
     );
 }
 
-function rxConfigListener(state) {
-    var config = physicalLayer.getConfig();
+function rxDspConfigListener(state) {
+    var config = physicalLayer.getDspConfig();
 
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
     html(
@@ -90,7 +90,7 @@ function rxConfigListener(state) {
     powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     html('#tx-config', formatSymbolRange(state));
 
     setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
@@ -109,7 +109,7 @@ function rxSymbolListener(state) {
 
 function rxSampleListener(state) {
     var
-        rxConfig = physicalLayer.getRxConfig(),
+        rxDspConfig = physicalLayer.getRxDspConfig(),
         rxSymbol = physicalLayer.getRxSymbol();
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
@@ -121,15 +121,15 @@ function rxSampleListener(state) {
         'Offset: ' + state.offset + '<br/>' +
         'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
         'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalFrequency: ' + (state.symbolRaw * rxConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     if (document.getElementById('spectrogram-active').checked) {
         rxSpectrogram.add(
             state.frequencyData,
-            rxConfig.symbolMin,
-            rxConfig.symbolMax,
-            rxConfig.symbolFrequencySpacing,
+            rxDspConfig.symbolMin,
+            rxDspConfig.symbolMax,
+            rxDspConfig.symbolFrequencySpacing,
             document.getElementById('symbol-marker-active').checked && rxSymbol.symbol
                 ? rxSymbol.symbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
@@ -144,7 +144,7 @@ function rxSampleListener(state) {
 }
 
 function rxSyncListener(state) {
-    var config = physicalLayer.getConfig();
+    var config = physicalLayer.getDspConfig();
 
     html(
         '#rx-sync',

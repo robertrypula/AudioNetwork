@@ -18,10 +18,10 @@ var PhysicalLayerBuilder = function () {
     this._rxSymbolListener = undefined;
     this._rxSampleListener = undefined;
     this._rxSyncListener = undefined;
-    this._rxConfigListener = undefined;
-    this._configListener = undefined;
+    this._rxDspConfigListener = undefined;
+    this._dspConfigListener = undefined;
     this._txListener = undefined;
-    this._txConfigListener = undefined;
+    this._txDspConfigListener = undefined;
 };
 
 PhysicalLayerBuilder.prototype.fftSize = function (fftSize) {
@@ -84,13 +84,13 @@ PhysicalLayerBuilder.prototype.rxSyncListener = function (listener) {
     return this;
 };
 
-PhysicalLayerBuilder.prototype.rxConfigListener = function (listener) {
-    this._rxConfigListener = listener;
+PhysicalLayerBuilder.prototype.rxDspConfigListener = function (listener) {
+    this._rxDspConfigListener = listener;
     return this;
 };
 
-PhysicalLayerBuilder.prototype.configListener = function (listener) {
-    this._configListener = listener;
+PhysicalLayerBuilder.prototype.dspConfigListener = function (listener) {
+    this._dspConfigListener = listener;
     return this;
 };
 
@@ -99,8 +99,8 @@ PhysicalLayerBuilder.prototype.txListener = function (listener) {
     return this;
 };
 
-PhysicalLayerBuilder.prototype.txConfigListener = function (listener) {
-    this._txConfigListener = listener;
+PhysicalLayerBuilder.prototype.txDspConfigListener = function (listener) {
+    this._txDspConfigListener = listener;
     return this;
 };
 
@@ -161,10 +161,10 @@ PhysicalLayer = function (builder) {
     this.$$rxSymbolListener = PhysicalLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
     this.$$rxSampleListener = PhysicalLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
     this.$$rxSyncListener = PhysicalLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
-    this.$$rxConfigListener = PhysicalLayer.$$isFunction(builder._rxConfigListener) ? builder._rxConfigListener : null;
-    this.$$configListener = PhysicalLayer.$$isFunction(builder._configListener) ? builder._configListener : null;
+    this.$$rxDspConfigListener = PhysicalLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
+    this.$$dspConfigListener = PhysicalLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
     this.$$txListener = PhysicalLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
-    this.$$txConfigListener = PhysicalLayer.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
+    this.$$txDspConfigListener = PhysicalLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 
     this.$$firstSmartTimerCall = true;
 };
@@ -185,9 +185,9 @@ PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass 
 // -----------------------------------------
 
 PhysicalLayer.prototype.getRxSampleRate = function () {
-    var rxConfig = this.getRxConfig();
+    var rxDspConfig = this.getRxDspConfig();
 
-    return rxConfig.sampleRate;
+    return rxDspConfig.sampleRate;
 };
 
 PhysicalLayer.prototype.sendSync = function () {
@@ -237,17 +237,17 @@ PhysicalLayer.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$txSymbolMax = this.$$getSymbolMax(this.$$txSampleRate);
     this.$$txSymbolQueue.length = 0;
     this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
-    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+    this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
 };
 
 PhysicalLayer.prototype.setLoopback = function (state) {
     this.$$audioMonoIO.setLoopback(state);
-    this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
+    this.$$dspConfigListener ? this.$$dspConfigListener(this.getDspConfig()) : undefined;
 };
 
 PhysicalLayer.prototype.setAmplitude = function (amplitude) {
     this.$$amplitude = amplitude;
-    this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+    this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
 };
 
 // -----------------------------------------
@@ -291,7 +291,7 @@ PhysicalLayer.prototype.getRxSync = function () {
     };
 };
 
-PhysicalLayer.prototype.getRxConfig = function () {
+PhysicalLayer.prototype.getRxDspConfig = function () {
     var symbolFrequencySpacing = this.$$getFrequency(
         PhysicalLayer.$$_FIRST_SYMBOL,
         this.$$rxSampleRate
@@ -307,7 +307,7 @@ PhysicalLayer.prototype.getRxConfig = function () {
     };
 };
 
-PhysicalLayer.prototype.getConfig = function () {
+PhysicalLayer.prototype.getDspConfig = function () {
     return {
         fftSkipFactor: this.$$fftSkipFactor,
         fftSize: this.$$fftSize,
@@ -322,13 +322,13 @@ PhysicalLayer.prototype.getTx = function () {
     return {
         symbol: this.$$txSymbol,
         symbolQueue: this.$$txSymbolQueue.slice(0),
-        isTxActive:
+        isTxBusy:
             this.$$txSymbolQueue.length > 0 ||
             this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
     }
 };
 
-PhysicalLayer.prototype.getTxConfig = function () {
+PhysicalLayer.prototype.getTxDspConfig = function () {
     var symbolFrequencySpacing = this.$$getFrequency(
         PhysicalLayer.$$_FIRST_SYMBOL,
         this.$$txSampleRate
@@ -360,7 +360,7 @@ PhysicalLayer.prototype.$$handleGapLogic = function () {
     // If symbol is not last we need to remove that
     // unnessescary gap.
     tx = this.getTx();
-    if (!tx.isTxActive) {
+    if (!tx.isTxBusy) {
         this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
         this.$$txSymbolQueue.push(PhysicalLayer.$$_SYMBOL_GAP);
     } else {
@@ -375,9 +375,9 @@ PhysicalLayer.prototype.$$handleGapLogic = function () {
 
 PhysicalLayer.prototype.$$smartTimerListener = function () {
     if (this.$$firstSmartTimerCall) {
-        this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
-        this.$$configListener ? this.$$configListener(this.getConfig()) : undefined;
-        this.$$txConfigListener ? this.$$txConfigListener(this.getTxConfig()) : undefined;
+        this.$$rxDspConfigListener ? this.$$rxDspConfigListener(this.getRxDspConfig()) : undefined;
+        this.$$dspConfigListener ? this.$$dspConfigListener(this.getDspConfig()) : undefined;
+        this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
     }
 
     this.$$sampleId++;
@@ -445,7 +445,7 @@ PhysicalLayer.prototype.$$rx = function () {
     // call listeners
     if (isNewSyncAvailable) {
         this.$$rxSyncListener ? this.$$rxSyncListener(this.getRxSync()) : undefined;
-        this.$$rxConfigListener ? this.$$rxConfigListener(this.getRxConfig()) : undefined;
+        this.$$rxDspConfigListener ? this.$$rxDspConfigListener(this.getRxDspConfig()) : undefined;
     }
     this.$$rxSampleListener ? this.$$rxSampleListener(this.getRxSample()) : undefined;
     if (this.$$isSymbolSamplingPoint) {

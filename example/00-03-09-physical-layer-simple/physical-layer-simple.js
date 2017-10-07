@@ -13,20 +13,20 @@ function init() {
     physicalLayer = physicalLayerBuilder
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
-        .rxConfigListener(rxConfigListener)
-        .configListener(configListener)
-        .txConfigListener(txConfigListener)
+        .rxDspConfigListener(rxDspConfigListener)
+        .dspConfigListener(dspConfigListener)
+        .txDspConfigListener(txDspConfigListener)
         .build();
 }
 
 function rxSymbolListener(state) {
     var
-        rxConfig = physicalLayer.getRxConfig(),
+        rxDspConfig = physicalLayer.getRxDspConfig(),
         byte,
         byteText;
 
     byte = state.symbol
-        ? state.symbol - rxConfig.symbolMin
+        ? state.symbol - rxDspConfig.symbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     rxByteHistory.push(byteText);
@@ -45,7 +45,7 @@ function rxSampleListener(state) {
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 }
 
-function rxConfigListener(state) {
+function rxDspConfigListener(state) {
     var symbol, htmlContent, byte;
 
     if (!rxByteContainerRendered) {
@@ -63,11 +63,11 @@ function rxConfigListener(state) {
     html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
 }
 
-function configListener(state) {
+function dspConfigListener(state) {
     html('#loopback', state.isLoopbackEnabled ? 'enabled' : 'disabled');
 }
 
-function txConfigListener(state) {
+function txDspConfigListener(state) {
     var symbol, byte, htmlContent = '';
 
     for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
@@ -87,8 +87,8 @@ function byteToText(byte) {
 
 function onSendByteClick(byte) {
     var
-        txConfig = physicalLayer.getTxConfig(),
-        symbol = txConfig.symbolMin + byte;
+        txDspConfig = physicalLayer.getTxDspConfig(),
+        symbol = txDspConfig.symbolMin + byte;
 
     try {
         physicalLayer.sendSymbol(symbol);

@@ -18,10 +18,10 @@ var TransportLayerBuilder = function () {
     this._rxSymbolListener = undefined;
     this._rxSampleListener = undefined;
     this._rxSyncListener = undefined;
-    this._rxConfigListener = undefined;
-    this._configListener = undefined;
+    this._rxDspConfigListener = undefined;
+    this._dspConfigListener = undefined;
     this._txListener = undefined;
-    this._txConfigListener = undefined;
+    this._txDspConfigListener = undefined;
 };
 
 TransportLayerBuilder.prototype.rxByteStreamListener = function (listener) {
@@ -74,13 +74,13 @@ TransportLayerBuilder.prototype.rxSyncListener = function (listener) {
     return this;
 };
 
-TransportLayerBuilder.prototype.rxConfigListener = function (listener) {
-    this._rxConfigListener = listener;
+TransportLayerBuilder.prototype.rxDspConfigListener = function (listener) {
+    this._rxDspConfigListener = listener;
     return this;
 };
 
-TransportLayerBuilder.prototype.configListener = function (listener) {
-    this._configListener = listener;
+TransportLayerBuilder.prototype.dspConfigListener = function (listener) {
+    this._dspConfigListener = listener;
     return this;
 };
 
@@ -89,8 +89,8 @@ TransportLayerBuilder.prototype.txListener = function (listener) {
     return this;
 };
 
-TransportLayerBuilder.prototype.txConfigListener = function (listener) {
-    this._txConfigListener = listener;
+TransportLayerBuilder.prototype.txDspConfigListener = function (listener) {
+    this._txDspConfigListener = listener;
     return this;
 };
 
@@ -111,10 +111,10 @@ TransportLayer = function (builder) {
         .rxSymbolListener(this.$$rxSymbolListener.bind(this))
         .rxSampleListener(this.$$rxSampleListener.bind(this))
         .rxSyncListener(this.$$rxSyncListener.bind(this))
-        .rxConfigListener(this.$$rxConfigListener.bind(this))
-        .configListener(this.$$configListener.bind(this))
+        .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
+        .dspConfigListener(this.$$dspConfigListener.bind(this))
         .txListener(this.$$txListener.bind(this))
-        .txConfigListener(this.$$txConfigListener.bind(this))
+        .txDspConfigListener(this.$$txDspConfigListener.bind(this))
         .build();
 
     // setup listeners - transport layer
@@ -132,10 +132,10 @@ TransportLayer = function (builder) {
     this.$$externalRxSymbolListener = TransportLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
     this.$$externalRxSampleListener = TransportLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
     this.$$externalRxSyncListener = TransportLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
-    this.$$externalRxConfigListener = TransportLayer.$$isFunction(builder._rxConfigListener) ? builder._rxConfigListener : null;
-    this.$$externalConfigListener = TransportLayer.$$isFunction(builder._configListener) ? builder._configListener : null;
+    this.$$externalRxDspConfigListener = TransportLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
+    this.$$externalConfigListener = TransportLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
     this.$$externalTxListener = TransportLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
-    this.$$externalTxConfigListener = TransportLayer.$$isFunction(builder._txConfigListener) ? builder._txConfigListener : null;
+    this.$$externalTxDspConfigListener = TransportLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 
     // TODO code below is proof of concept
     this.$$serverState = S_CLOSED;
@@ -326,11 +326,11 @@ TransportLayer.prototype.$$rxSyncListener = function (data) {
     this.$$externalRxSyncListener ? this.$$externalRxSyncListener(data) : undefined;
 };
 
-TransportLayer.prototype.$$rxConfigListener = function (data) {
-    this.$$externalRxConfigListener ? this.$$externalRxConfigListener(data) : undefined;
+TransportLayer.prototype.$$rxDspConfigListener = function (data) {
+    this.$$externalRxDspConfigListener ? this.$$externalRxDspConfigListener(data) : undefined;
 };
 
-TransportLayer.prototype.$$configListener = function (data) {
+TransportLayer.prototype.$$dspConfigListener = function (data) {
     this.$$externalConfigListener ? this.$$externalConfigListener(data) : undefined;
 };
 
@@ -339,8 +339,8 @@ TransportLayer.prototype.$$txListener = function (data) {
     this.$$handleTx();
 };
 
-TransportLayer.prototype.$$txConfigListener = function (data) {
-    this.$$externalTxConfigListener ? this.$$externalTxConfigListener(data) : undefined;
+TransportLayer.prototype.$$txDspConfigListener = function (data) {
+    this.$$externalTxDspConfigListener ? this.$$externalTxDspConfigListener(data) : undefined;
 };
 
 // -----------------------------------------------------
