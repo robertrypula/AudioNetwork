@@ -9,7 +9,7 @@ function init() {
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
         .rxSymbolListener(rxSymbolListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .build();
     html('#rx-sample-rate', physicalLayer.getRxDspConfig().rxSampleRate);
 }
@@ -49,7 +49,7 @@ function rxSymbolListener(state) {
     html('#rx-byte', byte !== null ? byte : '---');
 }
 
-function rxSampleListener(data) {
+function rxSampleDspDetailsListener(data) {
     html('#sync', data.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', data.isSyncInProgress ? '[sync in progress]' : '');
 }

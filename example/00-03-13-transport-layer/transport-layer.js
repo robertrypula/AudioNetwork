@@ -13,7 +13,7 @@ function init() {
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .dspConfigListener(dspConfigListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .build();
 }
 
@@ -43,7 +43,7 @@ function onRecordStopClick() {
     }, 0);
 }
 
-function rxSampleListener(state) {
+function rxSampleDspDetailsListener(state) {
     var rxDspConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxDspConfig();
 
     recordedData.indexMin = rxDspConfig.rxSymbolMin;

@@ -8,7 +8,7 @@ DataLinkLayer = function (builder) {
     // Data Link Layer hides Physical Layer inside
     this.$$physicalLayer = (new PhysicalLayerBuilder())
         .rxSymbolListener(this.$$rxSymbolListener.bind(this))
-        .rxSampleListener(this.$$rxSampleListener.bind(this))
+        .rxSampleDspDetailsListener(this.$$rxSampleDspDetailsListener.bind(this))
         .rxSyncListener(this.$$rxSyncListener.bind(this))
         .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
         .dspConfigListener(this.$$dspConfigListener.bind(this))
@@ -31,7 +31,7 @@ DataLinkLayer = function (builder) {
 
     // setup listeners - physical layer
     this.$$externalRxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
-    this.$$externalRxSampleListener = DataLinkLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
+    this.$$externalRxSampleDspDetailsListener = DataLinkLayer.$$isFunction(builder._rxSampleDspDetailsListener) ? builder._rxSampleDspDetailsListener : null;
     this.$$externalRxSyncListener = DataLinkLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
     this.$$externalRxDspConfigListener = DataLinkLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$externalConfigListener = DataLinkLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
@@ -95,10 +95,10 @@ DataLinkLayer.prototype.sendCommand = function (command) {
     var frame;
 
     frame = DataLinkLayer.$$buildFrame(DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND, [command]);
-    this.$$sendFrame(frame);
+    this.$$txFrame(frame);
 };
 
-DataLinkLayer.prototype.sendFrame = function (payload) {
+DataLinkLayer.prototype.txFrame = function (payload) {
     var payloadType, frame;
 
     if (payload.length > this.$$framePayloadLengthMax) {
@@ -106,7 +106,7 @@ DataLinkLayer.prototype.sendFrame = function (payload) {
     }
     payloadType = DataLinkLayer.$$_PAYLOAD_TYPE_DATA;
     frame = DataLinkLayer.$$buildFrame(payloadType, payload);
-    this.$$sendFrame(frame);
+    this.$$txFrame(frame);
 };
 
 DataLinkLayer.prototype.getFrame = function () {
@@ -152,10 +152,10 @@ DataLinkLayer.prototype.getFrameCandidate = function () {
 
 DataLinkLayer.prototype.$$handleRxSymbol = function (data) {
     var
-        rxSample = this.$$physicalLayer.getRxSample(),
+        rxSampleDspDetails = this.$$physicalLayer.getRxSampleDspDetails(),
         rxDspConfig = this.$$physicalLayer.getRxDspConfig(),
         rxSymbolMin = rxDspConfig.rxSymbolMin,
-        byte = (rxSample.symbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
+        byte = (rxSampleDspDetails.symbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
         symbolId = data.id,
         isNewFrameAvailable,
         command;
@@ -264,7 +264,7 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
 
 // -----------------------------------------------------
 
-DataLinkLayer.prototype.$$sendFrame = function (frame) {
+DataLinkLayer.prototype.$$txFrame = function (frame) {
     var txDspConfig, txSymbolMin, i, byte, txSymbol;
 
     txDspConfig = this.$$physicalLayer.getTxDspConfig();
@@ -283,8 +283,8 @@ DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
     this.$$handleRxSymbol(data);
 };
 
-DataLinkLayer.prototype.$$rxSampleListener = function (data) {
-    this.$$externalRxSampleListener ? this.$$externalRxSampleListener(data) : undefined;
+DataLinkLayer.prototype.$$rxSampleDspDetailsListener = function (data) {
+    this.$$externalRxSampleDspDetailsListener ? this.$$externalRxSampleDspDetailsListener(data) : undefined;
 };
 
 DataLinkLayer.prototype.$$rxSyncListener = function (data) {

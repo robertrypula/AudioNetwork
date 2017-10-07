@@ -21,7 +21,7 @@ function init() {
         .symbolRange(10)
         .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .rxSyncListener(rxSyncListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
@@ -119,7 +119,7 @@ function rxSymbolListener(state) {
     html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
 }
 
-function rxSampleListener(state) {
+function rxSampleDspDetailsListener(state) {
     var
         rxDspConfig = physicalLayer.getRxDspConfig(),
         rxSymbol = physicalLayer.getRxSymbol();

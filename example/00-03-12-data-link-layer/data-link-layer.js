@@ -14,7 +14,7 @@ function init() {
         .frameListener(frameListener)
         .frameCandidateListener(frameCandidateListener)
         .txListener(txListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .dspConfigListener(dspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .rxDspConfigListener(rxDspConfigListener)
@@ -80,7 +80,7 @@ function txListener(state) {
     html('#tx-byte-hex-queue', txByteHexQueue);
 }
 
-function rxSampleListener(state) {
+function rxSampleDspDetailsListener(state) {
     var
         rxDspConfig = dataLinkLayer.getPhysicalLayer().getRxDspConfig(),
         rxSymbolMin = rxDspConfig.rxSymbolMin;
@@ -136,7 +136,7 @@ function onSendHexClick() {
             payload.push(byte);
         }
     }
-    sendFrame(payload);
+    txFrame(payload);
 }
 
 function onSendAsciiClick() {
@@ -152,12 +152,12 @@ function onSendAsciiClick() {
             : ASCII_NULL;
         payload.push(byte);
     }
-    sendFrame(payload);
+    txFrame(payload);
 }
 
-function sendFrame(payload) {
+function txFrame(payload) {
     try {
-        dataLinkLayer.sendFrame(payload);
+        dataLinkLayer.txFrame(payload);
     } catch (e) {
         alert(e);
     }

@@ -10,7 +10,7 @@ function init() {
     dataLinkLayer = dataLinkLayerBuilder
         .frameListener(frameListener)
         .frameCandidateListener(frameCandidateListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .dspConfigListener(dspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .rxDspConfigListener(rxDspConfigListener)
@@ -37,7 +37,7 @@ function frameCandidateListener(frameCandidateList) {
     html('#rx-frame-candidate-progress', progress);
 }
 
-function rxSampleListener(state) {
+function rxSampleDspDetailsListener(state) {
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 }
@@ -58,7 +58,7 @@ function rxDspConfigListener(state) {
 }
 
 function txListener(state) {
-    html('#tx-status', state.isTxBusy ? 'transmitting' : 'idle');
+    html('#tx-status', state.isTxInProgress ? 'transmitting' : 'idle');
 }
 
 // ---------
@@ -89,7 +89,7 @@ function onSendHexClick() {
         }
     }
     try {
-        dataLinkLayer.sendFrame(payload);
+        dataLinkLayer.txFrame(payload);
     } catch (e) {
         alert(e);
     }

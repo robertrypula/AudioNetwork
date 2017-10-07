@@ -16,7 +16,7 @@ var PhysicalLayerBuilder = function () {
     this._rxSignalDecibelThresholdFactor = 0.6;
 
     this._rxSymbolListener = undefined;
-    this._rxSampleListener = undefined;
+    this._rxSampleDspDetailsListener = undefined;
     this._rxSyncListener = undefined;
     this._rxDspConfigListener = undefined;
     this._dspConfigListener = undefined;
@@ -74,8 +74,8 @@ PhysicalLayerBuilder.prototype.rxSymbolListener = function (listener) {
     return this;
 };
 
-PhysicalLayerBuilder.prototype.rxSampleListener = function (listener) {
-    this._rxSampleListener = listener;
+PhysicalLayerBuilder.prototype.rxSampleDspDetailsListener = function (listener) {
+    this._rxSampleDspDetailsListener = listener;
     return this;
 };
 
@@ -159,7 +159,7 @@ PhysicalLayer = function (builder) {
 
     // setup listeners
     this.$$rxSymbolListener = PhysicalLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
-    this.$$rxSampleListener = PhysicalLayer.$$isFunction(builder._rxSampleListener) ? builder._rxSampleListener : null;
+    this.$$rxSampleDspDetailsListener = PhysicalLayer.$$isFunction(builder._rxSampleDspDetailsListener) ? builder._rxSampleDspDetailsListener : null;
     this.$$rxSyncListener = PhysicalLayer.$$isFunction(builder._rxSyncListener) ? builder._rxSyncListener : null;
     this.$$rxDspConfigListener = PhysicalLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$dspConfigListener = PhysicalLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
@@ -261,7 +261,7 @@ PhysicalLayer.prototype.getRxSymbol = function () {
     };
 };
 
-PhysicalLayer.prototype.getRxSample = function () {
+PhysicalLayer.prototype.getRxSampleDspDetails = function () {
     var sync = this.$$syncCodeDetector.getSync();
 
     return {
@@ -323,7 +323,7 @@ PhysicalLayer.prototype.getTx = function () {
     return {
         symbol: this.$$txSymbol,
         symbolQueue: this.$$txSymbolQueue.slice(0),
-        isTxBusy:
+        isTxInProgress:
             this.$$txSymbolQueue.length > 0 ||
             this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
     }
@@ -361,7 +361,7 @@ PhysicalLayer.prototype.$$handleGapLogic = function () {
     // If symbol is not last we need to remove that
     // unnessescary gap.
     tx = this.getTx();
-    if (tx.isTxBusy) {
+    if (tx.isTxInProgress) {
         this.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue();
     } else {
         this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);
@@ -454,7 +454,7 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$rxSyncListener ? this.$$rxSyncListener(this.getRxSync()) : undefined;
         this.$$rxDspConfigListener ? this.$$rxDspConfigListener(this.getRxDspConfig()) : undefined;
     }
-    this.$$rxSampleListener ? this.$$rxSampleListener(this.getRxSample()) : undefined;
+    this.$$rxSampleDspDetailsListener ? this.$$rxSampleDspDetailsListener(this.getRxSampleDspDetails()) : undefined;
     if (this.$$isSymbolSamplingPoint) {
         this.$$symbolId++;
         this.$$rxSymbolListener ? this.$$rxSymbolListener(this.getRxSymbol()) : undefined;

@@ -17,7 +17,7 @@ function init() {
     physicalLayer = physicalLayerBuilder
         .txAmplitude(INITIAL_TX_AMPLITUDE)
         .rxSymbolListener(rxSymbolListener)
-        .rxSampleListener(rxSampleListener)
+        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .rxSyncListener(rxSyncListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
@@ -89,7 +89,7 @@ function rxSymbolListener(state) {
     html('#rx-ascii-history', rxAsciiHistory.getAll().join(''));
 }
 
-function rxSampleListener(state) {
+function rxSampleDspDetailsListener(state) {
     var rxDspConfig = physicalLayer.getRxDspConfig();
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
