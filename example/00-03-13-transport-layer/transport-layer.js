@@ -46,9 +46,9 @@ function onRecordStopClick() {
 function rxSampleListener(state) {
     var rxDspConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxDspConfig();
 
-    recordedData.indexMin = rxDspConfig.symbolMin;
-    recordedData.indexMax = rxDspConfig.symbolMax;
-    recordedData.frequencySpacing = rxDspConfig.symbolFrequencySpacing;
+    recordedData.indexMin = rxDspConfig.rxSymbolMin;
+    recordedData.indexMax = rxDspConfig.rxSymbolMax;
+    recordedData.frequencySpacing = rxDspConfig.rxSymbolFrequencySpacing;
     recordedData.history = recordedData.history ? recordedData.history : [];
     recordedData.history.push({
         dateTime: new Date(),
@@ -69,11 +69,11 @@ function dspConfigListener(state) {
 }
 
 function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
 function rxDspConfigListener(state) {
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
 
 // ---------

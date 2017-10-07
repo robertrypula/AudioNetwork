@@ -28,7 +28,7 @@ function rxSymbolListener(state) {
         byteText;
 
     byte = state.symbol
-        ? state.symbol - rxDspConfig.symbolMin
+        ? state.symbol - rxDspConfig.rxSymbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     rxByteHistory.pushEvenIfFull(byteText);
@@ -56,8 +56,8 @@ function rxDspConfigListener(state) {
 
     if (!rxByteContainerRendered) {
         htmlContent = '';
-        for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
-            byte = symbol - state.symbolMin;
+        for (symbol = state.rxSymbolMin; symbol <= state.rxSymbolMax; symbol++) {
+            byte = symbol - state.rxSymbolMin;
             htmlContent +=
                 '<span id="rx-symbol-' + symbol + '">' +
                 byteToText(byte) +
@@ -66,7 +66,7 @@ function rxDspConfigListener(state) {
         html('#rx-byte-container', htmlContent);
         rxByteContainerRendered = true;
     }
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
     log('log-rx-dsp-config', state);
 }
 
@@ -82,16 +82,16 @@ function txListener(state) {
 function txDspConfigListener(state) {
     var symbol, byte, htmlContent = '';
 
-    for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
-        byte = symbol - state.symbolMin;
+    for (symbol = state.txSymbolMin; symbol <= state.txSymbolMax; symbol++) {
+        byte = symbol - state.txSymbolMin;
         htmlContent +=
             '<a href="javascript:void(0)" onClick="onSendByteClick(' + byte + ')">' +
             byteToText(byte) +
             '</a>';
     }
     html('#tx-byte-container', htmlContent);
-    html('#tx-sample-rate', (state.sampleRate / 1000).toFixed(1));
-    html('#amplitude', (state.amplitude * 100).toFixed(0));
+    html('#tx-sample-rate', (state.txSampleRate / 1000).toFixed(1));
+    html('#tx-amplitude', (state.txAmplitude * 100).toFixed(0));
     log('log-tx-dsp-config', state);
 }
 
@@ -99,14 +99,10 @@ function log(elementId, object) {
     html('#' + elementId, JSON.stringify(object, null, 2));
 }
 
-function byteToText(byte) {
-    return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
-}
-
 function onSendByteClick(byte) {
     var
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.symbolMin + byte;
+        symbol = txDspConfig.txSymbolMin + byte;
 
     try {
         physicalLayer.sendSymbol(symbol);

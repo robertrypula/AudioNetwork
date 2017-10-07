@@ -4,7 +4,7 @@
 var
     RX_HISTORY_SIZE = 16,
     ASCII_NULL = 0x00,
-    INITIAL_AMPLITUDE = 0.2,
+    INITIAL_TX_AMPLITUDE = 0.2,
     powerBar,
     physicalLayerBuilder,
     physicalLayer,
@@ -15,7 +15,7 @@ function init() {
     powerBar = new PowerBar(document.getElementById('power-bar'));
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
-        .amplitude(INITIAL_AMPLITUDE)
+        .txAmplitude(INITIAL_TX_AMPLITUDE)
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
         .rxSyncListener(rxSyncListener)
@@ -28,12 +28,22 @@ function init() {
     rxAsciiHistory = new Buffer(RX_HISTORY_SIZE);
 }
 
-function formatSymbolRange(state) {
+function formatTxSymbolRange(state) {
     var s;
 
-    s = 'SymbolMin: ' + state.symbolMin + '&nbsp;(' + (state.symbolMin * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.symbolMax + '&nbsp;(' + (state.symbolMax * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.symbolFrequencySpacing.toFixed(2) + ' Hz';
+    s = 'SymbolMin: ' + state.txSymbolMin + '&nbsp;(' + (state.txSymbolMin * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolMax: ' + state.txSymbolMax + '&nbsp;(' + (state.txSymbolMax * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolSpacing: ' + state.txSymbolFrequencySpacing.toFixed(2) + ' Hz';
+
+    return s;
+}
+
+function formatRxSymbolRange(state) {
+    var s;
+
+    s = 'SymbolMin: ' + state.rxSymbolMin + '&nbsp;(' + (state.rxSymbolMin * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolMax: ' + state.rxSymbolMax + '&nbsp;(' + (state.rxSymbolMax * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolSpacing: ' + state.rxSymbolFrequencySpacing.toFixed(2) + ' Hz';
 
     return s;
 }
@@ -43,22 +53,22 @@ function formatSymbolRange(state) {
 function rxDspConfigListener(state) {
     var config = physicalLayer.getDspConfig();
 
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
     html(
         '#rx-config',
-        formatSymbolRange(state) + '<br/>' +
-        'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
-        'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
+        formatRxSymbolRange(state) + '<br/>' +
+        'FFT time: ' + (config.fftSize / state.rxSampleRate).toFixed(3) + ' s<br/>' +
+        'Threshold: ' + state.rxSignalDecibelThreshold.toFixed(1) + '&nbsp;dB'
     );
 
-    powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
+    powerBar.setSignalDecibelThreshold(state.rxSignalDecibelThreshold);
 }
 
 function txDspConfigListener(state) {
-    html('#tx-config', formatSymbolRange(state));
+    html('#tx-config', formatTxSymbolRange(state));
 
-    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.txAmplitude * 10).toFixed(0));
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
 function rxSymbolListener(state) {
@@ -68,7 +78,7 @@ function rxSymbolListener(state) {
         char;
 
     rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
-    charCode = state.symbol - rxDspConfig.symbolMin;
+    charCode = state.symbol - rxDspConfig.rxSymbolMin;
     char = String.fromCharCode(charCode);
     rxAsciiHistory.pushEvenIfFull(
         isPrintableAscii(char) ? char : UNICODE_UNKNOWN
@@ -91,7 +101,7 @@ function rxSampleListener(state) {
         'Offset: ' + state.offset + '<br/>' +
         'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
         'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.rxSymbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     powerBar.setSignalDecibel(state.signalDecibel);
@@ -125,8 +135,8 @@ function onTxSampleRateClick(txSampleRate) {
     physicalLayer.setTxSampleRate(txSampleRate);
 }
 
-function onAmplitudeClick(amplitude) {
-    physicalLayer.setAmplitude(amplitude);
+function onAmplitudeClick(txAmplitude) {
+    physicalLayer.setTxAmplitude(txAmplitude);
 }
 
 function onSendSyncClick() {
@@ -147,7 +157,7 @@ function onSendTextClick() {
     var
         text = getFormFieldValue('#tx-text-field'),
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbolMin = txDspConfig.symbolMin,
+        txSymbolMin = txDspConfig.txSymbolMin,
         byte,
         symbol,
         i;
@@ -156,7 +166,7 @@ function onSendTextClick() {
         byte = isPrintableAscii(text[i])
             ? text.charCodeAt(i)
             : ASCII_NULL;
-        symbol = symbolMin + byte;
+        symbol = txSymbolMin + byte;
         physicalLayer.sendSymbol(symbol);
     }
 }

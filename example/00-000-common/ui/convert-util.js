@@ -6,14 +6,21 @@ var
     SYMBOL_ZERO_PADDING = 3;
 
 function getStringFromSymbolArray(symbolArray) {
-    var i, tmp, formatted = [];
+    var i, tmp, symbol, formatted = [];
 
     for (i = 0; i < symbolArray.length; i++) {
-        tmp = pad(symbolArray[i], SYMBOL_ZERO_PADDING);
+        symbol = symbolArray[i];
+        tmp = symbol <= 0
+            ? '[gap]'
+            : pad(symbolArray[i], SYMBOL_ZERO_PADDING);
         formatted.push(tmp);
     }
 
     return formatted.join(' ');
+}
+
+function byteToText(byte) {
+    return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
 }
 
 function isPrintableAscii(char) {

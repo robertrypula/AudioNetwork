@@ -284,8 +284,8 @@ TransportLayer.prototype.txTwoWaySync = function () {
     this.$$dataLinkLayer.txTwoWaySync();  // alias for easier access
 };
 
-TransportLayer.prototype.setAmplitude = function (amplitude) {
-    this.$$dataLinkLayer.setAmplitude(amplitude);  // alias for easier access
+TransportLayer.prototype.setTxAmplitude = function (txAmplitude) {
+    this.$$dataLinkLayer.setTxAmplitude(txAmplitude);  // alias for easier access
 };
 
 TransportLayer.prototype.setLoopback = function (state) {

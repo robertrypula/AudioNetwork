@@ -64,7 +64,7 @@ DataLinkLayer.prototype.getPhysicalLayer = function () {
 DataLinkLayer.prototype.getRxSampleRate = function () {
     var rxDspConfig = this.$$physicalLayer.getRxDspConfig();
 
-    return rxDspConfig.sampleRate;
+    return rxDspConfig.rxSampleRate;
 };
 
 DataLinkLayer.prototype.setTxSampleRate = function (txSampleRate) {
@@ -154,8 +154,8 @@ DataLinkLayer.prototype.$$handleRxSymbol = function (data) {
     var
         rxSample = this.$$physicalLayer.getRxSample(),
         rxDspConfig = this.$$physicalLayer.getRxDspConfig(),
-        symbolMin = rxDspConfig.symbolMin,
-        byte = (rxSample.symbolRaw - symbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
+        rxSymbolMin = rxDspConfig.rxSymbolMin,
+        byte = (rxSample.symbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
         symbolId = data.id,
         isNewFrameAvailable,
         command;
@@ -265,13 +265,13 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
 // -----------------------------------------------------
 
 DataLinkLayer.prototype.$$sendFrame = function (frame) {
-    var txDspConfig, symbolMin, i, byte, symbol;
+    var txDspConfig, txSymbolMin, i, byte, symbol;
 
     txDspConfig = this.$$physicalLayer.getTxDspConfig();
-    symbolMin = txDspConfig.symbolMin;
+    txSymbolMin = txDspConfig.txSymbolMin;
     for (i = 0; i < frame.length; i++) {
         byte = frame[i];
-        symbol = symbolMin + byte;
+        symbol = txSymbolMin + byte;
         this.$$physicalLayer.sendSymbol(symbol);
     }
 };

@@ -159,15 +159,15 @@
                             </div>
 
                             <div class="margin-bottom">
-                                <strong>Amplitude:</strong> <span id="amplitude">-</span>%
+                                <strong>Amplitude:</strong> <span id="tx-amplitude">-</span>%
                             </div>
 
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.2)">20%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.4)">40%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.6)">60%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(0.8)">80%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setAmplitude(1.0)">100%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.2)">20%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.4)">40%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.6)">60%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.8)">80%</button>
+                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(1.0)">100%</button>
                             </div>
                         </div>
                     </div>
@@ -203,6 +203,7 @@
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/sync-code-detector.js"></script>
     <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/ui/convert-util.js"></script>
     <script src="physical-layer-listeners-demo.js"></script>
 
     <script>

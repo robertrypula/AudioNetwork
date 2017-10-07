@@ -70,11 +70,11 @@ function frameCandidateListener(frameCandidateList) {
 function txListener(state) {
     var
         txDspConfig = dataLinkLayer.getPhysicalLayer().getTxDspConfig(),
-        symbolMin = txDspConfig.symbolMin,
+        txSymbolMin = txDspConfig.txSymbolMin,
         txByteHex = state.symbol
-            ? getByteHexFromSymbol(state.symbol, symbolMin)
+            ? getByteHexFromSymbol(state.symbol, txSymbolMin)
             : 'idle',
-        txByteHexQueue = getByteHexFromSymbolList(state.symbolQueue, symbolMin);
+        txByteHexQueue = getByteHexFromSymbolList(state.symbolQueue, txSymbolMin);
 
     html('#tx-byte-hex', txByteHex);
     html('#tx-byte-hex-queue', txByteHexQueue);
@@ -83,14 +83,14 @@ function txListener(state) {
 function rxSampleListener(state) {
     var
         rxDspConfig = dataLinkLayer.getPhysicalLayer().getRxDspConfig(),
-        symbolMin = rxDspConfig.symbolMin;
+        rxSymbolMin = rxDspConfig.rxSymbolMin;
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 
     if (state.isSymbolSamplingPoint) {
         rxSymbolRawHistory.pushEvenIfFull(state.symbolRaw);
-        html('#rx-byte-raw-history', getByteHexFromSymbolList(rxSymbolRawHistory.getAll(), symbolMin));
+        html('#rx-byte-raw-history', getByteHexFromSymbolList(rxSymbolRawHistory.getAll(), rxSymbolMin));
     }
 }
 
@@ -102,11 +102,11 @@ function dspConfigListener(state) {
 }
 
 function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
 function rxDspConfigListener(state) {
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
 
 // ---------

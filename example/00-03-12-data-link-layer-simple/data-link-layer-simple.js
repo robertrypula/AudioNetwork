@@ -50,11 +50,11 @@ function dspConfigListener(state) {
 }
 
 function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
 function rxDspConfigListener(state) {
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
 
 function txListener(state) {

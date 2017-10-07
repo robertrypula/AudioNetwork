@@ -4,7 +4,6 @@
 var
     RX_SYMBOL_HISTORY = 16,
     DIGIT_ZERO_SYMBOL = 100,
-    SYMBOL_ZERO_PADDING = 3,
     powerBar,
     physicalLayerBuilder,
     physicalLayer,
@@ -33,7 +32,7 @@ function init() {
     rxSpectrogram = new Spectrogram(document.getElementById('rx-spectrogram'));
     txSampleRateWidget = new EditableFloatWidget(
         document.getElementById('tx-sample-rate'),
-        physicalLayer.getTxDspConfig().sampleRate, 5, 0,
+        physicalLayer.getTxDspConfig().txSampleRate, 5, 0,
         onTxSampleRateWidgetChange
     );
     document.addEventListener(
@@ -49,12 +48,22 @@ function init() {
     );
 }
 
-function formatSymbolRange(state) {
+function formatTxSymbolRange(state) {
     var s;
 
-    s = 'SymbolMin: ' + state.symbolMin + '&nbsp;(' + (state.symbolMin * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.symbolMax + '&nbsp;(' + (state.symbolMax * state.symbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.symbolFrequencySpacing.toFixed(2) + ' Hz';
+    s = 'SymbolMin: ' + state.txSymbolMin + '&nbsp;(' + (state.txSymbolMin * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolMax: ' + state.txSymbolMax + '&nbsp;(' + (state.txSymbolMax * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolSpacing: ' + state.txSymbolFrequencySpacing.toFixed(2) + ' Hz';
+
+    return s;
+}
+
+function formatRxSymbolRange(state) {
+    var s;
+
+    s = 'SymbolMin: ' + state.rxSymbolMin + '&nbsp;(' + (state.rxSymbolMin * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolMax: ' + state.rxSymbolMax + '&nbsp;(' + (state.rxSymbolMax * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'SymbolSpacing: ' + state.rxSymbolFrequencySpacing.toFixed(2) + ' Hz';
 
     return s;
 }
@@ -79,25 +88,25 @@ function dspConfigListener(state) {
 function rxDspConfigListener(state) {
     var config = physicalLayer.getDspConfig();
 
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
     html(
         '#rx-config',
-        formatSymbolRange(state) + '<br/>' +
-        'FFT time: ' + (config.fftSize / state.sampleRate).toFixed(3) + ' s<br/>' +
-        'Threshold: ' + state.signalDecibelThreshold.toFixed(1) + '&nbsp;dB'
+        formatRxSymbolRange(state) + '<br/>' +
+        'FFT time: ' + (config.fftSize / state.rxSampleRate).toFixed(3) + ' s<br/>' +
+        'Threshold: ' + state.rxSignalDecibelThreshold.toFixed(1) + '&nbsp;dB'
     );
 
-    powerBar.setSignalDecibelThreshold(state.signalDecibelThreshold);
+    powerBar.setSignalDecibelThreshold(state.rxSignalDecibelThreshold);
 }
 
 function txDspConfigListener(state) {
-    html('#tx-config', formatSymbolRange(state));
+    html('#tx-config', formatTxSymbolRange(state));
 
-    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.amplitude * 10).toFixed(0));
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.sampleRate);
+    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.txAmplitude * 10).toFixed(0));
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 
     if (txSampleRateWidget) {
-        txSampleRateWidget.setValue(state.sampleRate);
+        txSampleRateWidget.setValue(state.txSampleRate);
     }
 }
 
@@ -121,15 +130,15 @@ function rxSampleListener(state) {
         'Offset: ' + state.offset + '<br/>' +
         'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
         'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.symbolFrequencySpacing).toFixed(2) + ' Hz'
+        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.rxSymbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     if (document.getElementById('spectrogram-active').checked) {
         rxSpectrogram.add(
             state.frequencyData,
-            rxDspConfig.symbolMin,
-            rxDspConfig.symbolMax,
-            rxDspConfig.symbolFrequencySpacing,
+            rxDspConfig.rxSymbolMin,
+            rxDspConfig.rxSymbolMax,
+            rxDspConfig.rxSymbolFrequencySpacing,
             document.getElementById('symbol-marker-active').checked && rxSymbol.symbol
                 ? rxSymbol.symbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
@@ -179,8 +188,8 @@ function onSampleRateClick(sampleRate) {
     physicalLayer.setTxSampleRate(sampleRate);
 }
 
-function onAmplitudeClick(amplitude) {
-    physicalLayer.setAmplitude(amplitude);
+function onAmplitudeClick(txAmplitude) {
+    physicalLayer.setTxAmplitude(txAmplitude);
 }
 
 function onSendSyncClick() {
@@ -196,24 +205,6 @@ function onSendSymbolClick(symbol) {
 }
 
 // -----------------------------------------------------------------
-
-
-function pad(num, size) {
-    var s = '000000000' + num;
-
-    return s.substr(s.length - size);
-}
-
-function getStringFromSymbolArray(symbolArray) {
-    var i, tmp, formatted = [];
-
-    for (i = 0; i < symbolArray.length; i++) {
-        tmp = pad(symbolArray[i], SYMBOL_ZERO_PADDING);
-        formatted.push(tmp);
-    }
-
-    return formatted.join(' ');
-}
 
 function getDigitFromKeyCode(keyCode) {
     var digit = null;

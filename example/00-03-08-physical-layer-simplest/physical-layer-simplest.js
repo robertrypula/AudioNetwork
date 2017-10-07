@@ -11,7 +11,7 @@ function init() {
         .rxSymbolListener(rxSymbolListener)
         .rxSampleListener(rxSampleListener)
         .build();
-    html('#rx-sample-rate', physicalLayer.getRxDspConfig().sampleRate);
+    html('#rx-sample-rate', physicalLayer.getRxDspConfig().rxSampleRate);
 }
 
 function onSetTxSampleRateClick() {
@@ -29,7 +29,7 @@ function onSendByteClick() {
     var
         byte = getFormFieldValue('#tx-byte', 'int'),
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.symbolMin + byte;
+        symbol = txDspConfig.txSymbolMin + byte;
 
     try {
         physicalLayer.sendSymbol(symbol);
@@ -43,7 +43,7 @@ function rxSymbolListener(state) {
 
     rxDspConfig = physicalLayer.getRxDspConfig();
     byte = state.symbol !== null
-        ? state.symbol - rxDspConfig.symbolMin
+        ? state.symbol - rxDspConfig.rxSymbolMin
         : null;
     html('#rx-symbol', state.symbol !== null ? state.symbol : 'idle');
     html('#rx-byte', byte !== null ? byte : '---');

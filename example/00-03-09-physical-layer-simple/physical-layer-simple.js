@@ -26,7 +26,7 @@ function rxSymbolListener(state) {
         byteText;
 
     byte = state.symbol
-        ? state.symbol - rxDspConfig.symbolMin
+        ? state.symbol - rxDspConfig.rxSymbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     rxByteHistory.push(byteText);
@@ -50,8 +50,8 @@ function rxDspConfigListener(state) {
 
     if (!rxByteContainerRendered) {
         htmlContent = '';
-        for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
-            byte = symbol - state.symbolMin;
+        for (symbol = state.rxSymbolMin; symbol <= state.rxSymbolMax; symbol++) {
+            byte = symbol - state.rxSymbolMin;
             htmlContent +=
                 '<span id="rx-symbol-' + symbol + '">' +
                 byteToText(byte) +
@@ -60,7 +60,7 @@ function rxDspConfigListener(state) {
         html('#rx-byte-container', htmlContent);
         rxByteContainerRendered = true;
     }
-    html('#rx-sample-rate', (state.sampleRate / 1000).toFixed(1));
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
 
 function dspConfigListener(state) {
@@ -70,25 +70,21 @@ function dspConfigListener(state) {
 function txDspConfigListener(state) {
     var symbol, byte, htmlContent = '';
 
-    for (symbol = state.symbolMin; symbol <= state.symbolMax; symbol++) {
-        byte = symbol - state.symbolMin;
+    for (symbol = state.txSymbolMin; symbol <= state.txSymbolMax; symbol++) {
+        byte = symbol - state.txSymbolMin;
         htmlContent +=
             '<a href="javascript:void(0)" onClick="onSendByteClick(' + byte + ')">' +
             byteToText(byte) +
             '</a>';
     }
     html('#tx-byte-container', htmlContent);
-    html('#tx-sample-rate', (state.sampleRate / 1000).toFixed(1));
-}
-
-function byteToText(byte) {
-    return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
+    html('#tx-sample-rate', (state.txSampleRate / 1000).toFixed(1));
 }
 
 function onSendByteClick(byte) {
     var
         txDspConfig = physicalLayer.getTxDspConfig(),
-        symbol = txDspConfig.symbolMin + byte;
+        symbol = txDspConfig.txSymbolMin + byte;
 
     try {
         physicalLayer.sendSymbol(symbol);

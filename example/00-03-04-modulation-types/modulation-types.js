@@ -331,12 +331,6 @@ function generateSineWave(samplePerPeriod, amplitude, unitPhaseOffset, sample) {
     return amplitude * Math.sin(x);
 }
 
-function pad(num, size) {
-    var s = '000000000' + num;
-
-    return s.substr(s.length - size);
-}
-
 function arraySmartCopy(src, size) {
     var result, index, srcLength, limit, i, isFromBack, element;
 
