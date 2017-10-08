@@ -137,13 +137,13 @@ PhysicalLayer = function (builder) {
     this.$$symbolId = PhysicalLayer.$$_INITIAL_ID;
     this.$$sampleId = PhysicalLayer.$$_INITIAL_ID;
     this.$$symbol = undefined;
-    this.$$symbolRaw = undefined;
-    this.$$signalDecibel = undefined;
-    this.$$signalDecibelNextCandidate = undefined;
-    this.$$noiseDecibel = undefined;
-    this.$$frequencyData = undefined;
-    this.$$isSyncInProgress = undefined;
-    this.$$isSymbolSamplingPoint = undefined;
+    this.$$rxSymbolRaw = undefined;
+    this.$$rxSignalDecibel = undefined;
+    this.$$rxSignalDecibelNextCandidate = undefined;
+    this.$$rxNoiseDecibel = undefined;
+    this.$$rxFrequencyData = undefined;
+    this.$$isRxSyncInProgress = undefined;
+    this.$$isRxSymbolSamplingPoint = undefined;
     this.$$rxSignalDecibelThreshold = PhysicalLayer.$$_INITIAL_RX_SIGNAL_DECIBEL_THRESHOLD;
     this.$$syncLastId = undefined;
     this.$$txSymbol = PhysicalLayer.$$_SYMBOL_IDLE;
@@ -266,15 +266,15 @@ PhysicalLayer.prototype.getRxSampleDspDetails = function () {
 
     return {
         id: this.$$sampleId,
-        symbolRaw: this.$$symbolRaw,
-        signalDecibel: this.$$signalDecibel,
-        // signalDecibelNextCandidate: this.$$signalDecibelNextCandidate,  // TODO add this at some point
-        noiseDecibel: this.$$noiseDecibel,
-        frequencyData: this.$$frequencyData.slice(0),
-        isSyncInProgress: this.$$isSyncInProgress,
-        isSymbolSamplingPoint: this.$$isSymbolSamplingPoint,
-        sampleNumber: this.$$sampleNumber,
-        offset: this.$$offset,
+        rxSymbolRaw: this.$$rxSymbolRaw,
+        rxSignalDecibel: this.$$rxSignalDecibel,
+        // rxSignalDecibelNextCandidate: this.$$rxSignalDecibelNextCandidate,  // TODO add this at some point
+        rxNoiseDecibel: this.$$rxNoiseDecibel,
+        rxFrequencyData: this.$$rxFrequencyData.slice(0),
+        isRxSyncInProgress: this.$$isRxSyncInProgress,
+        isRxSymbolSamplingPoint: this.$$isRxSymbolSamplingPoint,
+        rxSampleNumber: this.$$sampleNumber,
+        rxSampleOffset: this.$$offset,
         syncId: sync.id
     };
 };
@@ -310,8 +310,8 @@ PhysicalLayer.prototype.getRxDspConfig = function () {
 
 PhysicalLayer.prototype.getDspConfig = function () {
     return {
-        fftSkipFactor: this.$$fftSkipFactor,
-        fftSize: this.$$fftSize,
+        fftSkipFactor: this.$$fftSkipFactor,              // TODO move it to getRxDspConfig?
+        fftSize: this.$$fftSize,                          // TODO move it to getRxDspConfig?
         samplePerSymbol: this.$$samplePerSymbol,
         unitTime: this.$$unitTime,
         correlationCodeLength: this.$$syncCode.length,
@@ -415,28 +415,29 @@ PhysicalLayer.prototype.$$rx = function () {
     if (isAllowedToListen) {
         fftResult = new FFTResult(this.$$audioMonoIO.getFrequencyData(), this.$$rxSampleRate);
         fftResult.downconvert(this.$$fftSkipFactor);
-        this.$$frequencyData = fftResult.getFrequencyData();
-        this.$$symbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
-        this.$$signalDecibel = fftResult.getDecibel(this.$$symbolRaw);
-        this.$$signalDecibelNextCandidate = -Infinity; // TODO add this
-        this.$$noiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$symbolRaw);
+        this.$$rxFrequencyData = fftResult.getFrequencyData();
+        this.$$rxSymbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
+        this.$$rxSignalDecibel = fftResult.getDecibel(this.$$rxSymbolRaw);
+        this.$$rxSignalDecibelNextCandidate = -Infinity; // TODO add this
+        this.$$rxNoiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$rxSymbolRaw);
     } else {
+        // TODO refactor this
         fakeFrequencyData = [];
         for (i = 0; i < this.$$fftSize * 0.5; i++) {
             fakeFrequencyData.push(-160);
         }
         fftResult = new FFTResult(fakeFrequencyData, this.$$rxSampleRate);
         fftResult.downconvert(this.$$fftSkipFactor);
-        this.$$frequencyData = fftResult.getFrequencyData();
-        this.$$symbolRaw = this.$$rxSymbolMin;
-        this.$$signalDecibel = -Infinity;
-        this.$$signalDecibelNextCandidate = -Infinity;
-        this.$$noiseDecibel = -Infinity;
+        this.$$rxFrequencyData = fftResult.getFrequencyData();
+        this.$$rxSymbolRaw = this.$$rxSymbolMin;
+        this.$$rxSignalDecibel = -Infinity;
+        this.$$rxSignalDecibelNextCandidate = -Infinity;
+        this.$$rxNoiseDecibel = -Infinity;
     }
 
     this.$$handleSyncCode();
 
-    this.$$isSyncInProgress = this.$$syncCodeDetector.isSyncInProgress();
+    this.$$isRxSyncInProgress = this.$$syncCodeDetector.isSyncInProgress();
     sync = this.$$syncCodeDetector.getSync();
     if (sync.id && sync.id !== this.$$syncLastId) {
         this.$$rxSignalDecibelThreshold = sync.noiseDecibelAverage +
@@ -445,9 +446,9 @@ PhysicalLayer.prototype.$$rx = function () {
         isNewSyncAvailable = true;
     }
 
-    this.$$isSymbolSamplingPoint = sync.id && this.$$offset === sync.symbolSamplingPointOffset;
-    isNewSymbolReadyToTake = this.$$isSymbolSamplingPoint && this.$$signalDecibel > this.$$rxSignalDecibelThreshold;
-    this.$$symbol = isNewSymbolReadyToTake ? this.$$symbolRaw : PhysicalLayer.$$_SYMBOL_IDLE;
+    this.$$isRxSymbolSamplingPoint = sync.id && this.$$offset === sync.symbolSamplingPointOffset;
+    isNewSymbolReadyToTake = this.$$isRxSymbolSamplingPoint && this.$$rxSignalDecibel > this.$$rxSignalDecibelThreshold;
+    this.$$symbol = isNewSymbolReadyToTake ? this.$$rxSymbolRaw : PhysicalLayer.$$_SYMBOL_IDLE;
 
     // call listeners
     if (isNewSyncAvailable) {
@@ -455,7 +456,7 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$rxDspConfigListener ? this.$$rxDspConfigListener(this.getRxDspConfig()) : undefined;
     }
     this.$$rxSampleDspDetailsListener ? this.$$rxSampleDspDetailsListener(this.getRxSampleDspDetails()) : undefined;
-    if (this.$$isSymbolSamplingPoint) {
+    if (this.$$isRxSymbolSamplingPoint) {
         this.$$symbolId++;
         this.$$rxSymbolListener ? this.$$rxSymbolListener(this.getRxSymbol()) : undefined;
     }
@@ -507,7 +508,7 @@ PhysicalLayer.prototype.$$tx = function () {
 PhysicalLayer.prototype.$$handleSyncCode = function () {
     var codeValue = null;
 
-    switch (this.$$symbolRaw) {
+    switch (this.$$rxSymbolRaw) {
         case this.$$rxSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET:
             codeValue = -1;
             break;
@@ -516,7 +517,7 @@ PhysicalLayer.prototype.$$handleSyncCode = function () {
             break;
     }
     this.$$syncCodeDetector.handle(
-        codeValue, this.$$signalDecibel, this.$$noiseDecibel
+        codeValue, this.$$rxSignalDecibel, this.$$rxNoiseDecibel
     );
 };
 

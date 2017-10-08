@@ -155,13 +155,13 @@ DataLinkLayer.prototype.$$handleRxSymbol = function (data) {
         rxSampleDspDetails = this.$$physicalLayer.getRxSampleDspDetails(),
         rxDspConfig = this.$$physicalLayer.getRxDspConfig(),
         rxSymbolMin = rxDspConfig.rxSymbolMin,
-        byte = (rxSampleDspDetails.symbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
+        byte = (rxSampleDspDetails.rxSymbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
         symbolId = data.id,
         isNewFrameAvailable,
         command;
 
     this.$$cleanUpFrameCandidateList();
-    this.$$addSymbolRawToFrameCandidateList(byte, symbolId);
+    this.$$addNewByteToFrameCandidateList(byte, symbolId);
     this.$$tryToCreateNewFrameCandidate(byte, symbolId);
     isNewFrameAvailable = this.$$tryToFindNewFrame();
 
@@ -188,7 +188,7 @@ DataLinkLayer.prototype.$$cleanUpFrameCandidateList = function () {
     }
 };
 
-DataLinkLayer.prototype.$$addSymbolRawToFrameCandidateList = function (byte, symbolId) {
+DataLinkLayer.prototype.$$addNewByteToFrameCandidateList = function (byte, symbolId) {
     var i, frameCandidate, readyToComputeChecksum, fullyReceived, notFullyReceived, frameWithoutChecksum, receivedChecksum;
 
     for (i = 0; i < this.$$frameCandidateList.length; i++) {

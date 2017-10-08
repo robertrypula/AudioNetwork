@@ -52,9 +52,9 @@ function rxSampleDspDetailsListener(state) {
     recordedData.history = recordedData.history ? recordedData.history : [];
     recordedData.history.push({
         dateTime: new Date(),
-        frequencyData: state.frequencyData,
-        indexMarker: state.symbolRaw,
-        rowMarker: state.isSymbolSamplingPoint
+        frequencyData: state.rxFrequencyData,
+        indexMarker: state.rxSymbolRaw,
+        rowMarker: state.isRxSymbolSamplingPoint
     });
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');

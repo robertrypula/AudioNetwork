@@ -88,8 +88,8 @@ function rxSampleDspDetailsListener(state) {
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
 
-    if (state.isSymbolSamplingPoint) {
-        rxSymbolRawHistory.pushEvenIfFull(state.symbolRaw);
+    if (state.isRxSymbolSamplingPoint) {
+        rxSymbolRawHistory.pushEvenIfFull(state.rxSymbolRaw);
         html('#rx-byte-raw-history', getByteHexFromSymbolList(rxSymbolRawHistory.getAll(), rxSymbolMin));
     }
 }

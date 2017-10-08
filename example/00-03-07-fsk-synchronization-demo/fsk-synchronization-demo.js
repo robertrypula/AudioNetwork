@@ -129,30 +129,30 @@ function rxSampleDspDetailsListener(state) {
 
     html(
         '#rx-sample',
-        'SampleNumber: ' + state.sampleNumber + '<br/>' +
-        'Offset: ' + state.offset + '<br/>' +
-        'IsSymbolSamplingPoint: ' + (state.isSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
-        'SymbolRaw: ' + state.symbolRaw + '<br/>' +
-        'SignalFrequency: ' + (state.symbolRaw * rxDspConfig.rxSymbolFrequencySpacing).toFixed(2) + ' Hz'
+        'rxSampleNumber: ' + state.rxSampleNumber + '<br/>' +
+        'rxSampleOffset: ' + state.rxSampleOffset + '<br/>' +
+        'isRxSymbolSamplingPoint: ' + (state.isRxSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
+        'rxSymbolRaw: ' + state.rxSymbolRaw + '<br/>' +
+        'rxSignalFrequency: ' + (state.rxSymbolRaw * rxDspConfig.rxSymbolFrequencySpacing).toFixed(2) + ' Hz'
     );
 
     if (document.getElementById('spectrogram-active').checked) {
         rxSpectrogram.add(
-            state.frequencyData,
+            state.rxFrequencyData,
             rxDspConfig.rxSymbolMin,
             rxDspConfig.rxSymbolMax,
             rxDspConfig.rxSymbolFrequencySpacing,
             document.getElementById('symbol-marker-active').checked && rxSymbol.symbol
                 ? rxSymbol.symbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
-            state.isSymbolSamplingPoint
+            state.isRxSymbolSamplingPoint
                 ? Spectrogram.ROW_MARKER_ENABLED
                 : Spectrogram.ROW_MARKER_DISABLED
         );
     }
 
-    powerBar.setSignalDecibel(state.signalDecibel);
-    powerBar.setNoiseDecibel(state.noiseDecibel);
+    powerBar.setSignalDecibel(state.rxSignalDecibel);
+    powerBar.setNoiseDecibel(state.rxNoiseDecibel);
 }
 
 function rxSyncListener(state) {

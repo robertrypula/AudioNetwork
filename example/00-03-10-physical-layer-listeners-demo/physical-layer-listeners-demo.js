@@ -41,7 +41,7 @@ function rxSymbolListener(state) {
 }
 
 function rxSampleDspDetailsListener(state) {
-    state.frequencyData = '[spectrogram array]';
+    state.rxFrequencyData = '[spectrogram array]';
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
     html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
     log('log-rx-sample', state);
