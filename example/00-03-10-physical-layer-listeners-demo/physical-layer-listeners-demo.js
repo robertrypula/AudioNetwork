@@ -27,16 +27,16 @@ function rxSymbolListener(state) {
         byte,
         byteText;
 
-    byte = state.symbol
-        ? state.symbol - rxDspConfig.rxSymbolMin
+    byte = state.rxSymbol
+        ? state.rxSymbol - rxDspConfig.rxSymbolMin
         : null;
     byteText = byte !== null ? byteToText(byte) : '---';
     rxByteHistory.pushEvenIfFull(byteText);
 
     html('#rx-byte-history', rxByteHistory.getAll().join(' '));
-    html('#rx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
     html('#rx-byte', byteText);
-    setActive('#rx-byte-container', '#rx-symbol-' + (state.symbol ? state.symbol : ''));
+    setActive('#rx-byte-container', '#rx-symbol-' + (state.rxSymbol ? state.rxSymbol : ''));
     log('log-rx-symbol', state);
 }
 

@@ -77,14 +77,14 @@ function rxSymbolListener(state) {
         charCode,
         char;
 
-    rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
-    charCode = state.symbol - rxDspConfig.rxSymbolMin;
+    rxSymbolHistory.pushEvenIfFull(state.rxSymbol ? state.rxSymbol : '---');
+    charCode = state.rxSymbol - rxDspConfig.rxSymbolMin;
     char = String.fromCharCode(charCode);
     rxAsciiHistory.pushEvenIfFull(
         isPrintableAscii(char) ? char : UNICODE_UNKNOWN
     );
 
-    html('#rx-symbol', state.symbol ? state.symbol : 'idle');
+    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
     html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
     html('#rx-ascii-history', rxAsciiHistory.getAll().join(''));
 }

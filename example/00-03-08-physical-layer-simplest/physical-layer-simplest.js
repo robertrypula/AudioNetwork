@@ -42,10 +42,10 @@ function rxSymbolListener(state) {
     var rxDspConfig, byte;
 
     rxDspConfig = physicalLayer.getRxDspConfig();
-    byte = state.symbol !== null
-        ? state.symbol - rxDspConfig.rxSymbolMin
+    byte = state.rxSymbol
+        ? state.rxSymbol - rxDspConfig.rxSymbolMin
         : null;
-    html('#rx-symbol', state.symbol !== null ? state.symbol : 'idle');
+    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
     html('#rx-byte', byte !== null ? byte : '---');
 }
 

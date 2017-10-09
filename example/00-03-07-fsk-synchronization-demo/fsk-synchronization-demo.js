@@ -75,12 +75,11 @@ function formatRxSymbolRange(state) {
 
 function dspConfigListener(state) {
     html(
-        '#config',
-        'FftSkipFactor: ' + state.fftSkipFactor + '<br/>' +
-        'FftSize: ' + state.fftSize + '<br/>' +
-        'SamplePerSymbol: ' + state.samplePerSymbol + '<br/>' +
-        'UnitTime: ' + state.unitTime + ' s<br/>' +
-        'CorrelationCodeLength: ' + state.correlationCodeLength
+        '#dsp-config',
+        'fftSkipFactor: ' + state.fftSkipFactor + '<br/>' +
+        'fftSize: ' + state.fftSize + '<br/>' +
+        'samplePerSymbol: ' + state.samplePerSymbol + '<br/>' +
+        'unitTime: ' + state.unitTime + ' s'
     );
     setActive(
         '#loopback-container',
@@ -114,8 +113,8 @@ function txDspConfigListener(state) {
 }
 
 function rxSymbolListener(state) {
-    rxSymbolHistory.pushEvenIfFull(state.symbol ? state.symbol : '---');
-    html('#rx-symbol', state.symbol ? state.symbol : 'idle');
+    rxSymbolHistory.pushEvenIfFull(state.rxSymbol ? state.rxSymbol : '---');
+    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
     html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
 }
 
@@ -142,8 +141,8 @@ function rxSampleDspDetailsListener(state) {
             rxDspConfig.rxSymbolMin,
             rxDspConfig.rxSymbolMax,
             rxDspConfig.rxSymbolFrequencySpacing,
-            document.getElementById('symbol-marker-active').checked && rxSymbol.symbol
-                ? rxSymbol.symbol
+            document.getElementById('symbol-marker-active').checked && rxSymbol.rxSymbol
+                ? rxSymbol.rxSymbol
                 : Spectrogram.INDEX_MARKER_DISABLED,
             state.isRxSymbolSamplingPoint
                 ? Spectrogram.ROW_MARKER_ENABLED

@@ -1,31 +1,31 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var SyncCodeDetector = function (samplePerSymbol, code) {
+var RxSyncDetector = function (samplePerSymbol, code) {
     this.$$samplePerSymbol = samplePerSymbol;
     this.$$syncInProgress = false;
     this.$$sync = this.$$getEmptySync();
-    this.$$syncId = SyncCodeDetector.$$_INITIAL_ID;
+    this.$$syncId = RxSyncDetector.$$_INITIAL_ID;
     this.$$correlator = new Correlator(samplePerSymbol, code);
     this.$$blockHistory = undefined;
-    this.$$sampleNumber = SyncCodeDetector.$$_INITIAL_SAMPLE_NUMBER;
+    this.$$sampleNumber = RxSyncDetector.$$_INITIAL_SAMPLE_NUMBER;
 
     this.$$initializeBlockHistory();
 };
 
-SyncCodeDetector.$$_FIRST_ELEMENT = 0;
-SyncCodeDetector.$$_INITIAL_ID = 1;
-SyncCodeDetector.$$_INITIAL_SAMPLE_NUMBER = 0;
+RxSyncDetector.$$_FIRST_ELEMENT = 0;
+RxSyncDetector.$$_INITIAL_ID = 1;
+RxSyncDetector.$$_INITIAL_SAMPLE_NUMBER = 0;
 
-SyncCodeDetector.prototype.isSyncInProgress = function () {
+RxSyncDetector.prototype.isSyncInProgress = function () {
     return this.$$syncInProgress;
 };
 
-SyncCodeDetector.prototype.getSync = function () {
+RxSyncDetector.prototype.getSync = function () {
     return this.$$sync;
 };
 
-SyncCodeDetector.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
+RxSyncDetector.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
     var
         offset,
         blockHistoryEntry,
@@ -67,19 +67,19 @@ SyncCodeDetector.prototype.handle = function (codeValue, signalDecibel, noiseDec
     this.$$sampleNumber++;
 };
 
-SyncCodeDetector.prototype.$$sortByCorrelationValue = function (a, b) {
+RxSyncDetector.prototype.$$sortByCorrelationValue = function (a, b) {
     return a.correlationValue < b.correlationValue
         ? 1
         : (a.correlationValue > b.correlationValue ? -1 : 0);
 };
 
-SyncCodeDetector.prototype.$$sortBySignalDecibel = function (a, b) {
+RxSyncDetector.prototype.$$sortBySignalDecibel = function (a, b) {
     return a.signalDecibelAverage < b.signalDecibelAverage
         ? 1
         : (a.signalDecibelAverage > b.signalDecibelAverage ? -1 : 0);
 };
 
-SyncCodeDetector.prototype.$$sortDecisionList = function (data) {
+RxSyncDetector.prototype.$$sortDecisionList = function (data) {
     var self = this;
 
     data.sort(function (a, b) {
@@ -89,7 +89,7 @@ SyncCodeDetector.prototype.$$sortDecisionList = function (data) {
     });
 };
 
-SyncCodeDetector.prototype.$$initializeBlockHistory = function () {
+RxSyncDetector.prototype.$$initializeBlockHistory = function () {
     var offset;
 
     this.$$blockHistory = [];
@@ -102,7 +102,7 @@ SyncCodeDetector.prototype.$$initializeBlockHistory = function () {
     }
 };
 
-SyncCodeDetector.prototype.$$resetBlockHistory = function () {
+RxSyncDetector.prototype.$$resetBlockHistory = function () {
     var offset, blockHistoryEntry;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
@@ -113,7 +113,7 @@ SyncCodeDetector.prototype.$$resetBlockHistory = function () {
     }
 };
 
-SyncCodeDetector.prototype.$$getStrongestSync = function () {
+RxSyncDetector.prototype.$$getStrongestSync = function () {
     var offset, decisionList, innerDecisionList, strongestSync;
 
     decisionList = [];
@@ -121,23 +121,23 @@ SyncCodeDetector.prototype.$$getStrongestSync = function () {
         innerDecisionList = this.$$blockHistory[offset].decisionList;
         if (innerDecisionList.length > 0) {
             this.$$sortDecisionList(innerDecisionList);
-            decisionList.push(innerDecisionList[SyncCodeDetector.$$_FIRST_ELEMENT]);
+            decisionList.push(innerDecisionList[RxSyncDetector.$$_FIRST_ELEMENT]);
         }
     }
     this.$$sortDecisionList(decisionList);
-    strongestSync = decisionList[SyncCodeDetector.$$_FIRST_ELEMENT];
+    strongestSync = decisionList[RxSyncDetector.$$_FIRST_ELEMENT];
 
     return strongestSync;
 };
 
-SyncCodeDetector.prototype.$$updateSync = function () {
+RxSyncDetector.prototype.$$updateSync = function () {
     this.$$sync = this.$$getStrongestSync();
     this.$$sync.id = this.$$syncId++;
     this.$$resetBlockHistory();
     this.$$correlator.reset();
 };
 
-SyncCodeDetector.prototype.$$tryToUpdateSync = function () {
+RxSyncDetector.prototype.$$tryToUpdateSync = function () {
     var offset;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
@@ -150,7 +150,7 @@ SyncCodeDetector.prototype.$$tryToUpdateSync = function () {
     return false;
 };
 
-SyncCodeDetector.prototype.$$isSyncInProgressInHistoryBlock = function () {
+RxSyncDetector.prototype.$$isSyncInProgressInHistoryBlock = function () {
     var offset, blockHistoryEntry;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
@@ -163,7 +163,7 @@ SyncCodeDetector.prototype.$$isSyncInProgressInHistoryBlock = function () {
     return false;
 };
 
-SyncCodeDetector.prototype.$$getEmptySync = function () {
+RxSyncDetector.prototype.$$getEmptySync = function () {
     return {
         id: null,
         symbolSamplingPointOffset: undefined,
