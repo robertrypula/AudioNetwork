@@ -13,7 +13,7 @@ function init() {
     physicalLayer = physicalLayerBuilder
         .rxSymbolListener(rxSymbolListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
-        .rxSyncListener(rxSyncListener)
+        .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
         .rxDspConfigListener(rxDspConfigListener)
         .dspConfigListener(dspConfigListener)
         .txListener(txListener)
@@ -43,11 +43,11 @@ function rxSymbolListener(state) {
 function rxSampleDspDetailsListener(state) {
     state.rxFrequencyData = '[spectrogram array]';
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
     log('log-rx-sample', state);
 }
 
-function rxSyncListener(state) {
+function rxSyncDspDetailsListener(state) {
     log('log-rx-sync', state);
 }
 

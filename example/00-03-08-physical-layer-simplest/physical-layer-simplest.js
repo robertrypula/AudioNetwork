@@ -51,5 +51,5 @@ function rxSymbolListener(state) {
 
 function rxSampleDspDetailsListener(data) {
     html('#sync', data.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', data.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', data.isRxSyncInProgress ? '[sync in progress]' : '');
 }

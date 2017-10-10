@@ -3,10 +3,10 @@
 
 var Correlator;
 
-Correlator = function (skipFactor, code) {
-    this.$$code = code
-        ? code.slice(0)
-        : Correlator.DEFAULT_CODE.slice(0);
+Correlator = function (skipFactor, correlationCode) {
+    this.$$correlationCode = correlationCode
+        ? correlationCode.slice(0)
+        : Correlator.DEFAULT_CORRELATION_CODE.slice(0);
 
     this.$$skipFactor = undefined;
     this.$$dataBuffer = undefined;
@@ -19,7 +19,7 @@ Correlator = function (skipFactor, code) {
     this.$$setSkipFactor(skipFactor);
 };
 
-Correlator.DEFAULT_CODE = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1]; // Barker Code 11
+Correlator.DEFAULT_CORRELATION_CODE = [1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1]; // Barker Code 11
 
 Correlator.CORRELATION_POSITIVE = 'CORRELATION_POSITIVE';
 Correlator.CORRELATION_NONE = 'CORRELATION_NONE';
@@ -35,14 +35,14 @@ Correlator.prototype.reset = function () {
     this.$$setSkipFactor(this.$$skipFactor);     // setting skip factor is like reset
 };
 
-Correlator.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
+Correlator.prototype.handle = function (correlationCodeValue, signalDecibel, noiseDecibel) {
     var data, isValidDecibel;
 
     data = Correlator.NO_DATA;
-    switch (codeValue) {
+    switch (correlationCodeValue) {
         case -1:
         case 1:
-            data = codeValue;
+            data = correlationCodeValue;
     }
     this.$$dataBuffer.pushEvenIfFull(data);
 
@@ -71,7 +71,7 @@ Correlator.prototype.isCorrelated = function () {
 Correlator.prototype.getCorrelation = function () {
     var
         correlationValue = this.getCorrelationValue(),
-        threshold = Math.floor(Correlator.THRESHOLD_UNIT * this.$$code.length);
+        threshold = Math.floor(Correlator.THRESHOLD_UNIT * this.$$correlationCode.length);
 
     if (correlationValue >= threshold) {
         return Correlator.CORRELATION_POSITIVE;
@@ -84,7 +84,7 @@ Correlator.prototype.getCorrelation = function () {
 };
 
 Correlator.prototype.getCorrelationValue = function () {
-    var i, lastIndexInSkipBlock, bufferIndex, data, code, result;
+    var i, lastIndexInSkipBlock, bufferIndex, data, correlationCode, result;
 
     if (this.$$cacheCorrelactionValue !== undefined) {
         return this.$$cacheCorrelactionValue;
@@ -92,12 +92,12 @@ Correlator.prototype.getCorrelationValue = function () {
 
     result = 0;
     lastIndexInSkipBlock = this.$$skipFactor - 1;
-    for (i = 0; i < this.$$code.length; i++) {
+    for (i = 0; i < this.$$correlationCode.length; i++) {
         bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
         data = this.$$dataBuffer.getItem(bufferIndex);
         if (data !== Correlator.NO_DATA) {
-            code = this.$$code[i];
-            result += data * code;
+            correlationCode = this.$$correlationCode[i];
+            result += data * correlationCode;
         }
     }
 
@@ -140,6 +140,10 @@ Correlator.prototype.getSignalToNoiseRatio = function () {
     return signalToNoiseRatio;
 };
 
+Correlator.prototype.getCorrelationCodeLength = function () {
+    return this.$$correlationCode.length;
+};
+
 Correlator.prototype.$$clearCache = function () {
     this.$$cacheCorrelactionValue = undefined;
     this.$$cacheSignalDecibelAverage = undefined;
@@ -152,7 +156,7 @@ Correlator.prototype.$$getDecibelAverage = function (buffer) {
     sum = 0;
     sumLength = 0;
     lastIndexInSkipBlock = this.$$skipFactor - 1;
-    for (i = 0; i < this.$$code.length; i++) {
+    for (i = 0; i < this.$$correlationCode.length; i++) {
         bufferIndex = lastIndexInSkipBlock + i * this.$$skipFactor;
         value = buffer.getItem(bufferIndex);
         if (value !== Correlator.NO_DECIBEL) {
@@ -172,7 +176,7 @@ Correlator.prototype.$$setSkipFactor = function (skipFactor) {
     var i, bufferMaxSize;
 
     skipFactor = skipFactor || 1;
-    bufferMaxSize = this.$$code.length * skipFactor;
+    bufferMaxSize = this.$$correlationCode.length * skipFactor;
 
     this.$$skipFactor = skipFactor;
     this.$$dataBuffer = new Buffer(bufferMaxSize);

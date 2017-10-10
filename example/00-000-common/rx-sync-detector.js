@@ -1,82 +1,83 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var RxSyncDetector = function (samplePerSymbol, code) {
+var RxSyncDetector = function (samplePerSymbol, correlationCode) {
     this.$$samplePerSymbol = samplePerSymbol;
-    this.$$syncInProgress = false;
-    this.$$sync = this.$$getEmptySync();
-    this.$$syncId = RxSyncDetector.$$_INITIAL_ID;
-    this.$$correlator = new Correlator(samplePerSymbol, code);
+    this.$$rxSyncInProgress = false;
+    this.$$rxSyncDspDetails = RxSyncDetector.$$getEmpty();
+    this.$$id = RxSyncDetector.$$_INITIAL_ID;
+    this.$$correlator = new Correlator(samplePerSymbol, correlationCode);
     this.$$blockHistory = undefined;
-    this.$$sampleNumber = RxSyncDetector.$$_INITIAL_SAMPLE_NUMBER;
+    this.$$rxSampleNumber = RxSyncDetector.$$_INITIAL_RX_SAMPLE_NUMBER;
 
     this.$$initializeBlockHistory();
 };
 
 RxSyncDetector.$$_FIRST_ELEMENT = 0;
 RxSyncDetector.$$_INITIAL_ID = 1;
-RxSyncDetector.$$_INITIAL_SAMPLE_NUMBER = 0;
+RxSyncDetector.$$_INITIAL_RX_SAMPLE_NUMBER = 0;
 
-RxSyncDetector.prototype.isSyncInProgress = function () {
-    return this.$$syncInProgress;
+RxSyncDetector.prototype.isRxSyncInProgress = function () {
+    return this.$$rxSyncInProgress;
 };
 
-RxSyncDetector.prototype.getSync = function () {
-    return this.$$sync;
+RxSyncDetector.prototype.getRxSyncDspDetails = function () {
+    return this.$$rxSyncDspDetails;
 };
 
-RxSyncDetector.prototype.handle = function (codeValue, signalDecibel, noiseDecibel) {
+RxSyncDetector.prototype.handle = function (correlationCodeValue, signalDecibel, noiseDecibel) {
     var
         offset,
         blockHistoryEntry,
         isLastOffsetInSamplingBlock,
-        syncCodeDetected,
+        syncDetected,
         syncJustUpdated,
-        lastSyncCodeDetected,
+        lastSyncDetected,
         syncCandidate;
 
-    offset = this.$$sampleNumber % this.$$samplePerSymbol;
+    offset = this.$$rxSampleNumber % this.$$samplePerSymbol;
     blockHistoryEntry = this.$$blockHistory[offset];
     isLastOffsetInSamplingBlock = offset === (this.$$samplePerSymbol - 1);
 
-    this.$$correlator.handle(codeValue, signalDecibel, noiseDecibel);
-    syncCodeDetected = this.$$correlator.isCorrelated();
+    this.$$correlator.handle(correlationCodeValue, signalDecibel, noiseDecibel);
+    syncDetected = this.$$correlator.isCorrelated();
 
-    if (syncCodeDetected) {
-        syncCandidate = this.$$getEmptySync();
-        syncCandidate.symbolSamplingPointOffset = offset;
-        syncCandidate.correlationValue = this.$$correlator.getCorrelationValue();
-        syncCandidate.signalDecibelAverage = this.$$correlator.getSignalDecibelAverage();
-        syncCandidate.noiseDecibelAverage = this.$$correlator.getNoiseDecibelAverage();
-        syncCandidate.signalToNoiseRatio = this.$$correlator.getSignalToNoiseRatio();
+    if (syncDetected) {
+        syncCandidate = RxSyncDetector.$$getEmpty();
+        syncCandidate.rxSymbolSamplingPointOffset = offset;
+        syncCandidate.rxCorrelationValue = this.$$correlator.getCorrelationValue();
+        syncCandidate.rxCorrelationCodeLength = this.$$correlator.getCorrelationCodeLength();
+        syncCandidate.rxSignalDecibelAverage = this.$$correlator.getSignalDecibelAverage();
+        syncCandidate.rxNoiseDecibelAverage = this.$$correlator.getNoiseDecibelAverage();
+        syncCandidate.rxSignalToNoiseRatio = this.$$correlator.getSignalToNoiseRatio();
         
         blockHistoryEntry.decisionList.push(syncCandidate);
     }
-    lastSyncCodeDetected = blockHistoryEntry.syncCodeDetected;
-    blockHistoryEntry.syncCodeJustLost = lastSyncCodeDetected && !syncCodeDetected;
-    blockHistoryEntry.syncCodeDetected = syncCodeDetected;
+    lastSyncDetected = blockHistoryEntry.syncDetected;
+    blockHistoryEntry.syncJustLost = lastSyncDetected && !syncDetected;
+    blockHistoryEntry.syncDetected = syncDetected;
 
     if (isLastOffsetInSamplingBlock) {
         syncJustUpdated = this.$$tryToUpdateSync();
     }
 
-    this.$$syncInProgress =
+    this.$$rxSyncInProgress =
         !syncJustUpdated &&
-        this.$$isSyncInProgressInHistoryBlock();
+        this.$$isRxSyncInProgressInHistoryBlock();
 
-    this.$$sampleNumber++;
+    this.$$rxSampleNumber++;
 };
 
 RxSyncDetector.prototype.$$sortByCorrelationValue = function (a, b) {
-    return a.correlationValue < b.correlationValue
+    return a.rxCorrelationValue < b.rxCorrelationValue
         ? 1
-        : (a.correlationValue > b.correlationValue ? -1 : 0);
+        : (a.rxCorrelationValue > b.rxCorrelationValue ? -1 : 0);
 };
 
 RxSyncDetector.prototype.$$sortBySignalDecibel = function (a, b) {
-    return a.signalDecibelAverage < b.signalDecibelAverage
+    return a.rxSignalDecibelAverage < b.rxSignalDecibelAverage
         ? 1
-        : (a.signalDecibelAverage > b.signalDecibelAverage ? -1 : 0);
+        : (a.rxSignalDecibelAverage > b.rxSignalDecibelAverage ? -1 : 0);
 };
 
 RxSyncDetector.prototype.$$sortDecisionList = function (data) {
@@ -96,8 +97,8 @@ RxSyncDetector.prototype.$$initializeBlockHistory = function () {
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
         this.$$blockHistory.push({
             decisionList: [],
-            syncCodeJustLost: undefined,
-            syncCodeDetected: undefined
+            syncJustLost: undefined,
+            syncDetected: undefined
         });
     }
 };
@@ -108,12 +109,12 @@ RxSyncDetector.prototype.$$resetBlockHistory = function () {
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
         blockHistoryEntry = this.$$blockHistory[offset];
         blockHistoryEntry.decisionList.length = 0;
-        blockHistoryEntry.syncCodeJustLost = undefined;
-        blockHistoryEntry.syncCodeDetected = undefined;
+        blockHistoryEntry.syncJustLost = undefined;
+        blockHistoryEntry.syncDetected = undefined;
     }
 };
 
-RxSyncDetector.prototype.$$getStrongestSync = function () {
+RxSyncDetector.prototype.$$getTheBestRxSyncDspDetails = function () {
     var offset, decisionList, innerDecisionList, strongestSync;
 
     decisionList = [];
@@ -131,8 +132,8 @@ RxSyncDetector.prototype.$$getStrongestSync = function () {
 };
 
 RxSyncDetector.prototype.$$updateSync = function () {
-    this.$$sync = this.$$getStrongestSync();
-    this.$$sync.id = this.$$syncId++;
+    this.$$rxSyncDspDetails = this.$$getTheBestRxSyncDspDetails();
+    this.$$rxSyncDspDetails.id = this.$$id++;
     this.$$resetBlockHistory();
     this.$$correlator.reset();
 };
@@ -141,7 +142,7 @@ RxSyncDetector.prototype.$$tryToUpdateSync = function () {
     var offset;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
-        if (this.$$blockHistory[offset].syncCodeJustLost) {
+        if (this.$$blockHistory[offset].syncJustLost) {
             this.$$updateSync();
             return true;
         }
@@ -150,12 +151,12 @@ RxSyncDetector.prototype.$$tryToUpdateSync = function () {
     return false;
 };
 
-RxSyncDetector.prototype.$$isSyncInProgressInHistoryBlock = function () {
+RxSyncDetector.prototype.$$isRxSyncInProgressInHistoryBlock = function () {
     var offset, blockHistoryEntry;
 
     for (offset = 0; offset < this.$$samplePerSymbol; offset++) {
         blockHistoryEntry = this.$$blockHistory[offset];
-        if (blockHistoryEntry.syncCodeDetected || blockHistoryEntry.syncCodeJustLost) {
+        if (blockHistoryEntry.syncDetected || blockHistoryEntry.syncJustLost) {
             return true;
         }
     }
@@ -163,13 +164,14 @@ RxSyncDetector.prototype.$$isSyncInProgressInHistoryBlock = function () {
     return false;
 };
 
-RxSyncDetector.prototype.$$getEmptySync = function () {
+RxSyncDetector.$$getEmpty = function () {
     return {
         id: null,
-        symbolSamplingPointOffset: undefined,
-        correlationValue: undefined,
-        signalDecibelAverage: undefined,
-        noiseDecibelAverage: undefined,
-        signalToNoiseRatio: undefined
+        rxSymbolSamplingPointOffset: undefined,
+        rxCorrelationValue: undefined,
+        rxCorrelationCodeLength: undefined,
+        rxSignalDecibelAverage: undefined,
+        rxNoiseDecibelAverage: undefined,
+        rxSignalToNoiseRatio: undefined
     };
 };

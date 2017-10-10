@@ -42,7 +42,7 @@ function rxSymbolListener(state) {
 
 function rxSampleDspDetailsListener(state) {
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 }
 
 function rxDspConfigListener(state) {

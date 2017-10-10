@@ -86,7 +86,7 @@ function rxSampleDspDetailsListener(state) {
         rxSymbolMin = rxDspConfig.rxSymbolMin;
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 
     if (state.isRxSymbolSamplingPoint) {
         rxSymbolRawHistory.pushEvenIfFull(state.rxSymbolRaw);

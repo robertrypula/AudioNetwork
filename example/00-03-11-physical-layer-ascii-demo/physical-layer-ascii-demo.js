@@ -18,7 +18,7 @@ function init() {
         .txAmplitude(INITIAL_TX_AMPLITUDE)
         .rxSymbolListener(rxSymbolListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
-        .rxSyncListener(rxSyncListener)
+        .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .txListener(txListener)
@@ -93,7 +93,7 @@ function rxSampleDspDetailsListener(state) {
     var rxDspConfig = physicalLayer.getRxDspConfig();
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 
     html(
         '#rx-sample',
@@ -108,9 +108,9 @@ function rxSampleDspDetailsListener(state) {
     powerBar.setNoiseDecibel(state.rxNoiseDecibel);
 }
 
-function rxSyncListener(state) {
-    powerBar.setSignalDecibelAverage(state.signalDecibelAverage);
-    powerBar.setNoiseDecibelAverage(state.noiseDecibelAverage);
+function rxSyncDspDetailsListener(state) {
+    powerBar.setSignalDecibelAverage(state.rxSignalDecibelAverage);
+    powerBar.setNoiseDecibelAverage(state.rxNoiseDecibelAverage);
 }
 
 function txListener(state) {

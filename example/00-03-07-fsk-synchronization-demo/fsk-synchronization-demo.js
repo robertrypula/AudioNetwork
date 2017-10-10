@@ -22,7 +22,7 @@ function init() {
         .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
-        .rxSyncListener(rxSyncListener)
+        .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .txListener(txListener)
@@ -124,7 +124,7 @@ function rxSampleDspDetailsListener(state) {
         rxSymbol = physicalLayer.getRxSymbol();
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isSyncInProgress ? '[sync in progress]' : '');
+    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 
     html(
         '#rx-sample',
@@ -154,21 +154,19 @@ function rxSampleDspDetailsListener(state) {
     powerBar.setNoiseDecibel(state.rxNoiseDecibel);
 }
 
-function rxSyncListener(state) {
-    var config = physicalLayer.getDspConfig();
-
+function rxSyncDspDetailsListener(state) {
     html(
         '#rx-sync',
-        'ID: ' + state.id + '<br/>' +
-        'SymbolSamplingPointOffset: ' + state.symbolSamplingPointOffset + '<br/>' +
-        'CorrelationValue: ' + state.correlationValue + ' in range <-' + config.correlationCodeLength + ',+' + config.correlationCodeLength + '><br/>' +
-        'SignalDecibelAverage: ' + state.signalDecibelAverage.toFixed(2) + ' dB<br/>' +
-        'NoiseDecibelAverage: ' + state.noiseDecibelAverage.toFixed(2) + ' dB<br/>' +
-        'SignalToNoiseRatio: ' + state.signalToNoiseRatio.toFixed(2) + ' dB'
+        'id: ' + state.id + '<br/>' +
+        'rxSymbolSamplingPointOffset: ' + state.rxSymbolSamplingPointOffset + '<br/>' +
+        'rxCorrelationValue: ' + state.rxCorrelationValue + ' in range <-' + state.rxCorrelationCodeLength + ',+' + state.rxCorrelationCodeLength + '><br/>' +
+        'rxSignalDecibelAverage: ' + state.rxSignalDecibelAverage.toFixed(2) + ' dB<br/>' +
+        'rxNoiseDecibelAverage: ' + state.rxNoiseDecibelAverage.toFixed(2) + ' dB<br/>' +
+        'rxSignalToNoiseRatio: ' + state.rxSignalToNoiseRatio.toFixed(2) + ' dB'
     );
 
-    powerBar.setSignalDecibelAverage(state.signalDecibelAverage);
-    powerBar.setNoiseDecibelAverage(state.noiseDecibelAverage);
+    powerBar.setSignalDecibelAverage(state.rxSignalDecibelAverage);
+    powerBar.setNoiseDecibelAverage(state.rxNoiseDecibelAverage);
 }
 
 function txListener(state) {
