@@ -184,11 +184,11 @@ function onTxSampleRateWidgetChange() {
     physicalLayer.setTxSampleRate(txSampleRateWidget.getValue());
 }
 
-function onSampleRateClick(sampleRate) {
+function onSetTxSampleRateClick(sampleRate) {
     physicalLayer.setTxSampleRate(sampleRate);
 }
 
-function onAmplitudeClick(txAmplitude) {
+function onSetTxAmplitudeClick(txAmplitude) {
     physicalLayer.setTxAmplitude(txAmplitude);
 }
 

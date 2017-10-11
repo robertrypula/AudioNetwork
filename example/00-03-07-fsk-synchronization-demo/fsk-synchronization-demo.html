@@ -91,7 +91,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Sample&nbsp;rate
+                                RxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -106,7 +106,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Status
+                                RxSyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -118,7 +118,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Sync
+                                RxSyncDspDetails
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -129,7 +129,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Rx Config
+                                RxDspConfig
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -140,7 +140,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Sample
+                                RxSampleDspDetails
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -216,13 +216,13 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Sample rate
+                                TxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="tx-sample-rate-container">
-                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSampleRateClick(44100)">44.1 kHz</button>
-                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSampleRateClick(48000)">48.0 kHz</button>
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSetTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSetTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
                             <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
                             <p>
@@ -237,7 +237,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Send sync
+                                TxSync
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -248,7 +248,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Send symbol
+                                TxSymbol
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -291,15 +291,15 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Amplitude
+                                TxAmplitude
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
-                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onAmplitudeClick(0.2)">0.2</button>
-                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onAmplitudeClick(0.4)">0.4</button>
-                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onAmplitudeClick(0.6)">0.6</button>
-                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onAmplitudeClick(0.8)">0.8</button>
-                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onAmplitudeClick(1.0)">1.0</button>
+                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.2)">0.2</button>
+                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.4)">0.4</button>
+                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.6)">0.6</button>
+                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.8)">0.8</button>
+                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onSetTxAmplitudeClick(1.0)">1.0</button>
                         </div>
                     </div>
 
