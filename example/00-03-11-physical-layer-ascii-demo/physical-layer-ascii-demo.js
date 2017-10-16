@@ -14,6 +14,7 @@ function init() {
         .txDspConfigListener(txDspConfigListener)
         .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
+        .txSymbolListener(txSymbolListener)
         .build();
 
     ioTraffic = new IoTraffic(document.getElementById('io-traffic'));
@@ -45,63 +46,9 @@ function txDspConfigListener(state) {
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
-// ----------------------------------
-
-function onSetLoopbackClick(state) {
-    physicalLayer.setLoopback(state);
-}
-
-function onSetTxSampleRateClick(txSampleRate) {
-    physicalLayer.setTxSampleRate(txSampleRate);
-}
-
-function onTxSyncClick() {
-    physicalLayer.txSync();
-}
-
-var txId = 1;
-var rxId = 1;
-
-function onTxTextClick() {
-    var
-        text = getFormFieldValue('#tx-textarea'),
-        byteList = getByteListFromAsciiString(text),
-        txDspConfig = physicalLayer.getTxDspConfig(),
-        txSymbolMin = txDspConfig.txSymbolMin,
-        txSymbol,
-        txByte,
-        txChar,
-        i;
-
-    for (i = 0; i < byteList.length; i++) {
-        txByte = byteList[i];
-        txChar = getAsciiFromByte(txByte);
-        txSymbol = txSymbolMin + txByte;
-        physicalLayer.txSymbol(txSymbol);
-        txChar = txChar === ' ' ? '&nbsp;' : txChar;
-        ioTraffic.addTxItem('tx-' + txId, txChar);
-
-        // TODO currently it's only emulation of transmission confirmation - implement it in physical layer
-        (function (txId) {
-            setTimeout(
-                function () {
-                    ioTraffic.addClass('tx-' + txId, 'finished');
-                    ioTraffic.updateProgressBar('tx-' + txId, 1, IoTraffic.PROGRESS_BAR_A);
-                },
-                500 * (i + 1)
-            );
-        })(txId);
-
-        txId++;
-        /*
-        ioTraffic.addClass(id, 'fade-out');
-        ioTraffic.removeClass(id, 'fade-out');
-        ioTraffic.updateProgress(id, 32);
-        ioTraffic.updateItemHtml(id, 32);
-        */
-    }
-    setValue('#tx-textarea', '');
-    ioTraffic.forceNewRow();
+function txSymbolListener(state) {
+    ioTraffic.addClass('tx-' + state.id, 'finished');
+    ioTraffic.updateProgressBar('tx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
 }
 
 function rxSymbolListener(state) {
@@ -116,9 +63,45 @@ function rxSymbolListener(state) {
 
     rxByte = state.rxSymbol - rxDspConfig.rxSymbolMin;
     rxChar = getAsciiFromByte(rxByte);
-    ioTraffic.addRxItem('rx-' + rxId, rxChar);
-    ioTraffic.addClass('rx-' + rxId, 'finished');
-    ioTraffic.updateProgressBar('rx-' + rxId, 1, IoTraffic.PROGRESS_BAR_A);
+    ioTraffic.addRxItem('rx-' + state.id, rxChar);
+    ioTraffic.addClass('rx-' + state.id, 'finished');
+    ioTraffic.updateProgressBar('rx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
+}
 
-    rxId++;
+// ----------------------------------
+
+function onSetLoopbackClick(state) {
+    physicalLayer.setLoopback(state);
+}
+
+function onSetTxSampleRateClick(txSampleRate) {
+    physicalLayer.setTxSampleRate(txSampleRate);
+}
+
+function onTxSyncClick() {
+    physicalLayer.txSync();
+}
+
+function onTxTextClick() {
+    var
+        text = getFormFieldValue('#tx-textarea'),
+        byteList = getByteListFromAsciiString(text),
+        txDspConfig = physicalLayer.getTxDspConfig(),
+        txSymbolMin = txDspConfig.txSymbolMin,
+        txSymbolId,
+        txSymbol,
+        txByte,
+        txChar,
+        i;
+
+    for (i = 0; i < byteList.length; i++) {
+        txByte = byteList[i];
+        txChar = getAsciiFromByte(txByte);
+        txSymbol = txSymbolMin + txByte;
+        txSymbolId = physicalLayer.txSymbol(txSymbol);
+        txChar = txChar === ' ' ? '&nbsp;' : txChar;
+        ioTraffic.addTxItem('tx-' + txSymbolId, txChar);
+    }
+    setValue('#tx-textarea', '');
+    ioTraffic.forceNewRow();
 }

@@ -17,6 +17,7 @@ function init() {
         .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
         .rxDspConfigListener(rxDspConfigListener)
         .dspConfigListener(dspConfigListener)
+        .txSymbolListener(txSymbolListener)
         .txSymbolProgressListener(txSymbolProgressListener)
         .txDspConfigListener(txDspConfigListener)
         .build();
@@ -83,8 +84,12 @@ function dspConfigListener(state) {
     log('log-dsp-config', state);
 }
 
+function txSymbolListener(state) {
+    log('log-tx-symbol', state);
+}
+
 function txSymbolProgressListener(state) {
-    log('log-tx', state);
+    log('log-tx-symbol-progress', state);
 }
 
 function txDspConfigListener(state) {

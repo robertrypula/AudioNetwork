@@ -3,6 +3,202 @@
 
 // TODO refactor needed - move data returned by listeners to separate classes
 
+var TxSymbol = function (id, type) {
+    this.$$id = id;
+    this.$$txSymbolType = type;
+    this.$$txFskSymbol = null;
+};
+
+TxSymbol.TX_SYMBOL_IDLE = 'TX_SYMBOL_IDLE';
+TxSymbol.TX_SYMBOL_GAP_IMPORTANT = 'TX_SYMBOL_GAP_IMPORTANT';
+TxSymbol.TX_SYMBOL_GAP_DELETABLE = 'TX_SYMBOL_GAP_DELETABLE';
+TxSymbol.TX_SYMBOL_FSK = 'TX_SYMBOL_FSK';
+
+TxSymbol.prototype.setTxFskSymbol = function (txFskSymbol) {
+    this.$$txFskSymbol = txFskSymbol;
+};
+
+TxSymbol.prototype.cloneClean = function () {
+    return {
+        id: this.$$id,
+        txSymbolType: this.$$txSymbolType,
+        txFskSymbol: this.$$txFskSymbol
+    };
+};
+
+TxSymbol.prototype.isNotIdle = function () {
+    return this.$$txSymbolType !== TxSymbol.TX_SYMBOL_IDLE;
+};
+
+TxSymbol.prototype.isIdle = function () {
+    return this.$$txSymbolType === TxSymbol.TX_SYMBOL_IDLE;
+};
+
+TxSymbol.prototype.isFsk = function () {
+    return this.$$txSymbolType === TxSymbol.TX_SYMBOL_FSK;
+};
+
+TxSymbol.prototype.isNotGapDeletable = function () {
+    return this.$$txSymbolType !== TxSymbol.TX_SYMBOL_GAP_DELETABLE;
+};
+
+TxSymbol.prototype.getId = function () {
+    return this.$$id;
+};
+
+TxSymbol.prototype.getTxFskSymbol = function () {
+    return this.$$txFskSymbol;
+};
+
+var TxSymbolManager = function () {
+    this.$$txSymbolId = 1;
+    this.$$txSymbol = null;
+    this.$$txSymbolCurrent = this.$$getTxSymbolIdle();
+    this.$$txSymbolQueue = [];
+};
+
+TxSymbolManager.prototype.clearTxSymbolQueue = function () {
+    this.$$txSymbolQueue.length;
+};
+
+TxSymbolManager.prototype.getTxSymbol = function () {
+    return this.$$txSymbol.cloneClean();
+};
+
+TxSymbolManager.prototype.getTxSymbolCurrent = function () {
+    return this.$$txSymbolCurrent;
+};
+
+TxSymbolManager.prototype.getTxSymbolProgress = function () {
+    var
+        result = {},
+        i;
+
+    result.txSymbolCurrent = this.$$txSymbolCurrent.cloneClean();
+    result.txSymbolQueue = [];
+    result.isTxInProgress = this.isTxInProgress();
+
+    for (i = 0; i < this.$$txSymbolQueue.length; i++) {
+        result.txSymbolQueue.push(
+            this.$$txSymbolQueue[i].cloneClean()
+        );
+    }
+
+    return result;
+};
+
+TxSymbolManager.prototype.isTxInProgress = function () {
+    return this.$$txSymbolQueue.length > 0 ||
+        this.$$txSymbolCurrent.isNotIdle();
+};
+
+TxSymbolManager.prototype.addTxFskSymbol = function (txFskSymbol) {
+    var txSymbol = new TxSymbol(
+        this.$$txSymbolId++,
+        TxSymbol.TX_SYMBOL_FSK
+    );
+
+    txSymbol.setTxFskSymbol(txFskSymbol);
+    this.$$txSymbolQueue.push(txSymbol);
+
+    return txSymbol.getId();
+};
+
+TxSymbolManager.prototype.addTxSymbolGapImportant = function () {
+    var txSymbolGapImportant = new TxSymbol(
+        this.$$txSymbolId++,
+        TxSymbol.TX_SYMBOL_GAP_IMPORTANT
+    );
+    this.$$txSymbolQueue.push(txSymbolGapImportant);
+};
+
+TxSymbolManager.prototype.addTxSymbolGapDeletable = function () {
+    var txSymbolGapDeletable = new TxSymbol(
+        this.$$txSymbolId++,
+        TxSymbol.TX_SYMBOL_GAP_DELETABLE
+    );
+    this.$$txSymbolQueue.push(txSymbolGapDeletable);
+};
+
+TxSymbolManager.prototype.$$getTxSymbolIdle = function () {
+    return new TxSymbol(
+        this.$$txSymbolId++,
+        TxSymbol.TX_SYMBOL_IDLE
+    );
+};
+
+TxSymbolManager.prototype.isTxAboutToStart = function () {
+    var isQueueNotEmpty = this.$$txSymbolQueue.length !== 0;
+
+    return this.$$txSymbolCurrent.isIdle() && isQueueNotEmpty;
+};
+
+TxSymbolManager.prototype.isTxAboutToEnd = function () {
+    var isQueueEmpty = this.$$txSymbolQueue.length === 0;
+
+    return isQueueEmpty && this.$$txSymbolCurrent.isNotIdle();
+};
+
+TxSymbolManager.prototype.tick = function () {
+    var txSymbolIdle, isQueueEmpty;
+
+    isQueueEmpty = this.$$txSymbolQueue.length === 0;
+    this.$$txSymbol = this.$$txSymbolCurrent;
+
+    if (isQueueEmpty) {
+        txSymbolIdle = this.$$getTxSymbolIdle();
+        this.$$txSymbolCurrent = txSymbolIdle;
+    } else {
+        this.$$txSymbolCurrent = this.$$txSymbolQueue.shift();
+    }
+};
+
+TxSymbolManager.prototype.handleGapLogicAtStart = function () {
+    // When device A sends some data to device B
+    // then device B cannot respond immediately. We
+    // need make sure that device A will have some time
+    // to reinitialize microphone again. This is solved
+    // by adding two 'gap' symbols in the beginning
+    // Similar problem we have at the end. If we enable
+    // microphone at the same time as last symbol stops
+    // then we have a glitch. We need to add one 'gap'
+    // symbol after the last symbol.
+    // If symbol is not last we need to remove that
+    // unnecessary gap.
+    if (this.isTxInProgress()) {
+        this.$$clearAllDeletableGapFromTheEndOfTheQueue();
+    } else {
+        this.addTxSymbolGapDeletable();  // #1
+        this.addTxSymbolGapDeletable();  // #2
+    }
+};
+
+TxSymbolManager.prototype.handleGapLogicAtEnd = function () {
+    // will be removed if subsequent symbol will arrive
+    this.addTxSymbolGapDeletable();
+};
+
+TxSymbolManager.prototype.handleGapLogicAtEndOfSync = function (gapImportantNumber) {
+    var i;
+
+    for (i = 0; i < gapImportantNumber; i++) {
+        this.addTxSymbolGapImportant();
+    }
+};
+
+TxSymbolManager.prototype.$$clearAllDeletableGapFromTheEndOfTheQueue = function () {
+    var i;
+
+    for (i = this.$$txSymbolQueue.length - 1; i >= 0; i--) {
+        if (this.$$txSymbolQueue[i].isNotGapDeletable()) {
+            this.$$txSymbolQueue.length = i + 1;
+            break;
+        }
+    }
+};
+
+// ------------------
+
 var PhysicalLayer;
 
 PhysicalLayer = function (builder) {
@@ -39,9 +235,8 @@ PhysicalLayer = function (builder) {
     this.$$isRxSyncInProgress = undefined;
     this.$$isRxSymbolSamplingPoint = undefined;
     this.$$rxSignalDecibelThreshold = PhysicalLayer.$$_INITIAL_RX_SIGNAL_DECIBEL_THRESHOLD;
-    this.$$syncLastId = undefined;
-    this.$$txSymbol = PhysicalLayer.$$_SYMBOL_IDLE;
-    this.$$txSymbolQueue = [];
+    this.$$rxSyncDspDetailsLastId = undefined;
+    this.$$txSymbolManager = new TxSymbolManager();
 
     // symbol ranges depends on sampleRate
     this.$$rxSymbolMin = this.$$getSymbolMin(this.$$rxSampleRate);
@@ -58,6 +253,7 @@ PhysicalLayer = function (builder) {
     this.$$rxSyncDspDetailsListener = PhysicalLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
     this.$$rxDspConfigListener = PhysicalLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$dspConfigListener = PhysicalLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
+    this.$$txSymbolListener = PhysicalLayer.$$isFunction(builder._txSymbolListener) ? builder._txSymbolListener : null;
     this.$$txSymbolProgressListener = PhysicalLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
     this.$$txDspConfigListener = PhysicalLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 
@@ -69,14 +265,12 @@ PhysicalLayer.MICROPHONE_MODE_AUTO_ON_OFF_WITH_GAP = 1;
 PhysicalLayer.$$_INITIAL_SAMPLE_NUMER = 0;
 PhysicalLayer.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayer.$$_INITIAL_RX_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
-PhysicalLayer.$$_SYMBOL_IDLE = null;
-PhysicalLayer.$$_TX_SYMBOL_GAP = -1;
-PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT = -2;
 PhysicalLayer.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayer.$$_TX_FREQUENCY_ZERO = 0;
 PhysicalLayer.$$_FIRST_SYMBOL = 1;
 PhysicalLayer.$$_SYMBOL_SYNC_A_OFFSET = 1;
 PhysicalLayer.$$_SYMBOL_SYNC_B_OFFSET = 0;
+PhysicalLayer.$$_RX_SYMBOL_IDLE = null;
 PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
 // -----------------------------------------
@@ -88,52 +282,53 @@ PhysicalLayer.prototype.getRxSampleRate = function () {
 };
 
 PhysicalLayer.prototype.txSync = function () {
-    var i, correlationCodeValue, symbol, halfPlusOne;
+    var i, correlationCodeValue, txFskSymbol, halfPlusOne;
 
-    this.$$handleGapLogic();
+    this.$$txSymbolManager.handleGapLogicAtStart();
 
     for (i = 0; i < this.$$correlationCode.length; i++) {
         correlationCodeValue = this.$$correlationCode[i];
-        symbol = correlationCodeValue === -1
+        txFskSymbol = correlationCodeValue === -1
             ? this.$$txSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_A_OFFSET
             : this.$$txSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_B_OFFSET;
-        this.$$txSymbolQueue.push(symbol);
+        this.$$txSymbolManager.addTxFskSymbol(txFskSymbol);
     }
 
     // TODO actually it should take into account the Correlator.THRESHOLD_UNIT value
     halfPlusOne = Math.ceil(this.$$correlationCode.length / 2) + 1;
-    for (i = 0; i < halfPlusOne; i++) {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT);
-    }
+    this.$$txSymbolManager.handleGapLogicAtEndOfSync(halfPlusOne);
 
     this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
 };
 
 PhysicalLayer.prototype.txSymbol = function (txSymbol) {
-    var isNumber, txSymbolParsed, inRange, isValid;
+    var isNumber, txFskSymbolParsed, inRange, isValid, id;
 
-    this.$$handleGapLogic();
+    this.$$txSymbolManager.handleGapLogicAtStart();
 
-    txSymbolParsed = parseInt(txSymbol);
-    isNumber = typeof txSymbolParsed === 'number';
-    inRange = this.$$txSymbolMin <= txSymbolParsed && txSymbolParsed <= this.$$txSymbolMax;
+    txFskSymbolParsed = parseInt(txSymbol);
+    isNumber = typeof txFskSymbolParsed === 'number';
+    inRange = this.$$txSymbolMin <= txFskSymbolParsed && txFskSymbolParsed <= this.$$txSymbolMax;
     isValid = isNumber && inRange;
 
     if (!isValid) {
         throw PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION;
     }
 
-    this.$$txSymbolQueue.push(txSymbolParsed);
-    this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);     // will be removed if subsequent txSymbol will arrive
+    id = this.$$txSymbolManager.addTxFskSymbol(txFskSymbolParsed);
+
+    this.$$txSymbolManager.handleGapLogicAtEnd();
 
     this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
+
+    return id;
 };
 
 PhysicalLayer.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$txSampleRate = txSampleRate;
     this.$$txSymbolMin = this.$$getSymbolMin(this.$$txSampleRate);
     this.$$txSymbolMax = this.$$getSymbolMax(this.$$txSampleRate);
-    this.$$txSymbolQueue.length = 0;
+    this.$$txSymbolManager.clearTxSymbolQueue();
     this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
     this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
 };
@@ -224,14 +419,12 @@ PhysicalLayer.prototype.getDspConfig = function () {
     };
 };
 
+PhysicalLayer.prototype.getTxSymbol = function () {
+    return this.$$txSymbolManager.getTxSymbol();
+};
+
 PhysicalLayer.prototype.getTxSymbolProgress = function () {
-    return {
-        symbol: this.$$txSymbol,
-        symbolQueue: this.$$txSymbolQueue.slice(0),
-        isTxInProgress:
-            this.$$txSymbolQueue.length > 0 ||
-            this.$$txSymbol !== PhysicalLayer.$$_SYMBOL_IDLE
-    }
+    return this.$$txSymbolManager.getTxSymbolProgress();
 };
 
 PhysicalLayer.prototype.getTxDspConfig = function () {
@@ -250,40 +443,6 @@ PhysicalLayer.prototype.getTxDspConfig = function () {
 };
 
 // -----------------------------------------
-
-PhysicalLayer.prototype.$$handleGapLogic = function () {
-    var tx;
-
-    // When device A sends some data to device B
-    // then device B cannot respond immediately. We
-    // need make sure that device A will have some time
-    // to reinitialize microphone again. This is solved
-    // by adding two 'gap' symbols in the beginning
-    // Similar problem we have at the end. If we enable
-    // microphone at the same time as last symbol stops
-    // then we have a glitch. We need to add one 'gap'
-    // symbol after the last symbol.
-    // If symbol is not last we need to remove that
-    // unnecessary gap.
-    tx = this.getTxSymbolProgress();
-    if (tx.isTxInProgress) {
-        this.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue();
-    } else {
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);
-        this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);
-    }
-};
-
-PhysicalLayer.prototype.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue = function () {
-    var i;
-
-    for (i = this.$$txSymbolQueue.length - 1; i >= 0; i--) {
-        if (this.$$txSymbolQueue[i] !== PhysicalLayer.$$_TX_SYMBOL_GAP) {
-            this.$$txSymbolQueue.length = i + 1;
-            break;
-        }
-    }
-};
 
 PhysicalLayer.prototype.$$smartTimerListener = function () {
     if (this.$$firstSmartTimerCall) {
@@ -315,7 +474,7 @@ PhysicalLayer.prototype.$$rx = function () {
     this.$$rxSyncStatusId++;
 
     isAllowedToListen =
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
+        this.$$txSymbolManager.getTxSymbolCurrent().isIdle() ||
         this.$$audioMonoIO.isLoopbackEnabled();
 
     if (isAllowedToListen) {
@@ -345,16 +504,16 @@ PhysicalLayer.prototype.$$rx = function () {
 
     this.$$isRxSyncInProgress = this.$$rxSyncDetector.isRxSyncInProgress();
     rxSyncDspDetails = this.$$rxSyncDetector.getRxSyncDspDetails();
-    if (rxSyncDspDetails.id && rxSyncDspDetails.id !== this.$$syncLastId) {
+    if (rxSyncDspDetails.id && rxSyncDspDetails.id !== this.$$rxSyncDspDetailsLastId) {
         this.$$rxSignalDecibelThreshold = rxSyncDspDetails.rxNoiseDecibelAverage +
             this.$$rxSignalDecibelThresholdFactor * rxSyncDspDetails.rxSignalToNoiseRatio;
-        this.$$syncLastId = rxSyncDspDetails.id;
+        this.$$rxSyncDspDetailsLastId = rxSyncDspDetails.id;
         isNewSyncAvailable = true;
     }
 
     this.$$isRxSymbolSamplingPoint = rxSyncDspDetails.id > 0 && this.$$sampleOffset === rxSyncDspDetails.rxSymbolSamplingPointOffset;
     isNewSymbolReadyToTake = this.$$isRxSymbolSamplingPoint && this.$$rxSignalDecibel > this.$$rxSignalDecibelThreshold;
-    this.$$rxSymbol = isNewSymbolReadyToTake ? this.$$rxSymbolRaw : PhysicalLayer.$$_SYMBOL_IDLE;
+    this.$$rxSymbol = isNewSymbolReadyToTake ? this.$$rxSymbolRaw : PhysicalLayer.$$_RX_SYMBOL_IDLE;
 
     // call listeners
     if (isNewSyncAvailable) {
@@ -372,42 +531,30 @@ PhysicalLayer.prototype.$$rx = function () {
 PhysicalLayer.prototype.$$tx = function () {
     var
         isFirstSampleOfBlock = this.$$sampleOffset === 0,
-        txJustStarted = false,
-        txJustEnded = false,
-        newSymbolReady,
-        txSymbolPrevious;
+        isTxAboutToStart,
+        isTxAboutToEnd;
 
-    if (isFirstSampleOfBlock) {
-        newSymbolReady = this.$$txSymbolQueue.length > 0;
-
-        txSymbolPrevious = this.$$txSymbol;
-        txJustStarted =
-            this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE &&
-            newSymbolReady;
-
-        this.$$txSymbol = newSymbolReady
-            ? this.$$txSymbolQueue.shift()
-            : PhysicalLayer.$$_SYMBOL_IDLE;
-
-        txJustEnded =
-            txSymbolPrevious !== PhysicalLayer.$$_SYMBOL_IDLE &&
-            this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE;
-
-        this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
-
-        if (txJustStarted) {
-            this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature, this solves volume control problem on mobile browsers
-            // console.log('microphone disable');
-        }
-        if (txJustEnded) {
-            this.$$audioMonoIO.microphoneEnable();  // TODO experimental feature, this solves volume control problem on mobile browsers
-            // console.log('microphone enable');
-        }
-
-        this.$$updateOscillator();
-
-        // console.log('-----');
+    if (!isFirstSampleOfBlock) {
+        return;
     }
+
+    isTxAboutToStart = this.$$txSymbolManager.isTxAboutToStart();
+    isTxAboutToEnd = this.$$txSymbolManager.isTxAboutToEnd();
+    this.$$txSymbolManager.tick();
+
+    if (isTxAboutToStart) {
+        this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature, this solves volume control problem on mobile browsers
+        // console.log('microphone disable');
+    }
+    if (isTxAboutToEnd) {
+        this.$$audioMonoIO.microphoneEnable();  // TODO experimental feature, this solves volume control problem on mobile browsers
+        // console.log('microphone enable');
+    }
+
+    this.$$updateOscillator();
+
+    this.$$txSymbolListener ? this.$$txSymbolListener(this.getTxSymbol()) : undefined;
+    this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
 };
 
 // -------
@@ -446,19 +593,16 @@ PhysicalLayer.prototype.$$getSymbolMax = function (sampleRate) {
 };
 
 PhysicalLayer.prototype.$$updateOscillator = function () {
-    var frequency, amplitude, isSymbolSpecial;
+    var frequency, amplitude, isFsk, txSymbolCurrent;
 
-    isSymbolSpecial =
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
-        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP ||
-        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT;
-
-    if (isSymbolSpecial) {
+    txSymbolCurrent = this.$$txSymbolManager.getTxSymbolCurrent();
+    isFsk = txSymbolCurrent.isFsk();
+    if (isFsk) {
+        frequency = this.$$getFrequency(txSymbolCurrent.getTxFskSymbol(), this.$$txSampleRate);
+        amplitude = this.$$txAmplitude;
+    } else {
         frequency = PhysicalLayer.$$_TX_FREQUENCY_ZERO;
         amplitude = PhysicalLayer.$$_TX_AMPLITUDE_SILENT;
-    } else {
-        frequency = this.$$getFrequency(this.$$txSymbol, this.$$txSampleRate);
-        amplitude = this.$$txAmplitude;
     }
 
     this.$$audioMonoIO.setPeriodicWave(frequency, amplitude);
@@ -473,3 +617,4 @@ PhysicalLayer.prototype.$$getFrequency = function (symbol, sampleRate) {
 PhysicalLayer.$$isFunction = function (variable) {
     return typeof variable === 'function';
 };
+

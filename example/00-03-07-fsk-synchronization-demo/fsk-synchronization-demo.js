@@ -143,8 +143,8 @@ function rxSyncDspDetailsListener(state) {
 }
 
 function txSymbolProgressListener(state) {
-    html('#tx-symbol', state.symbol ? state.symbol : 'idle');
-    html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
+    html('#tx-symbol-current', state.txSymbolCurrent.txFskSymbol ? state.txSymbolCurrent.txFskSymbol : 'idle');
+    html('#tx-symbol-queue', state.txSymbolQueue.length);
 }
 
 // ----------------------------------

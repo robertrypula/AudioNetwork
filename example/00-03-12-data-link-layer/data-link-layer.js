@@ -68,16 +68,18 @@ function frameCandidateListener(frameCandidateList) {
 }
 
 function txSymbolProgressListener(state) {
+    /* TODO api changed
     var
         txDspConfig = dataLinkLayer.getPhysicalLayer().getTxDspConfig(),
         txSymbolMin = txDspConfig.txSymbolMin,
-        txByteHex = state.symbol
-            ? getByteHexFromSymbol(state.symbol, txSymbolMin)
+        txByteHex = state.txSymbol
+            ? getByteHexFromSymbol(state.txSymbol, txSymbolMin)
             : 'idle',
-        txByteHexQueue = getByteHexFromSymbolList(state.symbolQueue, txSymbolMin);
+        txByteHexQueue = getByteHexFromSymbolList(state.txSymbolQueue, txSymbolMin);
 
     html('#tx-byte-hex', txByteHex);
     html('#tx-byte-hex-queue', txByteHexQueue);
+    */
 }
 
 function rxSampleDspDetailsListener(state) {

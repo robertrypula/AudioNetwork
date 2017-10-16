@@ -26,6 +26,7 @@ var PhysicalLayerBuilder = function () {
 
     this._dspConfigListener = undefined;
 
+    this._txSymbolListener = undefined;
     this._txSymbolProgressListener = undefined;
     this._txDspConfigListener = undefined;
 };
@@ -107,6 +108,11 @@ PhysicalLayerBuilder.prototype.rxDspConfigListener = function (listener) {
 
 PhysicalLayerBuilder.prototype.dspConfigListener = function (listener) {
     this._dspConfigListener = listener;
+    return this;
+};
+
+PhysicalLayerBuilder.prototype.txSymbolListener = function (listener) {
+    this._txSymbolListener = listener;
     return this;
 };
 
