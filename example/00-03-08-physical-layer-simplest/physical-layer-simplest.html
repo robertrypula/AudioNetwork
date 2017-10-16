@@ -59,15 +59,15 @@
                 <div class="margin-bottom">
                     <strong>Loopback</strong>
                 </div>
-                <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true); alert('Enabled');">Enable</button>
-                <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false); alert('Disabled');">Disable</button>
+                <button class="btn btn-default" type="button" onClick="onSetLoopbackClick(true);">Enable</button>
+                <button class="btn btn-default" type="button" onClick="onSetLoopbackClick(false);">Disable</button>
             </div>
 
             <div class="row">
-                <div class="col col-sm-6">
+                <div class="col col-sm-6 margin-bottom">
                     <h2>Receiver</h2>
                     <div class="margin-bottom">
-                        <strong>Sample Rate:</strong>
+                        <strong>RxSampleRate:</strong>
                         <br/>
                         <div class="label-box">
                             <span>
@@ -76,35 +76,38 @@
                         </div>
                     </div>
                     <div class="margin-bottom">
-                        <strong>Status:</strong> <span id="sync"></span> <span id="sync-in-progress">-</span>
+                        <strong>RxSyncStatus:</strong>
+                        <br/>
+                        <div class="label-box">
+                            <span>
+                                <span id="rx-sync-status"></span>
+                            </span>
+                        </div>
                     </div>
                     <div class="margin-bottom">
-                        <strong>Received symbol:</strong> <span id="rx-symbol">-</span>
-                    </div>
-                    <div class="margin-bottom">
-                        <strong>Received byte:</strong> <span id="rx-byte">-</span>
+                        <strong>RxByte:</strong> <span id="rx-byte">-</span>
                     </div>
                 </div>
 
-                <div class="col col-sm-6">
+                <div class="col col-sm-6 margin-bottom">
                     <h2>Transmitter</h2>
                     <div class="margin-bottom">
                         <div class="clearfix">
                             <div class="input-container pull-left">
                                 <input id="tx-sample-rate" type="number" value="44100" />
                             </div>
-                            <button class="btn btn-default pull-left" onClick="onSetTxSampleRateClick()">Set Sample Rate</button>
+                            <button class="btn btn-default pull-left" onClick="onSetTxSampleRateClick()">setTxSampleRate</button>
                         </div>
                     </div>
                     <div class="margin-bottom">
-                        <button class="btn btn-default" onClick="onTxSyncClick()">Sync</button>
+                        <button class="btn btn-default" onClick="onTxSyncClick()">TxSync</button>
                     </div>
                     <div class="margin-bottom">
                         <div class="clearfix">
                             <div class="input-container pull-left">
                                 <input id="tx-byte" type="number" value="0" />
                             </div>
-                            <button class="btn btn-default pull-left" onClick="onSendByteClick()">Send Byte</button>
+                            <button class="btn btn-default pull-left" onClick="onTxByteClick()">TxByte</button>
                         </div>
                     </div>
                 </div>
@@ -137,7 +140,8 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="physical-layer-simplest.js"></script>
 
     <script>

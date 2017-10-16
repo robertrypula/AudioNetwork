@@ -222,3 +222,23 @@ function smartTimerListener() {
     rxSampleCount++;
 }
 
+/*
+// Crazy OFDM experiments...
+
+function r() {
+    return Math.random() > 0.5 ? 1 : 0.05;
+}
+
+function ofdmTest() {
+    audioMonoIO.setPeriodicWave(
+        2 * 5 * audioMonoIO.getSampleRate() / audioMonoIO.getFFTSize(),
+        0.05,
+        0,
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+}
+
+setInterval(ofdmTest, 1000);
+
+ */

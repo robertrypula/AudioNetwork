@@ -64,8 +64,8 @@
                     </div>
 
                     <div class="margin-bottom">
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(true)">Enable</button>
-                        <button class="btn btn-default" type="button" onClick="physicalLayer.setLoopback(false)">Disable</button>
+                        <button class="btn btn-default" type="button" onClick="onSetLoopbackClick(true)">Enable</button>
+                        <button class="btn btn-default" type="button" onClick="onSetLoopbackClick(false)">Disable</button>
                     </div>
 
                     <div class="margin-bottom">
@@ -80,7 +80,7 @@
                     <div class="row">
                         <div class="col col-md-4 margin-bottom">
                             <div class="margin-bottom">
-                                <strong>SampleRate:</strong>
+                                <strong>RxSampleRate:</strong>
                                 <br/>
                                 <div class="label-box">
                                     <span>
@@ -89,39 +89,50 @@
                                 </div>
                             </div>
                             <div class="margin-bottom">
-                                <strong>Status:</strong> <span id="sync"></span> <span id="sync-in-progress">-</span>
+                                <strong>RxSyncStatus:</strong>
+                                <br/>
+                                <div class="label-box">
+                                    <span>
+                                        <span id="rx-sync-status"></span>
+                                    </span>
+                                </div>
                             </div>
                             <div class="margin-bottom">
-                                <strong>Symbol:</strong> <span id="rx-symbol">-</span>
+                                <strong>RxSymbol:</strong> <span id="rx-symbol">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <strong>Byte:</strong> <span id="rx-byte">-</span>
+                                <strong>RxByteHex:</strong> <span id="rx-byte-hex">-</span>
                             </div>
                             <div class="margin-bottom">
-                                <span id="rx-byte-history">-</span>
+                                <span id="rx-byte-hex-history">-</span>
                             </div>
-                            <div id="rx-byte-container">-</div>
+                            <div id="rx-byte-hex-container">-</div>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
-                            <h3>RxSymbol</h3>
+                            <h3>RxSyncStatus:</h3>
+                            <pre id="log-rx-sync-status"></pre>
+                        </div>
+
+                        <div class="col col-md-4 margin-bottom">
+                            <h3>RxSymbol:</h3>
                             <pre id="log-rx-symbol"></pre>
-                        </div>
-
-                        <div class="col col-md-4 margin-bottom">
-                            <h3>RxSample</h3>
-                            <pre id="log-rx-sample"></pre>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col col-md-6 margin-bottom">
-                            <h3>RxSync</h3>
-                            <pre id="log-rx-sync"></pre>
+                        <div class="col col-md-4 margin-bottom">
+                            <h3>RxSampleDspDetails:</h3>
+                            <pre id="log-rx-sample-dsp-details"></pre>
                         </div>
 
-                        <div class="col col-md-6 margin-bottom">
-                            <h3>RxDspConfig</h3>
+                        <div class="col col-md-4 margin-bottom">
+                            <h3>RxSyncDspDetails:</h3>
+                            <pre id="log-rx-sync-dsp-details"></pre>
+                        </div>
+
+                        <div class="col col-md-4 margin-bottom">
+                            <h3>RxDspConfig:</h3>
                             <pre id="log-rx-dsp-config"></pre>
                         </div>
                     </div>
@@ -133,16 +144,16 @@
                     <div class="row">
                         <div class="col col-md-4 margin-bottom">
                             <div class="margin-bottom">
-                                <strong>Receiver's SampleRate:</strong> <span id="tx-sample-rate">-</span> kHz
+                                <strong>TxSampleRate:</strong> <span id="tx-sample-rate">-</span> kHz
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(44100)">Set 44.1 kHz</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxSampleRate(48000)">Set 48.0 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(44100)">Set 44.1 kHz</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(48000)">Set 48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.txSync()">Sync</button>
+                                <button class="btn btn-default" type="button" onClick="onTxSyncClick()">TxSync</button>
                             </div>
-                            <div class="margin-bottom" id="tx-byte-container"></div>
+                            <div class="margin-bottom" id="tx-byte-hex-container"></div>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
@@ -163,11 +174,11 @@
                             </div>
 
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.2)">20%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.4)">40%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.6)">60%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(0.8)">80%</button>
-                                <button class="btn btn-default" type="button" onClick="physicalLayer.setTxAmplitude(1.0)">100%</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.2)">20%</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.4)">40%</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.6)">60%</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.8)">80%</button>
+                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(1.0)">100%</button>
                             </div>
                         </div>
                     </div>
@@ -202,7 +213,8 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>
     <script src="physical-layer-listeners-demo.js"></script>
 

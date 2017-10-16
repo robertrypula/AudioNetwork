@@ -21,11 +21,12 @@ function init() {
         .symbolRange(10)
         .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
-        .txListener(txListener)
+        .txSymbolProgressListener(txSymbolProgressListener)
         .build();
 
     rxSymbolHistory = new Buffer(RX_SYMBOL_HISTORY);
@@ -35,40 +36,7 @@ function init() {
         physicalLayer.getTxDspConfig().txSampleRate, 5, 0,
         onTxSampleRateWidgetChange
     );
-    document.addEventListener(
-        'keyup',
-        function(e) {
-            var
-                digit = getDigitFromKeyCode(e.keyCode),
-                txSymbol;
-
-            if (digit !== null) {
-                txSymbol = DIGIT_ZERO_SYMBOL + digit;
-                physicalLayer.txSymbol(txSymbol);
-            }
-        },
-        true
-    );
-}
-
-function formatTxSymbolRange(state) {
-    var s;
-
-    s = 'SymbolMin: ' + state.txSymbolMin + '&nbsp;(' + (state.txSymbolMin * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.txSymbolMax + '&nbsp;(' + (state.txSymbolMax * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.txSymbolFrequencySpacing.toFixed(2) + ' Hz';
-
-    return s;
-}
-
-function formatRxSymbolRange(state) {
-    var s;
-
-    s = 'SymbolMin: ' + state.rxSymbolMin + '&nbsp;(' + (state.rxSymbolMin * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.rxSymbolMax + '&nbsp;(' + (state.rxSymbolMax * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.rxSymbolFrequencySpacing.toFixed(2) + ' Hz';
-
-    return s;
+    document.addEventListener('keyup', keyUpListener, true);
 }
 
 // ----------------------------------
@@ -95,7 +63,7 @@ function rxDspConfigListener(state) {
         '#rx-config',
         formatRxSymbolRange(state) + '<br/>' +
         'FFT time: ' + (config.fftSize / state.rxSampleRate).toFixed(3) + ' s<br/>' +
-        'Threshold: ' + state.rxSignalDecibelThreshold.toFixed(1) + '&nbsp;dB'
+        'rxSignalDecibelThreshold: ' + state.rxSignalDecibelThreshold.toFixed(1) + '&nbsp;dB'
     );
 
     powerBar.setSignalDecibelThreshold(state.rxSignalDecibelThreshold);
@@ -118,13 +86,18 @@ function rxSymbolListener(state) {
     html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
 }
 
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
+}
+
 function rxSampleDspDetailsListener(state) {
     var
         rxDspConfig = physicalLayer.getRxDspConfig(),
         rxSymbol = physicalLayer.getRxSymbol();
-
-    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 
     html(
         '#rx-sample',
@@ -169,14 +142,14 @@ function rxSyncDspDetailsListener(state) {
     powerBar.setNoiseDecibelAverage(state.rxNoiseDecibelAverage);
 }
 
-function txListener(state) {
+function txSymbolProgressListener(state) {
     html('#tx-symbol', state.symbol ? state.symbol : 'idle');
     html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
 }
 
 // ----------------------------------
 
-function onLoopbackClick(state) {
+function onSetLoopbackClick(state) {
     physicalLayer.setLoopback(state);
 }
 
@@ -201,6 +174,17 @@ function onTxSymbolClick(txSymbol) {
         physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e);
+    }
+}
+
+function keyUpListener(e) {
+    var
+        digit = getDigitFromKeyCode(e.keyCode),
+        txSymbol;
+
+    if (digit !== null) {
+        txSymbol = DIGIT_ZERO_SYMBOL + digit;
+        physicalLayer.txSymbol(txSymbol);
     }
 }
 

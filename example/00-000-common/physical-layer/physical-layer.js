@@ -1,114 +1,7 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var PhysicalLayerBuilder = function () {
-    this._fftSize = 8192;
-    this._unitTime = 0.25;
-    this._fftSkipFactor = 3;
-    this._samplePerSymbol = 2;
-    this._symbolMin44100 = 114;
-    this._symbolMin48000 = 82;
-    this._symbolMinDefault = 1;
-    this._symbolRange = 256 + 2;    // 256 for data, 2 for "sync"
-    this._txSampleRate = 44100;
-    this._txAmplitude = 0.2;
-    this._correlationCode = [1, -1, 1, -1];      // [1, -1, 1, -1, 1, -1];
-    this._rxSignalDecibelThresholdFactor = 0.6;
-
-    this._rxSymbolListener = undefined;
-    this._rxSampleDspDetailsListener = undefined;
-    this._rxSyncDspDetailsListener = undefined;
-    this._rxDspConfigListener = undefined;
-    this._dspConfigListener = undefined;
-    this._txListener = undefined;
-    this._txDspConfigListener = undefined;
-};
-
-PhysicalLayerBuilder.prototype.fftSize = function (fftSize) {
-    this._fftSize = fftSize;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.unitTime = function (unitTime) {
-    this._unitTime = unitTime;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.fftSkipFactor = function (fftSkipFactor) {
-    this._fftSkipFactor = fftSkipFactor;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.samplePerSymbol = function (samplePerSymbol) {
-    this._samplePerSymbol = samplePerSymbol;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.symbolMin44100 = function (symbolMin44100) {
-    this._symbolMin44100 = symbolMin44100;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.symbolMin48000 = function (symbolMin48000) {
-    this._symbolMin48000 = symbolMin48000;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.symbolMinDefault = function (symbolMinDefault) {
-    this._symbolMinDefault = symbolMinDefault;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.symbolRange = function (symbolRange) {
-    this._symbolRange = symbolRange;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.txAmplitude = function (txAmplitude) {
-    this._txAmplitude = txAmplitude;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.rxSymbolListener = function (listener) {
-    this._rxSymbolListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.rxSampleDspDetailsListener = function (listener) {
-    this._rxSampleDspDetailsListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.rxSyncDspDetailsListener = function (listener) {
-    this._rxSyncDspDetailsListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.rxDspConfigListener = function (listener) {
-    this._rxDspConfigListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.dspConfigListener = function (listener) {
-    this._dspConfigListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.txListener = function (listener) {
-    this._txListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.txDspConfigListener = function (listener) {
-    this._txDspConfigListener = listener;
-    return this;
-};
-
-PhysicalLayerBuilder.prototype.build = function () {
-    return new PhysicalLayer(this);
-};
-
-// -----------------------------------------------------------------------------------------
+// TODO refactor needed - move data returned by listeners to separate classes
 
 var PhysicalLayer;
 
@@ -136,6 +29,7 @@ PhysicalLayer = function (builder) {
     this.$$sampleOffset = undefined;
     this.$$rxSymbolId = PhysicalLayer.$$_INITIAL_ID;
     this.$$rxSampleDspDetailsId = PhysicalLayer.$$_INITIAL_ID;
+    this.$$rxSyncStatusId = PhysicalLayer.$$_INITIAL_ID;
     this.$$rxSymbol = undefined;
     this.$$rxSymbolRaw = undefined;
     this.$$rxSignalDecibel = undefined;
@@ -159,16 +53,19 @@ PhysicalLayer = function (builder) {
 
     // setup listeners
     this.$$rxSymbolListener = PhysicalLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
+    this.$$rxSyncStatusListener = PhysicalLayer.$$isFunction(builder._rxSyncStatusListener) ? builder._rxSyncStatusListener : null;
     this.$$rxSampleDspDetailsListener = PhysicalLayer.$$isFunction(builder._rxSampleDspDetailsListener) ? builder._rxSampleDspDetailsListener : null;
     this.$$rxSyncDspDetailsListener = PhysicalLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
     this.$$rxDspConfigListener = PhysicalLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$dspConfigListener = PhysicalLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
-    this.$$txListener = PhysicalLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
+    this.$$txSymbolProgressListener = PhysicalLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
     this.$$txDspConfigListener = PhysicalLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 
     this.$$firstSmartTimerCall = true;
 };
 
+PhysicalLayer.MICROPHONE_MODE_ALWAYS_ON = 0;
+PhysicalLayer.MICROPHONE_MODE_AUTO_ON_OFF_WITH_GAP = 1;
 PhysicalLayer.$$_INITIAL_SAMPLE_NUMER = 0;
 PhysicalLayer.$$_INITIAL_ID = 0;   // will be incremented BEFORE first use
 PhysicalLayer.$$_INITIAL_RX_SIGNAL_DECIBEL_THRESHOLD = +Infinity;
@@ -178,8 +75,8 @@ PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT = -2;
 PhysicalLayer.$$_TX_AMPLITUDE_SILENT = 0;
 PhysicalLayer.$$_TX_FREQUENCY_ZERO = 0;
 PhysicalLayer.$$_FIRST_SYMBOL = 1;
-PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET = 1;
-PhysicalLayer.$$_SYNC_SYMBOL_B_OFFSET = 0;
+PhysicalLayer.$$_SYMBOL_SYNC_A_OFFSET = 1;
+PhysicalLayer.$$_SYMBOL_SYNC_B_OFFSET = 0;
 PhysicalLayer.SYMBOL_IS_NOT_VALID_EXCEPTION = 'Symbol is not valid. Please pass number that is inside symbol range.';
 
 // -----------------------------------------
@@ -198,8 +95,8 @@ PhysicalLayer.prototype.txSync = function () {
     for (i = 0; i < this.$$correlationCode.length; i++) {
         correlationCodeValue = this.$$correlationCode[i];
         symbol = correlationCodeValue === -1
-            ? this.$$txSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET
-            : this.$$txSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_B_OFFSET;
+            ? this.$$txSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_A_OFFSET
+            : this.$$txSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_B_OFFSET;
         this.$$txSymbolQueue.push(symbol);
     }
 
@@ -209,7 +106,7 @@ PhysicalLayer.prototype.txSync = function () {
         this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT);
     }
 
-    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
+    this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
 };
 
 PhysicalLayer.prototype.txSymbol = function (txSymbol) {
@@ -229,7 +126,7 @@ PhysicalLayer.prototype.txSymbol = function (txSymbol) {
     this.$$txSymbolQueue.push(txSymbolParsed);
     this.$$txSymbolQueue.push(PhysicalLayer.$$_TX_SYMBOL_GAP);     // will be removed if subsequent txSymbol will arrive
 
-    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
+    this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
 };
 
 PhysicalLayer.prototype.setTxSampleRate = function (txSampleRate) {
@@ -237,7 +134,7 @@ PhysicalLayer.prototype.setTxSampleRate = function (txSampleRate) {
     this.$$txSymbolMin = this.$$getSymbolMin(this.$$txSampleRate);
     this.$$txSymbolMax = this.$$getSymbolMax(this.$$txSampleRate);
     this.$$txSymbolQueue.length = 0;
-    this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
+    this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
     this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
 };
 
@@ -261,9 +158,19 @@ PhysicalLayer.prototype.getRxSymbol = function () {
     };
 };
 
-PhysicalLayer.prototype.getRxSampleDspDetails = function () {
+PhysicalLayer.prototype.getRxSyncStatus = function () {
     var rxSyncDspDetails = this.$$rxSyncDetector.getRxSyncDspDetails();
 
+    return {
+        id: this.$$rxSyncStatusId,
+        isRxSyncInProgress: this.$$isRxSyncInProgress,
+        isRxSyncOk: !!rxSyncDspDetails.id,
+        rxSyncDspDetailsId: rxSyncDspDetails.id,
+        rxSampleDspDetailsId: this.$$rxSampleDspDetailsId
+    };
+};
+
+PhysicalLayer.prototype.getRxSampleDspDetails = function () {
     return {
         id: this.$$rxSampleDspDetailsId,
         rxSymbolRaw: this.$$rxSymbolRaw,
@@ -273,10 +180,7 @@ PhysicalLayer.prototype.getRxSampleDspDetails = function () {
         rxFrequencyData: this.$$rxFrequencyData.slice(0),
         isRxSymbolSamplingPoint: this.$$isRxSymbolSamplingPoint,
         rxSampleNumber: this.$$sampleNumber,
-        rxSampleOffset: this.$$sampleOffset,
-        // TODO move to dedicated listener
-        isRxSyncInProgress: this.$$isRxSyncInProgress,
-        syncId: rxSyncDspDetails.id
+        rxSampleOffset: this.$$sampleOffset
     };
 };
 
@@ -320,7 +224,7 @@ PhysicalLayer.prototype.getDspConfig = function () {
     };
 };
 
-PhysicalLayer.prototype.getTx = function () {
+PhysicalLayer.prototype.getTxSymbolProgress = function () {
     return {
         symbol: this.$$txSymbol,
         symbolQueue: this.$$txSymbolQueue.slice(0),
@@ -354,14 +258,14 @@ PhysicalLayer.prototype.$$handleGapLogic = function () {
     // then device B cannot respond immediately. We
     // need make sure that device A will have some time
     // to reinitialize microphone again. This is solved
-    // by adding two 'gap' symbols in the beggining
+    // by adding two 'gap' symbols in the beginning
     // Similar problem we have at the end. If we enable
     // microphone at the same time as last symbol stops
     // then we have a glitch. We need to add one 'gap'
     // symbol after the last symbol.
     // If symbol is not last we need to remove that
-    // unnessescary gap.
-    tx = this.getTx();
+    // unnecessary gap.
+    tx = this.getTxSymbolProgress();
     if (tx.isTxInProgress) {
         this.$$removeAllGapSymbolFromTheEndOfTxSymbolQueue();
     } else {
@@ -408,6 +312,7 @@ PhysicalLayer.prototype.$$rx = function () {
         i;
 
     this.$$rxSampleDspDetailsId++;
+    this.$$rxSyncStatusId++;
 
     isAllowedToListen =
         this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ||
@@ -419,10 +324,10 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$rxFrequencyData = fftResult.getFrequencyData();
         this.$$rxSymbolRaw = fftResult.getLoudestBinIndexInBinRange(this.$$rxSymbolMin, this.$$rxSymbolMax);
         this.$$rxSignalDecibel = fftResult.getDecibel(this.$$rxSymbolRaw);
-        this.$$rxSignalDecibelNextCandidate = -Infinity; // TODO add this
+        this.$$rxSignalDecibelNextCandidate = -Infinity; // TODO add this at some point
         this.$$rxNoiseDecibel = fftResult.getDecibelAverage(this.$$rxSymbolMin, this.$$rxSymbolMax, this.$$rxSymbolRaw);
     } else {
-        // TODO refactor this
+        // TODO experiments - refactor this
         fakeFrequencyData = [];
         for (i = 0; i < this.$$fftSize * 0.5; i++) {
             fakeFrequencyData.push(-160);
@@ -436,7 +341,7 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$rxNoiseDecibel = -Infinity;
     }
 
-    this.$$handleSyncCode();
+    this.$$handleRxSync();
 
     this.$$isRxSyncInProgress = this.$$rxSyncDetector.isRxSyncInProgress();
     rxSyncDspDetails = this.$$rxSyncDetector.getRxSyncDspDetails();
@@ -447,7 +352,7 @@ PhysicalLayer.prototype.$$rx = function () {
         isNewSyncAvailable = true;
     }
 
-    this.$$isRxSymbolSamplingPoint = rxSyncDspDetails.id && this.$$sampleOffset === rxSyncDspDetails.rxSymbolSamplingPointOffset;
+    this.$$isRxSymbolSamplingPoint = rxSyncDspDetails.id > 0 && this.$$sampleOffset === rxSyncDspDetails.rxSymbolSamplingPointOffset;
     isNewSymbolReadyToTake = this.$$isRxSymbolSamplingPoint && this.$$rxSignalDecibel > this.$$rxSignalDecibelThreshold;
     this.$$rxSymbol = isNewSymbolReadyToTake ? this.$$rxSymbolRaw : PhysicalLayer.$$_SYMBOL_IDLE;
 
@@ -457,6 +362,7 @@ PhysicalLayer.prototype.$$rx = function () {
         this.$$rxDspConfigListener ? this.$$rxDspConfigListener(this.getRxDspConfig()) : undefined;
     }
     this.$$rxSampleDspDetailsListener ? this.$$rxSampleDspDetailsListener(this.getRxSampleDspDetails()) : undefined;
+    this.$$rxSyncStatusListener ? this.$$rxSyncStatusListener(this.getRxSyncStatus()) : undefined;
     if (this.$$isRxSymbolSamplingPoint) {
         this.$$rxSymbolId++;
         this.$$rxSymbolListener ? this.$$rxSymbolListener(this.getRxSymbol()) : undefined;
@@ -487,14 +393,14 @@ PhysicalLayer.prototype.$$tx = function () {
             txSymbolPrevious !== PhysicalLayer.$$_SYMBOL_IDLE &&
             this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE;
 
-        this.$$txListener ? this.$$txListener(this.getTx()) : undefined;
+        this.$$txSymbolProgressListener ? this.$$txSymbolProgressListener(this.getTxSymbolProgress()) : undefined;
 
         if (txJustStarted) {
-            this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature, this solves volume controll problem on mobile browsers
+            this.$$audioMonoIO.microphoneDisable(); // TODO experimental feature, this solves volume control problem on mobile browsers
             // console.log('microphone disable');
         }
         if (txJustEnded) {
-            this.$$audioMonoIO.microphoneEnable();  // TODO experimental feature, this solves volume controll problem on mobile browsers
+            this.$$audioMonoIO.microphoneEnable();  // TODO experimental feature, this solves volume control problem on mobile browsers
             // console.log('microphone enable');
         }
 
@@ -506,14 +412,14 @@ PhysicalLayer.prototype.$$tx = function () {
 
 // -------
 
-PhysicalLayer.prototype.$$handleSyncCode = function () {
+PhysicalLayer.prototype.$$handleRxSync = function () {
     var correlationCodeValue = null;
 
     switch (this.$$rxSymbolRaw) {
-        case this.$$rxSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_A_OFFSET:
+        case this.$$rxSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_A_OFFSET:
             correlationCodeValue = -1;
             break;
-        case this.$$rxSymbolMax - PhysicalLayer.$$_SYNC_SYMBOL_B_OFFSET:
+        case this.$$rxSymbolMax - PhysicalLayer.$$_SYMBOL_SYNC_B_OFFSET:
             correlationCodeValue = 1;
             break;
     }
@@ -555,14 +461,6 @@ PhysicalLayer.prototype.$$updateOscillator = function () {
         amplitude = this.$$txAmplitude;
     }
 
-    /*
-    console.log(
-        'setPeriodicWave', frequency, amplitude,
-        this.$$txSymbol === PhysicalLayer.$$_SYMBOL_IDLE ? 'IDLE' : '',
-        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP ? 'GAP' : '',
-        this.$$txSymbol === PhysicalLayer.$$_TX_SYMBOL_GAP_IMPORTANT ? 'GAP IMPORTANT' : ''
-    );
-    */
     this.$$audioMonoIO.setPeriodicWave(frequency, amplitude);
 };
 

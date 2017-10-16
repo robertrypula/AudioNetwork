@@ -57,129 +57,12 @@
 
             <div class="row margin-bottom">
                 <div class="col col-xs-12">
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Loopback
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom" id="loopback-container">
-                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
-                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h2>Receiver</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Sample&nbsp;rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="rx-sample-rate">-</span> kHz
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Status
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="sync">-</span>
-                            <span id="sync-in-progress">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Frame candidate
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
-                            <div id="rx-frame-candidate-progress">-</div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Last frame
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9 log-container">
-                            <div id="rx-frame" class="clearfix">
-                                <div class="rx-box-with-border">
-                                    <strong>IsComand:</strong> <span id="rx-frame-is-command">-</span><br/>
-                                    <div id="rx-frame-payload">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ----- -->
-
-                    <h2>Transmitter</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Sample Rate
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
-                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
-                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
-                            </div>
-                            <div class="margin-bottom">
-                                <button class="btn btn-default" onClick="onSendTwoWaySyncClick()">Two Way Sync</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Send...
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="margin-bottom">
-                                <div class="margin-bottom">
-                                    <textarea id="tx-hex">61 62 63</textarea>
-                                </div>
-                                <button
-                                    class="btn btn-default"
-                                    onClick="onSendHexClick()">
-                                    Send frame - bytes in HEX
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Status
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-status"></span>
-                        </div>
-                    </div>
-
+                    Not implemented
                 </div>
             </div>
 
             <!-- ---------------- -->
+
 
             <script>
                 if (isProduction()) { // TODO refactor this
@@ -206,7 +89,8 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/data-link-layer/data-link-layer.js"></script>
     <script src="../00-000-common/data-link-layer/data-link-layer-builder.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>

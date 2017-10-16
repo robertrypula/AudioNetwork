@@ -81,10 +81,6 @@ button, textarea, input {
     clear: both;
 }
 
-.pull-left {
-    float: left;
-}
-
 .col {
     position: relative;
     min-height: 1px;
@@ -119,7 +115,6 @@ button, textarea, input {
 @media (max-width: 767px) {
     .col-hidden-at-xs { display: none !important; }
 }
-
 
 @media (min-width: 768px) {
     .container, footer {
@@ -180,6 +175,14 @@ button, textarea, input {
 }
 
 /* helpers */
+
+.pull-left {
+    float: left;
+}
+
+.pull-right {
+    float: right;
+}
 
 .hidden {
     display: none !important;
@@ -356,10 +359,20 @@ b.label {
     display: block;
 }
 
+hr {
+    height: 1px;
+    overflow: hidden;
+    display: block;
+    border: 0;
+    padding: 0;
+    outline: 0;
+    background-color: lightgray;
+}
+
 label {
     display: block;
     font-weight: bold;
-    padding-top: 9px;
+    padding-top: 7px;
 }
 
 label.label-compact {

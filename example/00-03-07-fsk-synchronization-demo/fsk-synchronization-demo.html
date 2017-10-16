@@ -69,8 +69,8 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="loopback-container">
-                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
-                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onSetLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onSetLoopbackClick(false)">Disabled</button>
                             </div>
                         </div>
                     </div>
@@ -105,13 +105,16 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
+                            <label>
                                 RxSyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="sync"></span>
-                            <span id="sync-in-progress"></span>
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sync-status"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -122,7 +125,7 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-sync" class="log-container"></div>
+                            <div id="rx-sync" class="log-container">-</div>
                         </div>
                     </div>
 
@@ -154,7 +157,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Symbol
+                                RxSymbol
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -165,7 +168,7 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Symbol history
+                                RxSymbol history
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -253,16 +256,21 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="tx-config" class="log-container margin-bottom"></div>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(100)">100</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(101)">101</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(102)">102</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(103)">103</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(104)">104</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(105)">105</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(106)">106</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(107)">107</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(108)">108</button>
-                            <button class="btn btn-default" onClick="onTxSymbolClick(109)">109</button>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onTxSymbolClick(100)">100</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(101)">101</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(102)">102</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(103)">103</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(104)">104</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(105)">105</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(106)">106</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(107)">107</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(108)">108</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(109)">109</button>
+                            </div>
+                            <p>
+                                Note: you can also use keyboard 0-9 keys
+                            </p>
                         </div>
                     </div>
 
@@ -336,7 +344,8 @@
     <script src="../00-000-common/rx-sync-detector.js"></script>
     <script src="../00-000-common/ui/editable-float.js"></script>
     <script src="../00-000-common/ui/spectrogram.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>
     <script src="fsk-synchronization-demo.js"></script>
 

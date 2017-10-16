@@ -20,7 +20,7 @@ var TransportLayerBuilder = function () {
     this._rxSyncDspDetailsListener = undefined;
     this._rxDspConfigListener = undefined;
     this._dspConfigListener = undefined;
-    this._txListener = undefined;
+    this._txSymbolProgressListener = undefined;
     this._txDspConfigListener = undefined;
 };
 
@@ -84,8 +84,8 @@ TransportLayerBuilder.prototype.dspConfigListener = function (listener) {
     return this;
 };
 
-TransportLayerBuilder.prototype.txListener = function (listener) {
-    this._txListener = listener;
+TransportLayerBuilder.prototype.txSymbolProgressListener = function (listener) {
+    this._txSymbolProgressListener = listener;
     return this;
 };
 
@@ -113,7 +113,7 @@ TransportLayer = function (builder) {
         .rxSyncDspDetailsListener(this.$$rxSyncDspDetailsListener.bind(this))
         .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
         .dspConfigListener(this.$$dspConfigListener.bind(this))
-        .txListener(this.$$txListener.bind(this))
+        .txSymbolProgressListener(this.$$txSymbolProgressListener.bind(this))
         .txDspConfigListener(this.$$txDspConfigListener.bind(this))
         .build();
 
@@ -134,7 +134,7 @@ TransportLayer = function (builder) {
     this.$$externalRxSyncListener = TransportLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
     this.$$externalRxDspConfigListener = TransportLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$externalConfigListener = TransportLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
-    this.$$externalTxListener = TransportLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
+    this.$$externalTxSymbolProgressListener = TransportLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
     this.$$externalTxDspConfigListener = TransportLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 
     // TODO code below is proof of concept
@@ -334,8 +334,8 @@ TransportLayer.prototype.$$dspConfigListener = function (data) {
     this.$$externalConfigListener ? this.$$externalConfigListener(data) : undefined;
 };
 
-TransportLayer.prototype.$$txListener = function (data) {
-    this.$$externalTxListener ? this.$$externalTxListener(data) : undefined;
+TransportLayer.prototype.$$txSymbolProgressListener = function (data) {
+    this.$$externalTxSymbolProgressListener ? this.$$externalTxSymbolProgressListener(data) : undefined;
     this.$$handleTx();
 };
 

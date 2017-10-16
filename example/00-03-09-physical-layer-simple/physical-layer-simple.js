@@ -2,17 +2,17 @@
 'use strict';
 
 var
-    RX_HISTORY_SIZE = 8,
-    rxByteContainerRendered = false,
+    RX_BYTE_HEX_HISTORY_SIZE = 8,
+    rxByteHexContainerRendered = false,
+    rxByteHexHistory = [],
     physicalLayerBuilder,
-    rxByteHistory = [],
     physicalLayer;
 
 function init() {
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
         .rxSymbolListener(rxSymbolListener)
-        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .rxDspConfigListener(rxDspConfigListener)
         .dspConfigListener(dspConfigListener)
         .txDspConfigListener(txDspConfigListener)
@@ -22,43 +22,48 @@ function init() {
 function rxSymbolListener(state) {
     var
         rxDspConfig = physicalLayer.getRxDspConfig(),
-        byte,
-        byteText;
+        rxByteHex,
+        rxByte;
 
-    byte = state.rxSymbol
+    rxByte = state.rxSymbol
         ? state.rxSymbol - rxDspConfig.rxSymbolMin
         : null;
-    byteText = byte !== null ? byteToText(byte) : '---';
-    rxByteHistory.push(byteText);
-    if (rxByteHistory.length > RX_HISTORY_SIZE) {
-        rxByteHistory.shift();
+    rxByteHex = rxByte !== null ? byteToHex(rxByte) : '---';
+    rxByteHexHistory.push(rxByteHex);
+    if (rxByteHexHistory.length > RX_BYTE_HEX_HISTORY_SIZE) {
+        rxByteHexHistory.shift();
     }
 
-    html('#rx-byte-history', rxByteHistory.join(' '));
-    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
-    html('#rx-byte', byteText);
-    setActive('#rx-byte-container', '#rx-symbol-' + (state.rxSymbol ? state.rxSymbol : ''));
+    html('#rx-byte-hex-history', rxByteHexHistory.join(' '));
+    html('#rx-byte-hex', rxByteHex);
+    setActive(
+        '#rx-byte-hex-container',
+        '#rx-symbol-' + (state.rxSymbol ? state.rxSymbol : '')
+    );
 }
 
-function rxSampleDspDetailsListener(state) {
-    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
 }
 
 function rxDspConfigListener(state) {
-    var symbol, htmlContent, byte;
+    var rxSymbol, htmlContent, rxByte;
 
-    if (!rxByteContainerRendered) {
+    if (!rxByteHexContainerRendered) {
         htmlContent = '';
-        for (symbol = state.rxSymbolMin; symbol <= state.rxSymbolMax; symbol++) {
-            byte = symbol - state.rxSymbolMin;
+        for (rxSymbol = state.rxSymbolMin; rxSymbol <= state.rxSymbolMax; rxSymbol++) {
+            rxByte = rxSymbol - state.rxSymbolMin;
             htmlContent +=
-                '<span id="rx-symbol-' + symbol + '">' +
-                byteToText(byte) +
+                '<span id="rx-symbol-' + rxSymbol + '">' +
+                byteToHex(rxByte) +
                 '</span>';
         }
-        html('#rx-byte-container', htmlContent);
-        rxByteContainerRendered = true;
+        html('#rx-byte-hex-container', htmlContent);
+        rxByteHexContainerRendered = true;
     }
     html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
@@ -68,29 +73,33 @@ function dspConfigListener(state) {
 }
 
 function txDspConfigListener(state) {
-    var symbol, byte, htmlContent = '';
+    var txSymbol, txByte, htmlContent = '';
 
-    for (symbol = state.txSymbolMin; symbol <= state.txSymbolMax; symbol++) {
-        byte = symbol - state.txSymbolMin;
+    for (txSymbol = state.txSymbolMin; txSymbol <= state.txSymbolMax; txSymbol++) {
+        txByte = txSymbol - state.txSymbolMin;
         htmlContent +=
-            '<a href="javascript:void(0)" onClick="onSendByteClick(' + byte + ')">' +
-            byteToText(byte) +
+            '<a href="javascript:void(0)" onClick="onTxByteClick(' + txByte + ')">' +
+            byteToHex(txByte) +
             '</a>';
     }
-    html('#tx-byte-container', htmlContent);
+    html('#tx-byte-hex-container', htmlContent);
     html('#tx-sample-rate', (state.txSampleRate / 1000).toFixed(1));
 }
 
-function onSendByteClick(byte) {
+function onTxByteClick(txByte) {
     var
         txDspConfig = physicalLayer.getTxDspConfig(),
-        txSymbol = txDspConfig.txSymbolMin + byte;
+        txSymbol = txDspConfig.txSymbolMin + txByte;
 
     try {
         physicalLayer.txSymbol(txSymbol);
     } catch (e) {
         alert(e); // it's because user may enter symbol out of range
     }
+}
+
+function onSetLoopbackClick(state) {
+    physicalLayer.setLoopback(state);
 }
 
 function onSetTxSampleRateClick(txSampleRate) {

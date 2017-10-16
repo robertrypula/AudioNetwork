@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="../00-000-common/ui/power-bar.css">
+    <link rel="stylesheet" type="text/css" href="../00-000-common/ui/io-traffic.css">
     <link rel="stylesheet" type="text/css" href="physical-layer-ascii-demo.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
@@ -66,18 +66,18 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="loopback-container">
-                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
-                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onSetLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onSetLoopbackClick(false)">Disabled</button>
                             </div>
                         </div>
                     </div>
 
-                    <h2>Receiver</h2>
+                    <h2>Synchronization</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Sample&nbsp;rate
+                            <label>
+                                RxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
@@ -91,167 +91,60 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Status
+                            <label>
+                                RxSyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="sync"></span>
-                            <span id="sync-in-progress"></span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Rx Config
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-config" class="log-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Sample
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="margin-bottom">
-                                <div id="rx-sample" class="log-container"></div>
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sync-status"></span>
+                                </span>
                             </div>
-                            <div id="power-bar" class="clearfix"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Symbol
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol">-</div>
+                        <div class="col col-xs-12">
+                            <hr/>
                         </div>
                     </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Symbol history
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-symbol-history">-</div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                ASCII history
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-ascii-history">-</div>
-                        </div>
-                    </div>
-
-                    <!-- ----- -->
-
-                    <h2>Transmitter</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label>
-                                Sample Rate
+                                TxSampleRate
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="tx-sample-rate-container">
-                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
-                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSetTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSetTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
-                            <p>
-                                This value should match sample rate that is displayed on the receiver's side.
-                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
-                                rate is fixed and depends on device. The solution is to tune the transmitter
-                                to match frequency bins that receiver is looking for.
-                            </p>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onTxSyncClick()">TxSync</button>
+                            </div>
                         </div>
                     </div>
 
+                    <h2>ASCII chat</h2>
+
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Send...
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom">
-                                <button class="btn btn-default" onClick="onTxSyncClick()">Sync</button>
-                            </div>
+                        <div class="col" id="io-traffic"></div>
+                    </div>
 
-                            <div class="clearfix margin-bottom">
-                                <input type="text" class="pull-left margin-right" id="tx-symbol-field" />
-                                <button
-                                    class="btn btn-default pull-left"
-                                    onClick="onTxSymbolClick()">
-                                    Symbol
-                                </button>
-                            </div>
-
-                            <div id="tx-config" class="log-container margin-bottom"></div>
-
-                            <div class="clearfix margin-bottom">
-                                <div class="clearfix margin-bottom">
-                                    <textarea id="tx-text-field"></textarea>
+                    <div class="row margin-bottom-double">
+                        <div class="col">
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-textarea"></textarea>
                                 </div>
                                 <button
                                     class="btn btn-default"
-                                    onClick="onSendTextClick()">
-                                    ASCII
+                                    onClick="onTxTextClick()">
+                                    Send
                                 </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Symbol
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-symbol">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Symbol Queue
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="tx-symbol-queue">-</span>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
-                                Amplitude
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
-                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onAmplitudeClick(0.2)">0.2</button>
-                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onAmplitudeClick(0.4)">0.4</button>
-                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onAmplitudeClick(0.6)">0.6</button>
-                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onAmplitudeClick(0.8)">0.8</button>
-                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onAmplitudeClick(1.0)">1.0</button>
                         </div>
                     </div>
 
@@ -281,13 +174,14 @@
     <script src="../00-000-common/audio-mono-io.js"></script>
     <script src="../00-000-common/ui/dom-util.js"></script>
     <script src="../00-000-common/smart-timer.js"></script>
-    <script src="../00-000-common/ui/power-bar.js"></script>
     <script src="../00-000-common/fft-result.js"></script>
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>
+    <script src="../00-000-common/ui/io-traffic.js"></script>
     <script src="physical-layer-ascii-demo.js"></script>
 
     <script>

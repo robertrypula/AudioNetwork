@@ -14,7 +14,7 @@ var DataLinkLayerBuilder = function () {
     this._rxSyncDspDetailsListener = undefined;
     this._rxDspConfigListener = undefined;
     this._dspConfigListener = undefined;
-    this._txListener = undefined;
+    this._txSymbolProgressListener = undefined;
     this._txDspConfigListener = undefined;
 };
 
@@ -58,8 +58,8 @@ DataLinkLayerBuilder.prototype.dspConfigListener = function (listener) {
     return this;
 };
 
-DataLinkLayerBuilder.prototype.txListener = function (listener) {
-    this._txListener = listener;
+DataLinkLayerBuilder.prototype.txSymbolProgressListener = function (listener) {
+    this._txSymbolProgressListener = listener;
     return this;
 };
 

@@ -9,27 +9,32 @@ function init() {
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
         .rxSymbolListener(rxSymbolListener)
-        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .build();
-    html('#rx-sample-rate', physicalLayer.getRxDspConfig().rxSampleRate);
+    html('#rx-sample-rate', physicalLayer.getRxSampleRate());
+}
+
+function onSetLoopbackClick(state) {
+    physicalLayer.setLoopback(state);
+    alert('Loopback state changed!');
 }
 
 function onSetTxSampleRateClick() {
     var txSampleRate = getFormFieldValue('#tx-sample-rate', 'int');
 
     physicalLayer.setTxSampleRate(txSampleRate);
-    alert('Tx Sample Rate set!');
+    alert('Ok!');
 }
 
 function onTxSyncClick() {
     physicalLayer.txSync();
 }
 
-function onSendByteClick() {
+function onTxByteClick() {
     var
-        byte = getFormFieldValue('#tx-byte', 'int'),
+        txByte = getFormFieldValue('#tx-byte', 'int'),
         txDspConfig = physicalLayer.getTxDspConfig(),
-        txSymbol = txDspConfig.txSymbolMin + byte;
+        txSymbol = txDspConfig.txSymbolMin + txByte;
 
     try {
         physicalLayer.txSymbol(txSymbol);
@@ -39,17 +44,19 @@ function onSendByteClick() {
 }
 
 function rxSymbolListener(state) {
-    var rxDspConfig, byte;
+    var rxDspConfig, txByte;
 
     rxDspConfig = physicalLayer.getRxDspConfig();
-    byte = state.rxSymbol
+    txByte = state.rxSymbol
         ? state.rxSymbol - rxDspConfig.rxSymbolMin
         : null;
-    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
-    html('#rx-byte', byte !== null ? byte : '---');
+    html('#rx-byte', txByte !== null ? txByte : '---');
 }
 
-function rxSampleDspDetailsListener(data) {
-    html('#sync', data.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', data.isRxSyncInProgress ? '[sync in progress]' : '');
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
 }

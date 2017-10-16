@@ -66,8 +66,8 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="loopback-container">
-                                <button id="loopback-enabled" class="btn btn-default" onClick="onLoopbackClick(true)">Enabled</button>
-                                <button id="loopback-disabled" class="btn btn-default" onClick="onLoopbackClick(false)">Disabled</button>
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onSetLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onSetLoopbackClick(false)">Disabled</button>
                             </div>
                         </div>
                     </div>
@@ -94,12 +94,12 @@
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                SyncStatus
+                                RxSyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <span id="sync">-</span>
-                            <span id="sync-in-progress">-</span>
+                            <span id="is-rx-sync-in-progress">-</span>
                         </div>
                     </div>
 
@@ -111,8 +111,8 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div class="clearfix margin-bottom" id="tx-sample-rate-container">
-                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onTxSampleRateClick(44100)">44.1 kHz</button>
-                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onTxSampleRateClick(48000)">48.0 kHz</button>
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSetTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSetTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
                                 <button class="btn btn-default" onClick="onSendTwoWaySyncClick()">Two Way Sync</button>
@@ -157,7 +157,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
@@ -295,7 +294,8 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
-    <script src="../00-000-common/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/data-link-layer/checksum-service.js"></script>
     <script src="../00-000-common/data-link-layer/frame.js"></script>
     <script src="../00-000-common/data-link-layer/data-link-layer.js"></script>

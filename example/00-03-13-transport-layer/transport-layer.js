@@ -58,7 +58,7 @@ function rxSampleDspDetailsListener(state) {
     });
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
+    html('#is-rx-sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 }
 
 function dspConfigListener(state) {
@@ -82,11 +82,11 @@ function onSendTwoWaySyncClick() {
     transportLayer.txTwoWaySync();
 }
 
-function onTxSampleRateClick(txSampleRate) {
+function onSetTxSampleRateClick(txSampleRate) {
     transportLayer.setTxSampleRate(txSampleRate);
 }
 
-function onLoopbackClick(state) {
+function onSetLoopbackClick(state) {
     transportLayer.setLoopback(state);
 }
 

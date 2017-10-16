@@ -13,7 +13,7 @@ function init() {
     dataLinkLayer = dataLinkLayerBuilder
         .frameListener(frameListener)
         .frameCandidateListener(frameCandidateListener)
-        .txListener(txListener)
+        .txSymbolProgressListener(txSymbolProgressListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .dspConfigListener(dspConfigListener)
         .txDspConfigListener(txDspConfigListener)
@@ -67,7 +67,7 @@ function frameCandidateListener(frameCandidateList) {
     html('#rx-frame-candidate', htmlContent);
 }
 
-function txListener(state) {
+function txSymbolProgressListener(state) {
     var
         txDspConfig = dataLinkLayer.getPhysicalLayer().getTxDspConfig(),
         txSymbolMin = txDspConfig.txSymbolMin,
@@ -86,7 +86,7 @@ function rxSampleDspDetailsListener(state) {
         rxSymbolMin = rxDspConfig.rxSymbolMin;
 
     html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
+    html('#is-rx-sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
 
     if (state.isRxSymbolSamplingPoint) {
         rxSymbolRawHistory.pushEvenIfFull(state.rxSymbolRaw);
@@ -115,11 +115,11 @@ function onSendTwoWaySyncClick() {
     dataLinkLayer.txTwoWaySync();
 }
 
-function onTxSampleRateClick(txSampleRate) {
+function onSetTxSampleRateClick(txSampleRate) {
     dataLinkLayer.setTxSampleRate(txSampleRate);
 }
 
-function onLoopbackClick(state) {
+function onSetLoopbackClick(state) {
     dataLinkLayer.setLoopback(state);
 }
 

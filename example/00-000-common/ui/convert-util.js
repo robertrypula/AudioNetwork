@@ -2,7 +2,8 @@
 'use strict';
 
 var
-    UNICODE_UNKNOWN = '�',
+    CHAR_UNICODE_UNKNOWN = '�',
+    ASCII_NULL = 0x00,
     SYMBOL_ZERO_PADDING = 3;
 
 function getStringFromSymbolArray(symbolArray) {
@@ -19,7 +20,7 @@ function getStringFromSymbolArray(symbolArray) {
     return formatted.join(' ');
 }
 
-function byteToText(byte) {
+function byteToHex(byte) {
     return (byte < 16 ? '0' : '') + byte.toString(16).toUpperCase();
 }
 
@@ -80,11 +81,32 @@ function getAsciiFromByteList(byteList) {
     var i, char, result = '';
 
     for (i = 0; i < byteList.length; i++) {
-        char = String.fromCharCode(byteList[i]);
-        result += isPrintableAscii(char) ? char : UNICODE_UNKNOWN;
+        char = getAsciiFromByte(byteList[i]);
+        result += char;
     }
 
     return result;
+}
+
+function getAsciiFromByte(byte) {
+    var char = String.fromCharCode(byte);
+
+    return isPrintableAscii(char)
+        ? char
+        : CHAR_UNICODE_UNKNOWN;
+}
+
+function getByteListFromAsciiString(text) {
+    var i, byte, byteList = [];
+
+    for (i = 0; i < text.length; i++) {
+        byte = isPrintableAscii(text[i])
+            ? text.charCodeAt(i)
+            : ASCII_NULL;
+        byteList.push(byte);
+    }
+
+    return byteList;
 }
 
 function pad(num, size) {
@@ -93,3 +115,22 @@ function pad(num, size) {
     return s.substr(s.length - size);
 }
 
+function formatTxSymbolRange(state) {
+    var s;
+
+    s = 'txSymbolMin: ' + state.txSymbolMin + '&nbsp;(' + (state.txSymbolMin * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'rxSymbolMax: ' + state.txSymbolMax + '&nbsp;(' + (state.txSymbolMax * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'txSymbolFrequencySpacing: ' + state.txSymbolFrequencySpacing.toFixed(2) + ' Hz';
+
+    return s;
+}
+
+function formatRxSymbolRange(state) {
+    var s;
+
+    s = 'txSymbolMin: ' + state.rxSymbolMin + '&nbsp;(' + (state.rxSymbolMin * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'rxSymbolMax: ' + state.rxSymbolMax + '&nbsp;(' + (state.rxSymbolMax * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
+        'rxSymbolFrequencySpacing: ' + state.rxSymbolFrequencySpacing.toFixed(2) + ' Hz';
+
+    return s;
+}

@@ -2,121 +2,25 @@
 'use strict';
 
 var
-    RX_HISTORY_SIZE = 16,
-    ASCII_NULL = 0x00,
-    INITIAL_TX_AMPLITUDE = 0.2,
-    powerBar,
     physicalLayerBuilder,
     physicalLayer,
-    rxSymbolHistory,
-    rxAsciiHistory;
+    ioTraffic;
 
 function init() {
-    powerBar = new PowerBar(document.getElementById('power-bar'));
     physicalLayerBuilder = new PhysicalLayerBuilder();
     physicalLayer = physicalLayerBuilder
-        .txAmplitude(INITIAL_TX_AMPLITUDE)
-        .rxSymbolListener(rxSymbolListener)
-        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
-        .rxSyncDspDetailsListener(rxSyncDspDetailsListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
-        .txListener(txListener)
         .dspConfigListener(dspConfigListener)
+        .rxSymbolListener(rxSymbolListener)
         .build();
-    rxSymbolHistory = new Buffer(RX_HISTORY_SIZE);
-    rxAsciiHistory = new Buffer(RX_HISTORY_SIZE);
-}
 
-function formatTxSymbolRange(state) {
-    var s;
-
-    s = 'SymbolMin: ' + state.txSymbolMin + '&nbsp;(' + (state.txSymbolMin * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.txSymbolMax + '&nbsp;(' + (state.txSymbolMax * state.txSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.txSymbolFrequencySpacing.toFixed(2) + ' Hz';
-
-    return s;
-}
-
-function formatRxSymbolRange(state) {
-    var s;
-
-    s = 'SymbolMin: ' + state.rxSymbolMin + '&nbsp;(' + (state.rxSymbolMin * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolMax: ' + state.rxSymbolMax + '&nbsp;(' + (state.rxSymbolMax * state.rxSymbolFrequencySpacing).toFixed(0) + '&nbsp;Hz)<br/>' +
-        'SymbolSpacing: ' + state.rxSymbolFrequencySpacing.toFixed(2) + ' Hz';
-
-    return s;
+    ioTraffic = new IoTraffic(document.getElementById('io-traffic'));
+    invokeOnEnter('#tx-textarea', onTxTextClick);
 }
 
 // ----------------------------------
-
-function rxDspConfigListener(state) {
-    var config = physicalLayer.getDspConfig();
-
-    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
-    html(
-        '#rx-config',
-        formatRxSymbolRange(state) + '<br/>' +
-        'FFT time: ' + (config.fftSize / state.rxSampleRate).toFixed(3) + ' s<br/>' +
-        'Threshold: ' + state.rxSignalDecibelThreshold.toFixed(1) + '&nbsp;dB'
-    );
-
-    powerBar.setSignalDecibelThreshold(state.rxSignalDecibelThreshold);
-}
-
-function txDspConfigListener(state) {
-    html('#tx-config', formatTxSymbolRange(state));
-
-    setActive('#tx-amplitude-container', '#tx-amplitude-' + (state.txAmplitude * 10).toFixed(0));
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
-}
-
-function rxSymbolListener(state) {
-    var
-        rxDspConfig = physicalLayer.getRxDspConfig(),
-        charCode,
-        char;
-
-    rxSymbolHistory.pushEvenIfFull(state.rxSymbol ? state.rxSymbol : '---');
-    charCode = state.rxSymbol - rxDspConfig.rxSymbolMin;
-    char = String.fromCharCode(charCode);
-    rxAsciiHistory.pushEvenIfFull(
-        isPrintableAscii(char) ? char : UNICODE_UNKNOWN
-    );
-
-    html('#rx-symbol', state.rxSymbol ? state.rxSymbol : 'idle');
-    html('#rx-symbol-history', getStringFromSymbolArray(rxSymbolHistory.getAll()));
-    html('#rx-ascii-history', rxAsciiHistory.getAll().join(''));
-}
-
-function rxSampleDspDetailsListener(state) {
-    var rxDspConfig = physicalLayer.getRxDspConfig();
-
-    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
-
-    html(
-        '#rx-sample',
-        'rxSampleNumber: ' + state.rxSampleNumber + '<br/>' +
-        'rxSampleOffset: ' + state.rxSampleOffset + '<br/>' +
-        'isRxSymbolSamplingPoint: ' + (state.isRxSymbolSamplingPoint ? 'yes' : 'no') + '<br/>' +
-        'rxSymbolRaw: ' + state.rxSymbolRaw + '<br/>' +
-        'rxSignalFrequency: ' + (state.rxSymbolRaw * rxDspConfig.rxSymbolFrequencySpacing).toFixed(2) + ' Hz'
-    );
-
-    powerBar.setSignalDecibel(state.rxSignalDecibel);
-    powerBar.setNoiseDecibel(state.rxNoiseDecibel);
-}
-
-function rxSyncDspDetailsListener(state) {
-    powerBar.setSignalDecibelAverage(state.rxSignalDecibelAverage);
-    powerBar.setNoiseDecibelAverage(state.rxNoiseDecibelAverage);
-}
-
-function txListener(state) {
-    html('#tx-symbol', state.symbol ? state.symbol : 'idle');
-    html('#tx-symbol-queue', getStringFromSymbolArray(state.symbolQueue));
-}
 
 function dspConfigListener(state) {
     setActive(
@@ -125,48 +29,96 @@ function dspConfigListener(state) {
     );
 }
 
+function rxDspConfigListener(state) {
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
+}
+
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
+}
+
+function txDspConfigListener(state) {
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
+}
+
 // ----------------------------------
 
-function onLoopbackClick(state) {
+function onSetLoopbackClick(state) {
     physicalLayer.setLoopback(state);
 }
 
-function onTxSampleRateClick(txSampleRate) {
+function onSetTxSampleRateClick(txSampleRate) {
     physicalLayer.setTxSampleRate(txSampleRate);
-}
-
-function onAmplitudeClick(txAmplitude) {
-    physicalLayer.setTxAmplitude(txAmplitude);
 }
 
 function onTxSyncClick() {
     physicalLayer.txSync();
 }
 
-function onTxSymbolClick() {
-    var txSymbol = getFormFieldValue('#tx-symbol-field');
+var txId = 1;
+var rxId = 1;
 
-    try {
-        physicalLayer.txSymbol(txSymbol);
-    } catch (e) {
-        alert(e); // it's because user may enter symbol out of range
-    }
-}
-
-function onSendTextClick() {
+function onTxTextClick() {
     var
-        text = getFormFieldValue('#tx-text-field'),
+        text = getFormFieldValue('#tx-textarea'),
+        byteList = getByteListFromAsciiString(text),
         txDspConfig = physicalLayer.getTxDspConfig(),
         txSymbolMin = txDspConfig.txSymbolMin,
-        byte,
         txSymbol,
+        txByte,
+        txChar,
         i;
 
-    for (i = 0; i < text.length; i++) {
-        byte = isPrintableAscii(text[i])
-            ? text.charCodeAt(i)
-            : ASCII_NULL;
-        txSymbol = txSymbolMin + byte;
+    for (i = 0; i < byteList.length; i++) {
+        txByte = byteList[i];
+        txChar = getAsciiFromByte(txByte);
+        txSymbol = txSymbolMin + txByte;
         physicalLayer.txSymbol(txSymbol);
+        txChar = txChar === ' ' ? '&nbsp;' : txChar;
+        ioTraffic.addTxItem('tx-' + txId, txChar);
+
+        // TODO currently it's only emulation of transmission confirmation - implement it in physical layer
+        (function (txId) {
+            setTimeout(
+                function () {
+                    ioTraffic.addClass('tx-' + txId, 'finished');
+                    ioTraffic.updateProgressBar('tx-' + txId, 1, IoTraffic.PROGRESS_BAR_A);
+                },
+                500 * (i + 1)
+            );
+        })(txId);
+
+        txId++;
+        /*
+        ioTraffic.addClass(id, 'fade-out');
+        ioTraffic.removeClass(id, 'fade-out');
+        ioTraffic.updateProgress(id, 32);
+        ioTraffic.updateItemHtml(id, 32);
+        */
     }
+    setValue('#tx-textarea', '');
+    ioTraffic.forceNewRow();
+}
+
+function rxSymbolListener(state) {
+    var
+        rxDspConfig = physicalLayer.getRxDspConfig(),
+        rxByte,
+        rxChar;
+
+    if (state.rxSymbol === null) {
+        return;
+    }
+
+    rxByte = state.rxSymbol - rxDspConfig.rxSymbolMin;
+    rxChar = getAsciiFromByte(rxByte);
+    ioTraffic.addRxItem('rx-' + rxId, rxChar);
+    ioTraffic.addClass('rx-' + rxId, 'finished');
+    ioTraffic.updateProgressBar('rx-' + rxId, 1, IoTraffic.PROGRESS_BAR_A);
+
+    rxId++;
 }

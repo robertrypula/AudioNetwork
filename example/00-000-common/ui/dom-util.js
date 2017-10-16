@@ -132,3 +132,21 @@ function hasClass(selector, className) {
 
     return result;
 }
+
+function invokeOnEnter(selector, callback) {
+    var domElement = document.querySelector(selector);
+
+    if (!domElement) {
+        return;
+    }
+
+    domElement.addEventListener(
+        'keydown',
+        function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                callback();
+            }
+        }
+    );
+}

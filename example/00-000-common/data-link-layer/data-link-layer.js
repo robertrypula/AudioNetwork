@@ -12,7 +12,7 @@ DataLinkLayer = function (builder) {
         .rxSyncDspDetailsListener(this.$$rxSyncDspDetailsListener.bind(this))
         .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
         .dspConfigListener(this.$$dspConfigListener.bind(this))
-        .txListener(this.$$txListener.bind(this))
+        .txSymbolProgressListener(this.$$txSymbolProgressListener.bind(this))
         .txDspConfigListener(this.$$txDspConfigListener.bind(this))
         .build();
 
@@ -35,7 +35,7 @@ DataLinkLayer = function (builder) {
     this.$$externalRxSyncListener = DataLinkLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
     this.$$externalRxDspConfigListener = DataLinkLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
     this.$$externalConfigListener = DataLinkLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
-    this.$$externalTxListener = DataLinkLayer.$$isFunction(builder._txListener) ? builder._txListener : null;
+    this.$$externalTxSymbolProgressListener = DataLinkLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
     this.$$externalTxDspConfigListener = DataLinkLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
 };
 
@@ -299,8 +299,8 @@ DataLinkLayer.prototype.$$dspConfigListener = function (data) {
     this.$$externalConfigListener ? this.$$externalConfigListener(data) : undefined;
 };
 
-DataLinkLayer.prototype.$$txListener = function (data) {
-    this.$$externalTxListener ? this.$$externalTxListener(data) : undefined;
+DataLinkLayer.prototype.$$txSymbolProgressListener = function (data) {
+    this.$$externalTxSymbolProgressListener ? this.$$externalTxSymbolProgressListener(data) : undefined;
 };
 
 DataLinkLayer.prototype.$$txDspConfigListener = function (data) {
