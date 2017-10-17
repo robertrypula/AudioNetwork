@@ -95,8 +95,8 @@ Redirect 301 /physical-layer-simple-src https://github.com/robertrypula/AudioNet
 Redirect 301 /physical-layer-listeners-demo /example/00-03-10-physical-layer-listeners-demo/physical-layer-listeners-demo.html
 Redirect 301 /physical-layer-listeners-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-10-physical-layer-listeners-demo
 
-Redirect 301 /physical-layer-ascii-demo /example/00-03-11-physical-layer-ascii-demo/physical-layer-ascii-demo.html
-Redirect 301 /physical-layer-ascii-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-11-physical-layer-ascii-demo
+Redirect 301 /physical-layer /example/00-03-11-physical-layer/physical-layer.html
+Redirect 301 /physical-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-11-physical-layer
 
 Redirect 301 /data-link-layer /example/00-03-12-data-link-layer/data-link-layer.html
 Redirect 301 /data-link-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-12-data-link-layer

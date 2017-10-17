@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// TODO refactor - move code to dedicated classes
+
 var DataLinkLayer;
 
 DataLinkLayer = function (builder) {
@@ -8,35 +10,35 @@ DataLinkLayer = function (builder) {
     // Data Link Layer hides Physical Layer inside
     this.$$physicalLayer = (new PhysicalLayerBuilder())
         .rxSymbolListener(this.$$rxSymbolListener.bind(this))
-        .rxSampleDspDetailsListener(this.$$rxSampleDspDetailsListener.bind(this))
-        .rxSyncDspDetailsListener(this.$$rxSyncDspDetailsListener.bind(this))
-        .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
-        .dspConfigListener(this.$$dspConfigListener.bind(this))
-        .txSymbolProgressListener(this.$$txSymbolProgressListener.bind(this))
-        .txDspConfigListener(this.$$txDspConfigListener.bind(this))
+        .rxSampleDspDetailsListener(builder._rxSampleDspDetailsListener)
+        .rxSyncStatusListener(builder._rxSyncStatusListener)
+        .rxSyncDspDetailsListener(builder._rxSyncDspDetailsListener)
+        .rxDspConfigListener(builder._rxDspConfigListener)
+        .dspConfigListener(builder._dspConfigListener)
+        .txSymbolListener(this.$$txSymbolListener.bind(this))
+        .txSymbolProgressListener(builder._txSymbolProgressListener)
+        .txDspConfigListener(builder._txDspConfigListener)
         .build();
 
     // general config
-    this.$$framePayloadLengthMax = builder._framePayloadLengthMax;
+    this.$$framePayloadLengthLimit = builder._framePayloadLengthLimit;
 
     // state variables
     this.$$frame = undefined;
     this.$$frameId = DataLinkLayer.$$_INITIAL_ID;
     this.$$frameCandidateId = DataLinkLayer.$$_INITIAL_ID;
     this.$$frameCandidateList = [];
+    this.$$txFrameManager = new TxFrameManager();
 
     // setup listeners - data link layer
-    this.$$frameListener = DataLinkLayer.$$isFunction(builder._frameListener) ? builder._frameListener : null;
-    this.$$frameCandidateListener = DataLinkLayer.$$isFunction(builder._frameCandidateListener) ? builder._frameCandidateListener : null;
+    this.$$rxFrameListener = DataLinkLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
+    this.$$rxFrameCandidateListener = DataLinkLayer.$$isFunction(builder._rxFrameCandidateListener) ? builder._rxFrameCandidateListener : null;
+    this.$$txFrameListener = DataLinkLayer.$$isFunction(builder._txFrameListener) ? builder._txFrameListener : null;
+    this.$$txFrameProgressListener = DataLinkLayer.$$isFunction(builder._txFrameProgressListener) ? builder._txFrameProgressListener : null;
 
     // setup listeners - physical layer
     this.$$externalRxSymbolListener = DataLinkLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
-    this.$$externalRxSampleDspDetailsListener = DataLinkLayer.$$isFunction(builder._rxSampleDspDetailsListener) ? builder._rxSampleDspDetailsListener : null;
-    this.$$externalRxSyncListener = DataLinkLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
-    this.$$externalRxDspConfigListener = DataLinkLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
-    this.$$externalConfigListener = DataLinkLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
-    this.$$externalTxSymbolProgressListener = DataLinkLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
-    this.$$externalTxDspConfigListener = DataLinkLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
+    this.$$externalTxSymbolListener = DataLinkLayer.$$isFunction(builder._txSymbolListener) ? builder._txSymbolListener : null;
 };
 
 DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION = 'Payload is too big!';
@@ -76,13 +78,15 @@ DataLinkLayer.prototype.txSync = function () {
 };
 
 DataLinkLayer.prototype.txTwoWaySync = function () {
+    var isCommand = true;
+
     this.txSync();
     switch (this.getRxSampleRate()) {
         case 44100:
-            this.sendCommand(DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100);
+            this.txFrame([DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100], isCommand);
             break;
         case 48000:
-            this.sendCommand(DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000);
+            this.txFrame([DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000], isCommand);
             break;
     }
 };
@@ -91,25 +95,48 @@ DataLinkLayer.prototype.setLoopback = function (state) {
     this.$$physicalLayer.setLoopback(state);  // alias for easier access
 };
 
-DataLinkLayer.prototype.sendCommand = function (command) {
-    var frame;
-
-    frame = DataLinkLayer.$$buildFrame(DataLinkLayer.$$_PAYLOAD_TYPE_COMMAND, [command]);
-    this.$$txFrame(frame);
+DataLinkLayer.prototype.getFramePayloadLengthLimit = function () {
+    return this.$$framePayloadLengthLimit;
 };
 
-DataLinkLayer.prototype.txFrame = function (payload) {
-    var payloadType, frame;
+DataLinkLayer.prototype.txFrame = function (txFramePayload, isTxFrameCommand) {
+    var txFrame, txDspConfig, txSymbolMin, i, txByte, txSymbol, txSymbolId;
 
-    if (payload.length > this.$$framePayloadLengthMax) {
+    if (txFramePayload.length > this.$$framePayloadLengthLimit) {
         throw DataLinkLayer.PAYLOAD_TO_BIG_EXCEPTION;
     }
-    payloadType = DataLinkLayer.$$_PAYLOAD_TYPE_DATA;
-    frame = DataLinkLayer.$$buildFrame(payloadType, payload);
-    this.$$txFrame(frame);
+
+    txFrame = new TxFrame(
+        this.$$txFrameManager.getNextTxFrameId(),
+        txFramePayload,
+        isTxFrameCommand
+    );
+
+    txDspConfig = this.$$physicalLayer.getTxDspConfig();
+    txSymbolMin = txDspConfig.txSymbolMin;
+    for (i = 0; i < txFrame.getTxByteLength(); i++) {
+        txByte = txFrame.getTxByte(i);
+        txSymbol = txSymbolMin + txByte;
+        txSymbolId = this.$$physicalLayer.txSymbol(txSymbol);
+        txFrame.addTxSymbolId(txSymbolId);
+    }
+
+    this.$$txFrameManager.addTxFrame(txFrame);
+
+    this.$$txFrameProgressListener ? this.$$txFrameProgressListener(this.getTxFrameProgress()) : undefined;
+
+    return txFrame.getId();
 };
 
-DataLinkLayer.prototype.getFrame = function () {
+DataLinkLayer.prototype.getTxFrame = function () {
+    return this.$$txFrameManager.getTxFrameCloned();
+};
+
+DataLinkLayer.prototype.getTxFrameProgress = function () {
+    return this.$$txFrameManager.getTxFrameProgressCloned();
+};
+
+DataLinkLayer.prototype.getRxFrame = function () {
     var
         frame = this.$$frame,
         frameCopy;
@@ -120,27 +147,27 @@ DataLinkLayer.prototype.getFrame = function () {
 
     frameCopy = {
         id: frame.id,
-        header: frame.header,
-        payload: frame.payload.slice(0),
-        checksum: frame.checksum,
-        isCommand: frame.isCommand,
-        frameCandidateId: frame.frameCandidateId
+        rxFrameHeader: frame.rxFrameHeader,
+        rxFramePayload: frame.rxFramePayload.slice(0),
+        rxFrameChecksum: frame.rxFrameChecksum,
+        isRxFrameCommand: frame.isRxFrameCommand,
+        rxFrameCandidateId: frame.rxFrameCandidateId
     };
 
     return frameCopy;
 };
 
-DataLinkLayer.prototype.getFrameCandidate = function () {
+DataLinkLayer.prototype.getRxFrameCandidate = function () {
     var i, frameCandidate, frameCandidateCopy, result = [];
 
     for (i = 0; i < this.$$frameCandidateList.length; i++) {
         frameCandidate = this.$$frameCandidateList[i];
         frameCandidateCopy = {
             id: frameCandidate.id,
-            received: frameCandidate.received.slice(0),
-            expected: frameCandidate.expected,
-            isValid: frameCandidate.isValid,
-            symbolId: frameCandidate.symbolId.slice(0)
+            rxByteReceived: frameCandidate.rxByteReceived.slice(0),
+            rxByteExpected: frameCandidate.rxByteExpected,
+            isRxFrameCandidateValid: frameCandidate.isRxFrameCandidateValid,
+            rxSampleDspDetailsId: frameCandidate.rxSampleDspDetailsId.slice(0)
         };
         result.push(frameCandidateCopy);
     }
@@ -156,24 +183,37 @@ DataLinkLayer.prototype.$$handleRxSymbol = function (data) {
         rxDspConfig = this.$$physicalLayer.getRxDspConfig(),
         rxSymbolMin = rxDspConfig.rxSymbolMin,
         byte = (rxSampleDspDetails.rxSymbolRaw - rxSymbolMin) & DataLinkLayer.$$_ONE_BYTE_MASK,
-        symbolId = data.id,
+        rxSampleDspDetailsId = rxSampleDspDetails.id,
         isNewFrameAvailable,
         command;
 
     this.$$cleanUpFrameCandidateList();
-    this.$$addNewByteToFrameCandidateList(byte, symbolId);
-    this.$$tryToCreateNewFrameCandidate(byte, symbolId);
+    this.$$addNewByteToFrameCandidateList(byte, rxSampleDspDetailsId);
+    this.$$tryToCreateNewFrameCandidate(byte, rxSampleDspDetailsId);
     isNewFrameAvailable = this.$$tryToFindNewFrame();
 
     // call listeners
-    this.$$frameCandidateListener ? this.$$frameCandidateListener(this.getFrameCandidate()) : undefined;
+    this.$$rxFrameCandidateListener ? this.$$rxFrameCandidateListener(this.getRxFrameCandidate()) : undefined;
     if (isNewFrameAvailable) {
-        if (this.$$frame.isCommand) {
-            command = this.$$frame.payload[0];
+        if (this.$$frame.isRxFrameCommand) {
+            command = this.$$frame.rxFramePayload[0];
             this.$$handleReceivedCommand(command);
         }
-        this.$$frameListener ? this.$$frameListener(this.getFrame()) : undefined;
+        this.$$rxFrameListener ? this.$$rxFrameListener(this.getRxFrame()) : undefined;
     }
+};
+
+DataLinkLayer.prototype.$$handleTxSymbol = function (data) {
+    var txSymbolId, txFrameCloned;
+
+    txSymbolId = data.id;
+    this.$$txFrameManager.handleTxSymbolId(txSymbolId);
+
+    txFrameCloned = this.$$txFrameManager.getTxFrameCloned();
+    if (txFrameCloned) {
+        this.$$txFrameListener ? this.$$txFrameListener(txFrameCloned) : undefined;
+    }
+    this.$$txFrameProgressListener ? this.$$txFrameProgressListener(this.getTxFrameProgress()) : undefined;
 };
 
 DataLinkLayer.prototype.$$cleanUpFrameCandidateList = function () {
@@ -181,39 +221,39 @@ DataLinkLayer.prototype.$$cleanUpFrameCandidateList = function () {
 
     for (i = this.$$frameCandidateList.length - 1; i >= 0; i--) {
         frameCandidate = this.$$frameCandidateList[i];
-        receivedFully = frameCandidate.received.length === frameCandidate.expected;
+        receivedFully = frameCandidate.rxByteReceived.length === frameCandidate.rxByteExpected;
         if (receivedFully) {
             this.$$frameCandidateList.splice(i, 1);
         }
     }
 };
 
-DataLinkLayer.prototype.$$addNewByteToFrameCandidateList = function (byte, symbolId) {
-    var i, frameCandidate, readyToComputeChecksum, fullyReceived, notFullyReceived, frameWithoutChecksum, receivedChecksum;
+DataLinkLayer.prototype.$$addNewByteToFrameCandidateList = function (byte, rxSampleDspDetailsId) {
+    var i, frameCandidate, readyToComputeChecksum, fullyReceived, notFullyReceived, frameWithoutChecksum, rxChecksum;
 
     for (i = 0; i < this.$$frameCandidateList.length; i++) {
         frameCandidate = this.$$frameCandidateList[i];
-        notFullyReceived = frameCandidate.received.length < frameCandidate.expected;
+        notFullyReceived = frameCandidate.rxByteReceived.length < frameCandidate.rxByteExpected;
         if (notFullyReceived) {
-            frameCandidate.received.push(byte);
-            frameCandidate.symbolId.push(symbolId);
+            frameCandidate.rxByteReceived.push(byte);
+            frameCandidate.rxSampleDspDetailsId.push(rxSampleDspDetailsId);
         }
 
-        readyToComputeChecksum = frameCandidate.received.length === (frameCandidate.expected - 1);
+        readyToComputeChecksum = frameCandidate.rxByteReceived.length === (frameCandidate.rxByteExpected - 1);
         if (readyToComputeChecksum) {
-            frameWithoutChecksum = frameCandidate.received;
-            frameCandidate.expectedChecksum = DataLinkLayer.$$computeChecksum(frameWithoutChecksum);
+            frameWithoutChecksum = frameCandidate.rxByteReceived;
+            frameCandidate.rxChecksumExpected = ChecksumService.fletcher8(frameWithoutChecksum);
         }
 
-        fullyReceived = frameCandidate.received.length === frameCandidate.expected;
+        fullyReceived = frameCandidate.rxByteReceived.length === frameCandidate.rxByteExpected;
         if (fullyReceived) {
-            receivedChecksum = frameCandidate.received[frameCandidate.received.length - 1];
-            frameCandidate.isValid = frameCandidate.expectedChecksum === receivedChecksum;
+            rxChecksum = frameCandidate.rxByteReceived[frameCandidate.rxByteReceived.length - 1];
+            frameCandidate.isRxFrameCandidateValid = frameCandidate.rxChecksumExpected === rxChecksum;
         }
     }
 };
 
-DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (byte, symbolId) {
+DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (byte, rxSampleDspDetailsId) {
     var frameCandidate, header, payloadLength;
 
     if (!DataLinkLayer.$$isValidHeader(byte)) {
@@ -224,11 +264,11 @@ DataLinkLayer.prototype.$$tryToCreateNewFrameCandidate = function (byte, symbolI
 
     frameCandidate = {
         id: this.$$frameCandidateId++,
-        received: [header],
-        expected: payloadLength + DataLinkLayer.$$_HEADER_AND_CHECKSUM_BYTE_OVERHEAD,
-        isValid: false,
-        expectedChecksum: null,
-        symbolId: [symbolId]
+        rxByteReceived: [header],
+        rxByteExpected: payloadLength + DataLinkLayer.$$_HEADER_AND_CHECKSUM_BYTE_OVERHEAD,
+        isRxFrameCandidateValid: false,
+        rxChecksumExpected: null,
+        rxSampleDspDetailsId: [rxSampleDspDetailsId]
     };
     this.$$frameCandidateList.push(frameCandidate);
 };
@@ -238,8 +278,8 @@ DataLinkLayer.prototype.$$tryToFindNewFrame = function () {
 
     for (i = 0; i < this.$$frameCandidateList.length; i++) {
         frameCandidate = this.$$frameCandidateList[i];
-        if (frameCandidate.isValid) {
-            this.$$frame = DataLinkLayer.$$getFrameFromFrameCandidate(frameCandidate, this.$$frameId++);
+        if (frameCandidate.isRxFrameCandidateValid) {
+            this.$$frame = DataLinkLayer.$$getRxFrameFromFrameCandidate(frameCandidate, this.$$frameId++);
             // there is possibility that there are more valid frames
             // but the assumption is that we are picking the biggest one only
             return true;
@@ -264,62 +304,29 @@ DataLinkLayer.prototype.$$handleReceivedCommand = function (command) {
 
 // -----------------------------------------------------
 
-DataLinkLayer.prototype.$$txFrame = function (frame) {
-    var txDspConfig, txSymbolMin, i, byte, txSymbol;
-
-    txDspConfig = this.$$physicalLayer.getTxDspConfig();
-    txSymbolMin = txDspConfig.txSymbolMin;
-    for (i = 0; i < frame.length; i++) {
-        byte = frame[i];
-        txSymbol = txSymbolMin + byte;
-        this.$$physicalLayer.txSymbol(txSymbol);
-    }
+DataLinkLayer.prototype.$$txSymbolListener = function (data) {
+    this.$$externalTxSymbolListener ? this.$$externalTxSymbolListener(data) : undefined;
+    this.$$handleTxSymbol(data);
 };
-
-// -----------------------------------------------------
 
 DataLinkLayer.prototype.$$rxSymbolListener = function (data) {
     this.$$externalRxSymbolListener ? this.$$externalRxSymbolListener(data) : undefined;
     this.$$handleRxSymbol(data);
 };
 
-DataLinkLayer.prototype.$$rxSampleDspDetailsListener = function (data) {
-    this.$$externalRxSampleDspDetailsListener ? this.$$externalRxSampleDspDetailsListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$rxSyncDspDetailsListener = function (data) {
-    this.$$externalRxSyncListener ? this.$$externalRxSyncListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$rxDspConfigListener = function (data) {
-    this.$$externalRxDspConfigListener ? this.$$externalRxDspConfigListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$dspConfigListener = function (data) {
-    this.$$externalConfigListener ? this.$$externalConfigListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$txSymbolProgressListener = function (data) {
-    this.$$externalTxSymbolProgressListener ? this.$$externalTxSymbolProgressListener(data) : undefined;
-};
-
-DataLinkLayer.prototype.$$txDspConfigListener = function (data) {
-    this.$$externalTxDspConfigListener ? this.$$externalTxDspConfigListener(data) : undefined;
-};
-
 // -----------------------------------------------------
 
-DataLinkLayer.$$getFrameFromFrameCandidate = function (frameCandidate, frameId) {
-    var frame, header;
+DataLinkLayer.$$getRxFrameFromFrameCandidate = function (frameCandidate, frameId) {
+    var frame, rxFrameHeader;
 
-    header = frameCandidate.received[0];
+    rxFrameHeader = frameCandidate.rxByteReceived[0];
     frame = {
         id: frameId,
-        header: header,
-        payload: frameCandidate.received.slice(1, frameCandidate.received.length - 1),
-        checksum: frameCandidate.received[frameCandidate.received.length - 1],
-        isCommand: DataLinkLayer.$$getIsCommand(header),
-        frameCandidateId: frameCandidate.id
+        rxFrameHeader: rxFrameHeader,
+        rxFramePayload: frameCandidate.rxByteReceived.slice(1, frameCandidate.rxByteReceived.length - 1),
+        rxFrameChecksum: frameCandidate.rxByteReceived[frameCandidate.rxByteReceived.length - 1],
+        isRxFrameCommand: DataLinkLayer.$$getIsCommand(rxFrameHeader),
+        rxFrameCandidateId: frameCandidate.id
     };
 
     return frame;
@@ -336,7 +343,7 @@ DataLinkLayer.$$buildFrame = function (payloadType, payload) {
         byte = payload[i] & DataLinkLayer.$$_ONE_BYTE_MASK;
         frame.push(byte);
     }
-    checksum = DataLinkLayer.$$computeChecksum(frame);
+    checksum = ChecksumService.fletcher8(frame);
     frame.push(checksum);
 
     return frame;
@@ -371,25 +378,6 @@ DataLinkLayer.$$getPayloadLength = function (header) {
 
 DataLinkLayer.$$getIsCommand = function (header) {
     return !!(header & DataLinkLayer.$$_HEADER_COMMAND_BIT_SET);
-};
-
-DataLinkLayer.$$computeChecksum = function (frameWithoutChecksum) {
-    var sum0, sum1, i, isLeftHalfOfByte, byteNumber, byte, halfOfByte;
-
-    sum0 = 0;
-    sum1 = 0;
-    for (i = 0; i < 2 * frameWithoutChecksum.length; i++) {
-        isLeftHalfOfByte = i % 2 === 0;
-        byteNumber = i >>> 1;
-        byte = frameWithoutChecksum[byteNumber];
-        halfOfByte = isLeftHalfOfByte
-            ? (byte & 0xF0) >>> 4
-            : byte & 0x0F;
-        sum0 = (sum0 + halfOfByte) % 0x0F;
-        sum1 = (sum1 + sum0) % 0x0F;
-    }
-
-    return (sum1 << 4) | sum0;
 };
 
 DataLinkLayer.$$isFunction = function (variable) {

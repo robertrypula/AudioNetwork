@@ -59,7 +59,7 @@ IoTraffic.prototype.removeClass = function (id, cssClass) {
 
 IoTraffic.prototype.updateProgressBar = function (id, unitProgress, progressBar) {
     var
-        progressBarSelector = progressBar === IoTraffic.PROGRESS_BAR_A ? 'first-child' : 'last-child',
+        progressBarSelector = progressBar === IoTraffic.PROGRESS_BAR_B ? 'last-child' : 'first-child',
         selector = '#' + this.$$id + ' #' + id + ' > div:first-child > div:' + progressBarSelector,
         domProgressBar = document.querySelector(selector);
 
@@ -78,6 +78,12 @@ IoTraffic.prototype.updateItemHtml = function (id, itemHtml) {
     if (domContent) {
         domContent.innerHTML = itemHtml;
     }
+};
+
+IoTraffic.prototype.alreadyExists = function (id) {
+    var existingItem = this.$$getExistingItem(id);
+
+    return !!existingItem;
 };
 
 IoTraffic.prototype.forceNewRow = function () {

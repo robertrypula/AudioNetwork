@@ -18,7 +18,7 @@ function init() {
         .build();
 
     ioTraffic = new IoTraffic(document.getElementById('io-traffic'));
-    invokeOnEnter('#tx-textarea', onTxTextClick);
+    invokeOnEnter('#tx-textarea', onTxClick);
 }
 
 // ----------------------------------
@@ -82,7 +82,7 @@ function onTxSyncClick() {
     physicalLayer.txSync();
 }
 
-function onTxTextClick() {
+function onTxClick() {
     var
         text = getFormFieldValue('#tx-textarea'),
         byteList = getByteListFromAsciiString(text),

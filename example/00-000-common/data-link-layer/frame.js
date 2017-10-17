@@ -1,67 +1,71 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var Frame;
+var Frame = (function () {
+    var Frame;
 
-Frame = function () {
-    this.header = undefined;
-    this.payload = [];
-    this.checksum = undefined;
-};
+    Frame = function (id, payload, isCommand) {
+        this.$$id = id;
+        this.$$header = undefined;
+        this.$$payload = [];
+        this.$$checksum = undefined;
 
-Frame.PAYLOAD_TYPE_COMMAND = 'PAYLOAD_TYPE_COMMAND';
-Frame.PAYLOAD_TYPE_DATA = 'PAYLOAD_TYPE_DATA';
-Frame.$$_HEADER_FRAME_START_MARKER = 0xE0;
-Frame.$$_HEADER_RESERVED_BIT = 0x08;
-Frame.$$_HEADER_COMMAND_BIT_SET = 0x10;
-Frame.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
-Frame.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
+        this.setPayload(payload, isCommand);
+    };
 
-Frame.prototype.getHeader = function () {
-    return this.header;
-};
+    Frame.$$_HEADER_FRAME_START_MARKER = 0xE0;
+    Frame.$$_HEADER_COMMAND_BIT_SET = 0x10;
+    Frame.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
+    Frame.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
 
-Frame.prototype.getPayload = function () {
-    return this.payload;
-};
+    Frame.prototype.getId = function () {
+        return this.$$id;
+    };
 
-Frame.prototype.getChecksum = function () {
-    return this.checksum;
-};
+    Frame.prototype.getHeader = function () {
+        return this.$$header;
+    };
 
-Frame.prototype.setPayload = function (payload, payloadType) {
-    var frameWithoutChecksum, frame, isCommand, header, checksum, i, byte;
+    Frame.prototype.getPayload = function () {
+        return this.$$payload;
+    };
 
-    frameWithoutChecksum = [];
-    isCommand = payloadType === Frame.PAYLOAD_TYPE_COMMAND;
-    header = Frame.$$generateHeader(isCommand, payload.length);
-    frameWithoutChecksum.push(header);
-    for (i = 0; i < payload.length; i++) {
-        byte = payload[i] & DataLinkLayer.$$_ONE_BYTE_MASK;
-        frameWithoutChecksum.push(byte);
-    }
-    checksum = Frame.$$computeChecksum(frameWithoutChecksum);
+    Frame.prototype.getChecksum = function () {
+        return this.$$checksum;
+    };
 
-    frame = frameWithoutChecksum;
-    frame.push(checksum);
+    Frame.prototype.setPayload = function (payload, isCommand) {
+        var frameWithoutChecksum, i, byte;
 
-    return frame;
-};
+        frameWithoutChecksum = [];
+        this.$$header = Frame.$$generateHeader(isCommand, payload.length);
+        frameWithoutChecksum.push(this.$$header);
+        this.$$payload.length = 0;
+        for (i = 0; i < payload.length; i++) {
+            byte = payload[i] & DataLinkLayer.$$_ONE_BYTE_MASK;
+            this.$$payload.push(byte);
+            frameWithoutChecksum.push(byte);
+        }
+        this.$$checksum = Frame.$$computeChecksum(frameWithoutChecksum);
+    };
 
-Frame.$$computeChecksum = function (frameWithoutChecksum) {
-    return ChecksumService.fletcher8(frameWithoutChecksum);
-};
+    Frame.$$computeChecksum = function (frameWithoutChecksum) {
+        return ChecksumService.fletcher8(frameWithoutChecksum);
+    };
 
-Frame.$$generateHeader = function (isCommand, payloadLength) {
-    var frameStartMarker, commandBit, header;
+    Frame.$$generateHeader = function (isCommand, payloadLength) {
+        var frameStartMarker, commandBit, header;
 
-    frameStartMarker = Frame.$$_HEADER_FRAME_START_MARKER;
-    commandBit = isCommand
-        ? Frame.$$_HEADER_COMMAND_BIT_SET
-        : Frame.$$_HEADER_COMMAND_BIT_NOT_SET;
-    payloadLength = Frame.$$_HEADER_PAYLOAD_LENGTH_MASK & payloadLength;
+        frameStartMarker = Frame.$$_HEADER_FRAME_START_MARKER;
+        commandBit = isCommand
+            ? Frame.$$_HEADER_COMMAND_BIT_SET
+            : Frame.$$_HEADER_COMMAND_BIT_NOT_SET;
+        payloadLength = Frame.$$_HEADER_PAYLOAD_LENGTH_MASK & payloadLength;
 
-    header = frameStartMarker | commandBit | payloadLength;
+        header = frameStartMarker | commandBit | payloadLength;
 
-    return header;
-};
+        return header;
+    };
+
+    return Frame;
+})();

@@ -2,7 +2,6 @@
 'use strict';
 
 var ChecksumService = (function () {
-
     var ChecksumService;
 
     ChecksumService = function () {

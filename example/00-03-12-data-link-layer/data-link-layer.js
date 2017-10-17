@@ -2,99 +2,29 @@
 'use strict';
 
 var
-    ASCII_NULL = 0,
-    RAW_SYMBOL_MAX = 10,
     dataLinkLayerBuilder,
     dataLinkLayer,
-    rxSymbolRawHistory = new Buffer(RAW_SYMBOL_MAX);
+    ioTraffic,
+    txFrameLastAddedId = 0;
 
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
     dataLinkLayer = dataLinkLayerBuilder
-        .frameListener(frameListener)
-        .frameCandidateListener(frameCandidateListener)
-        .txSymbolProgressListener(txSymbolProgressListener)
-        .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
+        .rxFrameListener(rxFrameListener)
+        .rxFrameCandidateListener(rxFrameCandidateListener)
+        .txFrameListener(txFrameListener)
+        .txFrameProgressListener(txFrameProgressListener)
         .dspConfigListener(dspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .rxDspConfigListener(rxDspConfigListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .build();
+
+    ioTraffic = new IoTraffic(document.getElementById('io-traffic'));
+    invokeOnEnter('#tx-textarea', onTxClick);
 }
 
-function frameListener(frame) {
-    var commandName = '', htmlContent = '';
-
-    if (frame.isCommand) {
-        switch (frame.payload[0]) {
-            case DataLinkLayer.COMMAND_TWO_WAY_SYNC_44100:
-                commandName = 'COMMAND_TWO_WAY_SYNC_44100';
-                break;
-            case DataLinkLayer.COMMAND_TWO_WAY_SYNC_48000:
-                commandName = 'COMMAND_TWO_WAY_SYNC_48000';
-                break;
-        }
-    }
-
-    htmlContent += '<div class="rx-box-with-border">';
-    // htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
-    // htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
-    htmlContent += '<div>' + getByteHexFromByteList(frame.payload) + '</div>';
-    htmlContent += '<div>' + getAsciiFromByteList(frame.payload) + '</div>';
-    // htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
-    // htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
-    htmlContent += '</div>';
-
-    html('#rx-frame', htmlContent, true);
-}
-
-function frameCandidateListener(frameCandidateList) {
-    var i, fc, progress, htmlContent = '';
-
-    for (i = 0; i < frameCandidateList.length; i++) {
-        fc = frameCandidateList[i];
-        progress = (100 * fc.received.length / fc.expected).toFixed(0);
-        htmlContent += '<div class="rx-box-with-border">';
-        htmlContent += '<div class="rx-process-bar"><div style="width: ' + progress + '%"></div></div>';
-        // htmlContent += '<strong>Id:</strong> ' + fc.id + '<br/>';
-        // htmlContent += '<strong>Progress:</strong> ' + progress + '<br/>';
-        htmlContent += '<div>' + getByteHexFromByteList(fc.received) + '</div>';
-        htmlContent += '<div>' + getAsciiFromByteList(fc.received) + '</div>';
-        // htmlContent += '<strong>IsValid:</strong> ' + (fc.isValid ? 'yes' : 'no') + '<br/>';
-        // htmlContent += '<strong>SymbolId:</strong> ' + fc.symbolId.join(', ') + '<br/>';
-        htmlContent += '</div>';
-    }
-
-    html('#rx-frame-candidate', htmlContent);
-}
-
-function txSymbolProgressListener(state) {
-    /* TODO api changed
-    var
-        txDspConfig = dataLinkLayer.getPhysicalLayer().getTxDspConfig(),
-        txSymbolMin = txDspConfig.txSymbolMin,
-        txByteHex = state.txSymbol
-            ? getByteHexFromSymbol(state.txSymbol, txSymbolMin)
-            : 'idle',
-        txByteHexQueue = getByteHexFromSymbolList(state.txSymbolQueue, txSymbolMin);
-
-    html('#tx-byte-hex', txByteHex);
-    html('#tx-byte-hex-queue', txByteHexQueue);
-    */
-}
-
-function rxSampleDspDetailsListener(state) {
-    var
-        rxDspConfig = dataLinkLayer.getPhysicalLayer().getRxDspConfig(),
-        rxSymbolMin = rxDspConfig.rxSymbolMin;
-
-    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#is-rx-sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
-
-    if (state.isRxSymbolSamplingPoint) {
-        rxSymbolRawHistory.pushEvenIfFull(state.rxSymbolRaw);
-        html('#rx-byte-raw-history', getByteHexFromSymbolList(rxSymbolRawHistory.getAll(), rxSymbolMin));
-    }
-}
+// ----------------------------------
 
 function dspConfigListener(state) {
     setActive(
@@ -103,27 +33,131 @@ function dspConfigListener(state) {
     );
 }
 
-function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
-}
-
 function rxDspConfigListener(state) {
     html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
 }
 
-// ---------
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
+}
 
-function onSendTwoWaySyncClick() {
-    dataLinkLayer.txTwoWaySync();
+function txDspConfigListener(state) {
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
+}
+
+function rxFrameCandidateListener(data) {
+    /*
+    var i, frameCandidate;
+
+    for (i = 0; i < data.length; i++) {
+        frameCandidate = data[i];
+        ioTraffic.addRxItem(
+            'rx-' + frameCandidate.id,
+            '<pre style="font-size: 9px; line-height: 1em;">' + JSON.stringify(frameCandidate, null, 2) + '</pre>'
+        );
+    }
+    */
+}
+
+function rxFrameListener(data) {
+    var rxFrameHtml;
+
+    rxFrameHtml = getAsciiFromByteList(data.rxFramePayload);
+    ioTraffic.addRxItem('rx-' + data.id, rxFrameHtml);
+}
+
+function txFrameListener(data) {
+    ioTraffic.updateProgressBar('tx-' + data.id, 1);
+    ioTraffic.addClass('tx-' + data.id, 'finished');
+}
+
+function txFrameProgressListener(data) {
+    var
+        txFrameCurrent = data.txFrameCurrent,
+        txFrameQueueItem,
+        unitProgress,
+        txFrameHtml,
+        id,
+        i;
+
+    for (i = 0; i < data.txFrameQueue.length; i++) {
+        txFrameQueueItem = data.txFrameQueue[i];
+        id = txFrameQueueItem.id;
+        if (id > txFrameLastAddedId) {
+            txFrameHtml = getAsciiFromByteList(txFrameQueueItem.txFramePayload);
+            ioTraffic.addTxItem('tx-' + id, txFrameHtml);
+            txFrameLastAddedId = id;
+        }
+    }
+
+    if (txFrameCurrent) {
+        id = txFrameCurrent.id;
+        unitProgress = txFrameCurrent.txSymbolTransmitted / txFrameCurrent.txSymbolId.length;
+        ioTraffic.updateProgressBar('tx-' + id, unitProgress);
+    }
+}
+
+// ----------------------------------
+
+function onSetLoopbackClick(state) {
+    dataLinkLayer.setLoopback(state);
 }
 
 function onSetTxSampleRateClick(txSampleRate) {
     dataLinkLayer.setTxSampleRate(txSampleRate);
 }
 
-function onSetLoopbackClick(state) {
-    dataLinkLayer.setLoopback(state);
+function onTxTwoWaySyncClick() {
+    dataLinkLayer.txTwoWaySync();
 }
+
+function onTxClick() {
+    var
+        text = getFormFieldValue('#tx-textarea'),
+        byteList = getByteListFromAsciiString(text),
+        txFramePayloadList = getTxFramePayloadListFromByteList(byteList),
+        isTxFrameCommand = false,
+        txFramePayload,
+        i;
+
+    for (i = 0; i < txFramePayloadList.length; i++) {
+        txFramePayload = txFramePayloadList[i];
+        dataLinkLayer.txFrame(txFramePayload, isTxFrameCommand);
+    }
+    setValue('#tx-textarea', '');
+    ioTraffic.forceNewRow();
+}
+
+function getTxFramePayloadListFromByteList(byteList) {
+    var
+        limit = dataLinkLayer.getFramePayloadLengthLimit(),
+        txFramePayloadList = [],
+        payloadCompleted,
+        txFramePayload,
+        i;
+
+    txFramePayload = [];
+    for (i = 0; i < byteList.length; i++) {
+        txFramePayload.push(byteList[i]);
+
+        payloadCompleted =
+            (i % limit) === (limit - 1) ||
+            i === (byteList.length - 1);
+
+        if (payloadCompleted) {
+            txFramePayloadList.push(txFramePayload);
+            txFramePayload = [];
+        }
+    }
+
+    return txFramePayloadList;
+}
+
+/*
 
 function onSendHexClick() {
     var
@@ -140,27 +174,4 @@ function onSendHexClick() {
     }
     txFrame(payload);
 }
-
-function onSendAsciiClick() {
-    var
-        text = getFormFieldValue('#tx-data'),
-        payload = [],
-        byte,
-        i;
-
-    for (i = 0; i < text.length; i++) {
-        byte = isPrintableAscii(text[i])
-            ? text.charCodeAt(i)
-            : ASCII_NULL;
-        payload.push(byte);
-    }
-    txFrame(payload);
-}
-
-function txFrame(payload) {
-    try {
-        dataLinkLayer.txFrame(payload);
-    } catch (e) {
-        alert(e);
-    }
-}
+*/

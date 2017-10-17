@@ -11,8 +11,8 @@ var TransportLayerBuilder = function () {
     this._txConnectionStatus = undefined;
 
     // data link layer listeners
-    this._frameListener = undefined;
-    this._frameCandidateListener = undefined;
+    this._rxFrameListener = undefined;
+    this._rxFrameCandidateListener = undefined;
 
     // physical layer listeners
     this._rxSymbolListener = undefined;
@@ -49,13 +49,13 @@ TransportLayerBuilder.prototype.txConnectionStatus = function (listener) {
     return this;
 };
 
-TransportLayerBuilder.prototype.frameListener = function (listener) {
-    this._frameListener = listener;
+TransportLayerBuilder.prototype.rxFrameListener = function (listener) {
+    this._rxFrameListener = listener;
     return this;
 };
 
-TransportLayerBuilder.prototype.frameCandidateListener = function (listener) {
-    this._frameCandidateListener = listener;
+TransportLayerBuilder.prototype.rxFrameCandidateListener = function (listener) {
+    this._rxFrameCandidateListener = listener;
     return this;
 };
 
@@ -106,8 +106,8 @@ TransportLayer = function (builder) {
     // let's create network stack!
     // Transport Layer hides Data Link Layer inside
     this.$$dataLinkLayer = (new DataLinkLayerBuilder())
-        .frameListener(this.$$frameListener.bind(this))
-        .frameCandidateListener(this.$$frameCandidateListener.bind(this))
+        .rxFrameListener(this.$$rxFrameListener.bind(this))
+        .rxFrameCandidateListener(this.$$rxFrameCandidateListener.bind(this))
         .rxSymbolListener(this.$$rxSymbolListener.bind(this))
         .rxSampleDspDetailsListener(this.$$rxSampleDspDetailsListener.bind(this))
         .rxSyncDspDetailsListener(this.$$rxSyncDspDetailsListener.bind(this))
@@ -125,8 +125,8 @@ TransportLayer = function (builder) {
     this.$$txConnectionStatus = TransportLayer.$$isFunction(builder._txConnectionStatus) ? builder._txConnectionStatus : null;
 
     // setup listeners - data link layer
-    this.$$externalFrameListener = TransportLayer.$$isFunction(builder._frameListener) ? builder._frameListener : null;
-    this.$$externalFrameCandidateListener = TransportLayer.$$isFunction(builder._frameCandidateListener) ? builder._frameCandidateListener : null;
+    this.$$externalRxFrameListener = TransportLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
+    this.$$externalRxFrameCandidateListener = TransportLayer.$$isFunction(builder._rxFrameCandidateListener) ? builder._rxFrameCandidateListener : null;
 
     // setup listeners - physical layer
     this.$$externalRxSymbolListener = TransportLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
@@ -305,13 +305,13 @@ TransportLayer.prototype.$$handleTx = function () {
 
 // -----------------------------------------------------
 
-TransportLayer.prototype.$$frameListener = function (data) {
-    this.$$externalFrameListener ? this.$$externalFrameListener(data) : undefined;
+TransportLayer.prototype.$$rxFrameListener = function (data) {
+    this.$$externalRxFrameListener ? this.$$externalRxFrameListener(data) : undefined;
     this.$$handleFrame(data);
 };
 
-TransportLayer.prototype.$$frameCandidateListener = function (data) {
-    this.$$externalFrameCandidateListener ? this.$$externalFrameCandidateListener(data) : undefined;
+TransportLayer.prototype.$$rxFrameCandidateListener = function (data) {
+    this.$$externalRxFrameCandidateListener ? this.$$externalRxFrameCandidateListener(data) : undefined;
 };
 
 TransportLayer.prototype.$$rxSymbolListener = function (data) {

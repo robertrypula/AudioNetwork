@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
     <link rel="stylesheet" type="text/css" href="../00-000-common/ui/io-traffic.css">
-    <link rel="stylesheet" type="text/css" href="physical-layer-ascii-demo.css">
+    <link rel="stylesheet" type="text/css" href="physical-layer.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -127,7 +127,7 @@
                         </div>
                     </div>
 
-                    <h2>ASCII chat</h2>
+                    <h2>ASCII chat (Physical Layer symbols)</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col" id="io-traffic"></div>
@@ -141,7 +141,7 @@
                                 </div>
                                 <button
                                     class="btn btn-default"
-                                    onClick="onTxTextClick()">
+                                    onClick="onTxClick()">
                                     Send
                                 </button>
                             </div>
@@ -178,11 +178,13 @@
     <script src="../00-000-common/buffer.js"></script>
     <script src="../00-000-common/correlator.js"></script>
     <script src="../00-000-common/rx-sync-detector.js"></script>
+    <script src="../00-000-common/physical-layer/tx-symbol.js"></script>
+    <script src="../00-000-common/physical-layer/tx-symbol-manager.js"></script>
     <script src="../00-000-common/physical-layer/physical-layer.js"></script>
     <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>
     <script src="../00-000-common/ui/io-traffic.js"></script>
-    <script src="physical-layer-ascii-demo.js"></script>
+    <script src="physical-layer.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

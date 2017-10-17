@@ -2,11 +2,13 @@
 'use strict';
 
 var DataLinkLayerBuilder = function () {
-    this._framePayloadLengthMax = 7;
+    this._framePayloadLengthLimit = 7;
 
     // data link layer listeners
-    this._frameListener = undefined;
-    this._frameCandidateListener = undefined;
+    this._rxFrameListener = undefined;
+    this._rxFrameCandidateListener = undefined;
+    this._txFrameListener = undefined;
+    this._txFrameProgressListener = undefined;
 
     // physical layer listeners
     this._rxSymbolListener = undefined;
@@ -18,18 +20,28 @@ var DataLinkLayerBuilder = function () {
     this._txDspConfigListener = undefined;
 };
 
-DataLinkLayerBuilder.prototype.framePayloadLengthMax = function (framePayloadLengthMax) {
-    this._framePayloadLengthMax = framePayloadLengthMax;
+DataLinkLayerBuilder.prototype.framePayloadLengthLimit = function (framePayloadLengthLimit) {
+    this._framePayloadLengthLimit = framePayloadLengthLimit;
     return this;
 };
 
-DataLinkLayerBuilder.prototype.frameListener = function (frameListener) {
-    this._frameListener = frameListener;
+DataLinkLayerBuilder.prototype.rxFrameListener = function (rxFrameListener) {
+    this._rxFrameListener = rxFrameListener;
     return this;
 };
 
-DataLinkLayerBuilder.prototype.frameCandidateListener = function (frameCandidateListener) {
-    this._frameCandidateListener = frameCandidateListener;
+DataLinkLayerBuilder.prototype.txFrameListener = function (txFrameListener) {
+    this._txFrameListener = txFrameListener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.txFrameProgressListener = function (txFrameProgressListener) {
+    this._txFrameProgressListener = txFrameProgressListener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.rxFrameCandidateListener = function (rxFrameCandidateListener) {
+    this._rxFrameCandidateListener = rxFrameCandidateListener;
     return this;
 };
 
@@ -40,6 +52,11 @@ DataLinkLayerBuilder.prototype.rxSymbolListener = function (listener) {
 
 DataLinkLayerBuilder.prototype.rxSampleDspDetailsListener = function (listener) {
     this._rxSampleDspDetailsListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.rxSyncStatusListener = function (listener) {
+    this._rxSyncStatusListener = listener;
     return this;
 };
 
@@ -55,6 +72,11 @@ DataLinkLayerBuilder.prototype.rxDspConfigListener = function (listener) {
 
 DataLinkLayerBuilder.prototype.dspConfigListener = function (listener) {
     this._dspConfigListener = listener;
+    return this;
+};
+
+DataLinkLayerBuilder.prototype.txSymbolListener = function (listener) {
+    this._txSymbolListener = listener;
     return this;
 };
 
