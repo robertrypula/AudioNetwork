@@ -78,3 +78,9 @@
 #rx-byte-hex-container span.active {
     background-color: lightgreen;
 }
+
+.data-link-frame-hex {
+    font-size: 11px;
+    font-family: "Courier New";
+    display: inline-block;
+}

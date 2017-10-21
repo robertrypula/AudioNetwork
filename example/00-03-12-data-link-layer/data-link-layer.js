@@ -5,7 +5,7 @@ var
     dataLinkLayerBuilder,
     dataLinkLayer,
     ioTraffic,
-    txFrameLastAddedId = 0;
+    txFrameLastRenderedId = 0;
 
 function init() {
     dataLinkLayerBuilder = new DataLinkLayerBuilder();
@@ -50,24 +50,35 @@ function txDspConfigListener(state) {
 }
 
 function rxFrameCandidateListener(data) {
-    /*
-    var i, frameCandidate;
+    var i, frameCandidate, hex, ascii, rxFrameCandidateHtml, alreadyExists, ioTraffixId, progress;
 
     for (i = 0; i < data.length; i++) {
         frameCandidate = data[i];
-        ioTraffic.addRxItem(
-            'rx-' + frameCandidate.id,
-            '<pre style="font-size: 9px; line-height: 1em;">' + JSON.stringify(frameCandidate, null, 2) + '</pre>'
-        );
+        ioTraffixId = 'rx-' + frameCandidate.id;
+
+        alreadyExists = ioTraffic.alreadyExists(ioTraffixId);
+        if (!alreadyExists) {
+            ioTraffic.addRxItem(ioTraffixId, '');
+        }
+
+        progress = frameCandidate.rxByteReceived.length / frameCandidate.rxByteExpected;
+        ioTraffic.updateProgressBar(ioTraffixId, progress);
+
+        hex = getDataLinkFrameCandidateHex(frameCandidate.rxByteReceived, frameCandidate.rxByteExpected);
+        ascii = getAsciiFromByteList(frameCandidate.rxByteReceived);
+        ascii = ascii.substring(1, frameCandidate.rxByteExpected - 1);
+        rxFrameCandidateHtml = hex + '<br/>' + ascii + '&nbsp;';
+        ioTraffic.updateHtml(ioTraffixId, rxFrameCandidateHtml);
+
+        if (progress === 1 && !frameCandidate.isRxFrameCandidateValid) {
+            ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'error');
+        }
     }
-    */
 }
 
 function rxFrameListener(data) {
-    var rxFrameHtml;
-
-    rxFrameHtml = getAsciiFromByteList(data.rxFramePayload);
-    ioTraffic.addRxItem('rx-' + data.id, rxFrameHtml);
+    //  ioTraffic.updateProgressBar('rx-' + data.rxFrameCandidateId, 1);
+    ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'finished');
 }
 
 function txFrameListener(data) {
@@ -81,16 +92,24 @@ function txFrameProgressListener(data) {
         txFrameQueueItem,
         unitProgress,
         txFrameHtml,
+        txFrameHex,
+        ascii,
         id,
         i;
 
     for (i = 0; i < data.txFrameQueue.length; i++) {
         txFrameQueueItem = data.txFrameQueue[i];
         id = txFrameQueueItem.id;
-        if (id > txFrameLastAddedId) {
-            txFrameHtml = getAsciiFromByteList(txFrameQueueItem.txFramePayload);
+        if (id > txFrameLastRenderedId) {
+            txFrameHex = getDataLinkFrameHex(
+                txFrameQueueItem.txFrameHeader,
+                txFrameQueueItem.txFramePayload,
+                txFrameQueueItem.txFrameChecksum
+            );
+            ascii = getAsciiFromByteList(txFrameQueueItem.txFramePayload);
+            txFrameHtml = txFrameHex + '<br/>' + ascii + '&nbsp;';
             ioTraffic.addTxItem('tx-' + id, txFrameHtml);
-            txFrameLastAddedId = id;
+            txFrameLastRenderedId = id;
         }
     }
 
@@ -156,22 +175,3 @@ function getTxFramePayloadListFromByteList(byteList) {
 
     return txFramePayloadList;
 }
-
-/*
-
-function onSendHexClick() {
-    var
-        textSplit = getFormFieldValue('#tx-data', 'split'),
-        payload = [],
-        byte,
-        i;
-
-    for (i = 0; i < textSplit.length; i++) {
-        byte = parseInt(textSplit[i], 16);
-        if (0 <= byte && byte <= 255) {
-            payload.push(byte);
-        }
-    }
-    txFrame(payload);
-}
-*/

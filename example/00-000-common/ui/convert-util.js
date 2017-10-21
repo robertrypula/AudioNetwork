@@ -134,3 +134,24 @@ function formatRxSymbolRange(state) {
 
     return s;
 }
+
+function getDataLinkFrameHex(header, payload, checksum) {
+    return '' +
+        '<span class="data-link-frame-hex">' +
+        getByteHexFromByte(header) + ' ' +
+        getByteHexFromByteList(payload) + ' ' +
+        getByteHexFromByte(checksum) +
+        '</span>';
+}
+
+function getDataLinkFrameCandidateHex(byteReceived, byteExpected) {
+    var
+        emptyByte = '.. .. .. .. .. .. .. .. .. .. ', // Yes, you're right. I was little lazy in this piece of code...
+        hex;
+
+    hex = getByteHexFromByteList(byteReceived) + ' ';
+    hex += emptyByte;
+    hex = hex.substring(0, byteExpected * 3);
+
+    return '<span class="data-link-frame-hex">' + hex + '</span>';
+}

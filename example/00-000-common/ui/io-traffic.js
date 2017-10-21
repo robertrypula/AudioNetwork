@@ -70,13 +70,20 @@ IoTraffic.prototype.updateProgressBar = function (id, unitProgress, progressBar)
     }
 };
 
-IoTraffic.prototype.updateItemHtml = function (id, itemHtml) {
+IoTraffic.prototype.updateHtml = function (id, itemHtml) {
     var
         selector = '#' + this.$$id + ' #' + id + ' > div:last-child',
-        domContent = document.querySelector(selector);
+        domContent = document.querySelector(selector),
+        isScrollAtBottom;
 
     if (domContent) {
+        isScrollAtBottom = IoTraffic.isScrollAtBottom(this.$$domIoTrafficElement);
+
         domContent.innerHTML = itemHtml;
+
+        if (isScrollAtBottom) {
+            IoTraffic.scrollToBottom(this.$$domIoTrafficElement);
+        }
     }
 };
 
