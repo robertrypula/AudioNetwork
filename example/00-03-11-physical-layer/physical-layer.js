@@ -47,7 +47,7 @@ function txDspConfigListener(state) {
 }
 
 function txSymbolListener(state) {
-    ioTraffic.addClass('tx-' + state.id, 'finished');
+    ioTraffic.addClass('tx-' + state.id, 'io-traffic-success');
     ioTraffic.updateProgressBar('tx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
 }
 
@@ -64,7 +64,7 @@ function rxSymbolListener(state) {
     rxByte = state.rxSymbol - rxDspConfig.rxSymbolMin;
     rxChar = getAsciiFromByte(rxByte);
     ioTraffic.addRxItem('rx-' + state.id, rxChar);
-    ioTraffic.addClass('rx-' + state.id, 'finished');
+    ioTraffic.addClass('rx-' + state.id, 'io-traffic-success');
     ioTraffic.updateProgressBar('rx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
 }
 

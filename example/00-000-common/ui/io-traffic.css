@@ -95,8 +95,7 @@
 }
 
 .io-traffic .rx-item:after, .io-traffic .tx-item:after {
-    content: '\2713';
-    color: green;
+    content: '-';
     font-weight: bold;
     position: absolute;
     font-size: 8px;
@@ -111,9 +110,22 @@
     transition: bottom 0.25s, opacity 0.5s;
 }
 
-.io-traffic .rx-item.finished:after, .io-traffic .tx-item.finished:after {
+.io-traffic .rx-item.io-traffic-success:after,
+.io-traffic .tx-item.io-traffic-success:after,
+.io-traffic .rx-item.io-traffic-error:after,
+.io-traffic .tx-item.io-traffic-error:after {
     bottom: 0;
     opacity: 1;
+}
+
+.io-traffic .rx-item.io-traffic-success:after, .io-traffic .tx-item.io-traffic-success:after {
+    content: '\2713';
+    color: green;
+}
+
+.io-traffic .rx-item.io-traffic-error:after, .io-traffic .tx-item.io-traffic-error:after {
+    content: 'x';
+    color: #fa5252;
 }
 
 .io-traffic .rx-item:after {

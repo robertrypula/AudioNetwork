@@ -71,19 +71,19 @@ function rxFrameCandidateListener(data) {
         ioTraffic.updateHtml(ioTraffixId, rxFrameCandidateHtml);
 
         if (progress === 1 && !frameCandidate.isRxFrameCandidateValid) {
-            ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'error');
+            ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'io-traffic-error');
         }
     }
 }
 
 function rxFrameListener(data) {
     //  ioTraffic.updateProgressBar('rx-' + data.rxFrameCandidateId, 1);
-    ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'finished');
+    ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'io-traffic-success');
 }
 
 function txFrameListener(data) {
     ioTraffic.updateProgressBar('tx-' + data.id, 1);
-    ioTraffic.addClass('tx-' + data.id, 'finished');
+    ioTraffic.addClass('tx-' + data.id, 'io-traffic-success');
 }
 
 function txFrameProgressListener(data) {
