@@ -43,7 +43,7 @@ RxSyncDetector.prototype.handle = function (correlationCodeValue, signalDecibel,
     syncDetected = this.$$correlator.isCorrelated();
 
     if (syncDetected) {
-        syncCandidate = RxSyncDetector.$$getEmpty();
+        syncCandidate = RxSyncDetector.$$getEmpty();    // TODO create dedicated class
         syncCandidate.rxSymbolSamplingPointOffset = offset;
         syncCandidate.rxCorrelationValue = this.$$correlator.getCorrelationValue();
         syncCandidate.rxCorrelationCodeLength = this.$$correlator.getCorrelationCodeLength();

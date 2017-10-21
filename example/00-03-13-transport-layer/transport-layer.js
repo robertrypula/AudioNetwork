@@ -3,9 +3,7 @@
 
 var
     transportLayerBuilder,
-    transportLayer,
-    recordedData = {},
-    isRecording = false;
+    transportLayer;
 
 function init() {
     transportLayerBuilder = new TransportLayerBuilder();
@@ -13,10 +11,96 @@ function init() {
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .dspConfigListener(dspConfigListener)
+        .rxSyncStatusListener(rxSyncStatusListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .build();
 }
 
+function dspConfigListener(state) {
+    setActive(
+        '#loopback-container',
+        '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
+    );
+}
+
+function rxDspConfigListener(state) {
+    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
+}
+
+function rxSyncStatusListener(state) {
+    html(
+        '#rx-sync-status',
+        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
+        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+    );
+}
+
+function txDspConfigListener(state) {
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
+}
+
+// ---------
+
+function onTxTwoWaySyncClick() {
+    transportLayer.txTwoWaySync();
+}
+
+function onSetTxSampleRateClick(txSampleRate) {
+    transportLayer.setTxSampleRate(txSampleRate);
+}
+
+function onSetLoopbackClick(state) {
+    transportLayer.setLoopback(state);
+}
+
+// -----------------------------------------------------------------------
+
+function clientConnect() {
+    transportLayer.clientConnect();
+}
+
+function clientDisconnect() {
+    transportLayer.clientDisconnect();
+}
+
+function serverListen() {
+    transportLayer.serverListen();
+}
+
+function serverDisconnect() {
+    transportLayer.serverDisconnect();
+}
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
+
+var
+    recordedData = {},
+    isRecording = false;
+
+function rxSampleDspDetailsListener(state) {
+    var rxDspConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxDspConfig();
+
+    recordedData.indexMin = rxDspConfig.rxSymbolMin;
+    recordedData.indexMax = rxDspConfig.rxSymbolMax;
+    recordedData.frequencySpacing = rxDspConfig.rxSymbolFrequencySpacing;
+    recordedData.history = recordedData.history ? recordedData.history : [];
+    recordedData.history.push({
+        dateTime: new Date(),
+        frequencyData: state.rxFrequencyData,
+        indexMarker: state.rxSymbolRaw,
+        rowMarker: state.isRxSymbolSamplingPoint
+    });
+}
 
 function onRecordStartClick() {
     isRecording = true;
@@ -41,73 +125,4 @@ function onRecordStopClick() {
     setTimeout(function () {
         document.getElementById('recorded-data').value = recordedDataString;
     }, 0);
-}
-
-function rxSampleDspDetailsListener(state) {
-    var rxDspConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxDspConfig();
-
-    recordedData.indexMin = rxDspConfig.rxSymbolMin;
-    recordedData.indexMax = rxDspConfig.rxSymbolMax;
-    recordedData.frequencySpacing = rxDspConfig.rxSymbolFrequencySpacing;
-    recordedData.history = recordedData.history ? recordedData.history : [];
-    recordedData.history.push({
-        dateTime: new Date(),
-        frequencyData: state.rxFrequencyData,
-        indexMarker: state.rxSymbolRaw,
-        rowMarker: state.isRxSymbolSamplingPoint
-    });
-
-    html('#sync', state.syncId === null ? 'waiting for sync...' : 'OK');
-    html('#is-rx-sync-in-progress', state.isRxSyncInProgress ? '[sync in progress]' : '');
-}
-
-function dspConfigListener(state) {
-    setActive(
-        '#loopback-container',
-        '#loopback-' + (state.isLoopbackEnabled ? 'enabled' : 'disabled')
-    );
-}
-
-function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
-}
-
-function rxDspConfigListener(state) {
-    html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
-}
-
-// ---------
-
-function onSendTwoWaySyncClick() {
-    transportLayer.txTwoWaySync();
-}
-
-function onSetTxSampleRateClick(txSampleRate) {
-    transportLayer.setTxSampleRate(txSampleRate);
-}
-
-function onSetLoopbackClick(state) {
-    transportLayer.setLoopback(state);
-}
-
-// --------- TODO remove code below - only tests
-
-function clientConnect() {
-    transportLayer.clientConnect();
-}
-
-function clientDisconnect() {
-    transportLayer.clientDisconnect();
-}
-
-function clientStartFakeTransmission() {
-    transportLayer.clientStartFakeTransmission();
-}
-
-function serverListen() {
-    transportLayer.serverListen();
-}
-
-function serverDisconnect() {
-    transportLayer.serverDisconnect();
 }

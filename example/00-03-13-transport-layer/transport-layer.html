@@ -93,13 +93,22 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
+                            <label>
                                 RxSyncStatus
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <span id="sync">-</span>
-                            <span id="is-rx-sync-in-progress">-</span>
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sync-status"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+                            <hr/>
                         </div>
                     </div>
 
@@ -115,10 +124,12 @@
                                 <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSetTxSampleRateClick(48000)">48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" onClick="onSendTwoWaySyncClick()">Two Way Sync</button>
+                                <button class="btn btn-default" onClick="onTxTwoWaySyncClick()">TxTwoWaySync</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- --- -->
 
                     <h2>Client</h2>
 
@@ -132,8 +143,6 @@
                             <div id="client-state" class="margin-bottom">-</div>
                             <button class="btn btn-default" onClick="clientConnect()">Connect</button>
                             <button class="btn btn-default" onClick="clientDisconnect()">Disconnect</button>
-
-                            <button class="btn btn-default" onClick="clientStartFakeTransmission()">Start fake transmission</button>
                         </div>
                     </div>
 
@@ -152,31 +161,42 @@
                         </div>
                     </div>
 
-                    <h2>Segments</h2>
+                    <!-- --- -->
+
+                    <h2>Transport Layer</h2>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Received
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="rx-segment" style="font-family: monospace;"></div>
+                        <div class="col">
+                            <h3>Segments</h3>
+                            <div id="io-traffic-segment"></div>
                         </div>
                     </div>
 
                     <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Transmited
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="tx-segment" style="font-family: monospace;"></div>
+                        <div class="col">
+                            <h3>Stream</h3>
+                            <div id="io-traffic-stream"></div>
                         </div>
                     </div>
 
-                    <h2>Recording</h2>
+                    <div class="row margin-bottom-double">
+                        <div class="col">
+                            <div class="margin-bottom">
+                                <div class="margin-bottom">
+                                    <textarea id="tx-textarea"></textarea>
+                                </div>
+                                <button
+                                    class="btn btn-default"
+                                    onClick="onTxClick()">
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- --- -->
+
+                    <h2>Recording - only for debugging, it will be deleted soon</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-5 col-sm-5 col-md-3">
@@ -236,10 +256,16 @@
     <script src="../00-000-common/physical-layer/tx-symbol-manager.js"></script>
     <script src="../00-000-common/physical-layer/physical-layer.js"></script>
     <script src="../00-000-common/physical-layer/physical-layer-builder.js"></script>
+    <script src="../00-000-common/data-link-layer/checksum-service.js"></script>
+    <script src="../00-000-common/data-link-layer/frame.js"></script>
+    <script src="../00-000-common/data-link-layer/tx-frame.js"></script>
+    <script src="../00-000-common/data-link-layer/tx-frame-manager.js"></script>
     <script src="../00-000-common/data-link-layer/data-link-layer.js"></script>
     <script src="../00-000-common/data-link-layer/data-link-layer-builder.js"></script>
-    <script src="../00-000-common/transport-layer/transport-layer.js"></script>
     <script src="../00-000-common/ui/convert-util.js"></script>
+    <script src="../00-000-common/ui/io-traffic.js"></script>
+    <script src="../00-000-common/transport-layer/transport-layer.js"></script>
+    <script src="../00-000-common/transport-layer/transport-layer-builder.js"></script>
     <script src="transport-layer.js"></script>
     <script>
         if (isProduction()) { // TODO refactor this

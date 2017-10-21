@@ -28,23 +28,23 @@ var DataLinkLayerBuilder = (function () { // <-- TODO this will be soon refactor
         return this;
     };
 
-    DataLinkLayerBuilder.prototype.rxFrameListener = function (rxFrameListener) {
-        this._rxFrameListener = rxFrameListener;
+    DataLinkLayerBuilder.prototype.rxFrameListener = function (listener) {
+        this._rxFrameListener = listener;
         return this;
     };
 
-    DataLinkLayerBuilder.prototype.txFrameListener = function (txFrameListener) {
-        this._txFrameListener = txFrameListener;
+    DataLinkLayerBuilder.prototype.txFrameListener = function (listener) {
+        this._txFrameListener = listener;
         return this;
     };
 
-    DataLinkLayerBuilder.prototype.txFrameProgressListener = function (txFrameProgressListener) {
-        this._txFrameProgressListener = txFrameProgressListener;
+    DataLinkLayerBuilder.prototype.txFrameProgressListener = function (listener) {
+        this._txFrameProgressListener = listener;
         return this;
     };
 
-    DataLinkLayerBuilder.prototype.rxFrameCandidateListener = function (rxFrameCandidateListener) {
-        this._rxFrameCandidateListener = rxFrameCandidateListener;
+    DataLinkLayerBuilder.prototype.rxFrameCandidateListener = function (listener) {
+        this._rxFrameCandidateListener = listener;
         return this;
     };
 
