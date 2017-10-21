@@ -1,3 +1,5 @@
+# UPDATE 2017.10.21 - don't look at this description - it's outdated
+
 # Common classes used in examples
 
 Classes described below are not dependent to Audio Network project. You can grab them
