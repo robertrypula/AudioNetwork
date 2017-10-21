@@ -71,7 +71,7 @@ function rxFrameCandidateListener(data) {
         ioTraffic.updateHtml(ioTraffixId, rxFrameCandidateHtml);
 
         if (progress === 1 && !frameCandidate.isRxFrameCandidateValid) {
-            ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'io-traffic-error');
+            ioTraffic.addClass(ioTraffixId, 'io-traffic-error');
         }
     }
 }
