@@ -8,15 +8,17 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         // let's create network stack!
         // Transport Layer hides Data Link Layer inside
         this.$$dataLinkLayer = (new DataLinkLayerBuilder())
+            .txFrameListener(this.$$txFrameListener.bind(this))
             .rxFrameListener(this.$$rxFrameListener.bind(this))
-            .rxFrameCandidateListener(this.$$rxFrameCandidateListener.bind(this))
-            .rxSymbolListener(this.$$rxSymbolListener.bind(this))
-            .rxSampleDspDetailsListener(this.$$rxSampleDspDetailsListener.bind(this))
-            .rxSyncDspDetailsListener(this.$$rxSyncDspDetailsListener.bind(this))
-            .rxDspConfigListener(this.$$rxDspConfigListener.bind(this))
-            .dspConfigListener(this.$$dspConfigListener.bind(this))
-            .txSymbolProgressListener(this.$$txSymbolProgressListener.bind(this))
-            .txDspConfigListener(this.$$txDspConfigListener.bind(this))
+            .rxSymbolListener(builder._rxSymbolListener)
+            .rxSampleDspDetailsListener(builder._rxSampleDspDetailsListener)
+            .rxSyncStatusListener(builder._rxSyncStatusListener)
+            .rxSyncDspDetailsListener(builder._rxSyncDspDetailsListener)
+            .rxDspConfigListener(builder._rxDspConfigListener)
+            .dspConfigListener(builder._dspConfigListener)
+            .txSymbolListener(builder._txSymbolListener)
+            .txSymbolProgressListener(builder._txSymbolProgressListener)
+            .txDspConfigListener(builder._txDspConfigListener)
             .build();
 
         // setup listeners - transport layer
@@ -24,151 +26,13 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$rxSegmentListener = TransportLayer.$$isFunction(builder._rxSegmentListener) ? builder._rxSegmentListener : null;
         this.$$rxConnectionStatus = TransportLayer.$$isFunction(builder._rxConnectionStatus) ? builder._rxConnectionStatus : null;
         this.$$txByteStreamListener = TransportLayer.$$isFunction(builder._txByteStreamListener) ? builder._txByteStreamListener : null;
+        this.$$txSegmentListener = TransportLayer.$$isFunction(builder._txSegmentListener) ? builder._txSegmentListener : null;
         this.$$txConnectionStatus = TransportLayer.$$isFunction(builder._txConnectionStatus) ? builder._txConnectionStatus : null;
 
         // setup listeners - data link layer
-        this.$$externalRxFrameListener = TransportLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
-        this.$$externalRxFrameCandidateListener = TransportLayer.$$isFunction(builder._rxFrameCandidateListener) ? builder._rxFrameCandidateListener : null;
-
-        // setup listeners - physical layer
-        this.$$externalRxSymbolListener = TransportLayer.$$isFunction(builder._rxSymbolListener) ? builder._rxSymbolListener : null;
-        this.$$externalRxSampleDspDetailsListener = TransportLayer.$$isFunction(builder._rxSampleDspDetailsListener) ? builder._rxSampleDspDetailsListener : null;
-        this.$$externalRxSyncListener = TransportLayer.$$isFunction(builder._rxSyncDspDetailsListener) ? builder._rxSyncDspDetailsListener : null;
-        this.$$externalRxDspConfigListener = TransportLayer.$$isFunction(builder._rxDspConfigListener) ? builder._rxDspConfigListener : null;
-        this.$$externalConfigListener = TransportLayer.$$isFunction(builder._dspConfigListener) ? builder._dspConfigListener : null;
-        this.$$externalTxSymbolProgressListener = TransportLayer.$$isFunction(builder._txSymbolProgressListener) ? builder._txSymbolProgressListener : null;
-        this.$$externalTxDspConfigListener = TransportLayer.$$isFunction(builder._txDspConfigListener) ? builder._txDspConfigListener : null;
-
-        // TODO code below is proof of concept
-        this.$$serverState = S_CLOSED;
-        this.$$clientState = C_CLOSED;
-        this.$$c = 1000;
-        this.$$updateUI();
+        this.$$externalRxFrameListener = DataLinkLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
+        this.$$externalTxFrameListener = DataLinkLayer.$$isFunction(builder._txFrameListener) ? builder._txFrameListener : null;
     };
-
-    var
-        C_CLOSED = 'C_CLOSED',
-        C_SYN_SENT = 'C_SYN_SENT',
-        C_ESTABLISHED = 'C_ESTABLISHED',
-        C_HI_SENT = 'C_HI_SENT',
-        C_HI_ACT_RECEIEVD = 'C_HI_ACT_RECEIEVD',
-        C_HEY_RECEIEVD = 'C_HEY_RECEIEVD',
-        C_HEY_ACK_SENT = 'C_HEY_ACK_SENT',
-
-        S_CLOSED = 'S_CLOSED',
-        S_LISTEN = 'S_LISTEN',
-        S_SYN_RECEIVED = 'S_SYN_RECEIVED',
-        S_ESTABLISHED = 'S_ESTABLISHED',
-        S_HI_ACT_SENT = 'S_HI_ACT_SENT',
-        S_HEY_SENT = 'S_HEY_SENT',
-        S_HEY_ACT_RECEIVED = 'S_HEY_ACT_RECEIVED';
-
-    // -------------------------------------- TODO code below is just quick Proof Of Concept
-
-    function formatSegment(payload) {
-        return payload.map(function (byte) { return (byte < 16 ? '0' : '') + byte.toString(16); }).join('|');
-    }
-
-    TransportLayer.prototype.$$updateUI = function () {
-        document.getElementById('server-state').innerHTML = this.$$serverState;
-        document.getElementById('client-state').innerHTML = this.$$clientState;
-    };
-
-    TransportLayer.prototype.clientConnect = function () {
-        var p;
-
-        switch (this.$$clientState) {
-            case C_CLOSED:
-                p = [0x8f, 0];
-                this.$$dataLinkLayer.txFrame(p);
-                html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
-                this.$$clientState = C_SYN_SENT;
-                break;
-        }
-
-        this.$$updateUI();
-    };
-
-    TransportLayer.prototype.clientDisconnect = function () {
-        this.$$clientState = C_CLOSED;
-        this.$$updateUI();
-    };
-
-    TransportLayer.prototype.serverListen = function () {
-        this.$$serverState = S_LISTEN;
-        this.$$updateUI();
-    };
-
-    TransportLayer.prototype.serverDisconnect = function () {
-        this.$$serverState = S_CLOSED;
-        this.$$updateUI();
-    };
-
-    TransportLayer.prototype.clientStartFakeTransmission = function () {
-        var p;
-
-        if (this.$$clientState === C_ESTABLISHED) {
-            p = [0xFF, 0xEE, 0x61, 0x62, 0x63, 0x64];
-            this.$$dataLinkLayer.txFrame(p);
-            html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
-            this.$$clientState = 'C_FAKE_ABCD_SENT';
-        }
-        this.$$updateUI();
-    };
-
-    TransportLayer.prototype.$$handleFramePoc = function (frame) {
-        var
-            segmentPayload = formatSegment(frame.payload),
-            p;
-
-        html('#rx-segment', (this.$$c++) + ' ???: ' + segmentPayload + '<br/>', true);
-
-        // server
-        switch (this.$$serverState) {
-            case S_LISTEN:
-                if (segmentPayload === '8f|00') {
-                    p = [0xc8, 0x90];
-                    this.$$dataLinkLayer.txFrame(p);
-                    html('#tx-segment', (this.$$c++) +  ' srv: ' + formatSegment(p) + '<br/>', true);
-                    this.$$serverState = S_SYN_RECEIVED;
-                }
-                break;
-            case S_SYN_RECEIVED:
-                if (segmentPayload === '10|c9') {
-                    this.$$serverState = S_ESTABLISHED;
-                }
-                break;
-            case S_ESTABLISHED:
-                if (segmentPayload === 'ff|ee|61|62|63|64') {
-                    p = [0xFF, 0xEE, 0x00];
-                    this.$$dataLinkLayer.txFrame(p);
-                    html('#tx-segment', (this.$$c++) +  ' srv: ' + formatSegment(p) + '<br/>', true);
-                    this.$$serverState = 'C_FAKE_ABCD_RECEIVED';
-                }
-                break;
-        }
-
-        // client
-        switch (this.$$clientState) {
-            case C_SYN_SENT:
-                if (segmentPayload === 'c8|90') {
-                    p = [0x10, 0xc9];
-                    this.$$dataLinkLayer.txFrame(p);
-                    html('#tx-segment', (this.$$c++) +  ' cli: ' + formatSegment(p) + '<br/>', true);
-                    this.$$clientState = C_ESTABLISHED;
-                }
-                break;
-            case 'C_FAKE_ABCD_SENT':
-                if (segmentPayload === 'ff|ee|00') {
-                    this.$$clientState = 'C_FAKE_ABCD_ACK_RECEIVED';
-                }
-                break;
-        }
-
-        this.$$updateUI();
-    };
-
-    // --------------------------------------
 
     TransportLayer.prototype.getDataLinkLayer = function () {
         return this.$$dataLinkLayer;
@@ -180,6 +44,10 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
     TransportLayer.prototype.setTxSampleRate = function (txSampleRate) {
         this.$$dataLinkLayer.setTxSampleRate(txSampleRate);  // alias for easier access
+    };
+
+    TransportLayer.prototype.txSync = function () {
+        this.$$dataLinkLayer.txSync();  // alias for easier access
     };
 
     TransportLayer.prototype.txTwoWaySync = function () {
@@ -196,53 +64,30 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.$$handleFrame = function (frame) {
-        this.$$handleFramePoc(frame);
-        // console.log('transport layer rx frame handler');
+    TransportLayer.prototype.txByteStream = function (data) {
+
     };
 
-    TransportLayer.prototype.$$handleTx = function () {
-        // console.log('transport layer tx listener');
+    // -----------------------------------------------------
+
+    TransportLayer.prototype.$$handleRxFrameListener = function (data) {
+
+    };
+
+    TransportLayer.prototype.$$handleTxFrameListener = function (data) {
+
     };
 
     // -----------------------------------------------------
 
     TransportLayer.prototype.$$rxFrameListener = function (data) {
         this.$$externalRxFrameListener ? this.$$externalRxFrameListener(data) : undefined;
-        this.$$handleFrame(data);
+        this.$$handleRxFrame(data);
     };
 
-    TransportLayer.prototype.$$rxFrameCandidateListener = function (data) {
-        this.$$externalRxFrameCandidateListener ? this.$$externalRxFrameCandidateListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$rxSymbolListener = function (data) {
-        this.$$externalRxSymbolListener ? this.$$externalRxSymbolListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$rxSampleDspDetailsListener = function (data) {
-        this.$$externalRxSampleDspDetailsListener ? this.$$externalRxSampleDspDetailsListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$rxSyncDspDetailsListener = function (data) {
-        this.$$externalRxSyncListener ? this.$$externalRxSyncListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$rxDspConfigListener = function (data) {
-        this.$$externalRxDspConfigListener ? this.$$externalRxDspConfigListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$dspConfigListener = function (data) {
-        this.$$externalConfigListener ? this.$$externalConfigListener(data) : undefined;
-    };
-
-    TransportLayer.prototype.$$txSymbolProgressListener = function (data) {
-        this.$$externalTxSymbolProgressListener ? this.$$externalTxSymbolProgressListener(data) : undefined;
-        this.$$handleTx();
-    };
-
-    TransportLayer.prototype.$$txDspConfigListener = function (data) {
-        this.$$externalTxDspConfigListener ? this.$$externalTxDspConfigListener(data) : undefined;
+    TransportLayer.prototype.$$txFrameListener = function (data) {
+        this.$$externalTxFrameListener ? this.$$externalTxFrameListener(data) : undefined;
+        this.$$handleTxFrame(data);
     };
 
     // -----------------------------------------------------
