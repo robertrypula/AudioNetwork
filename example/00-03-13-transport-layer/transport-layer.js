@@ -14,6 +14,7 @@ function init() {
         .rxSyncStatusListener(rxSyncStatusListener)
         .rxSampleDspDetailsListener(rxSampleDspDetailsListener)
         .build();
+    invokeOnEnter('#tx-data-textarea', onTxDataClick);
 }
 
 function dspConfigListener(state) {
@@ -54,6 +55,15 @@ function onSetLoopbackClick(state) {
 }
 
 // -----------------------------------------------------------------------
+
+function onTxDataClick() {
+    var
+        text = getFormFieldValue('#tx-data-textarea'),
+        data = getByteListFromAsciiString(text);
+
+    transportLayer.txData(data);
+    setValue('#tx-data-textarea', '');
+}
 
 function clientConnect() {
     transportLayer.clientConnect();

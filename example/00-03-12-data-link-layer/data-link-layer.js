@@ -148,7 +148,7 @@ function onTxClick() {
         dataLinkLayer.txFrame(txFramePayload, isTxFrameCommand);
     }
     setValue('#tx-textarea', '');
-    ioTraffic.forceNewRow();
+    ioTraffic.forceNewRow();         // TODO probably not needed
 }
 
 function getTxFramePayloadListFromByteList(byteList) {

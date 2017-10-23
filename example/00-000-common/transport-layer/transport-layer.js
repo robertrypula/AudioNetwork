@@ -21,6 +21,11 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
             .txDspConfigListener(builder._txDspConfigListener)
             .build();
 
+        // state variables
+        this.$$segmentPayloadLengthLimit = this.$$dataLinkLayer.getFramePayloadLengthLimit() - Segment.HEADER_BYTE_LENGTH;
+        this.$$clientSocket = new Socket(this.$$segmentPayloadLengthLimit);
+        this.$$serverSocket = new Socket(this.$$segmentPayloadLengthLimit);
+
         // setup listeners - transport layer
         this.$$rxByteStreamListener = TransportLayer.$$isFunction(builder._rxByteStreamListener) ? builder._rxByteStreamListener : null;
         this.$$rxSegmentListener = TransportLayer.$$isFunction(builder._rxSegmentListener) ? builder._rxSegmentListener : null;
@@ -64,17 +69,18 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.txByteStream = function (data) {
-
+    TransportLayer.prototype.txData = function (data) {
+        // TODO consider loopback and socket state when picking $$clientSocket/$$serverSocket
+        this.$$clientSocket.txData(data);
     };
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.$$handleRxFrameListener = function (data) {
+    TransportLayer.prototype.$$handleRxFrame = function (data) {
 
     };
 
-    TransportLayer.prototype.$$handleTxFrameListener = function (data) {
+    TransportLayer.prototype.$$handleTxFrame = function (data) {
 
     };
 
