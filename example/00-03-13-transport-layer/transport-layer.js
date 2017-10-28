@@ -58,10 +58,10 @@ function onSetLoopbackClick(state) {
 
 function onTxDataClick() {
     var
-        text = getFormFieldValue('#tx-data-textarea'),
-        data = getByteListFromAsciiString(text);
+        txDataTextarea = getFormFieldValue('#tx-data-textarea'),
+        txData = getByteListFromAsciiString(txDataTextarea);
 
-    transportLayer.txData(data);
+    transportLayer.txData(txData);
     setValue('#tx-data-textarea', '');
 }
 

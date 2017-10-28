@@ -13,7 +13,9 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
         this._txConnectionStatus = undefined;
 
         // data link layer listeners
+        this._txFrameListener = undefined;
         this._rxFrameListener = undefined;
+        this._txFrameProgressListener = undefined;
         this._rxFrameCandidateListener = undefined;
 
         // physical layer listeners
@@ -56,13 +58,13 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
         return this;
     };
 
-    TransportLayerBuilder.prototype.rxFrameListener = function (listener) {
-        this._rxFrameListener = listener;
+    TransportLayerBuilder.prototype.txFrameListener = function (listener) {
+        this._txFrameListener = listener;
         return this;
     };
 
-    TransportLayerBuilder.prototype.txFrameListener = function (listener) {
-        this._txFrameListener = listener;
+    TransportLayerBuilder.prototype.rxFrameListener = function (listener) {
+        this._rxFrameListener = listener;
         return this;
     };
 
