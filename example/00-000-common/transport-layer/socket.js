@@ -36,17 +36,20 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             txSegment;
 
         if (!activeDataChunk) {
-            throw Socket.LOGIC_ERROR_EXCEPTION;
+            // throw Socket.LOGIC_ERROR_EXCEPTION;
+            return null;
         }
 
         txSegment = activeDataChunk.getLastTxSegment();
 
         if (!txSegment) {
-            throw Socket.LOGIC_ERROR_EXCEPTION;
+            // throw Socket.LOGIC_ERROR_EXCEPTION;
+            return null;
         }
 
         if (txSegment.getTxFrameId() !== txFrameId) {
-            throw Socket.LOGIC_ERROR_EXCEPTION;
+            // throw Socket.LOGIC_ERROR_EXCEPTION;
+            return null;
         }
 
         return txSegment;

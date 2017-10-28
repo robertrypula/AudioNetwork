@@ -65,6 +65,7 @@ function onTxDataClick() {
     setValue('#tx-data-textarea', '');
 }
 
+/*
 function clientConnect() {
     transportLayer.clientConnect();
 }
@@ -80,13 +81,13 @@ function serverListen() {
 function serverDisconnect() {
     transportLayer.serverDisconnect();
 }
+*/
 
+function externalFakeStateListener(state) {        // TODO this is POC - it will be deleted
+    var date = new Date();
 
-
-
-
-
-
+    html('#fake-state', date.toLocaleTimeString() + '.' + date.getMilliseconds() + ' | ' + state + '<br/>', true);
+}
 
 
 
