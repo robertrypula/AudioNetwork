@@ -67,9 +67,9 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
     TransportLayer.STATE_MB_RECEIVED = 'STATE_MB_RECEIVED';
     TransportLayer.STATE_MB_CONFIRMED = 'STATE_MB_CONFIRMED';
 
-    TransportLayer.MESSAGE_A_1 = [0x06, 'H'.charAt(0), 'e'.charAt(0), 'l'.charAt(0), 'l'.charAt(0)];
-    TransportLayer.MESSAGE_A_2 = ['o'.charAt(0), '!'.charAt(0)];
-    TransportLayer.MESSAGE_B = [0x03, 'H'.charAt(0), 'i'.charAt(0), '!'.charAt(0)];
+    TransportLayer.MESSAGE_A_1 = [0x06, 'H'.charCodeAt(0), 'e'.charCodeAt(0), 'l'.charCodeAt(0), 'l'.charCodeAt(0)];
+    TransportLayer.MESSAGE_A_2 = ['o'.charCodeAt(0), '!'.charCodeAt(0)];
+    TransportLayer.MESSAGE_B = [0x03, 'H'.charCodeAt(0), 'i'.charCodeAt(0), '!'.charCodeAt(0)];
 
     TransportLayer.prototype.getDataLinkLayer = function () {
         return this.$$dataLinkLayer;
@@ -151,7 +151,13 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
     TransportLayer.prototype.$$handleRxFrame = function (rxFrame) {        // TODO this is POC - it will be deleted
         var
             rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload),
-            rxSegmentPayload = rxSegment.getPayload();
+            rxSegmentPayload;
+
+        if (!rxSegment) {
+            return;
+        }
+
+        rxSegmentPayload = rxSegment.getPayload();
 
         switch (this.$$fakeState) {
             case TransportLayer.STATE_CLOSED:                                     // SER / CLI
@@ -174,6 +180,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
                 }
                 break;
             case TransportLayer.STATE_ESTABLISHED:                                // SER
+                console.log('TransportLayer.STATE_ESTABLISHED', rxSegmentPayload, TransportLayer.MESSAGE_A_1);
                 if (TransportLayer.equal(rxSegmentPayload, TransportLayer.MESSAGE_A_1)) {
                     this._txSegment(true, 20, true, 0, []);
                     this.setFakeState(TransportLayer.STATE_MA1_RECEIVED);

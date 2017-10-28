@@ -9,7 +9,7 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$sequenceNumber = sequenceNumber & 0x7f;
         this.$$acknowledgementFlag = !!(acknowledgementFlag & 0x80);
         this.$$acknowledgementNumber = acknowledgementNumber & 0x7f;
-        this.$$payload = payload;
+        this.$$payload = payload.slice(0);
 
         this.$$rxFrameId = null;      // probably we can have only one property for frame ID
         this.$$txFrameId = null;
@@ -80,7 +80,8 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
             i;
 
         if (rxFramePayload.length < Segment.HEADER_BYTE_LENGTH) {
-            throw Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION;
+            return null;
+            // throw Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION;
         }
 
         synchronizeFlag = !!(rxFramePayload[0] & 0x80);
