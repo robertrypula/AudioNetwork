@@ -7,7 +7,7 @@ var
     RX_FREQUENCY_MIN = 0,
     RX_FREQUENCY_MAX = 20000,
     SAMPLE_TIME_MS = 250,
-    ROW_LIMIT = 200,
+    ROW_LIMIT = 2000,
 
     audioMonoIO,
     rxSpectrogram,
