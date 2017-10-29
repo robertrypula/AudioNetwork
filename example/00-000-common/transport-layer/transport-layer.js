@@ -33,7 +33,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$rxSegmentListener = TransportLayer.$$isFunction(builder._rxSegmentListener) ? builder._rxSegmentListener : null;
         this.$$rxConnectionStatus = TransportLayer.$$isFunction(builder._rxConnectionStatus) ? builder._rxConnectionStatus : null;
         this.$$txByteStreamListener = TransportLayer.$$isFunction(builder._txByteStreamListener) ? builder._txByteStreamListener : null;
-        this.$$txSegmentListener = TransportLayer.$$isFunction(builder._txSegmentListener) ? builder._txSegmentListener : null;
+        this.$$txSegmentListener = TransportLayer.$$isFunction(builder.fakeTransmitEventListener) ? builder.fakeTransmitEventListener : null;
         this.$$txConnectionStatus = TransportLayer.$$isFunction(builder._txConnectionStatus) ? builder._txConnectionStatus : null;
 
         // setup listeners - data link layer
@@ -42,15 +42,20 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$externalTxFrameProgressListener = DataLinkLayer.$$isFunction(builder._txFrameProgressListener) ? builder._txFrameProgressListener : null;
 
 
-        this.setFakeState(TransportLayer.STATE_CLOSED);
+        this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_CLOSED);
     };
 
     // | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
-    //      - - P T T P -           - - P T T P -       - - P T T A H e l l P -           - - P T T o ! P -                                       - - P T T P -
-    //                  - - P T T P -                                         - - P T T P -               - - P T T P -       - - P T T A H i ! P -
-
-    // C   SS                        E                 MA1_S                             MA2_S                       MA2_CON                       MB_R
-    // C L               SR                        E                          MA1_R                        MA2_R              MB_S
+    //         CLI #1                  CLI #2                   CLI #3                         CLI #4                                               CLI #5
+    //          20 0                    21 51                 21 51                              26 51                                               28 54
+    // C        SS                E                         MA1_S                             MA2_S                 MA2_C                     MB_R
+    //                                                            . . . . .                         . .
+    //      - - P T T P -           - - P T T P -       - - P T T A H e l l P -           - - P T T o ! P -                                     - - P T T P -
+    //                  - - P T T P -                                         - - P T T P -               - - P T T P -       - - P T T A H i P -
+    //                                                                                                                                  ^ ^ ^
+    // C L            SR                      E                             MA1_R                       MA2_R                     MB_S                    MB_C
+    //                      50 21                                                  51 26                      51 28                      51 28                     54 28
+    //                     SER #1                                                  SER #2                     SER #3                     SER #4
 
     TransportLayer.STATE_CLOSED = 'STATE_CLOSED';
     TransportLayer.STATE_LISTEN = 'STATE_LISTEN';
@@ -69,7 +74,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
     TransportLayer.MESSAGE_A_1 = [0x06, 'H'.charCodeAt(0), 'e'.charCodeAt(0), 'l'.charCodeAt(0), 'l'.charCodeAt(0)];
     TransportLayer.MESSAGE_A_2 = ['o'.charCodeAt(0), '!'.charCodeAt(0)];
-    TransportLayer.MESSAGE_B = [0x03, 'H'.charCodeAt(0), 'i'.charCodeAt(0), '!'.charCodeAt(0)];
+    TransportLayer.MESSAGE_B = [0x02, 'H'.charCodeAt(0), 'i'.charCodeAt(0)];
 
     TransportLayer.prototype.getDataLinkLayer = function () {
         return this.$$dataLinkLayer;
@@ -109,31 +114,31 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
     // -----------------------------------------------------
 
     TransportLayer.prototype.fakeClose = function () {        // TODO this is POC - it will be deleted
-        this.setFakeState(TransportLayer.STATE_CLOSED);
+        this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_CLOSED);
     };
 
     TransportLayer.prototype.fakeListen = function () {        // TODO this is POC - it will be deleted
-        this.setFakeState(TransportLayer.STATE_LISTEN);
+        this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_LISTEN);
     };
 
     TransportLayer.prototype.fakeConnect = function () {        // TODO this is POC - it will be deleted
         if (this.$$fakeState === TransportLayer.STATE_CLOSED) {
-            this._txSegment(true, 20, false, 0, []);
-            this.setFakeState(TransportLayer.STATE_SYN_SENT);
+            this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_SYN_SENT);
+            this.fakeTransmitEvent(true, 0x20, false, 0x00, []);                                                        // CLI #1
         }
     };
 
     TransportLayer.prototype.fakeMessageA = function () {        // TODO this is POC - it will be deleted
         if (this.$$fakeState === TransportLayer.STATE_ESTABLISHED) {
-            this._txSegment(true, 20, true, 0, TransportLayer.MESSAGE_A_1);
-            this.setFakeState(TransportLayer.STATE_MA1_SENT);
+            this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MA1_SENT);
+            this.fakeTransmitEvent(false, 0x21, true, 0x51, TransportLayer.MESSAGE_A_1);                                // CLI #3
         }
     };
 
     TransportLayer.prototype.fakeMessageB = function () {        // TODO this is POC - it will be deleted
         if (this.$$fakeState === TransportLayer.STATE_MA2_RECEIVED) {
-            this._txSegment(true, 20, true, 0, TransportLayer.MESSAGE_B);
-            this.setFakeState(TransportLayer.STATE_MB_SENT);
+            this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MB_SENT);
+            this.fakeTransmitEvent(false, 0x51, true, 0x28, TransportLayer.MESSAGE_B);                                  // SER #4
         }
     };
 
@@ -160,61 +165,55 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         rxSegmentPayload = rxSegment.getPayload();
 
         switch (this.$$fakeState) {
-            case TransportLayer.STATE_CLOSED:                                     // SER / CLI
-                break;
-            case TransportLayer.STATE_LISTEN:                                     // SER
+            case TransportLayer.STATE_LISTEN:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this._txSegment(true, 20, true, 0, []);
-                    this.setFakeState(TransportLayer.STATE_SYN_RECEIVED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_SYN_RECEIVED, rxFrame);
+                    this.fakeTransmitEvent(true, 0x50, true, 0x21, []);                                                 // SER #1
                 }
                 break;
-            case TransportLayer.STATE_SYN_SENT:                                   // CLI
+            case TransportLayer.STATE_SYN_SENT:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this._txSegment(true, 20, true, 0, []);
-                    this.setFakeState(TransportLayer.STATE_ESTABLISHED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_ESTABLISHED, rxFrame);
+                    this.fakeTransmitEvent(false, 0x21, true, 0x51, []);                                                // CLI  #2
                 }
                 break;
-            case TransportLayer.STATE_SYN_RECEIVED:                               // SER
+            case TransportLayer.STATE_SYN_RECEIVED:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this.setFakeState(TransportLayer.STATE_ESTABLISHED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_ESTABLISHED, rxFrame);
                 }
                 break;
-            case TransportLayer.STATE_ESTABLISHED:                                // SER
-                console.log('TransportLayer.STATE_ESTABLISHED', rxSegmentPayload, TransportLayer.MESSAGE_A_1);
+            case TransportLayer.STATE_ESTABLISHED:
                 if (TransportLayer.equal(rxSegmentPayload, TransportLayer.MESSAGE_A_1)) {
-                    this._txSegment(true, 20, true, 0, []);
-                    this.setFakeState(TransportLayer.STATE_MA1_RECEIVED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MA1_RECEIVED, rxFrame);
+                    this.fakeTransmitEvent(false, 0x51, true, 0x26, []);                                                // SER #2
                 }
                 break;
-            case TransportLayer.STATE_MA1_SENT:                                   // CLI
+            case TransportLayer.STATE_MA1_SENT:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this._txSegment(true, 20, true, 0, TransportLayer.MESSAGE_A_2);
-                    this.setFakeState(TransportLayer.STATE_MA2_SENT);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MA2_SENT, rxFrame);
+                    this.fakeTransmitEvent(false, 0x26, true, 0x51, TransportLayer.MESSAGE_A_2);                        // CLI #4
                 }
                 break;
-            case TransportLayer.STATE_MA1_RECEIVED:                               // SER
+            case TransportLayer.STATE_MA1_RECEIVED:
                 if (TransportLayer.equal(rxSegmentPayload, TransportLayer.MESSAGE_A_2)) {
-                    this._txSegment(true, 20, true, 0, []);
-                    this.setFakeState(TransportLayer.STATE_MA2_RECEIVED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MA2_RECEIVED, rxFrame);
+                    this.fakeTransmitEvent(false, 0x51, true, 0x28, []);                                                // SER #3
                 }
                 break;
-            case TransportLayer.STATE_MA2_SENT:                                   // CLI
+            case TransportLayer.STATE_MA2_SENT:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this.setFakeState(TransportLayer.STATE_MA2_CONFIRMED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MA2_CONFIRMED, rxFrame);
                 }
-                break;
-            case TransportLayer.STATE_MA2_RECEIVED:
-                // -------------
                 break;
             case TransportLayer.STATE_MA2_CONFIRMED:
                 if (TransportLayer.equal(rxSegmentPayload, TransportLayer.MESSAGE_B)) {
-                    this._txSegment(true, 20, true, 0, []);
-                    this.setFakeState(TransportLayer.STATE_MB_RECEIVED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MB_RECEIVED, rxFrame);
+                    this.fakeTransmitEvent(false, 0x28, true, 0x54, []);                                                // CLI #5
                 }
                 break;
             case TransportLayer.STATE_MB_SENT:
                 if (TransportLayer.equal(rxSegmentPayload, [])) {
-                    this.setFakeState(TransportLayer.STATE_MB_CONFIRMED);
+                    this.fakeReceiveOrSetStateEvent(TransportLayer.STATE_MB_CONFIRMED, rxFrame);
                 }
                 break;
         }
@@ -229,13 +228,24 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         */
     };
 
-    TransportLayer.prototype._txSegment = function (synFlag, sNumber, ackFlag, aNumber, payload) {        // TODO this is POC - it will be deleted
-        this.$$dataLinkLayer.txFrame((new Segment(synFlag, sNumber, ackFlag, aNumber, payload)).getTxFramePayload(), false);
+    TransportLayer.prototype.fakeTransmitEvent = function (synFlag, sNumber, ackFlag, aNumber, payload) {        // TODO this is POC - it will be deleted
+        var
+            txFrameId = this.$$dataLinkLayer.txFrame((new Segment(synFlag, sNumber, ackFlag, aNumber, payload)).getTxFramePayload(), false),
+            txFrameQueue = this.$$dataLinkLayer.getTxFrameProgress().txFrameQueue;
+
+        if (txFrameQueue.length === 0) {
+            alert('Logic error #1');
+        }
+        if (txFrameQueue[0].id !== txFrameId) {
+            alert('logic error #2')
+        }
+
+        fakeTransmitEventListener(txFrameQueue[0]);
     };
 
-    TransportLayer.prototype.setFakeState = function (state) {        // TODO this is POC - it will be deleted
+    TransportLayer.prototype.fakeReceiveOrSetStateEvent = function (state, rxFrame) {        // TODO this is POC - it will be deleted
         this.$$fakeState = state;
-        externalFakeStateListener(this.$$fakeState);
+        fakeReceiveOrSetStateEventListener(this.$$fakeState, rxFrame);
     };
 
     TransportLayer.equal = function (a, b) {

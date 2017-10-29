@@ -83,13 +83,38 @@ function serverDisconnect() {
 }
 */
 
-function externalFakeStateListener(state) {        // TODO this is POC - it will be deleted
-    var date = new Date();
+function fakeReceiveOrSetStateEventListener(state, rxFrame) {        // TODO this is POC - it will be deleted
+    var frameStr;
 
-    html('#fake-state', date.toLocaleTimeString() + '.' + date.getMilliseconds() + ' | ' + state + '<br/>', true);
+    html('#fake-state', now() + ' | ' + state + '<br/>', true);
+    if (rxFrame) {
+        frameStr = toHex(rxFrame.rxFrameHeader) + ' ' + rxFrame.rxFramePayload.map(function (item) { return toHex(item); }).join(' ') + ' ' + toHex(rxFrame.rxFrameChecksum);
+        html('#fake-traffic', now() + ' | ' + 'RX: ' + frameStr + '<br/>', true);
+    }
 }
 
+function now() {
+    var now = new Date();
 
+    return '' +
+        ('0' + now.getHours()).slice(-2) + ':' +
+        ('0' + now.getMinutes()).slice(-2) + ':' +
+        ('0' + now.getSeconds()).slice(-2) + '.' +
+        ('000' + now.getMilliseconds()).slice(-3)
+    ;
+}
+
+function fakeTransmitEventListener(txFrame) {
+    var frameStr = toHex(txFrame.txFrameHeader) + ' ' + txFrame.txFramePayload.map(function (item) { return toHex(item); }).join(' ') + ' ' + toHex(txFrame.txFrameChecksum);
+
+    html('#fake-traffic', now() + ' | ' + 'TX: ' + frameStr + '<br/>', true);
+}
+
+function toHex(value) {
+    var hex = value.toString(16);
+
+    return hex.length === 1 ? '0' + hex : hex;
+}
 
 // -----------------------------------------------------------------------
 // -----------------------------------------------------------------------
@@ -101,6 +126,9 @@ var
 function rxSampleDspDetailsListener(state) {
     var rxDspConfig = transportLayer.getDataLinkLayer().getPhysicalLayer().getRxDspConfig();
 
+    if (!isRecording) {
+        return;
+    }
     recordedData.indexMin = rxDspConfig.rxSymbolMin;
     recordedData.indexMax = rxDspConfig.rxSymbolMax;
     recordedData.frequencySpacing = rxDspConfig.rxSymbolFrequencySpacing;
