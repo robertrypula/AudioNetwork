@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ofdm</title>
+</head>
+<body onload="init()">
+
+<script src="../00-000-common/ui/dom-util.js"></script>
+<script src="../00-000-common/util/buffer.js"></script>
+<script src="../00-000-common/dsp/complex.js"></script>
+<script src="../00-000-common/dsp/wave-analyser.js"></script>
+<script src="../00-000-common/dsp/wave-generator.js"></script>
+<script src="../00-000-common/web-audio/audio-mono-io.js"></script>
+<script src="ofdm.js"></script>
+
+
+<h1>Generate</h1>
+TxSampleRate: <input id="tx-sample-rate" type="number" min="44100" max="48000" step="100" value="48000"><br/>
+#05 <input id="sub-carrier-0" type="number" min="-1" max="359" step="1" value="0"><br/>
+#06 <input id="sub-carrier-1" type="number" min="-1" max="359" step="1" value="0"><br/>
+#07 <input id="sub-carrier-2" type="number" min="-1" max="359" step="1" value="0"><br/>
+#08 <input id="sub-carrier-3" type="number" min="-1" max="359" step="1" value="0"><br/>
+#09 <input id="sub-carrier-4" type="number" min="-1" max="359" step="1" value="0"><br/>
+#10 <input id="sub-carrier-5" type="number" min="-1" max="359" step="1" value="0"><br/>
+#11 <input id="sub-carrier-6" type="number" min="-1" max="359" step="1" value="0"><br/>
+#12 <input id="sub-carrier-7" type="number" min="-1" max="359" step="1" value="0"><br/>
+#13 <input id="sub-carrier-8" type="number" min="-1" max="359" step="1" value="0"><br/>
+#14 <input id="sub-carrier-9" type="number" min="-1" max="359" step="1" value="0"><br/>
+
+<button onclick="txStartUpdate()">Start/update</button>
+<button onclick="txStop()">Stop</button>
+
+<h1>Detect</h1>
+
+
+<button onClick="analyse()" class="btn btn-default">Analyse!</button>
+
+<h2>Time domain</h2>
+<canvas id="canvas-time-domain"></canvas>
+
+
+<h2>Frequency domain</h2>
+<canvas id="canvas-frequency-domain"></canvas>
+
+<h2>Frequency domain - interpolated zoom</h2>
+<canvas id="canvas-frequency-domain-interpolated-zoom"></canvas>
+
+</body>
+</html>
