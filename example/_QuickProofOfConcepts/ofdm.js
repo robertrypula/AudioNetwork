@@ -2,13 +2,13 @@
 'use strict';
 
 var
-    FFT_SKIP_FACTOR = 64,
+    BIN_SCALER = 64,
     FFT_SIZE = 8192,
-    LIMIT_CANVAS_WIDTH = false,
+    LIMIT_CANVAS_WIDTH = true,
     CANVAS_WIDTH_TIME_DOMAIN = FFT_SIZE,
     CANVAS_WIDTH_FREQUENCY_DOMAIN = FFT_SIZE * 0.5,
-    CANVAS_HEIGHT = 301,
-    MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 1024 : Number.POSITIVE_INFINITY,
+    CANVAS_HEIGHT = 201,
+    MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 2048 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -160,
     audioMonoIO,
     ctxTimeDomain,
@@ -16,8 +16,6 @@ var
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
-
-    audioMonoIO.setLoopback(true);
 
     ctxTimeDomain = getConfiguredCanvasContext(
         'canvas-time-domain',
@@ -29,10 +27,16 @@ function init() {
         CANVAS_WIDTH_FREQUENCY_DOMAIN,
         CANVAS_HEIGHT
     );
+
+    setInterval(analyse, 256);
+}
+
+function loopbackChange() {
+    audioMonoIO.setLoopback(getCheckboxState('#loopback'));
 }
 
 function getTransmitFrequency() {
-    return FFT_SKIP_FACTOR * getFormFieldValue('#tx-sample-rate', 'int') / FFT_SIZE;
+    return BIN_SCALER * getFormFieldValue('#tx-sample-rate', 'int') / FFT_SIZE;
 }
 
 function setTone() {
@@ -66,38 +70,108 @@ function txStop() {
     audioMonoIO.setPeriodicWave(0);
 }
 
-
 function analyse() {
     var
-        timeDomainData,
+        timeDomainDataOriginal,
+        timeDomainData = [],
         frequencyData,
+        unitPhaseData = [],
+        f = getFormFieldValue('#factor', 'int'),
+        startingOffset = getFormFieldValue('#time-domain-starting-offset', 'int'),
+        fixedUnitPhase,
         start,
         end,
-        time;
+        time,
+        log,
+        i;
 
-    timeDomainData = audioMonoIO.getTimeDomainData();
+    timeDomainDataOriginal = audioMonoIO.getTimeDomainData();
+    for (i = startingOffset; i < startingOffset + timeDomainDataOriginal.length / (BIN_SCALER / f); i++) {
+        timeDomainData.push(timeDomainDataOriginal[i]);
+    }
 
     start = new Date().getTime();
-    frequencyData = getFrequencyData(timeDomainData);
+    frequencyData = getFrequencyData(
+        timeDomainData,
+        unitPhaseData,
+        [0 * f, 1 * f, 2 * f, 3 * f, 4 * f, 5 * f, 6 * f, 7 * f, 8 * f, 9 * f, 10 * f, 11 * f, 12 * f, 13 * f, 14 * f]
+    );
     end = new Date().getTime();
     time = end - start;
-    alert('Execution time (standard DFT): ' + time + ' ms');
+
+    html('#time-log', time + ' ms');
+
+    fixedUnitPhase = getFixedUnitPhaseData(unitPhaseData);
+
+    log = '';
+    for (i = 0; i < frequencyData.length; i++) {
+        log += i + '# ' + frequencyData[i].toFixed(1) + ' dB, ' + convertToDegree(unitPhaseData[i]) + ', ' + convertToDegree(fixedUnitPhase[i]) + '<br/>';
+    }
+    html('#subcarrier-log', log);
 
     drawTimeDomainData(ctxTimeDomain, timeDomainData);
     drawFrequencyDomainData(ctxFrequencyDomain, frequencyData);
+    drawUnitPhaseData(ctxFrequencyDomain, fixedUnitPhase);
 }
 
-function getFrequencyData(timeDomainData) {
+function convertToDegree(value) {
+    value = normalizeUnit(value);
+    value *= 360;
+    value = Math.round(value);
+    value = value >= 360 ? value - 360 : value;
+
+    return value;
+}
+
+function getFixedUnitPhaseData(unitPhaseData) {
+    var normalized = [], baseOffset, i, j, result, absDiff, bestAbsDiff;
+
+    baseOffset = unitPhaseData[5] / 5;
+    for (i = 0; i < unitPhaseData.length; i++) {
+        normalized.push(normalizeUnit(unitPhaseData[i] - baseOffset * i));
+    }
+    bestAbsDiff = getDistanceToZeroDegree(normalized[5]) + getDistanceToZeroDegree(normalized[7]) + getDistanceToZeroDegree(normalized[11]);
+    result = normalized.slice(0);
+
+    baseOffset = 1 / 5;
+    for (i = 0; i < 5; i++) {
+        absDiff = getDistanceToZeroDegree(normalized[5] + 5 * baseOffset * i) + getDistanceToZeroDegree(normalized[7] + 7 * baseOffset * i) + getDistanceToZeroDegree(normalized[11] + 11 * baseOffset * i);
+
+        if (absDiff < bestAbsDiff) {
+            bestAbsDiff = absDiff;
+            result.length = 0;
+            for (j = 0; j < unitPhaseData.length; j++) {
+                result.push(normalizeUnit(normalized[j] + j * baseOffset * i));
+            }
+        }
+    }
+
+    return result;
+}
+
+function normalizeUnit(value) {
+    value =  value - Math.floor(value);
+    value = value >= 1 ? value - 1 : value;
+
+    return value;
+}
+
+function getDistanceToZeroDegree(value) {
+    value = normalizeUnit(value);
+
+    return Math.abs(value > 0.5 ? -1 + value : value);
+}
+
+function getFrequencyData(timeDomainData, unitPhaseData, calculateList) {
     var
         dummySamplePerPeriod = 1,   // just for initialization
         windowSize = timeDomainData.length,
         frequencyBinCount = 0.5 * windowSize,
-        windowFunction = true,
+        windowFunction = false,
         waveAnalyser = new WaveAnalyser(dummySamplePerPeriod, windowSize, windowFunction),
         N = timeDomainData.length,
         frequencyData = [],
-        samplePerPeriod,
-        decibel,
+        frequencyBin,
         i,
         k;
 
@@ -105,16 +179,35 @@ function getFrequencyData(timeDomainData) {
         waveAnalyser.handle(timeDomainData[i]);
     }
 
-    for (k = 0; k < frequencyBinCount; k++) {
-        samplePerPeriod = (k === 0)
-            ? Infinity       // DC-offset (0 Hz)
-            : N / k;
-        waveAnalyser.setSamplePerPeriod(samplePerPeriod);
-        decibel = waveAnalyser.getDecibel();
-        frequencyData.push(decibel);
+    if (!calculateList) {
+        calculateList = [];
+        for (k = 0; k < frequencyBinCount; k++) {
+            calculateList.push(k);
+        }
+    }
+
+    for (i = 0; i < calculateList.length; i++) {
+        k = calculateList[i];
+        frequencyBin = getFrequencyBin(waveAnalyser, k, N);
+        frequencyData.push(frequencyBin.decibel);
+        unitPhaseData.push(frequencyBin.unitPhase);
     }
 
     return frequencyData;
+}
+
+function getFrequencyBin(waveAnalyser, k, N) {
+    var samplePerPeriod,
+
+    samplePerPeriod = (k === 0)
+        ? Infinity       // DC-offset (0 Hz)
+        : N / k;
+    waveAnalyser.setSamplePerPeriod(samplePerPeriod);
+
+    return {
+        decibel: waveAnalyser.getDecibel(),
+        unitPhase: waveAnalyser.getUnitPhase()
+    };
 }
 
 // -----------------------------------------------------------------------
@@ -178,5 +271,24 @@ function drawFrequencyDomainData(ctx, data, doNotClear) {
         y1 = hMaxPix * (data[x] / DECIBEL_MIN);
         y2 = hMaxPix * (data[x + 1] / DECIBEL_MIN);
         drawLine(ctx, x, y1, x + 1, y2);
+    }
+}
+
+function drawUnitPhaseData(ctx, data) {
+    var i, B = 100;
+
+    for (i = 5; i < data.length; i++) {
+
+        drawLine(ctx, i * B, 10, (i + 1) * B, 10);
+        drawLine(ctx, i * B, 10 + B, (i + 1) * B, 10 + B);
+        drawLine(ctx, i * B, 10, i * B, 10 + B);
+        drawLine(ctx, (i + 1) * B, 10, (i + 1) * B, 10 + B);
+
+        drawLine(ctx,
+            i * B + B * 0.5,
+            10 + B * 0.5,
+            i * B + B * 0.5 + B * 0.5 * Math.cos(data[i] * 2 * Math.PI),
+            10 + B * 0.5 - B * 0.5 * Math.sin(data[i] * 2 * Math.PI)
+        );
     }
 }
