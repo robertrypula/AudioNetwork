@@ -5,9 +5,9 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
     var Segment;
 
     Segment = function (synchronizeFlag, sequenceNumber, acknowledgementFlag, acknowledgementNumber, payload) {
-        this.$$synchronizeFlag = !!(synchronizeFlag & 0x80);
+        this.$$synchronizeFlag = !!synchronizeFlag;
         this.$$sequenceNumber = sequenceNumber & 0x7f;
-        this.$$acknowledgementFlag = !!(acknowledgementFlag & 0x80);
+        this.$$acknowledgementFlag = !!acknowledgementFlag;
         this.$$acknowledgementNumber = acknowledgementNumber & 0x7f;
         this.$$payload = payload.slice(0);
 

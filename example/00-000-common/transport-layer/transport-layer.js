@@ -50,8 +50,8 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
     //          20 0                    21 51                 21 51                              26 51                                               28 54
     // C        SS                E                         MA1_S                             MA2_S                 MA2_C                     MB_R
     //                                                            . . . . .                         . .
-    //      - - P T T P -           - - P T T P -       - - P T T A H e l l P -           - - P T T o ! P -                                     - - P T T P -
-    //                  - - P T T P -                                         - - P T T P -               - - P T T P -       - - P T T A H i P -
+    //  . . - - P T T P - . . . . . - - P T T P - . . . - - P T T A H e l l P - . . . . . - - P T T o ! P - . . . . . . . . . . . . . . . . . . - - P T T P - . . .
+    //  . . . . . . . . - - P T T P - . . . . . . . . . . . . . . . . . . . . - - P T T P - . . . . . . . - - P T T P - . . . - - P T T A H i P - . . . . . . . . .
     //                                                                                                                                  ^ ^ ^
     // C L            SR                      E                             MA1_R                       MA2_R                     MB_S                    MB_C
     //                      50 21                                                  51 26                      51 28                      51 28                     54 28
@@ -72,9 +72,9 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
     TransportLayer.STATE_MB_RECEIVED = 'STATE_MB_RECEIVED';
     TransportLayer.STATE_MB_CONFIRMED = 'STATE_MB_CONFIRMED';
 
-    TransportLayer.MESSAGE_A_1 = [0x06, 'H'.charCodeAt(0), 'e'.charCodeAt(0), 'l'.charCodeAt(0), 'l'.charCodeAt(0)];
+    TransportLayer.MESSAGE_A_1 = [0x86, 'H'.charCodeAt(0), 'e'.charCodeAt(0), 'l'.charCodeAt(0), 'l'.charCodeAt(0)];
     TransportLayer.MESSAGE_A_2 = ['o'.charCodeAt(0), '!'.charCodeAt(0)];
-    TransportLayer.MESSAGE_B = [0x02, 'H'.charCodeAt(0), 'i'.charCodeAt(0)];
+    TransportLayer.MESSAGE_B = [0x82, 'H'.charCodeAt(0), 'i'.charCodeAt(0)];
 
     TransportLayer.prototype.getDataLinkLayer = function () {
         return this.$$dataLinkLayer;
