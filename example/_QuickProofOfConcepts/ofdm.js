@@ -11,11 +11,13 @@ var
     MAX_WIDTH = LIMIT_CANVAS_WIDTH ? 2048 : Number.POSITIVE_INFINITY,
     DECIBEL_MIN = -160,
     audioMonoIO,
+    spectrogram,
     ctxTimeDomain,
     ctxFrequencyDomain;
 
 function init() {
     audioMonoIO = new AudioMonoIO(FFT_SIZE);
+    spectrogram = new Spectrogram(document.getElementById('spectrogram'));
 
     ctxTimeDomain = getConfiguredCanvasContext(
         'canvas-time-domain',
@@ -98,6 +100,15 @@ function analyse() {
     );
     end = new Date().getTime();
     time = end - start;
+
+    spectrogram.add(
+        frequencyData,
+        5,
+        14,
+        1,
+        Spectrogram.INDEX_MARKER_DISABLED,
+        Spectrogram.ROW_MARKER_DISABLED
+    );
 
     html('#time-log', time + ' ms');
 
@@ -278,6 +289,10 @@ function drawUnitPhaseData(ctx, data) {
     var i, B = 100;
 
     for (i = 5; i < data.length; i++) {
+
+        if (i === 5 || i === 7 || i === 11) {
+            drawLine(ctx, i * B, 8, (i + 1) * B, 8);
+        }
 
         drawLine(ctx, i * B, 10, (i + 1) * B, 10);
         drawLine(ctx, i * B, 10 + B, (i + 1) * B, 10 + B);

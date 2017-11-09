@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Ofdm</title>
+    <link rel="stylesheet" type="text/css" href="../00-000-common/ui/spectrogram.css">
 </head>
 <body onload="init()">
 
 <script src="../00-000-common/ui/dom-util.js"></script>
+<script src="../00-000-common/ui/spectrogram.js"></script>
 <script src="../00-000-common/util/buffer.js"></script>
 <script src="../00-000-common/dsp/complex.js"></script>
 <script src="../00-000-common/dsp/wave-analyser.js"></script>
@@ -45,6 +47,8 @@ TxSampleRate: <input id="tx-sample-rate" type="number" min="44000" max="48100" s
 
 <h2>Frequency domain</h2>
 <canvas style="border: 1px solid lightgray" id="canvas-frequency-domain"></canvas>
+
+<div id="spectrogram" style="width: 300px;"></div>
 
 <div style="font-family: monospace;" id="subcarrier-log"></div>
 
