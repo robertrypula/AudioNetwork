@@ -6,55 +6,55 @@ Redirect 301 /example/00-040-dft-carrier-recovery-simple/dft-carrier-recovery-si
 
 # Article 1 aliases:
 
-Redirect 301 /dft-simple /example/00-010-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
-Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-010-discrete-fourier-transform-simple
+Redirect 301 /dft-simple /example/00-01-00-discrete-fourier-transform-simple/discrete-fourier-transform-simple.html
+Redirect 301 /dft-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-01-00-discrete-fourier-transform-simple
 
-Redirect 301 /dft-full /example/00-011-discrete-fourier-transform-full/discrete-fourier-transform-full.html
-Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-011-discrete-fourier-transform-full
+Redirect 301 /dft-full /example/00-01-01-discrete-fourier-transform-full/discrete-fourier-transform-full.html
+Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-01-01-discrete-fourier-transform-full
 
 # Article 2 aliases:
 
-Redirect 301 /audio-mono-io-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/web-audio/audio-mono-io.js
-Redirect 301 /example-docs https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common
+Redirect 301 /audio-mono-io-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/web-audio/audio-mono-io.js
+Redirect 301 /example-docs https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common
 
-Redirect 301 /audio-context-init /example/00-020-audio-context-init/audio-context-init.html
-Redirect 301 /audio-context-init-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-020-audio-context-init
+Redirect 301 /audio-context-init /example/00-02-00-audio-context-init/audio-context-init.html
+Redirect 301 /audio-context-init-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-00-audio-context-init
 
-Redirect 301 /square-wave /example/00-021-square-wave/square-wave.html
-Redirect 301 /square-wave-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-021-square-wave
+Redirect 301 /square-wave /example/00-02-01-square-wave/square-wave.html
+Redirect 301 /square-wave-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-01-square-wave
 
-Redirect 301 /square-wave-phase /example/00-022-square-wave-phase/square-wave-phase.html
-Redirect 301 /square-wave-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-022-square-wave-phase
+Redirect 301 /square-wave-phase /example/00-02-02-square-wave-phase/square-wave-phase.html
+Redirect 301 /square-wave-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-02-square-wave-phase
 
-Redirect 301 /analyser-node /example/00-023-analyser-node/analyser-node.html
-Redirect 301 /analyser-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-023-analyser-node
+Redirect 301 /analyser-node /example/00-02-03-analyser-node/analyser-node.html
+Redirect 301 /analyser-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-03-analyser-node
 
-Redirect 301 /script-processor-node /example/00-024-script-processor-node/script-processor-node.html
-Redirect 301 /script-processor-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-024-script-processor-node
+Redirect 301 /script-processor-node /example/00-02-04-script-processor-node/script-processor-node.html
+Redirect 301 /script-processor-node-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-04-script-processor-node
 
-Redirect 301 /audio-mono-io-basic /example/00-025-audio-mono-io-basic/audio-mono-io-basic.html
-Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-025-audio-mono-io-basic
+Redirect 301 /audio-mono-io-basic /example/00-02-05-audio-mono-io-basic/audio-mono-io-basic.html
+Redirect 301 /audio-mono-io-basic-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-05-audio-mono-io-basic
 
-Redirect 301 /harmonics-and-phase /example/00-026-harmonics-and-phase/harmonics-and-phase.html
-Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-026-harmonics-and-phase
+Redirect 301 /harmonics-and-phase /example/00-02-06-harmonics-and-phase/harmonics-and-phase.html
+Redirect 301 /harmonics-and-phase-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-06-harmonics-and-phase
 
-Redirect 301 /piano /example/00-028-piano/piano.html
-Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-028-piano
+Redirect 301 /piano /example/00-02-07-piano/piano.html
+Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-02-07-piano
 
 # Article 3 aliases:
 
 Redirect 301 /internet-sources https://github.com/robertrypula/AudioNetwork/tree/master/example/internet-sources.md
 
-Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/dsp/wave-analyser.js
-Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/dsp/wave-generator.js
-Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/util/buffer.js
-Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/dsp/complex.js
-Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/dsp/correlator.js
-Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/physical-layer/rx-sync-detector.js
-Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/physical-layer/physical-layer.js
-Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/data-link-layer/data-link-layer.js
-Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/transport-layer/transport-layer.js
-Redirect 301 /spectrogram-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-000-common/ui/spectrogram.js
+Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/wave-analyser.js
+Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/wave-generator.js
+Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/util/buffer.js
+Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/complex.js
+Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/correlator.js
+Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/rx-sync-detector.js
+Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/physical-layer.js
+Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/data-link-layer/data-link-layer.js
+Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/transport-layer/transport-layer.js
+Redirect 301 /spectrogram-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/ui/spectrogram.js
 
 Redirect 301 /wave-generator-wave-analyser /example/00-03-00-wave-generator-wave-analyser/wave-generator-wave-analyser.html
 Redirect 301 /wave-generator-wave-analyser-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-00-wave-generator-wave-analyser
@@ -77,52 +77,44 @@ Redirect 301 /analyser-node-performance-src https://github.com/robertrypula/Audi
 Redirect 301 /spectral-waterfall /example/00-03-06-spectral-waterfall/spectral-waterfall.html
 Redirect 301 /spectral-waterfall-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall
 
-Redirect 301 /spectral-waterfall-recorder /example/00-03-06-spectral-waterfall-recorder/spectral-waterfall-recorder.html
-Redirect 301 /spectral-waterfall-recorder-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-spectral-waterfall-recorder
+Redirect 301 /spectral-waterfall-recorder /example/00-03-07-spectral-waterfall-recorder/spectral-waterfall-recorder.html
+Redirect 301 /spectral-waterfall-recorder-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-07-spectral-waterfall-recorder
 
-Redirect 301 /window-function /example/00-03-06-window-function/window-function.html
-Redirect 301 /window-function-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-06-window-function
+Redirect 301 /window-function /example/00-03-08-window-function/window-function.html
+Redirect 301 /window-function-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-08-window-function
 
-Redirect 301 /fsk-synchronization-demo /example/00-03-07-fsk-synchronization-demo/fsk-synchronization-demo.html
-Redirect 301 /fsk-synchronization-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-07-fsk-synchronization-demo
+Redirect 301 /fsk-synchronization-demo /example/00-03-09-fsk-synchronization-demo/fsk-synchronization-demo.html
+Redirect 301 /fsk-synchronization-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-09-fsk-synchronization-demo
 
-Redirect 301 /physical-layer-simplest /example/00-03-08-physical-layer-simplest/physical-layer-simplest.html
-Redirect 301 /physical-layer-simplest-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-08-physical-layer-simplest
+Redirect 301 /physical-layer-simplest /example/00-03-10-physical-layer-simplest/physical-layer-simplest.html
+Redirect 301 /physical-layer-simplest-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-10-physical-layer-simplest
 
-Redirect 301 /physical-layer-simple /example/00-03-09-physical-layer-simple/physical-layer-simple.html
-Redirect 301 /physical-layer-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-09-physical-layer-simple
+Redirect 301 /physical-layer-simple /example/00-03-11-physical-layer-simple/physical-layer-simple.html
+Redirect 301 /physical-layer-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-11-physical-layer-simple
 
-Redirect 301 /physical-layer-listeners-demo /example/00-03-10-physical-layer-listeners-demo/physical-layer-listeners-demo.html
-Redirect 301 /physical-layer-listeners-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-10-physical-layer-listeners-demo
+Redirect 301 /physical-layer-listeners-demo /example/00-03-12-physical-layer-listeners-demo/physical-layer-listeners-demo.html
+Redirect 301 /physical-layer-listeners-demo-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-12-physical-layer-listeners-demo
 
-Redirect 301 /physical-layer /example/00-03-11-physical-layer/physical-layer.html
-Redirect 301 /physical-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-11-physical-layer
+Redirect 301 /physical-layer /example/00-03-13-physical-layer/physical-layer.html
+Redirect 301 /physical-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-13-physical-layer
 
-Redirect 301 /data-link-layer /example/00-03-12-data-link-layer/data-link-layer.html
-Redirect 301 /data-link-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-12-data-link-layer
+Redirect 301 /data-link-layer-simple /example/00-03-14-data-link-layer-simple/data-link-layer-simple.html
+Redirect 301 /data-link-layer-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-14-data-link-layer-simple
 
-Redirect 301 /data-link-layer-simple /example/00-03-12-data-link-layer-simple/data-link-layer-simple.html
-Redirect 301 /data-link-layer-simple-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-12-data-link-layer-simple
+Redirect 301 /data-link-layer /example/00-03-15-data-link-layer/data-link-layer.html
+Redirect 301 /data-link-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-15-data-link-layer
 
-Redirect 301 /transport-layer /example/00-03-13-transport-layer/transport-layer.html
-Redirect 301 /transport-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-13-transport-layer
+Redirect 301 /transport-layer /example/00-03-16-transport-layer/transport-layer.html
+Redirect 301 /transport-layer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-16-transport-layer
 
-Redirect 301 /audio-chat /example/00-03-14-audio-chat/audio-chat.html
-Redirect 301 /audio-chat-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-14-audio-chat
+Redirect 301 /audio-chat /example/00-03-17-audio-chat/audio-chat.html
+Redirect 301 /audio-chat-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-17-audio-chat
 
-Redirect 301 /fir-filter /example/00-03-15-fir-filter/fir-filter.html
-Redirect 301 /fir-filter-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-15-fir-filter
+Redirect 301 /fir-filter /example/00-03-18-fir-filter/fir-filter.html
+Redirect 301 /fir-filter-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-18-fir-filter
 
-Redirect 301 /fft /example/00-03-16-fft/fft.html
-Redirect 301 /fft-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-16-fft
+Redirect 301 /fft /example/00-03-19-fft/fft.html
+Redirect 301 /fft-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-19-fft
 
-Redirect 301 /iq-mixer /example/00-03-17-iq-mixer/iq-mixer.html
-Redirect 301 /iq-mixer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-17-iq-mixer
-
-
-
-
-
-
-
-
+Redirect 301 /iq-mixer /example/00-03-20-iq-mixer/iq-mixer.html
+Redirect 301 /iq-mixer-src https://github.com/robertrypula/AudioNetwork/tree/master/example/00-03-20-iq-mixer

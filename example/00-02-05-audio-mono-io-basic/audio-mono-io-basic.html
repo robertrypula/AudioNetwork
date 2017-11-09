@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="fm-modulation.css">
+    <link rel="stylesheet" type="text/css" href="audio-mono-io-basic.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -54,74 +54,105 @@
 
             <!-- ---------------- -->
 
+
             <div class="row margin-bottom">
-                <div class="col col-xs-12" id="test">
+                <div class="col col-xs-12">
+                    <p>
+                        This example shows how to use
+                        <a href="https://github.com/robertrypula/AudioNetwork/blob/master/example/00-000-common/audio-mono-io.js" target="_blank">AudioMonoIO</a>
+                        class to simplify all communication with Web Audio API.
+                    </p>
+                </div>
+            </div>
 
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-12">
-                            <p>
-                                This example allows to experiment with FM modulation
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-triple">
-                        <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label for="loopback-checkbox" class="label-compact">
-                                Enable loopback
-                            </label>
-                        </div>
-                        <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <input
-                                type="checkbox"
-                                onChange="onLoopbackCheckboxChange()"
-                                id="loopback-checkbox"
-                                value="1" />
-                        </div>
-                    </div>
-
-                    <h2>RX - Frequency domain (AnalyserNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-frequency-data"></canvas>
-                    </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label class="label-compact">
-                                Loudest frequency
+                                FFT resolution
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <span id="loudest-frequency"></span>
+                            <span id="fft-resolution"></span>
                         </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>RX - Time domain audio (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-time-domain-audio"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                FFT index with max value (Analyser)
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="fft-max-value-index"></span>
+                        </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>RX - Time domain baseband (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-time-domain-baseband"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                Peak Frequency (Analyser)
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="peak-frequency"></span>
+                        </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>TX - Time domain baseband (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-tx-time-domain-baseband"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                Input volume (Analyser)
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div class="gauge-container">
+                                <div id="max-absolute-amplitude-gauge-analysernode" class="gauge"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- --- -->
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                Input volume (ScriptProcessor)
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <div class="gauge-container">
+                                <div id="max-absolute-amplitude-gauge-rawsample" class="gauge"></div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <h2>TX - Time domain audio (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-tx-time-domain-audio"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                White noise
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="whiteNoiseUpdateVolume(0)" class="btn btn-default">Mute</button>
+                            <button onClick="whiteNoiseUpdateVolume(0.01)" class="btn btn-default">Volume 1%</button>
+                            <button onClick="whiteNoiseUpdateVolume(0.1)" class="btn btn-default">Volume 10%</button>
+                            <button onClick="whiteNoiseUpdateVolume(1.0)" class="btn btn-default">Volume 100%</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                Tone
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="toneUpdateVolume(0)" class="btn btn-default">Mute</button>
+                            <button onClick="toneUpdateVolume(0.01)" class="btn btn-default">Volume 1%</button>
+                            <button onClick="toneUpdateVolume(0.1)" class="btn btn-default">Volume 10%</button>
+                            <button onClick="toneUpdateVolume(1.0)" class="btn btn-default">Volume 100%</button>
+                        </div>
                     </div>
 
                 </div>
@@ -148,7 +179,7 @@
     </div>
 
     <script src="../00-00-00-common/web-audio/audio-mono-io.js"></script>
-    <script src="fm-modulation.js"></script>
+    <script src="audio-mono-io-basic.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

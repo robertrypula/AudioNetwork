@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <title>Audio Network - data transmission over sound waves</title>
+
+    <meta name="description" content="">
+
+    <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
+    <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/editable-float.css">
+    <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/spectrogram.css">
+    <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/power-bar.css">
+    <link rel="stylesheet" type="text/css" href="fsk-synchronization-demo.css">
+    <script src="../../asset/js/site.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body onLoad="init()">
+
+    <div id="fb-root"></div>
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        }
+    </script>
+
+    <div class="wrapper">
+
+        <div class="container">
+
+            <h1>Audio Network - send data over sound in JavaScript</h1>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="fb-like-cont">
+                        <a href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" target="_blank" class="a-icon a-icon-fb">
+                            <img src="/asset/image/fb.png" alt="Audio Network at Facebook">
+                        </a>
+                        <div class="fb-like" data-href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" data-layout="button" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
+                    </div>
+                    <p class="text-right">
+                        Return to <a href="https://audio-network.rypula.pl">main page</a>
+                    </p>
+                    <p class="larger text-center">
+                        THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
+                        Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                Loopback
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom" id="loopback-container">
+                                <button id="loopback-enabled" class="btn btn-default" onClick="onSetLoopbackClick(true)">Enabled</button>
+                                <button id="loopback-disabled" class="btn btn-default" onClick="onSetLoopbackClick(false)">Disabled</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                DspConfig
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="dsp-config" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <h2>Receiver</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                RxSampleRate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sample-rate">-</span> kHz
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                RxSyncStatus
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="label-box">
+                                <span>
+                                    <span id="rx-sync-status"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                RxSyncDspDetails
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-sync" class="log-container">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                RxDspConfig
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-config" class="log-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                RxSampleDspDetails
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="margin-bottom">
+                                <div id="rx-sample" class="log-container"></div>
+                            </div>
+                            <div id="power-bar" class="clearfix"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                RxSymbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-symbol">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                RxSymbol history
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="rx-symbol-history">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-12">
+                            <div id="rx-spectrogram"></div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label for="spectrogram-active" class="label-compact">
+                                Spectrogram
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="spectrogram-active"
+                                checked
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label for="symbol-marker-active" class="label-compact">
+                                Symbol marker
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <input
+                                type="checkbox"
+                                id="symbol-marker-active"
+                                checked
+                                value="1" />
+                        </div>
+                    </div>
+
+                    <!-- ----- -->
+
+                    <h2>Transmitter</h2>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                TxSampleRate
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div class="clearfix margin-bottom" id="tx-sample-rate-container">
+                                <button id="tx-sample-rate-44100" class="btn btn-default" onClick="onSetTxSampleRateClick(44100)">44.1 kHz</button>
+                                <button id="tx-sample-rate-48000" class="btn btn-default" onClick="onSetTxSampleRateClick(48000)">48.0 kHz</button>
+                            </div>
+                            <div id="tx-sample-rate" class="margin-bottom clearfix"></div>
+                            <p>
+                                This value should match sample rate that is displayed on the receiver's side.
+                                The problem is that we cannot fine-tune receiver because in Web Audio API sample
+                                rate is fixed and depends on device. The solution is to tune the transmitter
+                                to match frequency bins that receiver is looking for.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                TxSync
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <button class="btn btn-default" onClick="onTxSyncClick()">Sync</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                TxSymbol
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="tx-config" class="log-container margin-bottom"></div>
+                            <div class="margin-bottom">
+                                <button class="btn btn-default" onClick="onTxSymbolClick(100)">100</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(101)">101</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(102)">102</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(103)">103</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(104)">104</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(105)">105</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(106)">106</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(107)">107</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(108)">108</button>
+                                <button class="btn btn-default" onClick="onTxSymbolClick(109)">109</button>
+                            </div>
+                            <p>
+                                Note: you can also use keyboard 0-9 keys
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                TxSymbolCurrent
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-symbol-current">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                TxSymbolQueue
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <span id="tx-symbol-queue">-</span>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label>
+                                TxAmplitude
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9" id="tx-amplitude-container">
+                            <button id="tx-amplitude-2" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.2)">0.2</button>
+                            <button id="tx-amplitude-4" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.4)">0.4</button>
+                            <button id="tx-amplitude-6" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.6)">0.6</button>
+                            <button id="tx-amplitude-8" class="btn btn-default" onClick="onSetTxAmplitudeClick(0.8)">0.8</button>
+                            <button id="tx-amplitude-10" class="btn btn-default" onClick="onSetTxAmplitudeClick(1.0)">1.0</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <script>
+                if (isProduction()) { // TODO refactor this
+                    document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+                }
+            </script>
+
+        </div>
+
+        <footer>
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="copyright">Robert Rypuła 2015-2017</div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="../00-00-00-common/web-audio/audio-mono-io.js"></script>
+    <script src="../00-00-00-common/ui/dom-util.js"></script>
+    <script src="../00-00-00-common/util/smart-timer.js"></script>
+    <script src="../00-00-00-common/dsp/fft-result.js"></script>
+    <script src="../00-00-00-common/ui/power-bar.js"></script>
+    <script src="../00-00-00-common/util/buffer.js"></script>
+    <script src="../00-00-00-common/dsp/correlator.js"></script>
+    <script src="../00-00-00-common/physical-layer/rx-sync-detector.js"></script>
+    <script src="../00-00-00-common/ui/editable-float.js"></script>
+    <script src="../00-00-00-common/ui/spectrogram.js"></script>
+    <script src="../00-00-00-common/physical-layer/tx-symbol.js"></script>
+    <script src="../00-00-00-common/physical-layer/tx-symbol-manager.js"></script>
+    <script src="../00-00-00-common/physical-layer/physical-layer.js"></script>
+    <script src="../00-00-00-common/physical-layer/physical-layer-builder.js"></script>
+    <script src="../00-00-00-common/ui/convert-util.js"></script>
+    <script src="fsk-synchronization-demo.js"></script>
+
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-76662342-1', 'auto');
+            ga('send', 'pageview');
+        }
+    </script>
+
+</body>
+</html>

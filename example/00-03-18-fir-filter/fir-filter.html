@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="fm-modulation.css">
+    <link rel="stylesheet" type="text/css" href="fir-filter.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -61,15 +61,20 @@
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to experiment with FM modulation
+                                This example allows to experiment with Finite Impulse Response filter.
+                                It implements Windowed-Sinc lowpass filter.
                             </p>
+                            <ul>
+                                <li>When Loopback is enabled then randomly generated white noise is used for filtering. You can see how this signal gets filtered on the frequency domain chart.</li>
+                                <li>When Loopback is disabled then input from microphone is used for filtering. IMPORTANT NOTE: frequency domain chart shows input BEFORE filtering.</li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div class="row margin-bottom-triple">
+                    <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
                             <label for="loopback-checkbox" class="label-compact">
-                                Enable loopback
+                                Loopback
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
@@ -77,51 +82,83 @@
                                 type="checkbox"
                                 onChange="onLoopbackCheckboxChange()"
                                 id="loopback-checkbox"
+                                checked="checked"
                                 value="1" />
                         </div>
                     </div>
 
-                    <h2>RX - Frequency domain (AnalyserNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-frequency-data"></canvas>
-                    </div>
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-6 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                Loudest frequency
+                            <label>
+                                Cutoff Frequency [Hz]
                             </label>
                         </div>
                         <div class="col col-xs-6 col-sm-7 col-md-6">
-                            <span id="loudest-frequency"></span>
+                            <input
+                                type="number"
+                                onChange="onFilterParametersChange()"
+                                value="1500"
+                                id="cutoff-frequency" />
                         </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>RX - Time domain audio (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-time-domain-audio"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>
+                                Transition bandwidth [Hz]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                onChange="onFilterParametersChange()"
+                                value="300"
+                                id="transition-bandwidth" />
+                        </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>RX - Time domain baseband (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-rx-time-domain-baseband"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="window-function-checkbox" class="label-compact">
+                                Window function
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="checkbox"
+                                onChange="onFilterParametersChange()"
+                                id="window-function-checkbox"
+                                checked="checked"
+                                value="1" />
+                        </div>
                     </div>
 
-                    <!-- --- -->
-
-                    <h2>TX - Time domain baseband (ScriptProcessorNode based)</h2>
-                    <div class="scroll-container">
-                        <canvas id="canvas-tx-time-domain-baseband"></canvas>
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                Filter taps number
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <span id="filter-taps-number"></span>
+                        </div>
                     </div>
 
-                    <!-- --- -->
+                    <h2>Filter impulse response</h2>
+                    <div class="scroll-container" id="filter-impulse-response-container"></div>
 
-                    <h2>TX - Time domain audio (ScriptProcessorNode based)</h2>
+                    <h2>Frequency domain computed from input</h2>
+                    <div class="row margin-bottom">
+                        <div class="col col-xs-12">
+                            <p>
+                                Please note that this is input spectrum. When loopback is dissabled it will show
+                                full spectrum that microphone is 'hearing' (not filtered). You can verify filering
+                                on the speakers.
+                            </p>
+                        </div>
+                    </div>
                     <div class="scroll-container">
-                        <canvas id="canvas-tx-time-domain-audio"></canvas>
+                        <canvas id="canvas-frequency-data"></canvas>
                     </div>
 
                 </div>
@@ -147,8 +184,16 @@
 
     </div>
 
+    <script>
+        var AudioNetworkBootConfig = {
+            createAlias: false,
+            devScriptLoad: true
+        };
+    </script>
+    <script src="../../src/audio-network-boot.js"></script>
+
     <script src="../00-00-00-common/web-audio/audio-mono-io.js"></script>
-    <script src="fm-modulation.js"></script>
+    <script src="fir-filter.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

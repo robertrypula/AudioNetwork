@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="wave-analyser-performance.css">
+    <link rel="stylesheet" type="text/css" href="fft.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -29,7 +29,6 @@
             }(document, 'script', 'facebook-jssdk'));
         }
     </script>
-
 
     <div class="wrapper">
 
@@ -56,34 +55,25 @@
             <!-- ---------------- -->
 
             <div class="row margin-bottom">
-                <div class="col col-xs-12">
+                <div class="col col-xs-12" id="test">
+
 
                     <div class="row margin-bottom">
                         <div class="col col-xs-12">
                             <p>
-                                This example allows to check overall performance of WaveAnaluser class.
+                                This example allows to experiment with FFT algorithm
                             </p>
                         </div>
                     </div>
 
-                    <h2>WaveAnalyser performance</h2>
-
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            Actions
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-6">
-                            <button onClick="checkWaveAnalyserPerformance()" class="btn btn-default">Run test</button>
-                        </div>
+                    <h2>Frequency domain (AnalyserNode)</h2>
+                    <div class="scroll-container">
+                        <canvas id="canvas-analyser-node"></canvas>
                     </div>
 
-                    <div class="row margin-bottom">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            Log
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-6">
-                            <div id="log-performance"></div>
-                        </div>
+                    <h2>Frequency domain (FFT computed from ScriptProcessorNode's raw samples)</h2>
+                    <div class="scroll-container">
+                        <canvas id="canvas-fft"></canvas>
                     </div>
 
                 </div>
@@ -110,12 +100,7 @@
     </div>
 
     <script src="../00-00-00-common/web-audio/audio-mono-io.js"></script>
-    <script src="../00-00-00-common/dsp/fft-result.js"></script>
-    <script src="../00-00-00-common/ui/dom-util.js"></script>
-    <script src="../00-00-00-common/util/buffer.js"></script>
-    <script src="../00-00-00-common/dsp/complex.js"></script>
-    <script src="../00-00-00-common/dsp/wave-analyser.js"></script>
-    <script src="wave-analyser-performance.js"></script>
+    <script src="fft.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this
