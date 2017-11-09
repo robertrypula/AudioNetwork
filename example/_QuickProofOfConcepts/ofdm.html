@@ -16,36 +16,56 @@
 <script src="../00-000-common/web-audio/audio-mono-io.js"></script>
 <script src="ofdm.js"></script>
 
-<h1>Loopback</h1>
+<h1>General config</h1>
 
-<input id="loopback" type="checkbox" onChange="loopbackChange()" />
+<div>
+    <input id="loopback" type="checkbox" onChange="loopbackChange()" />
+</div>
+<div>
+    <button onClick="audioMonoIO.microphoneDisable()">Mic OFF</button>
+    <button onClick="audioMonoIO.microphoneEnable()">Mic ON</button>
+</div>
 
 <h1>Generate</h1>
 TxSampleRate: <input id="tx-sample-rate" type="number" min="44000" max="48100" step="100" value="48000" onChange="txStartUpdate()"><br/>
 #05 <input id="sub-carrier-0" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#06 <input id="sub-carrier-1" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
+#06 <input id="sub-carrier-1" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
 #07 <input id="sub-carrier-2" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#08 <input id="sub-carrier-3" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#09 <input id="sub-carrier-4" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#10 <input id="sub-carrier-5" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
+#08 <input id="sub-carrier-3" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
+#09 <input id="sub-carrier-4" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
+#10 <input id="sub-carrier-5" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
 #11 <input id="sub-carrier-6" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#12 <input id="sub-carrier-7" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#13 <input id="sub-carrier-8" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
-#14 <input id="sub-carrier-9" type="number" min="-1" max="359" step="1" value="0" onChange="txStartUpdate()"><br/>
+#12 <input id="sub-carrier-7" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
+#13 <input id="sub-carrier-8" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
+#14 <input id="sub-carrier-9" type="number" min="-1" max="359" step="1" value="-1" onChange="txStartUpdate()"><br/>
 
 <button onclick="txStop()">Stop</button>
 
 <h1>Detect</h1>
 
-<span id="time-log"></span>
-<br/>
-<input type="number" id="factor" value="1" min="1" max="16" step="1">
-<input type="number" id="time-domain-starting-offset" value="1" min="0" max="8192" step="1">
+<div>
+    <span id="time-log"></span>
+</div>
+<div>
+    OFDM symbols <input type="number" id="factor" value="1" min="1" max="16" step="1">
+</div>
+<div>
+    sample offset <input type="number" id="time-domain-starting-offset" value="1" min="0" max="8192" step="1">
+</div>
 
 <h2>Time domain</h2>
+
+<div>
+    Log scale <input type="checkbox" id="log-scale" />
+</div>
+
 <canvas style="border: 1px solid lightgray" id="canvas-time-domain"></canvas>
 
 <h2>Frequency domain</h2>
+
+<div>
+    fix phase <input type="checkbox" id="fix-phase" checked />
+</div>
 <canvas style="border: 1px solid lightgray" id="canvas-frequency-domain"></canvas>
 
 <div id="spectrogram" style="width: 300px;"></div>

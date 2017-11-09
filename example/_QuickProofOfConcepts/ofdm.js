@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// NOTE: Very fast written Proof Of Concept of OFDM communication
+
 var
     BIN_SCALER = 64,
     FFT_SIZE = 8192,
@@ -30,7 +32,7 @@ function init() {
         CANVAS_HEIGHT
     );
 
-    setInterval(analyse, 256);
+    setInterval(analyse, 500);
 }
 
 function loopbackChange() {
@@ -87,32 +89,34 @@ function analyse() {
         log,
         i;
 
+    start = new Date().getTime();
+
     timeDomainDataOriginal = audioMonoIO.getTimeDomainData();
     for (i = startingOffset; i < startingOffset + timeDomainDataOriginal.length / (BIN_SCALER / f); i++) {
         timeDomainData.push(timeDomainDataOriginal[i]);
     }
 
-    start = new Date().getTime();
+
     frequencyData = getFrequencyData(
         timeDomainData,
         unitPhaseData,
         [0 * f, 1 * f, 2 * f, 3 * f, 4 * f, 5 * f, 6 * f, 7 * f, 8 * f, 9 * f, 10 * f, 11 * f, 12 * f, 13 * f, 14 * f]
     );
-    end = new Date().getTime();
-    time = end - start;
 
     spectrogram.add(
         frequencyData,
         5,
         14,
-        1,
+        getTransmitFrequency(),
         Spectrogram.INDEX_MARKER_DISABLED,
         Spectrogram.ROW_MARKER_DISABLED
     );
 
-    html('#time-log', time + ' ms');
-
-    fixedUnitPhase = getFixedUnitPhaseData(unitPhaseData);
+    if (getCheckboxState('#fix-phase')) {
+        fixedUnitPhase = getFixedUnitPhaseData(unitPhaseData);
+    } else {
+        fixedUnitPhase = unitPhaseData;
+    }
 
     log = '';
     for (i = 0; i < frequencyData.length; i++) {
@@ -120,9 +124,38 @@ function analyse() {
     }
     html('#subcarrier-log', log);
 
+    if (getCheckboxState('#log-scale')) {
+        for (i = 0; i < timeDomainData.length; i++) {
+            timeDomainData[i] = logScale(timeDomainData[i]);
+        }
+    }
+
     drawTimeDomainData(ctxTimeDomain, timeDomainData);
     drawFrequencyDomainData(ctxFrequencyDomain, frequencyData);
-    drawUnitPhaseData(ctxFrequencyDomain, fixedUnitPhase);
+    drawUnitPhaseData(ctxFrequencyDomain, fixedUnitPhase, frequencyData);
+
+    end = new Date().getTime();
+    time = end - start;
+    html('#time-log', time + ' ms');
+}
+
+function log10(value) {
+    return Math.log(value) / Math.log(10);
+}
+
+function logScale(value) {
+    var minus = value < 0;
+
+    value = value > 1 ? 1 : value;
+    value = Math.abs(value);
+    value *= 10000;
+    if (value <= 1) {
+        value = 0;
+    } else {
+        value = log10(value) / 4;
+    }
+
+    return minus ? -value : value;
 }
 
 function convertToDegree(value) {
@@ -135,24 +168,29 @@ function convertToDegree(value) {
 }
 
 function getFixedUnitPhaseData(unitPhaseData) {
-    var normalized = [], baseOffset, i, j, result, absDiff, bestAbsDiff;
+    var phaseGlobal, i, j, result, absDiff, bestAbsDiff, index;
 
-    baseOffset = unitPhaseData[5] / 5;
-    for (i = 0; i < unitPhaseData.length; i++) {
-        normalized.push(normalizeUnit(unitPhaseData[i] - baseOffset * i));
-    }
-    bestAbsDiff = getDistanceToZeroDegree(normalized[5]) + getDistanceToZeroDegree(normalized[7]) + getDistanceToZeroDegree(normalized[11]);
-    result = normalized.slice(0);
+    bestAbsDiff =
+        getDistanceToZeroDegree(unitPhaseData[5]) +
+        getDistanceToZeroDegree(unitPhaseData[7]) +
+        getDistanceToZeroDegree(unitPhaseData[11]);
+    result = unitPhaseData.slice(0);
+    index = 0;
 
-    baseOffset = 1 / 5;
-    for (i = 0; i < 5; i++) {
-        absDiff = getDistanceToZeroDegree(normalized[5] + 5 * baseOffset * i) + getDistanceToZeroDegree(normalized[7] + 7 * baseOffset * i) + getDistanceToZeroDegree(normalized[11] + 11 * baseOffset * i);
+    // TODO find better solution than this brute force one... ;)
+    for (i = 0; i <= 128 * 10; i++) {
+        phaseGlobal = i / (128 * 10);
+        absDiff =
+            getDistanceToZeroDegree(unitPhaseData[5] + 5 * phaseGlobal) +
+            getDistanceToZeroDegree(unitPhaseData[7] + 7 * phaseGlobal) +
+            getDistanceToZeroDegree(unitPhaseData[11] + 11 * phaseGlobal);
 
         if (absDiff < bestAbsDiff) {
+            index = i;
             bestAbsDiff = absDiff;
             result.length = 0;
             for (j = 0; j < unitPhaseData.length; j++) {
-                result.push(normalizeUnit(normalized[j] + j * baseOffset * i));
+                result.push(normalizeUnit(unitPhaseData[j] + j * phaseGlobal));
             }
         }
     }
@@ -285,13 +323,13 @@ function drawFrequencyDomainData(ctx, data, doNotClear) {
     }
 }
 
-function drawUnitPhaseData(ctx, data) {
+function drawUnitPhaseData(ctx, data, dataDecibel) {
     var i, B = 100;
 
     for (i = 5; i < data.length; i++) {
 
         if (i === 5 || i === 7 || i === 11) {
-            drawLine(ctx, i * B, 8, (i + 1) * B, 8);
+            drawLine(ctx, i * B, 5, (i + 1) * B, 5);
         }
 
         drawLine(ctx, i * B, 10, (i + 1) * B, 10);
