@@ -38,6 +38,7 @@ function init() {
         if (!getCheckboxState('#auto-generate')) {
             return;
         }
+        select('#sub-carrier-1')[0].value = (getFormFieldValue('#sub-carrier-1', 'int') + 10) % 360;
         select('#sub-carrier-3')[0].value = (getFormFieldValue('#sub-carrier-3', 'int') + 45) % 360;
         select('#sub-carrier-4')[0].value = (getFormFieldValue('#sub-carrier-4', 'int') + 90) % 360;
         select('#sub-carrier-5')[0].value = (getFormFieldValue('#sub-carrier-5', 'int') + 180) % 360;
