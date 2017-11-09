@@ -33,6 +33,16 @@ function init() {
     );
 
     setInterval(analyse, 500);
+
+    setInterval(function () {
+        if (!getCheckboxState('#auto-generate')) {
+            return;
+        }
+        select('#sub-carrier-3')[0].value = (getFormFieldValue('#sub-carrier-3', 'int') + 45) % 360;
+        select('#sub-carrier-4')[0].value = (getFormFieldValue('#sub-carrier-4', 'int') + 90) % 360;
+        select('#sub-carrier-5')[0].value = (getFormFieldValue('#sub-carrier-5', 'int') + 180) % 360;
+        txStartUpdate();
+    }, 1000);
 }
 
 function loopbackChange() {
@@ -148,11 +158,11 @@ function logScale(value) {
 
     value = value > 1 ? 1 : value;
     value = Math.abs(value);
-    value *= 10000;
+    value *= 100000;
     if (value <= 1) {
         value = 0;
     } else {
-        value = log10(value) / 4;
+        value = log10(value) / 5;
     }
 
     return minus ? -value : value;
