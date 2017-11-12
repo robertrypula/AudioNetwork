@@ -1,73 +1,19 @@
 ## Roadmap
-  - 1.x.x finish all PhysicalLayer stuff (Web Audio API, raw packets)
-  - 2.x.x finish all DataLinkLayer stuff (frames with correction codes and SRC and DEST addresses)
-  - 3.x.x finish all NetworkLayer stuff (similar to IP datagrams with ability to route data somewhere)
-  - 4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)
-  - 5.x.x finalization of the project, some example applications like p2p file exchange, web server etc
+  - 1.1.0 Last version with old PSK solution at Physial Layer
+  - 1.2.x Completly rewritten PhysicalLayer with FSK support. Old PSK core marked as deprecated
+  - 1.3.x Data link layer with frames and checksums
+  - 1.4.x Transport layer that supports simplified TCP protocol
+  - 1.5.x Application layer with simple text exchange protocol
+  - 2.0.0 Old PSK core removed from the project.
+  - 2.x.x ?? OFDM
+  - 2.x.x ?? Move to TypeScript
 
-## Backlog for future 1.x.x releases
+## v1.2.0 (2017-11-xx) [not yet released] First version that uses new FSK solution for Physical Layer
+  -
 
-### Current:
-
-  - rename Queue to Buffer
-  - POWER CHART, refactor to follow 'abstract class' approach 
-  - POWER CHART, show important power level (threshold, min/max, etc)
-  - POWER CHART, configurable bar width and color
-  - ANALYZER CHART, refactor to follow 'abstract class' approach
-  - change adapter parameter order (channelIndex shouldn't be first parameter)
-  - fix last templates issues in amplitude-modulation-transmission-full
-
-### Core code refactor
-
-  - add AudioNetworkBootConfig = { developerMode: true, createAlias: true, scriptBaseUrl: 'http://localhost' }
-  - core should not work as proxy for methods from other classes
-  - visualizers should be separated 
-  - ability to change all settings in the runtime
-  - promise approach instead of callback functions
-  - remove setInterval, schedule function call for the future via setTimeout (at manager level, not core object level)
-  - refactor manager code to pass whole array to/from channel instead single sample
-    - receive-manager                      holds audio process event and logic that triggers receive events in proper moments
-    - receive-channel                      
-    - receive-channel-subcarrier           adds phase correction, handles notify intervals
-    
-```
-receive-channel-subcarrier
-  - contains receiveWorker object with methods:
-    - receiveWorker.handleSampleBlock(sampleBlock, detailIndexList).then(function )
-    - receiveWorker.setSamplePerPeriod(samplePerPeriod).then(function )
-    - receiveWorker.setSamplePerDftWindow(samplePerDftWindow).then(function )
-
-receive-worker.builder will decide to go with:
-
-[A]
-receive-multicore-worker           init new Worker, communication between 
-receive-multicore-worker-thread    short script that wraps receive-worker with postMessage
-
-[B]
-receive-worker
-  - holds carrierRecovery object
-  - handles carrierDetailIndexList and promises
-   
-    
-```
-  
-### Nice but not important code refactor
-  - wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace
-  - refactor DOM helpers (move to service)
-  - create wrapper classes for audio nodes
-  - create sine/cosine cache service + tests in jasmine
-  - rename destroy methods to destroyAsync
-
-### Receive Adapter
-
-  - rename ERROR to SYNC_TO_LONG and SYMBOL to PILOT_SIGNAL
-  - rename phaseOffsetCollector to frequencyErrorCollector
-  - introduce some phaseErrorCollector (?)
-  - add new state: INTERPACKET_GAP
-   
-## v1.1.0 (2017-0x-xx) [not yet released]
+## v1.1.0 (2017-11-12) Old PSK core marked as deprecated
   + Dynamic dev files loading
-  + Boot config added 
+  + Boot config added like { developerMode: true, createAlias: true, scriptBaseUrl: 'http://localhost' }
   + Env variables added (isBrowser, isNode, isWebWorker)
   + NodeJs export added - you can now use AudioNetwork in NodeJs applications! 
   + ActiveAudioContext abstraction

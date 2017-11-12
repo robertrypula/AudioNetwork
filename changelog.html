@@ -50,73 +50,21 @@
 
 <h2 id="roadmap">Roadmap</h2>
 <ul>
-<li>1.x.x finish all PhysicalLayer stuff (Web Audio API, raw packets)</li>
-<li>2.x.x finish all DataLinkLayer stuff (frames with correction codes and SRC and DEST addresses)</li>
-<li>3.x.x finish all NetworkLayer stuff (similar to IP datagrams with ability to route data somewhere)</li>
-<li>4.x.x finish all TransportLayer stuff (similar to TPC segments to give ability to create reliable connection)</li>
-<li>5.x.x finalization of the project, some example applications like p2p file exchange, web server etc</li>
+<li>1.1.0 Last version with old PSK solution at Physial Layer</li>
+<li>1.2.x Completly rewritten PhysicalLayer with FSK support. Old PSK core marked as deprecated</li>
+<li>1.3.x Data link layer with frames and checksums</li>
+<li>1.4.x Transport layer that supports simplified TCP protocol</li>
+<li>1.5.x Application layer with simple text exchange protocol</li>
+<li>2.0.0 Old PSK core removed from the project.</li>
+<li>2.x.x ?? OFDM</li>
+<li>2.x.x ?? Move to TypeScript</li>
 </ul>
-<h2 id="backlog-for-future-1-x-x-releases">Backlog for future 1.x.x releases</h2>
-<h3 id="current-">Current:</h3>
-<ul>
-<li>rename Queue to Buffer</li>
-<li>POWER CHART, refactor to follow &#39;abstract class&#39; approach </li>
-<li>POWER CHART, show important power level (threshold, min/max, etc)</li>
-<li>POWER CHART, configurable bar width and color</li>
-<li>ANALYZER CHART, refactor to follow &#39;abstract class&#39; approach</li>
-<li>change adapter parameter order (channelIndex shouldn&#39;t be first parameter)</li>
-<li>fix last templates issues in amplitude-modulation-transmission-full</li>
-</ul>
-<h3 id="core-code-refactor">Core code refactor</h3>
-<ul>
-<li>add AudioNetworkBootConfig = { developerMode: true, createAlias: true, scriptBaseUrl: &#39;<a href="http://localhost">http://localhost</a>&#39; }</li>
-<li>core should not work as proxy for methods from other classes</li>
-<li>visualizers should be separated </li>
-<li>ability to change all settings in the runtime</li>
-<li>promise approach instead of callback functions</li>
-<li>remove setInterval, schedule function call for the future via setTimeout (at manager level, not core object level)</li>
-<li>refactor manager code to pass whole array to/from channel instead single sample<ul>
-<li>receive-manager                      holds audio process event and logic that triggers receive events in proper moments</li>
-<li>receive-channel                      </li>
-<li>receive-channel-subcarrier           adds phase correction, handles notify intervals</li>
-</ul>
-</li>
-</ul>
-<pre><code>receive-channel-subcarrier
-- contains receiveWorker object with methods:
-- receiveWorker.handleSampleBlock(sampleBlock, detailIndexList).then(function )
-- receiveWorker.setSamplePerPeriod(samplePerPeriod).then(function )
-- receiveWorker.setSamplePerDftWindow(samplePerDftWindow).then(function )
-
-receive-worker.builder will decide to go with:
-
-[A]
-receive-multicore-worker           init new Worker, communication between
-receive-multicore-worker-thread    short script that wraps receive-worker with postMessage
-
-[B]
-receive-worker
-- holds carrierRecovery object
-- handles carrierDetailIndexList and promises
-</code></pre><h3 id="nice-but-not-important-code-refactor">Nice but not important code refactor</h3>
-<ul>
-<li>wrap with dedicated class JS methods like requestAnimationFrame, setTimeout, setInterval and create dedicated namespace</li>
-<li>refactor DOM helpers (move to service)</li>
-<li>create wrapper classes for audio nodes</li>
-<li>create sine/cosine cache service + tests in jasmine</li>
-<li>rename destroy methods to destroyAsync</li>
-</ul>
-<h3 id="receive-adapter">Receive Adapter</h3>
-<ul>
-<li>rename ERROR to SYNC_TO_LONG and SYMBOL to PILOT_SIGNAL</li>
-<li>rename phaseOffsetCollector to frequencyErrorCollector</li>
-<li>introduce some phaseErrorCollector (?)</li>
-<li>add new state: INTERPACKET_GAP</li>
-</ul>
-<h2 id="v1-1-0-2017-0x-xx-not-yet-released-">v1.1.0 (2017-0x-xx) [not yet released]</h2>
+<h2 id="v1-2-0-2017-11-xx-not-yet-released-first-version-that-uses-new-fsk-solution-for-physical-layer">v1.2.0 (2017-11-xx) [not yet released] First version that uses new FSK solution for Physical Layer</h2>
+<p>  -</p>
+<h2 id="v1-1-0-2017-11-12-old-psk-core-marked-as-deprecated">v1.1.0 (2017-11-12) Old PSK core marked as deprecated</h2>
 <ul>
 <li>Dynamic dev files loading</li>
-<li>Boot config added </li>
+<li>Boot config added like { developerMode: true, createAlias: true, scriptBaseUrl: &#39;<a href="http://localhost">http://localhost</a>&#39; }</li>
 <li>Env variables added (isBrowser, isNode, isWebWorker)</li>
 <li>NodeJs export added - you can now use AudioNetwork in NodeJs applications! </li>
 <li>ActiveAudioContext abstraction</li>
@@ -271,6 +219,7 @@ receive-worker
 </ul>
 </li>
 </ul>
+
 
 
                 </div>

@@ -70,7 +70,7 @@ In both cases at `build` directory you will find minified and unminified js file
 include it into your HTML file. For example:
 
 ```
-<script src="node_modules/audio-network/build/audio-network-v1.1.0rc1.min.js"></script>
+<script src="node_modules/audio-network/build/audio-network-v1.1.0.min.js"></script>
 ```
 
 Now you can access `AudioNetwork` object at global JavaScript scope. It's the entry point for all components:
@@ -80,8 +80,8 @@ var physicalLayer, transmitAdapter, receiveAdapter;
 
 physicalLayer = new AudioNetwork.PhysicalLayer.PhysicalLayer({
     // config
-}),
-transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer),
+});
+transmitAdapter = new AudioNetwork.PhysicalLayerAdapter.TransmitAdapter(physicalLayer);
 receiveAdapter = new AudioNetwork.PhysicalLayerAdapter.ReceiveAdapter(physicalLayer);
 ```
 
