@@ -5,7 +5,7 @@ var
     AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
     AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.version = '1.1.0';
+AudioNetwork.version = '1.2.0rc';
 
 // conditions from: http://stackoverflow.com/a/33697246
 AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;
@@ -39,7 +39,7 @@ AudioNetwork.bootConfig = {
         : false,
     createAlias: typeof AudioNetworkBootConfig.createAlias !== 'undefined'
         ? !!AudioNetworkBootConfig.createAlias
-        : (AudioNetwork.isBrowser ? true : false),
+        : true,
     multicoreState: Object.keys(AudioNetwork.MULTICORE_STATE).indexOf(AudioNetworkBootConfig.multicoreState) !== -1
         ? AudioNetworkBootConfig.multicoreState
         : AudioNetwork.MULTICORE_STATE.DISABLED
