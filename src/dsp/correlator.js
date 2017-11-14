@@ -5,9 +5,13 @@
     AudioNetwork.Injector
         .registerFactory('Rewrite.Dsp.Correlator', Correlator);
 
-    Correlator.$inject = [];
+    Correlator.$inject = [
+        'Rewrite.Util.Buffer'
+    ];
 
-    function Correlator() {
+    function Correlator(
+        Buffer
+    ) {
         var Correlator;
 
         Correlator = function (skipFactor, correlationCode) {

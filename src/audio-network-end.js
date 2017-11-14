@@ -5,6 +5,8 @@ if (AudioNetwork.bootConfig.createAlias) {
 
     AudioNetwork.Rewrite = {};
     AudioNetwork.Rewrite.Dsp = {};
+    AudioNetwork.Rewrite.PhysicalLayer = {};
+    AudioNetwork.Rewrite.Util = {};
     AudioNetwork.Rewrite.WebAudio = {};
     AudioNetwork.Visualizer = {};
 
@@ -13,6 +15,12 @@ if (AudioNetwork.bootConfig.createAlias) {
     AudioNetwork.Rewrite.Dsp.FFTResult = AudioNetwork.Injector.resolve('Rewrite.Dsp.FFTResult');
     AudioNetwork.Rewrite.Dsp.WaveAnalyser = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveAnalyser');
     AudioNetwork.Rewrite.Dsp.WaveGenerator = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveGenerator');
+    AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder = AudioNetwork.Injector.resolve('Rewrite.PhysicalLayer.PhysicalLayerBuilder');
+    AudioNetwork.Rewrite.Util.Buffer = AudioNetwork.Injector.resolve('Rewrite.Util.Buffer');
+    AudioNetwork.Rewrite.Util.FrequencyCalculator = AudioNetwork.Injector.resolve('Rewrite.Util.FrequencyCalculator');
+    AudioNetwork.Rewrite.Util.MusicCalculator = AudioNetwork.Injector.resolve('Rewrite.Util.MusicCalculator');
+    AudioNetwork.Rewrite.Util.SmartTimer = AudioNetwork.Injector.resolve('Rewrite.Util.SmartTimer');
+    AudioNetwork.Rewrite.Util.WavAudioFile = AudioNetwork.Injector.resolve('Rewrite.Util.WavAudioFile');
     AudioNetwork.Rewrite.WebAudio.AudioMonoIO = AudioNetwork.Injector.resolve('Rewrite.WebAudio.AudioMonoIO');
     AudioNetwork.Rewrite.WebAudio.AudioMonoIOLite = AudioNetwork.Injector.resolve('Rewrite.WebAudio.AudioMonoIOLite');
     AudioNetwork.Visualizer.AnalyserChart = AudioNetwork.Injector.resolve('Visualizer.AnalyserChart');

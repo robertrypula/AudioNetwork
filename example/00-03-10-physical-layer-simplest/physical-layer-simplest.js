@@ -2,6 +2,7 @@
 'use strict';
 
 var
+    PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder,
     physicalLayerBuilder,
     physicalLayer;
 
