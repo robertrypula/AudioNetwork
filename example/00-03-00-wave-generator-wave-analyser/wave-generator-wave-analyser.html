@@ -271,14 +271,16 @@
 
     </div>
 
+    <!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
+    <script>
+        var AudioNetworkBootConfig = {
+            devScriptLoad: true
+        };
+    </script>
+    <script src="../../src/audio-network-boot.js"></script>
+    <!-- audio network END -->
+
     <script src="../00-00-00-common/ui/editable-float.js"></script>
-    <script src="../../src/util/frequency-calculator.js"></script>
-    <script src="../../src/dsp/complex.js"></script>
-    <script src="../../src/util/buffer.js"></script>
-    <script src="../../src/dsp/wave-generator.js"></script>
-    <script src="../../src/dsp/wave-analyser.js"></script>
-    <script src="../../src/web-audio/audio-mono-io.js"></script>
-    <script src="../../src/web-audio/audio-mono-io-lite.js"></script>
     <script src="wave-generator-wave-analyser.js"></script>
 
     <script>

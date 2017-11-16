@@ -94,8 +94,15 @@
 
     </div>
 
-    <script src="../../src/dsp/wave-generator.js"></script>
-    <script src="../../src/util/frequency-calculator.js"></script>
+    <!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
+    <script>
+        var AudioNetworkBootConfig = {
+            devScriptLoad: true
+        };
+    </script>
+    <script src="../../src/audio-network-boot.js"></script>
+    <!-- audio network END -->
+
     <script src="canvas-drawer.js"></script>
 
     <script>

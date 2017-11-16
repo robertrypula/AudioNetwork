@@ -6,10 +6,14 @@
 </head>
 <body>
 
-<script src="../../src/util/buffer.js"></script>
-<script src="../../src/dsp/complex.js"></script>
-<script src="../../src/dsp/wave-analyser.js"></script>
-<script src="../../src/dsp/wave-generator.js"></script>
+<!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
+<script>
+    var AudioNetworkBootConfig = {
+        devScriptLoad: true
+    };
+</script>
+<script src="../../src/audio-network-boot.js"></script>
+<!-- audio network END -->
 
 <script>
 var

@@ -7,13 +7,17 @@
 </head>
 <body onload="init()">
 
+<!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
+<script>
+    var AudioNetworkBootConfig = {
+        devScriptLoad: true
+    };
+</script>
+<script src="../../src/audio-network-boot.js"></script>
+<!-- audio network END -->
+
 <script src="../00-00-00-common/ui/dom-util.js"></script>
 <script src="../00-00-00-common/ui/spectrogram.js"></script>
-<script src="../../src/util/buffer.js"></script>
-<script src="../../src/dsp/complex.js"></script>
-<script src="../../src/dsp/wave-analyser.js"></script>
-<script src="../../src/dsp/wave-generator.js"></script>
-<script src="../../src/web-audio/audio-mono-io.js"></script>
 <script src="ofdm.js"></script>
 
 <h1>General config</h1>
