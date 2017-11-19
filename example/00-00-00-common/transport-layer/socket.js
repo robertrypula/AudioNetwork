@@ -4,143 +4,77 @@
 var Socket = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
     var Socket;
 
-    Socket = function (segmentPayloadLengthLimit) {
+    Socket = function (segmentPayloadLengthLimit, socketClient) {
         this.$$segmentPayloadLengthLimit = segmentPayloadLengthLimit;
-        this.$$state = Socket.ESTABLISHED;   // TODO move to closed
+        this.$$socketClient = socketClient;
 
-        this.$$initialSequenceNumber = 0;
-        this.$$sequenceNumber = 0;
-        this.$$acknowledgementNumber = 0;
+        this.$$initialSequenceNumber = undefined;
+        this.$$sequenceNumber = undefined;
+        this.$$acknowledgementNumber = undefined;
 
-        this.$$dataChunkActiveIndex = 0;
-        this.$$dataChunk = [];
+        this.$$state = undefined;
+        this.$$updateState(Socket.CLOSED);
     };
 
     Socket.CLOSED = 'CLOSED';
     Socket.LISTEN = 'LISTEN';
-    Socket.SYN_SENT = 'C_SYN_SENT';
-    Socket.SYN_RECEIVED = 'SYN_RECEIVED';
-    Socket.ESTABLISHED = 'ESTABLISHED';
+    Socket.HANDSHAKE_A_WAIT = 'HANDSHAKE_A_WAIT';
+    Socket.HANDSHAKE_A_IN_PROGRESS = 'HANDSHAKE_A_IN_PROGRESS';
 
-    Socket.RETRANSMISSION_LIMIT = 5;
-
-    Socket.LOGIC_ERROR_EXCEPTION = 'LOGIC_ERROR_EXCEPTION';
-
-    Socket.prototype.addTxData = function (txData) {
-        this.$$addAsTxDataChunk(txData);
-    };
-    
-    Socket.prototype.findTxSegmentByTxFrameId = function (txFrameId) {
-        var
-            activeDataChunk = this.$$getActiveDataChunk(),
-            txSegment;
-
-        if (!activeDataChunk) {
-            // throw Socket.LOGIC_ERROR_EXCEPTION;
-            return null;
-        }
-
-        txSegment = activeDataChunk.getLastTxSegment();
-
-        if (!txSegment) {
-            // throw Socket.LOGIC_ERROR_EXCEPTION;
-            return null;
-        }
-
-        if (txSegment.getTxFrameId() !== txFrameId) {
-            // throw Socket.LOGIC_ERROR_EXCEPTION;
-            return null;
-        }
-
-        return txSegment;
+    Socket.prototype.close = function () {
+        this.$$updateState(Socket.CLOSED);
     };
 
-    Socket.prototype.getTxSegment = function (txSymbolId) {
-        var
-            activeDataChunk = this.$$getActiveDataChunk(),
-            lastTxSegment,
-            txSegment = null;
-
-        if (this.$$state === Socket.CLOSED) {
-            return;
-        }
-
-        if (!activeDataChunk) {
-            return null;
-        }
-
-        if (activeDataChunk.isLastTxSegmentInProgress()) {
-            return null;
-        }
-
-        if (activeDataChunk.txSegmentLength() > Socket.RETRANSMISSION_LIMIT) {
-            this.$$state = Socket.CLOSED;
-            return null;
-        }
-
-        lastTxSegment = activeDataChunk.getLastTxSegment();
-
-        if (!lastTxSegment || lastTxSegment.getTxSymbolId() + 21 <= txSymbolId) {  // TODO fix hardcoded value
-            txSegment = new Segment(false, this.$$sequenceNumber, true, this.$$acknowledgementNumber, activeDataChunk.getPayload());
-            txSegment.setTxSymbolId(txSymbolId);
-            activeDataChunk.addTxSegment(txSegment);
-        }
-
-        return txSegment;
+    Socket.prototype.listen = function () {
+        this.$$updateState(Socket.LISTEN);
     };
+
+    Socket.prototype.connect = function () {
+        switch (this.$$state) {
+            case Socket.CLOSED:
+                this.$$updateState(Socket.HANDSHAKE_A_WAIT);
+                break;
+        }
+    };
+
+    Socket.prototype.send = function () {};
+
+    Socket.prototype.findTxSegmentByTxFrameId = function (txFrameId) {console.log('findTxSegmentByTxFrameId', txFrameId)};
 
     Socket.prototype.handleRxSegment = function (rxSegment) {
-        var
-            activeDataChunk = this.$$getActiveDataChunk(),
-            dataChunk,
-            payload;
+        console.log('handleRxSegment', rxSegment);
+        switch (this.$$state) {
+            case Socket.LISTEN:
+                /*
+                if (rxSegment.isHandshakeSyn()) {
+                    this.$$acknowledgementNumber = rxSegment.getSequenceNumber() + 1;
 
-        if (this.$$state === Socket.CLOSED) {
-            return;
+                    this.$$updateState(Socket.HANDSHAKE_A_IN_PROGRESS);
+                }
+                */
+                break;
         }
-
-        if (!activeDataChunk) {
-            payload = rxSegment.getPayload();
-            dataChunk = new DataChunk(payload);
-            this.$$dataChunk.push(dataChunk);
-            return;
-        }
-
-        if (activeDataChunk.isLastTxSegmentInProgress()) {
-            return;
-        }
-
     };
 
-    Socket.prototype.$$getActiveDataChunk = function () {
-        if (this.$$dataChunkActiveIndex >= this.$$dataChunk.length) {
-            return null;
+    Socket.prototype.getTxSegment = function () {
+        var txSegment = null;
+
+        switch (this.$$state) {
+            case Socket.HANDSHAKE_A_WAIT:
+                txSegment = Segment.handshakeSyn();
+                this.$$initialSequenceNumber = txSegment.getSequenceNumber();
+                this.$$sequenceNumber = this.$$initialSequenceNumber;
+                this.$$acknowledgementNumber = txSegment.getAcknowledgmentNumber();
+                this.$$updateState(Socket.HANDSHAKE_A_IN_PROGRESS);
+                break;
         }
 
-        return this.$$dataChunk[this.$$dataChunkActiveIndex];
+        return txSegment;
     };
 
-    Socket.prototype.$$addAsTxDataChunk = function (txData) {
-        var
-            isDataChunkCompleted,
-            payload,
-            dataChunk,
-            i;
-
-        payload = [];
-        for (i = 0; i < txData.length; i++) {
-            payload.push(txData[i]);
-
-            isDataChunkCompleted =
-                (i % this.$$segmentPayloadLengthLimit) === (this.$$segmentPayloadLengthLimit - 1) ||
-                i === (txData.length - 1);
-
-            if (isDataChunkCompleted) {
-                dataChunk = new DataChunk(payload);
-                this.$$dataChunk.push(dataChunk);
-                payload = [];
-            }
-        }
+    Socket.prototype.$$updateState = function (newState) {
+        this.$$state = newState;
+        this.$$socketClient.onSocketStateChange(this.$$state);
     };
 
     return Socket;

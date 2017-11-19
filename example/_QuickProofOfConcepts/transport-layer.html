@@ -15,6 +15,35 @@
 <!--<script src="../../src/audio-network-boot.js"></script>-->
 <!-- audio network END -->
 
+
+<div style="width: 300px; float: left;">
+    <h2>Socket A</h2>
+
+    <button onClick="transportLayerMockA.$$socket.close()">Close</button>
+    <button onClick="transportLayerMockA.$$socket.listen()">Listen</button>
+    <button onClick="transportLayerMockA.$$socket.connect()">Connect</button>
+    <button onClick="transportLayerMockA.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
+    <button onClick="transportLayerMockA.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
+
+    <div id="socket-a-state" style="font-family: monospace; line-height: 1em; font-size: 13px; font-weight: bold; padding: 10px; outline: 1px dashed lightgray;"></div>
+    <div id="socket-a-log" style="font-family: monospace; line-height: 1em; font-size: 10px;"></div>
+</div>
+
+<div style="width: 300px; float: left;">
+    <h2>Socket B</h2>
+
+    <button onClick="transportLayerMockB.$$socket.close()">Close</button>
+    <button onClick="transportLayerMockB.$$socket.listen()">Listen</button>
+    <button onClick="transportLayerMockB.$$socket.connect()">Connect</button>
+    <button onClick="transportLayerMockB.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
+    <button onClick="transportLayerMockB.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
+
+    <div id="socket-b-state" style="font-family: monospace; line-height: 1em; font-size: 13px; font-weight: bold; padding: 10px; outline: 1px dashed lightgray;"></div>
+    <div id="socket-b-log" style="font-family: monospace; line-height: 1em; font-size: 10px;"></div>
+</div>
+
+<script src="../00-00-00-common/ui/dom-util.js"></script>
+<script src="../00-00-00-common/ui/convert-util.js"></script>
 <script src="../00-00-00-common/transport-layer/segment.js"></script>
 <script src="../00-00-00-common/transport-layer/data-chunk.js"></script>
 <script src="../00-00-00-common/transport-layer/socket.js"></script>

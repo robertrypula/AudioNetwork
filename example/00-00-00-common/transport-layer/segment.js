@@ -11,20 +11,24 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$acknowledgementNumber = acknowledgementNumber & 0x7f;
         this.$$payload = payload.slice(0);
 
-        this.$$rxFrameId = null;      // probably we can have only one property for frame ID
         this.$$txFrameId = null;
-        this.$$txCompleted = false;
+        this.$$txFrameFinished = false;
         this.$$txSymbolId = null;
     };
 
     Segment.HEADER_BYTE_LENGTH = 2;
     Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION = 'Not enough bytes to create segment';
 
-    Segment.prototype.txCompleted = function () {
-        this.$$txCompleted = true;
+    Segment.prototype.getSequenceNumber = function () {
+        return this.$$sequenceNumber;
     };
-    Segment.prototype.setRxFrameId = function (rxFrameId) {
-        this.$$rxFrameId = rxFrameId;
+
+    Segment.prototype.getAcknowledgmentNumber = function () {
+        return this.$$acknowledgementNumber;
+    };
+
+    Segment.prototype.markTxFrameAsFinished = function () {
+        this.$$txFrameFinished = true;
     };
 
     Segment.prototype.setTxFrameId = function (txFrameId) {
@@ -43,8 +47,8 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         return this.$$txSymbolId;
     };
 
-    Segment.prototype.getTxConfirmed = function () {
-        return this.$$txCompleted;
+    Segment.prototype.isTxFrameFinished = function () {
+        return this.$$txFrameFinished;
     };
 
     Segment.prototype.getTxFrameId = function () {
@@ -80,8 +84,7 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
             i;
 
         if (rxFramePayload.length < Segment.HEADER_BYTE_LENGTH) {
-            return null;
-            // throw Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION;
+            throw Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION;
         }
 
         synchronizeFlag = !!(rxFramePayload[0] & 0x80);
@@ -100,6 +103,20 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
             acknowledgementNumber,
             payload
         );
+    };
+
+    Segment.handshakeSyn = function () {
+        return new Segment(
+            true,
+            Segment.generateInitialSequenceNumber(),
+            false,
+            0,
+            []
+        );
+    };
+
+    Segment.generateInitialSequenceNumber = function () {
+        return (Math.random() * 0x80) & 0x7f;
     };
 
     return Segment;
