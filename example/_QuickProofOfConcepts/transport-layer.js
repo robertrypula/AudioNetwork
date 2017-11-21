@@ -36,11 +36,8 @@ TransportLayerMock.prototype.onSocketStateChange = function (state) {
 };
 
 TransportLayerMock.prototype.txFrame = function (txFrame) {
-    var txSegment = this.$$socket.findTxSegmentByTxFrameId(txFrame.id);
+    this.$$socket.txSegmentSent();
 
-    if (txSegment) {
-        txSegment.markTxFrameAsFinished();
-    }
     this.$$otherSideTransportLayer.rxFrame({
         rxFramePayload: txFrame.txFramePayload.slice(0)
     });
@@ -79,7 +76,7 @@ TransportLayerMock.prototype.txFrameProgress = function () {
     this.$$txFrame.txSymbolId = txSymbolId;
     txSegment.setTxFrameId(txFrameId);
 
-    html(this.$$logDomElementId, txSymbolId + ': [new-frame] ' + getByteHexFromByteList(txFramePayload) + '<br/>', true);
+    html(this.$$logDomElementId, txSymbolId + ': [new-frame] ' + getByteHexFromByteList(txFramePayload) + ' ' + txSegment.getHeaderLog() + '<br/>', true);
 };
 
 TransportLayerMock.prototype.rxFrame = function (rxFrame) {

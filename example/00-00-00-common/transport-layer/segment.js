@@ -12,23 +12,36 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$payload = payload.slice(0);
 
         this.$$txFrameId = null;
-        this.$$txFrameFinished = false;
         this.$$txSymbolId = null;
     };
 
     Segment.HEADER_BYTE_LENGTH = 2;
     Segment.NOT_ENOUGH_BYTES_TO_CREATE_SEGMENT_EXCEPTION = 'Not enough bytes to create segment';
 
+    Segment.SYNCHRONIZE_FLAG_ENABLED = true;
+    Segment.SYNCHRONIZE_FLAG_DISABLED = false;
+    Segment.ACKNOWLEDGEMENT_FLAG_ENABLED = true;
+    Segment.ACKNOWLEDGEMENT_FLAG_DISABLED = false;
+    Segment.ACKNOWLEDGEMENT_NUMBER_ZERO = 0;
+    Segment.SYNCHRONIZE_VIRTUAL_PAYLOAD_LENGTH = 1;
+
+    Segment.prototype.getHeaderLog = function () {
+        var log = [];
+
+        this.$$synchronizeFlag ? log.push('SYN') : undefined;
+        this.$$acknowledgementFlag ? log.push('ACK') : undefined;
+        log.push('sn=' + this.$$sequenceNumber);
+        log.push('an=' + this.$$acknowledgementNumber);
+
+        return '[' + log.join(',') + ']';
+    };
+
     Segment.prototype.getSequenceNumber = function () {
         return this.$$sequenceNumber;
     };
 
-    Segment.prototype.getAcknowledgmentNumber = function () {
+    Segment.prototype.getAcknowledgementNumber = function () {
         return this.$$acknowledgementNumber;
-    };
-
-    Segment.prototype.markTxFrameAsFinished = function () {
-        this.$$txFrameFinished = true;
     };
 
     Segment.prototype.setTxFrameId = function (txFrameId) {
@@ -45,10 +58,6 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
 
     Segment.prototype.getTxSymbolId = function () {
         return this.$$txSymbolId;
-    };
-
-    Segment.prototype.isTxFrameFinished = function () {
-        return this.$$txFrameFinished;
     };
 
     Segment.prototype.getTxFrameId = function () {
@@ -105,12 +114,61 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         );
     };
 
+    Segment.prototype.isHandshakeSyn = function () {
+        return this.$$synchronizeFlag &&
+            !this.$$acknowledgementFlag &&
+            this.$$acknowledgementNumber === Segment.ACKNOWLEDGEMENT_NUMBER_ZERO &&
+            this.$$payload.length === 0;
+    };
+
+    Segment.prototype.isHandshakeSynAck = function () {
+        return this.$$synchronizeFlag &&
+            this.$$acknowledgementFlag &&
+            this.$$payload.length === 0;
+    };
+
+    Segment.prototype.isHandshakeAck = function () {
+        return !this.$$synchronizeFlag &&
+            this.$$acknowledgementFlag &&
+            this.$$payload.length === 0;
+    };
+
+    Segment.prototype.getSequenceNumberNext = function () {
+        return this.$$synchronizeFlag
+            ? this.$$sequenceNumber + Segment.SYNCHRONIZE_VIRTUAL_PAYLOAD_LENGTH
+            : this.$$sequenceNumber + this.$$payload.length;
+    };
+
+    Segment.prototype.getAcknowledgementNumberForLastRxSegment = function () {
+        return this.getSequenceNumberNext();
+    };
+
     Segment.handshakeSyn = function () {
         return new Segment(
-            true,
+            Segment.SYNCHRONIZE_FLAG_ENABLED,
             Segment.generateInitialSequenceNumber(),
-            false,
-            0,
+            Segment.ACKNOWLEDGEMENT_FLAG_DISABLED,
+            Segment.ACKNOWLEDGEMENT_NUMBER_ZERO,
+            []
+        );
+    };
+
+    Segment.handshakeSynAck = function (acknowledgementNumber) {
+        return new Segment(
+            Segment.SYNCHRONIZE_FLAG_ENABLED,
+            Segment.generateInitialSequenceNumber(),
+            Segment.ACKNOWLEDGEMENT_FLAG_ENABLED,
+            acknowledgementNumber,
+            []
+        );
+    };
+
+    Segment.handshakeAck = function (sequenceNumber, acknowledgementNumber) {
+        return new Segment(
+            Segment.SYNCHRONIZE_FLAG_DISABLED,
+            sequenceNumber,
+            Segment.ACKNOWLEDGEMENT_FLAG_ENABLED,
+            acknowledgementNumber,
             []
         );
     };

@@ -12,7 +12,11 @@
     //                     SER #1                                                  SER #2                     SER #3                     SER #4
 
 
-           listen()
+
+
+                                                  ackNumber  SN next
+                                                             SN
+           listen()                                          ISN
  CLOSE     LISTEN                              HS_B_WAIT      HS_B_IN_PROG      HS_B_SENT                           ESTABLISHED
    |         |                                   [R]          |                 |                                   [R]
 --------------------------------------------------------------###################----------------------------------------------------------------------------------------------
@@ -23,6 +27,9 @@
  CLOSE            HS_A_WAIT   HS_A_IN_PROG     HS_A_SENT                           HS_C_WAIT                     ESTABLISHED
                   connect()
 
+                          ISN
+                          SN
+                          SNnext
 
 
 
