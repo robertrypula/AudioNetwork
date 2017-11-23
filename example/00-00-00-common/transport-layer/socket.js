@@ -12,12 +12,18 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$sequenceNumber = undefined;
         this.$$sequenceNumberNext = undefined;
         this.$$acknowledgementNumberForLastRxSegment = undefined;
-        this.$$txSegment = [];
+        this.$$txSegmentHistory = [];
         this.$$txSegmentCurrent = null;
+
+        this.$$txDataChunkHistory = [];
+        this.$$txDataChunkCurrent = null;
+        this.$$txDataChunkQueue = [];
 
         this.$$state = undefined;
         this.$$updateState(Socket.CLOSED);
     };
+
+    Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION = 'Sending is possible only in ESTABLISHED state';
 
     Socket.CLOSED = 'CLOSED';
     Socket.LISTEN = 'LISTEN';
@@ -31,6 +37,9 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.HANDSHAKE_C_IN_PROGRESS = 'HANDSHAKE_C_IN_PROGRESS';
     Socket.HANDSHAKE_C_SENT = 'HANDSHAKE_C_SENT';
     Socket.ESTABLISHED = 'ESTABLISHED';
+    Socket.DATA_CHUNK_WAIT = 'DATA_CHUNK_WAIT';
+    Socket.DATA_CHUNK_IN_PROGRESS = 'DATA_CHUNK_IN_PROGRESS';
+    Socket.DATA_CHUNK_SENT = 'DATA_CHUNK_SENT';
 
     Socket.prototype.close = function () {
         this.$$updateState(Socket.CLOSED);
@@ -48,7 +57,14 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         }
     };
 
-    Socket.prototype.send = function () {};
+    Socket.prototype.send = function (txData) {
+        if (this.$$state !== Socket.ESTABLISHED) {
+            throw Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION;
+        }
+
+        this.$$splitIntoTxDataChunk(txData);
+        this.$$updateState(Socket.DATA_CHUNK_WAIT);
+    };
 
     Socket.prototype.txSegmentSent = function () {
         switch (this.$$state) {
@@ -61,29 +77,26 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             case Socket.HANDSHAKE_C_IN_PROGRESS:
                 this.$$updateState(Socket.ESTABLISHED);
                 break;
+            case Socket.DATA_CHUNK_IN_PROGRESS:
+                this.$$updateState(Socket.DATA_CHUNK_SENT);
+                break;
         }
 
 
-        this.$$txSegment.push(this.$$txSegmentCurrent);
+        this.$$txSegmentHistory.push(this.$$txSegmentCurrent);
         this.$$txSegmentCurrent = null;
     };
 
     Socket.prototype.handleRxSegment = function (rxSegment) {
         console.log('handleRxSegment', rxSegment, rxSegment.getHeaderLog());
         switch (this.$$state) {
+            // SERVER
             case Socket.LISTEN:
                 if (!rxSegment.isHandshakeSyn()) {
                     break;
                 }
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
                 this.$$updateState(Socket.HANDSHAKE_B_WAIT);
-                break;
-            case Socket.HANDSHAKE_A_SENT:
-                if (!rxSegment.isHandshakeSynAck() || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
-                    break;
-                }
-                this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
-                this.$$updateState(Socket.HANDSHAKE_C_WAIT);
                 break;
             case Socket.HANDSHAKE_B_SENT:
                 if (!rxSegment.isHandshakeAck() || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
@@ -92,13 +105,35 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
                 this.$$updateState(Socket.ESTABLISHED);
                 break;
+            case Socket.ESTABLISHED:
+                // TODO implement
+                /*
+                if (!rxSegment.isData() || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
+                    break;
+                }
+                this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
+                this.$$updateState(Socket.ESTABLISHED);
+                */
+                break;
+
+            // CLIENT
+            case Socket.HANDSHAKE_A_SENT:
+                if (!rxSegment.isHandshakeSynAck() || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
+                    break;
+                }
+                this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
+                this.$$updateState(Socket.HANDSHAKE_C_WAIT);
+                break;
         }
     };
 
     Socket.prototype.getTxSegment = function () {
-        var txSegment = null;
+        var
+            txSegment = null,
+            payload;
 
         switch (this.$$state) {
+            // CLIENT
             case Socket.HANDSHAKE_A_WAIT:
                 txSegment = Segment.handshakeSyn();
                 this.$$initialSequenceNumber = txSegment.getSequenceNumber();
@@ -106,18 +141,28 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.HANDSHAKE_A_IN_PROGRESS);
                 break;
+            case Socket.HANDSHAKE_C_WAIT:
+                this.$$sequenceNumber = this.$$sequenceNumberNext;
+                txSegment = Segment.handshakeAck(this.$$sequenceNumber, this.$$acknowledgementNumberForLastRxSegment);
+                this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
+                this.$$updateState(Socket.HANDSHAKE_C_IN_PROGRESS);
+                break;
+            case Socket.DATA_CHUNK_WAIT:
+                this.$$sequenceNumber = this.$$sequenceNumberNext;
+                this.$$txDataChunkCurrent = this.$$txDataChunkQueue.shift();
+                payload = this.$$txDataChunkCurrent.getPayload();
+                txSegment = Segment.data(this.$$sequenceNumber, this.$$acknowledgementNumberForLastRxSegment, payload);
+                this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
+                this.$$updateState(Socket.DATA_CHUNK_IN_PROGRESS);
+                break;
+
+            // SERVER
             case Socket.HANDSHAKE_B_WAIT:
                 txSegment = Segment.handshakeSynAck(this.$$acknowledgementNumberForLastRxSegment);
                 this.$$initialSequenceNumber = txSegment.getSequenceNumber();
                 this.$$sequenceNumber = this.$$initialSequenceNumber;
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.HANDSHAKE_B_IN_PROGRESS);
-                break;
-            case Socket.HANDSHAKE_C_WAIT:
-                txSegment = Segment.handshakeAck(this.$$sequenceNumberNext, this.$$acknowledgementNumberForLastRxSegment);
-                this.$$sequenceNumber = this.$$sequenceNumberNext;
-                this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
-                this.$$updateState(Socket.HANDSHAKE_C_IN_PROGRESS);
                 break;
         }
 
@@ -131,6 +176,31 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.prototype.$$updateState = function (newState) {
         this.$$state = newState;
         this.$$socketClient.onSocketStateChange(this.$$state);
+    };
+
+    Socket.prototype.$$splitIntoTxDataChunk = function (txData) {
+        var
+            isDataChunkPayloadReady,
+            isLastByteInDataChunk,
+            isLastByteInTxData,
+            txDataChunk,
+            payload,
+            i;
+
+        payload = [];
+        for (i = 0; i < txData.length; i++) {
+            payload.push(txData[i]);
+
+            isLastByteInDataChunk = (i % this.$$segmentPayloadLengthLimit) === (this.$$segmentPayloadLengthLimit - 1);
+            isLastByteInTxData = i === (txData.length - 1);
+
+            isDataChunkPayloadReady = isLastByteInDataChunk || isLastByteInTxData;
+            if (isDataChunkPayloadReady) {
+                txDataChunk = new DataChunk(payload);
+                this.$$txDataChunkQueue.push(txDataChunk);
+                payload = [];
+            }
+        }
     };
 
     return Socket;

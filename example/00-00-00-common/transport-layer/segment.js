@@ -128,6 +128,16 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
     };
 
     Segment.prototype.isHandshakeAck = function () {
+        return this.isDataAck(); // there is no difference
+    };
+
+    Segment.prototype.isData = function () {
+        return !this.$$synchronizeFlag &&
+            this.$$acknowledgementFlag &&
+            this.$$payload.length > 0;
+    };
+
+    Segment.prototype.isDataAck = function () {
         return !this.$$synchronizeFlag &&
             this.$$acknowledgementFlag &&
             this.$$payload.length === 0;
@@ -164,6 +174,20 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
     };
 
     Segment.handshakeAck = function (sequenceNumber, acknowledgementNumber) {
+        return Segment.dataAck(sequenceNumber, acknowledgementNumber); // there is no difference
+    };
+
+    Segment.data = function (sequenceNumber, acknowledgementNumber, payload) {
+        return new Segment(
+            Segment.SYNCHRONIZE_FLAG_DISABLED,
+            sequenceNumber,
+            Segment.ACKNOWLEDGEMENT_FLAG_ENABLED,
+            acknowledgementNumber,
+            payload
+        );
+    };
+
+    Segment.dataAck = function (sequenceNumber, acknowledgementNumber) {
         return new Segment(
             Segment.SYNCHRONIZE_FLAG_DISABLED,
             sequenceNumber,

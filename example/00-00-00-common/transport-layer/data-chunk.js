@@ -10,6 +10,11 @@ var DataChunk = (function () { // <-- TODO this will be soon refactored when cod
         this.$$rxSegment = [];
     };
 
+    DataChunk.prototype.getPayload = function () {
+        return this.$$payload;
+    };
+
+    /*
     DataChunk.prototype.getTxAttemptNumber = function () {
         return this.$$payload;
     };
@@ -18,10 +23,6 @@ var DataChunk = (function () { // <-- TODO this will be soon refactored when cod
         return this.$$txSegment.length > 0
             ? this.$$txSegment[this.$$txSegment.length - 1]
             : null;
-    };
-
-    DataChunk.prototype.getPayload = function () {
-        return this.$$payload;
     };
 
     DataChunk.prototype.addTxSegment = function (txSegment) {
@@ -39,6 +40,7 @@ var DataChunk = (function () { // <-- TODO this will be soon refactored when cod
 
         return !this.$$txSegment[this.$$txSegment.length - 1].getTxConfirmed();
     };
+    */
 
     return DataChunk;
 })();
