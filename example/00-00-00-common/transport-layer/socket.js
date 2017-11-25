@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// NOTE: this class was written in a hurry to meet deadline and might have some big issues
+
 var Socket = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
     var Socket;
 
@@ -21,10 +23,15 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
 
         this.$$state = undefined;
         this.$$updateState(Socket.CLOSED);
+
+        this.$$handshakeResponseDelay = 0;
+        this.$$dataChunkResponseDelay = 0;
+        this.$$dataChunkRetransmissionCount = 0;
     };
 
     Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION = 'Sending is possible only in ESTABLISHED state';
 
+    // TODO: find better names for states (?)
     Socket.CLOSED = 'CLOSED';
     Socket.LISTEN = 'LISTEN';
     Socket.HANDSHAKE_A_WAIT = 'HANDSHAKE_A_WAIT';
@@ -42,6 +49,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.DATA_CHUNK_SENT = 'DATA_CHUNK_SENT';
     Socket.DATA_CHUNK_RECEIVED_ACT_WAIT = 'DATA_CHUNK_RECEIVED_ACT_WAIT';
     Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS = 'DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS';
+
+    Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT = 4;
+    Socket.DATA_CHUNK_RESPONSE_DELAY_LIMIT = 4;
+    Socket.DATA_CHUNK_RETRANSMISSION_COUNT_LIMIT = 5;
 
     Socket.prototype.close = function () {
         this.$$updateState(Socket.CLOSED);
@@ -68,34 +79,18 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$updateState(Socket.DATA_CHUNK_WAIT);
     };
 
-    Socket.prototype.txSegmentSent = function () {
-        switch (this.$$state) {
-            case Socket.HANDSHAKE_A_IN_PROGRESS:
-                this.$$updateState(Socket.HANDSHAKE_A_SENT);
-                break;
-            case Socket.HANDSHAKE_B_IN_PROGRESS:
-                this.$$updateState(Socket.HANDSHAKE_B_SENT);
-                break;
-            case Socket.HANDSHAKE_C_IN_PROGRESS:
-                this.$$updateState(Socket.ESTABLISHED);
-                break;
-            case Socket.DATA_CHUNK_IN_PROGRESS:
-                this.$$updateState(Socket.DATA_CHUNK_SENT);
-                break;
-            case Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS:
-                this.$$updateState(Socket.ESTABLISHED);
-                break;
+    Socket.prototype.handleRxSegment = function (rxSegment) {
+        var isReceiveBlocked = this.$$socketClient.isReceiveBlocked();
+
+        // console.log('------------------------------------------');
+        // console.log(this.$$state);
+        // console.log(isReceiveBlocked ? 'receive blocked!!!' : 'receive ok');
+        // console.log('handleRxSegment', rxSegment, rxSegment.getHeaderLog());
+
+        if (isReceiveBlocked) {
+            return;
         }
 
-
-        this.$$txSegmentHistory.push(this.$$txSegmentCurrent);
-        this.$$txSegmentCurrent = null;
-    };
-
-    Socket.prototype.handleRxSegment = function (rxSegment) {
-        console.log('------------------------------------------');
-        console.log(this.$$state);
-        console.log('handleRxSegment', rxSegment, rxSegment.getHeaderLog());
         switch (this.$$state) {
             // SERVER
             case Socket.LISTEN:
@@ -123,9 +118,16 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             case Socket.ESTABLISHED:
                 console.log('----');
                 console.log('Expecting data', rxSegment.isData());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment);
+                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment, 'or', rxSegment.getAcknowledgementNumberForLastRxSegmentPrevious(this.$$acknowledgementNumberForLastRxSegment));
                 console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
-                if (!rxSegment.isData() || rxSegment.getSequenceNumber() !== this.$$acknowledgementNumberForLastRxSegment || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
+                if (
+                    !rxSegment.isData() ||
+                    (
+                        rxSegment.getSequenceNumber() !== this.$$acknowledgementNumberForLastRxSegment &&
+                        rxSegment.getSequenceNumber() !== rxSegment.getAcknowledgementNumberForLastRxSegmentPrevious(this.$$acknowledgementNumberForLastRxSegment)
+                    ) ||
+                    rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext
+                ) {
                     break;
                 }
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
@@ -153,7 +155,12 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                     break;
                 }
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
-                this.$$updateState(Socket.ESTABLISHED);
+
+                if (this.$$txDataChunkQueue.length > 0) {
+                    this.$$updateState(Socket.DATA_CHUNK_WAIT);
+                } else {
+                    this.$$updateState(Socket.ESTABLISHED);
+                }
                 break;
         }
     };
@@ -163,6 +170,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             txSegment = null,
             payload;
 
+        console.log('--------------------------------------------------');
+        console.log('TX SEGMENT');
+        console.log(getPrettyDateTime(new Date()), this.$$state, this.$$initialSequenceNumber);
+
         switch (this.$$state) {
             // CLIENT
             case Socket.HANDSHAKE_A_WAIT:
@@ -171,6 +182,11 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$sequenceNumber = this.$$initialSequenceNumber;
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.HANDSHAKE_A_IN_PROGRESS);
+                break;
+            case Socket.HANDSHAKE_A_SENT:
+                if (this.$$handshakeResponseDelay++ > Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT) {
+                    this.$$updateState(Socket.CLOSED);
+                }
                 break;
             case Socket.HANDSHAKE_C_WAIT:
                 this.$$sequenceNumber = this.$$sequenceNumberNext;
@@ -182,12 +198,23 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$sequenceNumber = this.$$sequenceNumberNext;
                 this.$$txDataChunkCurrent = this.$$txDataChunkQueue.shift();
                 payload = this.$$txDataChunkCurrent.getPayload();
+                this.$$dataChunkRetransmissionCount = 0;
                 txSegment = Segment.data(this.$$sequenceNumber, this.$$acknowledgementNumberForLastRxSegment, payload);
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.DATA_CHUNK_IN_PROGRESS);
                 break;
             case Socket.DATA_CHUNK_SENT:
-                // this.$$updateState(Socket.ESTABLISHED);       // TODO fix it
+                if (this.$$dataChunkResponseDelay++ > Socket.DATA_CHUNK_RESPONSE_DELAY_LIMIT) {
+                    if (this.$$dataChunkRetransmissionCount++ >= Socket.DATA_CHUNK_RETRANSMISSION_COUNT_LIMIT) {
+                        this.$$updateState(Socket.CLOSED);
+                        break;
+                    }
+                    // retransmission
+                    payload = this.$$txDataChunkCurrent.getPayload();
+                    txSegment = Segment.data(this.$$sequenceNumber, this.$$acknowledgementNumberForLastRxSegment, payload);
+                    this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
+                    this.$$updateState(Socket.DATA_CHUNK_IN_PROGRESS);
+                }
                 break;
 
             // SERVER
@@ -198,9 +225,14 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.HANDSHAKE_B_IN_PROGRESS);
                 break;
+            case Socket.HANDSHAKE_B_SENT:
+                if (this.$$handshakeResponseDelay++ > Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT) {
+                    this.$$updateState(Socket.CLOSED);
+                }
+                break;
             case Socket.DATA_CHUNK_RECEIVED_ACT_WAIT:
-                txSegment = Segment.dataAck(this.$$sequenceNumberNext, this.$$acknowledgementNumberForLastRxSegment);
-                this.$$sequenceNumber = this.$$initialSequenceNumber;
+                this.$$sequenceNumber = this.$$sequenceNumberNext;
+                txSegment = Segment.dataAck(this.$$sequenceNumber, this.$$acknowledgementNumberForLastRxSegment);
                 this.$$sequenceNumberNext = txSegment.getSequenceNumberNext();
                 this.$$updateState(Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS);
                 break;
@@ -208,9 +240,45 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
 
         if (txSegment) {
             this.$$txSegmentCurrent = txSegment;
+        } else {
+            txSegment = this.$$txSegmentCurrent;
         }
 
         return txSegment;
+    };
+
+    Socket.prototype.txSegmentSent = function () {
+        // console.log('--------------------------------------------------');
+        // console.log('TX SEGMENT SENT');
+        // console.log(getPrettyDateTime(new Date()), this.$$state, this.$$initialSequenceNumber);
+
+        switch (this.$$state) {
+            // CLIENT
+            case Socket.HANDSHAKE_A_IN_PROGRESS:
+                this.$$updateState(Socket.HANDSHAKE_A_SENT);
+                this.$$handshakeResponseDelay = 0;
+                break;
+            case Socket.HANDSHAKE_C_IN_PROGRESS:
+                this.$$updateState(Socket.ESTABLISHED);
+                break;
+            case Socket.DATA_CHUNK_IN_PROGRESS:
+                this.$$updateState(Socket.DATA_CHUNK_SENT);
+                this.$$dataChunkResponseDelay = 0;
+                break;
+
+            // SERVER
+            case Socket.HANDSHAKE_B_IN_PROGRESS:
+                this.$$updateState(Socket.HANDSHAKE_B_SENT);
+                this.$$handshakeResponseDelay = 0;
+                break;
+            case Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS:
+                this.$$updateState(Socket.ESTABLISHED);
+                break;
+        }
+
+
+        this.$$txSegmentHistory.push(this.$$txSegmentCurrent);
+        this.$$txSegmentCurrent = null;
     };
 
     Socket.prototype.$$updateState = function (newState) {

@@ -144,13 +144,21 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
     };
 
     Segment.prototype.getSequenceNumberNext = function () {
-        return this.$$synchronizeFlag
+        var sequenceNumberNext = this.$$synchronizeFlag
             ? this.$$sequenceNumber + Segment.SYNCHRONIZE_VIRTUAL_PAYLOAD_LENGTH
             : this.$$sequenceNumber + this.$$payload.length;
+
+        sequenceNumberNext = sequenceNumberNext % 0x80;
+
+        return sequenceNumberNext;
     };
 
     Segment.prototype.getAcknowledgementNumberForLastRxSegment = function () {
         return this.getSequenceNumberNext();
+    };
+
+    Segment.prototype.getAcknowledgementNumberForLastRxSegmentPrevious = function (acknowledgementNumberForLastRxSegment) {
+        return (acknowledgementNumberForLastRxSegment - this.$$payload.length + 0x80) % 0x80;
     };
 
     Segment.handshakeSyn = function () {

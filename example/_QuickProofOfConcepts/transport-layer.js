@@ -3,8 +3,8 @@ var
     transportLayerMockB;
 
 function init() {
-    transportLayerMockA = new TransportLayerMock('#socket-a-log', '#socket-a-state');
-    transportLayerMockB = new TransportLayerMock('#socket-b-log', '#socket-b-state');
+    transportLayerMockA = new TransportLayerMock('#socket-a-log', '#socket-a-state', '#socket-a-block-receive');
+    transportLayerMockB = new TransportLayerMock('#socket-b-log', '#socket-b-state', '#socket-b-block-receive');
 
     transportLayerMockA.setOtherSideTransportLayer(transportLayerMockB);
     transportLayerMockB.setOtherSideTransportLayer(transportLayerMockA);
@@ -12,9 +12,10 @@ function init() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-var TransportLayerMock = function (logDomElementId, stateDomElementId) {
+var TransportLayerMock = function (logDomElementId, stateDomElementId, blockReceiveDomElementId) {
     this.$$logDomElementId = logDomElementId;
     this.$$stateDomElementId = stateDomElementId;
+    this.$$blockReceiveDomElementId = blockReceiveDomElementId;
     this.$$socket = new Socket(5, this);
     this.$$txSymbolId = 0;
     this.$$txFrameId = 0;
@@ -24,7 +25,7 @@ var TransportLayerMock = function (logDomElementId, stateDomElementId) {
         txSymbolId: null
     };
     this.$$otherSideTransportLayer = undefined;
-    setInterval(this.txFrameProgress.bind(this), 500);
+    setInterval(this.txFrameProgress.bind(this), 1500);
 };
 
 TransportLayerMock.prototype.setOtherSideTransportLayer = function (otherSideTransportLayer) {
@@ -50,25 +51,27 @@ TransportLayerMock.prototype.txFrameProgress = function () {
         txFramePayload,
         txSegment;
 
-    if (this.$$txFrame.id !== null) {
-        if (txSymbolId > (this.$$txFrame.txSymbolId + this.$$txFrame.txFramePayload.length)) {
-            this.txFrame(this.$$txFrame);
-            this.$$txFrame.id = null;
-            this.$$txFrame.txFramePayload = null;
-            this.$$txFrame.txSymbolId = null;
-            html(this.$$logDomElementId, txSymbolId + ': [frame-tx-finished]<br/>', true);
-        } else {
-            html(this.$$logDomElementId, txSymbolId + ': [frame-tx-in-progress]<br/>', true);
-        }
-        return;
+    // this emulates data link layer frame transmission
+    if (
+        this.$$txFrame.id !== null &&
+        txSymbolId > (this.$$txFrame.txSymbolId + this.$$txFrame.txFramePayload.length)
+    ) {
+        this.txFrame(this.$$txFrame);
+        this.$$txFrame.id = null;
+        this.$$txFrame.txFramePayload = null;
+        this.$$txFrame.txSymbolId = null;
     }
 
     txSegment = this.$$socket.getTxSegment(txSymbolId);
-    if (!txSegment) {
+
+    if (this.$$txFrame.id === null && !txSegment) {
         html(this.$$logDomElementId, txSymbolId + '<br/>', true);
         return;
     }
-
+    if (this.$$txFrame.id !== null && txSegment) {
+        html(this.$$logDomElementId, txSymbolId + ': [frame-in-progress]' + '<br/>', true);
+        return;
+    }
     txFrameId = this.$$txFrameId++;
     txFramePayload = txSegment.getTxFramePayload();
     this.$$txFrame.id = txFrameId;
@@ -76,11 +79,15 @@ TransportLayerMock.prototype.txFrameProgress = function () {
     this.$$txFrame.txSymbolId = txSymbolId;
     txSegment.setTxFrameId(txFrameId);
 
-    html(this.$$logDomElementId, txSymbolId + ': [new-frame] ' + getByteHexFromByteList(txFramePayload) + ' ' + txSegment.getHeaderLog() + '<br/>', true);
+    html(this.$$logDomElementId, txSymbolId + ': [frame-new] ' + getByteHexFromByteList(txFramePayload) + ' ' + txSegment.getHeaderLog() + '<br/>', true);
 };
 
 TransportLayerMock.prototype.rxFrame = function (rxFrame) {
     var rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
 
     this.$$socket.handleRxSegment(rxSegment);
+};
+
+TransportLayerMock.prototype.isReceiveBlocked = function () {    // TODO remove it, only for debugging
+    return getCheckboxState(this.$$blockReceiveDomElementId);
 };

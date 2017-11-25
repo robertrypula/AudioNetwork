@@ -155,3 +155,28 @@ function getDataLinkFrameCandidateHex(byteReceived, byteExpected) {
 
     return '<span class="data-link-frame-hex">' + hex + '</span>';
 }
+
+function getPrettyDateTime(date) {
+    var
+        year = date.getFullYear(),
+        month = date.getMonth() + 1,
+        day = date.getDate(),
+        hour = date.getHours(),
+        minute = date.getMinutes(),
+        second = date.getSeconds(),
+        milisecond = date.getMilliseconds();
+
+    month = month < 10 ? '0' + month : month;
+    day = day < 10 ? '0' + day : day;
+    hour = hour < 10 ? '0' + hour : hour;
+    minute = minute < 10 ? '0' + minute : minute;
+    second = second < 10 ? '0' + second : second;
+    milisecond = milisecond >= 100
+        ? milisecond
+        : (
+            milisecond < 10 ? '00' + milisecond : '0' + milisecond
+        );
+
+    return year + '.' + month + '.' + day + ' ' +
+        hour + ':' + minute + ':' + second + '.' + milisecond;
+}

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body onLoad="init()">
+<body onLoad="init()" style="min-width: 800px">
 
 <!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
 <script>
@@ -16,7 +16,7 @@
 <!-- audio network END -->
 
 
-<div style="width: 300px; float: left;">
+<div style="width: 400px; float: left;">
     <h2>Socket A</h2>
 
     <button onClick="transportLayerMockA.$$socket.close()">Close</button>
@@ -25,11 +25,13 @@
     <button onClick="transportLayerMockA.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
     <button onClick="transportLayerMockA.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
 
+    <input type="checkbox" id="socket-a-block-receive" />
+
     <div id="socket-a-state" style="font-family: monospace; line-height: 1em; font-size: 13px; font-weight: bold; padding: 10px; outline: 1px dashed lightgray;"></div>
     <div id="socket-a-log" style="font-family: monospace; line-height: 1em; font-size: 10px;"></div>
 </div>
 
-<div style="width: 300px; float: left;">
+<div style="width: 400px; float: left;">
     <h2>Socket B</h2>
 
     <button onClick="transportLayerMockB.$$socket.close()">Close</button>
@@ -37,6 +39,8 @@
     <button onClick="transportLayerMockB.$$socket.connect()">Connect</button>
     <button onClick="transportLayerMockB.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
     <button onClick="transportLayerMockB.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
+
+    <input type="checkbox" id="socket-b-block-receive" />
 
     <div id="socket-b-state" style="font-family: monospace; line-height: 1em; font-size: 13px; font-weight: bold; padding: 10px; outline: 1px dashed lightgray;"></div>
     <div id="socket-b-log" style="font-family: monospace; line-height: 1em; font-size: 10px;"></div>
