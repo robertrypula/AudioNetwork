@@ -3,8 +3,8 @@ var
     transportLayerMockB;
 
 function init() {
-    transportLayerMockA = new TransportLayerMock('#socket-a-log', '#socket-a-state', '#socket-a-block-receive');
-    transportLayerMockB = new TransportLayerMock('#socket-b-log', '#socket-b-state', '#socket-b-block-receive');
+    transportLayerMockA = new TransportLayerMock('#socket-a-log', '#socket-a-state', '#socket-a-block-receive', '#socket-a-rx-data-chunk');
+    transportLayerMockB = new TransportLayerMock('#socket-b-log', '#socket-b-state', '#socket-b-block-receive', '#socket-b-rx-data-chunk');
 
     transportLayerMockA.setOtherSideTransportLayer(transportLayerMockB);
     transportLayerMockB.setOtherSideTransportLayer(transportLayerMockA);
@@ -12,10 +12,11 @@ function init() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-var TransportLayerMock = function (logDomElementId, stateDomElementId, blockReceiveDomElementId) {
+var TransportLayerMock = function (logDomElementId, stateDomElementId, blockReceiveDomElementId, rxDataChunkDomElementId) {
     this.$$logDomElementId = logDomElementId;
     this.$$stateDomElementId = stateDomElementId;
     this.$$blockReceiveDomElementId = blockReceiveDomElementId;
+    this.$$rxDataChunkDomElementId = rxDataChunkDomElementId;
     this.$$socket = new Socket(5, this);
     this.$$txSymbolId = 0;
     this.$$txFrameId = 0;
@@ -25,7 +26,7 @@ var TransportLayerMock = function (logDomElementId, stateDomElementId, blockRece
         txSymbolId: null
     };
     this.$$otherSideTransportLayer = undefined;
-    setInterval(this.txFrameProgress.bind(this), 1500);
+    setInterval(this.txFrameProgress.bind(this), 200);
 };
 
 TransportLayerMock.prototype.setOtherSideTransportLayer = function (otherSideTransportLayer) {
@@ -34,6 +35,18 @@ TransportLayerMock.prototype.setOtherSideTransportLayer = function (otherSideTra
 
 TransportLayerMock.prototype.onSocketStateChange = function (state) {
     html(this.$$stateDomElementId, state);
+};
+
+TransportLayerMock.prototype.onRxDataChunk = function (rxDataChunk) {
+    console.log(rxDataChunk);
+
+    html(
+        this.$$rxDataChunkDomElementId,
+        getAsciiFromByteList(
+            rxDataChunk[rxDataChunk.length - 1].getLastRxSegment().getPayload()
+        ),
+        true
+    );
 };
 
 TransportLayerMock.prototype.txFrame = function (txFrame) {

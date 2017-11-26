@@ -21,6 +21,8 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$txDataChunkCurrent = null;
         this.$$txDataChunkQueue = [];
 
+        this.$$rxDataChunk = [];
+
         this.$$state = undefined;
         this.$$updateState(Socket.CLOSED);
 
@@ -80,7 +82,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     };
 
     Socket.prototype.handleRxSegment = function (rxSegment) {
-        var isReceiveBlocked = this.$$socketClient.isReceiveBlocked();
+        var
+            isReceiveBlocked = this.$$socketClient.isReceiveBlocked(),
+            receivedFreshDataChunk,
+            rxDataChunk;
 
         // console.log('------------------------------------------');
         // console.log(this.$$state);
@@ -91,13 +96,15 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             return;
         }
 
+        // TODO clean this giant switch below as this is not following clean code principles
+
         switch (this.$$state) {
             // SERVER
             case Socket.LISTEN:
-                console.log('----');
-                console.log('Expecting handshake SYN', rxSegment.isHandshakeSyn());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting.............', this.$$acknowledgementNumberForLastRxSegment);
-                console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting.............', this.$$sequenceNumberNext);
+                // console.log('----');
+                // console.log('Expecting handshake SYN', rxSegment.isHandshakeSyn());
+                // console.log('Got seq', rxSegment.getSequenceNumber(), 'no expectation.............', this.$$acknowledgementNumberForLastRxSegment);
+                // console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'no expectation.............', this.$$sequenceNumberNext);
                 if (!rxSegment.isHandshakeSyn()) {
                     break;
                 }
@@ -105,10 +112,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$updateState(Socket.HANDSHAKE_B_WAIT);
                 break;
             case Socket.HANDSHAKE_B_SENT:
-                console.log('----');
-                console.log('Expecting handshake ack', rxSegment.isHandshakeAck());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment);
-                console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
+                // console.log('----');
+                // console.log('Expecting handshake ack', rxSegment.isHandshakeAck());
+                // console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment);
+                // console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
                 if (!rxSegment.isHandshakeAck() || rxSegment.getSequenceNumber() !== this.$$acknowledgementNumberForLastRxSegment || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
                     break;
                 }
@@ -116,10 +123,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$updateState(Socket.ESTABLISHED);
                 break;
             case Socket.ESTABLISHED:
-                console.log('----');
-                console.log('Expecting data', rxSegment.isData());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment, 'or', rxSegment.getAcknowledgementNumberForLastRxSegmentPrevious(this.$$acknowledgementNumberForLastRxSegment));
-                console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
+                // console.log('----');
+                // console.log('Expecting data', rxSegment.isData());
+                // console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment, 'or', rxSegment.getAcknowledgementNumberForLastRxSegmentPrevious(this.$$acknowledgementNumberForLastRxSegment));
+                // console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
                 if (
                     !rxSegment.isData() ||
                     (
@@ -132,14 +139,31 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 }
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
                 this.$$updateState(Socket.DATA_CHUNK_RECEIVED_ACT_WAIT);
+
+                rxDataChunk = this.$$getLastRxDataChunk();
+                receivedFreshDataChunk =
+                    !rxDataChunk ||
+                    (rxDataChunk && rxDataChunk.getLastRxSegment().getSequenceNumber() !== rxSegment.getSequenceNumber());
+                if (receivedFreshDataChunk) {
+                    // TODO implement payload check - retransmitted segments should have the same payload
+                    // TODO it would be nice to handle that case
+
+                    rxDataChunk = new DataChunk(rxSegment.getPayload());
+                    rxDataChunk.addRxSegment(rxSegment);
+                    this.$$rxDataChunk.push(rxDataChunk);
+                } else {
+                    rxDataChunk.addRxSegment(rxSegment);
+                }
+
+                this.$$socketClient.onRxDataChunk(this.$$rxDataChunk);
                 break;
 
             // CLIENT
             case Socket.HANDSHAKE_A_SENT:
-                console.log('----');
-                console.log('Expecting handshake syn ack', rxSegment.isHandshakeSynAck());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting..........', this.$$acknowledgementNumberForLastRxSegment);
-                console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
+                // console.log('----');
+                // console.log('Expecting handshake syn ack', rxSegment.isHandshakeSynAck());
+                // console.log('Got seq', rxSegment.getSequenceNumber(), 'no expectation..........', this.$$acknowledgementNumberForLastRxSegment);
+                // console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
                 if (!rxSegment.isHandshakeSynAck() || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
                     break;
                 }
@@ -147,10 +171,10 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 this.$$updateState(Socket.HANDSHAKE_C_WAIT);
                 break;
             case Socket.DATA_CHUNK_SENT:
-                console.log('----');
-                console.log('Expecting data ack', rxSegment.isDataAck());
-                console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment);
-                console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
+                // console.log('----');
+                // console.log('Expecting data ack', rxSegment.isDataAck());
+                // console.log('Got seq', rxSegment.getSequenceNumber(), 'expecting', this.$$acknowledgementNumberForLastRxSegment);
+                // console.log('Got ack', rxSegment.getAcknowledgementNumber(), 'expecting', this.$$sequenceNumberNext);
                 if (!rxSegment.isDataAck() || rxSegment.getSequenceNumber() !== this.$$acknowledgementNumberForLastRxSegment || rxSegment.getAcknowledgementNumber() !== this.$$sequenceNumberNext) {
                     break;
                 }
@@ -170,9 +194,9 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
             txSegment = null,
             payload;
 
-        console.log('--------------------------------------------------');
-        console.log('TX SEGMENT');
-        console.log(getPrettyDateTime(new Date()), this.$$state, this.$$initialSequenceNumber);
+        // console.log('--------------------------------------------------');
+        // console.log('TX SEGMENT');
+        // console.log(getPrettyDateTime(new Date()), this.$$state, this.$$initialSequenceNumber);
 
         switch (this.$$state) {
             // CLIENT
@@ -284,6 +308,12 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.prototype.$$updateState = function (newState) {
         this.$$state = newState;
         this.$$socketClient.onSocketStateChange(this.$$state);
+    };
+
+    Socket.prototype.$$getLastRxDataChunk = function () {
+        return this.$$rxDataChunk.length > 0
+            ? this.$$rxDataChunk[this.$$rxDataChunk.length - 1]
+            : null;
     };
 
     Socket.prototype.$$splitIntoTxDataChunk = function (txData) {

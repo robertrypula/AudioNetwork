@@ -25,6 +25,12 @@
     <button onClick="transportLayerMockA.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
     <button onClick="transportLayerMockA.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
 
+    <button onClick="transportLayerMockA.$$socket.send(getByteListFromAsciiString(getFormFieldValue('#socket-a-textarea')))">Send texarea</button>
+
+    <pre id="socket-a-rx-data-chunk" style="border: 1px solid red; padding: 10px;"></pre>
+
+    <textarea id="socket-a-textarea"></textarea>
+
     <input type="checkbox" id="socket-a-block-receive" />
 
     <div id="socket-a-state" style="font-family: monospace; line-height: 1em; font-size: 13px; font-weight: bold; padding: 10px; outline: 1px dashed lightgray;"></div>
@@ -39,6 +45,12 @@
     <button onClick="transportLayerMockB.$$socket.connect()">Connect</button>
     <button onClick="transportLayerMockB.$$socket.send([0x86, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21])">Send 'Hello!'</button>
     <button onClick="transportLayerMockB.$$socket.send([0x82, 0x48, 0x69])">Send 'Hi'</button>
+
+    <button onClick="transportLayerMockB.$$socket.send(getByteListFromAsciiString(getFormFieldValue('#socket-b-textarea')))">Send texarea</button>
+
+    <pre id="socket-b-rx-data-chunk" style="border: 1px solid red; padding: 10px;"></pre>
+
+    <textarea id="socket-b-textarea"></textarea>
 
     <input type="checkbox" id="socket-b-block-receive" />
 

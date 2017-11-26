@@ -14,6 +14,16 @@ var DataChunk = (function () { // <-- TODO this will be soon refactored when cod
         return this.$$payload;
     };
 
+    DataChunk.prototype.getLastRxSegment = function () {
+        return this.$$rxSegment.length > 0
+            ? this.$$rxSegment[this.$$rxSegment.length - 1]
+            : null;
+    };
+
+    DataChunk.prototype.addRxSegment = function (rxSegment) {
+        this.$$rxSegment.push(rxSegment);
+    };
+
     /*
     DataChunk.prototype.getTxAttemptNumber = function () {
         return this.$$payload;
