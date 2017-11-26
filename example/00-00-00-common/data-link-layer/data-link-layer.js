@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder;
+
 // TODO move and refactor RX code (dedicated classes like in TX part)
 // TODO implement solution what will not require PhysicalLayer synchronization (looking for frames in two FSK symbol streams)
 

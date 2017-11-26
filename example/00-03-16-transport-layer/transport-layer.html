@@ -60,15 +60,12 @@
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label>
+                            <label class="label-compact">
                                 Loopback
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div class="clearfix margin-bottom" id="loopback-container">
-                                <button id="loopback-enabled" class="btn btn-default" onClick="onSetLoopbackClick(true)">Enabled</button>
-                                <button id="loopback-disabled" class="btn btn-default" onClick="onSetLoopbackClick(false)">Disabled</button>
-                            </div>
+                            In current implementation of Transport Layer Loopback is not possible as we need to have two sockets.
                         </div>
                     </div>
 
@@ -131,7 +128,7 @@
 
                     <!-- --- -->
 
-                    <h2>Client</h2>
+                    <h2>Socket</h2>
 
                     <div class="row margin-bottom-double">
                         <div class="col col-xs-4 col-sm-5 col-md-3">
@@ -140,24 +137,10 @@
                             </label>
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="client-state" class="margin-bottom">-</div>
-                            <button class="btn btn-default" onClick="clientConnect()">Connect</button>
-                            <button class="btn btn-default" onClick="clientDisconnect()">Disconnect</button>
-                        </div>
-                    </div>
-
-                    <h2>Server</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-4 col-sm-5 col-md-3">
-                            <label class="label-compact">
-                                State
-                            </label>
-                        </div>
-                        <div class="col col-xs-8 col-sm-7 col-md-9">
-                            <div id="server-state" class="margin-bottom">-</div>
-                            <button class="btn btn-default" onClick="serverListen()">Listen</button>
-                            <button class="btn btn-default" onClick="serverDisconnect()">Disconnect</button>
+                            <div id="socket-state" class="margin-bottom">-</div>
+                            <button class="btn btn-default" onClick="onConnectClick()">Connect</button>
+                            <button class="btn btn-default" onClick="onListenClick()">Listen</button>
+                            <button class="btn btn-default" onClick="onCloseClick()">Disconnect</button>
                         </div>
                     </div>
 
@@ -195,51 +178,6 @@
                     </div>
 
                     <!-- --- -->
-
-                    <h2>Fake data</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col">
-                            <button class="btn btn-default" onClick="transportLayer.fakeClose()">Close</button>
-                            <button class="btn btn-default" onClick="transportLayer.fakeListen()">Listen</button>
-                            <button class="btn btn-default" onClick="transportLayer.fakeConnect()">Connect</button>
-                            <button class="btn btn-default" onClick="transportLayer.fakeMessageA()">Message A</button>
-                            <button class="btn btn-default" onClick="transportLayer.fakeMessageB()">Message B</button>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col">
-                            <div id="fake-state" class="margin-bottom-double"></div>
-                            <div id="fake-traffic" style="padding: 20px; border: 1px solid gray;"></div>
-                        </div>
-                    </div>
-
-                    <h2>Recording - only for debugging, it will be deleted soon</h2>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label>
-                                Record actions
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <button class="btn btn-default" onClick="onRecordStartClick()">Start</button>
-                            <button class="btn btn-default" onClick="onRecordStopClick()">Stop</button>
-                            <div id="recording-status">-</div>
-                        </div>
-                    </div>
-
-                    <div class="row margin-bottom-double">
-                        <div class="col col-xs-5 col-sm-5 col-md-3">
-                            <label>
-                                Record data
-                            </label>
-                        </div>
-                        <div class="col col-xs-7 col-sm-7 col-md-9">
-                            <textarea id="recorded-data" style="height: 200px;"></textarea>
-                        </div>
-                    </div>
 
                 </div>
             </div>

@@ -14,10 +14,9 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$sequenceNumber = undefined;
         this.$$sequenceNumberNext = undefined;
         this.$$acknowledgementNumberForLastRxSegment = undefined;
-        this.$$txSegmentHistory = [];
+
         this.$$txSegmentCurrent = null;
 
-        this.$$txDataChunkHistory = [];
         this.$$txDataChunkCurrent = null;
         this.$$txDataChunkQueue = [];
 
@@ -32,6 +31,7 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     };
 
     Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION = 'Sending is possible only in ESTABLISHED state';
+    Socket.THERE_IS_NOTHING_TO_SEND_EXCEPTION = 'There is nothing to send';
 
     // TODO: find better names for states (?)
     Socket.CLOSED = 'CLOSED';
@@ -73,6 +73,9 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     };
 
     Socket.prototype.send = function (txData) {
+        if (!txData || txData.length === 0) {
+            throw Socket.THERE_IS_NOTHING_TO_SEND_EXCEPTION;
+        }
         if (this.$$state !== Socket.ESTABLISHED) {
             throw Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION;
         }
@@ -151,11 +154,11 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                     rxDataChunk = new DataChunk(rxSegment.getPayload());
                     rxDataChunk.addRxSegment(rxSegment);
                     this.$$rxDataChunk.push(rxDataChunk);
+                    this.$$socketClient.onRxDataChunk(this.$$rxDataChunk);
                 } else {
                     rxDataChunk.addRxSegment(rxSegment);
                 }
 
-                this.$$socketClient.onRxDataChunk(this.$$rxDataChunk);
                 break;
 
             // CLIENT
@@ -300,8 +303,6 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 break;
         }
 
-
-        this.$$txSegmentHistory.push(this.$$txSegmentCurrent);
         this.$$txSegmentCurrent = null;
     };
 

@@ -10,6 +10,7 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
         this._rxSegmentListener = undefined;
         this._rxConnectionStatus = undefined;
         this._txByteStreamListener = undefined;
+        this._txSegmentListener = undefined;
         this._txConnectionStatus = undefined;
 
         // data link layer listeners
