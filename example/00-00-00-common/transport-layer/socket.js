@@ -52,8 +52,8 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.DATA_CHUNK_RECEIVED_ACT_WAIT = 'DATA_CHUNK_RECEIVED_ACT_WAIT';
     Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS = 'DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS';
 
-    Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT = 4;
-    Socket.DATA_CHUNK_RESPONSE_DELAY_LIMIT = 4;
+    Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT = 15;
+    Socket.DATA_CHUNK_RESPONSE_DELAY_LIMIT = 15;
     Socket.DATA_CHUNK_RETRANSMISSION_COUNT_LIMIT = 5;
 
     Socket.prototype.close = function () {
@@ -182,6 +182,8 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                     break;
                 }
                 this.$$acknowledgementNumberForLastRxSegment = rxSegment.getAcknowledgementNumberForLastRxSegment();
+
+                this.$$socketClient.onTxDataChunk(this.$$txDataChunkCurrent);
 
                 if (this.$$txDataChunkQueue.length > 0) {
                     this.$$updateState(Socket.DATA_CHUNK_WAIT);

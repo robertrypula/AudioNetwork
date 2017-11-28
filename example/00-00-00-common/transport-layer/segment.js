@@ -14,7 +14,6 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$payload = payload.slice(0);
 
         this.$$txFrameId = null;
-        this.$$txSymbolId = null;
     };
 
     Segment.HEADER_BYTE_LENGTH = 2;
@@ -50,16 +49,8 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$txFrameId = txFrameId;
     };
 
-    Segment.prototype.setTxSymbolId = function (txSymbolId) {
-        this.$$txSymbolId = txSymbolId;
-    };
-
     Segment.prototype.getPayload = function () {
         return this.$$payload;
-    };
-
-    Segment.prototype.getTxSymbolId = function () {
-        return this.$$txSymbolId;
     };
 
     Segment.prototype.getTxFrameId = function () {

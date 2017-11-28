@@ -49,12 +49,10 @@ TransportLayerMock.prototype.onRxDataChunk = function (rxDataChunk) {
     );
 };
 
-TransportLayerMock.prototype.txFrame = function (txFrame) {
-    this.$$socket.txSegmentSent();
+TransportLayerMock.prototype.rxFrame = function (rxFrame) {
+    var rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
 
-    this.$$otherSideTransportLayer.rxFrame({
-        rxFramePayload: txFrame.txFramePayload.slice(0)
-    });
+    this.$$socket.handleRxSegment(rxSegment);
 };
 
 TransportLayerMock.prototype.txFrameProgress = function () {
@@ -85,6 +83,7 @@ TransportLayerMock.prototype.txFrameProgress = function () {
         html(this.$$logDomElementId, txSymbolId + ': [frame-in-progress]' + '<br/>', true);
         return;
     }
+
     txFrameId = this.$$txFrameId++;
     txFramePayload = txSegment.getTxFramePayload();
     this.$$txFrame.id = txFrameId;
@@ -95,10 +94,12 @@ TransportLayerMock.prototype.txFrameProgress = function () {
     html(this.$$logDomElementId, txSymbolId + ': [frame-new] ' + getByteHexFromByteList(txFramePayload) + ' ' + txSegment.getHeaderLog() + '<br/>', true);
 };
 
-TransportLayerMock.prototype.rxFrame = function (rxFrame) {
-    var rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
+TransportLayerMock.prototype.txFrame = function (txFrame) {
+    this.$$socket.txSegmentSent();
 
-    this.$$socket.handleRxSegment(rxSegment);
+    this.$$otherSideTransportLayer.rxFrame({
+        rxFramePayload: txFrame.txFramePayload.slice(0)
+    });
 };
 
 TransportLayerMock.prototype.isReceiveBlocked = function () {    // TODO remove it, only for debugging

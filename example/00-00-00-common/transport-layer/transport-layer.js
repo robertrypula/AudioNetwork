@@ -23,22 +23,23 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
             .txDspConfigListener(builder._txDspConfigListener)
             .build();
 
-        // state variables
-        this.$$segmentPayloadLengthLimit = this.$$dataLinkLayer.getFramePayloadLengthLimit() - Segment.HEADER_BYTE_LENGTH;
-        this.$$socket = new Socket(this.$$segmentPayloadLengthLimit, this);
-
         // setup listeners - transport layer
+        this.$$connectionStatus = TransportLayer.$$isFunction(builder._connectionStatus) ? builder._connectionStatus : null;
         this.$$rxByteStreamListener = TransportLayer.$$isFunction(builder._rxByteStreamListener) ? builder._rxByteStreamListener : null;
         this.$$rxSegmentListener = TransportLayer.$$isFunction(builder._rxSegmentListener) ? builder._rxSegmentListener : null;
-        this.$$rxConnectionStatus = TransportLayer.$$isFunction(builder._rxConnectionStatus) ? builder._rxConnectionStatus : null;
         this.$$txByteStreamListener = TransportLayer.$$isFunction(builder._txByteStreamListener) ? builder._txByteStreamListener : null;
         this.$$txSegmentListener = TransportLayer.$$isFunction(builder._txSegmentListener) ? builder._txSegmentListener : null;
-        this.$$txConnectionStatus = TransportLayer.$$isFunction(builder._txConnectionStatus) ? builder._txConnectionStatus : null;
 
         // setup listeners - data link layer
         this.$$externalTxFrameListener = DataLinkLayer.$$isFunction(builder._txFrameListener) ? builder._txFrameListener : null;
         this.$$externalRxFrameListener = DataLinkLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
         this.$$externalTxFrameProgressListener = DataLinkLayer.$$isFunction(builder._txFrameProgressListener) ? builder._txFrameProgressListener : null;
+
+        // state variables
+        this.$$segmentPayloadLengthLimit = this.$$dataLinkLayer.getFramePayloadLengthLimit() - Segment.HEADER_BYTE_LENGTH;
+        this.$$socket = new Socket(this.$$segmentPayloadLengthLimit, this);
+        this.$$isTxFrameOnAir = false;
+        this.$$txSymbolIdInProcessing = null;
     };
 
     TransportLayer.prototype.getDataLinkLayer = function () {
@@ -67,64 +68,110 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.txData = function (txData) {
-        this.$$socket.addTxData(txData);
-        this.$$handleTxFrameProgress();
+    TransportLayer.prototype.send = function (txData) {
+        this.$$socket.send(txData);
+        // this.$$handleTxFrameProgress();
+    };
+
+    TransportLayer.prototype.connect = function () {
+        this.$$socket.connect();
+    };
+
+    TransportLayer.prototype.listen = function () {
+        this.$$socket.listen();
+    };
+
+    TransportLayer.prototype.close = function () {
+        this.$$socket.close();
     };
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.onSocketStateChange = function (state) {
-        console.log(state);                            // TODO think more about it
-        // this.$$txListener ? this.$$txFrameProgressListener(this.getTxFrameProgress()) : undefined;
+    TransportLayer.prototype.isReceiveBlocked = function (state) {   // TODO remove me, only for debugging
+        return false;
     };
 
-    TransportLayer.prototype.$$handleTxFrame = function (txFrame) {
-        var txSegment = this.$$socket.findTxSegmentByTxFrameId(txFrame.id);
+    TransportLayer.prototype.onSocketStateChange = function (state) {    // TODO maybe socket should call this method in more 'listener' way (?)
+        var connectionStatus = {
+            state: state
+        };
+        this.$$connectionStatus ? this.$$connectionStatus(connectionStatus) : undefined;
+    };
 
-        if (txSegment) {
-            txSegment.txCompleted();
-        }
+    TransportLayer.prototype.onRxDataChunk = function (rxDataChunk) {    // TODO maybe socket should call this method in more 'listener' way (?)
+        var rxDataChunk = {
+            payload: rxDataChunk[rxDataChunk.length - 1].getLastRxSegment().getPayload().splice(0)
+        };
+        console.log('onRxDataChunk');
+        console.log(JSON.stringify(rxDataChunk, null, true));
+        this.$$rxByteStreamListener ? this.$$rxByteStreamListener(rxDataChunk) : undefined;
+    };
+
+    TransportLayer.prototype.onTxDataChunk = function (txDataChunkCurrent) {    // TODO maybe socket should call this method in more 'listener' way (?)
+        var txDataChunk = {
+            payload: txDataChunkCurrent.getPayload().splice(0)
+        };
+
+        console.log('onTxDataChunk');
+        console.log(JSON.stringify(txDataChunkCurrent, null, true));
+        this.$$txByteStreamListener ? this.$$txByteStreamListener(txDataChunk) : undefined;
     };
 
     TransportLayer.prototype.$$handleRxFrame = function (rxFrame) {        // TODO this is POC - it will be deleted
-        var rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
+        var rxSegment;
 
-        rxSegment.setRxFrameId(rxFrame.id);
-        console.log('RX Segment', rxSegment);
-        this.$$socket.handleRxSegment(rxSegment);
+        try {
+            rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
+            // rxSegment.setRxFrameId(rxFrame.id);  // TODO track txFrameId in segment
+            this.$$socket.handleRxSegment(rxSegment);
+            this.$$rxSegmentListener ? this.$$rxSegmentListener(txDataChunk) : undefined;
+        } catch (e) {
+            console.error(e);
+        }
     };
 
-    TransportLayer.prototype.$$handleTxFrameProgress = function () {
+    TransportLayer.prototype.$$handleTxFrameProgress = function (txFrameProgress) {
         var
-            txSymbolId = this.$$dataLinkLayer.getPhysicalLayer().getTxSymbol().id,     // we need to go deeper... ;)
+            txSymbolId = this.$$dataLinkLayer.getPhysicalLayer().getTxSymbol().id,
             txSegment = this.$$socket.getTxSegment(txSymbolId),
             txFramePayload,
             txFrameId;
 
-        if (txSegment) {
-            txFramePayload = txSegment.getTxFramePayload();
-            txFrameId = this.$$dataLinkLayer.txFrame(txFramePayload, false);
-            txSegment.setTxFrameId(txFrameId);
-            console.log('TX Segment', txSegment);
+        // txFrame re-triggers txFrameProgress so we need this condition in order to prevent infinite loop
+        if (this.$$txSymbolIdInProcessing === txSymbolId) {
+            return;
         }
+        this.$$txSymbolIdInProcessing = txSymbolId;
+
+        if (txSegment && !this.$$isTxFrameOnAir) {
+            txFramePayload = txSegment.getTxFramePayload();
+            txFrameId = this.$$dataLinkLayer.txFrame(txFramePayload, false);     // TODO add constant in DataLinkLayer for 'false'
+            txSegment.setTxFrameId(txFrameId);
+            this.$$isTxFrameOnAir = true;
+        }
+        this.$$txSymbolIdInProcessing = null;
+    };
+
+    TransportLayer.prototype.$$handleTxFrame = function (txFrame) {
+        this.$$socket.txSegmentSent();
+        this.$$isTxFrameOnAir = false;
     };
 
     // -----------------------------------------------------
 
-    TransportLayer.prototype.$$txFrameListener = function (data) {
-        this.$$externalTxFrameListener ? this.$$externalTxFrameListener(data) : undefined;
-        //this.$$handleTxFrame(data);
-    };
-
     TransportLayer.prototype.$$rxFrameListener = function (data) {
         this.$$externalRxFrameListener ? this.$$externalRxFrameListener(data) : undefined;
-        //this.$$handleRxFrame(data);
+        this.$$handleRxFrame(data);
     };
 
     TransportLayer.prototype.$$txFrameProgressListener = function (data) {
         this.$$externalTxFrameProgressListener ? this.$$externalTxFrameProgressListener(data) : undefined;
-        //this.$$handleTxFrameProgress();
+        this.$$handleTxFrameProgress(data);
+    };
+
+    TransportLayer.prototype.$$txFrameListener = function (data) {
+        this.$$externalTxFrameListener ? this.$$externalTxFrameListener(data) : undefined;
+        this.$$handleTxFrame(data);
     };
 
     // -----------------------------------------------------

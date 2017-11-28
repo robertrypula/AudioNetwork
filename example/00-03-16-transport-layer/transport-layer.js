@@ -11,12 +11,19 @@ function init() {
         .rxDspConfigListener(rxDspConfigListener)
         .txDspConfigListener(txDspConfigListener)
         .rxSyncStatusListener(rxSyncStatusListener)
+        .connectionStatus(connectionStatusListener)
+        .rxByteStreamListener(rxByteStreamListener)
+        .txByteStreamListener(txByteStreamListener)
         .build();
     invokeOnEnter('#tx-data-textarea', onTxDataClick);
 }
 
 function rxDspConfigListener(state) {
     html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
+}
+
+function txDspConfigListener(state) {
+    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
 function rxSyncStatusListener(state) {
@@ -27,8 +34,26 @@ function rxSyncStatusListener(state) {
     );
 }
 
-function txDspConfigListener(state) {
-    setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
+function connectionStatusListener(state) {
+    html('#socket-state', state.state);
+}
+
+function rxByteStreamListener(byteStream) {
+    console.log('rxByteStreamListener', byteStream);
+    html(
+        '#rx-byte-stream',
+        getAsciiFromByteList(byteStream.payload),
+        true
+    );
+}
+
+function txByteStreamListener(byteStream) {
+    console.log('txByteStreamListener', byteStream);
+    html(
+        '#tx-byte-stream',
+        getAsciiFromByteList(byteStream.payload),
+        true
+    );
 }
 
 // ---------
@@ -48,24 +73,18 @@ function onTxDataClick() {
         txDataTextarea = getFormFieldValue('#tx-data-textarea'),
         txData = getByteListFromAsciiString(txDataTextarea);
 
-    transportLayer.txData(txData);
+    transportLayer.send(txData);
     setValue('#tx-data-textarea', '');
 }
 
-/*
-function clientConnect() {
-    transportLayer.clientConnect();
+function onConnectClick() {
+    transportLayer.connect();
 }
 
-function clientDisconnect() {
-    transportLayer.clientDisconnect();
+function onCloseClick() {
+    transportLayer.close();
 }
 
-function serverListen() {
-    transportLayer.serverListen();
+function onListenClick() {
+    transportLayer.listen();
 }
-
-function serverDisconnect() {
-    transportLayer.serverDisconnect();
-}
-*/

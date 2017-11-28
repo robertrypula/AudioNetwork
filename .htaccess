@@ -43,6 +43,7 @@ Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/t
 Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/wave-generator.js
 Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/util/buffer.js
 Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/complex.js
+Redirect 301 /smart-timer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/util/smart-timer.js
 Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/correlator.js
 Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/rx-sync-detector.js
 Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/physical-layer.js

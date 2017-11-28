@@ -6,12 +6,11 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
 
     TransportLayerBuilder = function () {
         // transport layer listeners
+        this._connectionStatus = undefined;
         this._rxByteStreamListener = undefined;
         this._rxSegmentListener = undefined;
-        this._rxConnectionStatus = undefined;
         this._txByteStreamListener = undefined;
         this._txSegmentListener = undefined;
-        this._txConnectionStatus = undefined;
 
         // data link layer listeners
         this._txFrameListener = undefined;
@@ -29,6 +28,11 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
         this._txDspConfigListener = undefined;
     };
 
+    TransportLayerBuilder.prototype.connectionStatus = function (listener) {
+        this._connectionStatus = listener;
+        return this;
+    };
+
     TransportLayerBuilder.prototype.rxByteStreamListener = function (listener) {
         this._rxByteStreamListener = listener;
         return this;
@@ -39,11 +43,6 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
         return this;
     };
 
-    TransportLayerBuilder.prototype.rxConnectionStatus = function (listener) {
-        this._rxConnectionStatus = listener;
-        return this;
-    };
-
     TransportLayerBuilder.prototype.txByteStreamListener = function (listener) {
         this._txByteStreamListener = listener;
         return this;
@@ -51,11 +50,6 @@ var TransportLayerBuilder = (function () { // <-- TODO this will be soon refacto
 
     TransportLayerBuilder.prototype.txSegmentListener = function (listener) {
         this._txSegmentListener = listener;
-        return this;
-    };
-
-    TransportLayerBuilder.prototype.txConnectionStatus = function (listener) {
-        this._txConnectionStatus = listener;
         return this;
     };
 

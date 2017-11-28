@@ -140,7 +140,7 @@
                             <div id="socket-state" class="margin-bottom">-</div>
                             <button class="btn btn-default" onClick="onConnectClick()">Connect</button>
                             <button class="btn btn-default" onClick="onListenClick()">Listen</button>
-                            <button class="btn btn-default" onClick="onCloseClick()">Disconnect</button>
+                            <button class="btn btn-default" onClick="onCloseClick()">Close</button>
                         </div>
                     </div>
 
@@ -148,18 +148,26 @@
 
                     <h2>Transport Layer</h2>
 
+                    <!--
                     <div class="row margin-bottom-double">
                         <div class="col">
                             <h3>Segments</h3>
                             <div id="io-traffic-segment"></div>
                         </div>
                     </div>
+                    -->
 
                     <div class="row margin-bottom-double">
-                        <div class="col">
-                            <h3>Stream</h3>
-                            <div id="io-traffic-stream"></div>
+                        <div class="col-md-6">
+                            <pre id="rx-byte-stream"></pre>
                         </div>
+                        <div class="col-md-6">
+                            <pre id="tx-byte-stream"></pre>
+                        </div>
+
+                        <!--<div class="col">-->
+                            <!--<div id="io-traffic-stream"></div>-->
+                        <!--</div>-->
                     </div>
 
                     <div class="row margin-bottom-double">
