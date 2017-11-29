@@ -40,6 +40,8 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$socket = new Socket(this.$$segmentPayloadLengthLimit, this);
         this.$$isTxFrameOnAir = false;
         this.$$txSymbolIdInProcessing = null;
+        this.$$rxSegment = null;
+        this.$$txSegment = null;
     };
 
     TransportLayer.prototype.getDataLinkLayer = function () {
@@ -85,16 +87,25 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$socket.close();
     };
 
+    TransportLayer.prototype.getRxSegment = function () {
+        return this.$$rxSegment
+            ? this.$$rxSegment.cloneCleanAsRx()
+            : null;
+    };
+
+    TransportLayer.prototype.getTxSegment = function () {
+        return this.$$txSegment
+            ? this.$$txSegment.cloneCleanAsTx()
+            : null;
+    };
+
     // -----------------------------------------------------
 
     TransportLayer.prototype.isReceiveBlocked = function (state) {   // TODO remove me, only for debugging
         return false;
     };
 
-    TransportLayer.prototype.onSocketStateChange = function (state) {    // TODO maybe socket should call this method in more 'listener' way (?)
-        var connectionStatus = {
-            state: state
-        };
+    TransportLayer.prototype.onSocketStateChange = function (connectionStatus) {    // TODO maybe socket should call this method in more 'listener' way (?)
         this.$$connectionStatus ? this.$$connectionStatus(connectionStatus) : undefined;
     };
 
@@ -103,7 +114,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
             payload: rxDataChunk[rxDataChunk.length - 1].getLastRxSegment().getPayload().splice(0)
         };
         console.log('onRxDataChunk');
-        console.log(JSON.stringify(rxDataChunk, null, true));
+        console.log(JSON.stringify(rxDataChunk, null, 2));
         this.$$rxByteStreamListener ? this.$$rxByteStreamListener(rxDataChunk) : undefined;
     };
 
@@ -113,7 +124,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         };
 
         console.log('onTxDataChunk');
-        console.log(JSON.stringify(txDataChunkCurrent, null, true));
+        console.log(JSON.stringify(txDataChunkCurrent, null, 2));
         this.$$txByteStreamListener ? this.$$txByteStreamListener(txDataChunk) : undefined;
     };
 
@@ -122,9 +133,11 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
         try {
             rxSegment = Segment.fromRxFramePayload(rxFrame.rxFramePayload);
-            // rxSegment.setRxFrameId(rxFrame.id);  // TODO track txFrameId in segment
+            rxSegment.setRxFrameId(rxFrame.id);
+            rxSegment.setId(this.$$socket.getNextRxSegmentId());
+            this.$$rxSegment = rxSegment;
+            this.$$rxSegmentListener ? this.$$rxSegmentListener(this.getRxSegment()) : undefined;
             this.$$socket.handleRxSegment(rxSegment);
-            this.$$rxSegmentListener ? this.$$rxSegmentListener(txDataChunk) : undefined;
         } catch (e) {
             console.error(e);
         }
@@ -137,7 +150,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
             txFramePayload,
             txFrameId;
 
-        // txFrame re-triggers txFrameProgress so we need this condition in order to prevent infinite loop
+        // txFrame re-triggers txFrameProgress so we need this condition in order to prevent infinite calls
         if (this.$$txSymbolIdInProcessing === txSymbolId) {
             return;
         }
@@ -147,6 +160,9 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
             txFramePayload = txSegment.getTxFramePayload();
             txFrameId = this.$$dataLinkLayer.txFrame(txFramePayload, false);     // TODO add constant in DataLinkLayer for 'false'
             txSegment.setTxFrameId(txFrameId);
+            txSegment.setId(this.$$socket.getNextTxSegmentId());
+            this.$$txSegment = txSegment;
+            this.$$txSegmentListener ? this.$$txSegmentListener(this.getTxSegment()) : undefined;
             this.$$isTxFrameOnAir = true;
         }
         this.$$txSymbolIdInProcessing = null;

@@ -14,9 +14,29 @@ function init() {
         .connectionStatus(connectionStatusListener)
         .rxByteStreamListener(rxByteStreamListener)
         .txByteStreamListener(txByteStreamListener)
+        .rxSegmentListener(rxSegmentListener)
+        .txSegmentListener(txSegmentListener)
         .build();
     invokeOnEnter('#tx-data-textarea', onTxDataClick);
 }
+
+/*
+rxDataChunkListener
+{
+    id: 23,
+    rxSegmentId: [12]
+    txSegmentId: [12, 32,],
+    rxDataChunkPayload: []
+}
+
+txDataProgressListener
+{
+    id;
+    txDataPayload: []
+    txDataChunkId: []
+    txDataChunkTransmitted: 43
+}
+ */
 
 function rxDspConfigListener(state) {
     html('#rx-sample-rate', (state.rxSampleRate / 1000).toFixed(1));
@@ -34,8 +54,17 @@ function rxSyncStatusListener(state) {
     );
 }
 
+function rxSegmentListener(rxSegment) {
+    console.log(rxSegment);
+}
+
+function txSegmentListener(txSegment) {
+    console.log(txSegment);
+}
+
 function connectionStatusListener(state) {
     html('#socket-state', state.state);
+    html('#socket-real-tcp-state', state.realTcpState);
 }
 
 function rxByteStreamListener(byteStream) {

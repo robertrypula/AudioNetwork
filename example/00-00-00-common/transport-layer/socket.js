@@ -16,11 +16,13 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$acknowledgementNumberForLastRxSegment = undefined;
 
         this.$$txSegmentCurrent = null;
-
         this.$$txDataChunkCurrent = null;
         this.$$txDataChunkQueue = [];
 
         this.$$rxDataChunk = [];
+
+        this.$$rxSegmentId = 1;
+        this.$$txSegmentId = 1;
 
         this.$$state = undefined;
         this.$$updateState(Socket.CLOSED);
@@ -32,6 +34,7 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
 
     Socket.SENDING_IS_POSSIBLE_ONLY_IN_ESTABLISHED_STATE_EXCEPTION = 'Sending is possible only in ESTABLISHED state';
     Socket.THERE_IS_NOTHING_TO_SEND_EXCEPTION = 'There is nothing to send';
+    Socket.STATE_TO_REAL_TCP_STATE_MAPPING_FAILED_EXCEPTION = 'State to real TCP state mapping failed';
 
     // TODO: find better names for states (?)
     Socket.CLOSED = 'CLOSED';
@@ -51,6 +54,12 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
     Socket.DATA_CHUNK_SENT = 'DATA_CHUNK_SENT';
     Socket.DATA_CHUNK_RECEIVED_ACT_WAIT = 'DATA_CHUNK_RECEIVED_ACT_WAIT';
     Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS = 'DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS';
+
+    Socket.REAL_TCP_CLOSED = 'CLOSED';
+    Socket.REAL_TCP_LISTEN = 'LISTEN';
+    Socket.REAL_TCP_SYN_SENT = 'SYN_SENT';
+    Socket.REAL_TCP_SYN_RECEIVED = 'SYN_RECEIVED';
+    Socket.REAL_TCP_ESTABLISHED = 'ESTABLISHED';
 
     Socket.HANDSHAKE_RESPONSE_DELAY_LIMIT = 15;
     Socket.DATA_CHUNK_RESPONSE_DELAY_LIMIT = 15;
@@ -308,9 +317,24 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
         this.$$txSegmentCurrent = null;
     };
 
+    Socket.prototype.getNextRxSegmentId = function () {
+        return this.$$rxSegmentId++;
+    };
+
+    Socket.prototype.getNextTxSegmentId = function () {
+        return this.$$txSegmentId++;
+    };
+
     Socket.prototype.$$updateState = function (newState) {
+        var connectionStatus;
+
         this.$$state = newState;
-        this.$$socketClient.onSocketStateChange(this.$$state);
+        connectionStatus = {
+            state: this.$$state,
+            realTcpState: Socket.mapStateToRealTcpState(this.$$state),
+            initialSequenceNumber: this.$$initialSequenceNumber
+        };
+        this.$$socketClient.onSocketStateChange(connectionStatus);
     };
 
     Socket.prototype.$$getLastRxDataChunk = function () {
@@ -342,6 +366,35 @@ var Socket = (function () { // <-- TODO this will be soon refactored when code w
                 payload = [];
             }
         }
+    };
+
+    Socket.mapStateToRealTcpState = function (state) {
+        switch (state) {
+            case Socket.CLOSED:
+                return Socket.REAL_TCP_CLOSED;
+            case Socket.LISTEN:
+            case Socket.HANDSHAKE_A_WAIT:
+            case Socket.HANDSHAKE_A_IN_PROGRESS:
+                return Socket.REAL_TCP_LISTEN;
+            case Socket.HANDSHAKE_A_SENT:
+                return Socket.REAL_TCP_SYN_SENT;
+            case Socket.HANDSHAKE_B_WAIT:
+            case Socket.HANDSHAKE_B_IN_PROGRESS:
+            case Socket.HANDSHAKE_B_SENT:
+                return Socket.REAL_TCP_SYN_RECEIVED;
+            case Socket.HANDSHAKE_C_WAIT:
+            case Socket.HANDSHAKE_C_IN_PROGRESS:
+            case Socket.HANDSHAKE_C_SENT:
+            case Socket.ESTABLISHED:
+            case Socket.DATA_CHUNK_WAIT:
+            case Socket.DATA_CHUNK_IN_PROGRESS:
+            case Socket.DATA_CHUNK_SENT:
+            case Socket.DATA_CHUNK_RECEIVED_ACT_WAIT:
+            case Socket.DATA_CHUNK_RECEIVED_ACT_IN_PROGRESS:
+                return Socket.REAL_TCP_ESTABLISHED;
+        }
+
+        throw Socket.STATE_TO_REAL_TCP_STATE_MAPPING_FAILED_EXCEPTION;
     };
 
     return Socket;

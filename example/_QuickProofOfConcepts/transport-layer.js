@@ -26,15 +26,15 @@ var TransportLayerMock = function (logDomElementId, stateDomElementId, blockRece
         txSymbolId: null
     };
     this.$$otherSideTransportLayer = undefined;
-    setInterval(this.txFrameProgress.bind(this), 200);
+    setInterval(this.txFrameProgress.bind(this), 1000);
 };
 
 TransportLayerMock.prototype.setOtherSideTransportLayer = function (otherSideTransportLayer) {
     this.$$otherSideTransportLayer = otherSideTransportLayer;
 };
 
-TransportLayerMock.prototype.onSocketStateChange = function (state) {
-    html(this.$$stateDomElementId, state);
+TransportLayerMock.prototype.onSocketStateChange = function (connectionState) {
+    html(this.$$stateDomElementId, JSON.stringify(connectionState, null, 2));
 };
 
 TransportLayerMock.prototype.onRxDataChunk = function (rxDataChunk) {

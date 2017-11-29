@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
-    <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/power-bar.css">
+    <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/io-traffic.css">
     <link rel="stylesheet" type="text/css" href="transport-layer.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
@@ -138,6 +138,24 @@
                         </div>
                         <div class="col col-xs-8 col-sm-7 col-md-9">
                             <div id="socket-state" class="margin-bottom">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                            <label class="label-compact">
+                                State real TCP
+                            </label>
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
+                            <div id="socket-real-tcp-state" class="margin-bottom">-</div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-4 col-sm-5 col-md-3">
+                        </div>
+                        <div class="col col-xs-8 col-sm-7 col-md-9">
                             <button class="btn btn-default" onClick="onConnectClick()">Connect</button>
                             <button class="btn btn-default" onClick="onListenClick()">Listen</button>
                             <button class="btn btn-default" onClick="onCloseClick()">Close</button>

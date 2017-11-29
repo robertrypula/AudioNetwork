@@ -336,7 +336,7 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
         return frame;
     };
 
-    DataLinkLayer.$$buildFrame = function (payloadType, payload) {
+    DataLinkLayer.$$buildFrame = function (payloadType, payload) { // TODO refactor needed as we have dedicated Frame class
         var frame, isCommand, header, checksum, i, byte;
 
         frame = [];
@@ -353,7 +353,7 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
         return frame;
     };
 
-    DataLinkLayer.$$getHeader = function (isCommand, payloadLength) {
+    DataLinkLayer.$$getHeader = function (isCommand, payloadLength) { // TODO refactor needed as we have dedicated Frame class
         var header, frameStartMarker, commandBit;
 
         frameStartMarker = DataLinkLayer.$$_HEADER_FRAME_START_MARKER;
@@ -367,7 +367,7 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
         return header;
     };
 
-    DataLinkLayer.$$isValidHeader = function (byte) {
+    DataLinkLayer.$$isValidHeader = function (byte) { // TODO refactor needed as we have dedicated Frame class
         var frameStartMarkerAvailable, reservedBitNotSet;
 
         frameStartMarkerAvailable = (DataLinkLayer.$$_HEADER_FRAME_START_MARKER & byte) === DataLinkLayer.$$_HEADER_FRAME_START_MARKER;
@@ -376,11 +376,11 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
         return frameStartMarkerAvailable && reservedBitNotSet;
     };
 
-    DataLinkLayer.$$getPayloadLength = function (header) {
+    DataLinkLayer.$$getPayloadLength = function (header) { // TODO refactor needed as we have dedicated Frame class
         return header & DataLinkLayer.$$_HEADER_PAYLOAD_LENGTH_MASK;
     };
 
-    DataLinkLayer.$$getIsCommand = function (header) {
+    DataLinkLayer.$$getIsCommand = function (header) { // TODO refactor needed as we have dedicated Frame class
         return !!(header & DataLinkLayer.$$_HEADER_COMMAND_BIT_SET);
     };
 

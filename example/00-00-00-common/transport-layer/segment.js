@@ -14,6 +14,7 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$payload = payload.slice(0);
 
         this.$$txFrameId = null;
+        this.$$rxFrameId = null;
     };
 
     Segment.HEADER_BYTE_LENGTH = 2;
@@ -26,6 +27,14 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
     Segment.ACKNOWLEDGEMENT_NUMBER_ZERO = 0;
     Segment.SYNCHRONIZE_VIRTUAL_PAYLOAD_LENGTH = 1;
 
+    Segment.prototype.setId = function (id) {
+        this.$$id = id;
+    };
+
+    Segment.prototype.getId = function () {
+        return this.$$id;
+    };
+
     Segment.prototype.getHeaderLog = function () {
         var log = [];
 
@@ -35,6 +44,30 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         log.push('an=' + this.$$acknowledgementNumber);
 
         return '[' + log.join(',') + ']';
+    };
+
+    Segment.prototype.cloneCleanAsRx = function () {
+        return {
+            id: this.$$id,
+            rxSegmentSynchronizeFlag: this.$$synchronizeFlag,
+            rxSegmentSequenceNumber: this.$$sequenceNumber,
+            rxSegmentAcknowledgementFlag: this.$$acknowledgementFlag,
+            rxSegmentAcknowledgementNumber: this.$$acknowledgementNumber,
+            rxSegmentPayload: this.$$payload.slice(0),
+            rxFrameId: this.$$rxFrameId
+        };
+    };
+
+    Segment.prototype.cloneCleanAsTx = function () {
+        return {
+            id: this.$$id,
+            txSegmentSynchronizeFlag: this.$$synchronizeFlag,
+            txSegmentSequenceNumber: this.$$sequenceNumber,
+            txSegmentAcknowledgementFlag: this.$$acknowledgementFlag,
+            txSegmentAcknowledgementNumber: this.$$acknowledgementNumber,
+            txSegmentPayload: this.$$payload.slice(0),
+            txFrameId: this.$$txFrameId
+        };
     };
 
     Segment.prototype.getSequenceNumber = function () {
@@ -49,12 +82,20 @@ var Segment = (function () { // <-- TODO this will be soon refactored when code 
         this.$$txFrameId = txFrameId;
     };
 
+    Segment.prototype.setRxFrameId = function (rxFrameId) {
+        this.$$rxFrameId = rxFrameId;
+    };
+
     Segment.prototype.getPayload = function () {
         return this.$$payload;
     };
 
     Segment.prototype.getTxFrameId = function () {
         return this.$$txFrameId;
+    };
+
+    Segment.prototype.getRxFrameId = function () {
+        return this.$$rxFrameId;
     };
 
     Segment.prototype.getTxFramePayload = function () {
