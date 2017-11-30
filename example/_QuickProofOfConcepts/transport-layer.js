@@ -37,6 +37,10 @@ TransportLayerMock.prototype.onSocketStateChange = function (connectionState) {
     html(this.$$stateDomElementId, JSON.stringify(connectionState, null, 2));
 };
 
+TransportLayerMock.prototype.onTxDataChunk = function (txDataChunk) {
+    console.log(txDataChunk);
+};
+
 TransportLayerMock.prototype.onRxDataChunk = function (rxDataChunk) {
     console.log(rxDataChunk);
 

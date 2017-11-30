@@ -1,8 +1,13 @@
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+'use strict';
+
 var
     ReceiveMulticoreWorker = AudioNetwork.Injector.resolve('PhysicalLayerCore.ReceiveMulticoreWorker'),
     ReceiveWorker = AudioNetwork.Injector.resolve('PhysicalLayerCore.ReceiveWorker'),
     Stopwatch = AudioNetwork.Injector.resolve('Common.Stopwatch'),
-    SimplePromiseBuilder = AudioNetwork.Injector.resolve('Common.SimplePromiseBuilder'),
+    SimplePromiseBuilder = AudioNetwork.Injector.resolve('Common.SimplePromiseBuilder');
+
+var
     rwMulti = [],
     rwMultiStarted = 0,
     rwMultiFinished = 0,

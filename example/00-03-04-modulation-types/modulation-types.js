@@ -1,6 +1,10 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    WavAudioFile = AudioNetwork.Rewrite.Util.WavAudioFile;
+
 // TODO extract modulation types to classes
 // TODO use WaveGenerator instead of generateSineWave function
 

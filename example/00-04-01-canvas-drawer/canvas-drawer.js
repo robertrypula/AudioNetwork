@@ -2,6 +2,11 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    FrequencyCalculator = AudioNetwork.Rewrite.Util.FrequencyCalculator,
+    WaveGenerator = AudioNetwork.Rewrite.Dsp.WaveGenerator;
+
+var
     WINDOW_SIZE = 128,
     SAMPLE_RATE = 44100,
     CANVAS_HEIGHT = 201,

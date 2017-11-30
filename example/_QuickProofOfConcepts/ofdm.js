@@ -4,6 +4,10 @@
 // NOTE: Very fast written Proof Of Concept of OFDM communication
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+
+var
     BIN_SCALER = 64,
     FFT_SIZE = 8192,
     LIMIT_CANVAS_WIDTH = true,

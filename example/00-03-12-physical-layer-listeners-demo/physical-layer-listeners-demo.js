@@ -2,6 +2,10 @@
 'use strict';
 
 var
+    PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder,
+    Buffer = AudioNetwork.Rewrite.Util.Buffer;
+
+var
     RX_BYTE_HEX_HISTORY_SIZE = 8,
     rxByteHexContainerRendered = false,
     rxByteHexHistory = new Buffer(RX_BYTE_HEX_HISTORY_SIZE),

@@ -5,7 +5,10 @@
 // TODO create canvas class and move code away from this file
 
 var
-    Queue = AudioNetwork.Injector.resolve('Common.Queue'),   // TODO remove this dependency
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    Queue = AudioNetwork.Common.Queue;   // TODO move it to Buffer
+
+var
     audioMonoIO,
     LIMIT_CANVAS_WIDTH = true,
     FFT_SIZE = 1 * 1024,         // powers of 2 in range: 32, 32768

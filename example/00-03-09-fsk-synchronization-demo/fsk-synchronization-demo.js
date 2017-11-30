@@ -2,6 +2,10 @@
 'use strict';
 
 var
+    PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder,
+    Buffer = AudioNetwork.Rewrite.Util.Buffer;
+
+var
     RX_SYMBOL_HISTORY = 16,
     DIGIT_ZERO_SYMBOL = 100,
     powerBar,

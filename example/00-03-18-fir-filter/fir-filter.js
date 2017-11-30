@@ -2,7 +2,10 @@
 'use strict';
 
 var
-    Queue = AudioNetwork.Injector.resolve('Common.Queue'),   // TODO remove this dependency
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    Queue = AudioNetwork.Injector.resolve('Common.Queue');   // TODO use buffer Buffer
+
+var
     audioMonoIO,
     LIMIT_CANVAS_WIDTH = false,   // TODO probably I can remove it completely
     FFT_SIZE = 2 * 1024,         // powers of 2 in range: 32, 32768

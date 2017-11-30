@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO;
+
 var
     audioMonoIO,
     LIMIT_CANVAS_WIDTH = true,
@@ -265,10 +267,10 @@ function sampleInHandler(monoIn) {
         frequencyData;
 
     // compute FFT from raw ScriptProcessorNode samples
-    console.time('Function #' + counter);
+    // console.time('Function #' + counter);
     timeDomain = convertRealSignalToComplexSignal(monoIn);
     frequencyData = getFrequencyData(timeDomain);
-    console.timeEnd('Function #' + counter++);
+    // console.timeEnd('Function #' + counter++);
     drawFrequencyDomainData(ctxFft, frequencyData);
 }
 

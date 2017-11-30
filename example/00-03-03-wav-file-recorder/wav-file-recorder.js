@@ -1,3 +1,11 @@
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+'use strict';
+
+var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    AudioMonoIOLite = AudioNetwork.Rewrite.WebAudio.AudioMonoIOLite,
+    WavAudioFile = AudioNetwork.Rewrite.Util.WavAudioFile;
+
 var
     audioMonoIO,
     audioMonoIOBufferSize,

@@ -2,6 +2,13 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    AudioMonoIOLite = AudioNetwork.Rewrite.WebAudio.AudioMonoIOLite,
+    FrequencyCalculator = AudioNetwork.Rewrite.Util.FrequencyCalculator,
+    WaveGenerator = AudioNetwork.Rewrite.Dsp.WaveGenerator,
+    WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+
+var
     DIGIT_BEFORE_THE_DOT = 5,
     DIGIT_AFTER_THE_DOT = 6,
     INITIAL_FREQUENCY_HERTZ = 1500,

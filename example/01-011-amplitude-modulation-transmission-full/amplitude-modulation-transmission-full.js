@@ -2,12 +2,11 @@
 'use strict';
 
 var
-    // import stuff from AudioNetwork lib
     SimpleAudioContext = AudioNetwork.Audio.SimpleAudioContext,
     CarrierRecovery = AudioNetwork.Common.CarrierRecovery,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     PowerChart = AudioNetwork.Visualizer.PowerChart,
-    Queue = AudioNetwork.Common.Queue,
+    Queue = AudioNetwork.Common.Queue;
 
     // +--+            +--+            +--+            +--+            +--+            +--+
     //     +--+            +--+            +--+            +--+            +--+            +--+
@@ -25,6 +24,7 @@ var
     //                        _________                                       _________
     // ________________,---```         ```---,_________________________,---```         ```---,_____________
 
+var
     LOOPBACK_ACTIVE,
     WHITE_NOISE_ACTIVE,
     POWER_INFO_ACTIVE,

@@ -2,6 +2,10 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+
+var
     FFT_SIZE = 2048,
     LIMIT_CANVAS_WIDTH = false,
     CANVAS_WIDTH_TIME_DOMAIN = FFT_SIZE,

@@ -2,15 +2,15 @@
 'use strict';
 
 var
-    // import stuff from AudioNetwork lib
     FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart,
     ConstellationDiagram = AudioNetwork.Visualizer.ConstellationDiagram,
     ComplexPlaneChart = AudioNetwork.Visualizer.ComplexPlaneChart,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     WindowFunction = AudioNetwork.Common.WindowFunction,
-    Queue = AudioNetwork.Common.Queue,
+    Queue = AudioNetwork.Common.Queue;
 
+var
     // general settings
     SAMPLE_RATE = 44100,
     SAMPLE_CHART_COMPACT_HEIGHT = 50,

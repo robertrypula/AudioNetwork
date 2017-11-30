@@ -2,6 +2,11 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    WaveGenerator = AudioNetwork.Rewrite.Dsp.WaveGenerator,
+    WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+
+var
     FFT_SIZE = 2048,
     SAMPLE_PER_PERIOD = 8,
     AMPLITUDE = 0.5,

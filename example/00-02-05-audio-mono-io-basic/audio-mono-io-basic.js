@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO;
+
 var
     FFT_SIZE = 8 * 1024,
     BUFFER_SIZE = 8 * 1024,

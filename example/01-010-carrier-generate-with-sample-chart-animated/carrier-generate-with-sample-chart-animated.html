@@ -10,19 +10,24 @@
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
     <link rel="stylesheet" type="text/css" href="carrier-generate-with-sample-chart-animated.css">
+    <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body onLoad="">
     <div id="fb-root"></div>
-    <script>(function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));</script>
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        }
+    </script>
 
     <div class="wrapper">
 
@@ -39,9 +44,12 @@
                     <p class="text-right">
                         Return to <a href="https://audio-network.rypula.pl">main page</a>
                     </p>
-                    <p class="larger text-center">
+                    <p class="larger text-center margin-bottom-triple">
                         THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
                         Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
+                    </p>
+                    <p class="larger text-center margin-bottom-triple" style="outline: 1px dashed red;">
+                        This example uses old classes for sample generation. They will be deprecated soon!
                     </p>
                     <p>
                         This example is developer's sandbox for carrier generate and recovery. I was testing here
@@ -96,13 +104,15 @@
     <script src="carrier-generate-with-sample-chart-animated.js"></script>
 
     <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        if (isProduction()) { // TODO refactor this
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-        ga('create', 'UA-76662342-1', 'auto');
-        ga('send', 'pageview');
+            ga('create', 'UA-76662342-1', 'auto');
+            ga('send', 'pageview');
+        }
     </script>
 
 </body>

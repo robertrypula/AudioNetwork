@@ -2,11 +2,11 @@
 'use strict';
 
 var
-    // import stuff from AudioNetwork lib
     CarrierGenerate = AudioNetwork.Common.CarrierGenerate,
     SampleChart = AudioNetwork.Visualizer.SampleChart,
-    Queue = AudioNetwork.Common.Queue,
+    Queue = AudioNetwork.Common.Queue;
 
+var
     SAMPLE_RATE = 100,
     FPS = 50,
     CHART_WIDTH = 800,

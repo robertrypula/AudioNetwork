@@ -2,6 +2,11 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    MusicCalculator = AudioNetwork.Rewrite.Util.MusicCalculator,
+    FFTResult = AudioNetwork.Rewrite.Dsp.FFTResult;
+
+var
     FFT_SIZE = 2 * 1024,
     DEFAULT_OCTAVE = 6,
     audioMonoIO,

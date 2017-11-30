@@ -2,6 +2,9 @@
 'use strict';
 
 // TODO use EditableFloat widget
+// TODO fix refresh issue at harmonics amplitude and phase
+
+var AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO;
 
 var
     LIMIT_CANVAS_WIDTH = true,

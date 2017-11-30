@@ -2,6 +2,10 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    FFTResult = AudioNetwork.Rewrite.Dsp.FFTResult;
+
+var
     fftSize,
     timestep,
     audioMonoIO,

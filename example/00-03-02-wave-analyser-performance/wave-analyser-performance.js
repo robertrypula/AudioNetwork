@@ -1,6 +1,10 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+
 function init() {
 }
 

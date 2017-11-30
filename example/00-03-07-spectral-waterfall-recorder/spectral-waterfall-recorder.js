@@ -2,6 +2,11 @@
 'use strict';
 
 var
+    AudioMonoIO = AudioNetwork.Rewrite.WebAudio.AudioMonoIO,
+    SmartTimer = AudioNetwork.Rewrite.Util.SmartTimer,
+    FFTResult = AudioNetwork.Rewrite.Dsp.FFTResult;
+
+var
     FFT_SIZE_EXPONENT = 13,
     FFT_FREQUENCY_BIN_SKIP_FACTOR = 47,
     RX_FREQUENCY_MIN = 0,
