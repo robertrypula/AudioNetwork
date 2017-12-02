@@ -5,10 +5,15 @@ Data transmission over sound waves written in JavaScript without any dependencie
 microphone, speakers and the browser!
 
 [Physical Layer](https://audio-network.rypula.pl/physical-layer)
+
 [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
+
 [Transport Layer (comming soon)](https://audio-network.rypula.pl/transport-layer)
+
 [Audio Chat (comming soon)](https://audio-network.rypula.pl/audio-chat)
+
 [Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+
 
 ## Self-made network stack based on Frequency-Shift Keying (>= v1.2.0)
 
@@ -17,8 +22,11 @@ waves to transmit data. Initialy it was using PSK modulation technique which was
 interested in details you can read more in polish programista magazine:
 
 '[Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/)' (08/2016)
+
 '[Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/)' (02/2017)
+
 '[Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/)' (10/2017)
+
 
 In near future this website will get more updates as part 3 was the last one. If you can't wait please go trought examples:
 
