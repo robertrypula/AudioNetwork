@@ -8,7 +8,7 @@ Redirect 301 /dft-full-src https://github.com/robertrypula/AudioNetwork/tree/mas
 
 # Article 2 aliases:
 
-Redirect 301 /audio-mono-io-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/web-audio/audio-mono-io.js
+Redirect 301 /audio-mono-io-class https://github.com/robertrypula/AudioNetwork/tree/master/src/web-audio/audio-mono-io.js
 Redirect 301 /example-docs https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common
 
 Redirect 301 /audio-context-init /example/00-02-00-audio-context-init/audio-context-init.html
@@ -39,14 +39,14 @@ Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master
 
 Redirect 301 /internet-sources https://github.com/robertrypula/AudioNetwork/tree/master/example/internet-sources.md
 
-Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/wave-analyser.js
-Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/wave-generator.js
-Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/util/buffer.js
-Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/complex.js
+Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/wave-analyser.js
+Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/wave-generator.js
+Redirect 301 /buffer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/util/buffer.js
+Redirect 301 /complex-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/complex.js
 Redirect 301 /smart-timer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/util/smart-timer.js
-Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/dsp/correlator.js
-Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/rx-sync-detector.js
-Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/physical-layer/physical-layer.js
+Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/correlator.js
+Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/src/physical-layer/rx-sync-detector.js
+Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/physical-layer/physical-layer.js
 Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/data-link-layer/data-link-layer.js
 Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/transport-layer/transport-layer.js
 Redirect 301 /spectrogram-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/ui/spectrogram.js
