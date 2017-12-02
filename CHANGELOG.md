@@ -1,19 +1,20 @@
 ## Roadmap
-  - 1.1.0 Last version with old PSK solution at Physial Layer
-  - 1.2.x Completly rewritten PhysicalLayer with FSK support. Old PSK core marked as deprecated
+  - 1.1.0 Last update for old PSK code
+  - 1.2.x Completly rewritten PhysicalLayer with FSK support. Old PSK code marked as deprecated
   - 1.3.x Data link layer with frames and checksums
   - 1.4.x Transport layer that supports simplified TCP protocol
   - 1.5.x Application layer with simple text exchange protocol
-  - 2.0.0 Old PSK core removed from the project.
+  - 1.x.x move to webpack
+  - 2.0.0 Old PSK code removed from the project.
   - 2.x.x ?? OFDM
   - 2.x.x ?? Move to TypeScript
 
-## v1.2.0 (2017-11-xx) [not yet released] First version that uses new FSK solution for Physical Layer
+## v1.2.0 (2017-12-xx) [not yet released] First version that uses new FSK technique at Physical Layer
   -
 
-## v1.1.0 (2017-11-12) Old PSK core marked as deprecated
+## v1.1.0 (2017-11-12) Last update for old PSK code
   + Dynamic dev files loading
-  + Boot config added like { developerMode: true, createAlias: true, scriptBaseUrl: 'http://localhost' }
+  + Boot config added
   + Env variables added (isBrowser, isNode, isWebWorker)
   + NodeJs export added - you can now use AudioNetwork in NodeJs applications! 
   + ActiveAudioContext abstraction
@@ -24,7 +25,7 @@
   + Visualizer abstract classes (Abstract2DVisualizer, AbstractVisualizer)
   + Visualizer code refactor
   + rename audio-network-begin to audio-network-boot
-  + WebWorker basic functionality added + Core refactor (?????)
+  + WebWorker basic functionality added
 
 ## v1.0.4 (2016-07-04)
   + new example where only CarrierRecovery/CarrierGenerate were used to send data using Amplitude Modulation (without PhysicalLayer module)

@@ -13,64 +13,44 @@ before I add some new feature to the AudioNetwork NPM package.
 
 - [WaveGenerator and WaveAnalyser](https://audio-network.rypula.pl/wave-generator-wave-analyser)
   [(source)](https://audio-network.rypula.pl/wave-generator-wave-analyser-src)
-
 - [WaveAnalyser vs AnalyserNode](https://audio-network.rypula.pl/wave-analyser-vs-analyser-node)
   [(source)](https://audio-network.rypula.pl/wave-analyser-vs-analyser-node-src)
-
 - [WaveAnalyser performance](https://audio-network.rypula.pl/wave-analyser-performance)
   [(source)](https://audio-network.rypula.pl/wave-analyser-performance-src)
-
 - [Wav file recorder](https://audio-network.rypula.pl/wav-file-recorder)
   [(source)](https://audio-network.rypula.pl/wav-file-recorder-src)
-
 - [Modulation types](https://audio-network.rypula.pl/modulation-types)
   [(source)](https://audio-network.rypula.pl/modulation-types-src)
-
 - [AnalyserNode performance](https://audio-network.rypula.pl/analyser-node-performance)
   [(source)](https://audio-network.rypula.pl/analyser-node-performance-src)
-
 - [Spectral Waterfall](https://audio-network.rypula.pl/spectral-waterfall)
   [(source)](https://audio-network.rypula.pl/spectral-waterfall-src)
-
 - [Spectral Waterfall recorder](https://audio-network.rypula.pl/spectral-waterfall-recorder)
   [(source)](https://audio-network.rypula.pl/spectral-waterfall-recorder-src)
-
 - [Window function](https://audio-network.rypula.pl/window-function)
   [(source)](https://audio-network.rypula.pl/window-function-src)
-
 - [FSK synchronization demo](https://audio-network.rypula.pl/fsk-synchronization-demo)
   [(source)](https://audio-network.rypula.pl/fsk-synchronization-demo-src)
-
 - [Physical Layer simplest](https://audio-network.rypula.pl/physical-layer-simplest)
   [(source)](https://audio-network.rypula.pl/physical-layer-simplest-src)
-
 - [Physical Layer simple](https://audio-network.rypula.pl/physical-layer-simple)
   [(source)](https://audio-network.rypula.pl/physical-layer-simple-src)
-
 - [Physical Layer listeners demo](https://audio-network.rypula.pl/physical-layer-listeners-demo)
   [(source)](https://audio-network.rypula.pl/physical-layer-listeners-demo-src)
-
 - [Physical Layer](https://audio-network.rypula.pl/physical-layer)
   [(source)](https://audio-network.rypula.pl/physical-layer-src)
-
 - [Data Link Layer simple](https://audio-network.rypula.pl/data-link-layer-simple)
   [(source)](https://audio-network.rypula.pl/data-link-layer-simple-src)
-
 - [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
   [(source)](https://audio-network.rypula.pl/data-link-layer-src)
-
 - [Transport Layer](https://audio-network.rypula.pl/transport-layer)
   [(source)](https://audio-network.rypula.pl/transport-layer-src)
-
 - [Audio Chat](https://audio-network.rypula.pl/audio-chat)
   [(source)](https://audio-network.rypula.pl/audio-chat-src)
-
 - [FIR filter](https://audio-network.rypula.pl/fir-filter)
   [(source)](https://audio-network.rypula.pl/fir-filter-src)
-
 - [FFT](https://audio-network.rypula.pl/fft)
   [(source)](https://audio-network.rypula.pl/fft-src)
-
 - [IQ mixer](https://audio-network.rypula.pl/iq-mixer)
   [(source)](https://audio-network.rypula.pl/iq-mixer-src)
 
