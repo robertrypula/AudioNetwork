@@ -4,11 +4,62 @@ Audio Network
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
+[Physical Layer](https://audio-network.rypula.pl/physical-layer)
+[Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
+[Transport Layer (comming soon)](https://audio-network.rypula.pl/transport-layer)
+[Audio Chat (comming soon)](https://audio-network.rypula.pl/audio-chat)
+[Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+
+## Self-made network stack based on Frequency-Shift Keying (>= v1.2.0)
+
+Audio Network library is a hobby project in which the goal was to create simple network stack that uses sound
+waves to transmit data. Initialy it was using PSK modulation technique which was later changed into FSK. If you are
+interested in details you can read more in polish programista magazine:
+
+'[Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/)' (08/2016)
+'[Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/)' (02/2017)
+'[Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/)' (10/2017)
+
+In near future this website will get more updates as part 3 was the last one. If you can't wait please go trought examples:
+
+- [Physical Layer simplest](https://audio-network.rypula.pl/physical-layer-simplest)
+  [(source)](https://audio-network.rypula.pl/physical-layer-simplest-src)
+
+- [Physical Layer simple](https://audio-network.rypula.pl/physical-layer-simple)
+  [(source)](https://audio-network.rypula.pl/physical-layer-simple-src)
+
+- [Physical Layer listeners demo](https://audio-network.rypula.pl/physical-layer-listeners-demo)
+  [(source)](https://audio-network.rypula.pl/physical-layer-listeners-demo-src)
+
+- [Physical Layer](https://audio-network.rypula.pl/physical-layer)
+  [(source)](https://audio-network.rypula.pl/physical-layer-src)
+
+- [Data Link Layer simple](https://audio-network.rypula.pl/data-link-layer-simple)
+  [(source)](https://audio-network.rypula.pl/data-link-layer-simple-src)
+
+- [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
+  [(source)](https://audio-network.rypula.pl/data-link-layer-src)
+
+- [Transport Layer](https://audio-network.rypula.pl/transport-layer)
+  [(source)](https://audio-network.rypula.pl/transport-layer-src)
+
+- [Audio Chat](https://audio-network.rypula.pl/audio-chat)
+  [(source)](https://audio-network.rypula.pl/audio-chat-src)
+
+Full list is available here:
+
+[Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+
+## Deprecated Phase-Shift Keying approach (last update at v1.1.0, will be removed at v2.0.0)
+
+First versions of this lib were based on Phase-Shift Keying modulation technique. Unfortunatelly
+it was not working well on mobile devices. Starting from v1.2.0 this part of the lib will be marked
+as deprecated.
+
 [Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
 
 [Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
 
-[Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
 features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit
@@ -18,7 +69,7 @@ data over sound between two laptops:
 
 >This project is still under development. Documentation is also planned but... little later :)
 
-## How can I transmit something over sound?
+### How can I transmit something over sound?
 
 First of all you need to have two devices. One for sending, one for receiving data. It should work with any
 device (PC, Mac, tablet, smartphone) with browser that supports Web Audio API. Next you need to open
@@ -49,7 +100,7 @@ data will appear on the receiver's side.
 >scenario is when your microphone has some hardware filter that you can't disable. In this case you need to throw it
 >away and buy a new one ;)
 
-## How to add sound transmission to my project?
+### How to add sound transmission to my project?
 
 Audio Network is available at GitHub and npm so you can just run one of the commands below:
 
@@ -101,14 +152,14 @@ For example AudioNetwork.PhysicalLayer.PhysicalLayer is just alias for
 AudioNetwork.Injector.resolve('PhysicalLayer.PhysicalLayer'). Other public classes/services that have aliases
 you can find [here](https://github.com/robertrypula/AudioNetwork/blob/master/src/audio-network-end.js)
 
-## More about full features demo
+### More about full features demo
 
 `Full feature demo` is growing with AudioNetwork library core. It's developer sandbox for all new features.
 
 Demo is divided into two sections - `Receive` and `Transmit` (blue bar with white text). You can show or hide
 stuff by clicking on `View type` buttons at `Initialize` section.
 
-### Receive section
+#### Receive section
 
 Here you can find lots of information like input spectrum, constellation diagrams, power chart.
 
@@ -126,14 +177,14 @@ This would be in next layer in the network stack - `DataLinkLayer` (like in
 
 >Orange box is kind of developer debug box - it will be replaced to some nicer UX in the future...
 
-### Transmit section
+#### Transmit section
 
 At `Transmit` section there is not that much as at `Receive` section. You will find there only few buttons to send
 `SYNC` signal, `PACKET` and individual symbols (`0`, `1`, ...). Number of unique symbols is determined by
 `PSK symbol size` (you need to switch view type to `Complex` to see that). At `Packet` textarea please remember to
 always put one space between each symbol but whole text needs to be without trailing and leading spaces.
 
-## Features
+### Features
 
 - Dependency free library
 - Unit test friendly. Build-in Dependency Injector (tests are planned in the future)
@@ -168,12 +219,12 @@ reference carrier frequency to minimize this effect.
 basically symbol zero transmitted for few seconds. During sync transmission receiver stores `averageFirstSyncPower`
 at `FIRST_SYNC` state. After those steps receiver calculates `powerThreshold` and it's ready for packets from sender. All above is needed to propperly determine signal and noise power levels. Without it we will not be able to decode packet.
 
-## Known limitations
+### Known limitations
 
 - Currently Guard Interval needs to be few times longer than Symbol Duration (two or tree times longer). It's
 because ReceiveAdapter, when restoring packet symbols, is 'clocked' by carrier frequency power changes.
 
-## Few more words about the project
+### Few more words about the project
 
 Internally AudioNetwork library uses [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 for retrieving audio data from the microphone and sending audio data to the speakers. To be more precise it is using
