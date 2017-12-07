@@ -77,7 +77,6 @@ function rxFrameCandidateListener(data) {
 }
 
 function rxFrameListener(data) {
-    //  ioTraffic.updateProgressBar('rx-' + data.rxFrameCandidateId, 1);
     ioTraffic.addClass('rx-' + data.rxFrameCandidateId, 'io-traffic-success');
 }
 

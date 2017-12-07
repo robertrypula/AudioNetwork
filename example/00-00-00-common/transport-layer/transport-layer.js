@@ -37,7 +37,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
 
         // state variables
         this.$$segmentPayloadLengthLimit = this.$$dataLinkLayer.getFramePayloadLengthLimit() - Segment.HEADER_BYTE_LENGTH;
-        this.$$socket = new Socket(this.$$segmentPayloadLengthLimit, this);
+        this.$$socket = new Socket(this, this.$$segmentPayloadLengthLimit);
         this.$$isTxFrameOnAir = false;
         this.$$txSymbolIdInProcessing = null;
         this.$$rxSegment = null;

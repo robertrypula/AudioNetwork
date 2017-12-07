@@ -6,7 +6,7 @@
 var Socket = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
     var Socket;
 
-    Socket = function (segmentPayloadLengthLimit, socketClient) {
+    Socket = function (socketClient, segmentPayloadLengthLimit) {
         this.$$segmentPayloadLengthLimit = segmentPayloadLengthLimit;
         this.$$socketClient = socketClient;
 

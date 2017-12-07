@@ -47,7 +47,7 @@ function rxSymbolListener(state) {
 }
 
 function rxSampleDspDetailsListener(state) {
-    state.rxFrequencyData = '[spectrogram array]';
+    state.rxFrequencyData = '[spectrogram array]';  // we don't want to show all the items in the log...
     log('log-rx-sample-dsp-details', state);
 }
 
@@ -85,6 +85,7 @@ function rxDspConfigListener(state) {
 
 function dspConfigListener(state) {
     html('#loopback', state.isLoopbackEnabled ? 'enabled' : 'disabled');
+    html('#unit-time', state.unitTime.toFixed(2));
     log('log-dsp-config', state);
 }
 
@@ -130,6 +131,10 @@ function onTxByteClick(txByte) {
 
 function onSetLoopbackClick(state) {
     physicalLayer.setLoopback(state);
+}
+
+function onSetUnitTimeClick(unitTime) {
+    physicalLayer.setUnitTime(unitTime);
 }
 
 function onSetTxSampleRateClick(txSampleRate) {

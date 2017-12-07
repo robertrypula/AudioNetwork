@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../asset/css/simple-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="../../asset/css/example.css">
     <link rel="stylesheet" type="text/css" href="../00-00-00-common/ui/power-bar.css">
-    <link rel="stylesheet" type="text/css" href="physical-layer-listeners-demo.css">
+    <link rel="stylesheet" type="text/css" href="data-link-layer-listeners-demo.css">
     <script src="../../asset/js/site.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,700italic,400italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -77,11 +77,6 @@
                         <button class="btn btn-default" type="button" onClick="onSetUnitTimeClick(4.0)">4.0</button>
                     </div>
 
-                    <div class="margin-bottom">
-                        <h3>DspConfig</h3>
-                        <pre id="log-dsp-config"></pre>
-                    </div>
-
                     <!-- ----- -->
 
                     <h2>Receiver</h2>
@@ -106,43 +101,16 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="margin-bottom">
-                                <strong>RxSymbol:</strong> <span id="rx-symbol">-</span>
-                            </div>
-                            <div class="margin-bottom">
-                                <strong>RxByteHex:</strong> <span id="rx-byte-hex">-</span>
-                            </div>
-                            <div class="margin-bottom">
-                                <span id="rx-byte-hex-history">-</span>
-                            </div>
-                            <div id="rx-byte-hex-container">-</div>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
-                            <h3>RxSyncStatus:</h3>
-                            <pre id="log-rx-sync-status"></pre>
+                            <h3>RxFrameCandidate:</h3>
+                            <pre id="log-rx-frame-candidate"></pre>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
-                            <h3>RxSymbol:</h3>
-                            <pre id="log-rx-symbol"></pre>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col col-md-4 margin-bottom">
-                            <h3>RxSampleDspDetails:</h3>
-                            <pre id="log-rx-sample-dsp-details"></pre>
-                        </div>
-
-                        <div class="col col-md-4 margin-bottom">
-                            <h3>RxSyncDspDetails:</h3>
-                            <pre id="log-rx-sync-dsp-details"></pre>
-                        </div>
-
-                        <div class="col col-md-4 margin-bottom">
-                            <h3>RxDspConfig:</h3>
-                            <pre id="log-rx-dsp-config"></pre>
+                            <h3>RxFrame:</h3>
+                            <pre id="log-rx-frame"></pre>
                         </div>
                     </div>
 
@@ -160,44 +128,29 @@
                                 <button class="btn btn-default" type="button" onClick="onSetTxSampleRateClick(48000)">Set 48.0 kHz</button>
                             </div>
                             <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="onTxSyncClick()">TxSync</button>
+                                <button class="btn btn-default" type="button" onClick="onTxTwoWaySyncClick()">TxTwoWaySync</button>
                             </div>
-                            <div class="margin-bottom" id="tx-byte-hex-container"></div>
+                            <div class="margin-bottom">
+                                <textarea id="tx-textarea"></textarea>
+                            </div>
+                            <button
+                                class="btn btn-default"
+                                onClick="onTxClick()">
+                                Send
+                            </button>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
                             <div class="margin-bottom">
-                                <h3>TxSymbol</h3>
-                                <pre id="log-tx-symbol"></pre>
-                            </div>
-                        </div>
-
-                        <div class="col col-md-4 margin-bottom">
-                            <div class="margin-bottom">
-                                <h3>TxSymbolProgress</h3>
-                                <pre id="log-tx-symbol-progress"></pre>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col col-md-4 margin-bottom">
-                            <div class="margin-bottom">
-                                <h3>TxDspConfig</h3>
-                                <pre id="log-tx-dsp-config"></pre>
+                                <h3>TxFrameListener</h3>
+                                <pre id="log-tx-frame"></pre>
                             </div>
                         </div>
 
                         <div class="col col-md-4 margin-bottom">
                             <div class="margin-bottom">
-                                <strong>TxAmplitude:</strong> <span id="tx-amplitude">-</span>%
-                            </div>
-                            <div class="margin-bottom">
-                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.2)">20%</button>
-                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.4)">40%</button>
-                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.6)">60%</button>
-                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(0.8)">80%</button>
-                                <button class="btn btn-default" type="button" onClick="onSetTxAmplitudeClick(1.0)">100%</button>
+                                <h3>TxFrameProgressListener</h3>
+                                <pre id="log-tx-frame-progress"></pre>
                             </div>
                         </div>
                     </div>
@@ -236,7 +189,13 @@
 
     <script src="../00-00-00-common/ui/dom-util.js"></script>
     <script src="../00-00-00-common/ui/convert-util.js"></script>
-    <script src="physical-layer-listeners-demo.js"></script>
+    <script src="../00-00-00-common/data-link-layer/checksum-service.js"></script>
+    <script src="../00-00-00-common/data-link-layer/frame.js"></script>
+    <script src="../00-00-00-common/data-link-layer/tx-frame.js"></script>
+    <script src="../00-00-00-common/data-link-layer/tx-frame-manager.js"></script>
+    <script src="../00-00-00-common/data-link-layer/data-link-layer.js"></script>
+    <script src="../00-00-00-common/data-link-layer/data-link-layer-builder.js"></script>
+    <script src="data-link-layer-listeners-demo.js"></script>
 
     <script>
         if (isProduction()) { // TODO refactor this

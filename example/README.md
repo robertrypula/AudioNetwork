@@ -80,6 +80,13 @@ before I add some new feature to the AudioNetwork NPM package.
 - [Discrete fourier transform](https://audio-network.rypula.pl/dft-full)
   [(source)](https://audio-network.rypula.pl/dft-full-src)
 
+## Proof of concept
+
+- [OFDM](https://audio-network.rypula.pl/example/_QuickProofOfConcepts/ofdm.html)
+- [Simple TCP sockets test](https://audio-network.rypula.pl/example/_QuickProofOfConcepts/transport-layer.html)    
+  
+[POCs source code](https://github.com/robertrypula/AudioNetwork/tree/master/example/_QuickProofOfConcepts)
+
 ## Old examples
 
 Examples that use old PSK aproach. They will be deprecated soon.

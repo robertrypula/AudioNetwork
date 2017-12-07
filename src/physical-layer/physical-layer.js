@@ -161,6 +161,12 @@
             this.$$dspConfigListener ? this.$$dspConfigListener(this.getDspConfig()) : undefined;
         };
 
+        PhysicalLayer.prototype.setUnitTime = function (unitTime) {
+            this.$$unitTime = unitTime;
+            this.$$smartTimer.setInterval(unitTime);
+            this.$$dspConfigListener ? this.$$dspConfigListener(this.getDspConfig()) : undefined;
+        };
+
         PhysicalLayer.prototype.setTxAmplitude = function (txAmplitude) {
             this.$$txAmplitude = txAmplitude;
             this.$$txDspConfigListener ? this.$$txDspConfigListener(this.getTxDspConfig()) : undefined;
@@ -172,7 +178,7 @@
             return {
                 id: this.$$rxSymbolId,
                 rxSymbol: this.$$rxSymbol,
-                rxSampleDspDetails: this.$$rxSampleDspDetailsId
+                rxSampleDspDetailsId: this.$$rxSampleDspDetailsId
             };
         };
 
