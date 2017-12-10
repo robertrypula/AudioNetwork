@@ -19,9 +19,11 @@ var TxFrame = (function () { // <-- TODO this will be soon refactored when code 
     TxFrame.prototype.cloneClean = function () {
         return {
             id: this.$$id,
-            txFrameHeader: this.$$header,
-            txFramePayload: this.$$payload.slice(0),
-            txFrameChecksum: this.$$checksum,
+            header: this.$$header,
+            payload: this.$$payload.slice(0),
+            checksum: this.$$checksum,
+            isFullyTransmitted: this.isFullyTransmitted(),
+            unitProgress: this.getUnitProgress(),
             txSymbolId: this.$$txSymbolId.slice(0),
             txSymbolTransmitted: this.$$txSymbolTransmitted
         };
@@ -42,11 +44,16 @@ var TxFrame = (function () { // <-- TODO this will be soon refactored when code 
             this.$$txSymbolTransmitted++;
             return true;
         }
+
         return false;
     };
 
     TxFrame.prototype.isFullyTransmitted = function () {
         return this.$$txSymbolId.length === this.$$txSymbolTransmitted;
+    };
+
+    TxFrame.prototype.getUnitProgress = function () {
+        return this.$$txSymbolTransmitted / this.$$txSymbolId.length;
     };
 
     TxFrame.prototype.getTxByte = function (index) {

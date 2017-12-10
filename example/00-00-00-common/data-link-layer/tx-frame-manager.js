@@ -5,11 +5,13 @@ var TxFrameManager = (function () { // <-- TODO this will be soon refactored whe
     var TxFrameManager;
 
     TxFrameManager = function () {
-        this.$$txFrameId = 1;
+        this.$$txFrameId = TxFrameManager.$$_INITIAL_TX_FRAME_ID;
         this.$$txFrame = null;
         this.$$txFrameCurrent = null;
         this.$$txFrameQueue = [];
     };
+
+    TxFrameManager.$$_INITIAL_TX_FRAME_ID = 1;
 
     TxFrameManager.prototype.getNextTxFrameId = function () {
         return this.$$txFrameId++;
@@ -26,17 +28,20 @@ var TxFrameManager = (function () { // <-- TODO this will be soon refactored whe
             result = {},
             i;
 
+        result.txFrame = this.getTxFrameCloned();
+
         result.txFrameCurrent = this.$$txFrameCurrent
             ? this.$$txFrameCurrent.cloneClean()
             : null;
-        result.txFrameQueue = [];
-        result.isTxFrameInProgress = this.isTxFrameInProgress();
 
+        result.txFrameQueue = [];
         for (i = 0; i < this.$$txFrameQueue.length; i++) {
             result.txFrameQueue.push(
                 this.$$txFrameQueue[i].cloneClean()
             );
         }
+
+        result.isTxFrameInProgress = this.isTxFrameInProgress();
 
         return result;
     };

@@ -151,10 +151,10 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
 
         frameCopy = {
             id: frame.id,
-            rxFrameHeader: frame.rxFrameHeader,
-            rxFramePayload: frame.rxFramePayload.slice(0),
-            rxFrameChecksum: frame.rxFrameChecksum,
-            isRxFrameCommand: frame.isRxFrameCommand,
+            header: frame.rxFrameHeader,
+            pyload: frame.rxFramePayload.slice(0),
+            checksum: frame.rxFrameChecksum,
+            isCommand: frame.isRxFrameCommand,
             rxFrameCandidateId: frame.rxFrameCandidateId
         };
 
@@ -168,9 +168,11 @@ var DataLinkLayer = (function () { // <-- TODO this will be soon refactored when
             frameCandidate = this.$$frameCandidateList[i];
             frameCandidateCopy = {
                 id: frameCandidate.id,
-                rxByteReceived: frameCandidate.rxByteReceived.slice(0),
-                rxByteExpected: frameCandidate.rxByteExpected,
-                isRxFrameCandidateValid: frameCandidate.isRxFrameCandidateValid,
+                byteReceived: frameCandidate.rxByteReceived.slice(0),
+                byteExpected: frameCandidate.rxByteExpected,
+                unitProgress: frameCandidate.rxByteReceived.length / frameCandidate.rxByteExpected,
+                isFullyReceived: frameCandidate.rxByteReceived.length === frameCandidate.rxByteExpected,
+                isValid: frameCandidate.isRxFrameCandidateValid,
                 rxSampleDspDetailsId: frameCandidate.rxSampleDspDetailsId.slice(0)
             };
             result.push(frameCandidateCopy);

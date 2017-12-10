@@ -128,7 +128,7 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$txByteStreamListener ? this.$$txByteStreamListener(txDataChunk) : undefined;
     };
 
-    TransportLayer.prototype.$$handleRxFrame = function (rxFrame) {        // TODO this is POC - it will be deleted
+    TransportLayer.prototype.$$handleRxFrame = function (rxFrame) {
         var rxSegment;
 
         try {

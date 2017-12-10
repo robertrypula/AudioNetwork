@@ -38,15 +38,18 @@
                 result = {},
                 i;
 
-            result.txSymbolCurrent = this.$$txSymbolCurrent.cloneClean();
-            result.txSymbolQueue = [];
-            result.isTxInProgress = this.isTxInProgress();
+            result.txSymbol = this.getTxSymbol();
 
+            result.txSymbolCurrent = this.$$txSymbolCurrent.cloneClean();
+
+            result.txSymbolQueue = [];
             for (i = 0; i < this.$$txSymbolQueue.length; i++) {
                 result.txSymbolQueue.push(
                     this.$$txSymbolQueue[i].cloneClean()
                 );
             }
+
+            result.isTxInProgress = this.isTxInProgress();
 
             return result;
         };
