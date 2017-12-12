@@ -6,7 +6,8 @@ var PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuild
 var
     physicalLayerBuilder,
     physicalLayer,
-    ioTraffic;
+    ioTraffic,
+    txSymbolLastRenderedId = 0;
 
 function init() {
     physicalLayerBuilder = new PhysicalLayerBuilder();
@@ -16,7 +17,7 @@ function init() {
         .txDspConfigListener(txDspConfigListener)
         .dspConfigListener(dspConfigListener)
         .rxSymbolListener(rxSymbolListener)
-        .txSymbolListener(txSymbolListener)
+        .txSymbolProgressListener(txSymbolProgressListener)
         .build();
 
     ioTraffic = new IoTraffic(document.getElementById('io-traffic'));
@@ -48,9 +49,40 @@ function txDspConfigListener(state) {
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
-function txSymbolListener(state) {
-    ioTraffic.addClass('tx-' + state.id, 'io-traffic-success');
-    ioTraffic.updateProgressBar('tx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
+function txSymbolProgressListener(data) {
+    var
+        txSymbolNotYetRendered,
+        txSymbolQueueItem,
+        id,
+        i;
+
+    for (i = 0; i < data.txSymbolQueue.length; i++) {
+        txSymbolQueueItem = data.txSymbolQueue[i];
+        if (txSymbolQueueItem.txSymbolType !== 'TX_SYMBOL_FSK') {        // TODO filter 'Sync'
+            continue;
+        }
+
+        id = txSymbolQueueItem.id;
+        txSymbolNotYetRendered = id > txSymbolLastRenderedId;
+        if (txSymbolNotYetRendered) {
+            ioTraffic.addTxItem('tx-' + id, getTxSymbolHtml(txSymbolQueueItem));
+            txSymbolLastRenderedId = id;
+        }
+    }
+
+    ioTraffic.updateProgressBar('tx-' + data.txSymbolCurrent.id, 1);
+    ioTraffic.addClass('tx-' + data.txSymbol.id, 'io-traffic-success');
+}
+
+function getTxSymbolHtml(txSymbolQueueItem) {
+    var txSymbolMin, txSymbol, txByte, txChar;
+
+    txSymbolMin = physicalLayer.getTxDspConfig().txSymbolMin;
+    txSymbol = txSymbolQueueItem.txFskSymbol;
+    txByte = txSymbol - txSymbolMin;
+    txChar = getAsciiFromByte(txByte);
+
+    return txChar === ' ' ? '&nbsp;' : txChar;
 }
 
 function rxSymbolListener(state) {
@@ -67,7 +99,7 @@ function rxSymbolListener(state) {
     rxChar = getAsciiFromByte(rxByte);
     ioTraffic.addRxItem('rx-' + state.id, rxChar);
     ioTraffic.addClass('rx-' + state.id, 'io-traffic-success');
-    ioTraffic.updateProgressBar('rx-' + state.id, 1, IoTraffic.PROGRESS_BAR_A);
+    ioTraffic.updateProgressBar('rx-' + state.id, 1);
 }
 
 // ----------------------------------
@@ -90,7 +122,6 @@ function onTxClick() {
         byteList = getByteListFromAsciiString(text),
         txDspConfig = physicalLayer.getTxDspConfig(),
         txSymbolMin = txDspConfig.txSymbolMin,
-        txSymbolId,
         txSymbol,
         txByte,
         txChar,
@@ -100,10 +131,8 @@ function onTxClick() {
         txByte = byteList[i];
         txChar = getAsciiFromByte(txByte);
         txSymbol = txSymbolMin + txByte;
-        txSymbolId = physicalLayer.txSymbol(txSymbol);
-        txChar = txChar === ' ' ? '&nbsp;' : txChar;
-        ioTraffic.addTxItem('tx-' + txSymbolId, txChar);
+        physicalLayer.txSymbol(txSymbol);
     }
     setValue('#tx-textarea', '');
-    ioTraffic.forceNewRow();
+    ioTraffic.forceNewRow();         // TODO probably not needed??
 }

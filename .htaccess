@@ -37,7 +37,7 @@ Redirect 301 /piano-src https://github.com/robertrypula/AudioNetwork/tree/master
 
 # Article 3 aliases:
 
-Redirect 301 /internet-sources https://github.com/robertrypula/AudioNetwork/tree/master/example/internet-sources.md
+Redirect 301 /internet-sources https://github.com/robertrypula/AudioNetwork/tree/master/INTERNET-SOURCES.md
 
 Redirect 301 /wave-analyser-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/wave-analyser.js
 Redirect 301 /wave-generator-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/wave-generator.js
