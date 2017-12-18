@@ -4,6 +4,8 @@
 var PhysicalLayerBuilder = AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder;
 
 var
+    PROGRESS_BAR_FULL = 1,
+    MAX_VALUE_IN_BYTE = 255,
     physicalLayerBuilder,
     physicalLayer,
     ioTraffic,
@@ -26,6 +28,20 @@ function init() {
 
 // ----------------------------------
 
+function getTxByteFromTxFskSymbol(txFskSymbol) {
+    return txFskSymbol - physicalLayer.getTxDspConfig().txSymbolMin;
+}
+
+function getTxFskSymbolFromTxByte(txByte) {
+    return physicalLayer.getTxDspConfig().txSymbolMin + txByte;
+}
+
+function getRxByteFromRxFskSymbol(rxSymbol) {
+    return rxSymbol - physicalLayer.getRxDspConfig().rxSymbolMin;
+}
+
+// ----------------------------------
+
 function dspConfigListener(state) {
     setActive(
         '#loopback-container',
@@ -40,8 +56,8 @@ function rxDspConfigListener(state) {
 function rxSyncStatusListener(state) {
     html(
         '#rx-sync-status',
-        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
-        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+        (state.isRxSyncOk ? 'OK' : 'waiting...') +
+        (state.isRxSyncInProgress ? ' [sync]' : '')
     );
 }
 
@@ -49,16 +65,23 @@ function txDspConfigListener(state) {
     setActive('#tx-sample-rate-container', '#tx-sample-rate-' + state.txSampleRate);
 }
 
+// ----------------------------------
+
 function txSymbolProgressListener(data) {
     var
         txSymbolNotYetRendered,
         txSymbolQueueItem,
+        isSpecialSymbol,
         id,
         i;
 
     for (i = 0; i < data.txSymbolQueue.length; i++) {
         txSymbolQueueItem = data.txSymbolQueue[i];
-        if (txSymbolQueueItem.txSymbolType !== 'TX_SYMBOL_FSK') {        // TODO filter 'Sync'
+        isSpecialSymbol =
+            txSymbolQueueItem.txSymbolType !== 'TX_SYMBOL_FSK' ||
+            getTxByteFromTxFskSymbol(txSymbolQueueItem.txFskSymbol) > MAX_VALUE_IN_BYTE;
+
+        if (isSpecialSymbol) {
             continue;
         }
 
@@ -70,36 +93,31 @@ function txSymbolProgressListener(data) {
         }
     }
 
-    ioTraffic.updateProgressBar('tx-' + data.txSymbolCurrent.id, 1);
+    ioTraffic.updateProgressBar('tx-' + data.txSymbolCurrent.id, PROGRESS_BAR_FULL);
     ioTraffic.addClass('tx-' + data.txSymbol.id, 'io-traffic-success');
 }
 
 function getTxSymbolHtml(txSymbolQueueItem) {
-    var txSymbolMin, txSymbol, txByte, txChar;
+    var txByte, txChar;
 
-    txSymbolMin = physicalLayer.getTxDspConfig().txSymbolMin;
-    txSymbol = txSymbolQueueItem.txFskSymbol;
-    txByte = txSymbol - txSymbolMin;
+    txByte = getTxByteFromTxFskSymbol(txSymbolQueueItem.txFskSymbol);
     txChar = getAsciiFromByte(txByte);
 
     return txChar === ' ' ? '&nbsp;' : txChar;
 }
 
 function rxSymbolListener(state) {
-    var
-        rxDspConfig = physicalLayer.getRxDspConfig(),
-        rxByte,
-        rxChar;
+    var rxByte, rxChar;
 
     if (state.rxSymbol === null) {
         return;
     }
 
-    rxByte = state.rxSymbol - rxDspConfig.rxSymbolMin;
+    rxByte = getRxByteFromRxFskSymbol(state.rxSymbol);
     rxChar = getAsciiFromByte(rxByte);
     ioTraffic.addRxItem('rx-' + state.id, rxChar);
     ioTraffic.addClass('rx-' + state.id, 'io-traffic-success');
-    ioTraffic.updateProgressBar('rx-' + state.id, 1);
+    ioTraffic.updateProgressBar('rx-' + state.id, PROGRESS_BAR_FULL);
 }
 
 // ----------------------------------
@@ -120,19 +138,14 @@ function onTxClick() {
     var
         text = getFormFieldValue('#tx-textarea'),
         byteList = getByteListFromAsciiString(text),
-        txDspConfig = physicalLayer.getTxDspConfig(),
-        txSymbolMin = txDspConfig.txSymbolMin,
-        txSymbol,
+        txFskSymbol,
         txByte,
-        txChar,
         i;
 
     for (i = 0; i < byteList.length; i++) {
         txByte = byteList[i];
-        txChar = getAsciiFromByte(txByte);
-        txSymbol = txSymbolMin + txByte;
-        physicalLayer.txSymbol(txSymbol);
+        txFskSymbol = getTxFskSymbolFromTxByte(txByte);
+        physicalLayer.txSymbol(txFskSymbol);
     }
     setValue('#tx-textarea', '');
-    ioTraffic.forceNewRow();         // TODO probably not needed??
 }

@@ -49,8 +49,8 @@ function txDspConfigListener(state) {
 function rxSyncStatusListener(state) {
     html(
         '#rx-sync-status',
-        (state.isRxSyncOk ? 'OK' : 'waiting for sync...') +
-        (state.isRxSyncInProgress ? ' [sync in progress]' : '')
+        (state.isRxSyncOk ? 'OK' : 'waiting...') +
+        (state.isRxSyncInProgress ? ' [sync]' : '')
     );
 }
 

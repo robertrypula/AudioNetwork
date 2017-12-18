@@ -3,7 +3,7 @@
 ## General
 
 - prepare dev server
-- finish physical layer example
+- [DONE] finish physical layer example
 - finish data link layer simple example
 - move all modules to main NPM package
     - switch all examples to the one lib file instead of development mode that loads all scripts
@@ -27,6 +27,7 @@
     - move common code to base class
     - lazy connection of the nodes
 - clean RX code
+- rename all variables like 'rxSymbol' / 'txSymbol' to 'rxFskSymbol' / 'txFskSymbol'
 - implement common sample rate for all decives ~16 kHz
     - SYNC setting 48/44.1 will no longer be needed
     - custom FFT implementation
