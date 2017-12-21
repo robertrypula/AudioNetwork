@@ -148,4 +148,5 @@ function onTxClick() {
         physicalLayer.txSymbol(txFskSymbol);
     }
     setValue('#tx-textarea', '');
+    ioTraffic.forceNewRow();
 }

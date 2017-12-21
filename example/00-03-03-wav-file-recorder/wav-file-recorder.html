@@ -17,156 +17,149 @@
 </head>
 <body>
 
-<div id="fb-root"></div>
-<script>
-    if (isProduction()) { // TODO refactor this
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-    }
-</script>
+    <div id="fb-root"></div>
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/pl_PL/sdk.js#xfbml=1&version=v2.7&appId=726972757440597";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        }
+    </script>
 
-<div class="wrapper">
+    <div class="wrapper">
 
-    <div class="container">
-        <h1>Audio Network - send data over sound in JavaScript</h1>
-        <div class="row margin-bottom">
-            <div class="col col-xs-12">
-                <div class="fb-like-cont">
-                    <a href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" target="_blank" class="a-icon a-icon-fb">
-                        <img src="/asset/image/fb.png" alt="Audio Network at Facebook">
-                    </a>
-                    <div class="fb-like" data-href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" data-layout="button" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
-                </div>
-                <p class="text-right">
-                    Return to <a href="https://audio-network.rypula.pl">main page</a>
-                </p>
-                <p class="larger text-center">
-                    THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
-                    Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
-                </p>
-            </div>
-        </div>
-
-        <!-- ---------------- -->
-
-
-        <div class="row margin-bottom">
-            <div class="col col-xs-12">
-                <p>
-                    This example shows how to grab RAW samples into a buffer for later processing as fast
-                    as possible. DSP operations sometimes takes a lot of time. If real-time processing is
-                    a problem your machine you can perform all needed computations 'offline' when recording
-                    is done.
-                    <br/>
-                    Additionally this example shows how to record Web Audio API data into wav file.
-                </p>
-            </div>
-        </div>
-
-
-        <div class="row margin-bottom">
-            <div class="col col-xs-12">
-
-                <div class="row margin-bottom-double" id="init-button-container">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <label>Init AudioMonoIO</label>
+        <div class="container">
+            <h1>Audio Network - send data over sound in JavaScript</h1>
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <div class="fb-like-cont">
+                        <a href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" target="_blank" class="a-icon a-icon-fb">
+                            <img src="/asset/image/fb.png" alt="Audio Network at Facebook">
+                        </a>
+                        <div class="fb-like" data-href="https://www.facebook.com/Data-transmission-over-sound-500422050157351/" data-layout="button" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
                     </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button onClick="initAudioMonoIO(2048)" class="btn btn-default">2048</button>
-                        <button onClick="initAudioMonoIO(8192)" class="btn btn-default">8192</button>
-                        <button onClick="initAudioMonoIO(16384)" class="btn btn-default">16384</button>
-                    </div>
-                </div>
-
-                <div class="row margin-bottom-double" id="init-lite-button-container">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <label>Init AudioMonoIOLite</label>
-                    </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button onClick="initAudioMonoIOLite(2048)" class="btn btn-default">2048</button>
-                        <button onClick="initAudioMonoIOLite(8192)" class="btn btn-default">8192</button>
-                        <button onClick="initAudioMonoIOLite(16384)" class="btn btn-default">16384</button>
-                    </div>
-                </div>
-
-                <div class="row margin-bottom-double">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                        <label for="record-time">
-                            Record time [sec]
-                        </label>
-                    </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <input
-                            type="number"
-                            id="record-time"
-                            value="2" />
-                    </div>
-                </div>
-
-                <div class="row margin-bottom-double">
-                    <div class="col col-xs-6 col-sm-5 col-md-3">
-                    </div>
-                    <div class="col col-xs-6 col-sm-7 col-md-6">
-                        <button
-                            style="display: none"
-                            onClick="onRecordClick()"
-                            class="btn btn-default"
-                            id="record-button">
-                            Record
-                        </button>
-                        <div id="download-link-container" class="margin-top"></div>
-                    </div>
+                    <p class="text-right">
+                        Return to <a href="https://audio-network.rypula.pl">main page</a>
+                    </p>
+                    <p class="larger text-center">
+                        THIS PROJECT IS STILL UNDER DEVELOPMENT<br/>
+                        Source code available at <a href="https://github.com/robertrypula/AudioNetwork" target="_blank">GitHub</a>
+                    </p>
                 </div>
             </div>
+
+            <!-- ---------------- -->
+
+
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+                    <p>
+                        This example shows how to grab RAW samples into a buffer for later processing as fast
+                        as possible. DSP operations sometimes takes a lot of time. If real-time processing is
+                        a problem your machine you can perform all needed computations 'offline' when recording
+                        is done.
+                        <br/>
+                        Additionally this example shows how to record Web Audio API data into wav file.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="row margin-bottom">
+                <div class="col col-xs-12">
+
+                    <div class="row margin-bottom-double" id="init-button-container">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>Init AudioMonoIO</label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="initAudioMonoIO(2048)" class="btn btn-default">2048</button>
+                            <button onClick="initAudioMonoIO(8192)" class="btn btn-default">8192</button>
+                            <button onClick="initAudioMonoIO(16384)" class="btn btn-default">16384</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double" id="init-lite-button-container">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label>Init AudioMonoIOLite</label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button onClick="initAudioMonoIOLite(2048)" class="btn btn-default">2048</button>
+                            <button onClick="initAudioMonoIOLite(8192)" class="btn btn-default">8192</button>
+                            <button onClick="initAudioMonoIOLite(16384)" class="btn btn-default">16384</button>
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                            <label for="record-time">
+                                Record time [sec]
+                            </label>
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <input
+                                type="number"
+                                id="record-time"
+                                value="2" />
+                        </div>
+                    </div>
+
+                    <div class="row margin-bottom-double">
+                        <div class="col col-xs-6 col-sm-5 col-md-3">
+                        </div>
+                        <div class="col col-xs-6 col-sm-7 col-md-6">
+                            <button
+                                style="display: none"
+                                onClick="onRecordClick()"
+                                class="btn btn-default"
+                                id="record-button">
+                                Record
+                            </button>
+                            <div id="download-link-container" class="margin-top"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- -->
+
+            <script>
+                if (isProduction()) { // TODO refactor this
+                    document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
+                }
+            </script>
+
         </div>
 
-        <!-- ---------------- -->
-
-        <script>
-            if (isProduction()) { // TODO refactor this
-                document.write('<div class="fb-comments" data-href="' + window.location.href + '" data-numposts="5"></div>');
-            }
-        </script>
+        <footer>
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="copyright">Robert Rypuła 2015-2017</div>
+                </div>
+            </div>
+        </footer>
 
     </div>
 
-    <footer>
-        <div class="row">
-            <div class="col col-xs-12">
-                <div class="copyright">Robert Rypuła 2015-2017</div>
-            </div>
-        </div>
-    </footer>
+    <script src="../../build/audio-network-v1.2.0rc.min.js"></script>
 
-</div>
+    <script src="wav-file-recorder.js"></script>
 
-<!-- audio network BEGIN - this kind of booting only for 'AudioNetwork' development -->
-<script>
-    var AudioNetworkBootConfig = {
-        devScriptLoad: true
-    };
-</script>
-<script src="../../src/audio-network-boot.js"></script>
-<!-- audio network END -->
+    <script>
+        if (isProduction()) { // TODO refactor this
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-<script src="wav-file-recorder.js"></script>
-
-<script>
-    if (isProduction()) { // TODO refactor this
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-        ga('create', 'UA-76662342-1', 'auto');
-        ga('send', 'pageview');
-    }
-</script>
+            ga('create', 'UA-76662342-1', 'auto');
+            ga('send', 'pageview');
+        }
+    </script>
 
 </body>
 </html>

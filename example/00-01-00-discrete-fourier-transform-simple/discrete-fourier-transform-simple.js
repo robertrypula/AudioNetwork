@@ -3,8 +3,8 @@
 
 // UPDATE 2017.08.16
 // if you are looking for object oriented solution plase look at:
-// - http://audio-network.rypula.pl/wave-analyser-class
-// - http://audio-network.rypula.pl/wave-generator-class
+// - https://audio-network.rypula.pl/wave-analyser-class
+// - https://audio-network.rypula.pl/wave-generator-class
 
 var
     SAMPLE_RATE = 44100;
