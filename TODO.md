@@ -14,7 +14,7 @@
 - finish Audio Chat example 
 - replace Gulp by WebPack
 - configure unit tests from console
-- remove external google fonts
+- [DONE] remove external google fonts
     - improove website loading time in general
 
 ## Physical Layer, Web Audio API and DSP stuff
