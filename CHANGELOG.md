@@ -1,6 +1,6 @@
 ## Roadmap
   - 1.1.0 Last update for old PSK code
-  - 1.2.x Completly rewritten PhysicalLayer with FSK support. Old PSK code marked as deprecated
+  - 1.2.x Completely rewritten Physical Layer with FSK support. Old PSK code marked as deprecated
   - 1.3.x Data link layer with frames and checksums
   - 1.4.x Transport layer that supports simplified TCP protocol
   - 1.5.x Application layer with simple text exchange protocol
@@ -9,8 +9,13 @@
   - 2.x.x ?? OFDM
   - 2.x.x ?? Move to TypeScript
 
-## v1.2.0 (2017-12-xx) [not yet released] First version that uses new FSK technique at Physical Layer
-  -
+## v1.2.0 (2017-12-28)
+  - Completely rewritten Physical Layer core based on Frequency-Shift Keying
+  - special "sync" sequence for symbol synchronization based on correlation technique
+  - many new examples
+  - old FSK code marked as deprecated
+  - volume control issue on mobile devices solved by detaching from microphone
+  - Injector aliases again enabled by default
 
 ## v1.1.0 (2017-11-12) Last update for old PSK code
   + Dynamic dev files loading
