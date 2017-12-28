@@ -28,7 +28,7 @@ var
     AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
     AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.version = '1.2.0rc';
+AudioNetwork.version = '1.2.0';
 
 // conditions from: http://stackoverflow.com/a/33697246
 AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;
@@ -3607,6 +3607,450 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
+        .registerService('PhysicalLayerAdapter.ReceiveAdapterState', _ReceiveAdapterState);
+
+    _ReceiveAdapterState.$inject = [];
+
+    function _ReceiveAdapterState() {
+        return {
+            NO_INPUT: 'NO_INPUT',
+            IDLE_INIT: 'IDLE_INIT',
+            FIRST_SYNC_WAIT: 'FIRST_SYNC_WAIT',
+            FIRST_SYNC: 'FIRST_SYNC',
+            FATAL_ERROR: 'FATAL_ERROR',
+            IDLE: 'IDLE',
+            SYMBOL: 'SYMBOL',
+            SYNC: 'SYNC',
+            GUARD: 'GUARD',
+            ERROR: 'ERROR'
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.ReceiveAdapter', _ReceiveAdapter);
+
+    _ReceiveAdapter.$inject = [
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayerAdapter.RxStateMachineManagerBuilder',
+        'Common.MathUtil'
+    ];
+
+    function _ReceiveAdapter(
+        DefaultConfig,
+        RxStateMachineManagerBuilder,
+        MathUtil
+    ) {
+        var ReceiveAdapter;
+
+        ReceiveAdapter = function (physicalLayer) {
+            var channelIndex, channelSize, stateMachineManager;
+
+            this.$$physicalLayer = physicalLayer;
+            this.$$stateMachineManager = [];
+            this.$$packetReceiveHandler = null;
+            this.$$frequencyUpdateHandler = null;
+            this.$$phaseCorrectionUpdateHandler = null;
+            
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (channelIndex = 0; channelIndex < channelSize; channelIndex++) {
+                stateMachineManager = RxStateMachineManagerBuilder.build(
+                    channelIndex,
+                    this.$$packetReceiveInternalHandler.bind(this),
+                    this.$$frequencyUpdateInternalHandler.bind(this),
+                    this.$$phaseCorrectionUpdateInternalHandler.bind(this)
+                );
+                this.$$stateMachineManager.push(stateMachineManager);
+            }
+            this.setSymbolDuration(DefaultConfig.SYMBOL_DURATION);
+            this.setGuardInterval(DefaultConfig.GUARD_INTERVAL);
+            this.setSyncDuration(DefaultConfig.SYNC_DURATION);
+            this.setSampleCollectionTimeIdleInitState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
+            this.setSampleCollectionTimeFirstSyncState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
+            this.setSyncPreamble(DefaultConfig.SYNC_PREAMBLE);
+            this.setPskSize(ReceiveAdapter.$$_ALL_CHANNEL, DefaultConfig.PSK_SIZE);
+        };
+
+        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
+        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
+        ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
+        ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
+        ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
+        ReceiveAdapter.$$_ALL_CHANNEL = null;
+
+        ReceiveAdapter.prototype.reset = function (channelIndex) {
+            this.$$checkChannelIndexRange(channelIndex);
+            return this.$$stateMachineManager[channelIndex].reset();
+        };
+
+        ReceiveAdapter.prototype.setSymbolDuration = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR
+                );
+            }
+        };
+
+        ReceiveAdapter.prototype.setGuardInterval = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR
+                );
+            }
+        };
+
+        ReceiveAdapter.prototype.setSyncDuration = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
+                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR
+                );
+            }
+        };
+
+        ReceiveAdapter.prototype.setSampleCollectionTimeIdleInitState = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSampleCollectionTimeIdleInitState(value);
+            }
+        };
+
+        ReceiveAdapter.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
+            var channelSize, i;
+
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSampleCollectionTimeFirstSyncState(value);
+            }
+        };
+
+        ReceiveAdapter.prototype.setSyncPreamble = function (value) {
+            var channelSize, i;
+
+            value = !!value;
+            channelSize = this.$$physicalLayer.getRxChannelSize();
+            for (i = 0; i < channelSize; i++) {
+                this.$$stateMachineManager[i].setSyncPreamble(value);
+            }
+        };
+
+        ReceiveAdapter.prototype.setPskSize = function (channelIndex, value) {
+            var channelSize, i;
+
+            if (channelIndex === ReceiveAdapter.$$_ALL_CHANNEL) {
+                channelSize = this.$$physicalLayer.getRxChannelSize();
+                for (i = 0; i < channelSize; i++) {
+                    this.$$stateMachineManager[i].setPskSize(value);
+                }
+            } else {
+                this.$$checkChannelIndexRange(channelIndex);
+                this.$$stateMachineManager[channelIndex].setPskSize(value);
+            }
+        };
+
+        ReceiveAdapter.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
+            var i;
+
+            for (i = 0; i < data.length; i++) {
+                if (data[i].length === 1) {
+                    data[i] = data[i][0];      // flatten data structure when only one ofdm is used for this channel
+                }
+            }
+
+            if (this.$$packetReceiveHandler) {
+                this.$$packetReceiveHandler(channelIndex, data);
+            }
+        };
+
+        ReceiveAdapter.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
+            var current;
+
+            if (drift === null) {
+                return;
+            }
+
+            // TODO pass drift as array
+            if (MathUtil.abs(drift) > 0.005) {
+                current = this.$$physicalLayer.getRxFrequency(channelIndex, 0);
+                console.log('phase history current', current);
+                this.$$physicalLayer.setRxFrequency(channelIndex, 0, current + drift);
+                console.log('Frequency corrected for channel ' + channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
+            }
+            if (this.$$frequencyUpdateHandler) {
+                this.$$frequencyUpdateHandler(channelIndex, drift);
+            }  
+        };
+
+        ReceiveAdapter.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
+            var current, i;
+
+            // TODO pass only phase array not full carrierDetail object
+            for (i = 0; i < carrierDetail.length; i++) {
+                current = this.$$physicalLayer.getRxPhaseCorrection(channelIndex, i);
+                this.$$physicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);
+                console.log('Phase corrected for channel ' + channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
+            }
+
+            if (this.$$phaseCorrectionUpdateHandler) {
+                this.$$phaseCorrectionUpdateHandler(channelIndex, carrierDetail);
+            }
+        };
+        
+        ReceiveAdapter.prototype.$$checkChannelIndexRange = function (channelIndex) {
+            if (channelIndex < 0 || channelIndex >= this.$$physicalLayer.getRxChannelSize()) {
+                throw 'Given channelIndex is outside range: ' + channelIndex;
+            }
+        };
+
+        ReceiveAdapter.prototype.setPacketReceiveHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$packetReceiveHandler = cb;
+            } else {
+                this.$$packetReceiveHandler = null;
+            }
+        };
+
+        ReceiveAdapter.prototype.setFrequencyUpdateHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$frequencyUpdateHandler = cb;
+            } else {
+                this.$$frequencyUpdateHandler = null;
+            }
+        };
+
+        ReceiveAdapter.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
+            if (typeof cb === 'function') {
+                this.$$phaseCorrectionUpdateHandler = cb;
+            } else {
+                this.$$phaseCorrectionUpdateHandler = null;
+            }
+        };
+
+        ReceiveAdapter.prototype.receive = function (channelIndex, carrierDetail, time) {
+            this.$$checkChannelIndexRange(channelIndex);
+            return this.$$stateMachineManager[channelIndex].receive(carrierDetail, time);
+        };
+
+        return ReceiveAdapter;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.TransmitAdapter', _TransmitAdapter);
+
+    _TransmitAdapter.$inject = [
+        'Common.MathUtil',
+        'Common.Util',
+        'PhysicalLayer.DefaultConfig'
+    ];
+
+    function _TransmitAdapter(
+        MathUtil,
+        Util,
+        DefaultConfig
+    ) {
+        var TransmitAdapter;
+
+        /**
+         * This works as an wrapper for raw API that PhysicalLayer provides.
+         * It's much easier to send data using Adapter API. In case of really fancy sound
+         * generation cases you can use PhysicalLayer API directly.
+         *
+         */
+        TransmitAdapter = function (physicalLayer) {
+            this.$$physicalLayer = physicalLayer;
+        };
+
+        TransmitAdapter.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION = 'Amplitude data length does not match symbol list length';
+        TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL = 0;
+        TransmitAdapter.$$_LOWEST_PSK_SIZE = 1;
+        TransmitAdapter.$$_ZERO_GUARD_INTERVAL = 0;
+        TransmitAdapter.$$_ZERO_INTERPACKET_GAP = 0;
+        TransmitAdapter.$$_NO_SYNC_PREAMBLE = false;
+        TransmitAdapter.$$_UNDEFINED_AMPLITUDE = undefined;
+
+        TransmitAdapter.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
+            var
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
+                data = [],
+                i
+            ;
+
+            for (i = 0; i < ofdmSize; i++) {
+                data.push(i === ofdmIndex ? symbol : null);
+            }
+            data = [ data.length === 1 ? data[0] : data ];
+
+            this.packet(
+                channelIndex,
+                data,
+                TransmitAdapter.$$_NO_SYNC_PREAMBLE,
+                pskSize,
+                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
+                TransmitAdapter.$$_ZERO_GUARD_INTERVAL,
+                TransmitAdapter.$$_ZERO_INTERPACKET_GAP,
+                TransmitAdapter.$$_UNDEFINED_AMPLITUDE
+            );
+        };
+
+        TransmitAdapter.prototype.packet = function (channelIndex, data, syncPreamble, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
+            var 
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
+                syncData,
+                i
+            ;
+
+            syncPreamble = Util.valueOrDefault(syncPreamble, DefaultConfig.SYNC_PREAMBLE);
+            if (syncPreamble) {
+                syncData = [];
+                for (i = 0; i < ofdmSize; i++) {
+                    syncData.push(TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL);
+                }
+                syncData = syncData.length === 1 ? syncData[0] : syncData;
+                data.unshift(syncData);
+            }
+
+            if (typeof amplitude === 'undefined') {
+                amplitude = [];
+                for (i = 0; i < ofdmSize; i++) {
+                    amplitude.push(
+                        MathUtil.floor(1000 / ofdmSize) / 1000
+                    );
+                }
+            }
+
+            this.$$transmit(
+                channelIndex, 
+                data,
+                Util.valueOrDefault(pskSize, DefaultConfig.PSK_SIZE),
+                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
+                Util.valueOrDefault(guardInterval, DefaultConfig.GUARD_INTERVAL),
+                Util.valueOrDefault(interpacketGap, DefaultConfig.INTERPACKET_GAP),
+                amplitude
+            );
+        };
+
+        TransmitAdapter.prototype.synchronization = function (channelIndex) {
+            var 
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
+                data = [],
+                amplitude = [],
+                i
+            ;
+
+            for (i = 0; i < ofdmSize; i++) {
+                data.push(TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL);
+                amplitude.push(
+                    MathUtil.floor(1000 / ofdmSize) / 1000
+                );
+            }
+            data = [ data.length === 1 ? data[0] : data ];
+
+            this.$$transmit(
+                channelIndex, 
+                data, 
+                TransmitAdapter.$$_LOWEST_PSK_SIZE,
+                DefaultConfig.SYNC_DURATION,
+                TransmitAdapter.$$_ZERO_GUARD_INTERVAL,
+                DefaultConfig.INTERPACKET_GAP,
+                amplitude
+            );
+        };
+
+        TransmitAdapter.prototype.$$transmit = function (channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
+            var
+                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
+                symbolList, symbol,
+                txData, txDataTmp,
+                mute,
+                i, j
+            ;
+
+            txData = [];
+            for (i = 0; i < data.length; i++) {
+                // allow simpler data structure for ofdm-1 (nested arrays are not needed in this case)
+                if (ofdmSize === 1 && typeof data[i] === 'number') {
+                    symbolList = [ data[i] ];
+                } else {
+                    symbolList = data[i];
+                }
+
+                if (symbolList.length !== amplitude.length) {
+                    throw TransmitAdapter.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION;
+                }
+
+                txDataTmp = [];
+                for (j = 0; j < symbolList.length; j++) {
+                    mute = symbolList[j] === null;
+                    symbol = mute ? 0 : parseInt(symbolList[j]) % pskSize;
+
+                    txDataTmp.push({
+                        amplitude: mute ? 0 : amplitude[j],
+                        duration: symbolDuration,
+                        phase: symbol / pskSize
+                    });
+                }
+                txData.push(txDataTmp);
+
+                if (guardInterval > 0) {
+                    txDataTmp = [];
+                    for (j = 0; j < symbolList.length; j++) {
+                        txDataTmp.push({
+                            amplitude: 0,
+                            duration: guardInterval
+                        });
+                    }
+                    txData.push(txDataTmp);
+                }
+            }
+
+            // add interpacket gap only when data loop above actually added something
+            if (interpacketGap > 0 && symbolList) {
+                txDataTmp = [];
+                for (j = 0; j < symbolList.length; j++) {
+                    txDataTmp.push({
+                        amplitude: 0,
+                        duration: interpacketGap
+                    });
+                }
+                txData.push(txDataTmp);
+            }
+
+            for (i = 0; i < txData.length; i++) {
+                this.$$physicalLayer.tx(channelIndex, txData[i]);
+            }
+        };
+
+        return TransmitAdapter;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
         .registerService('PhysicalLayer.ConfigurationParser', _ConfigurationParser);
 
     _ConfigurationParser.$inject = [
@@ -4225,450 +4669,6 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
             LOOPBACK: 'LOOPBACK',
             RECORDED_AUDIO: 'RECORDED_AUDIO'
         };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.ReceiveAdapterState', _ReceiveAdapterState);
-
-    _ReceiveAdapterState.$inject = [];
-
-    function _ReceiveAdapterState() {
-        return {
-            NO_INPUT: 'NO_INPUT',
-            IDLE_INIT: 'IDLE_INIT',
-            FIRST_SYNC_WAIT: 'FIRST_SYNC_WAIT',
-            FIRST_SYNC: 'FIRST_SYNC',
-            FATAL_ERROR: 'FATAL_ERROR',
-            IDLE: 'IDLE',
-            SYMBOL: 'SYMBOL',
-            SYNC: 'SYNC',
-            GUARD: 'GUARD',
-            ERROR: 'ERROR'
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.ReceiveAdapter', _ReceiveAdapter);
-
-    _ReceiveAdapter.$inject = [
-        'PhysicalLayer.DefaultConfig',
-        'PhysicalLayerAdapter.RxStateMachineManagerBuilder',
-        'Common.MathUtil'
-    ];
-
-    function _ReceiveAdapter(
-        DefaultConfig,
-        RxStateMachineManagerBuilder,
-        MathUtil
-    ) {
-        var ReceiveAdapter;
-
-        ReceiveAdapter = function (physicalLayer) {
-            var channelIndex, channelSize, stateMachineManager;
-
-            this.$$physicalLayer = physicalLayer;
-            this.$$stateMachineManager = [];
-            this.$$packetReceiveHandler = null;
-            this.$$frequencyUpdateHandler = null;
-            this.$$phaseCorrectionUpdateHandler = null;
-            
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (channelIndex = 0; channelIndex < channelSize; channelIndex++) {
-                stateMachineManager = RxStateMachineManagerBuilder.build(
-                    channelIndex,
-                    this.$$packetReceiveInternalHandler.bind(this),
-                    this.$$frequencyUpdateInternalHandler.bind(this),
-                    this.$$phaseCorrectionUpdateInternalHandler.bind(this)
-                );
-                this.$$stateMachineManager.push(stateMachineManager);
-            }
-            this.setSymbolDuration(DefaultConfig.SYMBOL_DURATION);
-            this.setGuardInterval(DefaultConfig.GUARD_INTERVAL);
-            this.setSyncDuration(DefaultConfig.SYNC_DURATION);
-            this.setSampleCollectionTimeIdleInitState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE);
-            this.setSampleCollectionTimeFirstSyncState(ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE);
-            this.setSyncPreamble(DefaultConfig.SYNC_PREAMBLE);
-            this.setPskSize(ReceiveAdapter.$$_ALL_CHANNEL, DefaultConfig.PSK_SIZE);
-        };
-
-        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_IDLE_INIT_STATE = DefaultConfig.SYNC_DURATION;
-        ReceiveAdapter.$$_SAMPLE_COLLECTION_TIME_FIRST_SYNC_STATE = DefaultConfig.SYNC_DURATION * 0.85; // little less than 'Sync Duration' in order to finish signal collection before sync transmission ends
-        ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR = 2.2; // how much state times can be longer
-        ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR = 1.1; // how much state times can be longer
-        ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR = 1.1; // how much state times can be longer
-        ReceiveAdapter.$$_ALL_CHANNEL = null;
-
-        ReceiveAdapter.prototype.reset = function (channelIndex) {
-            this.$$checkChannelIndexRange(channelIndex);
-            return this.$$stateMachineManager[channelIndex].reset();
-        };
-
-        ReceiveAdapter.prototype.setSymbolDuration = function (value) {
-            var channelSize, i;
-
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSymbolStateMaxDurationTime(
-                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYMBOL_DURATION_FACTOR
-                );
-            }
-        };
-
-        ReceiveAdapter.prototype.setGuardInterval = function (value) {
-            var channelSize, i;
-
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setGuardStateMaxDurationTime(
-                    value * ReceiveAdapter.$$_TIME_TOLERANCE_GUARD_INTERVAL_FACTOR
-                );
-            }
-        };
-
-        ReceiveAdapter.prototype.setSyncDuration = function (value) {
-            var channelSize, i;
-
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSyncStateMaxDurationTime(
-                    value * ReceiveAdapter.$$_TIME_TOLERANCE_SYNC_DURATION_FACTOR
-                );
-            }
-        };
-
-        ReceiveAdapter.prototype.setSampleCollectionTimeIdleInitState = function (value) {
-            var channelSize, i;
-
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSampleCollectionTimeIdleInitState(value);
-            }
-        };
-
-        ReceiveAdapter.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
-            var channelSize, i;
-
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSampleCollectionTimeFirstSyncState(value);
-            }
-        };
-
-        ReceiveAdapter.prototype.setSyncPreamble = function (value) {
-            var channelSize, i;
-
-            value = !!value;
-            channelSize = this.$$physicalLayer.getRxChannelSize();
-            for (i = 0; i < channelSize; i++) {
-                this.$$stateMachineManager[i].setSyncPreamble(value);
-            }
-        };
-
-        ReceiveAdapter.prototype.setPskSize = function (channelIndex, value) {
-            var channelSize, i;
-
-            if (channelIndex === ReceiveAdapter.$$_ALL_CHANNEL) {
-                channelSize = this.$$physicalLayer.getRxChannelSize();
-                for (i = 0; i < channelSize; i++) {
-                    this.$$stateMachineManager[i].setPskSize(value);
-                }
-            } else {
-                this.$$checkChannelIndexRange(channelIndex);
-                this.$$stateMachineManager[channelIndex].setPskSize(value);
-            }
-        };
-
-        ReceiveAdapter.prototype.$$packetReceiveInternalHandler = function (channelIndex, data) {
-            var i;
-
-            for (i = 0; i < data.length; i++) {
-                if (data[i].length === 1) {
-                    data[i] = data[i][0];      // flatten data structure when only one ofdm is used for this channel
-                }
-            }
-
-            if (this.$$packetReceiveHandler) {
-                this.$$packetReceiveHandler(channelIndex, data);
-            }
-        };
-
-        ReceiveAdapter.prototype.$$frequencyUpdateInternalHandler = function (channelIndex, drift) {
-            var current;
-
-            if (drift === null) {
-                return;
-            }
-
-            // TODO pass drift as array
-            if (MathUtil.abs(drift) > 0.005) {
-                current = this.$$physicalLayer.getRxFrequency(channelIndex, 0);
-                console.log('phase history current', current);
-                this.$$physicalLayer.setRxFrequency(channelIndex, 0, current + drift);
-                console.log('Frequency corrected for channel ' + channelIndex + ' at ofdm ' + 0 + ': ' + (current + drift));
-            }
-            if (this.$$frequencyUpdateHandler) {
-                this.$$frequencyUpdateHandler(channelIndex, drift);
-            }  
-        };
-
-        ReceiveAdapter.prototype.$$phaseCorrectionUpdateInternalHandler = function (channelIndex, carrierDetail) {
-            var current, i;
-
-            // TODO pass only phase array not full carrierDetail object
-            for (i = 0; i < carrierDetail.length; i++) {
-                current = this.$$physicalLayer.getRxPhaseCorrection(channelIndex, i);
-                this.$$physicalLayer.setRxPhaseCorrection(channelIndex, i, current + carrierDetail[i].phase);
-                console.log('Phase corrected for channel ' + channelIndex + ' at ofdm ' + i + ': ' + (current + carrierDetail[i].phase));
-            }
-
-            if (this.$$phaseCorrectionUpdateHandler) {
-                this.$$phaseCorrectionUpdateHandler(channelIndex, carrierDetail);
-            }
-        };
-        
-        ReceiveAdapter.prototype.$$checkChannelIndexRange = function (channelIndex) {
-            if (channelIndex < 0 || channelIndex >= this.$$physicalLayer.getRxChannelSize()) {
-                throw 'Given channelIndex is outside range: ' + channelIndex;
-            }
-        };
-
-        ReceiveAdapter.prototype.setPacketReceiveHandler = function (cb) {
-            if (typeof cb === 'function') {
-                this.$$packetReceiveHandler = cb;
-            } else {
-                this.$$packetReceiveHandler = null;
-            }
-        };
-
-        ReceiveAdapter.prototype.setFrequencyUpdateHandler = function (cb) {
-            if (typeof cb === 'function') {
-                this.$$frequencyUpdateHandler = cb;
-            } else {
-                this.$$frequencyUpdateHandler = null;
-            }
-        };
-
-        ReceiveAdapter.prototype.setPhaseCorrectionUpdateHandler = function (cb) {
-            if (typeof cb === 'function') {
-                this.$$phaseCorrectionUpdateHandler = cb;
-            } else {
-                this.$$phaseCorrectionUpdateHandler = null;
-            }
-        };
-
-        ReceiveAdapter.prototype.receive = function (channelIndex, carrierDetail, time) {
-            this.$$checkChannelIndexRange(channelIndex);
-            return this.$$stateMachineManager[channelIndex].receive(carrierDetail, time);
-        };
-
-        return ReceiveAdapter;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.TransmitAdapter', _TransmitAdapter);
-
-    _TransmitAdapter.$inject = [
-        'Common.MathUtil',
-        'Common.Util',
-        'PhysicalLayer.DefaultConfig'
-    ];
-
-    function _TransmitAdapter(
-        MathUtil,
-        Util,
-        DefaultConfig
-    ) {
-        var TransmitAdapter;
-
-        /**
-         * This works as an wrapper for raw API that PhysicalLayer provides.
-         * It's much easier to send data using Adapter API. In case of really fancy sound
-         * generation cases you can use PhysicalLayer API directly.
-         *
-         */
-        TransmitAdapter = function (physicalLayer) {
-            this.$$physicalLayer = physicalLayer;
-        };
-
-        TransmitAdapter.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION = 'Amplitude data length does not match symbol list length';
-        TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL = 0;
-        TransmitAdapter.$$_LOWEST_PSK_SIZE = 1;
-        TransmitAdapter.$$_ZERO_GUARD_INTERVAL = 0;
-        TransmitAdapter.$$_ZERO_INTERPACKET_GAP = 0;
-        TransmitAdapter.$$_NO_SYNC_PREAMBLE = false;
-        TransmitAdapter.$$_UNDEFINED_AMPLITUDE = undefined;
-
-        TransmitAdapter.prototype.symbol = function (channelIndex, ofdmIndex, symbol, pskSize, symbolDuration) {
-            var
-                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
-                data = [],
-                i
-            ;
-
-            for (i = 0; i < ofdmSize; i++) {
-                data.push(i === ofdmIndex ? symbol : null);
-            }
-            data = [ data.length === 1 ? data[0] : data ];
-
-            this.packet(
-                channelIndex,
-                data,
-                TransmitAdapter.$$_NO_SYNC_PREAMBLE,
-                pskSize,
-                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
-                TransmitAdapter.$$_ZERO_GUARD_INTERVAL,
-                TransmitAdapter.$$_ZERO_INTERPACKET_GAP,
-                TransmitAdapter.$$_UNDEFINED_AMPLITUDE
-            );
-        };
-
-        TransmitAdapter.prototype.packet = function (channelIndex, data, syncPreamble, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
-            var 
-                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
-                syncData,
-                i
-            ;
-
-            syncPreamble = Util.valueOrDefault(syncPreamble, DefaultConfig.SYNC_PREAMBLE);
-            if (syncPreamble) {
-                syncData = [];
-                for (i = 0; i < ofdmSize; i++) {
-                    syncData.push(TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL);
-                }
-                syncData = syncData.length === 1 ? syncData[0] : syncData;
-                data.unshift(syncData);
-            }
-
-            if (typeof amplitude === 'undefined') {
-                amplitude = [];
-                for (i = 0; i < ofdmSize; i++) {
-                    amplitude.push(
-                        MathUtil.floor(1000 / ofdmSize) / 1000
-                    );
-                }
-            }
-
-            this.$$transmit(
-                channelIndex, 
-                data,
-                Util.valueOrDefault(pskSize, DefaultConfig.PSK_SIZE),
-                Util.valueOrDefault(symbolDuration, DefaultConfig.SYMBOL_DURATION),
-                Util.valueOrDefault(guardInterval, DefaultConfig.GUARD_INTERVAL),
-                Util.valueOrDefault(interpacketGap, DefaultConfig.INTERPACKET_GAP),
-                amplitude
-            );
-        };
-
-        TransmitAdapter.prototype.synchronization = function (channelIndex) {
-            var 
-                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
-                data = [],
-                amplitude = [],
-                i
-            ;
-
-            for (i = 0; i < ofdmSize; i++) {
-                data.push(TransmitAdapter.$$_SYNCHRONIZATION_SYMBOL);
-                amplitude.push(
-                    MathUtil.floor(1000 / ofdmSize) / 1000
-                );
-            }
-            data = [ data.length === 1 ? data[0] : data ];
-
-            this.$$transmit(
-                channelIndex, 
-                data, 
-                TransmitAdapter.$$_LOWEST_PSK_SIZE,
-                DefaultConfig.SYNC_DURATION,
-                TransmitAdapter.$$_ZERO_GUARD_INTERVAL,
-                DefaultConfig.INTERPACKET_GAP,
-                amplitude
-            );
-        };
-
-        TransmitAdapter.prototype.$$transmit = function (channelIndex, data, pskSize, symbolDuration, guardInterval, interpacketGap, amplitude) {
-            var
-                ofdmSize = this.$$physicalLayer.getTxChannelOfdmSize(channelIndex),
-                symbolList, symbol,
-                txData, txDataTmp,
-                mute,
-                i, j
-            ;
-
-            txData = [];
-            for (i = 0; i < data.length; i++) {
-                // allow simpler data structure for ofdm-1 (nested arrays are not needed in this case)
-                if (ofdmSize === 1 && typeof data[i] === 'number') {
-                    symbolList = [ data[i] ];
-                } else {
-                    symbolList = data[i];
-                }
-
-                if (symbolList.length !== amplitude.length) {
-                    throw TransmitAdapter.AMPLITUDE_DATA_LENGTH_DOES_NOT_MATCH_SYMBOL_LIST_LENGTH_EXCEPTION;
-                }
-
-                txDataTmp = [];
-                for (j = 0; j < symbolList.length; j++) {
-                    mute = symbolList[j] === null;
-                    symbol = mute ? 0 : parseInt(symbolList[j]) % pskSize;
-
-                    txDataTmp.push({
-                        amplitude: mute ? 0 : amplitude[j],
-                        duration: symbolDuration,
-                        phase: symbol / pskSize
-                    });
-                }
-                txData.push(txDataTmp);
-
-                if (guardInterval > 0) {
-                    txDataTmp = [];
-                    for (j = 0; j < symbolList.length; j++) {
-                        txDataTmp.push({
-                            amplitude: 0,
-                            duration: guardInterval
-                        });
-                    }
-                    txData.push(txDataTmp);
-                }
-            }
-
-            // add interpacket gap only when data loop above actually added something
-            if (interpacketGap > 0 && symbolList) {
-                txDataTmp = [];
-                for (j = 0; j < symbolList.length; j++) {
-                    txDataTmp.push({
-                        amplitude: 0,
-                        duration: interpacketGap
-                    });
-                }
-                txData.push(txDataTmp);
-            }
-
-            for (i = 0; i < txData.length; i++) {
-                this.$$physicalLayer.tx(channelIndex, txData[i]);
-            }
-        };
-
-        return TransmitAdapter;
     }
 
 })();
@@ -6359,6 +6359,676 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
+        .registerService('Common.MathUtil', _MathUtil);
+
+    _MathUtil.$inject = [];
+
+    function _MathUtil() {
+
+        function abs(v) {
+            return Math.abs(v);
+        }
+
+        function asin(v) {
+            return Math.asin(v);
+        }
+
+        function sqrt(v) {
+            return Math.sqrt(v);
+        }
+
+        function round(v) {
+            return Math.round(v);
+        }
+
+        function random() {
+            return Math.random();
+        }
+
+        function floor(v) {
+            return Math.floor(v);
+        }
+
+        function sin(v) {
+            return Math.sin(v);
+        }
+
+        function cos(v) {
+            return Math.cos(v);
+        }
+
+        function log(v) {
+            return Math.log(v);
+        }
+
+        function minInArray(v) {
+            return Math.min.apply(null, v);
+        }
+
+        function maxInArray(v) {
+            return Math.max.apply(null, v);
+        }
+
+        return {
+            LN10: Math.LN10,
+            HALF_PI: 0.5 * Math.PI,
+            TWO_PI: 2 * Math.PI,
+            PI: Math.PI,
+            abs: abs,
+            floor: floor,
+            asin: asin,
+            sqrt: sqrt,
+            round: round,
+            random: random,
+            sin: sin,
+            cos: cos,
+            log: log,
+            minInArray: minInArray,
+            maxInArray: maxInArray
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.SimplePromiseBuilder', _SimplePromiseBuilder);
+
+    _SimplePromiseBuilder.$inject = [
+        'Common.SimplePromise'
+    ];
+
+    function _SimplePromiseBuilder(
+        SimplePromise
+    ) {
+
+        function build() {
+            return new SimplePromise();
+        }
+
+        function buildFromList(list) {
+            var i, promise, thenCount, catchCount;
+
+            promise = build();
+            thenCount = 0;
+            catchCount = 0;
+            for (i = 0; i < list.length; i++) {
+                list[i]
+                    .then(function () {
+                        thenCount++;
+                    })
+                    .catch(function () {
+                        catchCount++;
+                    })
+                    .finally(function () {
+                        if (thenCount + catchCount === list.length) {
+                            if (catchCount === 0) {
+                                promise.resolve();
+                            } else {
+                                promise.reject();
+                            }
+                        }
+                    });
+            }
+
+            return promise;
+        }
+
+        return {
+            build: build,
+            buildFromList: buildFromList
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.SimplePromise', _SimplePromise);
+
+    _SimplePromise.$inject = [];
+
+    function _SimplePromise() {
+        var SimplePromise;
+
+        SimplePromise = function () {
+            this.$$state = null;
+            this.$$value = undefined;
+            this.$$then = null;
+            this.$$catch = null;
+            this.$$finally = null;
+        };
+
+        SimplePromise.$$STATE_RESOLVE = 0;
+        SimplePromise.$$STATE_REJECT = 1;
+
+        SimplePromise.prototype.$$callbackInvoke = function () {
+            switch (this.$$state) {
+                case SimplePromise.$$STATE_RESOLVE:
+                    if (this.$$then) {
+                        this.$$then(this.$$value);
+                        this.$$then = null;
+                    }
+                    if (this.$$finally) {
+                        this.$$finally(this.$$value);
+                        this.$$finally = null;
+                    }
+                    break;
+                case SimplePromise.$$STATE_REJECT:
+                    if (this.$$catch) {
+                        this.$$catch(this.$$value);
+                        this.$$catch = null;
+                    }
+                    if (this.$$finally) {
+                        this.$$finally(this.$$value);
+                        this.$$finally = null;
+                    }
+                    break;
+            }
+        };
+
+        SimplePromise.prototype.resolve = function (value) {
+            if (this.$$state !== null) {
+                return;
+            }
+
+            this.$$state = SimplePromise.$$STATE_RESOLVE;
+            this.$$value = value;
+            this.$$callbackInvoke();
+        };
+
+        SimplePromise.prototype.reject = function (value) {
+            if (this.$$state !== null) {
+                return;
+            }
+
+            this.$$state = SimplePromise.$$STATE_REJECT;
+            this.$$value = value;
+            this.$$callbackInvoke();
+        };
+
+        SimplePromise.prototype.then = function (callback) {
+            if (typeof callback === 'function') {
+                this.$$then = callback;
+            }
+            this.$$callbackInvoke();
+            return this;
+        };
+
+        SimplePromise.prototype.catch = function (callback) {
+            if (typeof callback === 'function') {
+                this.$$catch = callback;
+            }
+            this.$$callbackInvoke();
+            return this;
+        };
+
+        SimplePromise.prototype.finally = function (callback) {
+            if (typeof callback === 'function') {
+                this.$$finally = callback;
+            }
+            this.$$callbackInvoke();
+            return this;
+        };
+
+        return SimplePromise;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.StopwatchBuilder', _StopwatchBuilder);
+
+    _StopwatchBuilder.$inject = [
+        'Common.Stopwatch'
+    ];
+
+    function _StopwatchBuilder(
+        Stopwatch
+    ) {
+
+        function build() {
+            return new Stopwatch();
+        }
+
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Common.Stopwatch', _Stopwatch);
+
+    _Stopwatch.$inject = [
+    ];
+
+    function _Stopwatch(
+    ) {
+        var Stopwatch;
+
+        Stopwatch = function () {
+            this.$$running = false;
+            this.$$timeStart = undefined;
+            this.$$timeEnd = undefined;
+        };
+
+        Stopwatch.STOPWATCH_ALREADY_STARTED_EXCEPTION = 'Stopwatch already started';
+        Stopwatch.STOPWATCH_ALREADY_STOPPED_EXCEPTION = 'Stopwatch already stopped';
+        Stopwatch.RESET_BEFORE_CALLING_START_EXCEPTION = 'Reset stopwatch before calling start() again';
+        Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION = 'stopwatch was not started';
+
+        Stopwatch.$$_MILLISECOND_IN_SECOND = 1000;
+
+        Stopwatch.prototype.reset = function () {
+            this.$$running = false;
+            this.$$timeStart = undefined;
+            this.$$timeEnd = undefined;
+
+            return this;
+        };
+
+        Stopwatch.prototype.start = function () {
+            if (this.$$running) {
+                throw Stopwatch.STOPWATCH_ALREADY_STARTED_EXCEPTION;
+            }
+
+            if (this.$$timeStart && this.$$timeEnd) {
+                throw Stopwatch.RESET_BEFORE_CALLING_START_EXCEPTION;
+            }
+
+            this.$$timeStart = new Date();
+            this.$$running = true;
+
+            return this;
+        };
+
+        Stopwatch.prototype.stop = function () {
+            if (!this.$$timeStart) {
+                throw Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION;
+            }
+
+            if (!this.$$running) {
+                throw Stopwatch.STOPWATCH_ALREADY_STOPPED_EXCEPTION;
+            }
+
+            this.$$timeEnd = new Date();
+            this.$$running = false;
+
+            return this;
+        };
+
+        Stopwatch.prototype.getDuration = function (inSeconds) {
+            var
+                millisecondDifference,
+                now = new Date();
+
+            if (!this.$$timeStart) {
+                throw Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION;
+            }
+
+            if (this.$$running) {
+                millisecondDifference = now.getTime() - this.$$timeStart.getTime();
+            } else {
+                millisecondDifference = this.$$timeEnd.getTime() - this.$$timeStart.getTime();
+            }
+
+            return inSeconds ? millisecondDifference / Stopwatch.$$_MILLISECOND_IN_SECOND : millisecondDifference;
+        };
+
+        return Stopwatch;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Common.WindowFunction', _WindowFunction);
+
+    _WindowFunction.$inject = [
+        'Common.MathUtil'
+    ];
+
+    function _WindowFunction(
+        MathUtil
+    ) {
+
+        function blackmanNuttall(n, N) {
+            return 0.3635819
+                - 0.4891775 * MathUtil.cos(2 * MathUtil.PI * n / (N - 1))
+                + 0.1365995 * MathUtil.cos(4 * MathUtil.PI * n / (N - 1))
+                - 0.0106411 * MathUtil.cos(6 * MathUtil.PI * n / (N - 1));
+        }
+
+        return {
+            blackmanNuttall: blackmanNuttall
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayerCore.ReceiveMulticoreWorkerThread', _ReceiveMulticoreWorkerThread);
+
+    _ReceiveMulticoreWorkerThread.$inject = [];
+
+    function _ReceiveMulticoreWorkerThread() {
+
+        function $$getFormattedDevScriptList() {
+            var i, src, isLast, scriptList = [];
+
+            for (i = 0; i < AudioNetwork.devScriptList.length; i++) {
+                src = AudioNetwork.bootConfig.devScriptBaseUrl + AudioNetwork.devScriptList[i];
+                isLast = i === AudioNetwork.devScriptList.length - 1;
+                scriptList.push('    \'' + src + '\'' + (isLast ? '' : ',') + '\n');
+            }
+
+            return scriptList;
+        }
+
+        function $$getFormattedProdScriptList() {
+            var src, scriptList = [];
+
+            src = AudioNetwork.bootConfig.prodScriptBaseUrl + AudioNetwork.bootConfig.prodScriptName;
+            scriptList.push('    \'' + src + '\'' + '\n');
+
+            return scriptList;
+        }
+
+        function getJavaScriptCode() {
+            var js = '', scriptList;
+
+            switch (AudioNetwork.bootConfig.multicoreState) {
+                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_DEV_SCRIPT:
+                    scriptList = $$getFormattedDevScriptList();
+                    break;
+                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_PROD_SCRIPT:
+                    scriptList = $$getFormattedProdScriptList();
+                    break;
+            }
+
+            js += 'self.importScripts(                                                                         ' + '\n';
+            js += scriptList.join('');
+            js += ');                                                                                          ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += 'var                                                                                         ' + '\n';
+            js += '    iAlias = AudioNetwork.Injector,                                                         ' + '\n';
+            js += '    ReceiveWorker = iAlias.resolve("PhysicalLayerCore.ReceiveWorker"),                      ' + '\n';
+            js += '    ReceiveMulticoreWorker = iAlias.resolve("PhysicalLayerCore.ReceiveMulticoreWorker"),    ' + '\n';
+            js += '    receiveWorker = undefined;                                                              ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += '// eval("console.log(\'eval inside thread test\');")                                        ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += 'self.onmessage = function(event) {                                                          ' + '\n';
+            js += '    var                                                                                     ' + '\n';
+            js += '        data = event.data,                                                                  ' + '\n';
+            js += '        messageIndex = data.length > 0 ? data[0] : null,                                    ' + '\n';
+            js += '        param = data.length > 0 ? data[1] : null,                                           ' + '\n';
+            js += '        promise;                                                                            ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += '    switch (messageIndex) {                                                                 ' + '\n';
+            js += '        case ReceiveMulticoreWorker.INITIALIZATION:                                         ' + '\n';
+            js += '            receiveWorker = new ReceiveWorker(param);                                       ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                               ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
+            js += '            break;                                                                          ' + '\n';
+            js += '        case ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK:                                    ' + '\n';
+            js += '            promise = receiveWorker.handleSampleBlock(param);                               ' + '\n';
+            js += '            break;                                                                          ' + '\n';
+            js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
+            js += '            promise = receiveWorker.computeCrazySineSum(param);                             ' + '\n';
+            js += '            break;                                                                          ' + '\n';
+            js += '    }                                                                                       ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += '    if (!promise) {                                                                         ' + '\n';
+            js += '        return;                                                                             ' + '\n';
+            js += '    }                                                                                       ' + '\n';
+            js += '                                                                                            ' + '\n';
+            js += '    promise                                                                                 ' + '\n';
+            js += '        .then(function (result) {                                                           ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS,         ' + '\n';
+            js += '                result                                                                      ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
+            js += '        })                                                                                  ' + '\n';
+            js += '        .catch(function () {                                                                ' + '\n';
+            js += '            self.postMessage([                                                              ' + '\n';
+            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL,            ' + '\n';
+            js += '                result                                                                      ' + '\n';
+            js += '            ]);                                                                             ' + '\n';
+            js += '        });                                                                                 ' + '\n';
+            js += '}                                                                                           ' + '\n';
+            js += '                                                                                            ' + '\n';
+
+            return js;
+        }
+
+        return {
+            getJavaScriptCode: getJavaScriptCode
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerCore.ReceiveMulticoreWorker', _ReceiveMulticoreWorker);
+
+    _ReceiveMulticoreWorker.$inject = [
+        'PhysicalLayerCore.ReceiveMulticoreWorkerThread',
+        'Common.SimplePromiseBuilder'
+    ];
+
+    function _ReceiveMulticoreWorker(
+        ReceiveMulticoreWorkerThread,
+        SimplePromiseBuilder
+    ) {
+        var ReceiveMulticoreWorker;
+
+        ReceiveMulticoreWorker = function (key) {
+            var threadCode, blob, objectUrl;
+
+            if (AudioNetwork.bootConfig.multicoreState === AudioNetwork.MULTICORE_STATE.DISABLED) {
+                throw ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION;
+            }
+
+            threadCode = ReceiveMulticoreWorkerThread.getJavaScriptCode();
+            blob = new Blob(
+                [ threadCode ],
+                { type: 'application/javascript' }
+            );
+            objectUrl = URL.createObjectURL(blob);
+
+            this.$$key = key;
+            this.$$worker = new Worker(objectUrl);
+            this.$$worker.onmessage = this.$$onMessage.bind(this);
+
+            this.$$promise = [];
+            this.$$promise.length = ReceiveMulticoreWorker.MESSAGE_TOTAL;
+
+            this.$$sendToThread(ReceiveMulticoreWorker.INITIALIZATION, this.$$key);
+        };
+
+        ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION = 'Multicore support is not enabled';
+        ReceiveMulticoreWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION = 'Previous promise not resolved yet';
+
+        ReceiveMulticoreWorker.INITIALIZATION = 0;
+        ReceiveMulticoreWorker.INITIALIZATION_SUCCESS = 1;
+        ReceiveMulticoreWorker.INITIALIZATION_FAIL = 2;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK = 3;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_SUCCESS = 4;
+        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_FAIL = 5;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM = 6;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS = 7;
+        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_FAIL = 8;
+
+        ReceiveMulticoreWorker.MESSAGE_TOTAL = 9;
+        ReceiveMulticoreWorker.MESSAGE_INDEX_SPACING = 3;
+        ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS = 1;
+        ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL = 2;
+
+        ReceiveMulticoreWorker.prototype.destroy = function() {
+            if (this.$$worker) {
+                this.$$worker.terminate();
+                this.$$worker = undefined;
+            }
+        };
+
+        ReceiveMulticoreWorker.prototype.getInitialization = function() {
+            return this.$$promise[ReceiveMulticoreWorker.INITIALIZATION];
+        };
+
+        ReceiveMulticoreWorker.prototype.$$onMessage = function(event) {
+            var
+                data = event.data,
+                messageIndex = data.length > 0 ? data[0] : null,
+                result = data.length > 1 ? data[1] : null,
+                promise,
+                i;
+
+            for (i = 0; i < this.$$promise.length; i++) {
+                promise = this.$$promise[i];
+                if (promise) {
+                    switch (messageIndex % ReceiveMulticoreWorker.MESSAGE_INDEX_SPACING) {
+                        case ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS:
+                            promise.resolve(result);
+                            break;
+                        case ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL:
+                            promise.reject(result);
+                            break;
+                    }
+                    this.$$promise[i] = undefined;
+                    break;
+                }
+            }
+        };
+
+        ReceiveMulticoreWorker.prototype.$$sendToThread = function (messageIndex, value) {
+            if (this.$$promise[messageIndex]) {
+                throw ReceiveWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION;
+            }
+            this.$$promise[messageIndex] = SimplePromiseBuilder.build();
+            this.$$worker.postMessage([
+                messageIndex,
+                value
+            ]);
+
+            return this.$$promise[messageIndex];
+        };
+
+        ReceiveMulticoreWorker.prototype.computeCrazySineSum = function (value) {
+            return this.$$sendToThread(ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM, value);
+        };
+
+        ReceiveMulticoreWorker.prototype.handleSampleBlock = function (value) {
+            return this.$$sendToThread(ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK, value);
+        };
+
+        return ReceiveMulticoreWorker;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerCore.ReceiveWorker', _ReceiveWorker);
+
+    _ReceiveWorker.$inject = [
+        'Common.CarrierRecoveryBuilder',
+        'Common.MathUtil',
+        'Common.SimplePromiseBuilder'
+    ];
+
+    function _ReceiveWorker(
+        CarrierRecoveryBuilder,
+        MathUtil,
+        SimplePromiseBuilder
+    ) {
+        var ReceiveWorker;
+
+        ReceiveWorker = function (key) {
+            this.$$key = key;
+            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 16 * 1024);
+        };
+
+        ReceiveWorker.prototype.computeCrazySineSum = function (addValue) {
+            var
+                promise = SimplePromiseBuilder.build(),
+                result = 0;
+
+            for (var i = 0; i < 9000111; i++) {
+                result += MathUtil.sin(i);
+            }
+            result = addValue + MathUtil.abs(result);
+            promise.resolve({
+                key: this.$$key,
+                result: result
+            });
+
+            return promise;
+        };
+
+        ReceiveWorker.prototype.handleSampleBlock = function (sampleBlock) {
+            var
+                promise = SimplePromiseBuilder.build(),
+                result,
+                i;
+
+            for (i = 0; i < 16 * 1024; i++) {
+                this.$$carrierRecovery.handleSample(
+                    Math.sin(2 * Math.PI * (i / 16 - 0.25))
+                );
+            }
+            result = this.$$carrierRecovery.getCarrierDetail();
+
+            promise.resolve({
+                key: this.$$key,
+                result: result
+            });
+
+            return promise;
+        };
+
+        return ReceiveWorker;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
         .registerService('Audio.ActiveAudioContext', _ActiveAudioContext);
 
     _ActiveAudioContext.$inject = [
@@ -7435,53 +8105,895 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
+        .registerService('PhysicalLayerAdapter.GuardPowerCollectorBuilder', _GuardPowerCollectorBuilder);
 
-    _AbstractChannelManager.$inject = [
-        'Audio.ActiveAudioContext'
+    _GuardPowerCollectorBuilder.$inject = [
+        'PhysicalLayerAdapter.GuardPowerCollector'
     ];
 
-    function _AbstractChannelManager(
-        ActiveAudioContext
+    function _GuardPowerCollectorBuilder(
+        GuardPowerCollector
     ) {
-        var AbstractChannelManager;
 
-        AbstractChannelManager = function () {
-            this.$$cpuLoadData = {
-                blockSampleSize: null,
-                blockTime: null,
-                blockRealTime: null,
-                load: null
-            };
+        function build() {
+            return new GuardPowerCollector();
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.GuardPowerCollector', _GuardPowerCollector);
+
+    _GuardPowerCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _GuardPowerCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
+        var GuardPowerCollector;
+
+        GuardPowerCollector = function () {
+            AbstractValueCollector.apply(this, arguments);
         };
 
-        AbstractChannelManager.prototype.getCpuLoadData = function () {
-            var c = this.$$cpuLoadData;
+        GuardPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        GuardPowerCollector.prototype.constructor = GuardPowerCollector;
+
+        GuardPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
+
+        GuardPowerCollector.prototype.$$finalize = function () {
+            if (this.$$valueList.length === 0) {
+                throw GuardPowerCollector.EMPTY_LIST_EXCEPTION;
+            }
+            
+            return MathUtil.minInArray(this.$$valueList);
+        };
+
+        return GuardPowerCollector;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayerAdapter.RxStateMachineBuilder', _RxStateMachineBuilder);
+
+    _RxStateMachineBuilder.$inject = [
+        'PhysicalLayerAdapter.RxStateMachine'
+    ];
+
+    function _RxStateMachineBuilder(
+        RxStateMachine
+    ) {
+
+        function build(handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
+            return new RxStateMachine(
+                handlerIdleInit,
+                handlerFirstSyncWait,
+                handlerFirstSync,
+                handlerFatalError,
+                handlerIdle,
+                handlerSymbol,
+                handlerSync,
+                handlerGuard,
+                handlerError
+            );
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.RxStateMachine', _RxStateMachine);
+
+    _RxStateMachine.$inject = [
+        'PhysicalLayerAdapter.ReceiveAdapterState'
+    ];
+
+    function _RxStateMachine(
+        ReceiveAdapterState
+    ) {
+        var RxStateMachine;
+
+        RxStateMachine = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
+            this.$$stateHandler = {};
+            this.$$stateHandler[ReceiveAdapterState.IDLE_INIT] = handlerIdleInit;
+            this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC_WAIT] = handlerFirstSyncWait;
+            this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC] = handlerFirstSync;
+            this.$$stateHandler[ReceiveAdapterState.FATAL_ERROR] = handlerFatalError;
+            this.$$stateHandler[ReceiveAdapterState.IDLE] = handlerIdle;
+            this.$$stateHandler[ReceiveAdapterState.SYMBOL] = handlerSymbol;
+            this.$$stateHandler[ReceiveAdapterState.SYNC] = handlerSync;
+            this.$$stateHandler[ReceiveAdapterState.GUARD] = handlerGuard;
+            this.$$stateHandler[ReceiveAdapterState.ERROR] = handlerError;
+            this.$$symbolStateMaxDurationTime = null;
+            this.$$guardStateMaxDurationTime = null;
+            this.$$syncStateMaxDurationTime = null;
+
+            this.$$state = null;
+            this.$$stateDurationTime = null;
+            this.$$stateBeginTime = null;
+            this.$$resetFlag = true;
+        };
+
+        RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION = 'Please set all max duration times first';
+
+        RxStateMachine.prototype.scheduleReset = function () {
+            this.$$resetFlag = true;
+        };
+
+        RxStateMachine.prototype.$$changeState = function (newState, time) {
+            if (newState !== null) {
+                this.$$state = newState;
+                this.$$stateBeginTime = time;
+            } else {
+                this.$$stateDurationTime = time - this.$$stateBeginTime;
+            }
+        };
+
+        RxStateMachine.prototype.$$handlerIdleInit = function (pilotSignalPresent, time) {
+            var newState;
+
+            this.$$changeState(null, time);
+
+            // run external handler
+            newState = this.$$stateHandler[ReceiveAdapterState.IDLE_INIT](this.$$stateDurationTime);
+
+            if (newState) {
+                this.$$changeState(newState, time);
+                return false;
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerFirstSyncWait = function (pilotSignalPresent, time) {
+            if (pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.FIRST_SYNC, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC_WAIT](this.$$stateDurationTime);
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerFirstSync = function (pilotSignalPresent, time) {
+            var newState;
+
+            this.$$changeState(null, time);
+
+            // run external handler
+            newState = this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC](this.$$stateDurationTime);
+
+            if (newState) {
+                this.$$changeState(newState, time);
+                return false;
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerFatalError = function (pilotSignalPresent, time) {
+            var newState;
+
+            this.$$changeState(null, time);
+
+            // run external handler
+            newState = this.$$stateHandler[ReceiveAdapterState.FATAL_ERROR](this.$$stateDurationTime);
+
+            if (newState) {
+                this.$$changeState(newState, time);
+                return false;
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerIdle = function (pilotSignalPresent, time) {
+            if (pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.SYMBOL, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.IDLE](this.$$stateDurationTime);
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerSymbol = function (pilotSignalPresent, time) {
+            if (!pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.GUARD, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.SYMBOL](this.$$stateDurationTime);
+
+                if (this.$$stateDurationTime > this.$$symbolStateMaxDurationTime) {
+                    this.$$changeState(ReceiveAdapterState.SYNC, time);
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerSync = function (pilotSignalPresent, time) {
+            if (!pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.IDLE, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.SYNC](this.$$stateDurationTime);
+
+                if (this.$$stateDurationTime > this.$$syncStateMaxDurationTime) {
+                    this.$$changeState(ReceiveAdapterState.ERROR, time);
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerGuard = function (pilotSignalPresent, time) {
+            if (pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.SYMBOL, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.GUARD](this.$$stateDurationTime);
+                
+                if (this.$$stateDurationTime > this.$$guardStateMaxDurationTime) {
+                    this.$$changeState(ReceiveAdapterState.IDLE, time);
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.$$handlerError = function (pilotSignalPresent, time) {
+            if (!pilotSignalPresent) {
+                this.$$changeState(ReceiveAdapterState.IDLE, time);
+                return false;
+            } else {
+                this.$$changeState(null, time);
+
+                // run external handler
+                this.$$stateHandler[ReceiveAdapterState.ERROR](this.$$stateDurationTime);
+            }
+
+            return true;
+        };
+
+        RxStateMachine.prototype.setGuardStateMaxDurationTime = function (time) {
+            this.$$guardStateMaxDurationTime = time;
+        };
+
+        RxStateMachine.prototype.setSymbolStateMaxDurationTime = function (time) {
+            this.$$symbolStateMaxDurationTime = time;
+        };
+
+        RxStateMachine.prototype.setSyncStateMaxDurationTime = function (time) {
+            this.$$syncStateMaxDurationTime = time;
+        };
+
+        RxStateMachine.prototype.getState = function (pilotSignalPresent, time) {
+            var
+                S = ReceiveAdapterState,
+                finished
+            ;
+
+            if (this.$$resetFlag) {
+                this.$$changeState(S.IDLE_INIT, time);
+                this.$$resetFlag = false;
+            }
+
+            if (
+                this.$$guardStateMaxDurationTime === null ||
+                this.$$symbolStateMaxDurationTime === null ||
+                this.$$syncStateMaxDurationTime === null
+            ) {
+                throw RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION;
+            }
+
+            while (true) {
+                switch (this.$$state) {
+                    case S.IDLE_INIT:
+                        finished = this.$$handlerIdleInit(pilotSignalPresent, time);
+                        break;
+                    case S.FIRST_SYNC_WAIT:
+                        finished = this.$$handlerFirstSyncWait(pilotSignalPresent, time);
+                        break;
+                    case S.FIRST_SYNC:
+                        finished = this.$$handlerFirstSync(pilotSignalPresent, time);
+                        break;
+                    case S.FATAL_ERROR:
+                        finished = this.$$handlerFatalError(pilotSignalPresent, time);
+                        break;
+                    case S.IDLE:
+                        finished = this.$$handlerIdle(pilotSignalPresent, time);
+                        break;
+                    case S.SYMBOL:
+                        finished = this.$$handlerSymbol(pilotSignalPresent, time);
+                        break;
+                    case S.SYNC:
+                        finished = this.$$handlerSync(pilotSignalPresent, time);
+                        break;
+                    case S.GUARD:
+                        finished = this.$$handlerGuard(pilotSignalPresent, time);
+                        break;
+                    case S.ERROR:
+                        finished = this.$$handlerError(pilotSignalPresent, time);
+                        break;
+                }
+
+                if (finished) {
+                    break;
+                }
+            }
+            return this.$$state;
+        };
+
+        return RxStateMachine;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayerAdapter.PhaseOffsetCollectorBuilder', _PhaseOffsetCollectorBuilder);
+
+    _PhaseOffsetCollectorBuilder.$inject = [
+        'PhysicalLayerAdapter.PhaseOffsetCollector'
+    ];
+
+    function _PhaseOffsetCollectorBuilder(
+        PhaseOffsetCollector
+    ) {
+
+        function build() {
+            return new PhaseOffsetCollector();
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.PhaseOffsetCollector', _PhaseOffsetCollector);
+
+    _PhaseOffsetCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _PhaseOffsetCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
+        var PhaseOffsetCollector;
+
+        PhaseOffsetCollector = function () {
+            AbstractValueCollector.apply(this, arguments);
+        };
+
+        PhaseOffsetCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        PhaseOffsetCollector.prototype.constructor = PhaseOffsetCollector;
+
+        PhaseOffsetCollector.prototype.$$finalize = function () {
+            var
+                i, indexA, indexB, drift,
+                str = '';
+
+            if (this.$$valueList.length === 0) {
+                return null;
+            }
+
+            // TODO rewrite this temporary code
+            for (i = 0; i < this.$$valueList.length; i++) {
+                str += (
+                    (MathUtil.round(this.$$valueList[i].time * 1000) / 1000) + ' ' +
+                    (MathUtil.round(this.$$valueList[i].phase * 1000) / 1000) + ' | '
+                );
+            }
+
+            indexA = MathUtil.round(0.43 * this.$$valueList.length);
+            indexB = MathUtil.round(0.57 * this.$$valueList.length);
+            indexB = indexB >= this.$$valueList.length ? this.$$valueList.length - 1 : indexB;
+            drift = 0;
+            if (indexA !== indexB && indexA < indexB) {
+                console.log('phase history indexA', this.$$valueList[indexA].time, this.$$valueList[indexA].phase);
+                console.log('phase history indexB', this.$$valueList[indexB].time, this.$$valueList[indexB].phase);
+                drift = -(this.$$valueList[indexB].phase - this.$$valueList[indexA].phase) / (this.$$valueList[indexB].time - this.$$valueList[indexA].time);
+                console.log('phase history drift', drift);
+            }
+
+            return drift;
+        };
+
+        PhaseOffsetCollector.prototype.collect = function (value) {
+            // TODO rewrite this temporary code
+            this.$$valueList.push({
+                time: value.stateDurationTime,
+                phase: value.carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            });                                          // TODO check also powerThreshold to avoid fine-tune on null OFDMs
+        };
+
+        return PhaseOffsetCollector;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayerAdapter.RxStateMachineManagerBuilder', _RxStateMachineManagerBuilder);
+
+    _RxStateMachineManagerBuilder.$inject = [
+        'PhysicalLayerAdapter.RxStateMachineManager'
+    ];
+
+    function _RxStateMachineManagerBuilder(
+        RxStateMachineManager
+    ) {
+
+        function build(channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
+            return new RxStateMachineManager(
+                channelIndex,
+                packetReceiveHandler, 
+                frequencyUpdateHandler, 
+                phaseCorrectionUpdateHandler
+            );
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.RxStateMachineManager', _RxStateMachineManager);
+
+    _RxStateMachineManager.$inject = [
+        'Common.MathUtil',
+        'Common.Util',
+        'Common.AverageValueCollectorBuilder',
+        'PhysicalLayer.DefaultConfig',
+        'PhysicalLayerAdapter.SignalPowerCollectorBuilder',
+        'PhysicalLayerAdapter.GuardPowerCollectorBuilder',
+        'PhysicalLayerAdapter.PhaseOffsetCollectorBuilder',
+        'PhysicalLayerAdapter.RxStateMachineBuilder',
+        'PhysicalLayerAdapter.ReceiveAdapterState'
+    ];
+
+    function _RxStateMachineManager(
+        MathUtil,
+        Util,
+        AverageValueCollectorBuilder,
+        DefaultConfig,
+        SignalPowerCollectorBuilder,
+        GuardPowerCollectorBuilder,
+        PhaseOffsetCollectorBuilder,
+        RxStateMachineBuilder,
+        ReceiveAdapterState
+    ) {
+        var RxStateMachineManager;
+
+        RxStateMachineManager = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
+            this.$$channelIndex = channelIndex;
+
+            this.$$packetReceiveHandler = packetReceiveHandler;
+            this.$$frequencyUpdateHandler = frequencyUpdateHandler;
+            this.$$phaseCorrectionUpdateHandler = phaseCorrectionUpdateHandler;
+
+            this.$$stateMachine = RxStateMachineBuilder.build(
+                this.$$handlerIdleInit.bind(this),
+                this.$$handlerFirstSyncWait.bind(this),
+                this.$$handlerFirstSync.bind(this),
+                this.$$handlerFatalError.bind(this),
+                this.$$handlerIdle.bind(this),
+                this.$$handlerSymbol.bind(this),
+                this.$$handlerSync.bind(this),
+                this.$$handlerGuard.bind(this),
+                this.$$handlerError.bind(this)
+            );
+
+            this.$$sampleCollectionTimeIdleInitState = null;
+            this.$$sampleCollectionTimeFirstSyncState = null;
+            this.$$syncPreamble = null;
+            this.$$pskSize = null;
+
+            this.$$averageIdlePowerCollector = AverageValueCollectorBuilder.build();
+            this.$$averageFirstSyncPowerCollector = AverageValueCollectorBuilder.build();
+            this.$$signalPowerCollector = SignalPowerCollectorBuilder.build();
+            this.$$guardPowerCollector = GuardPowerCollectorBuilder.build();
+            this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
+
+            this.$$resetInternal();
+        };
+
+        RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
+        RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE = 10; // decibels above average idle power (ambient noise) in order to catch first, even weak, signal - it means that you should keep this value low
+        RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
+        RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR = 0.5;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
+
+        RxStateMachineManager.prototype.$$resetInternal = function () {
+            this.$$averageIdlePowerCollector.clearAll();
+            this.$$averageFirstSyncPowerCollector.clearAll();
+            this.$$signalPowerCollector.clearAll();
+            this.$$guardPowerCollector.clearAll();
+            this.$$phaseOffsetCollector.clearAll();
+
+            this.$$powerThreshold = RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD;
+
+            this.$$currentData = null;
+            this.$$dataPacket = [];
+            this.$$dataSymbol = [];
+        };
+
+        RxStateMachineManager.prototype.reset = function () {
+            this.$$resetInternal();
+            this.$$stateMachine.scheduleReset();
+        };
+
+        RxStateMachineManager.prototype.setSymbolStateMaxDurationTime = function (value) {
+            this.$$stateMachine.setSymbolStateMaxDurationTime(value);
+        };
+
+        RxStateMachineManager.prototype.setGuardStateMaxDurationTime  = function (value) {
+            this.$$stateMachine.setGuardStateMaxDurationTime(value);
+        };
+
+        RxStateMachineManager.prototype.setSyncStateMaxDurationTime = function (value) {
+            this.$$stateMachine.setSyncStateMaxDurationTime(value);
+        };
+
+        RxStateMachineManager.prototype.setSampleCollectionTimeIdleInitState = function (value) {
+            this.$$sampleCollectionTimeIdleInitState = value;
+        };
+
+        RxStateMachineManager.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
+            this.$$sampleCollectionTimeFirstSyncState = value;
+        };
+
+        RxStateMachineManager.prototype.setSyncPreamble  = function (value) {
+            this.$$syncPreamble = value;
+        };
+
+        RxStateMachineManager.prototype.setPskSize  = function (value) {
+            this.$$pskSize = value;
+        };
+
+        RxStateMachineManager.prototype.$$handlerIdleInit = function (stateDurationTime) {
+            var
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                handlerResult = null
+            ;
+
+            if (stateDurationTime < this.$$sampleCollectionTimeIdleInitState) {
+                this.$$averageIdlePowerCollector.collect(powerDecibel);
+            } else {
+                try {
+                    // put first power threshold slightly above collected noise power to detect even weak signals
+                    this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE;
+                    handlerResult = ReceiveAdapterState.FIRST_SYNC_WAIT;
+                } catch (e) {
+                    handlerResult = ReceiveAdapterState.FATAL_ERROR;
+                }
+            }
+
+            return handlerResult;
+        };
+
+        RxStateMachineManager.prototype.$$handlerFirstSyncWait = function (stateDurationTime) {
+            // nothing much here - user needs to send 'Sync' signal on the other device, we can just wait...
+            return null;
+        };
+
+        RxStateMachineManager.prototype.$$handlerFirstSync = function (stateDurationTime) {
+            var 
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                averageFirstSyncPower, averageIdlePower, powerDifference
+            ;
+
+            // TODO refactor code block order - condition below happens actually at FIRST_SYNC state end
+            if (this.$$averageFirstSyncPowerCollector.getLastFinalizedResult()) {
+                // wait until signal will drop below threshold
+                if (powerDecibel < this.$$powerThreshold) {
+                    return ReceiveAdapterState.IDLE;
+                } else {
+                    return null;
+                }
+            }
+
+            // signal cannot be weaker than previously stored average idle noise... :)
+            if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
+                return ReceiveAdapterState.FATAL_ERROR;
+            }
+            
+            if (stateDurationTime < this.$$sampleCollectionTimeFirstSyncState) {
+                // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
+                this.$$phaseOffsetCollector.collect({
+                    stateDurationTime: stateDurationTime,
+                    carrierDetail: this.$$currentData.carrierDetail
+                });
+
+                // collect desired signal power history and later compute average signal power and power threshold
+                this.$$averageFirstSyncPowerCollector.collect(powerDecibel);
+            } else {
+                try {
+                    averageFirstSyncPower = this.$$averageFirstSyncPowerCollector.finalize();    // this line may trow error
+                    averageIdlePower = this.$$averageIdlePowerCollector.getLastFinalizedResult();
+                    powerDifference = averageFirstSyncPower - averageIdlePower;
+
+                    // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
+                    this.$$powerThreshold = averageIdlePower + RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
+                } catch (e) {
+                    return ReceiveAdapterState.FATAL_ERROR;
+                }
+            }
+        };
+
+        RxStateMachineManager.prototype.$$handlerFatalError = function (stateDurationTime) {
+            // nothing much here - only way to escape from this state is to reset Receive Adapter
+        };
+        
+        RxStateMachineManager.prototype.$$handlerIdle = function (stateDurationTime) {
+            // share collected packet with rest of the world
+            if (this.$$dataPacket.length > 0) {
+                this.$$packetReceiveHandler(this.$$channelIndex, this.$$preparePacket(this.$$dataPacket));
+                this.$$dataPacket.length = 0;
+            }
+
+            // fine-tune frequency offsets basing on phase history if any
+            if (this.$$phaseOffsetCollector.hasAtLeastItem()) {
+                this.$$frequencyUpdateHandler(this.$$channelIndex, this.$$phaseOffsetCollector.finalize());
+            }
+
+            // clear collected guard history from last 'GUARD' state because it was followed
+            // directly by IDLE state so technically it wasn't GUARD state at all
+            this.$$guardPowerCollector.clearList();
+        };
+
+        RxStateMachineManager.prototype.$$handlerSymbol = function (stateDurationTime) {
+            var powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
+
+            // code below stores information about quality of incoming packets in the real time
+            this.$$signalPowerCollector.collect(powerDecibel);
+            if (this.$$guardPowerCollector.hasAtLeastItem()) {
+                this.$$guardPowerCollector.finalize();
+            }
+        
+            // add current signal sample to list
+            this.$$dataSymbol.push(this.$$currentData);
+        };
+
+        RxStateMachineManager.prototype.$$handlerSync = function (stateDurationTime) {
+            // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
+            this.$$phaseOffsetCollector.collect({
+                stateDurationTime: stateDurationTime,
+                carrierDetail: this.$$currentData.carrierDetail
+            });
+        };
+
+        RxStateMachineManager.prototype.$$handlerGuard = function (stateDurationTime) {
+            var
+                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
+                bestQualityIndex
+            ;
+
+            // code below stores information about quality of incoming packets in the real time
+            this.$$guardPowerCollector.collect(powerDecibel);
+            if (this.$$signalPowerCollector.hasAtLeastItem()) {
+                this.$$signalPowerCollector.finalize();
+            }
+
+            // find best signal sample and add to current packet
+            if (this.$$dataSymbol.length > 0) {
+                bestQualityIndex = Util.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
+                this.$$dataPacket.push(
+                    this.$$dataSymbol[bestQualityIndex].carrierDetail
+                );
+                if (this.$$isCurrentSymbolSyncPreamble()) {
+                    this.$$phaseCorrectionUpdateHandler(this.$$channelIndex, this.$$dataSymbol[bestQualityIndex].carrierDetail);
+                }
+                this.$$dataSymbol = [];
+            }
+        };
+
+        RxStateMachineManager.prototype.$$handlerError = function (stateDurationTime) {
+            // nothing much here - this state will automatically transit to idle when pilot signal will be gone
+        };
+
+        RxStateMachineManager.prototype.$$preparePacket = function (dataPacket) {
+            var i, j, result, ofdmList, carrierDetail;
+
+            result = [];
+            for (i = 0; i < dataPacket.length; i++) {
+                if (i === 0 && this.$$syncPreamble) {
+                    // when syncPreamble is true then first burst is used only for phase
+                    // alignment - we can simply omit it in the final packet
+                    continue;
+                }
+                carrierDetail = dataPacket[i];
+                ofdmList = [];
+                for (j = 0; j < carrierDetail.length; j++) {
+                    ofdmList.push(
+                        MathUtil.round(carrierDetail[j].phase * this.$$pskSize) % this.$$pskSize
+                    );
+                }
+                result.push(ofdmList);
+            }
+
+            return result;
+        };
+
+        RxStateMachineManager.prototype.$$isCurrentSymbolSyncPreamble = function () {
+            return this.$$syncPreamble && this.$$dataPacket.length === 1;
+        };
+
+        RxStateMachineManager.prototype.$$isInputReallyConnected = function () {
+            return this.$$currentData.pilotSignal.powerDecibel !== DefaultConfig.MINIMUM_POWER_DECIBEL;
+        };
+
+        RxStateMachineManager.prototype.$$isPilotSignalPresent = function () {
+            return this.$$currentData.pilotSignal.powerDecibel > this.$$powerThreshold;
+        };
+
+        RxStateMachineManager.prototype.receive = function (carrierDetail, time) {
+            var state;
+
+            // grab current data, this will be available at all handlers that will be called back by $$stateMachine
+            this.$$currentData = {
+                pilotSignal: carrierDetail[RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX],  // alias for pilot
+                carrierDetail: carrierDetail
+            };
+
+            if (this.$$isInputReallyConnected()) {
+                state = this.$$stateMachine.getState(this.$$isPilotSignalPresent(), time);
+            } else {
+                state = ReceiveAdapterState.NO_INPUT;
+                this.reset();
+            }
 
             return {
-                blockSampleSize: c.blockSampleSize,
-                blockTime: c.blockTime,
-                blockRealTime: c.blockRealTime,
-                load: c.load
+                state: state,
+                // TODO clean that mess below, move data to some dedicated fields in return object
+                power: (
+                    '<br/>' +
+                    'averageIdlePower: ' + MathUtil.round(this.$$averageIdlePowerCollector.getLastFinalizedResult() * 100) / 100 + '<br/>' +
+                    'averageFirstSyncPower: ' + MathUtil.round(this.$$averageFirstSyncPowerCollector.getLastFinalizedResult() * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;delta: ' + MathUtil.round((this.$$averageFirstSyncPowerCollector.getLastFinalizedResult() - this.$$averageIdlePowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;powerThreshold: ' + MathUtil.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
+                    'minGuardPower: ' + MathUtil.round(this.$$guardPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$guardPowerCollector.getLastFinalizedSize() + '<br/>' +
+                    'maxSignalPower: ' + MathUtil.round(this.$$signalPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$signalPowerCollector.getLastFinalizedSize() + '<br/>' +
+                    '&nbsp;&nbsp;&nbsp;delta: ' + MathUtil.round((this.$$signalPowerCollector.getLastFinalizedResult() - this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
+                    '&nbsp;&nbsp;&nbsp;idealPowerThreshold: ' + MathUtil.round(0.5 * (this.$$signalPowerCollector.getLastFinalizedResult() + this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>'
+                )
             };
         };
 
-        AbstractChannelManager.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
-            var 
-                c = this.$$cpuLoadData,
-                blockRealTime, 
-                blockTime;
+        return RxStateMachineManager;
+    }
 
-            blockRealTime = endTime - beginTime;
-            blockTime = blockSampleSize / ActiveAudioContext.getSampleRate();
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('PhysicalLayerAdapter.SignalPowerCollectorBuilder', _SignalPowerCollectorBuilder);
+
+    _SignalPowerCollectorBuilder.$inject = [
+        'PhysicalLayerAdapter.SignalPowerCollector'
+    ];
+
+    function _SignalPowerCollectorBuilder(
+        SignalPowerCollector
+    ) {
+
+        function build() {
+            return new SignalPowerCollector();
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayerAdapter.SignalPowerCollector', _SignalPowerCollector);
+
+    _SignalPowerCollector.$inject = [
+        'Common.AbstractValueCollector',
+        'Common.MathUtil'
+    ];
+
+    function _SignalPowerCollector(
+        AbstractValueCollector,
+        MathUtil
+    ) {
+        var SignalPowerCollector;
+
+        SignalPowerCollector = function () {
+            AbstractValueCollector.apply(this, arguments);
+        };
+        
+        SignalPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
+        SignalPowerCollector.prototype.constructor = SignalPowerCollector;
+
+        SignalPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
+
+        SignalPowerCollector.prototype.$$finalize = function () {
+            if (this.$$valueList.length === 0) {
+                throw SignalPowerCollector.EMPTY_LIST_EXCEPTION;
+            }
             
-            c.blockSampleSize = blockSampleSize;
-            c.blockTime = blockTime;
-            c.blockRealTime = blockRealTime;
-            c.load = blockRealTime / blockTime;
+            return MathUtil.maxInArray(this.$$valueList);
         };
 
-        return AbstractChannelManager;
+        return SignalPowerCollector;
     }
 
 })();
@@ -7637,6 +9149,62 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
         };
 
         return ChannelReceive;
+    }
+
+})();
+
+// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('PhysicalLayer.AbstractChannelManager', _AbstractChannelManager);
+
+    _AbstractChannelManager.$inject = [
+        'Audio.ActiveAudioContext'
+    ];
+
+    function _AbstractChannelManager(
+        ActiveAudioContext
+    ) {
+        var AbstractChannelManager;
+
+        AbstractChannelManager = function () {
+            this.$$cpuLoadData = {
+                blockSampleSize: null,
+                blockTime: null,
+                blockRealTime: null,
+                load: null
+            };
+        };
+
+        AbstractChannelManager.prototype.getCpuLoadData = function () {
+            var c = this.$$cpuLoadData;
+
+            return {
+                blockSampleSize: c.blockSampleSize,
+                blockTime: c.blockTime,
+                blockRealTime: c.blockRealTime,
+                load: c.load
+            };
+        };
+
+        AbstractChannelManager.prototype.$$computeCpuLoadData = function (beginTime, endTime, blockSampleSize) {
+            var 
+                c = this.$$cpuLoadData,
+                blockRealTime, 
+                blockTime;
+
+            blockRealTime = endTime - beginTime;
+            blockTime = blockSampleSize / ActiveAudioContext.getSampleRate();
+            
+            c.blockSampleSize = blockSampleSize;
+            c.blockTime = blockTime;
+            c.blockRealTime = blockRealTime;
+            c.load = blockRealTime / blockTime;
+        };
+
+        return AbstractChannelManager;
     }
 
 })();
@@ -8205,1574 +9773,6 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
         };
 
         return RxHandler;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Common.MathUtil', _MathUtil);
-
-    _MathUtil.$inject = [];
-
-    function _MathUtil() {
-
-        function abs(v) {
-            return Math.abs(v);
-        }
-
-        function asin(v) {
-            return Math.asin(v);
-        }
-
-        function sqrt(v) {
-            return Math.sqrt(v);
-        }
-
-        function round(v) {
-            return Math.round(v);
-        }
-
-        function random() {
-            return Math.random();
-        }
-
-        function floor(v) {
-            return Math.floor(v);
-        }
-
-        function sin(v) {
-            return Math.sin(v);
-        }
-
-        function cos(v) {
-            return Math.cos(v);
-        }
-
-        function log(v) {
-            return Math.log(v);
-        }
-
-        function minInArray(v) {
-            return Math.min.apply(null, v);
-        }
-
-        function maxInArray(v) {
-            return Math.max.apply(null, v);
-        }
-
-        return {
-            LN10: Math.LN10,
-            HALF_PI: 0.5 * Math.PI,
-            TWO_PI: 2 * Math.PI,
-            PI: Math.PI,
-            abs: abs,
-            floor: floor,
-            asin: asin,
-            sqrt: sqrt,
-            round: round,
-            random: random,
-            sin: sin,
-            cos: cos,
-            log: log,
-            minInArray: minInArray,
-            maxInArray: maxInArray
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Common.SimplePromiseBuilder', _SimplePromiseBuilder);
-
-    _SimplePromiseBuilder.$inject = [
-        'Common.SimplePromise'
-    ];
-
-    function _SimplePromiseBuilder(
-        SimplePromise
-    ) {
-
-        function build() {
-            return new SimplePromise();
-        }
-
-        function buildFromList(list) {
-            var i, promise, thenCount, catchCount;
-
-            promise = build();
-            thenCount = 0;
-            catchCount = 0;
-            for (i = 0; i < list.length; i++) {
-                list[i]
-                    .then(function () {
-                        thenCount++;
-                    })
-                    .catch(function () {
-                        catchCount++;
-                    })
-                    .finally(function () {
-                        if (thenCount + catchCount === list.length) {
-                            if (catchCount === 0) {
-                                promise.resolve();
-                            } else {
-                                promise.reject();
-                            }
-                        }
-                    });
-            }
-
-            return promise;
-        }
-
-        return {
-            build: build,
-            buildFromList: buildFromList
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('Common.SimplePromise', _SimplePromise);
-
-    _SimplePromise.$inject = [];
-
-    function _SimplePromise() {
-        var SimplePromise;
-
-        SimplePromise = function () {
-            this.$$state = null;
-            this.$$value = undefined;
-            this.$$then = null;
-            this.$$catch = null;
-            this.$$finally = null;
-        };
-
-        SimplePromise.$$STATE_RESOLVE = 0;
-        SimplePromise.$$STATE_REJECT = 1;
-
-        SimplePromise.prototype.$$callbackInvoke = function () {
-            switch (this.$$state) {
-                case SimplePromise.$$STATE_RESOLVE:
-                    if (this.$$then) {
-                        this.$$then(this.$$value);
-                        this.$$then = null;
-                    }
-                    if (this.$$finally) {
-                        this.$$finally(this.$$value);
-                        this.$$finally = null;
-                    }
-                    break;
-                case SimplePromise.$$STATE_REJECT:
-                    if (this.$$catch) {
-                        this.$$catch(this.$$value);
-                        this.$$catch = null;
-                    }
-                    if (this.$$finally) {
-                        this.$$finally(this.$$value);
-                        this.$$finally = null;
-                    }
-                    break;
-            }
-        };
-
-        SimplePromise.prototype.resolve = function (value) {
-            if (this.$$state !== null) {
-                return;
-            }
-
-            this.$$state = SimplePromise.$$STATE_RESOLVE;
-            this.$$value = value;
-            this.$$callbackInvoke();
-        };
-
-        SimplePromise.prototype.reject = function (value) {
-            if (this.$$state !== null) {
-                return;
-            }
-
-            this.$$state = SimplePromise.$$STATE_REJECT;
-            this.$$value = value;
-            this.$$callbackInvoke();
-        };
-
-        SimplePromise.prototype.then = function (callback) {
-            if (typeof callback === 'function') {
-                this.$$then = callback;
-            }
-            this.$$callbackInvoke();
-            return this;
-        };
-
-        SimplePromise.prototype.catch = function (callback) {
-            if (typeof callback === 'function') {
-                this.$$catch = callback;
-            }
-            this.$$callbackInvoke();
-            return this;
-        };
-
-        SimplePromise.prototype.finally = function (callback) {
-            if (typeof callback === 'function') {
-                this.$$finally = callback;
-            }
-            this.$$callbackInvoke();
-            return this;
-        };
-
-        return SimplePromise;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Common.StopwatchBuilder', _StopwatchBuilder);
-
-    _StopwatchBuilder.$inject = [
-        'Common.Stopwatch'
-    ];
-
-    function _StopwatchBuilder(
-        Stopwatch
-    ) {
-
-        function build() {
-            return new Stopwatch();
-        }
-
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('Common.Stopwatch', _Stopwatch);
-
-    _Stopwatch.$inject = [
-    ];
-
-    function _Stopwatch(
-    ) {
-        var Stopwatch;
-
-        Stopwatch = function () {
-            this.$$running = false;
-            this.$$timeStart = undefined;
-            this.$$timeEnd = undefined;
-        };
-
-        Stopwatch.STOPWATCH_ALREADY_STARTED_EXCEPTION = 'Stopwatch already started';
-        Stopwatch.STOPWATCH_ALREADY_STOPPED_EXCEPTION = 'Stopwatch already stopped';
-        Stopwatch.RESET_BEFORE_CALLING_START_EXCEPTION = 'Reset stopwatch before calling start() again';
-        Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION = 'stopwatch was not started';
-
-        Stopwatch.$$_MILLISECOND_IN_SECOND = 1000;
-
-        Stopwatch.prototype.reset = function () {
-            this.$$running = false;
-            this.$$timeStart = undefined;
-            this.$$timeEnd = undefined;
-
-            return this;
-        };
-
-        Stopwatch.prototype.start = function () {
-            if (this.$$running) {
-                throw Stopwatch.STOPWATCH_ALREADY_STARTED_EXCEPTION;
-            }
-
-            if (this.$$timeStart && this.$$timeEnd) {
-                throw Stopwatch.RESET_BEFORE_CALLING_START_EXCEPTION;
-            }
-
-            this.$$timeStart = new Date();
-            this.$$running = true;
-
-            return this;
-        };
-
-        Stopwatch.prototype.stop = function () {
-            if (!this.$$timeStart) {
-                throw Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION;
-            }
-
-            if (!this.$$running) {
-                throw Stopwatch.STOPWATCH_ALREADY_STOPPED_EXCEPTION;
-            }
-
-            this.$$timeEnd = new Date();
-            this.$$running = false;
-
-            return this;
-        };
-
-        Stopwatch.prototype.getDuration = function (inSeconds) {
-            var
-                millisecondDifference,
-                now = new Date();
-
-            if (!this.$$timeStart) {
-                throw Stopwatch.STOPWATCH_WAS_NOT_STARTED_EXCEPTION;
-            }
-
-            if (this.$$running) {
-                millisecondDifference = now.getTime() - this.$$timeStart.getTime();
-            } else {
-                millisecondDifference = this.$$timeEnd.getTime() - this.$$timeStart.getTime();
-            }
-
-            return inSeconds ? millisecondDifference / Stopwatch.$$_MILLISECOND_IN_SECOND : millisecondDifference;
-        };
-
-        return Stopwatch;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Common.WindowFunction', _WindowFunction);
-
-    _WindowFunction.$inject = [
-        'Common.MathUtil'
-    ];
-
-    function _WindowFunction(
-        MathUtil
-    ) {
-
-        function blackmanNuttall(n, N) {
-            return 0.3635819
-                - 0.4891775 * MathUtil.cos(2 * MathUtil.PI * n / (N - 1))
-                + 0.1365995 * MathUtil.cos(4 * MathUtil.PI * n / (N - 1))
-                - 0.0106411 * MathUtil.cos(6 * MathUtil.PI * n / (N - 1));
-        }
-
-        return {
-            blackmanNuttall: blackmanNuttall
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.GuardPowerCollectorBuilder', _GuardPowerCollectorBuilder);
-
-    _GuardPowerCollectorBuilder.$inject = [
-        'PhysicalLayerAdapter.GuardPowerCollector'
-    ];
-
-    function _GuardPowerCollectorBuilder(
-        GuardPowerCollector
-    ) {
-
-        function build() {
-            return new GuardPowerCollector();
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.GuardPowerCollector', _GuardPowerCollector);
-
-    _GuardPowerCollector.$inject = [
-        'Common.AbstractValueCollector',
-        'Common.MathUtil'
-    ];
-
-    function _GuardPowerCollector(
-        AbstractValueCollector,
-        MathUtil
-    ) {
-        var GuardPowerCollector;
-
-        GuardPowerCollector = function () {
-            AbstractValueCollector.apply(this, arguments);
-        };
-
-        GuardPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
-        GuardPowerCollector.prototype.constructor = GuardPowerCollector;
-
-        GuardPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize GuardPowerCollector without any samples collected';
-
-        GuardPowerCollector.prototype.$$finalize = function () {
-            if (this.$$valueList.length === 0) {
-                throw GuardPowerCollector.EMPTY_LIST_EXCEPTION;
-            }
-            
-            return MathUtil.minInArray(this.$$valueList);
-        };
-
-        return GuardPowerCollector;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.PhaseOffsetCollectorBuilder', _PhaseOffsetCollectorBuilder);
-
-    _PhaseOffsetCollectorBuilder.$inject = [
-        'PhysicalLayerAdapter.PhaseOffsetCollector'
-    ];
-
-    function _PhaseOffsetCollectorBuilder(
-        PhaseOffsetCollector
-    ) {
-
-        function build() {
-            return new PhaseOffsetCollector();
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.PhaseOffsetCollector', _PhaseOffsetCollector);
-
-    _PhaseOffsetCollector.$inject = [
-        'Common.AbstractValueCollector',
-        'Common.MathUtil'
-    ];
-
-    function _PhaseOffsetCollector(
-        AbstractValueCollector,
-        MathUtil
-    ) {
-        var PhaseOffsetCollector;
-
-        PhaseOffsetCollector = function () {
-            AbstractValueCollector.apply(this, arguments);
-        };
-
-        PhaseOffsetCollector.prototype = Object.create(AbstractValueCollector.prototype);
-        PhaseOffsetCollector.prototype.constructor = PhaseOffsetCollector;
-
-        PhaseOffsetCollector.prototype.$$finalize = function () {
-            var
-                i, indexA, indexB, drift,
-                str = '';
-
-            if (this.$$valueList.length === 0) {
-                return null;
-            }
-
-            // TODO rewrite this temporary code
-            for (i = 0; i < this.$$valueList.length; i++) {
-                str += (
-                    (MathUtil.round(this.$$valueList[i].time * 1000) / 1000) + ' ' +
-                    (MathUtil.round(this.$$valueList[i].phase * 1000) / 1000) + ' | '
-                );
-            }
-
-            indexA = MathUtil.round(0.43 * this.$$valueList.length);
-            indexB = MathUtil.round(0.57 * this.$$valueList.length);
-            indexB = indexB >= this.$$valueList.length ? this.$$valueList.length - 1 : indexB;
-            drift = 0;
-            if (indexA !== indexB && indexA < indexB) {
-                console.log('phase history indexA', this.$$valueList[indexA].time, this.$$valueList[indexA].phase);
-                console.log('phase history indexB', this.$$valueList[indexB].time, this.$$valueList[indexB].phase);
-                drift = -(this.$$valueList[indexB].phase - this.$$valueList[indexA].phase) / (this.$$valueList[indexB].time - this.$$valueList[indexA].time);
-                console.log('phase history drift', drift);
-            }
-
-            return drift;
-        };
-
-        PhaseOffsetCollector.prototype.collect = function (value) {
-            // TODO rewrite this temporary code
-            this.$$valueList.push({
-                time: value.stateDurationTime,
-                phase: value.carrierDetail[0].phase      // TODO pass all ofdm phases here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            });                                          // TODO check also powerThreshold to avoid fine-tune on null OFDMs
-        };
-
-        return PhaseOffsetCollector;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.RxStateMachineBuilder', _RxStateMachineBuilder);
-
-    _RxStateMachineBuilder.$inject = [
-        'PhysicalLayerAdapter.RxStateMachine'
-    ];
-
-    function _RxStateMachineBuilder(
-        RxStateMachine
-    ) {
-
-        function build(handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
-            return new RxStateMachine(
-                handlerIdleInit,
-                handlerFirstSyncWait,
-                handlerFirstSync,
-                handlerFatalError,
-                handlerIdle,
-                handlerSymbol,
-                handlerSync,
-                handlerGuard,
-                handlerError
-            );
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.RxStateMachine', _RxStateMachine);
-
-    _RxStateMachine.$inject = [
-        'PhysicalLayerAdapter.ReceiveAdapterState'
-    ];
-
-    function _RxStateMachine(
-        ReceiveAdapterState
-    ) {
-        var RxStateMachine;
-
-        RxStateMachine = function (handlerIdleInit, handlerFirstSyncWait, handlerFirstSync, handlerFatalError, handlerIdle, handlerSymbol, handlerSync, handlerGuard, handlerError) {
-            this.$$stateHandler = {};
-            this.$$stateHandler[ReceiveAdapterState.IDLE_INIT] = handlerIdleInit;
-            this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC_WAIT] = handlerFirstSyncWait;
-            this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC] = handlerFirstSync;
-            this.$$stateHandler[ReceiveAdapterState.FATAL_ERROR] = handlerFatalError;
-            this.$$stateHandler[ReceiveAdapterState.IDLE] = handlerIdle;
-            this.$$stateHandler[ReceiveAdapterState.SYMBOL] = handlerSymbol;
-            this.$$stateHandler[ReceiveAdapterState.SYNC] = handlerSync;
-            this.$$stateHandler[ReceiveAdapterState.GUARD] = handlerGuard;
-            this.$$stateHandler[ReceiveAdapterState.ERROR] = handlerError;
-            this.$$symbolStateMaxDurationTime = null;
-            this.$$guardStateMaxDurationTime = null;
-            this.$$syncStateMaxDurationTime = null;
-
-            this.$$state = null;
-            this.$$stateDurationTime = null;
-            this.$$stateBeginTime = null;
-            this.$$resetFlag = true;
-        };
-
-        RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION = 'Please set all max duration times first';
-
-        RxStateMachine.prototype.scheduleReset = function () {
-            this.$$resetFlag = true;
-        };
-
-        RxStateMachine.prototype.$$changeState = function (newState, time) {
-            if (newState !== null) {
-                this.$$state = newState;
-                this.$$stateBeginTime = time;
-            } else {
-                this.$$stateDurationTime = time - this.$$stateBeginTime;
-            }
-        };
-
-        RxStateMachine.prototype.$$handlerIdleInit = function (pilotSignalPresent, time) {
-            var newState;
-
-            this.$$changeState(null, time);
-
-            // run external handler
-            newState = this.$$stateHandler[ReceiveAdapterState.IDLE_INIT](this.$$stateDurationTime);
-
-            if (newState) {
-                this.$$changeState(newState, time);
-                return false;
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerFirstSyncWait = function (pilotSignalPresent, time) {
-            if (pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.FIRST_SYNC, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC_WAIT](this.$$stateDurationTime);
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerFirstSync = function (pilotSignalPresent, time) {
-            var newState;
-
-            this.$$changeState(null, time);
-
-            // run external handler
-            newState = this.$$stateHandler[ReceiveAdapterState.FIRST_SYNC](this.$$stateDurationTime);
-
-            if (newState) {
-                this.$$changeState(newState, time);
-                return false;
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerFatalError = function (pilotSignalPresent, time) {
-            var newState;
-
-            this.$$changeState(null, time);
-
-            // run external handler
-            newState = this.$$stateHandler[ReceiveAdapterState.FATAL_ERROR](this.$$stateDurationTime);
-
-            if (newState) {
-                this.$$changeState(newState, time);
-                return false;
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerIdle = function (pilotSignalPresent, time) {
-            if (pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.SYMBOL, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.IDLE](this.$$stateDurationTime);
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerSymbol = function (pilotSignalPresent, time) {
-            if (!pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.GUARD, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.SYMBOL](this.$$stateDurationTime);
-
-                if (this.$$stateDurationTime > this.$$symbolStateMaxDurationTime) {
-                    this.$$changeState(ReceiveAdapterState.SYNC, time);
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerSync = function (pilotSignalPresent, time) {
-            if (!pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.IDLE, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.SYNC](this.$$stateDurationTime);
-
-                if (this.$$stateDurationTime > this.$$syncStateMaxDurationTime) {
-                    this.$$changeState(ReceiveAdapterState.ERROR, time);
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerGuard = function (pilotSignalPresent, time) {
-            if (pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.SYMBOL, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.GUARD](this.$$stateDurationTime);
-                
-                if (this.$$stateDurationTime > this.$$guardStateMaxDurationTime) {
-                    this.$$changeState(ReceiveAdapterState.IDLE, time);
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.$$handlerError = function (pilotSignalPresent, time) {
-            if (!pilotSignalPresent) {
-                this.$$changeState(ReceiveAdapterState.IDLE, time);
-                return false;
-            } else {
-                this.$$changeState(null, time);
-
-                // run external handler
-                this.$$stateHandler[ReceiveAdapterState.ERROR](this.$$stateDurationTime);
-            }
-
-            return true;
-        };
-
-        RxStateMachine.prototype.setGuardStateMaxDurationTime = function (time) {
-            this.$$guardStateMaxDurationTime = time;
-        };
-
-        RxStateMachine.prototype.setSymbolStateMaxDurationTime = function (time) {
-            this.$$symbolStateMaxDurationTime = time;
-        };
-
-        RxStateMachine.prototype.setSyncStateMaxDurationTime = function (time) {
-            this.$$syncStateMaxDurationTime = time;
-        };
-
-        RxStateMachine.prototype.getState = function (pilotSignalPresent, time) {
-            var
-                S = ReceiveAdapterState,
-                finished
-            ;
-
-            if (this.$$resetFlag) {
-                this.$$changeState(S.IDLE_INIT, time);
-                this.$$resetFlag = false;
-            }
-
-            if (
-                this.$$guardStateMaxDurationTime === null ||
-                this.$$symbolStateMaxDurationTime === null ||
-                this.$$syncStateMaxDurationTime === null
-            ) {
-                throw RxStateMachine.SET_ALL_MAX_DURATION_TIMES_FIRST_EXCEPTION;
-            }
-
-            while (true) {
-                switch (this.$$state) {
-                    case S.IDLE_INIT:
-                        finished = this.$$handlerIdleInit(pilotSignalPresent, time);
-                        break;
-                    case S.FIRST_SYNC_WAIT:
-                        finished = this.$$handlerFirstSyncWait(pilotSignalPresent, time);
-                        break;
-                    case S.FIRST_SYNC:
-                        finished = this.$$handlerFirstSync(pilotSignalPresent, time);
-                        break;
-                    case S.FATAL_ERROR:
-                        finished = this.$$handlerFatalError(pilotSignalPresent, time);
-                        break;
-                    case S.IDLE:
-                        finished = this.$$handlerIdle(pilotSignalPresent, time);
-                        break;
-                    case S.SYMBOL:
-                        finished = this.$$handlerSymbol(pilotSignalPresent, time);
-                        break;
-                    case S.SYNC:
-                        finished = this.$$handlerSync(pilotSignalPresent, time);
-                        break;
-                    case S.GUARD:
-                        finished = this.$$handlerGuard(pilotSignalPresent, time);
-                        break;
-                    case S.ERROR:
-                        finished = this.$$handlerError(pilotSignalPresent, time);
-                        break;
-                }
-
-                if (finished) {
-                    break;
-                }
-            }
-            return this.$$state;
-        };
-
-        return RxStateMachine;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.RxStateMachineManagerBuilder', _RxStateMachineManagerBuilder);
-
-    _RxStateMachineManagerBuilder.$inject = [
-        'PhysicalLayerAdapter.RxStateMachineManager'
-    ];
-
-    function _RxStateMachineManagerBuilder(
-        RxStateMachineManager
-    ) {
-
-        function build(channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
-            return new RxStateMachineManager(
-                channelIndex,
-                packetReceiveHandler, 
-                frequencyUpdateHandler, 
-                phaseCorrectionUpdateHandler
-            );
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.RxStateMachineManager', _RxStateMachineManager);
-
-    _RxStateMachineManager.$inject = [
-        'Common.MathUtil',
-        'Common.Util',
-        'Common.AverageValueCollectorBuilder',
-        'PhysicalLayer.DefaultConfig',
-        'PhysicalLayerAdapter.SignalPowerCollectorBuilder',
-        'PhysicalLayerAdapter.GuardPowerCollectorBuilder',
-        'PhysicalLayerAdapter.PhaseOffsetCollectorBuilder',
-        'PhysicalLayerAdapter.RxStateMachineBuilder',
-        'PhysicalLayerAdapter.ReceiveAdapterState'
-    ];
-
-    function _RxStateMachineManager(
-        MathUtil,
-        Util,
-        AverageValueCollectorBuilder,
-        DefaultConfig,
-        SignalPowerCollectorBuilder,
-        GuardPowerCollectorBuilder,
-        PhaseOffsetCollectorBuilder,
-        RxStateMachineBuilder,
-        ReceiveAdapterState
-    ) {
-        var RxStateMachineManager;
-
-        RxStateMachineManager = function (channelIndex, packetReceiveHandler, frequencyUpdateHandler, phaseCorrectionUpdateHandler) {
-            this.$$channelIndex = channelIndex;
-
-            this.$$packetReceiveHandler = packetReceiveHandler;
-            this.$$frequencyUpdateHandler = frequencyUpdateHandler;
-            this.$$phaseCorrectionUpdateHandler = phaseCorrectionUpdateHandler;
-
-            this.$$stateMachine = RxStateMachineBuilder.build(
-                this.$$handlerIdleInit.bind(this),
-                this.$$handlerFirstSyncWait.bind(this),
-                this.$$handlerFirstSync.bind(this),
-                this.$$handlerFatalError.bind(this),
-                this.$$handlerIdle.bind(this),
-                this.$$handlerSymbol.bind(this),
-                this.$$handlerSync.bind(this),
-                this.$$handlerGuard.bind(this),
-                this.$$handlerError.bind(this)
-            );
-
-            this.$$sampleCollectionTimeIdleInitState = null;
-            this.$$sampleCollectionTimeFirstSyncState = null;
-            this.$$syncPreamble = null;
-            this.$$pskSize = null;
-
-            this.$$averageIdlePowerCollector = AverageValueCollectorBuilder.build();
-            this.$$averageFirstSyncPowerCollector = AverageValueCollectorBuilder.build();
-            this.$$signalPowerCollector = SignalPowerCollectorBuilder.build();
-            this.$$guardPowerCollector = GuardPowerCollectorBuilder.build();
-            this.$$phaseOffsetCollector = PhaseOffsetCollectorBuilder.build();
-
-            this.$$resetInternal();
-        };
-
-        RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD = 0;      // after init we need to listen to noise so this threshold should prevent catching all possible signals
-        RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE = 10; // decibels above average idle power (ambient noise) in order to catch first, even weak, signal - it means that you should keep this value low
-        RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX = 0;
-        RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR = 0.5;  // 0.0 -> closer to average 'idle' power, 1.0 -> closer to average 'first sync' power
-
-        RxStateMachineManager.prototype.$$resetInternal = function () {
-            this.$$averageIdlePowerCollector.clearAll();
-            this.$$averageFirstSyncPowerCollector.clearAll();
-            this.$$signalPowerCollector.clearAll();
-            this.$$guardPowerCollector.clearAll();
-            this.$$phaseOffsetCollector.clearAll();
-
-            this.$$powerThreshold = RxStateMachineManager.$$_INITIAL_POWER_THRESHOLD;
-
-            this.$$currentData = null;
-            this.$$dataPacket = [];
-            this.$$dataSymbol = [];
-        };
-
-        RxStateMachineManager.prototype.reset = function () {
-            this.$$resetInternal();
-            this.$$stateMachine.scheduleReset();
-        };
-
-        RxStateMachineManager.prototype.setSymbolStateMaxDurationTime = function (value) {
-            this.$$stateMachine.setSymbolStateMaxDurationTime(value);
-        };
-
-        RxStateMachineManager.prototype.setGuardStateMaxDurationTime  = function (value) {
-            this.$$stateMachine.setGuardStateMaxDurationTime(value);
-        };
-
-        RxStateMachineManager.prototype.setSyncStateMaxDurationTime = function (value) {
-            this.$$stateMachine.setSyncStateMaxDurationTime(value);
-        };
-
-        RxStateMachineManager.prototype.setSampleCollectionTimeIdleInitState = function (value) {
-            this.$$sampleCollectionTimeIdleInitState = value;
-        };
-
-        RxStateMachineManager.prototype.setSampleCollectionTimeFirstSyncState = function (value) {
-            this.$$sampleCollectionTimeFirstSyncState = value;
-        };
-
-        RxStateMachineManager.prototype.setSyncPreamble  = function (value) {
-            this.$$syncPreamble = value;
-        };
-
-        RxStateMachineManager.prototype.setPskSize  = function (value) {
-            this.$$pskSize = value;
-        };
-
-        RxStateMachineManager.prototype.$$handlerIdleInit = function (stateDurationTime) {
-            var
-                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
-                handlerResult = null
-            ;
-
-            if (stateDurationTime < this.$$sampleCollectionTimeIdleInitState) {
-                this.$$averageIdlePowerCollector.collect(powerDecibel);
-            } else {
-                try {
-                    // put first power threshold slightly above collected noise power to detect even weak signals
-                    this.$$powerThreshold = this.$$averageIdlePowerCollector.finalize() + RxStateMachineManager.$$_DECIBLES_ABOVE_AVERAGE_IDLE;
-                    handlerResult = ReceiveAdapterState.FIRST_SYNC_WAIT;
-                } catch (e) {
-                    handlerResult = ReceiveAdapterState.FATAL_ERROR;
-                }
-            }
-
-            return handlerResult;
-        };
-
-        RxStateMachineManager.prototype.$$handlerFirstSyncWait = function (stateDurationTime) {
-            // nothing much here - user needs to send 'Sync' signal on the other device, we can just wait...
-            return null;
-        };
-
-        RxStateMachineManager.prototype.$$handlerFirstSync = function (stateDurationTime) {
-            var 
-                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
-                averageFirstSyncPower, averageIdlePower, powerDifference
-            ;
-
-            // TODO refactor code block order - condition below happens actually at FIRST_SYNC state end
-            if (this.$$averageFirstSyncPowerCollector.getLastFinalizedResult()) {
-                // wait until signal will drop below threshold
-                if (powerDecibel < this.$$powerThreshold) {
-                    return ReceiveAdapterState.IDLE;
-                } else {
-                    return null;
-                }
-            }
-
-            // signal cannot be weaker than previously stored average idle noise... :)
-            if (powerDecibel <= this.$$averageIdlePowerCollector.getLastFinalizedResult()) {
-                return ReceiveAdapterState.FATAL_ERROR;
-            }
-            
-            if (stateDurationTime < this.$$sampleCollectionTimeFirstSyncState) {
-                // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
-                this.$$phaseOffsetCollector.collect({
-                    stateDurationTime: stateDurationTime,
-                    carrierDetail: this.$$currentData.carrierDetail
-                });
-
-                // collect desired signal power history and later compute average signal power and power threshold
-                this.$$averageFirstSyncPowerCollector.collect(powerDecibel);
-            } else {
-                try {
-                    averageFirstSyncPower = this.$$averageFirstSyncPowerCollector.finalize();    // this line may trow error
-                    averageIdlePower = this.$$averageIdlePowerCollector.getLastFinalizedResult();
-                    powerDifference = averageFirstSyncPower - averageIdlePower;
-
-                    // put threshold somewhere (depending on unit factor) between average idle power and average first sync power
-                    this.$$powerThreshold = averageIdlePower + RxStateMachineManager.$$_AVERAGE_POWER_UNIT_FACTOR * powerDifference;
-                } catch (e) {
-                    return ReceiveAdapterState.FATAL_ERROR;
-                }
-            }
-        };
-
-        RxStateMachineManager.prototype.$$handlerFatalError = function (stateDurationTime) {
-            // nothing much here - only way to escape from this state is to reset Receive Adapter
-        };
-        
-        RxStateMachineManager.prototype.$$handlerIdle = function (stateDurationTime) {
-            // share collected packet with rest of the world
-            if (this.$$dataPacket.length > 0) {
-                this.$$packetReceiveHandler(this.$$channelIndex, this.$$preparePacket(this.$$dataPacket));
-                this.$$dataPacket.length = 0;
-            }
-
-            // fine-tune frequency offsets basing on phase history if any
-            if (this.$$phaseOffsetCollector.hasAtLeastItem()) {
-                this.$$frequencyUpdateHandler(this.$$channelIndex, this.$$phaseOffsetCollector.finalize());
-            }
-
-            // clear collected guard history from last 'GUARD' state because it was followed
-            // directly by IDLE state so technically it wasn't GUARD state at all
-            this.$$guardPowerCollector.clearList();
-        };
-
-        RxStateMachineManager.prototype.$$handlerSymbol = function (stateDurationTime) {
-            var powerDecibel = this.$$currentData.pilotSignal.powerDecibel;
-
-            // code below stores information about quality of incoming packets in the real time
-            this.$$signalPowerCollector.collect(powerDecibel);
-            if (this.$$guardPowerCollector.hasAtLeastItem()) {
-                this.$$guardPowerCollector.finalize();
-            }
-        
-            // add current signal sample to list
-            this.$$dataSymbol.push(this.$$currentData);
-        };
-
-        RxStateMachineManager.prototype.$$handlerSync = function (stateDurationTime) {
-            // collect phase history for all OFDM subcarriers - it will be later used for fine-tune frequency offsets
-            this.$$phaseOffsetCollector.collect({
-                stateDurationTime: stateDurationTime,
-                carrierDetail: this.$$currentData.carrierDetail
-            });
-        };
-
-        RxStateMachineManager.prototype.$$handlerGuard = function (stateDurationTime) {
-            var
-                powerDecibel = this.$$currentData.pilotSignal.powerDecibel,
-                bestQualityIndex
-            ;
-
-            // code below stores information about quality of incoming packets in the real time
-            this.$$guardPowerCollector.collect(powerDecibel);
-            if (this.$$signalPowerCollector.hasAtLeastItem()) {
-                this.$$signalPowerCollector.finalize();
-            }
-
-            // find best signal sample and add to current packet
-            if (this.$$dataSymbol.length > 0) {
-                bestQualityIndex = Util.findMaxValueIndex(this.$$dataSymbol, 'pilotSignal.powerDecibel');
-                this.$$dataPacket.push(
-                    this.$$dataSymbol[bestQualityIndex].carrierDetail
-                );
-                if (this.$$isCurrentSymbolSyncPreamble()) {
-                    this.$$phaseCorrectionUpdateHandler(this.$$channelIndex, this.$$dataSymbol[bestQualityIndex].carrierDetail);
-                }
-                this.$$dataSymbol = [];
-            }
-        };
-
-        RxStateMachineManager.prototype.$$handlerError = function (stateDurationTime) {
-            // nothing much here - this state will automatically transit to idle when pilot signal will be gone
-        };
-
-        RxStateMachineManager.prototype.$$preparePacket = function (dataPacket) {
-            var i, j, result, ofdmList, carrierDetail;
-
-            result = [];
-            for (i = 0; i < dataPacket.length; i++) {
-                if (i === 0 && this.$$syncPreamble) {
-                    // when syncPreamble is true then first burst is used only for phase
-                    // alignment - we can simply omit it in the final packet
-                    continue;
-                }
-                carrierDetail = dataPacket[i];
-                ofdmList = [];
-                for (j = 0; j < carrierDetail.length; j++) {
-                    ofdmList.push(
-                        MathUtil.round(carrierDetail[j].phase * this.$$pskSize) % this.$$pskSize
-                    );
-                }
-                result.push(ofdmList);
-            }
-
-            return result;
-        };
-
-        RxStateMachineManager.prototype.$$isCurrentSymbolSyncPreamble = function () {
-            return this.$$syncPreamble && this.$$dataPacket.length === 1;
-        };
-
-        RxStateMachineManager.prototype.$$isInputReallyConnected = function () {
-            return this.$$currentData.pilotSignal.powerDecibel !== DefaultConfig.MINIMUM_POWER_DECIBEL;
-        };
-
-        RxStateMachineManager.prototype.$$isPilotSignalPresent = function () {
-            return this.$$currentData.pilotSignal.powerDecibel > this.$$powerThreshold;
-        };
-
-        RxStateMachineManager.prototype.receive = function (carrierDetail, time) {
-            var state;
-
-            // grab current data, this will be available at all handlers that will be called back by $$stateMachine
-            this.$$currentData = {
-                pilotSignal: carrierDetail[RxStateMachineManager.$$_OFDM_PILOT_SIGNAL_INDEX],  // alias for pilot
-                carrierDetail: carrierDetail
-            };
-
-            if (this.$$isInputReallyConnected()) {
-                state = this.$$stateMachine.getState(this.$$isPilotSignalPresent(), time);
-            } else {
-                state = ReceiveAdapterState.NO_INPUT;
-                this.reset();
-            }
-
-            return {
-                state: state,
-                // TODO clean that mess below, move data to some dedicated fields in return object
-                power: (
-                    '<br/>' +
-                    'averageIdlePower: ' + MathUtil.round(this.$$averageIdlePowerCollector.getLastFinalizedResult() * 100) / 100 + '<br/>' +
-                    'averageFirstSyncPower: ' + MathUtil.round(this.$$averageFirstSyncPowerCollector.getLastFinalizedResult() * 100) / 100 + ' <br/>' +
-                    '&nbsp;&nbsp;&nbsp;delta: ' + MathUtil.round((this.$$averageFirstSyncPowerCollector.getLastFinalizedResult() - this.$$averageIdlePowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
-                    '&nbsp;&nbsp;&nbsp;powerThreshold: ' + MathUtil.round(this.$$powerThreshold * 100) / 100 + ' <br/>' +
-                    'minGuardPower: ' + MathUtil.round(this.$$guardPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$guardPowerCollector.getLastFinalizedSize() + '<br/>' +
-                    'maxSignalPower: ' + MathUtil.round(this.$$signalPowerCollector.getLastFinalizedResult() * 100) / 100 + ' sampleSize: ' + this.$$signalPowerCollector.getLastFinalizedSize() + '<br/>' +
-                    '&nbsp;&nbsp;&nbsp;delta: ' + MathUtil.round((this.$$signalPowerCollector.getLastFinalizedResult() - this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>' +
-                    '&nbsp;&nbsp;&nbsp;idealPowerThreshold: ' + MathUtil.round(0.5 * (this.$$signalPowerCollector.getLastFinalizedResult() + this.$$guardPowerCollector.getLastFinalizedResult()) * 100) / 100 + ' <br/>'
-                )
-            };
-        };
-
-        return RxStateMachineManager;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerAdapter.SignalPowerCollectorBuilder', _SignalPowerCollectorBuilder);
-
-    _SignalPowerCollectorBuilder.$inject = [
-        'PhysicalLayerAdapter.SignalPowerCollector'
-    ];
-
-    function _SignalPowerCollectorBuilder(
-        SignalPowerCollector
-    ) {
-
-        function build() {
-            return new SignalPowerCollector();
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerAdapter.SignalPowerCollector', _SignalPowerCollector);
-
-    _SignalPowerCollector.$inject = [
-        'Common.AbstractValueCollector',
-        'Common.MathUtil'
-    ];
-
-    function _SignalPowerCollector(
-        AbstractValueCollector,
-        MathUtil
-    ) {
-        var SignalPowerCollector;
-
-        SignalPowerCollector = function () {
-            AbstractValueCollector.apply(this, arguments);
-        };
-        
-        SignalPowerCollector.prototype = Object.create(AbstractValueCollector.prototype);
-        SignalPowerCollector.prototype.constructor = SignalPowerCollector;
-
-        SignalPowerCollector.EMPTY_LIST_EXCEPTION = 'Cannot finalize SignalPowerCollector without any samples collected';
-
-        SignalPowerCollector.prototype.$$finalize = function () {
-            if (this.$$valueList.length === 0) {
-                throw SignalPowerCollector.EMPTY_LIST_EXCEPTION;
-            }
-            
-            return MathUtil.maxInArray(this.$$valueList);
-        };
-
-        return SignalPowerCollector;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('PhysicalLayerCore.ReceiveMulticoreWorkerThread', _ReceiveMulticoreWorkerThread);
-
-    _ReceiveMulticoreWorkerThread.$inject = [];
-
-    function _ReceiveMulticoreWorkerThread() {
-
-        function $$getFormattedDevScriptList() {
-            var i, src, isLast, scriptList = [];
-
-            for (i = 0; i < AudioNetwork.devScriptList.length; i++) {
-                src = AudioNetwork.bootConfig.devScriptBaseUrl + AudioNetwork.devScriptList[i];
-                isLast = i === AudioNetwork.devScriptList.length - 1;
-                scriptList.push('    \'' + src + '\'' + (isLast ? '' : ',') + '\n');
-            }
-
-            return scriptList;
-        }
-
-        function $$getFormattedProdScriptList() {
-            var src, scriptList = [];
-
-            src = AudioNetwork.bootConfig.prodScriptBaseUrl + AudioNetwork.bootConfig.prodScriptName;
-            scriptList.push('    \'' + src + '\'' + '\n');
-
-            return scriptList;
-        }
-
-        function getJavaScriptCode() {
-            var js = '', scriptList;
-
-            switch (AudioNetwork.bootConfig.multicoreState) {
-                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_DEV_SCRIPT:
-                    scriptList = $$getFormattedDevScriptList();
-                    break;
-                case AudioNetwork.MULTICORE_STATE.ENABLED_USE_PROD_SCRIPT:
-                    scriptList = $$getFormattedProdScriptList();
-                    break;
-            }
-
-            js += 'self.importScripts(                                                                         ' + '\n';
-            js += scriptList.join('');
-            js += ');                                                                                          ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += 'var                                                                                         ' + '\n';
-            js += '    iAlias = AudioNetwork.Injector,                                                         ' + '\n';
-            js += '    ReceiveWorker = iAlias.resolve("PhysicalLayerCore.ReceiveWorker"),                      ' + '\n';
-            js += '    ReceiveMulticoreWorker = iAlias.resolve("PhysicalLayerCore.ReceiveMulticoreWorker"),    ' + '\n';
-            js += '    receiveWorker = undefined;                                                              ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += '// eval("console.log(\'eval inside thread test\');")                                        ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += 'self.onmessage = function(event) {                                                          ' + '\n';
-            js += '    var                                                                                     ' + '\n';
-            js += '        data = event.data,                                                                  ' + '\n';
-            js += '        messageIndex = data.length > 0 ? data[0] : null,                                    ' + '\n';
-            js += '        param = data.length > 0 ? data[1] : null,                                           ' + '\n';
-            js += '        promise;                                                                            ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += '    switch (messageIndex) {                                                                 ' + '\n';
-            js += '        case ReceiveMulticoreWorker.INITIALIZATION:                                         ' + '\n';
-            js += '            receiveWorker = new ReceiveWorker(param);                                       ' + '\n';
-            js += '            self.postMessage([                                                              ' + '\n';
-            js += '                ReceiveMulticoreWorker.INITIALIZATION_SUCCESS                               ' + '\n';
-            js += '            ]);                                                                             ' + '\n';
-            js += '            break;                                                                          ' + '\n';
-            js += '        case ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK:                                    ' + '\n';
-            js += '            promise = receiveWorker.handleSampleBlock(param);                               ' + '\n';
-            js += '            break;                                                                          ' + '\n';
-            js += '        case ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM:                                 ' + '\n';
-            js += '            promise = receiveWorker.computeCrazySineSum(param);                             ' + '\n';
-            js += '            break;                                                                          ' + '\n';
-            js += '    }                                                                                       ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += '    if (!promise) {                                                                         ' + '\n';
-            js += '        return;                                                                             ' + '\n';
-            js += '    }                                                                                       ' + '\n';
-            js += '                                                                                            ' + '\n';
-            js += '    promise                                                                                 ' + '\n';
-            js += '        .then(function (result) {                                                           ' + '\n';
-            js += '            self.postMessage([                                                              ' + '\n';
-            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS,         ' + '\n';
-            js += '                result                                                                      ' + '\n';
-            js += '            ]);                                                                             ' + '\n';
-            js += '        })                                                                                  ' + '\n';
-            js += '        .catch(function () {                                                                ' + '\n';
-            js += '            self.postMessage([                                                              ' + '\n';
-            js += '                messageIndex + ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL,            ' + '\n';
-            js += '                result                                                                      ' + '\n';
-            js += '            ]);                                                                             ' + '\n';
-            js += '        });                                                                                 ' + '\n';
-            js += '}                                                                                           ' + '\n';
-            js += '                                                                                            ' + '\n';
-
-            return js;
-        }
-
-        return {
-            getJavaScriptCode: getJavaScriptCode
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerCore.ReceiveMulticoreWorker', _ReceiveMulticoreWorker);
-
-    _ReceiveMulticoreWorker.$inject = [
-        'PhysicalLayerCore.ReceiveMulticoreWorkerThread',
-        'Common.SimplePromiseBuilder'
-    ];
-
-    function _ReceiveMulticoreWorker(
-        ReceiveMulticoreWorkerThread,
-        SimplePromiseBuilder
-    ) {
-        var ReceiveMulticoreWorker;
-
-        ReceiveMulticoreWorker = function (key) {
-            var threadCode, blob, objectUrl;
-
-            if (AudioNetwork.bootConfig.multicoreState === AudioNetwork.MULTICORE_STATE.DISABLED) {
-                throw ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION;
-            }
-
-            threadCode = ReceiveMulticoreWorkerThread.getJavaScriptCode();
-            blob = new Blob(
-                [ threadCode ],
-                { type: 'application/javascript' }
-            );
-            objectUrl = URL.createObjectURL(blob);
-
-            this.$$key = key;
-            this.$$worker = new Worker(objectUrl);
-            this.$$worker.onmessage = this.$$onMessage.bind(this);
-
-            this.$$promise = [];
-            this.$$promise.length = ReceiveMulticoreWorker.MESSAGE_TOTAL;
-
-            this.$$sendToThread(ReceiveMulticoreWorker.INITIALIZATION, this.$$key);
-        };
-
-        ReceiveMulticoreWorker.MULTICORE_SUPPORT_IS_NOT_ENABLED_EXCEPTION = 'Multicore support is not enabled';
-        ReceiveMulticoreWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION = 'Previous promise not resolved yet';
-
-        ReceiveMulticoreWorker.INITIALIZATION = 0;
-        ReceiveMulticoreWorker.INITIALIZATION_SUCCESS = 1;
-        ReceiveMulticoreWorker.INITIALIZATION_FAIL = 2;
-        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK = 3;
-        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_SUCCESS = 4;
-        ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK_FAIL = 5;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM = 6;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_SUCCESS = 7;
-        ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM_FAIL = 8;
-
-        ReceiveMulticoreWorker.MESSAGE_TOTAL = 9;
-        ReceiveMulticoreWorker.MESSAGE_INDEX_SPACING = 3;
-        ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS = 1;
-        ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL = 2;
-
-        ReceiveMulticoreWorker.prototype.destroy = function() {
-            if (this.$$worker) {
-                this.$$worker.terminate();
-                this.$$worker = undefined;
-            }
-        };
-
-        ReceiveMulticoreWorker.prototype.getInitialization = function() {
-            return this.$$promise[ReceiveMulticoreWorker.INITIALIZATION];
-        };
-
-        ReceiveMulticoreWorker.prototype.$$onMessage = function(event) {
-            var
-                data = event.data,
-                messageIndex = data.length > 0 ? data[0] : null,
-                result = data.length > 1 ? data[1] : null,
-                promise,
-                i;
-
-            for (i = 0; i < this.$$promise.length; i++) {
-                promise = this.$$promise[i];
-                if (promise) {
-                    switch (messageIndex % ReceiveMulticoreWorker.MESSAGE_INDEX_SPACING) {
-                        case ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_SUCCESS:
-                            promise.resolve(result);
-                            break;
-                        case ReceiveMulticoreWorker.MESSAGE_INDEX_OFFSET_FAIL:
-                            promise.reject(result);
-                            break;
-                    }
-                    this.$$promise[i] = undefined;
-                    break;
-                }
-            }
-        };
-
-        ReceiveMulticoreWorker.prototype.$$sendToThread = function (messageIndex, value) {
-            if (this.$$promise[messageIndex]) {
-                throw ReceiveWorker.PREVIOUS_PROMISE_NOT_RESOLVED_YET_EXCEPTION;
-            }
-            this.$$promise[messageIndex] = SimplePromiseBuilder.build();
-            this.$$worker.postMessage([
-                messageIndex,
-                value
-            ]);
-
-            return this.$$promise[messageIndex];
-        };
-
-        ReceiveMulticoreWorker.prototype.computeCrazySineSum = function (value) {
-            return this.$$sendToThread(ReceiveMulticoreWorker.COMPUTE_CRAZY_SINE_SUM, value);
-        };
-
-        ReceiveMulticoreWorker.prototype.handleSampleBlock = function (value) {
-            return this.$$sendToThread(ReceiveMulticoreWorker.HANDLE_SAMPLE_BLOCK, value);
-        };
-
-        return ReceiveMulticoreWorker;
-    }
-
-})();
-
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('PhysicalLayerCore.ReceiveWorker', _ReceiveWorker);
-
-    _ReceiveWorker.$inject = [
-        'Common.CarrierRecoveryBuilder',
-        'Common.MathUtil',
-        'Common.SimplePromiseBuilder'
-    ];
-
-    function _ReceiveWorker(
-        CarrierRecoveryBuilder,
-        MathUtil,
-        SimplePromiseBuilder
-    ) {
-        var ReceiveWorker;
-
-        ReceiveWorker = function (key) {
-            this.$$key = key;
-            this.$$carrierRecovery = CarrierRecoveryBuilder.build(16, 16 * 1024);
-        };
-
-        ReceiveWorker.prototype.computeCrazySineSum = function (addValue) {
-            var
-                promise = SimplePromiseBuilder.build(),
-                result = 0;
-
-            for (var i = 0; i < 9000111; i++) {
-                result += MathUtil.sin(i);
-            }
-            result = addValue + MathUtil.abs(result);
-            promise.resolve({
-                key: this.$$key,
-                result: result
-            });
-
-            return promise;
-        };
-
-        ReceiveWorker.prototype.handleSampleBlock = function (sampleBlock) {
-            var
-                promise = SimplePromiseBuilder.build(),
-                result,
-                i;
-
-            for (i = 0; i < 16 * 1024; i++) {
-                this.$$carrierRecovery.handleSample(
-                    Math.sin(2 * Math.PI * (i / 16 - 0.25))
-                );
-            }
-            result = this.$$carrierRecovery.getCarrierDetail();
-
-            promise.resolve({
-                key: this.$$key,
-                result: result
-            });
-
-            return promise;
-        };
-
-        return ReceiveWorker;
     }
 
 })();
