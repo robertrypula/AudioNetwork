@@ -6,6 +6,7 @@ if (AudioNetwork.bootConfig.createAlias) {
     AudioNetwork.Rewrite = {};
     AudioNetwork.Rewrite.Dsp = {};
     AudioNetwork.Rewrite.PhysicalLayer = {};
+    AudioNetwork.Rewrite.DataLinkLayer = {};
     AudioNetwork.Rewrite.Util = {};
     AudioNetwork.Rewrite.WebAudio = {};
     AudioNetwork.Visualizer = {};
@@ -16,6 +17,7 @@ if (AudioNetwork.bootConfig.createAlias) {
     AudioNetwork.Rewrite.Dsp.WaveAnalyser = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveAnalyser');
     AudioNetwork.Rewrite.Dsp.WaveGenerator = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveGenerator');
     AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder = AudioNetwork.Injector.resolve('Rewrite.PhysicalLayer.PhysicalLayerBuilder');
+    AudioNetwork.Rewrite.DataLinkLayer.DataLinkLayerBuilder = AudioNetwork.Injector.resolve('Rewrite.DataLinkLayer.DataLinkLayerBuilder');
     AudioNetwork.Rewrite.Util.Buffer = AudioNetwork.Injector.resolve('Rewrite.Util.Buffer');
     AudioNetwork.Rewrite.Util.FrequencyCalculator = AudioNetwork.Injector.resolve('Rewrite.Util.FrequencyCalculator');
     AudioNetwork.Rewrite.Util.MusicCalculator = AudioNetwork.Injector.resolve('Rewrite.Util.MusicCalculator');
