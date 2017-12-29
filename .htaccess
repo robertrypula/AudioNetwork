@@ -47,7 +47,7 @@ Redirect 301 /smart-timer-class https://github.com/robertrypula/AudioNetwork/tre
 Redirect 301 /correlator-class https://github.com/robertrypula/AudioNetwork/tree/master/src/dsp/correlator.js
 Redirect 301 /rx-sync-detector-class https://github.com/robertrypula/AudioNetwork/tree/master/src/physical-layer/rx-sync-detector.js
 Redirect 301 /physical-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/physical-layer/physical-layer.js
-Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/data-link-layer/data-link-layer.js
+Redirect 301 /data-link-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/src/data-link-layer/data-link-layer.js
 Redirect 301 /transport-layer-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/transport-layer/transport-layer.js
 Redirect 301 /spectrogram-class https://github.com/robertrypula/AudioNetwork/tree/master/example/00-00-00-common/ui/spectrogram.js
 

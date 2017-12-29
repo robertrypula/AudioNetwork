@@ -1,71 +1,84 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var Frame = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
-    var Frame;
+(function () {
+    AudioNetwork.Injector
+        .registerFactory('Rewrite.DataLinkLayer.Frame', Frame);
 
-    Frame = function (id, payload, isCommand) {
-        this.$$id = id;
-        this.$$header = undefined;
-        this.$$payload = [];
-        this.$$checksum = undefined;
+    Frame.$inject = [
+        'Rewrite.DataLinkLayer.ChecksumService'
+    ];
 
-        this.setPayload(payload, isCommand);
-    };
+    function Frame(
+        ChecksumService
+    ) {
+        var Frame;
 
-    Frame.$$_HEADER_FRAME_START_MARKER = 0xE0;
-    Frame.$$_HEADER_COMMAND_BIT_SET = 0x10;
-    Frame.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
-    Frame.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
+        Frame = function (id, payload, isCommand) {
+            this.$$id = id;
+            this.$$header = undefined;
+            this.$$payload = [];
+            this.$$checksum = undefined;
 
-    Frame.prototype.getId = function () {
-        return this.$$id;
-    };
+            this.setPayload(payload, isCommand);
+        };
 
-    Frame.prototype.getHeader = function () {
-        return this.$$header;
-    };
+        Frame.$$_HEADER_FRAME_START_MARKER = 0xE0;
+        Frame.$$_HEADER_COMMAND_BIT_SET = 0x10;
+        Frame.$$_HEADER_COMMAND_BIT_NOT_SET = 0x00;
+        Frame.$$_HEADER_PAYLOAD_LENGTH_MASK = 0x0F;
+        Frame.$$_ONE_BYTE_MASK = 0xFF;
 
-    Frame.prototype.getPayload = function () {
-        return this.$$payload;
-    };
+        Frame.prototype.getId = function () {
+            return this.$$id;
+        };
 
-    Frame.prototype.getChecksum = function () {
-        return this.$$checksum;
-    };
+        Frame.prototype.getHeader = function () {
+            return this.$$header;
+        };
 
-    Frame.prototype.setPayload = function (payload, isCommand) {
-        var frameWithoutChecksum, i, byte;
+        Frame.prototype.getPayload = function () {
+            return this.$$payload;
+        };
 
-        frameWithoutChecksum = [];
-        this.$$header = Frame.$$generateHeader(isCommand, payload.length);
-        frameWithoutChecksum.push(this.$$header);
-        this.$$payload.length = 0;
-        for (i = 0; i < payload.length; i++) {
-            byte = payload[i] & DataLinkLayer.$$_ONE_BYTE_MASK;
-            this.$$payload.push(byte);
-            frameWithoutChecksum.push(byte);
-        }
-        this.$$checksum = Frame.$$computeChecksum(frameWithoutChecksum);
-    };
+        Frame.prototype.getChecksum = function () {
+            return this.$$checksum;
+        };
 
-    Frame.$$computeChecksum = function (frameWithoutChecksum) {
-        return ChecksumService.fletcher8(frameWithoutChecksum);
-    };
+        Frame.prototype.setPayload = function (payload, isCommand) {
+            var frameWithoutChecksum, i, byte;
 
-    Frame.$$generateHeader = function (isCommand, payloadLength) {
-        var frameStartMarker, commandBit, header;
+            frameWithoutChecksum = [];
+            this.$$header = Frame.$$generateHeader(isCommand, payload.length);
+            frameWithoutChecksum.push(this.$$header);
+            this.$$payload.length = 0;
+            for (i = 0; i < payload.length; i++) {
+                byte = payload[i] & Frame.$$_ONE_BYTE_MASK;
+                this.$$payload.push(byte);
+                frameWithoutChecksum.push(byte);
+            }
+            this.$$checksum = Frame.$$computeChecksum(frameWithoutChecksum);
+        };
 
-        frameStartMarker = Frame.$$_HEADER_FRAME_START_MARKER;
-        commandBit = isCommand
-            ? Frame.$$_HEADER_COMMAND_BIT_SET
-            : Frame.$$_HEADER_COMMAND_BIT_NOT_SET;
-        payloadLength = Frame.$$_HEADER_PAYLOAD_LENGTH_MASK & payloadLength;
+        Frame.$$computeChecksum = function (frameWithoutChecksum) {
+            return ChecksumService.fletcher8(frameWithoutChecksum);
+        };
 
-        header = frameStartMarker | commandBit | payloadLength;
+        Frame.$$generateHeader = function (isCommand, payloadLength) {
+            var frameStartMarker, commandBit, header;
 
-        return header;
-    };
+            frameStartMarker = Frame.$$_HEADER_FRAME_START_MARKER;
+            commandBit = isCommand
+                ? Frame.$$_HEADER_COMMAND_BIT_SET
+                : Frame.$$_HEADER_COMMAND_BIT_NOT_SET;
+            payloadLength = Frame.$$_HEADER_PAYLOAD_LENGTH_MASK & payloadLength;
 
-    return Frame;
+            header = frameStartMarker | commandBit | payloadLength;
+
+            return header;
+        };
+
+        return Frame;
+    }
+
 })();

@@ -1,80 +1,88 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-var TxFrameManager = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
-    var TxFrameManager;
+(function () {
+    AudioNetwork.Injector
+        .registerFactory('Rewrite.DataLinkLayer.TxFrameManager', TxFrameManager);
 
-    TxFrameManager = function () {
-        this.$$txFrameId = TxFrameManager.$$_INITIAL_TX_FRAME_ID;
-        this.$$txFrame = null;
-        this.$$txFrameCurrent = null;
-        this.$$txFrameQueue = [];
-    };
+    TxFrameManager.$inject = [];
 
-    TxFrameManager.$$_INITIAL_TX_FRAME_ID = 1;
+    function TxFrameManager() {
+        var TxFrameManager;
 
-    TxFrameManager.prototype.getNextTxFrameId = function () {
-        return this.$$txFrameId++;
-    };
+        TxFrameManager = function () {
+            this.$$txFrameId = TxFrameManager.$$_INITIAL_TX_FRAME_ID;
+            this.$$txFrame = null;
+            this.$$txFrameCurrent = null;
+            this.$$txFrameQueue = [];
+        };
 
-    TxFrameManager.prototype.getTxFrameCloned = function () {
-        return this.$$txFrame
-            ? this.$$txFrame.cloneClean()
-            : null;
-    };
+        TxFrameManager.$$_INITIAL_TX_FRAME_ID = 1;
 
-    TxFrameManager.prototype.getTxFrameProgressCloned = function () {
-        var
-            result = {},
-            i;
+        TxFrameManager.prototype.getNextTxFrameId = function () {
+            return this.$$txFrameId++;
+        };
 
-        result.txFrame = this.getTxFrameCloned();
+        TxFrameManager.prototype.getTxFrameCloned = function () {
+            return this.$$txFrame
+                ? this.$$txFrame.cloneClean()
+                : null;
+        };
 
-        result.txFrameCurrent = this.$$txFrameCurrent
-            ? this.$$txFrameCurrent.cloneClean()
-            : null;
+        TxFrameManager.prototype.getTxFrameProgressCloned = function () {
+            var
+                result = {},
+                i;
 
-        result.txFrameQueue = [];
-        for (i = 0; i < this.$$txFrameQueue.length; i++) {
-            result.txFrameQueue.push(
-                this.$$txFrameQueue[i].cloneClean()
-            );
-        }
+            result.txFrame = this.getTxFrameCloned();
 
-        result.isTxFrameInProgress = this.isTxFrameInProgress();
+            result.txFrameCurrent = this.$$txFrameCurrent
+                ? this.$$txFrameCurrent.cloneClean()
+                : null;
 
-        return result;
-    };
+            result.txFrameQueue = [];
+            for (i = 0; i < this.$$txFrameQueue.length; i++) {
+                result.txFrameQueue.push(
+                    this.$$txFrameQueue[i].cloneClean()
+                );
+            }
 
-    TxFrameManager.prototype.isTxFrameInProgress = function () {
-        return this.$$txFrameQueue.length > 0 ||
-            !!this.$$txFrameCurrent;
-    };
+            result.isTxFrameInProgress = this.isTxFrameInProgress();
 
-    TxFrameManager.prototype.addTxFrame = function (txFrame) {
-        this.$$txFrameQueue.push(txFrame);
-    };
+            return result;
+        };
 
-    TxFrameManager.prototype.handleTxSymbolId = function (txSymbolId) {
-        var isQueueNotEmpty, confirmed;
+        TxFrameManager.prototype.isTxFrameInProgress = function () {
+            return this.$$txFrameQueue.length > 0 ||
+                !!this.$$txFrameCurrent;
+        };
 
-        isQueueNotEmpty = this.$$txFrameQueue.length > 0;
+        TxFrameManager.prototype.addTxFrame = function (txFrame) {
+            this.$$txFrameQueue.push(txFrame);
+        };
 
-        if (this.$$txFrameCurrent) {
-            confirmed = this.$$txFrameCurrent.tryToConfirmTxSymbolId(txSymbolId);
-            if (this.$$txFrameCurrent.isFullyTransmitted()) {
-                this.$$txFrame = this.$$txFrameCurrent;
+        TxFrameManager.prototype.handleTxSymbolId = function (txSymbolId) {
+            var isQueueNotEmpty, confirmed;
+
+            isQueueNotEmpty = this.$$txFrameQueue.length > 0;
+
+            if (this.$$txFrameCurrent) {
+                confirmed = this.$$txFrameCurrent.tryToConfirmTxSymbolId(txSymbolId);
+                if (this.$$txFrameCurrent.isFullyTransmitted()) {
+                    this.$$txFrame = this.$$txFrameCurrent;
+                    this.$$txFrameCurrent = isQueueNotEmpty ? this.$$txFrameQueue.shift() : null;
+                }
+            } else {
+                this.$$txFrame = null;
                 this.$$txFrameCurrent = isQueueNotEmpty ? this.$$txFrameQueue.shift() : null;
             }
-        } else {
-            this.$$txFrame = null;
-            this.$$txFrameCurrent = isQueueNotEmpty ? this.$$txFrameQueue.shift() : null;
-        }
 
-        if (this.$$txFrameCurrent && !confirmed) {
-            this.$$txFrameCurrent.tryToConfirmTxSymbolId(txSymbolId);
-        }
-    };
+            if (this.$$txFrameCurrent && !confirmed) {
+                this.$$txFrameCurrent.tryToConfirmTxSymbolId(txSymbolId);
+            }
+        };
 
-    return TxFrameManager;
+        return TxFrameManager;
+    }
+
 })();

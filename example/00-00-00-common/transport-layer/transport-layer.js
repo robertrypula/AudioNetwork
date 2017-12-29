@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+var DataLinkLayerBuilder = AudioNetwork.Rewrite.DataLinkLayer.DataLinkLayerBuilder;
+
 var TransportLayer = (function () { // <-- TODO this will be soon refactored when code will be moved to the main NPM package
     var TransportLayer;
 
@@ -31,9 +33,9 @@ var TransportLayer = (function () { // <-- TODO this will be soon refactored whe
         this.$$txSegmentListener = TransportLayer.$$isFunction(builder._txSegmentListener) ? builder._txSegmentListener : null;
 
         // setup listeners - data link layer
-        this.$$externalTxFrameListener = DataLinkLayer.$$isFunction(builder._txFrameListener) ? builder._txFrameListener : null;
-        this.$$externalRxFrameListener = DataLinkLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
-        this.$$externalTxFrameProgressListener = DataLinkLayer.$$isFunction(builder._txFrameProgressListener) ? builder._txFrameProgressListener : null;
+        this.$$externalTxFrameListener = TransportLayer.$$isFunction(builder._txFrameListener) ? builder._txFrameListener : null;
+        this.$$externalRxFrameListener = TransportLayer.$$isFunction(builder._rxFrameListener) ? builder._rxFrameListener : null;
+        this.$$externalTxFrameProgressListener = TransportLayer.$$isFunction(builder._txFrameProgressListener) ? builder._txFrameProgressListener : null;
 
         // state variables
         this.$$segmentPayloadLengthLimit = this.$$dataLinkLayer.getFramePayloadLengthLimit() - Segment.HEADER_BYTE_LENGTH;
