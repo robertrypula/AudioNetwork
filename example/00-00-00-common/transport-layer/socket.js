@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Robert Rypuła - https://audio-network.rypula.pl
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
 // NOTE: this class was written in a hurry to meet deadline and might have some big issues
