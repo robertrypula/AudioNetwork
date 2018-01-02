@@ -9,8 +9,16 @@
   - 2.x.x ?? OFDM
   - 2.x.x ?? Move to TypeScript
 
+## v1.3.0 (2018-01-02)
+  - adds Data Link Layer to the network stack
+  - up to 7 bytes of data can travel inside frame with header and checksum (Fletcher-8)
+  - frames tranmission progress listener
+  - incomming frames listener
+  - incomming frame candidates listener 
+  - 'TwoWaySync' that helps to exchange 'Sync' sequences and SampleRate values (this will be simplified even more in future versions)  
+
 ## v1.2.0 (2017-12-28)
-  - Completely rewritten Physical Layer core based on Frequency-Shift Keying
+  - completely rewritten Physical Layer core based on Frequency-Shift Keying
   - special "sync" sequence for symbol synchronization based on correlation technique
   - many new examples
   - old FSK code marked as deprecated
