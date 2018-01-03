@@ -25,6 +25,18 @@
             );
         };
 
+        Complex.fromReal = function (list) {
+            var i, result = [];
+
+            for (i = 0; i < list.length; i++) {
+                result.push(
+                    new Complex(list[i], 0)
+                );
+            }
+
+            return result;
+        };
+
         Complex.polar = function (unitAngle, magnitude) {
             var radian;
 
@@ -47,11 +59,15 @@
         Complex.prototype.add = function (b) {
             this.$$real += b.$$real;
             this.$$imag += b.$$imag;
+
+            return this;
         };
 
         Complex.prototype.subtract = function (b) {
             this.$$real -= b.$$real;
             this.$$imag -= b.$$imag;
+
+            return this;
         };
 
         Complex.prototype.multiply = function (b) {
@@ -61,20 +77,28 @@
 
             this.$$real = real;
             this.$$imag = imag;
+
+            return this;
         };
 
         Complex.prototype.conjugate = function () {
             this.$$imag *= -1;
+
+            return this;
         };
 
         Complex.prototype.multiplyScalar = function (b) {
             this.$$real *= b;
             this.$$imag *= b;
+
+            return this;
         };
 
         Complex.prototype.divideScalar = function (b) {
             this.$$real /= b;
             this.$$imag /= b;
+
+            return this;
         };
 
         Complex.prototype.getReal = function () {
@@ -137,6 +161,8 @@
             this.divideScalar(
                 this.getMagnitude()
             );
+
+            return this;
         };
 
         return Complex;

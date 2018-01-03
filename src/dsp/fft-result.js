@@ -2,6 +2,7 @@
 'use strict';
 
 // TODO add ranges check
+// TODO rename to FftResult
 
 (function () {
     AudioNetwork.Injector

@@ -13,7 +13,8 @@ if (AudioNetwork.bootConfig.createAlias) {
 
     AudioNetwork.Rewrite.Dsp.Complex = AudioNetwork.Injector.resolve('Rewrite.Dsp.Complex');
     AudioNetwork.Rewrite.Dsp.Correlator = AudioNetwork.Injector.resolve('Rewrite.Dsp.Correlator');
-    AudioNetwork.Rewrite.Dsp.FFTResult = AudioNetwork.Injector.resolve('Rewrite.Dsp.FFTResult');
+    AudioNetwork.Rewrite.Dsp.Fft = AudioNetwork.Injector.resolve('Rewrite.Dsp.Fft');
+    AudioNetwork.Rewrite.Dsp.FFTResult = AudioNetwork.Injector.resolve('Rewrite.Dsp.FFTResult');       // TODO rename to FftResult
     AudioNetwork.Rewrite.Dsp.WaveAnalyser = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveAnalyser');
     AudioNetwork.Rewrite.Dsp.WaveGenerator = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveGenerator');
     AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder = AudioNetwork.Injector.resolve('Rewrite.PhysicalLayer.PhysicalLayerBuilder');

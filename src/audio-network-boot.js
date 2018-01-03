@@ -285,6 +285,7 @@ AudioNetwork.devScriptList = [
     'dsp/complex.js',
     'dsp/correlator.js',
     'dsp/fft-result.js',
+    'dsp/fft.js',
     'dsp/wave-analyser.js',
     'dsp/wave-generator.js',
     'physical-layer/physical-layer-builder.js',
