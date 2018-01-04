@@ -17,7 +17,7 @@
         Fft = function () {
         };
 
-        Fft.compute = function (input) {
+        Fft.forward = function (input) {
             var
                 n = input.length,
                 nHalf,
@@ -34,8 +34,8 @@
             }
 
             // even and odd parts
-            even = Fft.compute(Fft.getHalf(input, 0));
-            odd = Fft.compute(Fft.getHalf(input, 1));
+            even = Fft.forward(Fft.$$getHalf(input, 0));
+            odd = Fft.forward(Fft.$$getHalf(input, 1));
 
             // combine
             output.length = n;
@@ -51,7 +51,23 @@
             return output;
         };
 
-        Fft.getHalf = function (list, offset) {
+        Fft.inverse = function (input) {
+            var
+                output = [],
+                i;
+
+            for (i = 0; i < input.length; i++) {
+                output.push(input[i].clone().swap());
+            }
+            output = Fft.forward(output);
+            for (i = 0; i < output.length; i++) {
+                output[i].swap().divideScalar(output.length);
+            }
+
+            return output;
+        };
+
+        Fft.$$getHalf = function (list, offset) {
             var i, listHalf, item, lengthHalf;
 
             listHalf = [];
@@ -63,7 +79,6 @@
 
             return listHalf;
         };
-
 
         return Fft;
     }

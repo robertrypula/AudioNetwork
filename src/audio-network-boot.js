@@ -206,16 +206,6 @@ AudioNetwork.DynamicScriptLoader = (function () {
     };
 
     DynamicScriptLoader.prototype.loadOne = function (url) {
-        /*
-        var
-            anRoot = document.getElementById('an-root'),
-            scriptTag = document.createElement('script'),
-            whereToAppend = anRoot ? anRoot : document.body;
-
-        scriptTag.src = AudioNetwork.bootConfig.devScriptBaseUrl + url;
-        whereToAppend.appendChild(scriptTag);
-        */
-        // block page loading - this is the best approach so far... :)
         document.write('<script src="' + AudioNetwork.bootConfig.devScriptBaseUrl + url + '"></script>')
     };
 

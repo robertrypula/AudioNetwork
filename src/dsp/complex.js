@@ -25,18 +25,6 @@
             );
         };
 
-        Complex.fromReal = function (list) {
-            var i, result = [];
-
-            for (i = 0; i < list.length; i++) {
-                result.push(
-                    new Complex(list[i], 0)
-                );
-            }
-
-            return result;
-        };
-
         Complex.polar = function (unitAngle, magnitude) {
             var radian;
 
@@ -54,6 +42,15 @@
 
         Complex.zero = function () {
             return new Complex(0, 0);
+        };
+
+        Complex.prototype.swap = function () {
+            var tmp = this.$$real;
+
+            this.$$real = this.$$imag;
+            this.$$imag = tmp;
+
+            return this;
         };
 
         Complex.prototype.add = function (b) {
