@@ -4,11 +4,11 @@ Audio Network
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
-- [Physical Layer](https://audio-network.rypula.pl/physical-layer)  
-- [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)  
-- [Transport Layer (comming soon, almost ready!)](https://audio-network.rypula.pl/transport-layer)  
+- [Physical Layer](https://audio-network.rypula.pl/physical-layer)
+- [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
+- [Transport Layer (comming soon, almost ready!)](https://audio-network.rypula.pl/transport-layer)
 - [Audio Chat (comming soon)](https://audio-network.rypula.pl/audio-chat)
-- [Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)    
+- [Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
 
 ## Self-made network stack based on Frequency-Shift Keying (>= v1.2.0)
 
@@ -16,9 +16,9 @@ Audio Network library is a hobby project in which the goal was to create simple 
 waves to transmit data. Initialy it was using PSK modulation technique which was later changed into FSK. If you are
 interested in details you can read more in polish Programista magazine:
 
-- [Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/) (08/2016)  
-- [Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/) (02/2017)  
-- [Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/) (10/2017)  
+- [Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/) (08/2016)
+- [Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/) (02/2017)
+- [Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/) (10/2017)
 
 Part 3 of the article was the last one. It means that more focus will go to this website and Audio Network releases. If you can't wait please go trought some of the examples:
 
@@ -50,14 +50,17 @@ Note: some of the modules are not yet in main NPM package. Please verify [roadma
 
 >This library is supported by [PGS Software](https://www.pgs-soft.com/) - the place where I work as Frontend Developer
 
+UPDATE 2018.02.06 - Project looks like dead but it's not. Now I'm focusing on configuration that allows me to move
+entire AudioNetwork project to TypeScript, WebPack, Jest unit test with coverge, Travis etc.
+
 ## Deprecated Phase-Shift Keying approach (last update at v1.1.0, will be removed at v2.0.0)
 
 Initial versions of this lib were based on Phase-Shift Keying modulation technique. Unfortunatelly after some tests
 in turned out that this implementation was not working reliable on mobile devices. Starting from v1.2.0 this part of the
 lib will be marked as deprecated.
 
-- [Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)  
-- [Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)  
+- [Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
+- [Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
 
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
