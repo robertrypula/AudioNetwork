@@ -1,8 +1,8 @@
 # Audio Network
 
 [![npm version](https://badge.fury.io/js/audio-network.svg)](https://badge.fury.io/js/audio-network)
-[![Build Status](https://travis-ci.org/robertrypula/audio-network.svg?branch=typescript-webpack-jest)](https://travis-ci.org/robertrypula/audio-network)
-[![Coverage Status](https://coveralls.io/repos/github/robertrypula/audio-network/badge.svg?branch=typescript-webpack-jest)](https://coveralls.io/github/robertrypula/audio-network?branch=typescript-webpack-jest)
+[![Build Status](https://travis-ci.org/robertrypula/AudioNetwork.svg?branch=typescript-webpack-jest)](https://travis-ci.org/robertrypula/AudioNetwork)
+[![Coverage Status](https://coveralls.io/repos/github/robertrypula/AudioNetwork/badge.svg?branch=typescript-webpack-jest)](https://coveralls.io/github/robertrypula/AudioNetwork?branch=typescript-webpack-jest)
 
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
