@@ -28,7 +28,7 @@ Freq domain time resolution:
     http://electronics.stackexchange.com/questions/12407/what-is-the-relation-between-fft-length-and-frequency-resolution
 
 IQ sampling explanation (complex signal):
-    http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!
+    http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!!
     https://www.youtube.com/watch?v=h_7d-m1ehoY
 
 Very nice project about DSP and Software Defined Radio
@@ -120,11 +120,11 @@ Another great example
 
 Nice articles about OFDM
     http://www.skydsp.com/publications/index.htm
-    
+
 OFDM Symbols synchronization
     https://dsp.stackexchange.com/questions/7724/how-is-symbol-synchronization-with-ofdm-done
     https://dsp.stackexchange.com/questions/360/how-to-demodulate-an-ofdm-signal/368#368
-    
+
 OFDM pilot tones
     https://dsp.stackexchange.com/questions/15164/using-pilot-tones-to-estimate-carrier-frequency-offset-in-ofdm
 ```
@@ -147,15 +147,15 @@ FFT FAQ
 
 FFT explained (Decimation In Time) - REALLY GREAT!
     https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
-    
+
 FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!
     https://cnx.org/contents/JqoGchv3@3/Overview-of-Fast-Fourier-Trans     FFT Overview
     https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2     DIT
     https://cnx.org/contents/XaYDVUAS@6/Decimation-in-Frequency-DIF-Ra     DIF
-    
+
 FFT explained (Decimation In Time and Decimation In Frequency) - REALLY GREAT!!
     http://www.cmlab.csie.ntu.edu.tw/cml/dsp/training/coding/transform/fft.html
-    
+
 FFT very clean implementation in Java (FFT Decimation In Time)
     http://stackoverflow.com/questions/7821473/fft-in-javascript
     http://introcs.cs.princeton.edu/java/97data/FFT.java.html        < link from stackoverflow answer
