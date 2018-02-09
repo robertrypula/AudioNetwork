@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { IComplex } from "./complex.interface";
+import { IComplex } from './complex.interface';
 
 class Complex implements IComplex {
   private real: number;
@@ -96,11 +96,11 @@ class Complex implements IComplex {
   };
   */
 
-  getReal(): number {
+  public getReal(): number {
     return this.real;
   }
 
-  getImaginary(): number {
+  public getImaginary(): number {
     return this.imaginary;
   }
 
