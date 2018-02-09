@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
+// TODO extract only value parts of this file - it will no longer be need when after introducing  WebPack/TypeScript
+
 if (AudioNetwork.bootConfig.createAlias) {
 
     AudioNetwork.Rewrite = {};
@@ -51,8 +53,4 @@ if (AudioNetwork.bootConfig.createAlias) {
     AudioNetwork.Common.CarrierGenerate = AudioNetwork.Injector.resolve('Common.CarrierGenerate'); // deprecated
     AudioNetwork.Common.WindowFunction = AudioNetwork.Injector.resolve('Common.WindowFunction'); // probably deprecated
     AudioNetwork.Common.Util = AudioNetwork.Injector.resolve('Common.Util'); // deprecated
-}
-
-if (AudioNetwork.isNode) {
-    module.exports = AudioNetwork;
 }
