@@ -1,12 +1,14 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-class Complex {
-  private real: number;
-  private imag: number;
+import { IComplex } from "./complex.interface";
 
-  constructor(real: number, imag: number) {
+class Complex implements IComplex {
+  private real: number;
+  private imaginary: number;
+
+  constructor(real: number, imaginary: number) {
     this.real = real;
-    this.imag = imag;
+    this.imaginary = imaginary;
   }
 
   /*
@@ -99,7 +101,7 @@ class Complex {
   }
 
   getImaginary(): number {
-    return this.imag;
+    return this.imaginary;
   }
 
   /*

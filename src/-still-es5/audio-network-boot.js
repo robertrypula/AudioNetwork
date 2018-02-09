@@ -1,7 +1,7 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 'use strict';
 
-// TODO extract only value parts of this file - it will no longer be need when after introducing  WebPack/TypeScript
+// TODO extract only important parts of this file - it will no longer be need when after introducing  WebPack/TypeScript
 
 var
     AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
