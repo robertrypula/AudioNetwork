@@ -1,168 +1,164 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
-'use strict';
 
-(function () {
-    AudioNetwork.Injector
-        .registerFactory('Rewrite.Dsp.Complex', Complex);
+class Complex {
+  private real: number;
+  private imag: number;
 
-    Complex.$inject = [];
+  constructor(real: number, imag: number) {
+    this.real = real;
+    this.imag = imag;
+  }
 
-    function Complex() {
-        var Complex;
+  /*
+  Complex.$$_EPSILON = 0.000001;
+  Complex.$$_UNIT_RADIUS = 1;
 
-        Complex = function (real, imag) {
-            this.$$real = real;
-            this.$$imag = imag;
-        };
+  Complex.prototype.clone = function () {
+      return new Complex(
+          this.$$real,
+          this.$$imag
+      );
+  };
 
-        Complex.$$_EPSILON = 0.000001;
-        Complex.$$_UNIT_RADIUS = 1;
+  Complex.polar = function (unitAngle, magnitude) {
+      var radian;
 
-        Complex.prototype.clone = function () {
-            return new Complex(
-                this.$$real,
-                this.$$imag
-            );
-        };
+      magnitude = typeof magnitude === 'undefined'
+          ? Complex.$$_UNIT_RADIUS
+          : magnitude;
 
-        Complex.polar = function (unitAngle, magnitude) {
-            var radian;
+      radian = 2 * Math.PI * unitAngle;
 
-            magnitude = typeof magnitude === 'undefined'
-                ? Complex.$$_UNIT_RADIUS
-                : magnitude;
+      return new Complex(
+          magnitude * Math.cos(radian),
+          magnitude * Math.sin(radian)
+      );
+  };
 
-            radian = 2 * Math.PI * unitAngle;
+  Complex.zero = function () {
+      return new Complex(0, 0);
+  };
 
-            return new Complex(
-                magnitude * Math.cos(radian),
-                magnitude * Math.sin(radian)
-            );
-        };
+  Complex.prototype.swap = function () {
+      var tmp = this.$$real;
 
-        Complex.zero = function () {
-            return new Complex(0, 0);
-        };
+      this.$$real = this.$$imag;
+      this.$$imag = tmp;
 
-        Complex.prototype.swap = function () {
-            var tmp = this.$$real;
+      return this;
+  };
 
-            this.$$real = this.$$imag;
-            this.$$imag = tmp;
+  Complex.prototype.add = function (b) {
+      this.$$real += b.$$real;
+      this.$$imag += b.$$imag;
 
-            return this;
-        };
+      return this;
+  };
 
-        Complex.prototype.add = function (b) {
-            this.$$real += b.$$real;
-            this.$$imag += b.$$imag;
+  Complex.prototype.subtract = function (b) {
+      this.$$real -= b.$$real;
+      this.$$imag -= b.$$imag;
 
-            return this;
-        };
+      return this;
+  };
 
-        Complex.prototype.subtract = function (b) {
-            this.$$real -= b.$$real;
-            this.$$imag -= b.$$imag;
+  Complex.prototype.multiply = function (b) {
+      var
+          real = this.$$real * b.$$real - this.$$imag * b.$$imag,
+          imag = this.$$real * b.$$imag + this.$$imag * b.$$real;
 
-            return this;
-        };
+      this.$$real = real;
+      this.$$imag = imag;
 
-        Complex.prototype.multiply = function (b) {
-            var
-                real = this.$$real * b.$$real - this.$$imag * b.$$imag,
-                imag = this.$$real * b.$$imag + this.$$imag * b.$$real;
+      return this;
+  };
 
-            this.$$real = real;
-            this.$$imag = imag;
+  Complex.prototype.conjugate = function () {
+      this.$$imag *= -1;
 
-            return this;
-        };
+      return this;
+  };
 
-        Complex.prototype.conjugate = function () {
-            this.$$imag *= -1;
+  Complex.prototype.multiplyScalar = function (b) {
+      this.$$real *= b;
+      this.$$imag *= b;
 
-            return this;
-        };
+      return this;
+  };
 
-        Complex.prototype.multiplyScalar = function (b) {
-            this.$$real *= b;
-            this.$$imag *= b;
+  Complex.prototype.divideScalar = function (b) {
+      this.$$real /= b;
+      this.$$imag /= b;
 
-            return this;
-        };
+      return this;
+  };
+  */
 
-        Complex.prototype.divideScalar = function (b) {
-            this.$$real /= b;
-            this.$$imag /= b;
+  getReal(): number {
+    return this.real;
+  }
 
-            return this;
-        };
+  getImaginary(): number {
+    return this.imag;
+  }
 
-        Complex.prototype.getReal = function () {
-            return this.$$real;
-        };
+  /*
+  Complex.prototype.getMagnitude = function () {
+      return Math.sqrt(
+          this.$$real * this.$$real +
+          this.$$imag * this.$$imag
+      );
+  };
 
-        Complex.prototype.getImaginary = function () {
-            return this.$$imag;
-        };
+  Complex.prototype.getUnitAngle = function () {
+      var x, y, magnitude, quarter, angle, unitAngle;
 
-        Complex.prototype.getMagnitude = function () {
-            return Math.sqrt(
-                this.$$real * this.$$real +
-                this.$$imag * this.$$imag
-            );
-        };
+      x = this.$$real;
+      y = this.$$imag;
+      magnitude = this.getMagnitude();
+      magnitude = magnitude < Complex.$$_EPSILON  // prevents from dividing by zero
+          ? Complex.$$_EPSILON
+          : magnitude;
 
-        Complex.prototype.getUnitAngle = function () {
-            var x, y, magnitude, quarter, angle, unitAngle;
+      //         ^             Legend:
+      //  II     *     I        '!' = 0 degrees
+      //         |              '*' = 90 degrees
+      //  ----@--+--!---->      '@' = 180 degrees
+      //         |              '%' = 270 degrees
+      //  III    %     IV
 
-            x = this.$$real;
-            y = this.$$imag;
-            magnitude = this.getMagnitude();
-            magnitude = magnitude < Complex.$$_EPSILON  // prevents from dividing by zero
-                ? Complex.$$_EPSILON
-                : magnitude;
+      quarter = (y >= 0)
+          ? (x >= 0 ? 1 : 2)
+          : (x <= 0 ? 3 : 4);
 
-            //         ^             Legend:
-            //  II     *     I        '!' = 0 degrees
-            //         |              '*' = 90 degrees
-            //  ----@--+--!---->      '@' = 180 degrees
-            //         |              '%' = 270 degrees
-            //  III    %     IV
+      switch (quarter) {
+          case 1:
+              angle = Math.asin(y / magnitude);
+              break;
+          case 2:
+              angle = Math.asin(-x / magnitude) + 0.5 * Math.PI;
+              break;
+          case 3:
+              angle = Math.asin(-y / magnitude) + Math.PI;
+              break;
+          case 4:
+              angle = Math.asin(x / magnitude) + 1.5 * Math.PI;
+              break;
+      }
 
-            quarter = (y >= 0)
-                ? (x >= 0 ? 1 : 2)
-                : (x <= 0 ? 3 : 4);
+      unitAngle = angle / (2 * Math.PI);
 
-            switch (quarter) {
-                case 1:
-                    angle = Math.asin(y / magnitude);
-                    break;
-                case 2:
-                    angle = Math.asin(-x / magnitude) + 0.5 * Math.PI;
-                    break;
-                case 3:
-                    angle = Math.asin(-y / magnitude) + Math.PI;
-                    break;
-                case 4:
-                    angle = Math.asin(x / magnitude) + 1.5 * Math.PI;
-                    break;
-            }
+      return unitAngle;
+  };
 
-            unitAngle = angle / (2 * Math.PI);
+  Complex.prototype.normalize = function () {
+      this.divideScalar(
+          this.getMagnitude()
+      );
 
-            return unitAngle;
-        };
+      return this;
+  };
+  */
+}
 
-        Complex.prototype.normalize = function () {
-            this.divideScalar(
-                this.getMagnitude()
-            );
-
-            return this;
-        };
-
-        return Complex;
-    }
-
-})();
+export default Complex;
