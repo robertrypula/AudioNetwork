@@ -39,7 +39,10 @@
       }
     </script>
 </head>
-<body onLoad="init()">
+<body>
+  <div>
+    <button type="button" onClick="init()">Init</button>
+  </div>
   <div>
     Frequency:
     <input type="range" min="0" max="20000" value="440" onChange="onFrequencyChange(this.value)" />
