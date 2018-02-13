@@ -3,32 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-    <title>Audio Network - https://slides.com/robertrypula - simple AudioContext graph</title>
+    <title>Audio Network - https://slides.com/robertrypula - simple AudioContext graph microphone</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
     <script>
-      var audioContext, oscillatorNode, gainNode;
+      var audioContext, microphoneNode, gainNode;
 
       function init() {
         audioContext = new AudioContext();
-
-        oscillatorNode = audioContext.createOscillator();
         gainNode = audioContext.createGain();
 
-        oscillatorNode.connect(gainNode);
+        connectMicrophoneTo(gainNode);
         gainNode.connect(audioContext.destination);
 
-        oscillatorNode.start();
-
-        onFrequencyChange(oscillatorNode.frequency.value);
         onVolumeChange(gainNode.gain.value);
       }
 
-      function onFrequencyChange(frequency) {
-        var currentTime = audioContext.currentTime;
+      function connectMicrophoneTo(audioNode) {
+        var
+          self = this,
+          constraints = {
+            video: false,
+            audio: true
+          };
 
-        oscillatorNode.frequency.setValueAtTime(frequency, currentTime);
-        document.getElementById('frequency').innerHTML = frequency;
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then(function (stream) {
+            microphoneNode = audioContext.createMediaStreamSource(stream);
+            microphoneNode.connect(audioNode);
+          })
+          .catch(function (error) {
+            alert(error);
+          });
       }
 
       function onVolumeChange(volume) {
@@ -44,12 +50,7 @@
     <button type="button" onClick="init()">Init</button>
   </div>
   <div>
-    Frequency:
-    <input type="range" min="0" max="20000" value="440" onChange="onFrequencyChange(this.value)" />
-    <span id="frequency"></span> Hz
-  </div>
-  <div>
-    Volume:
+    Microphone volume:
     <input type="range" min="0" max="1" value="1" step="0.01" onChange="onVolumeChange(this.value)" />
     <span id="volume"></span>%
   </div>
