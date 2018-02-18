@@ -29,7 +29,7 @@
     "dev": "npm run clean && webpack-dev-server --env.DEVELOPMENT --open",
     "build": "npm run clean && npm run test && npm run lint && npm run lint:tsfmt:verify && webpack --env.PRODUCTION",
     "test": "jest --coverage",
-    "test:watch": "jest --coverage --watch",
+    "test:watch": "jest --watch",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "lint:tsfmt:verify": "tsfmt --verify --no-tsfmt --no-tslint --no-tsconfig --no-vscode",
     "lint:tsfmt:replace": "tsfmt --replace --no-tsfmt --no-tslint --no-tsconfig --no-vscode",

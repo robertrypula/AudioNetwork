@@ -1,27 +1,27 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
+import { ISimpleMath } from '../common/simple-math/simple-math.interface';
 import { IComplex } from './complex.interface';
 
 class Complex implements IComplex {
+  private simpleMath: ISimpleMath;
   private real: number;
   private imaginary: number;
 
-  constructor(real: number, imaginary: number) {
+  constructor(simpleMath: ISimpleMath, real: number, imaginary: number) {
+    this.simpleMath = simpleMath; // TODO this is bad to have reference in every instance...
     this.real = real;
     this.imaginary = imaginary;
   }
 
+  // Complex.$$_EPSILON = 0.000001;
+  // Complex.$$_UNIT_RADIUS = 1;
+
+  public clone(): Complex {
+    return new Complex(this.simpleMath, this.real, this.imaginary);
+  }
+
   /*
-  Complex.$$_EPSILON = 0.000001;
-  Complex.$$_UNIT_RADIUS = 1;
-
-  Complex.prototype.clone = function () {
-      return new Complex(
-          this.$$real,
-          this.$$imag
-      );
-  };
-
   Complex.polar = function (unitAngle, magnitude) {
       var radian;
 
@@ -40,16 +40,18 @@ class Complex implements IComplex {
   Complex.zero = function () {
       return new Complex(0, 0);
   };
+  */
 
-  Complex.prototype.swap = function () {
-      var tmp = this.$$real;
+  public swap(): Complex {
+    const tmp: number = this.real;
 
-      this.$$real = this.$$imag;
-      this.$$imag = tmp;
+    this.real = this.imaginary;
+    this.imaginary = tmp;
 
-      return this;
-  };
+    return this;
+  }
 
+  /*
   Complex.prototype.add = function (b) {
       this.$$real += b.$$real;
       this.$$imag += b.$$imag;
@@ -74,27 +76,27 @@ class Complex implements IComplex {
 
       return this;
   };
-
-  Complex.prototype.conjugate = function () {
-      this.$$imag *= -1;
-
-      return this;
-  };
-
-  Complex.prototype.multiplyScalar = function (b) {
-      this.$$real *= b;
-      this.$$imag *= b;
-
-      return this;
-  };
-
-  Complex.prototype.divideScalar = function (b) {
-      this.$$real /= b;
-      this.$$imag /= b;
-
-      return this;
-  };
   */
+
+  public conjugate(): Complex {
+    this.imaginary *= -1;
+
+    return this;
+  }
+
+  public multiplyScalar(x: number): Complex {
+    this.real *= x;
+    this.imaginary *= x;
+
+    return this;
+  }
+
+  public divideScalar(x: number): Complex {
+    this.real /= x;
+    this.imaginary /= x;
+
+    return this;
+  }
 
   public getReal(): number {
     return this.real;
@@ -104,13 +106,12 @@ class Complex implements IComplex {
     return this.imaginary;
   }
 
+  public getMagnitude(): number {
+    return this.simpleMath.sqrt(
+      this.simpleMath.pow(this.real, 2) + this.simpleMath.pow(this.imaginary, 2)
+    );
+  }
   /*
-  Complex.prototype.getMagnitude = function () {
-      return Math.sqrt(
-          this.$$real * this.$$real +
-          this.$$imag * this.$$imag
-      );
-  };
 
   Complex.prototype.getUnitAngle = function () {
       var x, y, magnitude, quarter, angle, unitAngle;
@@ -152,15 +153,15 @@ class Complex implements IComplex {
 
       return unitAngle;
   };
-
-  Complex.prototype.normalize = function () {
-      this.divideScalar(
-          this.getMagnitude()
-      );
-
-      return this;
-  };
   */
+
+  public normalize(): Complex {
+    this.divideScalar(
+      this.getMagnitude()
+    );
+
+    return this;
+  }
 }
 
 export default Complex;
