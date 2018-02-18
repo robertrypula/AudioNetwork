@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from '../common/simple-math/simple-math.interface';
+import { ISimpleMath } from './../common/simple-math/simple-math.interface';
 import { IComplex } from './complex.interface';
 
 class Complex implements IComplex {
@@ -14,33 +14,9 @@ class Complex implements IComplex {
     this.imaginary = imaginary;
   }
 
-  // Complex.$$_EPSILON = 0.000001;
-  // Complex.$$_UNIT_RADIUS = 1;
-
   public clone(): Complex {
     return new Complex(this.simpleMath, this.real, this.imaginary);
   }
-
-  /*
-  Complex.polar = function (unitAngle, magnitude) {
-      var radian;
-
-      magnitude = typeof magnitude === 'undefined'
-          ? Complex.$$_UNIT_RADIUS
-          : magnitude;
-
-      radian = 2 * Math.PI * unitAngle;
-
-      return new Complex(
-          magnitude * Math.cos(radian),
-          magnitude * Math.sin(radian)
-      );
-  };
-
-  Complex.zero = function () {
-      return new Complex(0, 0);
-  };
-  */
 
   public swap(): Complex {
     const tmp: number = this.real;
@@ -51,32 +27,29 @@ class Complex implements IComplex {
     return this;
   }
 
-  /*
-  Complex.prototype.add = function (b) {
-      this.$$real += b.$$real;
-      this.$$imag += b.$$imag;
+  public add(x: Complex): Complex {
+    this.real += x.real;
+    this.imaginary += x.imaginary;
 
-      return this;
-  };
+    return this;
+  }
 
-  Complex.prototype.subtract = function (b) {
-      this.$$real -= b.$$real;
-      this.$$imag -= b.$$imag;
+  public subtract(x: Complex): Complex {
+    this.real -= x.real;
+    this.imaginary -= x.imaginary;
 
-      return this;
-  };
+    return this;
+  }
 
-  Complex.prototype.multiply = function (b) {
-      var
-          real = this.$$real * b.$$real - this.$$imag * b.$$imag,
-          imag = this.$$real * b.$$imag + this.$$imag * b.$$real;
+  public multiply(x: Complex): Complex {
+    const real = this.real * x.real - this.imaginary * x.imaginary;
+    const imaginary = this.real * x.imaginary + this.imaginary * x.real;
 
-      this.$$real = real;
-      this.$$imag = imag;
+    this.real = real;
+    this.imaginary = imaginary;
 
-      return this;
-  };
-  */
+    return this;
+  }
 
   public conjugate(): Complex {
     this.imaginary *= -1;
@@ -111,49 +84,49 @@ class Complex implements IComplex {
       this.simpleMath.pow(this.real, 2) + this.simpleMath.pow(this.imaginary, 2)
     );
   }
-  /*
 
-  Complex.prototype.getUnitAngle = function () {
-      var x, y, magnitude, quarter, angle, unitAngle;
+  public getUnitAngle(): number {
+    const MAGNITUDE_LIMIT = 0.0000001;
+    const x = this.real;
+    const y = this.imaginary;
+    const quarter = (y >= 0)
+      ? (x >= 0 ? 1 : 2)
+      : (x <= 0 ? 3 : 4);
+    let magnitude = this.getMagnitude();
+    let angle;
+    let unitAngle;
 
-      x = this.$$real;
-      y = this.$$imag;
-      magnitude = this.getMagnitude();
-      magnitude = magnitude < Complex.$$_EPSILON  // prevents from dividing by zero
-          ? Complex.$$_EPSILON
-          : magnitude;
+    // prevents from dividing by zero
+    magnitude = magnitude < MAGNITUDE_LIMIT
+      ? MAGNITUDE_LIMIT
+      : magnitude;
 
-      //         ^             Legend:
-      //  II     *     I        '!' = 0 degrees
-      //         |              '*' = 90 degrees
-      //  ----@--+--!---->      '@' = 180 degrees
-      //         |              '%' = 270 degrees
-      //  III    %     IV
+    //         ^             Legend:
+    //  II     *     I        '!' = 0 degrees
+    //         |              '*' = 90 degrees
+    //  ----@--+--!---->      '@' = 180 degrees
+    //         |              '%' = 270 degrees
+    //  III    %     IV
 
-      quarter = (y >= 0)
-          ? (x >= 0 ? 1 : 2)
-          : (x <= 0 ? 3 : 4);
+    switch (quarter) {
+      case 1:
+        angle = this.simpleMath.asin(y / magnitude);
+        break;
+      case 2:
+        angle = this.simpleMath.asin(-x / magnitude) + 0.5 * this.simpleMath.getPi();
+        break;
+      case 3:
+        angle = this.simpleMath.asin(-y / magnitude) + this.simpleMath.getPi();
+        break;
+      case 4:
+        angle = this.simpleMath.asin(x / magnitude) + 1.5 * this.simpleMath.getPi();
+        break;
+    }
 
-      switch (quarter) {
-          case 1:
-              angle = Math.asin(y / magnitude);
-              break;
-          case 2:
-              angle = Math.asin(-x / magnitude) + 0.5 * Math.PI;
-              break;
-          case 3:
-              angle = Math.asin(-y / magnitude) + Math.PI;
-              break;
-          case 4:
-              angle = Math.asin(x / magnitude) + 1.5 * Math.PI;
-              break;
-      }
+    unitAngle = angle / (2 * this.simpleMath.getPi());
 
-      unitAngle = angle / (2 * Math.PI);
-
-      return unitAngle;
-  };
-  */
+    return unitAngle;
+  }
 
   public normalize(): Complex {
     this.divideScalar(

@@ -2,6 +2,6 @@ import { version } from './index';
 
 describe('index', () => {
   it('should give proper version', () => {
-    expect(version).toBe('1.4.0-rc');
+    expect(version).toBe('2.0.0-rc');
   });
 });

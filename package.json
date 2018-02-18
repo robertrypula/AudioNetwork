@@ -36,7 +36,7 @@
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "clean": "rimraf dist && rimraf coverage"
   },
-  "main": "dist/audio-network-v1.4.0-rc.js",
+  "main": "dist/audio-network-v2.0.0-rc.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/"
