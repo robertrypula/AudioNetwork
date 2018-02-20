@@ -1,8 +1,14 @@
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
-import Complex from './../complex';
+import Complex from './complex';
 import { IComplexFactory } from './complex-factory.interface';
 
 class ComplexFactory implements IComplexFactory {
+  public static $inject: string[] = [
+    'SIMPLE_MATH'
+  ];
+
   private simpleMath: ISimpleMath;
 
   constructor(simpleMath: ISimpleMath) {
@@ -11,10 +17,6 @@ class ComplexFactory implements IComplexFactory {
 
   public create(real: number = 0, imaginary: number = 0): Complex {
     return new Complex(this.simpleMath, real, imaginary);
-  }
-
-  public createZero(): Complex {
-    return new Complex(this.simpleMath, 0, 0);
   }
 
   public createPolar(unitAngle: number = 0, magnitude: number = 1): Complex {
@@ -26,3 +28,5 @@ class ComplexFactory implements IComplexFactory {
     );
   }
 }
+
+export default ComplexFactory;

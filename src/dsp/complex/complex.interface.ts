@@ -1,3 +1,7 @@
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+
+import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
+
 interface IComplex {
   clone(): IComplex;
   swap(): IComplex;
@@ -15,7 +19,7 @@ interface IComplex {
 }
 
 interface IComplexStatic {
-  new(real: number, imaginary: number): IComplex;
+  new(simpleMath: ISimpleMath, real: number, imaginary: number): IComplex;
 }
 
 export {

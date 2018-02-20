@@ -1,4 +1,6 @@
-import SimpleMath from './../common/simple-math/simple-math';
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+
+import SimpleMath from './../../common/simple-math/simple-math';
 import Complex from './complex';
 
 describe('Complex', () => {
