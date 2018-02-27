@@ -63,6 +63,10 @@
           });
       }
 
+      function onSmoothingTimeConstantChange(value) {
+        analyserNode.smoothingTimeConstant = value;
+      }
+
       // -----------------------------------------------------------------------
       // animation, canvas 2d context
 
@@ -95,9 +99,9 @@
 
       function animationFrameLoop() {
         if (!animationFrameFirstCall) {
-            refreshDataOnScreen();
+          refreshDataOnScreen();
         } else {
-            animationFrameFirstCall = false;
+          animationFrameFirstCall = false;
         }
         requestAnimationFrame(animationFrameLoop);
       }
@@ -110,6 +114,8 @@
 
         drawTimeDomainData(ctxTimeDomainData, timeDomainData);
         drawFrequencyDomainData(ctxFrequencyData, frequencyData);
+
+        document.getElementById('smoothing-time-constant').innerHTML = analyserNode.smoothingTimeConstant;
       }
 
       function drawTimeDomainData(ctx, data) {
@@ -156,6 +162,12 @@
     <canvas id="time-domain"></canvas>
     <h2>Frequency domain</h2>
     <canvas id="frequency-domain"></canvas>
+    <br/>
+    <div>
+      Smoothing time constant:
+      <input type="range" min="0" max="1" value="1" step="0.01" onChange="onSmoothingTimeConstantChange(this.value)" />
+      <span id="smoothing-time-constant"></span>
+    </div>
   </div>
 </body>
 </html>

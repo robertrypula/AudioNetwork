@@ -8,7 +8,7 @@
 
       <script src="https://audio-network.rypula.pl/build/audio-network-v1.3.0.min.js"></script>
       <script>
-        var DFT_SIZE = 128;
+        var DFT_SIZE = 100;      // we are not using FFT algoritm so it's ok to use non power of two values
         var FREQUENCY_BIN_SIZE = DFT_SIZE * 0.5;
         var Queue = AudioNetwork.Common.Queue;
         var SampleChart = AudioNetwork.Visualizer.SampleChart;
@@ -63,6 +63,7 @@
           var amplitude;
           var cycles;
           var sample;
+          var windowFunction;
           var i, j;
 
           for (i = 0; i < DFT_SIZE; i++) {
@@ -79,7 +80,8 @@
             timeDomain.push(sample);
           }
 
-          frequencyDomain = getFrequencyData(timeDomain, true);
+          windowFunction = document.getElementById('window-function').checked;
+          frequencyDomain = getFrequencyData(timeDomain, windowFunction);
           for (i = 0; i < frequencyDomain.length; i++) {
             queue2.pushEvenIfFull(frequencyDomain[i]);
           }
@@ -94,8 +96,6 @@
   </head>
   <body onLoad="init()">
     <div id="wave" class="chart"></div>
-    <br/>
-    <div id="dft" class="chart"></div>
     <br/>
     Cycles:
     <input type="number" id="cycles-1" value="5" onChange="refresh()" />
@@ -114,5 +114,11 @@
     <br/>
     Noise amplitude:
     <input type="number" id="noise-amplitude" value="0.00" step="0.001" onChange="refresh()" />
+    <br/>
+    <br/>
+    <div id="dft" class="chart"></div>
+
+    Apply window function:
+    <input type="checkbox" id="window-function" onChange="refresh()" value="1" checked="checked" />
   </body>
 </html>
