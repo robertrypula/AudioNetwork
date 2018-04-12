@@ -17,9 +17,9 @@
 
         analyserNode = audioContext.createAnalyser();
         analyserNode.fftSize = FFT_SIZE;
+        analyserNode.smoothingTimeConstant = 0.8;
 
         connectMicrophoneTo(analyserNode);
-        analyserNode.connect(audioContext.destination);
 
         ctxTimeDomainData = getConfiguredCanvasContext('time-domain', FFT_SIZE, CANVAS_HEIGHT);
         ctxFrequencyData = getConfiguredCanvasContext('frequency-domain', FFT_SIZE * 0.5, CANVAS_HEIGHT);
@@ -45,6 +45,14 @@
         return data;
       }
 
+      function getFftResolution() {
+        return audioContext.sampleRate / analyserNode.fftSize;
+      }
+
+      function getFrequency(fftBinIndex) {
+        return fftBinIndex * getFftResolution();
+      }
+
       function connectMicrophoneTo(audioNode) {
         var
           self = this,
@@ -65,6 +73,20 @@
 
       function onSmoothingTimeConstantChange(value) {
         analyserNode.smoothingTimeConstant = value;
+      }
+
+      function getIndexOfMax(data) {
+        var i, maxIndex, max, value;
+
+        for (i = 0; i < data.length; i++) {
+          value = data[i];
+          if (i === 0 || value > max) {
+            max = value;
+            maxIndex = i;
+          }
+        }
+
+        return maxIndex;
       }
 
       // -----------------------------------------------------------------------
@@ -107,7 +129,7 @@
       }
 
       function refreshDataOnScreen() {
-        var timeDomainData, frequencyData;
+        var timeDomainData, frequencyData, dbc, frequencyDataMaxValueIndex;
 
         timeDomainData = getTimeDomainData();
         frequencyData = getFrequencyData();
@@ -116,6 +138,19 @@
         drawFrequencyDomainData(ctxFrequencyData, frequencyData);
 
         document.getElementById('smoothing-time-constant').innerHTML = analyserNode.smoothingTimeConstant;
+
+        dbc = analyserNode.frequencyBinCount;
+        document.getElementById('frequency-bin-log').innerHTML =
+            '[' + 0 + '] ' + frequencyData[0].toFixed(2) + ' dB (0.00 Hz) - DC offset' + '<br/>' +
+            '[' + (0.0625 * dbc) + '] ' + frequencyData[0.0625 * dbc].toFixed(2) + ' dB (' + getFrequency(0.0625 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.1250 * dbc) + '] ' + frequencyData[0.1250 * dbc].toFixed(2) + ' dB (' + getFrequency(0.1250 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.2500 * dbc) + '] ' + frequencyData[0.2500 * dbc].toFixed(2) + ' dB (' + getFrequency(0.2500 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.5000 * dbc) + '] ' + frequencyData[0.5000 * dbc].toFixed(2) + ' dB (' + getFrequency(0.5000 * dbc).toFixed(2) + ' Hz) - middle index' + '<br/>' +
+            '[' + (dbc - 1) + '] ' + frequencyData[dbc - 1].toFixed(2) + ' dB (' + getFrequency(dbc - 1).toFixed(2) + ' Hz) - last index';
+
+        frequencyDataMaxValueIndex = getIndexOfMax(frequencyData),
+        document.getElementById('frequency-bin-loudest').innerHTML =
+            '[' + frequencyDataMaxValueIndex + '] ' + frequencyData[frequencyDataMaxValueIndex].toFixed(2) + ' dB (' + getFrequency(frequencyDataMaxValueIndex).toFixed(2) + ' Hz)';
       }
 
       function drawTimeDomainData(ctx, data) {
@@ -165,8 +200,18 @@
     <br/>
     <div>
       Smoothing time constant:
-      <input type="range" min="0" max="1" value="1" step="0.01" onChange="onSmoothingTimeConstantChange(this.value)" />
+      <input type="range" min="0" max="1" value="0.8" step="0.01" onChange="onSmoothingTimeConstantChange(this.value)" />
       <span id="smoothing-time-constant"></span>
+    </div>
+    <br/>
+    <div>
+      Frequency bins:
+      <pre id="frequency-bin-log"></pre>
+    </div>
+    <br/>
+    <div>
+      Loudest frequency bin:
+      <pre id="frequency-bin-loudest"></pre>
     </div>
   </div>
 </body>
