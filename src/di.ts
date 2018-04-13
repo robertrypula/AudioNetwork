@@ -10,6 +10,8 @@ import ComplexFactory from './dsp/complex/complex-factory';
 import { COMPLEX_FACTORY } from './dsp/complex/di-token';
 import { DSP_MODULE } from './dsp/di-token';
 import DspModule from './dsp/dsp-module';
+import { FFT } from './dsp/fft/di-token';
+import Fft from './dsp/fft/fft';
 
 const injector = new Injector();
 
@@ -17,6 +19,7 @@ injector.registerService(SIMPLE_MATH, SimpleMath);
 injector.registerService(COMMON_MODULE, CommonModule);
 
 injector.registerService(COMPLEX_FACTORY, ComplexFactory);
+injector.registerService(FFT, Fft);
 injector.registerService(DSP_MODULE, DspModule);
 
 export default injector;

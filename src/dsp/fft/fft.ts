@@ -3,8 +3,9 @@
 import { IComplexFactory } from '../complex/complex-factory.interface';
 import { IComplex } from '../complex/complex.interface';
 import { COMPLEX_FACTORY } from '../complex/di-token';
+import { IFft } from './fft.interface';
 
-class Fft {
+class Fft implements IFft {
   public static $inject: string[] = [
     COMPLEX_FACTORY
   ];
@@ -14,8 +15,9 @@ class Fft {
   ) {
   }
 
-  /*
-  Fft.forward = function (input) {
+  public forward(input: IComplex[]): IComplex[] {
+    return input;
+    /*
     var
       n = input.length,
       nHalf,
@@ -47,8 +49,10 @@ class Fft {
     }
 
     return output;
-  };
+    */
+  }
 
+  /*
   Fft.inverse = function (input) {
     var
       output = [],
@@ -81,3 +85,5 @@ class Fft {
   }
 
 }
+
+export default Fft;

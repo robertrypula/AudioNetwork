@@ -2,14 +2,18 @@
 
 import { IComplexFactory } from './complex/complex-factory.interface';
 import { COMPLEX_FACTORY } from './complex/di-token';
+import { FFT } from './fft/di-token';
+import { IFft } from './fft/fft.interface';
 
 class DspModule {
   public static $inject: string[] = [
-    COMPLEX_FACTORY
+    COMPLEX_FACTORY,
+    FFT
   ];
 
   constructor(
-    public complexFactory: IComplexFactory
+    public complexFactory: IComplexFactory,
+    public fft: IFft
   ) {
   }
 }
