@@ -1,3 +1,5 @@
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+
 interface ISimpleMath {
   getPi(): number;
   sin(x: number): number;

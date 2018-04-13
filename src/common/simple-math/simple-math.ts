@@ -1,3 +1,5 @@
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+
 import { ISimpleMath } from './simple-math.interface';
 
 class SimpleMath implements ISimpleMath {

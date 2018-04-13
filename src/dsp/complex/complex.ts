@@ -4,14 +4,13 @@ import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import { IComplex } from './complex.interface';
 
 class Complex implements IComplex {
-  private simpleMath: ISimpleMath;
-  private real: number;
-  private imaginary: number;
-
-  constructor(simpleMath: ISimpleMath, real: number, imaginary: number) {
-    this.simpleMath = simpleMath; // TODO this is bad to have reference in every instance...
-    this.real = real;
-    this.imaginary = imaginary;
+  // TODO probably it's bad to have reference to 'simpleMath'
+  // in each Complex object but it's how DI works...
+  constructor(
+    private simpleMath: ISimpleMath,
+    private real: number,
+    private imaginary: number
+  ) {
   }
 
   public clone(): Complex {
