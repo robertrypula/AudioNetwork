@@ -10,5 +10,7 @@ const common: CommonModule = injector.get(COMMON_MODULE);
 const dsp: DspModule = injector.get(DSP_MODULE);
 
 export { version } from './version';
-export { dsp };
-export { common };
+export {
+  dsp,
+  common
+};
