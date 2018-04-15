@@ -1,10 +1,13 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
+import { staticImplements } from 'rr-tsdi';
+
 import { SIMPLE_MATH } from '../../common/simple-math/di-token';
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import Complex from './complex';
-import { IComplexFactory } from './complex-factory.interface';
+import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
 
+@staticImplements<IComplexFactoryStatic>()
 class ComplexFactory implements IComplexFactory {
   public static $inject: string[] = [
     SIMPLE_MATH

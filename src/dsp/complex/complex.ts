@@ -1,8 +1,11 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
-import { IComplex } from './complex.interface';
+import { staticImplements } from 'rr-tsdi';
 
+import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
+import { IComplex, IComplexStatic } from './complex.interface';
+
+@staticImplements<IComplexStatic>()
 class Complex implements IComplex {
   // TODO probably it's bad to have reference to 'simpleMath'
   // in each Complex object but it's how DI works...

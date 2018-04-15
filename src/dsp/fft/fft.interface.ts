@@ -5,6 +5,7 @@ import { IComplex } from '../complex/complex.interface';
 
 interface IFft {
   forward(input: IComplex[]): IComplex[];
+  inverse(input: IComplex[]): IComplex[];
 }
 
 interface IFftStatic {

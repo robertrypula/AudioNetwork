@@ -1,7 +1,10 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from './simple-math.interface';
+import { staticImplements } from 'rr-tsdi';
 
+import { ISimpleMath, ISimpleMathStatic } from './simple-math.interface';
+
+@staticImplements<ISimpleMathStatic>()
 class SimpleMath implements ISimpleMath {
   public getPi(): number {
     return Math.PI;
