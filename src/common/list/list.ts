@@ -1,56 +1,60 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-class List {
-  constructor(/*sizeMax*/) {
-    /*
-    this.$$data = [];
-    this.$$positionStart = null;
-    this.$$positionEnd = null;
-    this.$$size = null;
-    this.$$sizeMax = null;
+import { staticImplements } from 'rr-tsdi';
+
+import { IList, IListStatic } from './list.interface';
+
+@staticImplements<IListStatic<T>>()
+class List<T> implements IList<T> {
+  private data: T[];
+  private positionStart: number;
+  private positionEnd: number;
+  private size: number;
+  private sizeMax: number;
+
+  constructor(sizeMax: number) {
+    this.data = [];
     this.setSizeMax(sizeMax);
-    */
   }
 
-  /*
-  List.prototype.clone = function () {
-    var
-      buffer = new List(this.$$sizeMax),
-      dataLength = this.$$data.length,
-      i;
+  public clone(): List<T> {
+    const list = new List<T>(this.sizeMax);
+    const dataLength = this.data.length;
+    let i;
 
-    buffer.$$positionStart = this.$$positionStart;
-    buffer.$$positionEnd = this.$$positionEnd;
-    buffer.$$size = this.$$size;
+    list.positionStart = this.positionStart;
+    list.positionEnd = this.positionEnd;
+    list.size = this.size;
 
     for (i = 0; i < dataLength; i++) {
-      buffer[i] = this.$$data[i];
+      list.data[i] = this.data[i];
     }
 
-    return buffer;
+    return list;
   }
 
-  List.prototype.setSizeMax = function (sizeMax) {
-    this.$$positionStart = 0;
-    this.$$positionEnd = 0;
-    this.$$size = 0;
-    this.$$sizeMax = sizeMax;
-    this.$$data.length = 0;        // drop all data
-    this.$$data.length = sizeMax;
+  public setSizeMax(sizeMax: number): void {
+    this.positionStart = 0;
+    this.positionEnd = 0;
+    this.size = 0;
+    this.sizeMax = sizeMax;
+    this.data.length = 0;        // drop all data
+    this.data.length = sizeMax;  // pre-allokate space
   }
 
-  List.prototype.push = function (value) {
-    if (this.$$size === this.$$sizeMax) {
+  public append(value: T): boolean {
+    if (this.size === this.sizeMax) {
       return false;
     }
 
-    this.$$data[this.$$positionEnd] = value;
-    this.$$positionEnd = (this.$$positionEnd + 1) % this.$$sizeMax;
-    this.$$size++;
+    this.data[this.positionEnd] = value;
+    this.positionEnd = (this.positionEnd + 1) % this.sizeMax;
+    this.size++;
 
     return true;
   }
 
+  /*
   List.prototype.pushEvenIfFull = function (value) {
     if (this.isFull()) {
       this.pop();
@@ -82,11 +86,13 @@ class List {
   List.prototype.getSize = function () {
     return this.$$size;
   }
+  */
 
-  List.prototype.getSizeMax = function () {
-    return this.$$sizeMax;
+  public getSizeMax(): number {
+    return this.sizeMax;
   }
 
+  /*
   List.prototype.isFull = function () {
     return this.$$size === this.$$sizeMax;
   }
@@ -112,3 +118,5 @@ class List {
   }
   */
 }
+
+export default List;
