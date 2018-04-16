@@ -1,16 +1,17 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+/*
 'use strict';
 
 (function () {
     AudioNetwork.Injector
-        .registerFactory('Rewrite.Util.Buffer', Buffer);
+        .registerFactory('Rewrite.Util.List', List);
 
-    Buffer.$inject = [];
+    List.$inject = [];
 
-    function Buffer() {
-        var Buffer;
+    function List() {
+        var List;
 
-        Buffer = function (sizeMax) {
+        List = function (sizeMax) {
             this.$$data = [];
             this.$$positionStart = null;
             this.$$positionEnd = null;
@@ -19,9 +20,9 @@
             this.setSizeMax(sizeMax);
         };
 
-        Buffer.prototype.clone = function () {
+        List.prototype.clone = function () {
             var
-                buffer = new Buffer(this.$$sizeMax),
+                buffer = new List(this.$$sizeMax),
                 dataLength = this.$$data.length,
                 i;
 
@@ -36,7 +37,7 @@
             return buffer;
         };
 
-        Buffer.prototype.setSizeMax = function (sizeMax) {
+        List.prototype.setSizeMax = function (sizeMax) {
             this.$$positionStart = 0;
             this.$$positionEnd = 0;
             this.$$size = 0;
@@ -45,7 +46,7 @@
             this.$$data.length = sizeMax;
         };
 
-        Buffer.prototype.push = function (value) {
+        List.prototype.push = function (value) {
             if (this.$$size === this.$$sizeMax) {
                 return false;
             }
@@ -57,14 +58,14 @@
             return true;
         };
 
-        Buffer.prototype.pushEvenIfFull = function (value) {
+        List.prototype.pushEvenIfFull = function (value) {
             if (this.isFull()) {
                 this.pop();
             }
             this.push(value);
         };
 
-        Buffer.prototype.pop = function () {
+        List.prototype.pop = function () {
             var result;
 
             if (this.$$size === 0) {
@@ -77,7 +78,7 @@
             return result;
         };
 
-        Buffer.prototype.getItem = function (index) {
+        List.prototype.getItem = function (index) {
             if (index >= this.$$size || index < 0) {
                 return null;
             }
@@ -85,19 +86,19 @@
             return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
         };
 
-        Buffer.prototype.getSize = function () {
+        List.prototype.getSize = function () {
             return this.$$size;
         };
 
-        Buffer.prototype.getSizeMax = function () {
+        List.prototype.getSizeMax = function () {
             return this.$$sizeMax;
         };
 
-        Buffer.prototype.isFull = function () {
+        List.prototype.isFull = function () {
             return this.$$size === this.$$sizeMax;
         };
 
-        Buffer.prototype.getAll = function () {
+        List.prototype.getAll = function () {
             var i, result = [];
 
             for (i = 0; i < this.getSize(); i++) {
@@ -109,7 +110,7 @@
             return result;
         };
 
-        Buffer.prototype.fillWith = function (value) {
+        List.prototype.fillWith = function (value) {
             var i;
 
             for (i = 0; i < this.getSizeMax(); i++) {
@@ -117,7 +118,8 @@
             }
         };
 
-        return Buffer;
+        return List;
     }
 
 })();
+*/
