@@ -3,23 +3,27 @@
 import { staticImplements } from 'rr-tsdi';
 
 import GenericException from '../../generic-exception';
+import { ISimpleMath } from '../simple-math/simple-math.interface';
 import { IList, IListStatic } from './list.interface';
 
-// @staticImplements<IListStatic<T>>()
+@staticImplements<IListStatic<T>>()
 class List<T> implements IList<T> {
-  private data: T[];
-  private positionStart: number;
-  private positionEnd: number;
-  private size: number;
-  private sizeMax: number;
+  protected data: T[];
+  protected positionStart: number;
+  protected positionEnd: number;
+  protected size: number;
+  protected sizeMax: number;
 
-  constructor(sizeMax: number) {
+  constructor(
+    protected simpleMath: ISimpleMath,
+    sizeMax: number
+  ) {
     this.data = [];
     this.setSizeMax(sizeMax);
   }
 
   public clone(): List<T> {
-    const list = new List<T>(this.sizeMax);
+    const list = new List<T>(this.simpleMath, this.sizeMax);
     const dataLength = this.data.length;
     let i;
 
@@ -88,15 +92,42 @@ class List<T> implements IList<T> {
     return result;
   }
 
+  public takeLast(): T {
+    let result: T;
+
+    if (this.size === 0) {
+      throw new GenericException(LIST_EMPTY_NOTHING_TO_TAKE);
+    }
+
+    this.positionEnd = (this.positionEnd + this.sizeMax - 1) % this.sizeMax;
+    result = this.data[this.positionEnd];
+    this.size--;
+
+    return result;
+  }
+
+  public fillWith(value: T, size: number = Infinity): IList<T> {
+    const limit = this.simpleMath.min(this.sizeMax, size);
+    let i;
+
+    for (i = 0; i < limit; i++) {
+      this.append(value);
+    }
+
+    return this;
+  }
+
   // --------
 
-  public setSizeMax(sizeMax: number): void {
+  public setSizeMax(sizeMax: number): IList<T> {
     this.positionStart = 0;
     this.positionEnd = 0;
     this.size = 0;
     this.sizeMax = sizeMax;
     this.data.length = 0;        // drop all data
     this.data.length = sizeMax;  // pre-allokate space
+
+    return this;
   }
 
   /*

@@ -8,6 +8,8 @@ interface ISimpleMath {
   pow(x: number, exponent: number): number;
   sqrt(x: number): number;
   random(): number;
+  max(a: number, b: number): number;
+  min(a: number, b: number): number;
 }
 
 interface ISimpleMathStatic {

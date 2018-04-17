@@ -33,6 +33,14 @@ class SimpleMath implements ISimpleMath {
   public random(): number {
     return Math.random();
   }
+
+  public max(a: number, b: number): number {
+    return Math.max(a, b);
+  }
+
+  public min(a: number, b: number): number {
+    return Math.min(a, b);
+  }
 }
 
 export default SimpleMath;

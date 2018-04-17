@@ -1,5 +1,10 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
+import { Injector } from 'rr-tsdi';
+
+import { SIMPLE_MATH } from '../simple-math/di-token';
+import SimpleMath from '../simple-math/simple-math';
+import { ISimpleMath } from '../simple-math/simple-math.interface';
 import List from './list';
 
 describe('List', () => {
@@ -11,9 +16,15 @@ describe('List', () => {
   const INDEX_TWO = 2;
   const SIZE_MAX: number = 3;
   let list: List<number>;
+  let simpleMath: ISimpleMath;
 
   beforeEach(() => {
-    list = new List<number>(SIZE_MAX);
+    const injector = new Injector();
+
+    injector.registerService(SIMPLE_MATH, SimpleMath);
+    simpleMath = injector.get(SIMPLE_MATH);
+
+    list = new List<number>(simpleMath, SIZE_MAX);
   });
 
   it('should create proper instance', () => {
@@ -94,6 +105,55 @@ describe('List', () => {
     }).toThrow();
   });
 
+  it('should properly take first element of the list', () => {
+    const valueArray = [
+      INDEX_ZERO_VALUE,
+      INDEX_ONE_VALUE,
+      INDEX_TWO_VALUE
+    ];
+
+    expect(list.appendArray(valueArray)).toBe(list);
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_ONE_VALUE);
+    expect(list.getAt(INDEX_TWO)).toBe(INDEX_TWO_VALUE);
+    expect(list.getSize()).toBe(3);
+
+    expect(list.takeFirst()).toBe(INDEX_ZERO_VALUE);
+
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ONE_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_TWO_VALUE);
+    expect(() => {
+      list.getAt(INDEX_TWO);
+    }).toThrow();
+    expect(list.getSize()).toBe(2);
+  });
+
+  it('should properly take last element of the list', () => {
+    const valueArray = [
+      INDEX_ZERO_VALUE,
+      INDEX_ONE_VALUE,
+      INDEX_TWO_VALUE
+    ];
+
+    expect(list.appendArray(valueArray)).toBe(list);
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_ONE_VALUE);
+    expect(list.getAt(INDEX_TWO)).toBe(INDEX_TWO_VALUE);
+    expect(list.getSize()).toBe(3);
+
+    expect(list.takeLast()).toBe(INDEX_TWO_VALUE);
+
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_ONE_VALUE);
+    expect(() => {
+      list.getAt(INDEX_TWO);
+    }).toThrow();
+    expect(list.getSize()).toBe(2);
+  });
+
+  // it('should properly fill the list with value', () => {
+  // });
+
   // --------
 
   it('should return proper size of the list', () => {
@@ -119,7 +179,7 @@ describe('List', () => {
   it('should properly update size max and return new value', () => {
     const SIZE_MAX_NEW: number = 20;
 
-    list.setSizeMax(SIZE_MAX_NEW);
+    expect(list.setSizeMax(SIZE_MAX_NEW)).toBe(list);
     expect(list.getSizeMax()).toBe(SIZE_MAX_NEW);
   });
 
