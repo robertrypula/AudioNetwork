@@ -2,9 +2,43 @@
 
 interface IList<T> {
   clone(): IList<T>;
-  append(value: T): boolean;
+  getAt(position: number): T;
+  setAt(position: number, value: T): IList<T>;
+  append(value: T): IList<T>;
+  appendArray(valueArray: T[]): IList<T>;
+  takeFirst(): T;
+
+  // --------
+
   setSizeMax(sizeMax: number): void;
+  getSize(): number;
   getSizeMax(): number;
+  toArray(): T[];
+
+  /*
+getAt
+setAt
+append
+appendArray
+takeFirst
+takeLast
+fillWith()
+
+getSize
+getSizeMax
+setSizeMax()
+
+isFull
+isEmpty
+
+touchedReset()
+touched()
+forEach(item => {})
+
+getSkipedList(offset = 0, skipAmount = 2)
+
+toArray()
+  */
 }
 
 interface IListStatic<T> {

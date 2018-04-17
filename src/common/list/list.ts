@@ -2,9 +2,10 @@
 
 import { staticImplements } from 'rr-tsdi';
 
+import GenericException from '../../generic-exception';
 import { IList, IListStatic } from './list.interface';
 
-@staticImplements<IListStatic<T>>()
+// @staticImplements<IListStatic<T>>()
 class List<T> implements IList<T> {
   private data: T[];
   private positionStart: number;
@@ -33,6 +34,62 @@ class List<T> implements IList<T> {
     return list;
   }
 
+  public getAt(position: number): T {
+    if (position >= this.size || position < 0) {
+      throw new GenericException(POSITION_OUTSIDE_THE_RANGE, position);
+    }
+
+    return this.data[(this.positionStart + position) % this.sizeMax];
+  }
+
+  public setAt(position: number, value: T): List<T> {
+    if (position >= this.size || position < 0) {
+      throw new GenericException(POSITION_OUTSIDE_THE_RANGE, position);
+    }
+
+    this.data[(this.positionStart + position) % this.sizeMax] = value;
+
+    return this;
+  }
+
+  public append(value: T): List<T> {
+    if (this.size === this.sizeMax) {
+      throw new GenericException(LIST_FULL, value);
+    }
+
+    this.data[this.positionEnd] = value;
+    this.positionEnd = (this.positionEnd + 1) % this.sizeMax;
+    this.size++;
+
+    return this;
+  }
+
+  public appendArray(valueArray: T[]): List<T> {
+    let i;
+
+    for (i = 0; i < valueArray.length; i++) {
+      this.append(valueArray[i]);
+    }
+
+    return this;
+  }
+
+  public takeFirst(): T {
+    let result: T;
+
+    if (this.size === 0) {
+      throw new GenericException(LIST_EMPTY_NOTHING_TO_TAKE);
+    }
+
+    result = this.data[this.positionStart];
+    this.positionStart = (this.positionStart + 1) % this.sizeMax;
+    this.size--;
+
+    return result;
+  }
+
+  // --------
+
   public setSizeMax(sizeMax: number): void {
     this.positionStart = 0;
     this.positionEnd = 0;
@@ -40,18 +97,6 @@ class List<T> implements IList<T> {
     this.sizeMax = sizeMax;
     this.data.length = 0;        // drop all data
     this.data.length = sizeMax;  // pre-allokate space
-  }
-
-  public append(value: T): boolean {
-    if (this.size === this.sizeMax) {
-      return false;
-    }
-
-    this.data[this.positionEnd] = value;
-    this.positionEnd = (this.positionEnd + 1) % this.sizeMax;
-    this.size++;
-
-    return true;
   }
 
   /*
@@ -74,19 +119,11 @@ class List<T> implements IList<T> {
 
     return result;
   }
-
-  List.prototype.getItem = function (index) {
-    if (index >= this.$$size || index < 0) {
-      return null;
-    }
-
-    return this.$$data[(this.$$positionStart + index) % this.$$sizeMax];
-  }
-
-  List.prototype.getSize = function () {
-    return this.$$size;
-  }
   */
+
+  public getSize() {
+    return this.size;
+  }
 
   public getSizeMax(): number {
     return this.sizeMax;
@@ -102,7 +139,7 @@ class List<T> implements IList<T> {
 
     for (i = 0; i < this.getSize(); i++) {
       result.push(
-        this.getItem(i)
+        this.getAt(i)
       );
     }
 
@@ -117,6 +154,22 @@ class List<T> implements IList<T> {
     }
   }
   */
+
+  public toArray(): T[] {
+    let result: T[];
+    let i;
+
+    result = [];
+    for (i = 0; i < this.getSize(); i++) {
+      result.push(this.getAt(i));
+    }
+
+    return result;
+  }
 }
+
+const POSITION_OUTSIDE_THE_RANGE = 'Given position is outside the range';
+const LIST_FULL = 'List is full';
+const LIST_EMPTY_NOTHING_TO_TAKE = 'There is nothing to take, list is empty';
 
 export default List;

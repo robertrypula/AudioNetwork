@@ -6,11 +6,17 @@ import injector from './di';
 import { DSP_MODULE } from './dsp/di-token';
 import DspModule from './dsp/dsp-module';
 
-const common: CommonModule = injector.get(COMMON_MODULE);
-const dsp: DspModule = injector.get(DSP_MODULE);
+const getDspModule = (): DspModule => {
+  return injector.get(DSP_MODULE);
+};
+
+const getCommonModule = (): CommonModule => {
+  return injector.get(COMMON_MODULE);
+};
 
 export { version } from './version';
 export {
-  dsp,
-  common
+  injector,
+  getDspModule,
+  getCommonModule
 };
