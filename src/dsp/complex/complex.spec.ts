@@ -14,7 +14,7 @@ describe('Complex', () => {
   let complex: Complex;
 
   beforeEach(() => {
-    simpleMath = new SimpleMath();
+    simpleMath = new SimpleMath();       // TODO get simpleMath from DI
     complex = new Complex(simpleMath, REAL, IMAGINARY);
   });
 

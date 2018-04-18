@@ -2,7 +2,7 @@
 
 import CommonModule from './common/common-module';
 import { COMMON_MODULE } from './common/di-token';
-import injector from './di';
+import injector from './dependency-injection.config';
 import { DSP_MODULE } from './dsp/di-token';
 import DspModule from './dsp/dsp-module';
 

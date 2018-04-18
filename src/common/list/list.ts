@@ -2,7 +2,7 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import GenericException from '../../generic-exception';
+import GenericException from '../../common/generic-exception/generic-exception';
 import { ISimpleMath } from '../simple-math/simple-math.interface';
 import { IList, IListStatic } from './list.interface';
 

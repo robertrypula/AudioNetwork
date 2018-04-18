@@ -45,5 +45,27 @@ describe('Fft', () => {
     tmp2 = output.toArray().map((value: IComplex): number[] => [value.getReal(), value.getImaginary()]);
 
     expect(tmp2).toEqual(fftTestCaseA.output);
+
+    /*
+    TODO
+
+      complexFactory.createFromDto()
+      complex.toDto()
+      complex.isEqualTo(b: IComplex, epsilon)     move epsilon to DI/config
+
+      complexListUtil.fromDto(dto: ???): List<Complex>
+      complexListUtil.fromRawIQ(dto: number[]): List<Complex>
+      complexListUtil.toDto(list: List<Complex>): ???
+      complexListUtil.toRawIQ(list: List<Complex>): number[]
+      complexListUtil.isEqual(listA: List<Complex>, listB: List<Complex>): boolean
+    */
   });
+
+  /*
+  Signal class API proposal
+
+    signal.fromReal([1, 2, 3]);
+    signal.mix(Signal.complexSpiral(cyclesInLength, length));
+    signal.lowPass(0.5, );
+  */
 });
