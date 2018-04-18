@@ -2,18 +2,18 @@
 
 import { IComplexFactory } from './complex/complex-factory.interface';
 import { COMPLEX_FACTORY } from './complex/di-token';
-import { FFT } from './fft/di-token';
-import { IFft } from './fft/fft.interface';
+import { FOURIER_TRANSFORM } from './fourier-transform/di-token';
+import { IFourierTransform } from './fourier-transform/fourier-transform.interface';
 
 class DspModule {
   public static $inject: string[] = [
     COMPLEX_FACTORY,
-    FFT
+    FOURIER_TRANSFORM
   ];
 
   constructor(
     public complexFactory: IComplexFactory,
-    public fft: IFft
+    public fourierTransform: IFourierTransform
   ) {
   }
 }

@@ -2,28 +2,35 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { IComplexFactory } from '../complex/complex-factory.interface';
-import { IComplex } from '../complex/complex.interface';
-import { COMPLEX_FACTORY } from '../complex/di-token';
-import { IFft, IFftStatic } from './fft.interface';
+import { LIST_FACTORY } from '../../../common/list/di-token';
+import { IListFactory } from '../../../common/list/list-factory.interface';
+import { IList } from '../../../common/list/list.interface';
+import { IComplexFactory } from '../../complex/complex-factory.interface';
+import { IComplex } from '../../complex/complex.interface';
+import { COMPLEX_FACTORY } from '../../complex/di-token';
+import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
 
-@staticImplements<IFftStatic>()
-class Fft implements IFft {
+@staticImplements<IFourierTransformStatic>()
+class Fft implements IFourierTransform {
   public static $inject: string[] = [
+    LIST_FACTORY,
     COMPLEX_FACTORY
   ];
 
   constructor(
-    private complexFactory: IComplexFactory
+    protected listFactory: IListFactory,
+    protected complexFactory: IComplexFactory
   ) {
   }
 
-  public forward(input: IComplex[]): IComplex[] {
+  public forward(input: IList<IComplex>): IList<IComplex> {
+    return input;
+    /*
     const n = input.length;
     let nHalf: number;
-    let even: IComplex[];
-    let odd: IComplex[];
-    const output: IComplex[] = [];
+    let even: IList<IComplex>;
+    let odd: IList<IComplex>;
+    const output: IList<IComplex> = [];
     let wnkMultiplied: IComplex;
     let wnk: IComplex;
     let k: number;
@@ -49,10 +56,13 @@ class Fft implements IFft {
     }
 
     return output;
+    */
   }
 
-  public inverse(input: IComplex[]): IComplex[] {
-    let output: IComplex[] = [];
+  public inverse(input: IList<IComplex>): IList<IComplex> {
+    return input;
+    /*
+    let output: IList<IComplex> = [];
     let i: number;
 
     for (i = 0; i < input.length; i++) {
@@ -64,22 +74,8 @@ class Fft implements IFft {
     }
 
     return output;
+    */
   }
-
-  private getHalf(list: IComplex[], offset: number): IComplex[] {
-    const listHalf: IComplex[] = [];
-    const lengthHalf: number = list.length / 2;
-    let item: IComplex;
-    let i: number;
-
-    for (i = 0; i < lengthHalf; i++) {
-      item = list[i * 2 + offset];
-      listHalf.push(item);
-    }
-
-    return listHalf;
-  }
-
 }
 
 export default Fft;
