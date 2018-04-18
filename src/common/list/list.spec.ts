@@ -89,6 +89,24 @@ describe('List', () => {
     }).toThrow();
   });
 
+  it('should properly append new item to the list and remove first item when needed without throwing error', () => {
+    const value = 123456;
+
+    expect(list.appendEvenIfFull(INDEX_ZERO_VALUE)).toBe(list);
+    expect(list.appendEvenIfFull(INDEX_ONE_VALUE)).toBe(list);
+    expect(list.appendEvenIfFull(INDEX_TWO_VALUE)).toBe(list);
+
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_ONE_VALUE);
+    expect(list.getAt(INDEX_TWO)).toBe(INDEX_TWO_VALUE);
+
+    expect(list.appendEvenIfFull(value)).toBe(list);
+
+    expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ONE_VALUE);
+    expect(list.getAt(INDEX_ONE)).toBe(INDEX_TWO_VALUE);
+    expect(list.getAt(INDEX_TWO)).toBe(value);
+  });
+
   it('should properly append array of items up to size max', () => {
     const valueArray = [
       INDEX_ZERO_VALUE,
@@ -151,10 +169,52 @@ describe('List', () => {
     expect(list.getSize()).toBe(2);
   });
 
-  // it('should properly fill the list with value', () => {
-  // });
+  it('should properly fill the list with value', () => {
+    const value1 = 11111;
+    const value2 = 22222;
 
-  // --------
+    list.fillWith(value1, 2);
+
+    expect(list.getAt(INDEX_ZERO)).toBe(value1);
+    expect(list.getAt(INDEX_ONE)).toBe(value1);
+    expect(() => {
+      list.getAt(INDEX_TWO);
+    }).toThrow();
+
+    list.fillWith(value2);
+    expect(list.getAt(INDEX_ZERO)).toBe(value2);
+    expect(list.getAt(INDEX_ONE)).toBe(value2);
+    expect(list.getAt(INDEX_TWO)).toBe(value2);
+  });
+
+  it('should return true when list is full', () => {
+    expect(list.isFull()).toBe(false);
+    list.append(1);
+    expect(list.isFull()).toBe(false);
+    list.append(1);
+    expect(list.isFull()).toBe(false);
+    list.append(1);
+    expect(list.isFull()).toBe(true);
+  });
+
+  it('should return true when list is empty', () => {
+    expect(list.isEmpty()).toBe(true);
+    list.append(1);
+    expect(list.isEmpty()).toBe(false);
+    list.takeFirst();
+    expect(list.isEmpty()).toBe(true);
+  });
+
+  it('should properly update size max and return new value', () => {
+    const SIZE_MAX_NEW: number = 20;
+
+    expect(list.setSizeMax(SIZE_MAX_NEW)).toBe(list);
+    expect(list.getSizeMax()).toBe(SIZE_MAX_NEW);
+  });
+
+  it('should return same size max value as passed to constructor', () => {
+    expect(list.getSizeMax()).toBe(SIZE_MAX);
+  });
 
   it('should return proper size of the list', () => {
     expect(list.getSize()).toBe(0);
@@ -172,15 +232,58 @@ describe('List', () => {
     expect(list.getSize()).toBe(3);
   });
 
-  it('should return same size max value as passed to constructor', () => {
-    expect(list.getSizeMax()).toBe(SIZE_MAX);
+  it('should properly iterate trought the list items', () => {
+    const checkValue: number[] = [];
+    const checkIndex: number[] = [];
+
+    list.append(1);
+    list.append(2);
+    list.forEach((value) => {
+      checkValue.push(value);
+    });
+    expect(checkValue).toEqual([1, 2]);
+
+    checkValue.length = 0;
+    list.appendEvenIfFull(111);
+    list.appendEvenIfFull(222);
+    list.forEach((value, index) => {
+      checkValue.push(value);
+      checkIndex.push(index);
+    });
+    expect(checkValue).toEqual([2, 111, 222]);
+    expect(checkIndex).toEqual([0, 1, 2]);
+
+    checkValue.length = 0;
+    checkIndex.length = 0;
+    list.forEach((value, index) => {
+      checkValue.push(value);
+      checkIndex.push(index);
+
+      return false;   // 'false' means break the loop
+    });
+    expect(checkValue).toEqual([2]);
+    expect(checkIndex).toEqual([0]);
   });
 
-  it('should properly update size max and return new value', () => {
-    const SIZE_MAX_NEW: number = 20;
+  it('should properly filter the list items and the new list should be full', () => {
+    const checkValue: number[] = [];
+    const checkIndex: number[] = [];
+    let filteredList: List<number>;
 
-    expect(list.setSizeMax(SIZE_MAX_NEW)).toBe(list);
-    expect(list.getSizeMax()).toBe(SIZE_MAX_NEW);
+    list.appendArray([1, 2, 3]);
+    filteredList = list.filter((value) => {
+      if (value === 2) {
+        checkValue.push(value);
+        return true;
+      }
+
+      return false;
+    });
+    expect(checkValue).toEqual([2]);
+    expect(filteredList.getAt(0)).toBe(2);
+    expect(filteredList.getSize()).toBe(1);
+    expect(filteredList.getSizeMax()).toBe(1);
+    expect(filteredList.isFull()).toBe(true);
   });
 
   it('should return array of items', () => {

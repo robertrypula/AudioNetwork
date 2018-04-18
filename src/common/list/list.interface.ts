@@ -7,53 +7,22 @@ interface IList<T> {
   getAt(position: number): T;
   setAt(position: number, value: T): IList<T>;
   append(value: T): IList<T>;
-  // appendEvenIfFull(value: T): IList<T>;
+  appendEvenIfFull(value: T): IList<T>;
   appendArray(valueArray: T[]): IList<T>;
   // appendArrayEvenIfFull(value: T): IList<T>;
   takeFirst(): T;
   takeLast(): T;
   fillWith(value: T, size: number): IList<T>;
-
-  // --------
-
-  getSize(): number;
-  getSizeMax(): number;
+  isFull(): boolean;
+  isEmpty(): boolean;
   setSizeMax(sizeMax: number): IList<T>;
-
-  // isFull(): boolean;
-  // isEmpty(): boolean;
-
+  getSizeMax(): number;
+  getSize(): number;
   // touchedReset(): IList<T>
   // touched(): boolean
-  // forEach() ???
-  // getSkipedList ???
-
+  forEach(callback: (value: T, index?: number) => void | boolean): IList<T>;
+  filter(callback: (value: T, index?: number) => boolean): IList<T>;
   toArray(): T[];
-
-  /*
-getAt            OK
-setAt            OK
-append           OK
-appendArray      OK
-takeFirst        OK
-takeLast         OK
-fillWith()       tests missing
-
-getSize
-getSizeMax
-setSizeMax()
-
-isFull
-isEmpty
-
-touchedReset()
-touched()
-forEach(item => {})
-
-getSkipedList(offset = 0, skipAmount = 2)
-
-toArray()
-  */
 }
 
 interface IListStatic<T> {

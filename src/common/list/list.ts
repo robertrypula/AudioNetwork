@@ -68,6 +68,15 @@ class List<T> implements IList<T> {
     return this;
   }
 
+  public appendEvenIfFull(value: T): List<T> {
+    if (this.isFull()) {
+      this.takeFirst();
+    }
+    this.append(value);
+
+    return this;
+  }
+
   public appendArray(valueArray: T[]): List<T> {
     let i;
 
@@ -111,13 +120,19 @@ class List<T> implements IList<T> {
     let i;
 
     for (i = 0; i < limit; i++) {
-      this.append(value);
+      this.appendEvenIfFull(value);
     }
 
     return this;
   }
 
-  // --------
+  public isFull(): boolean {
+    return this.size === this.sizeMax;
+  }
+
+  public isEmpty(): boolean {
+    return this.size === 0;
+  }
 
   public setSizeMax(sizeMax: number): IList<T> {
     this.positionStart = 0;
@@ -130,61 +145,47 @@ class List<T> implements IList<T> {
     return this;
   }
 
-  /*
-  List.prototype.pushEvenIfFull = function (value) {
-    if (this.isFull()) {
-      this.pop();
-    }
-    this.push(value);
+  public getSizeMax(): number {
+    return this.sizeMax;
   }
-
-  List.prototype.pop = function () {
-    var result;
-
-    if (this.$$size === 0) {
-      return null;
-    }
-    result = this.$$data[this.$$positionStart];
-    this.$$positionStart = (this.$$positionStart + 1) % this.$$sizeMax;
-    this.$$size--;
-
-    return result;
-  }
-  */
 
   public getSize() {
     return this.size;
   }
 
-  public getSizeMax(): number {
-    return this.sizeMax;
-  }
-
-  /*
-  List.prototype.isFull = function () {
-    return this.$$size === this.$$sizeMax;
-  }
-
-  List.prototype.getAll = function () {
-    var i, result = [];
+  public forEach(callback: (item: T, index?: number) => void | boolean): List<T> {
+    let i;
 
     for (i = 0; i < this.getSize(); i++) {
-      result.push(
-        this.getAt(i)
-      );
+      if (callback(this.getAt(i), i) === false) {
+        break;
+      }
     }
+
+    return this;
+  }
+
+  public filter(callback: (value: T, index?: number) => boolean): List<T> {
+    const resultTmpArray: T[] = [];
+    let result: List<T>;
+    let value: T;
+    let i;
+
+    for (i = 0; i < this.getSize(); i++) {
+      value = this.getAt(i);
+      if (callback(value, i) === true) {
+        resultTmpArray.push(value);
+      }
+    }
+
+    result = new List<T>(
+      this.simpleMath,
+      resultTmpArray.length
+    );
+    result.appendArray(resultTmpArray);
 
     return result;
   }
-
-  List.prototype.fillWith = function (value) {
-    var i;
-
-    for (i = 0; i < this.getSizeMax(); i++) {
-      this.pushEvenIfFull(value);
-    }
-  }
-  */
 
   public toArray(): T[] {
     let result: T[];
