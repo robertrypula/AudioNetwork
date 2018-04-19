@@ -3,7 +3,7 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
-import { IComplex, IComplexStatic } from './complex.interface';
+import { IComplex, IComplexDto, IComplexStatic } from './complex.interface';
 
 @staticImplements<IComplexStatic>()
 class Complex implements IComplex {
@@ -136,6 +136,15 @@ class Complex implements IComplex {
     );
 
     return this;
+  }
+
+  public toDto(): IComplexDto {
+    /* tslint:disable:object-literal-sort-keys */
+    return {
+      real: this.real,
+      imaginary: this.imaginary
+    };
+    /* tslint:enable:object-literal-sort-keys */
   }
 }
 

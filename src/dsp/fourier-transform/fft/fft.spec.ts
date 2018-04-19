@@ -8,19 +8,21 @@ import { IListFactory } from '../../../common/list/list-factory.interface';
 import { IList } from '../../../common/list/list.interface';
 import { SIMPLE_MATH } from '../../../common/simple-math/di-token';
 import SimpleMath from '../../../common/simple-math/simple-math';
+import ComplexListUtil from '../../complex-list-util/complex-list-util';
+import { IComplexListDto, IComplexListUtil } from '../../complex-list-util/complex-list-util.interface';
+import { COMPLEX_LIST_UTIL } from '../../complex-list-util/di-token';
 import ComplexFactory from '../../complex/complex-factory';
 import { IComplexFactory } from '../../complex/complex-factory.interface';
 import { IComplex } from '../../complex/complex.interface';
 import { COMPLEX_FACTORY } from '../../complex/di-token';
 import { FOURIER_TRANSFORM } from '../di-token';
 import { IFourierTransform } from '../fourier-transform.interface';
+import { fourierTransformTestCaseA } from '../fourier-transform.spec-data';
 import Fft from './fft';
-import { fftTestCaseA } from './fft.spec-data';
 
 describe('Fft', () => {
   let fft: IFourierTransform;
-  let complexFactory: IComplexFactory;
-  let listFactory: IListFactory;
+  let complexListUtil: IComplexListUtil;
 
   beforeEach(() => {
     const injector = new Injector();
@@ -28,40 +30,31 @@ describe('Fft', () => {
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(LIST_FACTORY, ListFactory);
+    injector.registerService(COMPLEX_LIST_UTIL, ComplexListUtil);
     injector.registerService(FOURIER_TRANSFORM, Fft);
 
     fft = injector.get(FOURIER_TRANSFORM);
-    complexFactory = injector.get(COMPLEX_FACTORY);
-    listFactory = injector.get(LIST_FACTORY);
+    complexListUtil = injector.get(COMPLEX_LIST_UTIL);
   });
 
   it('should properly compute forward FFT (test case A)', () => {
-    const tmp: IComplex[] = fftTestCaseA.input.map((v: number[]): IComplex => complexFactory.create(v[0], v[1]));
-    const input: IList<IComplex> = listFactory.createFromArray<IComplex>(tmp);
+    const complexListDto = fourierTransformTestCaseA.input;
+    const input: IList<IComplex> = complexListUtil.fromDto(complexListDto);
     let output: IList<IComplex>;
-    let tmp2: any[];
+    let result: IComplexListDto;
 
     output = fft.forward(input);
-    tmp2 = output.toArray().map((value: IComplex): number[] => [value.getReal(), value.getImaginary()]);
+    result = complexListUtil.toDto(output);
 
-    expect(tmp2).toEqual(fftTestCaseA.output);
-
-    /*
-    TODO
-
-      complexFactory.createFromDto()
-      complex.toDto()
-      complex.isEqualTo(b: IComplex, epsilon)     move epsilon to DI/config
-
-      complexListUtil.fromDto(dto: ???): List<Complex>
-      complexListUtil.fromRawIQ(dto: number[]): List<Complex>
-      complexListUtil.toDto(list: List<Complex>): ???
-      complexListUtil.toRawIQ(list: List<Complex>): number[]
-      complexListUtil.isEqual(listA: List<Complex>, listB: List<Complex>): boolean
-    */
+    result.map((v, i) => {
+      expect(v.real).toBeCloseTo(fourierTransformTestCaseA.output[i].real, 6);
+      expect(v.imaginary).toBeCloseTo(fourierTransformTestCaseA.output[i].imaginary, 6);
+    });
   });
 
   /*
+  complex.isEqualTo(b: IComplex, epsilon)     move epsilon to DI/config
+
   Signal class API proposal
 
     signal.fromReal([1, 2, 3]);

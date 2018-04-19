@@ -6,7 +6,7 @@ import { SIMPLE_MATH } from '../../common/simple-math/di-token';
 import SimpleMath from '../../common/simple-math/simple-math';
 import Complex from './complex';
 import ComplexFactory from './complex-factory';
-
+import { IComplexDto } from './complex.interface';
 import { COMPLEX_FACTORY } from './di-token';
 
 describe('ComplexFactory', () => {
@@ -52,4 +52,12 @@ describe('ComplexFactory', () => {
     expect(complex.getImaginary()).toBeCloseTo(1.414214, NUMBER_OF_DIGITS);
   });
 
+  it('should create instance of Complex class basing on dto', () => {
+    const dto: IComplexDto = { real: 12, imaginary: -32 };
+    const complex: Complex = complexFactory.createFromDto(dto);
+
+    expect(complex).toBeInstanceOf(Complex);
+    expect(complex.getReal()).toBe(dto.real);
+    expect(complex.getImaginary()).toBe(dto.imaginary);
+  });
 });

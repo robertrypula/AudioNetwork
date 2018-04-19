@@ -2,6 +2,7 @@
 
 import SimpleMath from './../../common/simple-math/simple-math';
 import Complex from './complex';
+import { IComplexDto } from './complex.interface';
 
 describe('Complex', () => {
   const NUMBER_OF_DIGITS = 6;
@@ -153,5 +154,12 @@ describe('Complex', () => {
     expect(complexNormalized.getImaginary()).toBeCloseTo(IMAGINARY_NORMALIZED, NUMBER_OF_DIGITS);
     expect(complexNormalized.getMagnitude()).toBeCloseTo(UNIT, NUMBER_OF_DIGITS);
     expect(complex).toBe(complexNormalized);
+  });
+
+  it('should properly return DTO', () => {
+    const complexDto: IComplexDto = complex.toDto();
+
+    expect(complexDto.real).toBe(complex.getReal());
+    expect(complexDto.imaginary).toBe(complex.getImaginary());
   });
 });

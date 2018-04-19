@@ -24,13 +24,11 @@ class Fft implements IFourierTransform {
   }
 
   public forward(input: IList<IComplex>): IList<IComplex> {
-    return input;
-    /*
-    const n = input.length;
+    const n: number = input.getSize();
     let nHalf: number;
     let even: IList<IComplex>;
     let odd: IList<IComplex>;
-    const output: IList<IComplex> = [];
+    let output: IList<IComplex>;
     let wnkMultiplied: IComplex;
     let wnk: IComplex;
     let k: number;
@@ -41,22 +39,23 @@ class Fft implements IFourierTransform {
     }
 
     // even and odd parts
-    even = this.forward(this.getHalf(input, 0));
-    odd = this.forward(this.getHalf(input, 1));
+    even = this.forward(input.filter((value: IComplex, index: number) => index % 2 === 0));
+    odd = this.forward(input.filter((value: IComplex, index: number) => index % 2 === 1));
 
     // combine
-    output.length = n;
     nHalf = n / 2;
+    output = this.listFactory
+      .create<IComplex>(n)
+      .fillWith(undefined);
     for (k = 0; k < nHalf; k++) {
       unitAngle = -k / n;
       wnk = this.complexFactory.createPolar(unitAngle);
-      wnkMultiplied = wnk.clone().multiply(odd[k]);
-      output[k] = even[k].clone().add(wnkMultiplied);
-      output[nHalf + k] = even[k].clone().subtract(wnkMultiplied);
+      wnkMultiplied = wnk.clone().multiply(odd.getAt(k));
+      output.setAt(k, even.getAt(k).clone().add(wnkMultiplied));
+      output.setAt(nHalf + k, even.getAt(k).clone().subtract(wnkMultiplied));
     }
 
     return output;
-    */
   }
 
   public inverse(input: IList<IComplex>): IList<IComplex> {

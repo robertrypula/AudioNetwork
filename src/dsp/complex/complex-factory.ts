@@ -6,6 +6,7 @@ import { SIMPLE_MATH } from '../../common/simple-math/di-token';
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import Complex from './complex';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
+import { IComplexDto } from './complex.interface';
 
 @staticImplements<IComplexFactoryStatic>()
 class ComplexFactory implements IComplexFactory {
@@ -19,7 +20,11 @@ class ComplexFactory implements IComplexFactory {
   }
 
   public create(real: number = 0, imaginary: number = 0): Complex {
-    return new Complex(this.simpleMath, real, imaginary);
+    return new Complex(
+      this.simpleMath,
+      real,
+      imaginary
+    );
   }
 
   public createPolar(unitAngle: number = 0, magnitude: number = 1): Complex {
@@ -28,6 +33,14 @@ class ComplexFactory implements IComplexFactory {
     return this.create(
       magnitude * this.simpleMath.cos(radian),
       magnitude * this.simpleMath.sin(radian)
+    );
+  }
+
+  public createFromDto(complexDto: IComplexDto): Complex {
+    return new Complex(
+      this.simpleMath,
+      complexDto.real,
+      complexDto.imaginary
     );
   }
 }

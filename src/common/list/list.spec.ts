@@ -226,9 +226,8 @@ describe('List', () => {
     expect(list.getSize()).toBe(3);
     try {
       list.append(4);
-    } catch (e) {
-      /* tslint:disable:no-empty */
-    }
+      /* tslint:disable-next-line:no-empty */
+    } catch (e) { }
     expect(list.getSize()).toBe(3);
   });
 

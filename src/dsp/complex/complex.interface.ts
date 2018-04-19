@@ -2,6 +2,11 @@
 
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 
+interface IComplexDto {
+  real: number;
+  imaginary: number;
+}
+
 interface IComplex {
   clone(): IComplex;
   swap(): IComplex;
@@ -16,13 +21,19 @@ interface IComplex {
   getMagnitude(): number;
   getUnitAngle(): number;
   normalize(): IComplex;
+  toDto(): IComplexDto;
 }
 
 interface IComplexStatic {
-  new(simpleMath: ISimpleMath, real: number, imaginary: number): IComplex;
+  new(
+    simpleMath: ISimpleMath,
+    real: number,
+    imaginary: number
+  ): IComplex;
 }
 
 export {
+  IComplexDto,
   IComplex,
   IComplexStatic
 };

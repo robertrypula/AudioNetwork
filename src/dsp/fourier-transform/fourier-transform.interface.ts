@@ -2,6 +2,7 @@
 
 import { IListFactory } from '../../common/list/list-factory.interface';
 import { IList } from '../../common/list/list.interface';
+import { IComplexListDto } from '../complex-list-util/complex-list-util.interface';
 import { IComplexFactory } from '../complex/complex-factory.interface';
 import { IComplex } from '../complex/complex.interface';
 
@@ -17,7 +18,13 @@ interface IFourierTransformStatic {
   ): IFourierTransform;
 }
 
+interface IFourierTransformTestCase {
+  input: IComplexListDto;
+  output: IComplexListDto;
+}
+
 export {
   IFourierTransform,
-  IFourierTransformStatic
+  IFourierTransformStatic,
+  IFourierTransformTestCase
 };

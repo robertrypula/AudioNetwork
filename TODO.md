@@ -6,16 +6,16 @@
 - [DONE] finish physical layer example
 - finish data link layer simple example
 - move all modules to main NPM package
-    - switch all examples to the one lib file instead of development mode that loads all scripts
+- [DONE for all examples related to NPM package] switch all examples to the one lib file instead of development mode that loads all scripts
 - finish transport layer example
     - DataChunk listeners
     - segment listeners
     - example page itself
-- finish Audio Chat example 
-- replace Gulp by WebPack
-- configure unit tests from console
+- finish Audio Chat example
+- [DONE in PR] replace Gulp by WebPack
+- [DONE in PR] configure unit tests from console
 - [DONE] remove external google fonts
-    - improove website loading time in general
+    - [DONE] improove website loading time in general
 
 ## Physical Layer, Web Audio API and DSP stuff
 
@@ -32,16 +32,16 @@
     - SYNC setting 48/44.1 will no longer be needed in the Layers above Physical like Data Link Layer
     - custom FFT implementation
     - resampler
-    - FIR filter     
+    - FIR filter
 
 ## Data Link Layer
 
 - remove two way sync
     - look for frames in two FSK streams
-    - SYNC will not be required 
+    - SYNC will not be required
 
 ## Old todos (might be not valid anymore)
- 
+
 - DFT simple fix (code refactor)
 - full example DFT fix
     - add sampleRate input

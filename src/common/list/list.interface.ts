@@ -12,7 +12,7 @@ interface IList<T> {
   // appendArrayEvenIfFull(value: T): IList<T>;
   takeFirst(): T;
   takeLast(): T;
-  fillWith(value: T, size: number): IList<T>;
+  fillWith(value: T, size?: number): IList<T>;
   isFull(): boolean;
   isEmpty(): boolean;
   setSizeMax(sizeMax: number): IList<T>;
