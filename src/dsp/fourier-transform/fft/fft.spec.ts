@@ -13,11 +13,15 @@ import { IComplexListDto, IComplexListUtil } from '../../complex-list-util/compl
 import { COMPLEX_LIST_UTIL } from '../../complex-list-util/di-token';
 import ComplexFactory from '../../complex/complex-factory';
 import { IComplexFactory } from '../../complex/complex-factory.interface';
-import { IComplex } from '../../complex/complex.interface';
+import { IComplex, IComplexDto } from '../../complex/complex.interface';
 import { COMPLEX_FACTORY } from '../../complex/di-token';
 import { FOURIER_TRANSFORM } from '../di-token';
-import { IFourierTransform } from '../fourier-transform.interface';
-import { fourierTransformTestCaseA } from '../fourier-transform.spec-data';
+import { IFourierTransform, IFourierTransformTestCase } from '../fourier-transform.interface';
+import {
+  fourierTransformTestCaseA,
+  fourierTransformTestCaseB,
+  fourierTransformTestCaseC
+} from '../fourier-transform.spec-data';
 import Fft from './fft';
 
 describe('Fft', () => {
@@ -37,28 +41,60 @@ describe('Fft', () => {
     complexListUtil = injector.get(COMPLEX_LIST_UTIL);
   });
 
-  it('should properly compute forward FFT (test case A)', () => {
-    const complexListDto = fourierTransformTestCaseA.input;
-    const input: IList<IComplex> = complexListUtil.fromDto(complexListDto);
+  it('should properly compute forward FFT (Recursive, Decimation in time) for all test cases', () => {
+    const testCaseVector: IFourierTransformTestCase[] = [
+      fourierTransformTestCaseA,
+      fourierTransformTestCaseB,
+      fourierTransformTestCaseC
+    ];
+    let inputDto: IComplexListDto;
+    let outputDto: IComplexListDto;
+    let outputExpectationDto: IComplexListDto;
+    let input: IList<IComplex>;
     let output: IList<IComplex>;
-    let result: IComplexListDto;
 
-    output = fft.forward(input);
-    result = complexListUtil.toDto(output);
+    testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
+      inputDto = testCase.input;
+      outputExpectationDto = testCase.output;
 
-    result.map((v, i) => {
-      expect(v.real).toBeCloseTo(fourierTransformTestCaseA.output[i].real, 6);
-      expect(v.imaginary).toBeCloseTo(fourierTransformTestCaseA.output[i].imaginary, 6);
+      input = complexListUtil.fromDto(inputDto);
+      output = fft.forward(input);
+      outputDto = complexListUtil.toDto(output);
+      outputDto.forEach((v: IComplexDto, i: number) => {
+        expect(v.real).toBeCloseTo(outputExpectationDto[i].real, 6);
+        expect(v.imaginary).toBeCloseTo(outputExpectationDto[i].imaginary, 6);
+      });
+      // expect(outputDto).toEqual(outputExpectationDto);
+    });
+  });
+
+  it('should return same output as input for all test cases - fft.inverse(ftt.forward())', () => {
+    const testCaseVector: IFourierTransformTestCase[] = [
+      fourierTransformTestCaseA,
+      fourierTransformTestCaseB,
+      fourierTransformTestCaseC
+    ];
+    let inputDto: IComplexListDto;
+    let outputDto: IComplexListDto;
+    let input: IList<IComplex>;
+    let output: IList<IComplex>;
+
+    testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
+      inputDto = testCase.input;
+
+      input = complexListUtil.fromDto(inputDto);
+      output = fft.inverse(fft.forward(input));
+      outputDto = complexListUtil.toDto(output);
+      outputDto.forEach((v: IComplexDto, i: number) => {
+        expect(v.real).toBeCloseTo(testCase.input[i].real, 6);
+        expect(v.imaginary).toBeCloseTo(testCase.input[i].imaginary, 6);
+      });
+      // expect(outputDto).toEqual(outputExpectationDto);
     });
   });
 
   /*
   complex.isEqualTo(b: IComplex, epsilon)     move epsilon to DI/config
 
-  Signal class API proposal
-
-    signal.fromReal([1, 2, 3]);
-    signal.mix(Signal.complexSpiral(cyclesInLength, length));
-    signal.lowPass(0.5, );
   */
 });

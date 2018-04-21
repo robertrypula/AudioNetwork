@@ -1,0 +1,7 @@
+ /*
+  Signal class API proposal
+
+    signal.fromReal([1, 2, 3]);
+    signal.mix(Signal.complexSpiral(cyclesInLength, length));
+    signal.lowPass(0.5, );
+*/

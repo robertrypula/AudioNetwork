@@ -10,6 +10,14 @@ import { IComplex } from '../../complex/complex.interface';
 import { COMPLEX_FACTORY } from '../../complex/di-token';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
 
+/*
+  One of the simplest forms of FFT implementation
+  (recursive, decimation in time)
+
+  NOTE: this implementation is not efficient - the goal
+  was to just keep it clean and simple
+*/
+
 @staticImplements<IFourierTransformStatic>()
 class Fft implements IFourierTransform {
   public static $inject: string[] = [
@@ -34,6 +42,8 @@ class Fft implements IFourierTransform {
     let k: number;
     let unitAngle: number;
 
+    // TODO powers of 2 only - missing check
+
     if (n === 1) {
       return input;
     }
@@ -47,10 +57,11 @@ class Fft implements IFourierTransform {
     output = this.listFactory
       .create<IComplex>(n)
       .fillWith(undefined);
+
     for (k = 0; k < nHalf; k++) {
       unitAngle = -k / n;
       wnk = this.complexFactory.createPolar(unitAngle);
-      wnkMultiplied = wnk.clone().multiply(odd.getAt(k));
+      wnkMultiplied = wnk.clone().multiply(odd.getAt(k));     // <--- clone() probably not required
       output.setAt(k, even.getAt(k).clone().add(wnkMultiplied));
       output.setAt(nHalf + k, even.getAt(k).clone().subtract(wnkMultiplied));
     }
@@ -59,21 +70,17 @@ class Fft implements IFourierTransform {
   }
 
   public inverse(input: IList<IComplex>): IList<IComplex> {
-    return input;
-    /*
-    let output: IList<IComplex> = [];
-    let i: number;
+    let output: IList<IComplex> = this.listFactory.create<IComplex>(input.getSize());
 
-    for (i = 0; i < input.length; i++) {
-      output.push(input[i].clone().swap());
-    }
+    input.forEach((value: IComplex) => {
+      output.append(value.clone().swap());
+    });
     output = this.forward(output);
-    for (i = 0; i < output.length; i++) {
-      output[i].swap().divideScalar(output.length);
-    }
+    output.forEach((value: IComplex) => {
+      value.swap().divideScalar(output.getSize());
+    });
 
     return output;
-    */
   }
 }
 
