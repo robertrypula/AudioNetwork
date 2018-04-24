@@ -3,11 +3,12 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { LIST_FACTORY } from '../../../common/list/di-token';
+import { COMPLEX_FACTORY } from '../../complex/di-token';
+
 import { IListFactory } from '../../../common/list/list-factory.interface';
 import { IList } from '../../../common/list/list.interface';
 import { IComplexFactory } from '../../complex/complex-factory.interface';
 import { IComplex } from '../../complex/complex.interface';
-import { COMPLEX_FACTORY } from '../../complex/di-token';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
 
 /*
@@ -19,7 +20,7 @@ import { IFourierTransform, IFourierTransformStatic } from './../fourier-transfo
 */
 
 @staticImplements<IFourierTransformStatic>()
-class Fft implements IFourierTransform {
+class FftDitRecursive implements IFourierTransform {
   public static $inject: string[] = [
     LIST_FACTORY,
     COMPLEX_FACTORY
@@ -84,4 +85,4 @@ class Fft implements IFourierTransform {
   }
 }
 
-export default Fft;
+export default FftDitRecursive;

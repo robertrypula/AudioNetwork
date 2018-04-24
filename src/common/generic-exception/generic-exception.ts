@@ -17,7 +17,8 @@ class GenericException {
   }
 
   public toString(): string {
-    return this.message + ' - ' + this.value;
+    return this.message +
+      (this.value ? (' - ' + this.value) : '');
   }
 }
 

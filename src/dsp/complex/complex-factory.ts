@@ -3,6 +3,7 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { SIMPLE_MATH } from '../../common/simple-math/di-token';
+
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import Complex from './complex';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
@@ -15,7 +16,7 @@ class ComplexFactory implements IComplexFactory {
   ];
 
   constructor(
-    private simpleMath: ISimpleMath
+    protected simpleMath: ISimpleMath
   ) {
   }
 

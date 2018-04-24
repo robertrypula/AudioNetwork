@@ -3,6 +3,7 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { SIMPLE_MATH } from '../../common/simple-math/di-token';
+
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import List from './list';
 import { IListFactory, IListFactoryStatic } from './list-factory.interface';
@@ -14,7 +15,7 @@ class ListFactory implements IListFactory {
   ];
 
   constructor(
-    private simpleMath: ISimpleMath
+    protected simpleMath: ISimpleMath
   ) {
   }
 

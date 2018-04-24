@@ -10,9 +10,9 @@ class Complex implements IComplex {
   // TODO probably it's bad to have reference to 'simpleMath'
   // in each Complex object but it's how DI works...
   constructor(
-    private simpleMath: ISimpleMath,
-    private real: number,
-    private imaginary: number
+    protected simpleMath: ISimpleMath,
+    protected real: number,
+    protected imaginary: number
   ) {
   }
 

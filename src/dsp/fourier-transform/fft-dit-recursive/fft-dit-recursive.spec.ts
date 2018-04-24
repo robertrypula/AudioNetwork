@@ -3,26 +3,27 @@
 import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY } from '../../../common/list/di-token';
+import { SIMPLE_MATH } from '../../../common/simple-math/di-token';
+import { COMPLEX_LIST_UTIL } from '../../complex-list-util/di-token';
+import { COMPLEX_FACTORY } from '../../complex/di-token';
+import { FOURIER_TRANSFORM } from '../di-token';
+
 import ListFactory from '../../../common/list/list-factory';
 import { IListFactory } from '../../../common/list/list-factory.interface';
 import { IList } from '../../../common/list/list.interface';
-import { SIMPLE_MATH } from '../../../common/simple-math/di-token';
 import SimpleMath from '../../../common/simple-math/simple-math';
 import ComplexListUtil from '../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from '../../complex-list-util/complex-list-util.interface';
-import { COMPLEX_LIST_UTIL } from '../../complex-list-util/di-token';
 import ComplexFactory from '../../complex/complex-factory';
 import { IComplexFactory } from '../../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from '../../complex/complex.interface';
-import { COMPLEX_FACTORY } from '../../complex/di-token';
-import { FOURIER_TRANSFORM } from '../di-token';
 import { IFourierTransform, IFourierTransformTestCase } from '../fourier-transform.interface';
 import {
   fourierTransformTestCaseA,
   fourierTransformTestCaseB,
   fourierTransformTestCaseC
 } from '../fourier-transform.spec-data';
-import Fft from './fft';
+import FftDitRecursive from './fft-dit-recursive';
 
 describe('Fft', () => {
   let fft: IFourierTransform;
@@ -35,7 +36,7 @@ describe('Fft', () => {
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(LIST_FACTORY, ListFactory);
     injector.registerService(COMPLEX_LIST_UTIL, ComplexListUtil);
-    injector.registerService(FOURIER_TRANSFORM, Fft);
+    injector.registerService(FOURIER_TRANSFORM, FftDitRecursive);
 
     fft = injector.get(FOURIER_TRANSFORM);
     complexListUtil = injector.get(COMPLEX_LIST_UTIL);
