@@ -2,8 +2,8 @@
 
 import injector from './dependency-injection.config';
 
-import * as Common from './common/index';
-import * as Dsp from './dsp/index';
+import * as Common from './common';
+import * as Dsp from './dsp';
 
 const api = {
   get dspModule(): Dsp.IDspModule {
@@ -15,9 +15,9 @@ const api = {
 };
 
 export { version } from './version';
+export { injector };
+export { api };
 export {
   Common,
-  Dsp,
-  injector,
-  api
+  Dsp
 };

@@ -2,16 +2,12 @@
 
 import { Injector } from 'rr-tsdi';
 
-import { LIST_FACTORY } from './../../../common/list/di-token';
-import { SIMPLE_MATH } from './../../../common/simple-math/di-token';
+import { LIST_FACTORY, SIMPLE_MATH } from './../../../common';
 import { COMPLEX_LIST_UTIL } from './../../complex-list-util/di-token';
 import { COMPLEX_FACTORY } from './../../complex/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
-import ListFactory from './../../../common/list/list-factory';
-import { IListFactory } from './../../../common/list/list-factory.interface';
-import { IList } from './../../../common/list/list.interface';
-import SimpleMath from './../../../common/simple-math/simple-math';
+import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
 import ComplexListUtil from './../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
 import ComplexFactory from './../../complex/complex-factory';

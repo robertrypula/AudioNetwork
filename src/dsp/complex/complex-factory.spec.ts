@@ -2,10 +2,10 @@
 
 import { Injector } from 'rr-tsdi';
 
-import { SIMPLE_MATH } from './../../common/simple-math/di-token';
+import { SIMPLE_MATH } from './../../common';
 import { COMPLEX_FACTORY } from './di-token';
 
-import SimpleMath from './../../common/simple-math/simple-math';
+import { SimpleMath } from './../../common';
 import Complex from './complex';
 import ComplexFactory from './complex-factory';
 import { IComplexDto } from './complex.interface';

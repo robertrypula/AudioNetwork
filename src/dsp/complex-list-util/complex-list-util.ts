@@ -2,11 +2,10 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { LIST_FACTORY } from './../../common/list/di-token';
+import { LIST_FACTORY } from './../../common';
 import { COMPLEX_FACTORY } from './../complex/di-token';
 
-import { IListFactory } from './../../common/list/list-factory.interface';
-import { IList } from './../../common/list/list.interface';
+import { IList, IListFactory } from './../../common';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
 import { IComplexListDto, IComplexListUtil, IComplexListUtilStatic } from './complex-list-util.interface';

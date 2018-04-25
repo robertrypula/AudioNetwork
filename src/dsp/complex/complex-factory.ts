@@ -2,9 +2,9 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { SIMPLE_MATH } from './../../common/simple-math/di-token';
+import { SIMPLE_MATH } from './../../common';
 
-import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
+import { ISimpleMath } from './../../common';
 import Complex from './complex';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
 import { IComplexDto } from './complex.interface';

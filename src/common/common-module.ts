@@ -10,7 +10,7 @@ import { IListFactory } from './list/list-factory.interface';
 import { ISimpleMath } from './simple-math/simple-math.interface';
 
 @staticImplements<ICommonModuleStatic>()
-class CommonModule implements ICommonModule {
+export class CommonModule implements ICommonModule {
   public static $inject: string[] = [
     LIST_FACTORY,
     SIMPLE_MATH

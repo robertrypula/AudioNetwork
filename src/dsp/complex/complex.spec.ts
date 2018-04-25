@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import SimpleMath from './../../common/simple-math/simple-math';
+import { SimpleMath } from './../../common';
 import Complex from './complex';
 import { IComplexDto } from './complex.interface';
 

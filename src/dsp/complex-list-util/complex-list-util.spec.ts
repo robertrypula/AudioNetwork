@@ -2,12 +2,11 @@
 
 import { Injector } from 'rr-tsdi';
 
-import { LIST_FACTORY, SIMPLE_MATH } from './../../common/index';
+import { LIST_FACTORY, SIMPLE_MATH } from './../../common';
 import { COMPLEX_FACTORY } from './../complex/di-token';
 import { COMPLEX_LIST_UTIL } from './di-token';
 
-import ListFactory from './../../common/list/list-factory';
-import SimpleMath from './../../common/simple-math/simple-math';
+import { ListFactory, SimpleMath } from './../../common';
 import ComplexFactory from './../complex/complex-factory';
 import ComplexListUtil from './complex-list-util';
 
