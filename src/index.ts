@@ -2,23 +2,22 @@
 
 import injector from './dependency-injection.config';
 
-import { COMMON_MODULE } from './common/di-token';
-import { DSP_MODULE } from './dsp/di-token';
-
-import { ICommonModule } from './common/common.interface';
-import { IDspModule } from './dsp/dsp-module.interface';
+import * as Common from './common/index';
+import * as Dsp from './dsp/index';
 
 const api = {
-  get dspModule(): IDspModule {
-    return injector.get(DSP_MODULE);
+  get dspModule(): Dsp.IDspModule {
+    return injector.get(Dsp.DSP_MODULE);
   },
-  get commonModule(): ICommonModule {
-    return injector.get(COMMON_MODULE);
+  get commonModule(): Common.ICommonModule {
+    return injector.get(Common.COMMON_MODULE);
   }
 };
 
 export { version } from './version';
 export {
+  Common,
+  Dsp,
   injector,
   api
 };

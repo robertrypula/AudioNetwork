@@ -2,13 +2,13 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { LIST_FACTORY } from '../../../common/list/di-token';
-import { COMPLEX_FACTORY } from '../../complex/di-token';
+import { LIST_FACTORY } from './../../../common/list/di-token';
+import { COMPLEX_FACTORY } from './../../complex/di-token';
 
-import { IListFactory } from '../../../common/list/list-factory.interface';
-import { IList } from '../../../common/list/list.interface';
-import { IComplexFactory } from '../../complex/complex-factory.interface';
-import { IComplex } from '../../complex/complex.interface';
+import { IListFactory } from './../../../common/list/list-factory.interface';
+import { IList } from './../../../common/list/list.interface';
+import { IComplexFactory } from './../../complex/complex-factory.interface';
+import { IComplex } from './../../complex/complex.interface';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
 
 /*

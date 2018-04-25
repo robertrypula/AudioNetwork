@@ -2,10 +2,10 @@
 
 import { Injector } from 'rr-tsdi';
 
-import { SIMPLE_MATH } from '../simple-math/di-token';
+import { SIMPLE_MATH } from './../simple-math/di-token';
 
-import SimpleMath from '../simple-math/simple-math';
-import { ISimpleMath } from '../simple-math/simple-math.interface';
+import SimpleMath from './../simple-math/simple-math';
+import { ISimpleMath } from './../simple-math/simple-math.interface';
 import List from './list';
 
 describe('List', () => {

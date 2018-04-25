@@ -2,7 +2,7 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { SIMPLE_MATH } from '../../common/simple-math/di-token';
+import { SIMPLE_MATH } from './../../common/simple-math/di-token';
 
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import Complex from './complex';

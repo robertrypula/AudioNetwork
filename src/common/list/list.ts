@@ -2,8 +2,8 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import GenericException from '../../common/generic-exception/generic-exception';
-import { ISimpleMath } from '../simple-math/simple-math.interface';
+import GenericException from './../generic-exception/generic-exception';
+import { ISimpleMath } from './../simple-math/simple-math.interface';
 import { IList, IListStatic } from './list.interface';
 
 @staticImplements<IListStatic<T>>()

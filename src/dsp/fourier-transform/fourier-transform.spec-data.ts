@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { IComplexListDto } from '../complex-list-util/complex-list-util.interface';
+import { IComplexListDto } from './../complex-list-util/complex-list-util.interface';
 import { IFourierTransformTestCase } from './fourier-transform.interface';
 
 // All values verified using great online FFT calculator:

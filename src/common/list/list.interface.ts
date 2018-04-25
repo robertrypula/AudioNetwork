@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from '../simple-math/simple-math.interface';
+import { ISimpleMath } from './../simple-math/simple-math.interface';
 
 interface IList<T> {
   clone(): IList<T>;

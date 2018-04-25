@@ -2,14 +2,13 @@
 
 import { Injector } from 'rr-tsdi';
 
-import { LIST_FACTORY } from '../../common/list/di-token';
-import { SIMPLE_MATH } from '../../common/simple-math/di-token';
-import { COMPLEX_FACTORY } from '../complex/di-token';
+import { LIST_FACTORY, SIMPLE_MATH } from './../../common/index';
+import { COMPLEX_FACTORY } from './../complex/di-token';
 import { COMPLEX_LIST_UTIL } from './di-token';
 
-import ListFactory from '../../common/list/list-factory';
-import SimpleMath from '../../common/simple-math/simple-math';
-import ComplexFactory from '../complex/complex-factory';
+import ListFactory from './../../common/list/list-factory';
+import SimpleMath from './../../common/simple-math/simple-math';
+import ComplexFactory from './../complex/complex-factory';
 import ComplexListUtil from './complex-list-util';
 
 describe('ComplexListUtil', () => {

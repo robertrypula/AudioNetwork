@@ -1,9 +1,8 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { IListFactory } from '../../common/list/list-factory.interface';
-import { IList } from '../../common/list/list.interface';
-import { IComplexFactory } from '../complex/complex-factory.interface';
-import { IComplex, IComplexDto } from '../complex/complex.interface';
+import { IList, IListFactory } from './../../common/index';
+import { IComplexFactory } from './../complex/complex-factory.interface';
+import { IComplex, IComplexDto } from './../complex/complex.interface';
 
 type IComplexListDto = IComplexDto[];
 
