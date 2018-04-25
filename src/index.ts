@@ -5,14 +5,14 @@ import injector from './dependency-injection.config';
 import { COMMON_MODULE } from './common/di-token';
 import { DSP_MODULE } from './dsp/di-token';
 
-import CommonModule from './common/common-module';
-import DspModule from './dsp/dsp-module';
+import { ICommonModule } from './common/common.interface';
+import { IDspModule } from './dsp/dsp-module.interface';
 
 const api = {
-  get dspModule(): DspModule {
+  get dspModule(): IDspModule {
     return injector.get(DSP_MODULE);
   },
-  get commonModule(): CommonModule {
+  get commonModule(): ICommonModule {
     return injector.get(COMMON_MODULE);
   }
 };
