@@ -60,6 +60,7 @@ function getConfig(env) {
 }
 
 function fillDev(config) {
+  config.mode = 'development';
   config.entry = {
     [`${packageName}-v${version}`]: './src/index.ts'
   };
@@ -81,6 +82,7 @@ function fillDev(config) {
 }
 
 function fillProd(config) {
+  config.mode = 'production';
   config.entry = {
     [`${packageName}-v${version}`]: './src/index.ts',
     [`${packageName}-v${version}.min`]: './src/index.ts',

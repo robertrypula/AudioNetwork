@@ -17,7 +17,5 @@ const api = {
 export { version } from './version';
 export { injector };
 export { api };
-export {
-  Common,
-  Dsp
-};
+export * from './common';
+export * from './dsp';
