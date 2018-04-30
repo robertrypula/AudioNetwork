@@ -7,6 +7,7 @@ import { COMPLEX_LIST_UTIL } from './../../complex-list-util/di-token';
 import { COMPLEX_FACTORY } from './../../complex/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
+import { precisionDigits } from '../../../settings';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
 import ComplexListUtil from './../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
@@ -58,8 +59,8 @@ describe('Fft', () => {
       output = fft.forward(input);
       outputDto = complexListUtil.toDto(output);
       outputDto.forEach((v: IComplexDto, i: number) => {
-        expect(v.real).toBeCloseTo(outputExpectationDto[i].real, 6);
-        expect(v.imaginary).toBeCloseTo(outputExpectationDto[i].imaginary, 6);
+        expect(v.real).toBeCloseTo(outputExpectationDto[i].real, precisionDigits);
+        expect(v.imaginary).toBeCloseTo(outputExpectationDto[i].imaginary, precisionDigits);
       });
       // expect(outputDto).toEqual(outputExpectationDto);
     });
@@ -83,8 +84,8 @@ describe('Fft', () => {
       output = fft.inverse(fft.forward(input));
       outputDto = complexListUtil.toDto(output);
       outputDto.forEach((v: IComplexDto, i: number) => {
-        expect(v.real).toBeCloseTo(testCase.input[i].real, 6);
-        expect(v.imaginary).toBeCloseTo(testCase.input[i].imaginary, 6);
+        expect(v.real).toBeCloseTo(testCase.input[i].real, precisionDigits);
+        expect(v.imaginary).toBeCloseTo(testCase.input[i].imaginary, precisionDigits);
       });
       // expect(outputDto).toEqual(outputExpectationDto);
     });

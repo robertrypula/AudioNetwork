@@ -5,13 +5,13 @@ import { Injector } from 'rr-tsdi';
 import { SIMPLE_MATH } from './../../common';
 import { COMPLEX_FACTORY } from './di-token';
 
+import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
 import Complex from './complex';
 import ComplexFactory from './complex-factory';
 import { IComplexDto } from './complex.interface';
 
 describe('ComplexFactory', () => {
-  const NUMBER_OF_DIGITS = 6;
   let complexFactory: ComplexFactory;
 
   beforeEach(() => {
@@ -49,8 +49,8 @@ describe('ComplexFactory', () => {
 
     complex = complexFactory.createPolar(0.125, 2);
     expect(complex).toBeInstanceOf(Complex);
-    expect(complex.getReal()).toBeCloseTo(1.414214, NUMBER_OF_DIGITS);
-    expect(complex.getImaginary()).toBeCloseTo(1.414214, NUMBER_OF_DIGITS);
+    expect(complex.getReal()).toBeCloseTo(1.414214, precisionDigits);
+    expect(complex.getImaginary()).toBeCloseTo(1.414214, precisionDigits);
   });
 
   it('should create instance of Complex class basing on dto', () => {

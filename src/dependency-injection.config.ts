@@ -5,6 +5,7 @@ import { Injector } from 'rr-tsdi';
 import { COMMON_MODULE } from './common/di-token';
 import { LIST_FACTORY } from './common/list/di-token';
 import { SIMPLE_MATH } from './common/simple-math/di-token';
+import { PRECISION_DIGITS } from './di-token';
 import { COMPLEX_LIST_UTIL } from './dsp/complex-list-util/di-token';
 import { COMPLEX_FACTORY } from './dsp/complex/di-token';
 import { DSP_MODULE } from './dsp/di-token';
@@ -17,8 +18,11 @@ import ComplexListUtil from './dsp/complex-list-util/complex-list-util';
 import ComplexFactory from './dsp/complex/complex-factory';
 import DspModule from './dsp/dsp-module';
 import FftDitRecursive from './dsp/fourier-transform/fft-dit-recursive/fft-dit-recursive';
+import { precisionDigits } from './settings';
 
 const injector = new Injector();
+
+injector.registerValue(PRECISION_DIGITS, precisionDigits);
 
 injector.registerService(LIST_FACTORY, ListFactory);
 injector.registerService(SIMPLE_MATH, SimpleMath);

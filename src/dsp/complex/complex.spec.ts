@@ -1,11 +1,11 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
+import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
 import Complex from './complex';
 import { IComplexDto } from './complex.interface';
 
 describe('Complex', () => {
-  const NUMBER_OF_DIGITS = 6;
   const REAL = 5;
   const IMAGINARY = -9;
   const REAL_NORMALIZED = 0.485643;
@@ -47,8 +47,8 @@ describe('Complex', () => {
     const complexB: Complex = new Complex(simpleMath, REAL_TO_ADD, IMAGINARY_TO_ADD);
     const complexSummed: Complex = complex.add(complexB);
 
-    expect(complexSummed.getReal()).toBeCloseTo(REAL + REAL_TO_ADD, NUMBER_OF_DIGITS);
-    expect(complexSummed.getImaginary()).toBeCloseTo(IMAGINARY + IMAGINARY_TO_ADD, NUMBER_OF_DIGITS);
+    expect(complexSummed.getReal()).toBeCloseTo(REAL + REAL_TO_ADD, precisionDigits);
+    expect(complexSummed.getImaginary()).toBeCloseTo(IMAGINARY + IMAGINARY_TO_ADD, precisionDigits);
     expect(complexSummed).toBe(complex);
   });
 
@@ -58,8 +58,8 @@ describe('Complex', () => {
     const complexB: Complex = new Complex(simpleMath, REAL_TO_SUBTRACT, IMAGINARY_TO_SUBTRACT);
     const complexSubtracted: Complex = complex.subtract(complexB);
 
-    expect(complexSubtracted.getReal()).toBeCloseTo(REAL - REAL_TO_SUBTRACT, NUMBER_OF_DIGITS);
-    expect(complexSubtracted.getImaginary()).toBeCloseTo(IMAGINARY - IMAGINARY_TO_SUBTRACT, NUMBER_OF_DIGITS);
+    expect(complexSubtracted.getReal()).toBeCloseTo(REAL - REAL_TO_SUBTRACT, precisionDigits);
+    expect(complexSubtracted.getImaginary()).toBeCloseTo(IMAGINARY - IMAGINARY_TO_SUBTRACT, precisionDigits);
     expect(complexSubtracted).toBe(complex);
   });
 
@@ -71,8 +71,8 @@ describe('Complex', () => {
     const REAL_EXPECTATION = REAL * REAL_TO_MULTIPLY - IMAGINARY * IMAGINARY_TO_MULTIPLY;
     const IMAGINARY_EXPECTATION = REAL * IMAGINARY_TO_MULTIPLY + IMAGINARY * REAL_TO_MULTIPLY;
 
-    expect(complexMultiplied.getReal()).toBeCloseTo(REAL_EXPECTATION, NUMBER_OF_DIGITS);
-    expect(complexMultiplied.getImaginary()).toBeCloseTo(IMAGINARY_EXPECTATION, NUMBER_OF_DIGITS);
+    expect(complexMultiplied.getReal()).toBeCloseTo(REAL_EXPECTATION, precisionDigits);
+    expect(complexMultiplied.getImaginary()).toBeCloseTo(IMAGINARY_EXPECTATION, precisionDigits);
     expect(complexMultiplied).toBe(complex);
   });
 
@@ -90,8 +90,8 @@ describe('Complex', () => {
     const MULTIPLY_SCALAR: number = 5;
     const complexMultiplied: Complex = complex.multiplyScalar(MULTIPLY_SCALAR);
 
-    expect(complexMultiplied.getReal()).toBeCloseTo(REAL * MULTIPLY_SCALAR, NUMBER_OF_DIGITS);
-    expect(complexMultiplied.getImaginary()).toBeCloseTo(IMAGINARY * MULTIPLY_SCALAR, NUMBER_OF_DIGITS);
+    expect(complexMultiplied.getReal()).toBeCloseTo(REAL * MULTIPLY_SCALAR, precisionDigits);
+    expect(complexMultiplied.getImaginary()).toBeCloseTo(IMAGINARY * MULTIPLY_SCALAR, precisionDigits);
     expect(complex).toBe(complexMultiplied);
   });
 
@@ -99,8 +99,8 @@ describe('Complex', () => {
     const DIVIDE_SCALAR: number = 5;
     const complexDivided: Complex = complex.divideScalar(DIVIDE_SCALAR);
 
-    expect(complexDivided.getReal()).toBeCloseTo(REAL / DIVIDE_SCALAR, NUMBER_OF_DIGITS);
-    expect(complexDivided.getImaginary()).toBeCloseTo(IMAGINARY / DIVIDE_SCALAR, NUMBER_OF_DIGITS);
+    expect(complexDivided.getReal()).toBeCloseTo(REAL / DIVIDE_SCALAR, precisionDigits);
+    expect(complexDivided.getImaginary()).toBeCloseTo(IMAGINARY / DIVIDE_SCALAR, precisionDigits);
     expect(complex).toBe(complexDivided);
   });
 
@@ -112,47 +112,47 @@ describe('Complex', () => {
   it('should return proper magnitude', () => {
     const complexMagnitude: number = complex.getMagnitude();
 
-    expect(complexMagnitude).toBeCloseTo(EXPCTED_MAGNITUDE, NUMBER_OF_DIGITS);
+    expect(complexMagnitude).toBeCloseTo(EXPCTED_MAGNITUDE, precisionDigits);
   });
 
   it('should return unit angle between positive side of X axis and complex number point (counter-clockwise)', () => {
     let x: Complex;
 
     x = new Complex(simpleMath, 0.707107, 0.707106);
-    expect(x.getUnitAngle()).toBeCloseTo(0.125, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.125, precisionDigits);
 
     x = new Complex(simpleMath, -0.707107, 0.707106);
-    expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.125, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.125, precisionDigits);
 
     x = new Complex(simpleMath, -0.707107, -0.707106);
-    expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.125, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.125, precisionDigits);
 
     x = new Complex(simpleMath, 0.707107, -0.707106);
-    expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.125, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.125, precisionDigits);
 
     x = new Complex(simpleMath, 0.809017, 0.587785);
-    expect(x.getUnitAngle()).toBeCloseTo(0.1, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.1, precisionDigits);
 
     x = new Complex(simpleMath, 0.999980, 0.006283);
-    expect(x.getUnitAngle()).toBeCloseTo(0.001, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.001, precisionDigits);
 
     x = new Complex(simpleMath, -0.006283, 0.999980);
-    expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.001, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.001, precisionDigits);
 
     x = new Complex(simpleMath, -0.999980, -0.006283);
-    expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.001, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.001, precisionDigits);
 
     x = new Complex(simpleMath, 0.006283, -0.999980);
-    expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.001, NUMBER_OF_DIGITS);
+    expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.001, precisionDigits);
   });
 
   it('should normalize complex number and return the same instance', () => {
     const complexNormalized: Complex = complex.normalize();
     const UNIT = 1;
 
-    expect(complexNormalized.getReal()).toBeCloseTo(REAL_NORMALIZED, NUMBER_OF_DIGITS);
-    expect(complexNormalized.getImaginary()).toBeCloseTo(IMAGINARY_NORMALIZED, NUMBER_OF_DIGITS);
-    expect(complexNormalized.getMagnitude()).toBeCloseTo(UNIT, NUMBER_OF_DIGITS);
+    expect(complexNormalized.getReal()).toBeCloseTo(REAL_NORMALIZED, precisionDigits);
+    expect(complexNormalized.getImaginary()).toBeCloseTo(IMAGINARY_NORMALIZED, precisionDigits);
+    expect(complexNormalized.getMagnitude()).toBeCloseTo(UNIT, precisionDigits);
     expect(complex).toBe(complexNormalized);
   });
 
