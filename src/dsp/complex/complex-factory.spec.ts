@@ -51,6 +51,16 @@ describe('ComplexFactory', () => {
     expect(complex).toBeInstanceOf(Complex);
     expect(complex.getReal()).toBeCloseTo(1.414214, precisionDigits);
     expect(complex.getImaginary()).toBeCloseTo(1.414214, precisionDigits);
+
+    complex = complexFactory.createPolar(0.125);
+    expect(complex).toBeInstanceOf(Complex);
+    expect(complex.getReal()).toBeCloseTo(1.414214 / 2, precisionDigits);
+    expect(complex.getImaginary()).toBeCloseTo(1.414214 / 2, precisionDigits);
+
+    complex = complexFactory.createPolar();
+    expect(complex).toBeInstanceOf(Complex);
+    expect(complex.getReal()).toBeCloseTo(1, precisionDigits);
+    expect(complex.getImaginary()).toBeCloseTo(0, precisionDigits);
   });
 
   it('should create instance of Complex class basing on dto', () => {

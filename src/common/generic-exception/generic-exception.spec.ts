@@ -23,4 +23,15 @@ describe('GenericException', () => {
 
     expect(genericException + '').toBe(MESSAGE + ' - ' + VALUE);
   });
+
+  it('should store custom message without value', () => {
+    const MESSAGE = 'test';
+
+    genericException = new GenericException(MESSAGE);
+
+    expect(genericException).toBeInstanceOf(GenericException);
+    expect(genericException.getMessage()).toBe(MESSAGE);
+
+    expect(genericException + '').toBe(MESSAGE);
+  });
 });

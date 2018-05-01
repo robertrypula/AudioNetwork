@@ -124,12 +124,16 @@ describe('List', () => {
     }).toThrow();
   });
 
-  it('should properly take first element of the list', () => {
+  it('should properly take first element of the list but only if available', () => {
     const valueArray = [
       INDEX_ZERO_VALUE,
       INDEX_ONE_VALUE,
       INDEX_TWO_VALUE
     ];
+
+    expect(() => {
+      list.takeFirst();
+    }).toThrow();
 
     expect(list.appendArray(valueArray)).toBe(list);
     expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);
@@ -147,12 +151,16 @@ describe('List', () => {
     expect(list.getSize()).toBe(2);
   });
 
-  it('should properly take last element of the list', () => {
+  it('should properly take last element of the list but only if available', () => {
     const valueArray = [
       INDEX_ZERO_VALUE,
       INDEX_ONE_VALUE,
       INDEX_TWO_VALUE
     ];
+
+    expect(() => {
+      list.takeLast();
+    }).toThrow();
 
     expect(list.appendArray(valueArray)).toBe(list);
     expect(list.getAt(INDEX_ZERO)).toBe(INDEX_ZERO_VALUE);

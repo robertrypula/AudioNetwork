@@ -146,6 +146,13 @@ describe('Complex', () => {
     expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.001, precisionDigits);
   });
 
+  it('should not throw any error while trying to get unit angle when magnitude is zero', () => {
+    let x: Complex;
+
+    x = new Complex(simpleMath, 0, 0);
+    expect(x.getUnitAngle()).toBeCloseTo(0, precisionDigits);
+  });
+
   it('should normalize complex number and return the same instance', () => {
     const complexNormalized: Complex = complex.normalize();
     const UNIT = 1;
