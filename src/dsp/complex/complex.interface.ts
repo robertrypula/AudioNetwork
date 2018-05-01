@@ -22,6 +22,7 @@ interface IComplex {
   getUnitAngle(): number;
   normalize(): IComplex;
   toDto(): IComplexDto;
+  toRawIQ(): number[];
 }
 
 interface IComplexStatic {

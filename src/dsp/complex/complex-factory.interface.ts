@@ -7,6 +7,7 @@ interface IComplexFactory {
   create(real?: number, imaginary?: number): IComplex;
   createPolar(unitAngle?: number, magnitude?: number): IComplex;
   createFromDto(complexDto: IComplexDto): IComplex;
+  createFromRawIQ(rawIq: number[]): IComplex;
 }
 
 interface IComplexFactoryStatic {

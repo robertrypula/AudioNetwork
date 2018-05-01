@@ -169,4 +169,11 @@ describe('Complex', () => {
     expect(complexDto.real).toBe(complex.getReal());
     expect(complexDto.imaginary).toBe(complex.getImaginary());
   });
+
+  it('should properly return raw IQ', () => {
+    const rawIQ: number[] = complex.toRawIQ();
+
+    expect(rawIQ[0]).toBe(complex.getReal());
+    expect(rawIQ[1]).toBe(complex.getImaginary());
+  });
 });

@@ -4,7 +4,7 @@ import { staticImplements } from 'rr-tsdi';
 
 import { SIMPLE_MATH } from './../../common';
 
-import { ISimpleMath } from './../../common';
+import { GenericException, ISimpleMath } from './../../common';
 import { Complex } from './complex';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
 import { IComplexDto } from './complex.interface';
@@ -44,4 +44,18 @@ export class ComplexFactory implements IComplexFactory {
       complexDto.imaginary
     );
   }
+
+  public createFromRawIQ(rawIQ: number[]): Complex {
+    if (rawIQ.length !== 2) {
+      throw new GenericException(RAW_IQ_ARRAY_LENGTH_SHOULD_BE_EQUAL_TO_TWO);
+    }
+
+    return new Complex(
+      this.simpleMath,
+      rawIQ[0],
+      rawIQ[1]
+    );
+  }
 }
+
+const RAW_IQ_ARRAY_LENGTH_SHOULD_BE_EQUAL_TO_TWO = 'Raw IQ array should be equal to 2';

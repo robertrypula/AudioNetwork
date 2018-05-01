@@ -5,12 +5,13 @@ import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
 
 type IComplexListDto = IComplexDto[];
+type IComplexList = IList<IComplex>;
 
 interface IComplexListUtil {
   fromDto(complexListDto: IComplexListDto): IList<IComplex>;
-  // fromRawIQ(dto: number[]): IList<IComplex>;
+  fromRawIQ(rawIQ: number[]): IList<IComplex>;
   toDto(complexList: IList<IComplex>): IComplexListDto;
-  // toRawIQ(list: IList<IComplex>): number[];
+  toRawIQ(complexList: IList<IComplex>): number[];
   // isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean;
 }
 

@@ -146,4 +146,11 @@ export class Complex implements IComplex {
     };
     /* tslint:enable:object-literal-sort-keys */
   }
+
+  public toRawIQ(): number[] {
+    return [
+      this.real,
+      this.imaginary
+    ];
+  }
 }

@@ -71,4 +71,21 @@ describe('ComplexFactory', () => {
     expect(complex.getReal()).toBe(dto.real);
     expect(complex.getImaginary()).toBe(dto.imaginary);
   });
+
+  it('should create instance of Complex class basing on raw IQ data', () => {
+    const rawIQ: number[] = [12, -32];
+    let complex: Complex = complexFactory.createFromRawIQ(rawIQ);
+
+    expect(complex).toBeInstanceOf(Complex);
+    expect(complex.getReal()).toBe(rawIQ[0]);
+    expect(complex.getImaginary()).toBe(rawIQ[1]);
+
+    expect(() => {
+      complex = complexFactory.createFromRawIQ([]);
+    }).toThrow();
+
+    expect(() => {
+      complex = complexFactory.createFromRawIQ([1, 2, 3]);
+    }).toThrow();
+  });
 });
