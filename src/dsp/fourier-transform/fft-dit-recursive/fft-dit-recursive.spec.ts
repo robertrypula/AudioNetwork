@@ -3,14 +3,16 @@
 import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../../../common';
+import { PRECISION_DIGITS } from './../../../di-token';
 import { COMPLEX_LIST_UTIL } from './../../complex-list-util/di-token';
-import { COMPLEX_FACTORY } from './../../complex/di-token';
+import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../../complex/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
 import { precisionDigits } from '../../../settings';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
 import { ComplexListUtil } from './../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
+import { ComplexDependencyBag } from './../../complex/complex-dependency-bag';
 import { ComplexFactory } from './../../complex/complex-factory';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../../complex/complex.interface';
@@ -29,6 +31,8 @@ describe('Fft', () => {
   beforeEach(() => {
     const injector = new Injector();
 
+    injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
+    injector.registerValue(PRECISION_DIGITS, precisionDigits);
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(LIST_FACTORY, ListFactory);

@@ -3,13 +3,16 @@
 import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../common';
+import { PRECISION_DIGITS } from './../di-token';
 import { COMPLEX_LIST_UTIL } from './complex-list-util/di-token';
-import { COMPLEX_FACTORY } from './complex/di-token';
+import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './complex/di-token';
 import { DSP_MODULE } from './di-token';
 import { FOURIER_TRANSFORM } from './fourier-transform/di-token';
 
 import { ListFactory, SimpleMath } from './../common';
+import { precisionDigits } from './../settings';
 import { ComplexListUtil } from './complex-list-util/complex-list-util';
+import { ComplexDependencyBag } from './complex/complex-dependency-bag';
 import { ComplexFactory } from './complex/complex-factory';
 import { DspModule } from './dsp-module';
 import { IDspModule } from './dsp-module.interface';
@@ -22,7 +25,8 @@ describe('DspModule', () => {
 
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(LIST_FACTORY, ListFactory);
-
+    injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
+    injector.registerValue(PRECISION_DIGITS, precisionDigits);
     injector.registerService(COMPLEX_LIST_UTIL, ComplexListUtil);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(FOURIER_TRANSFORM, FftDitRecursive);

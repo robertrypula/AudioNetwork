@@ -1,8 +1,16 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { precisionDigits } from '../../settings';
+import { Injector } from 'rr-tsdi';
+
+import { SIMPLE_MATH } from './../../common';
+import { PRECISION_DIGITS } from './../../di-token';
+import { COMPLEX_DEPENDENCY_BAG } from './di-token';
+
 import { SimpleMath } from './../../common';
+import { precisionDigits } from './../../settings';
 import { Complex } from './complex';
+import { ComplexDependencyBag } from './complex-dependency-bag';
+import { IComplexDependencyBag } from './complex-dependency-bag.interface';
 import { IComplexDto } from './complex.interface';
 
 describe('Complex', () => {
@@ -11,12 +19,19 @@ describe('Complex', () => {
   const REAL_NORMALIZED = 0.485643;
   const IMAGINARY_NORMALIZED = -0.874157;
   const EXPCTED_MAGNITUDE = 10.295630;
-  let simpleMath: SimpleMath;
+  let complexDependencyBag: IComplexDependencyBag;
   let complex: Complex;
 
   beforeEach(() => {
-    simpleMath = new SimpleMath();       // TODO get simpleMath from DI
-    complex = new Complex(simpleMath, REAL, IMAGINARY);
+    const injector = new Injector();
+
+    injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
+    injector.registerService(SIMPLE_MATH, SimpleMath);
+    injector.registerValue(PRECISION_DIGITS, precisionDigits);
+
+    complexDependencyBag = injector.get(COMPLEX_DEPENDENCY_BAG);
+
+    complex = new Complex(complexDependencyBag, REAL, IMAGINARY);
   });
 
   it('should create proper instance', () => {
@@ -44,7 +59,7 @@ describe('Complex', () => {
   it('should properly add two complex numers and return the same instance', () => {
     const REAL_TO_ADD: number = 32;
     const IMAGINARY_TO_ADD: number = -3;
-    const complexB: Complex = new Complex(simpleMath, REAL_TO_ADD, IMAGINARY_TO_ADD);
+    const complexB: Complex = new Complex(complexDependencyBag, REAL_TO_ADD, IMAGINARY_TO_ADD);
     const complexSummed: Complex = complex.add(complexB);
 
     expect(complexSummed.getReal()).toBeCloseTo(REAL + REAL_TO_ADD, precisionDigits);
@@ -55,7 +70,7 @@ describe('Complex', () => {
   it('should properly subtract two complex numers and return the same instance', () => {
     const REAL_TO_SUBTRACT: number = 32;
     const IMAGINARY_TO_SUBTRACT: number = -3;
-    const complexB: Complex = new Complex(simpleMath, REAL_TO_SUBTRACT, IMAGINARY_TO_SUBTRACT);
+    const complexB: Complex = new Complex(complexDependencyBag, REAL_TO_SUBTRACT, IMAGINARY_TO_SUBTRACT);
     const complexSubtracted: Complex = complex.subtract(complexB);
 
     expect(complexSubtracted.getReal()).toBeCloseTo(REAL - REAL_TO_SUBTRACT, precisionDigits);
@@ -66,7 +81,7 @@ describe('Complex', () => {
   it('should properly multiply two complex numers and return the same instance', () => {
     const REAL_TO_MULTIPLY: number = 32;
     const IMAGINARY_TO_MULTIPLY: number = -3;
-    const complexB: Complex = new Complex(simpleMath, REAL_TO_MULTIPLY, IMAGINARY_TO_MULTIPLY);
+    const complexB: Complex = new Complex(complexDependencyBag, REAL_TO_MULTIPLY, IMAGINARY_TO_MULTIPLY);
     const complexMultiplied: Complex = complex.multiply(complexB);
     const REAL_EXPECTATION = REAL * REAL_TO_MULTIPLY - IMAGINARY * IMAGINARY_TO_MULTIPLY;
     const IMAGINARY_EXPECTATION = REAL * IMAGINARY_TO_MULTIPLY + IMAGINARY * REAL_TO_MULTIPLY;
@@ -118,38 +133,38 @@ describe('Complex', () => {
   it('should return unit angle between positive side of X axis and complex number point (counter-clockwise)', () => {
     let x: Complex;
 
-    x = new Complex(simpleMath, 0.707107, 0.707106);
+    x = new Complex(complexDependencyBag, 0.707107, 0.707106);
     expect(x.getUnitAngle()).toBeCloseTo(0.125, precisionDigits);
 
-    x = new Complex(simpleMath, -0.707107, 0.707106);
+    x = new Complex(complexDependencyBag, -0.707107, 0.707106);
     expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.125, precisionDigits);
 
-    x = new Complex(simpleMath, -0.707107, -0.707106);
+    x = new Complex(complexDependencyBag, -0.707107, -0.707106);
     expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.125, precisionDigits);
 
-    x = new Complex(simpleMath, 0.707107, -0.707106);
+    x = new Complex(complexDependencyBag, 0.707107, -0.707106);
     expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.125, precisionDigits);
 
-    x = new Complex(simpleMath, 0.809017, 0.587785);
+    x = new Complex(complexDependencyBag, 0.809017, 0.587785);
     expect(x.getUnitAngle()).toBeCloseTo(0.1, precisionDigits);
 
-    x = new Complex(simpleMath, 0.999980, 0.006283);
+    x = new Complex(complexDependencyBag, 0.999980, 0.006283);
     expect(x.getUnitAngle()).toBeCloseTo(0.001, precisionDigits);
 
-    x = new Complex(simpleMath, -0.006283, 0.999980);
+    x = new Complex(complexDependencyBag, -0.006283, 0.999980);
     expect(x.getUnitAngle()).toBeCloseTo(0.25 + 0.001, precisionDigits);
 
-    x = new Complex(simpleMath, -0.999980, -0.006283);
+    x = new Complex(complexDependencyBag, -0.999980, -0.006283);
     expect(x.getUnitAngle()).toBeCloseTo(0.5 + 0.001, precisionDigits);
 
-    x = new Complex(simpleMath, 0.006283, -0.999980);
+    x = new Complex(complexDependencyBag, 0.006283, -0.999980);
     expect(x.getUnitAngle()).toBeCloseTo(0.75 + 0.001, precisionDigits);
   });
 
   it('should not throw any error while trying to get unit angle when magnitude is zero', () => {
     let x: Complex;
 
-    x = new Complex(simpleMath, 0, 0);
+    x = new Complex(complexDependencyBag, 0, 0);
     expect(x.getUnitAngle()).toBeCloseTo(0, precisionDigits);
   });
 

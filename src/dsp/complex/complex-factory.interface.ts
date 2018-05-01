@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from './../../common';
+import { IComplexDependencyBag } from './complex-dependency-bag.interface';
 import { IComplex, IComplexDto } from './complex.interface';
 
 interface IComplexFactory {
@@ -12,7 +12,7 @@ interface IComplexFactory {
 
 interface IComplexFactoryStatic {
   new(
-    simpleMath: ISimpleMath
+    complexDependencyBag: IComplexDependencyBag
   ): IComplexFactory;
 }
 

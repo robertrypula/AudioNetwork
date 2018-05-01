@@ -3,21 +3,26 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
+import { IComplexDependencyBag } from './complex-dependency-bag.interface';
 import { IComplex, IComplexDto, IComplexStatic } from './complex.interface';
 
 @staticImplements<IComplexStatic>()
 export class Complex implements IComplex {
-  // TODO probably it's bad to have reference to 'simpleMath'
-  // in each Complex object but it's how DI works...
+  // All Complex class dependencies stored in one
+  // variable in order to save space in RAM
   constructor(
-    protected simpleMath: ISimpleMath,
+    protected complexDependencyBag: IComplexDependencyBag,
     protected real: number,
     protected imaginary: number
   ) {
   }
 
   public clone(): Complex {
-    return new Complex(this.simpleMath, this.real, this.imaginary);
+    return new Complex(
+      this.complexDependencyBag,
+      this.real,
+      this.imaginary
+    );
   }
 
   public swap(): Complex {
@@ -82,12 +87,15 @@ export class Complex implements IComplex {
   }
 
   public getMagnitude(): number {
-    return this.simpleMath.sqrt(
-      this.simpleMath.pow(this.real, 2) + this.simpleMath.pow(this.imaginary, 2)
+    const simpleMath: ISimpleMath = this.complexDependencyBag.simpleMath;
+
+    return simpleMath.sqrt(
+      simpleMath.pow(this.real, 2) + simpleMath.pow(this.imaginary, 2)
     );
   }
 
   public getUnitAngle(): number {
+    const simpleMath: ISimpleMath = this.complexDependencyBag.simpleMath;
     const MAGNITUDE_LIMIT = 0.0000001;
     const x = this.real;
     const y = this.imaginary;
@@ -112,20 +120,20 @@ export class Complex implements IComplex {
 
     switch (quarter) {
       case 1:
-        angle = this.simpleMath.asin(y / magnitude);
+        angle = simpleMath.asin(y / magnitude);
         break;
       case 2:
-        angle = this.simpleMath.asin(-x / magnitude) + 0.5 * this.simpleMath.getPi();
+        angle = simpleMath.asin(-x / magnitude) + 0.5 * simpleMath.getPi();
         break;
       case 3:
-        angle = this.simpleMath.asin(-y / magnitude) + this.simpleMath.getPi();
+        angle = simpleMath.asin(-y / magnitude) + simpleMath.getPi();
         break;
       case 4:
-        angle = this.simpleMath.asin(x / magnitude) + 1.5 * this.simpleMath.getPi();
+        angle = simpleMath.asin(x / magnitude) + 1.5 * simpleMath.getPi();
         break;
     }
 
-    unitAngle = angle / (2 * this.simpleMath.getPi());
+    unitAngle = angle / (2 * simpleMath.getPi());
 
     return unitAngle;
   }

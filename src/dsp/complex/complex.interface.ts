@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { ISimpleMath } from './../../common';
+import { IComplexDependencyBag } from './complex-dependency-bag.interface';
 
 interface IComplexDto {
   real: number;
@@ -27,7 +27,7 @@ interface IComplex {
 
 interface IComplexStatic {
   new(
-    simpleMath: ISimpleMath,
+    complexDependencyBag: IComplexDependencyBag,
     real: number,
     imaginary: number
   ): IComplex;

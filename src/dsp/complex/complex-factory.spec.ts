@@ -3,11 +3,13 @@
 import { Injector } from 'rr-tsdi';
 
 import { SIMPLE_MATH } from './../../common';
-import { COMPLEX_FACTORY } from './di-token';
+import { PRECISION_DIGITS } from './../../di-token';
+import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './di-token';
 
 import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
 import { Complex } from './complex';
+import { ComplexDependencyBag } from './complex-dependency-bag';
 import { ComplexFactory } from './complex-factory';
 import { IComplexDto } from './complex.interface';
 
@@ -19,6 +21,9 @@ describe('ComplexFactory', () => {
 
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
+    injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
+    injector.registerValue(PRECISION_DIGITS, precisionDigits);
+
     complexFactory = injector.get(COMPLEX_FACTORY);
   });
 

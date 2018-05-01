@@ -3,11 +3,15 @@
 import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../../common';
-import { COMPLEX_FACTORY } from './../complex/di-token';
+import { PRECISION_DIGITS } from './../../di-token';
+import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../complex/di-token';
 import { COMPLEX_LIST_UTIL } from './di-token';
 
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../common';
+
+import { precisionDigits } from './../../settings';
 import { IComplexListDto, IComplexListUtil } from './../complex-list-util/complex-list-util.interface';
+import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
@@ -21,6 +25,8 @@ describe('ComplexListUtil', () => {
   beforeEach(() => {
     const injector = new Injector();
 
+    injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
+    injector.registerValue(PRECISION_DIGITS, precisionDigits);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(LIST_FACTORY, ListFactory);

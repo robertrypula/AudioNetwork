@@ -2,44 +2,46 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { SIMPLE_MATH } from './../../common';
+import { COMPLEX_DEPENDENCY_BAG } from './di-token';
 
 import { GenericException, ISimpleMath } from './../../common';
 import { Complex } from './complex';
+import { IComplexDependencyBag } from './complex-dependency-bag.interface';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
 import { IComplexDto } from './complex.interface';
 
 @staticImplements<IComplexFactoryStatic>()
 export class ComplexFactory implements IComplexFactory {
   public static $inject: string[] = [
-    SIMPLE_MATH
+    COMPLEX_DEPENDENCY_BAG
   ];
 
   constructor(
-    protected simpleMath: ISimpleMath
+    protected complexDependencyBag: IComplexDependencyBag
   ) {
   }
 
   public create(real: number = 0, imaginary: number = 0): Complex {
     return new Complex(
-      this.simpleMath,
+      this.complexDependencyBag,
       real,
       imaginary
     );
   }
 
   public createPolar(unitAngle: number = 0, magnitude: number = 1): Complex {
-    const radian: number = 2 * this.simpleMath.getPi() * unitAngle;
+    const simpleMath: ISimpleMath = this.complexDependencyBag.simpleMath;
+    const radian: number = 2 * simpleMath.getPi() * unitAngle;
 
     return this.create(
-      magnitude * this.simpleMath.cos(radian),
-      magnitude * this.simpleMath.sin(radian)
+      magnitude * simpleMath.cos(radian),
+      magnitude * simpleMath.sin(radian)
     );
   }
 
   public createFromDto(complexDto: IComplexDto): Complex {
     return new Complex(
-      this.simpleMath,
+      this.complexDependencyBag,
       complexDto.real,
       complexDto.imaginary
     );
@@ -51,7 +53,7 @@ export class ComplexFactory implements IComplexFactory {
     }
 
     return new Complex(
-      this.simpleMath,
+      this.complexDependencyBag,
       rawIQ[0],
       rawIQ[1]
     );
