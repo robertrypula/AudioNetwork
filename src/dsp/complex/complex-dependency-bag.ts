@@ -15,9 +15,12 @@ export class ComplexDependencyBag implements IComplexDependencyBag {
     PRECISION_DIGITS
   ];
 
+  public epsilon: number;
+
   constructor(
     public simpleMath: ISimpleMath,
     public precisionDigits: number
   ) {
+    this.epsilon = simpleMath.pow(10, -precisionDigits);
   }
 }

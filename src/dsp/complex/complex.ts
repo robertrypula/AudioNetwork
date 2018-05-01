@@ -146,6 +146,14 @@ export class Complex implements IComplex {
     return this;
   }
 
+  public isEqualTo(b: IComplex): boolean {
+    const simpleMath: ISimpleMath = this.complexDependencyBag.simpleMath;
+    const epsilon: number = this.complexDependencyBag.epsilon;
+
+    return (simpleMath.abs(this.real - b.getReal()) < epsilon) &&
+      (simpleMath.abs(this.imaginary - b.getImaginary()) < epsilon);
+  }
+
   public toDto(): IComplexDto {
     /* tslint:disable:object-literal-sort-keys */
     return {

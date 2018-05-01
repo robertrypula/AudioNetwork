@@ -178,6 +178,18 @@ describe('Complex', () => {
     expect(complex).toBe(complexNormalized);
   });
 
+  it('should properly indicate that two complex numbers are equal', () => {
+    const complexA = new Complex(complexDependencyBag, REAL, IMAGINARY);
+    const complexB = new Complex(
+      complexDependencyBag,
+      REAL + 0.000001,
+      IMAGINARY + 0.000001
+    );
+
+    expect(complex.isEqualTo(complexA)).toBe(true);
+    expect(complex.isEqualTo(complexB)).toBe(false);
+  });
+
   it('should properly return DTO', () => {
     const complexDto: IComplexDto = complex.toDto();
 

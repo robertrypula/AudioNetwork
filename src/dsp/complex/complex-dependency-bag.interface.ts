@@ -5,6 +5,7 @@ import { ISimpleMath } from './../../common';
 interface IComplexDependencyBag {
   simpleMath: ISimpleMath;
   precisionDigits: number;
+  epsilon: number;
 }
 
 interface IComplexDependencyBagStatic {

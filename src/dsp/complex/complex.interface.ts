@@ -21,6 +21,7 @@ interface IComplex {
   getMagnitude(): number;
   getUnitAngle(): number;
   normalize(): IComplex;
+  isEqualTo(b: IComplex): boolean;
   toDto(): IComplexDto;
   toRawIQ(): number[];
 }

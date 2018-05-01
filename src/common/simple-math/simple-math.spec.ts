@@ -49,4 +49,9 @@ describe('List', () => {
     expect(simpleMath.max(0.123456, 0.654321)).toBeCloseTo(0.654321, precisionDigits);
     expect(simpleMath.min(0.123456, 0.654321)).toBeCloseTo(0.123456, precisionDigits);
   });
+
+  it('should properly return absolute value', () => {
+    expect(simpleMath.abs(0.123456)).toBeCloseTo(0.123456, precisionDigits);
+    expect(simpleMath.abs(-0.123456)).toBeCloseTo(0.123456, precisionDigits);
+  });
 });

@@ -10,6 +10,7 @@ interface ISimpleMath {
   random(): number;
   max(a: number, b: number): number;
   min(a: number, b: number): number;
+  abs(x: number): number;
 }
 
 interface ISimpleMathStatic {

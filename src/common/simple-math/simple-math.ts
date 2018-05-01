@@ -41,4 +41,8 @@ export class SimpleMath implements ISimpleMath {
   public min(a: number, b: number): number {
     return Math.min(a, b);
   }
+
+  public abs(x: number): number {
+    return Math.abs(x);
+  }
 }

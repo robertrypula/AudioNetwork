@@ -25,5 +25,6 @@ describe('ComplexDependencyBag', () => {
     expect(complexDependencyBag).toBeInstanceOf(ComplexDependencyBag);
     expect(complexDependencyBag.simpleMath).toBeInstanceOf(SimpleMath);
     expect(complexDependencyBag.precisionDigits).toBe(precisionDigits);
+    expect(complexDependencyBag.epsilon).toBe(0.000001);
   });
 });
