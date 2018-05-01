@@ -19,7 +19,7 @@ import { IFourierTransform, IFourierTransformStatic } from './../fourier-transfo
 */
 
 @staticImplements<IFourierTransformStatic>()
-class FftDitRecursive implements IFourierTransform {
+export class FftDitRecursive implements IFourierTransform {
   public static $inject: string[] = [
     LIST_FACTORY,
     COMPLEX_FACTORY
@@ -83,5 +83,3 @@ class FftDitRecursive implements IFourierTransform {
     return output;
   }
 }
-
-export default FftDitRecursive;

@@ -4,9 +4,9 @@ import { Injector } from 'rr-tsdi';
 
 import { SIMPLE_MATH } from './../simple-math/di-token';
 
-import SimpleMath from './../simple-math/simple-math';
+import { SimpleMath } from './../simple-math/simple-math';
 import { ISimpleMath } from './../simple-math/simple-math.interface';
-import List from './list';
+import { List } from './list';
 
 describe('List', () => {
   const INDEX_ZERO_VALUE = 1000;

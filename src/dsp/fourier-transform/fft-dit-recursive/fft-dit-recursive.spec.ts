@@ -9,9 +9,9 @@ import { FOURIER_TRANSFORM } from './../di-token';
 
 import { precisionDigits } from '../../../settings';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
-import ComplexListUtil from './../../complex-list-util/complex-list-util';
+import { ComplexListUtil } from './../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
-import ComplexFactory from './../../complex/complex-factory';
+import { ComplexFactory } from './../../complex/complex-factory';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../../complex/complex.interface';
 import { IFourierTransform, IFourierTransformTestCase } from './../fourier-transform.interface';
@@ -20,7 +20,7 @@ import {
   fourierTransformTestCaseB,
   fourierTransformTestCaseC
 } from './../fourier-transform.spec-data';
-import FftDitRecursive from './fft-dit-recursive';
+import { FftDitRecursive } from './fft-dit-recursive';
 
 describe('Fft', () => {
   let fft: IFourierTransform;

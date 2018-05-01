@@ -11,13 +11,13 @@ import { COMPLEX_FACTORY } from './dsp/complex/di-token';
 import { DSP_MODULE } from './dsp/di-token';
 import { FOURIER_TRANSFORM } from './dsp/fourier-transform/di-token';
 
-import CommonModule from './common/common-module';
-import ListFactory from './common/list/list-factory';
-import SimpleMath from './common/simple-math/simple-math';
-import ComplexListUtil from './dsp/complex-list-util/complex-list-util';
-import ComplexFactory from './dsp/complex/complex-factory';
-import DspModule from './dsp/dsp-module';
-import FftDitRecursive from './dsp/fourier-transform/fft-dit-recursive/fft-dit-recursive';
+import { CommonModule } from './common/common-module';
+import { ListFactory } from './common/list/list-factory';
+import { SimpleMath } from './common/simple-math/simple-math';
+import { ComplexListUtil } from './dsp/complex-list-util/complex-list-util';
+import { ComplexFactory } from './dsp/complex/complex-factory';
+import { DspModule } from './dsp/dsp-module';
+import { FftDitRecursive } from './dsp/fourier-transform/fft-dit-recursive/fft-dit-recursive';
 import { precisionDigits } from './settings';
 
 const injector = new Injector();

@@ -12,7 +12,7 @@ import { IDspModule, IDspModuleStatic } from './dsp-module.interface';
 import { IFourierTransform } from './fourier-transform/fourier-transform.interface';
 
 @staticImplements<IDspModuleStatic>()
-class DspModule implements IDspModule {
+export class DspModule implements IDspModule {
   public static $inject: string[] = [
     COMPLEX_LIST_UTIL,
     COMPLEX_FACTORY,
@@ -26,5 +26,3 @@ class DspModule implements IDspModule {
   ) {
   }
 }
-
-export default DspModule;

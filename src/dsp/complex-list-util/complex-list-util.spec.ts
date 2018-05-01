@@ -7,8 +7,8 @@ import { COMPLEX_FACTORY } from './../complex/di-token';
 import { COMPLEX_LIST_UTIL } from './di-token';
 
 import { ListFactory, SimpleMath } from './../../common';
-import ComplexFactory from './../complex/complex-factory';
-import ComplexListUtil from './complex-list-util';
+import { ComplexFactory } from './../complex/complex-factory';
+import { ComplexListUtil } from './complex-list-util';
 
 describe('ComplexListUtil', () => {
   let complexListUtil: ComplexListUtil;

@@ -2,7 +2,7 @@
 
 import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
-import Complex from './complex';
+import { Complex } from './complex';
 import { IComplexDto } from './complex.interface';
 
 describe('Complex', () => {

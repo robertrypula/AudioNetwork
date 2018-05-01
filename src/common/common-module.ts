@@ -5,7 +5,7 @@ import { staticImplements } from 'rr-tsdi';
 import { LIST_FACTORY } from './list/di-token';
 import { SIMPLE_MATH } from './simple-math/di-token';
 
-import { ICommonModule, ICommonModuleStatic } from './common.interface';
+import { ICommonModule, ICommonModuleStatic } from './common-module.interface';
 import { IListFactory } from './list/list-factory.interface';
 import { ISimpleMath } from './simple-math/simple-math.interface';
 
@@ -22,5 +22,3 @@ export class CommonModule implements ICommonModule {
   ) {
   }
 }
-
-export default CommonModule;

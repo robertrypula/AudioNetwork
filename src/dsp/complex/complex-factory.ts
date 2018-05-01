@@ -5,12 +5,12 @@ import { staticImplements } from 'rr-tsdi';
 import { SIMPLE_MATH } from './../../common';
 
 import { ISimpleMath } from './../../common';
-import Complex from './complex';
+import { Complex } from './complex';
 import { IComplexFactory, IComplexFactoryStatic } from './complex-factory.interface';
 import { IComplexDto } from './complex.interface';
 
 @staticImplements<IComplexFactoryStatic>()
-class ComplexFactory implements IComplexFactory {
+export class ComplexFactory implements IComplexFactory {
   public static $inject: string[] = [
     SIMPLE_MATH
   ];
@@ -45,5 +45,3 @@ class ComplexFactory implements IComplexFactory {
     );
   }
 }
-
-export default ComplexFactory;

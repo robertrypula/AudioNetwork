@@ -2,12 +2,12 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import GenericException from './../generic-exception/generic-exception';
+import { GenericException } from './../generic-exception/generic-exception';
 import { ISimpleMath } from './../simple-math/simple-math.interface';
 import { IList, IListStatic } from './list.interface';
 
 @staticImplements<IListStatic<T>>()
-class List<T> implements IList<T> {
+export class List<T> implements IList<T> {
   protected data: T[];
   protected positionStart: number;
   protected positionEnd: number;
@@ -203,5 +203,3 @@ class List<T> implements IList<T> {
 const POSITION_OUTSIDE_THE_RANGE = 'Given position is outside the range';
 const LIST_FULL = 'List is full';
 const LIST_EMPTY_NOTHING_TO_TAKE = 'There is nothing to take, list is empty';
-
-export default List;

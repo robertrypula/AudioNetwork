@@ -6,10 +6,10 @@ import { COMMON_MODULE } from './di-token';
 import { LIST_FACTORY } from './list/di-token';
 import { SIMPLE_MATH } from './simple-math/di-token';
 
-import CommonModule from './common-module';
-import { ICommonModule } from './common.interface';
-import ListFactory from './list/list-factory';
-import SimpleMath from './simple-math/simple-math';
+import { CommonModule } from './common-module';
+import { ICommonModule } from './common-module.interface';
+import { ListFactory } from './list/list-factory';
+import { SimpleMath } from './simple-math/simple-math';
 
 describe('CommonModule', () => {
   it('should properly provide all expected items', () => {

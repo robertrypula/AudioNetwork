@@ -6,7 +6,7 @@ import { ISimpleMath } from './../../common/simple-math/simple-math.interface';
 import { IComplex, IComplexDto, IComplexStatic } from './complex.interface';
 
 @staticImplements<IComplexStatic>()
-class Complex implements IComplex {
+export class Complex implements IComplex {
   // TODO probably it's bad to have reference to 'simpleMath'
   // in each Complex object but it's how DI works...
   constructor(
@@ -147,5 +147,3 @@ class Complex implements IComplex {
     /* tslint:enable:object-literal-sort-keys */
   }
 }
-
-export default Complex;

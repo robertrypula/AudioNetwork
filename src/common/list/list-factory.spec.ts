@@ -5,9 +5,9 @@ import { Injector } from 'rr-tsdi';
 import { SIMPLE_MATH } from './../simple-math/di-token';
 import { LIST_FACTORY } from './di-token';
 
-import SimpleMath from './../simple-math/simple-math';
-import List from './list';
-import ListFactory from './list-factory';
+import { SimpleMath } from './../simple-math/simple-math';
+import { List } from './list';
+import { ListFactory } from './list-factory';
 
 describe('ListFactory', () => {
   let listFactory: ListFactory;

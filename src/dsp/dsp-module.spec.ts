@@ -9,11 +9,11 @@ import { DSP_MODULE } from './di-token';
 import { FOURIER_TRANSFORM } from './fourier-transform/di-token';
 
 import { ListFactory, SimpleMath } from './../common';
-import ComplexListUtil from './complex-list-util/complex-list-util';
-import ComplexFactory from './complex/complex-factory';
-import DspModule from './dsp-module';
+import { ComplexListUtil } from './complex-list-util/complex-list-util';
+import { ComplexFactory } from './complex/complex-factory';
+import { DspModule } from './dsp-module';
 import { IDspModule } from './dsp-module.interface';
-import FftDitRecursive from './fourier-transform/fft-dit-recursive/fft-dit-recursive';
+import { FftDitRecursive } from './fourier-transform/fft-dit-recursive/fft-dit-recursive';
 
 describe('DspModule', () => {
   it('should properly provide all expected items', () => {

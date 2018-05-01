@@ -5,11 +5,11 @@ import { staticImplements } from 'rr-tsdi';
 import { SIMPLE_MATH } from './../simple-math/di-token';
 
 import { ISimpleMath } from './../simple-math/simple-math.interface';
-import List from './list';
+import { List } from './list';
 import { IListFactory, IListFactoryStatic } from './list-factory.interface';
 
 @staticImplements<IListFactoryStatic>()
-class ListFactory implements IListFactory {
+export class ListFactory implements IListFactory {
   public static $inject: string[] = [
     SIMPLE_MATH
   ];
@@ -37,5 +37,3 @@ class ListFactory implements IListFactory {
     return result;
   }
 }
-
-export default ListFactory;

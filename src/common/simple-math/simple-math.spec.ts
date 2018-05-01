@@ -5,7 +5,7 @@ import { Injector } from 'rr-tsdi';
 import { SIMPLE_MATH } from './di-token';
 
 import { precisionDigits } from './../../settings';
-import SimpleMath from './simple-math';
+import { SimpleMath } from './simple-math';
 import { ISimpleMath } from './simple-math.interface';
 
 describe('List', () => {

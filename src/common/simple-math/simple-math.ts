@@ -5,7 +5,7 @@ import { staticImplements } from 'rr-tsdi';
 import { ISimpleMath, ISimpleMathStatic } from './simple-math.interface';
 
 @staticImplements<ISimpleMathStatic>()
-class SimpleMath implements ISimpleMath {
+export class SimpleMath implements ISimpleMath {
   public getPi(): number {
     return Math.PI;
   }
@@ -42,5 +42,3 @@ class SimpleMath implements ISimpleMath {
     return Math.min(a, b);
   }
 }
-
-export default SimpleMath;

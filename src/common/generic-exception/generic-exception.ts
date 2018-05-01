@@ -1,7 +1,7 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
 // TODO think more about this class vs Dependency Injection
-class GenericException {
+export class GenericException {
   constructor(
     protected message: string = 'Something went terrible wrong',
     protected value: any = null
@@ -21,5 +21,3 @@ class GenericException {
       (this.value ? (' - ' + this.value) : '');
   }
 }
-
-export default GenericException;

@@ -7,8 +7,8 @@ import { COMPLEX_FACTORY } from './di-token';
 
 import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
-import Complex from './complex';
-import ComplexFactory from './complex-factory';
+import { Complex } from './complex';
+import { ComplexFactory } from './complex-factory';
 import { IComplexDto } from './complex.interface';
 
 describe('ComplexFactory', () => {

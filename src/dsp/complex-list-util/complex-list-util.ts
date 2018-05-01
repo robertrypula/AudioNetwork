@@ -11,7 +11,7 @@ import { IComplex, IComplexDto } from './../complex/complex.interface';
 import { IComplexListDto, IComplexListUtil, IComplexListUtilStatic } from './complex-list-util.interface';
 
 @staticImplements<IComplexListUtilStatic>()
-class ComplexListUtil implements IComplexListUtil {
+export class ComplexListUtil implements IComplexListUtil {
   public static $inject: string[] = [
     COMPLEX_FACTORY,
     LIST_FACTORY
@@ -46,5 +46,3 @@ class ComplexListUtil implements IComplexListUtil {
       );
   }
 }
-
-export default ComplexListUtil;
