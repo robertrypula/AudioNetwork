@@ -8,7 +8,7 @@ import { COMPLEX_FACTORY } from './../complex/di-token';
 import { GenericException, IList, IListFactory } from './../../common';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
-import { IComplexListDto, IComplexListUtil, IComplexListUtilStatic } from './complex-list-util.interface';
+import { IComplexList, IComplexListDto, IComplexListUtil, IComplexListUtilStatic } from './complex-list-util.interface';
 
 @staticImplements<IComplexListUtilStatic>()
 export class ComplexListUtil implements IComplexListUtil {
@@ -23,7 +23,7 @@ export class ComplexListUtil implements IComplexListUtil {
   ) {
   }
 
-  public fromDto(complexListDto: IComplexListDto): IList<IComplex> {
+  public fromDto(complexListDto: IComplexListDto): IComplexList {
     const tmp = complexListDto.map((complexDto: IComplexDto): IComplex => {
       return this.complexFactory.createFromDto(complexDto);
     });
@@ -31,7 +31,7 @@ export class ComplexListUtil implements IComplexListUtil {
     return this.listFactory.createFromArray<IComplex>(tmp);
   }
 
-  public fromRawIQ(rawIQ: number[]): IList<IComplex> {
+  public fromRawIQ(rawIQ: number[]): IComplexList {
     const tmp: IComplex[] = [];
     let i: number;
 
@@ -48,7 +48,7 @@ export class ComplexListUtil implements IComplexListUtil {
     return this.listFactory.createFromArray<IComplex>(tmp);
   }
 
-  public toDto(complexList: IList<IComplex>): IComplexListDto {
+  public toDto(complexList: IComplexList): IComplexListDto {
     return complexList
       .toArray()
       .map(
@@ -63,7 +63,7 @@ export class ComplexListUtil implements IComplexListUtil {
       );
   }
 
-  public toRawIQ(complexList: IList<IComplex>): number[] {
+  public toRawIQ(complexList: IComplexList): number[] {
     const rawIQ: number[] = [];
 
     complexList.forEach((value: IComplex): void => {
@@ -73,7 +73,7 @@ export class ComplexListUtil implements IComplexListUtil {
     return rawIQ;
   }
 
-  public isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean {
+  public isEqual(a: IComplexList, b: IComplexList): boolean {
     let isEqual;
 
     if (a.getSize() !== b.getSize()) {

@@ -6,6 +6,7 @@ import { LIST_FACTORY } from './../../../common';
 import { COMPLEX_FACTORY } from './../../complex/di-token';
 
 import { IList, IListFactory } from './../../../common';
+import { IComplexList } from './../../complex-list-util/complex-list-util.interface';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex } from './../../complex/complex.interface';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
@@ -31,12 +32,12 @@ export class FftDitRecursive implements IFourierTransform {
   ) {
   }
 
-  public forward(input: IList<IComplex>): IList<IComplex> {
+  public forward(input: IComplexList): IComplexList {
     const n: number = input.getSize();
     let nHalf: number;
-    let even: IList<IComplex>;
-    let odd: IList<IComplex>;
-    let output: IList<IComplex>;
+    let even: IComplexList;
+    let odd: IComplexList;
+    let output: IComplexList;
     let wnkMultiplied: IComplex;
     let wnk: IComplex;
     let k: number;
@@ -69,8 +70,8 @@ export class FftDitRecursive implements IFourierTransform {
     return output;
   }
 
-  public inverse(input: IList<IComplex>): IList<IComplex> {
-    let output: IList<IComplex> = this.listFactory.create<IComplex>(input.getSize());
+  public inverse(input: IComplexList): IComplexList {
+    let output: IComplexList = this.listFactory.create<IComplex>(input.getSize());
 
     input.forEach((value: IComplex) => {
       output.append(value.clone().swap());

@@ -11,7 +11,7 @@ import { FOURIER_TRANSFORM } from './../di-token';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
 import { precisionDigits } from './../../../settings';
 import { ComplexListUtil } from './../../complex-list-util/complex-list-util';
-import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
+import { IComplexList, IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
 import { ComplexDependencyBag } from './../../complex/complex-dependency-bag';
 import { ComplexFactory } from './../../complex/complex-factory';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
@@ -52,9 +52,9 @@ describe('Fft', () => {
     let inputDto: IComplexListDto;
     let outputDto: IComplexListDto;
     let outputExpectationDto: IComplexListDto;
-    let input: IList<IComplex>;
-    let output: IList<IComplex>;
-    let outputExpectation: IList<IComplex>;
+    let input: IComplexList;
+    let output: IComplexList;
+    let outputExpectation: IComplexList;
 
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;
@@ -82,8 +82,8 @@ describe('Fft', () => {
     ];
     let inputDto: IComplexListDto;
     let outputDto: IComplexListDto;
-    let input: IList<IComplex>;
-    let output: IList<IComplex>;
+    let input: IComplexList;
+    let output: IComplexList;
 
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;

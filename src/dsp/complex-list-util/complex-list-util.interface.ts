@@ -8,11 +8,11 @@ type IComplexListDto = IComplexDto[];
 type IComplexList = IList<IComplex>;
 
 interface IComplexListUtil {
-  fromDto(complexListDto: IComplexListDto): IList<IComplex>;
-  fromRawIQ(rawIQ: number[]): IList<IComplex>;
-  toDto(complexList: IList<IComplex>): IComplexListDto;
-  toRawIQ(complexList: IList<IComplex>): number[];
-  isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean;
+  fromDto(complexListDto: IComplexListDto): IComplexList;
+  fromRawIQ(rawIQ: number[]): IComplexList;
+  toDto(complexList: IComplexList): IComplexListDto;
+  toRawIQ(complexList: IComplexList): number[];
+  isEqual(a: IComplexList, b: IComplexList): boolean;
 }
 
 interface IComplexListUtilStatic {
@@ -24,6 +24,7 @@ interface IComplexListUtilStatic {
 
 export {
   IComplexListDto,
+  IComplexList,
   IComplexListUtil,
   IComplexListUtilStatic
 };

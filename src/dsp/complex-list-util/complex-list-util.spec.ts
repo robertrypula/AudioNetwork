@@ -10,7 +10,7 @@ import { COMPLEX_LIST_UTIL } from './di-token';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../common';
 
 import { precisionDigits } from './../../settings';
-import { IComplexListDto, IComplexListUtil } from './../complex-list-util/complex-list-util.interface';
+import { IComplexList, IComplexListDto, IComplexListUtil } from './../complex-list-util/complex-list-util.interface';
 import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
@@ -76,7 +76,7 @@ describe('ComplexListUtil', () => {
   });
 
   it('should convert complex list into ComplexList DTO', () => {
-    const complexList: IList<IComplex> = listFactory.create<IComplex>(2);
+    const complexList: IComplexList = listFactory.create<IComplex>(2);
     let complexListDto: IComplexListDto;
 
     complexList.append(complexFactory.create(1, 2));
@@ -93,7 +93,7 @@ describe('ComplexListUtil', () => {
   });
 
   it('should convert complex list into raw IQ data', () => {
-    const complexList: IList<IComplex> = listFactory.create<IComplex>(2);
+    const complexList: IComplexList = listFactory.create<IComplex>(2);
     let rawIQ: number[];
 
     complexList.append(complexFactory.create(1, 2));
