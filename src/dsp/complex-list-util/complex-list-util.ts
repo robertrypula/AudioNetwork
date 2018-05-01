@@ -72,6 +72,25 @@ export class ComplexListUtil implements IComplexListUtil {
 
     return rawIQ;
   }
+
+  public isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean {
+    let isEqual;
+
+    if (a.getSize() !== b.getSize()) {
+      return false;
+    }
+
+    isEqual = true;
+    a.forEach((value: IComplex, index: number): boolean => {
+      if (!value.isEqualTo(b.getAt(index))) {
+        isEqual = false;
+        return false;
+      }
+      return true;
+    });
+
+    return isEqual;
+  }
 }
 
 const RAW_IQ_ARRAY_LENGTH_NEEDS_TO_BE_EVEN = 'Raw IQ array length needs to be even';

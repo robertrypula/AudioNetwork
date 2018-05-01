@@ -6,8 +6,8 @@ import { SIMPLE_MATH } from './../../common';
 import { PRECISION_DIGITS } from './../../di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './di-token';
 
-import { precisionDigits } from '../../settings';
 import { SimpleMath } from './../../common';
+import { precisionDigits } from './../../settings';
 import { Complex } from './complex';
 import { ComplexDependencyBag } from './complex-dependency-bag';
 import { ComplexFactory } from './complex-factory';

@@ -8,8 +8,8 @@ import { COMPLEX_LIST_UTIL } from './../../complex-list-util/di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../../complex/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
-import { precisionDigits } from '../../../settings';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
+import { precisionDigits } from './../../../settings';
 import { ComplexListUtil } from './../../complex-list-util/complex-list-util';
 import { IComplexListDto, IComplexListUtil } from './../../complex-list-util/complex-list-util.interface';
 import { ComplexDependencyBag } from './../../complex/complex-dependency-bag';
@@ -54,6 +54,7 @@ describe('Fft', () => {
     let outputExpectationDto: IComplexListDto;
     let input: IList<IComplex>;
     let output: IList<IComplex>;
+    let outputExpectation: IList<IComplex>;
 
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;
@@ -66,7 +67,10 @@ describe('Fft', () => {
         expect(v.real).toBeCloseTo(outputExpectationDto[i].real, precisionDigits);
         expect(v.imaginary).toBeCloseTo(outputExpectationDto[i].imaginary, precisionDigits);
       });
-      // expect(outputDto).toEqual(outputExpectationDto);
+
+      // alternative equality check
+      outputExpectation = complexListUtil.fromDto(outputExpectationDto);
+      expect(complexListUtil.isEqual(output, outputExpectation)).toBe(true);
     });
   });
 
@@ -91,12 +95,9 @@ describe('Fft', () => {
         expect(v.real).toBeCloseTo(testCase.input[i].real, precisionDigits);
         expect(v.imaginary).toBeCloseTo(testCase.input[i].imaginary, precisionDigits);
       });
-      // expect(outputDto).toEqual(outputExpectationDto);
+
+      // alternative equality check
+      expect(complexListUtil.isEqual(output, input)).toBe(true);
     });
   });
-
-  /*
-  complex.isEqualTo(b: IComplex, epsilon)     move epsilon to DI/config
-
-  */
 });

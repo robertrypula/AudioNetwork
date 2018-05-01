@@ -12,7 +12,7 @@ interface IComplexListUtil {
   fromRawIQ(rawIQ: number[]): IList<IComplex>;
   toDto(complexList: IList<IComplex>): IComplexListDto;
   toRawIQ(complexList: IList<IComplex>): number[];
-  // isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean;
+  isEqual(a: IList<IComplex>, b: IList<IComplex>): boolean;
 }
 
 interface IComplexListUtilStatic {

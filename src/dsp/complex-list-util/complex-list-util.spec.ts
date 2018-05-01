@@ -103,4 +103,20 @@ describe('ComplexListUtil', () => {
 
     expect(rawIQ).toEqual([1, 2, 3, 4]);
   });
+
+  it('should properly indicate that two lists are equal', () => {
+    const a = complexListUtil.fromRawIQ([1, 2, 3, 4.000000]);
+    const b = complexListUtil.fromRawIQ([1, 2, 3, 4.000000]);
+    const c = complexListUtil.fromRawIQ([1, 2, 3, 4.0000001]);
+    const d = complexListUtil.fromRawIQ([1, 2, 3, 4.000001]);
+    const e = complexListUtil.fromRawIQ([1, 2]);
+    const emptyA = complexListUtil.fromRawIQ([]);
+    const emptyB = complexListUtil.fromRawIQ([]);
+
+    expect(complexListUtil.isEqual(a, b)).toBe(true);
+    expect(complexListUtil.isEqual(a, c)).toBe(true);
+    expect(complexListUtil.isEqual(a, d)).toBe(false);
+    expect(complexListUtil.isEqual(a, e)).toBe(false);
+    expect(complexListUtil.isEqual(emptyA, emptyB)).toBe(true);
+  });
 });
