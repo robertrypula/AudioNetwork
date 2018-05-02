@@ -7,19 +7,18 @@ import { PRECISION_DIGITS } from './../../di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../complex/di-token';
 import { SIGNAL_FACTORY } from './di-token';
 
-import { IList, IListFactory, ListFactory, SimpleMath } from './../../common';
+import { ListFactory, SimpleMath } from './../../common';
 
 import { precisionDigits } from './../../settings';
 import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
-import { IComplex, IComplexDto } from './../complex/complex.interface';
-import { IComplexList, IComplexListDto, ISignalFactory } from './../signal/signal-factory.interface';
+import { ISignalFactory } from './../signal/signal-factory.interface';
+import { ISignal, ISignalDto } from './../signal/signal.interface';
 import { SignalFactory } from './signal-factory';
 
 describe('SignalFactory', () => {
   let signalFactory: ISignalFactory;
-  let listFactory: IListFactory;
   let complexFactory: IComplexFactory;
 
   beforeEach(() => {
@@ -33,7 +32,6 @@ describe('SignalFactory', () => {
     injector.registerService(SIGNAL_FACTORY, SignalFactory);
 
     signalFactory = injector.get(SIGNAL_FACTORY);
-    listFactory = injector.get(LIST_FACTORY);
     complexFactory = injector.get(COMPLEX_FACTORY);
   });
 
@@ -42,49 +40,49 @@ describe('SignalFactory', () => {
   });
 
   it('should create a complex list from ComplexList DTO', () => {
-    const complexListDto = [
+    const signalDto = [
       { real: 1, imaginary: 2 },
       { real: 3, imaginary: 4 }
     ];
-    const complexList = signalFactory.fromDto(complexListDto);
+    const signal = signalFactory.fromDto(signalDto);
 
-    expect(complexList.getSize()).toBe(2);
+    expect(signal.getSize()).toBe(2);
 
-    expect(complexList.getAt(0).getReal()).toBe(complexListDto[0].real);
-    expect(complexList.getAt(0).getImaginary()).toBe(complexListDto[0].imaginary);
+    expect(signal.getAt(0).getReal()).toBe(signalDto[0].real);
+    expect(signal.getAt(0).getImaginary()).toBe(signalDto[0].imaginary);
 
-    expect(complexList.getAt(1).getReal()).toBe(complexListDto[1].real);
-    expect(complexList.getAt(1).getImaginary()).toBe(complexListDto[1].imaginary);
+    expect(signal.getAt(1).getReal()).toBe(signalDto[1].real);
+    expect(signal.getAt(1).getImaginary()).toBe(signalDto[1].imaginary);
   });
 
   it('should create a complex list from raw IQ data', () => {
     const rawIQ = [1, 2, 3, 4];
-    let complexList = signalFactory.fromRawIQ(rawIQ);
+    let signal = signalFactory.fromRawIQ(rawIQ);
 
-    expect(complexList.getSize()).toBe(2);
+    expect(signal.getSize()).toBe(2);
 
-    expect(complexList.getAt(0).getReal()).toBe(rawIQ[0]);
-    expect(complexList.getAt(0).getImaginary()).toBe(rawIQ[1]);
+    expect(signal.getAt(0).getReal()).toBe(rawIQ[0]);
+    expect(signal.getAt(0).getImaginary()).toBe(rawIQ[1]);
 
-    expect(complexList.getAt(1).getReal()).toBe(rawIQ[2]);
-    expect(complexList.getAt(1).getImaginary()).toBe(rawIQ[3]);
+    expect(signal.getAt(1).getReal()).toBe(rawIQ[2]);
+    expect(signal.getAt(1).getImaginary()).toBe(rawIQ[3]);
 
     rawIQ.push(5);
     expect(() => {
-      complexList = signalFactory.fromRawIQ(rawIQ);
+      signal = signalFactory.fromRawIQ(rawIQ);
     }).toThrow();
   });
 
-  it('should convert complex list into ComplexList DTO', () => {
-    const complexList: IComplexList = listFactory.create<IComplex>(2);
-    let complexListDto: IComplexListDto;
+  it('should convert complex list into ComplexList DTO', () => {  // TODO refactor me - move to Signal class
+    const signal: ISignal = signalFactory.create(2);
+    let signalDto: ISignalDto;
 
-    complexList.append(complexFactory.create(1, 2));
-    complexList.append(complexFactory.create(3, 4));
+    signal.append(complexFactory.create(1, 2));
+    signal.append(complexFactory.create(3, 4));
 
-    complexListDto = signalFactory.toDto(complexList);
+    signalDto = signalFactory.toDto(signal);
 
-    expect(complexListDto).toEqual(
+    expect(signalDto).toEqual(
       [
         { real: 1, imaginary: 2 },
         { real: 3, imaginary: 4 }
@@ -92,19 +90,19 @@ describe('SignalFactory', () => {
     );
   });
 
-  it('should convert complex list into raw IQ data', () => {
-    const complexList: IComplexList = listFactory.create<IComplex>(2);
+  it('should convert complex list into raw IQ data', () => {  // TODO refactor me - move to Signal class
+    const signal: ISignal = signalFactory.create(2);
     let rawIQ: number[];
 
-    complexList.append(complexFactory.create(1, 2));
-    complexList.append(complexFactory.create(3, 4));
+    signal.append(complexFactory.create(1, 2));
+    signal.append(complexFactory.create(3, 4));
 
-    rawIQ = signalFactory.toRawIQ(complexList);
+    rawIQ = signalFactory.toRawIQ(signal);
 
     expect(rawIQ).toEqual([1, 2, 3, 4]);
   });
 
-  it('should properly indicate that two lists are equal', () => {
+  it('should properly indicate that two lists are equal', () => {  // TODO refactor me - move to Signal class
     const a = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
     const b = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
     const c = signalFactory.fromRawIQ([1, 2, 3, 4.0000001]);

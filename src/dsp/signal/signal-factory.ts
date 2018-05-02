@@ -5,10 +5,12 @@ import { staticImplements } from 'rr-tsdi';
 import { LIST_FACTORY } from './../../common';
 import { COMPLEX_FACTORY } from './../complex/di-token';
 
-import { GenericException, IList, IListFactory } from './../../common';
+import { GenericException, IList, IListFactory, ISimpleMath } from './../../common';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
-import { IComplexList, IComplexListDto, ISignalFactory, ISignalFactoryStatic } from './signal-factory.interface';
+import { Signal } from './signal';
+import { ISignalFactory, ISignalFactoryStatic } from './signal-factory.interface';
+import { ISignal, ISignalDto } from './signal.interface';
 
 @staticImplements<ISignalFactoryStatic>()
 export class SignalFactory implements ISignalFactory {
@@ -23,15 +25,41 @@ export class SignalFactory implements ISignalFactory {
   ) {
   }
 
-  public fromDto(complexListDto: IComplexListDto): IComplexList {
-    const tmp = complexListDto.map((complexDto: IComplexDto): IComplex => {
-      return this.complexFactory.createFromDto(complexDto);
-    });
+  public create(maxSize: number): ISignal {
+    const complexList = this.listFactory.create<IComplex>(maxSize);
 
-    return this.listFactory.createFromArray<IComplex>(tmp);
+    return new Signal(complexList);
   }
 
-  public fromRawIQ(rawIQ: number[]): IComplexList {
+  public createFromArray(complexArray: IComplex[], maxSize?: number): ISignal {
+    let complexList: IList<IComplex>;
+    let result: ISignal;
+    let sizeMaxFinal: number;
+    let i;
+
+    sizeMaxFinal = (maxSize === undefined) ? complexArray.length : maxSize;
+    complexList = this.listFactory.create<IComplex>(sizeMaxFinal);
+    result = new Signal(complexList);
+    for (i = 0; i < complexArray.length; i++) {
+      result.appendEvenIfFull(complexArray[i]);
+    }
+
+    return result;
+  }
+
+  public fromDto(complexListDto: ISignalDto): ISignal {    // TODO rename me
+    let tmp: IComplex[];
+
+    tmp = complexListDto.map(
+      (complexDto: IComplexDto): IComplex => {
+        return this.complexFactory.createFromDto(complexDto);
+      }
+    );
+
+    return this.createFromArray(tmp);
+  }
+
+  public fromRawIQ(rawIQ: number[]): ISignal {    // TODO rename me
     const tmp: IComplex[] = [];
     let i: number;
 
@@ -45,10 +73,10 @@ export class SignalFactory implements ISignalFactory {
       );
     }
 
-    return this.listFactory.createFromArray<IComplex>(tmp);
+    return this.createFromArray(tmp);
   }
 
-  public toDto(complexList: IComplexList): IComplexListDto {
+  public toDto(complexList: ISignal): ISignalDto {  // TODO refactor me - move to Signal class
     return complexList
       .toArray()
       .map(
@@ -63,7 +91,7 @@ export class SignalFactory implements ISignalFactory {
       );
   }
 
-  public toRawIQ(complexList: IComplexList): number[] {
+  public toRawIQ(complexList: ISignal): number[] {  // TODO refactor me - move to Signal class
     const rawIQ: number[] = [];
 
     complexList.forEach((value: IComplex): void => {
@@ -73,7 +101,7 @@ export class SignalFactory implements ISignalFactory {
     return rawIQ;
   }
 
-  public isEqual(a: IComplexList, b: IComplexList): boolean {
+  public isEqual(a: ISignal, b: ISignal): boolean {  // TODO refactor me - move to Signal class
     let isEqual;
 
     if (a.getSize() !== b.getSize()) {

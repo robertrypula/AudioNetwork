@@ -2,13 +2,13 @@
 
 import { staticImplements } from 'rr-tsdi';
 
-import { LIST_FACTORY } from './../../../common';
 import { COMPLEX_FACTORY } from './../../complex/di-token';
+import { SIGNAL_FACTORY } from './../../signal/di-token';
 
-import { IList, IListFactory } from './../../../common';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex } from './../../complex/complex.interface';
-import { IComplexList } from './../../signal/signal-factory.interface';
+import { ISignalFactory } from './../../signal/signal-factory.interface';
+import { ISignal } from './../../signal/signal.interface';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';
 
 /*
@@ -22,22 +22,22 @@ import { IFourierTransform, IFourierTransformStatic } from './../fourier-transfo
 @staticImplements<IFourierTransformStatic>()
 export class FftDitRecursive implements IFourierTransform {
   public static $inject: string[] = [
-    LIST_FACTORY,
+    SIGNAL_FACTORY,
     COMPLEX_FACTORY
   ];
 
   constructor(
-    protected listFactory: IListFactory,
+    protected signalFactory: ISignalFactory,
     protected complexFactory: IComplexFactory
   ) {
   }
 
-  public forward(input: IComplexList): IComplexList {
+  public forward(input: ISignal): ISignal {
     const n: number = input.getSize();
     let nHalf: number;
-    let even: IComplexList;
-    let odd: IComplexList;
-    let output: IComplexList;
+    let even: ISignal;
+    let odd: ISignal;
+    let output: ISignal;
     let wnkMultiplied: IComplex;
     let wnk: IComplex;
     let k: number;
@@ -55,8 +55,8 @@ export class FftDitRecursive implements IFourierTransform {
 
     // combine
     nHalf = n / 2;
-    output = this.listFactory
-      .create<IComplex>(n)
+    output = this.signalFactory
+      .create(n)
       .fillWith(undefined);
 
     for (k = 0; k < nHalf; k++) {
@@ -70,8 +70,8 @@ export class FftDitRecursive implements IFourierTransform {
     return output;
   }
 
-  public inverse(input: IComplexList): IComplexList {
-    let output: IComplexList = this.listFactory.create<IComplex>(input.getSize());
+  public inverse(input: ISignal): ISignal {
+    let output: ISignal = this.signalFactory.create(input.getSize());
 
     input.forEach((value: IComplex) => {
       output.append(value.clone().swap());

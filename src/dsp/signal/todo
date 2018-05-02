@@ -1,4 +1,8 @@
  /*
+
+TODO align sizeMax maxSize !!!!!!!!!!!!!!
+TODO move getOdd getEven to signal
+
   Signal class API proposal
 
     signal.fromReal([1, 2, 3]);
@@ -29,4 +33,6 @@ signal.mixWith(spiral)
 signal.mixWith()
 
 signal.add();
+
+
 */

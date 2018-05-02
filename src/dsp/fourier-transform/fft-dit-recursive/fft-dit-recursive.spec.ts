@@ -8,14 +8,14 @@ import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../../complex/di-toke
 import { SIGNAL_FACTORY } from './../../signal/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
-import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
+import { ListFactory, SimpleMath } from './../../../common';
 import { precisionDigits } from './../../../settings';
 import { ComplexDependencyBag } from './../../complex/complex-dependency-bag';
 import { ComplexFactory } from './../../complex/complex-factory';
-import { IComplexFactory } from './../../complex/complex-factory.interface';
-import { IComplex, IComplexDto } from './../../complex/complex.interface';
+import { IComplexDto } from './../../complex/complex.interface';
 import { SignalFactory } from './../../signal/signal-factory';
-import { IComplexList, IComplexListDto, ISignalFactory } from './../../signal/signal-factory.interface';
+import { ISignalFactory } from './../../signal/signal-factory.interface';
+import { ISignal, ISignalDto } from './../../signal/signal.interface';
 import { IFourierTransform, IFourierTransformTestCase } from './../fourier-transform.interface';
 import {
   fourierTransformTestCaseA,
@@ -49,12 +49,12 @@ describe('Fft', () => {
       fourierTransformTestCaseB,
       fourierTransformTestCaseC
     ];
-    let inputDto: IComplexListDto;
-    let outputDto: IComplexListDto;
-    let outputExpectationDto: IComplexListDto;
-    let input: IComplexList;
-    let output: IComplexList;
-    let outputExpectation: IComplexList;
+    let inputDto: ISignalDto;
+    let outputDto: ISignalDto;
+    let outputExpectationDto: ISignalDto;
+    let input: ISignal;
+    let output: ISignal;
+    let outputExpectation: ISignal;
 
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;
@@ -80,10 +80,10 @@ describe('Fft', () => {
       fourierTransformTestCaseB,
       fourierTransformTestCaseC
     ];
-    let inputDto: IComplexListDto;
-    let outputDto: IComplexListDto;
-    let input: IComplexList;
-    let output: IComplexList;
+    let inputDto: ISignalDto;
+    let outputDto: ISignalDto;
+    let input: ISignal;
+    let output: ISignal;
 
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;

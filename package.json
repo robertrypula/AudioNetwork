@@ -34,7 +34,9 @@
     "lint:tsfmt:verify": "tsfmt --verify --no-tsfmt --no-tslint --no-tsconfig --no-vscode",
     "lint:tsfmt:replace": "tsfmt --replace --no-tsfmt --no-tslint --no-tsconfig --no-vscode",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
-    "clean": "rimraf dist && rimraf coverage"
+    "clean": "rimraf dist && rimraf coverage",
+    "npm-check": "npm-check --skip-unused",
+    "npm-check:u": "npm-check --skip-unused -u"
   },
   "main": "dist/audio-network-v2.0.0-rc.js",
   "types": "dist/index.d.ts",
