@@ -73,7 +73,7 @@ function fillDev(config) {
     compress: true,
     port: 8000,
     hot: false,
-    openPage: 'example/index.html',
+    openPage: 'example/typescript-rewrite-test-page.html',
     overlay: {
       warnings: true,
       errors: true

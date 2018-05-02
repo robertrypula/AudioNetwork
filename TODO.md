@@ -30,7 +30,7 @@
 - rename all variables like 'rxSymbol' / 'txSymbol' to 'rxFskSymbol' / 'txFskSymbol'
 - implement common sample rate for all decives ~16 kHz
     - SYNC setting 48/44.1 will no longer be needed in the Layers above Physical like Data Link Layer
-    - custom FFT implementation
+    - [DONE in PR] custom FFT implementation
     - resampler
     - FIR filter
 
