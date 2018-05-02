@@ -1,8 +1,5 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-export * from './signal/signal-factory.interface';
-export * from './signal/signal-factory';
-export * from './signal/di-token';
 export * from './complex/complex-dependency-bag.interface';
 export * from './complex/complex-dependency-bag';
 export * from './complex/complex-factory.interface';
@@ -16,3 +13,6 @@ export * from './dsp-module';
 export * from './fourier-transform/di-token';
 export * from './fourier-transform/fft-dit-recursive/fft-dit-recursive';
 export * from './fourier-transform/fourier-transform.interface';
+export * from './signal/di-token';
+export * from './signal/signal-factory.interface';
+export * from './signal/signal-factory';

@@ -3,8 +3,8 @@
 import { staticImplements } from 'rr-tsdi';
 
 import { IList } from './../../common';
-import { IComplex } from './../complex/complex.interface';
-import { ISignal, ISignalStatic } from './signal.interface';
+import { IComplex, IComplexDto } from './../complex/complex.interface';
+import { ISignal, ISignalDto, ISignalStatic } from './signal.interface';
 
 @staticImplements<ISignalStatic>()
 export class Signal implements ISignal {
@@ -99,5 +99,51 @@ export class Signal implements ISignal {
 
   public toArray(): IComplex[] {
     return this.complexList.toArray();
+  }
+
+  // ----------------------------------------------
+
+  public toDto(): ISignalDto {
+    return this.complexList
+      .toArray()
+      .map(
+        (value: IComplex): IComplexDto => {
+          /* tslint:disable:object-literal-sort-keys */
+          return {
+            real: value.getReal(),
+            imaginary: value.getImaginary()
+          };
+          /* tslint:enable:object-literal-sort-keys */
+        }
+      );
+  }
+
+  public toRawIQ(): number[] {
+    const rawIQ: number[] = [];
+
+    this.complexList.forEach((value: IComplex): void => {
+      rawIQ.push(...value.toRawIQ());
+    });
+
+    return rawIQ;
+  }
+
+  public isEqualTo(b: ISignal): boolean {
+    let isEqual;
+
+    if (this.complexList.getSize() !== b.getSize()) {
+      return false;
+    }
+
+    isEqual = true;
+    this.complexList.forEach((value: IComplex, index: number): boolean => {
+      if (!value.isEqualTo(b.getAt(index))) {
+        isEqual = false;
+        return false;
+      }
+      return true;
+    });
+
+    return isEqual;
   }
 }

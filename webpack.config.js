@@ -84,7 +84,7 @@ function fillDev(config) {
 function fillProd(config) {
   config.mode = 'production';
   config.entry = {
-    // TODO after introducing webpack modes both files are minified - find the solution
+    // TODO: BUG!! after introducing webpack 'modes' both files are minified - find the fix
     [`${packageName}-v${version}`]: './src/index.ts',
     [`${packageName}-v${version}.min`]: './src/index.ts',
   };

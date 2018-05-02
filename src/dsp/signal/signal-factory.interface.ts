@@ -6,14 +6,10 @@ import { IComplex } from './../complex/complex.interface';
 import { ISignal, ISignalDto } from './signal.interface';
 
 interface ISignalFactory {
-  create(maxSize: number): ISignal;
-  createFromArray(complexArray: IComplex[], maxSize?: number): ISignal;
-
-  fromDto(complexListDto: ISignalDto): ISignal;  // TODO rename me
-  fromRawIQ(rawIQ: number[]): ISignal;  // TODO rename me
-  toDto(complexList: ISignal): ISignalDto;  // TODO refactor me - move to Signal class
-  toRawIQ(complexList: ISignal): number[];  // TODO refactor me - move to Signal class
-  isEqual(a: ISignal, b: ISignal): boolean;  // TODO refactor me - move to Signal class
+  create(sizeMax: number): ISignal;
+  createFromComplexArray(complexArray: IComplex[], sizeMax?: number): ISignal;
+  createFromDto(signalDto: ISignalDto): ISignal;
+  createFromRawIQ(rawIQ: number[]): ISignal;
 }
 
 interface ISignalFactoryStatic {

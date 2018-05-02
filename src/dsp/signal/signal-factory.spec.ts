@@ -8,11 +8,11 @@ import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../complex/di-token';
 import { SIGNAL_FACTORY } from './di-token';
 
 import { ListFactory, SimpleMath } from './../../common';
-
 import { precisionDigits } from './../../settings';
 import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
+import { IComplex } from './../complex/complex.interface';
 import { ISignalFactory } from './../signal/signal-factory.interface';
 import { ISignal, ISignalDto } from './../signal/signal.interface';
 import { SignalFactory } from './signal-factory';
@@ -39,12 +39,38 @@ describe('SignalFactory', () => {
     expect(signalFactory).toBeInstanceOf(SignalFactory);
   });
 
-  it('should create a complex list from ComplexList DTO', () => {
-    const signalDto = [
+  it('should create signal instance from Complex array and respect provided size max', () => {
+    const complexArray: IComplex[] = [
+      complexFactory.create(1, 2),
+      complexFactory.create(3, 4)
+    ];
+    let signal: ISignal;
+
+    signal = signalFactory.createFromComplexArray(complexArray);
+    expect(signal.getSize()).toBe(2);
+    expect(signal.getAt(0).isEqualTo(complexArray[0])).toBe(true);
+    expect(signal.getAt(1).isEqualTo(complexArray[1])).toBe(true);
+
+    signal = signalFactory.createFromComplexArray(complexArray, 1);
+    expect(signal.getSize()).toBe(1);
+    expect(signal.getAt(0).isEqualTo(complexArray[1])).toBe(true); // <-- NOTE: on getAt(0) we have LAST item
+
+    signal = signalFactory.createFromComplexArray(complexArray, 3);
+    expect(signal.getSize()).toBe(2);
+    expect(signal.getSizeMax()).toBe(3);
+    expect(signal.getAt(0).isEqualTo(complexArray[0])).toBe(true);
+    expect(signal.getAt(1).isEqualTo(complexArray[1])).toBe(true);
+    expect(() => {
+      signal.getAt(2);
+    }).toThrow();
+  });
+
+  it('should create signal instance from Signal DTO', () => {
+    const signalDto: ISignalDto = [
       { real: 1, imaginary: 2 },
       { real: 3, imaginary: 4 }
     ];
-    const signal = signalFactory.fromDto(signalDto);
+    const signal = signalFactory.createFromDto(signalDto);
 
     expect(signal.getSize()).toBe(2);
 
@@ -55,9 +81,9 @@ describe('SignalFactory', () => {
     expect(signal.getAt(1).getImaginary()).toBe(signalDto[1].imaginary);
   });
 
-  it('should create a complex list from raw IQ data', () => {
-    const rawIQ = [1, 2, 3, 4];
-    let signal = signalFactory.fromRawIQ(rawIQ);
+  it('should create signal instance from raw IQ data', () => {
+    const rawIQ: number[] = [1, 2, 3, 4];
+    let signal = signalFactory.createFromRawIQ(rawIQ);
 
     expect(signal.getSize()).toBe(2);
 
@@ -69,52 +95,7 @@ describe('SignalFactory', () => {
 
     rawIQ.push(5);
     expect(() => {
-      signal = signalFactory.fromRawIQ(rawIQ);
+      signal = signalFactory.createFromRawIQ(rawIQ);
     }).toThrow();
-  });
-
-  it('should convert complex list into ComplexList DTO', () => {  // TODO refactor me - move to Signal class
-    const signal: ISignal = signalFactory.create(2);
-    let signalDto: ISignalDto;
-
-    signal.append(complexFactory.create(1, 2));
-    signal.append(complexFactory.create(3, 4));
-
-    signalDto = signalFactory.toDto(signal);
-
-    expect(signalDto).toEqual(
-      [
-        { real: 1, imaginary: 2 },
-        { real: 3, imaginary: 4 }
-      ]
-    );
-  });
-
-  it('should convert complex list into raw IQ data', () => {  // TODO refactor me - move to Signal class
-    const signal: ISignal = signalFactory.create(2);
-    let rawIQ: number[];
-
-    signal.append(complexFactory.create(1, 2));
-    signal.append(complexFactory.create(3, 4));
-
-    rawIQ = signalFactory.toRawIQ(signal);
-
-    expect(rawIQ).toEqual([1, 2, 3, 4]);
-  });
-
-  it('should properly indicate that two lists are equal', () => {  // TODO refactor me - move to Signal class
-    const a = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
-    const b = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
-    const c = signalFactory.fromRawIQ([1, 2, 3, 4.0000001]);
-    const d = signalFactory.fromRawIQ([1, 2, 3, 4.000001]);
-    const e = signalFactory.fromRawIQ([1, 2]);
-    const emptyA = signalFactory.fromRawIQ([]);
-    const emptyB = signalFactory.fromRawIQ([]);
-
-    expect(signalFactory.isEqual(a, b)).toBe(true);
-    expect(signalFactory.isEqual(a, c)).toBe(true);
-    expect(signalFactory.isEqual(a, d)).toBe(false);
-    expect(signalFactory.isEqual(a, e)).toBe(false);
-    expect(signalFactory.isEqual(emptyA, emptyB)).toBe(true);
   });
 });

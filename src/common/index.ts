@@ -1,7 +1,7 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-export * from './common-module';
 export * from './common-module.interface';
+export * from './common-module';
 export * from './di-token';
 export * from './generic-exception/generic-exception';
 export * from './list/di-token';

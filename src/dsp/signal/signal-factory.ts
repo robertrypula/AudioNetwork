@@ -25,42 +25,41 @@ export class SignalFactory implements ISignalFactory {
   ) {
   }
 
-  public create(maxSize: number): ISignal {
-    const complexList = this.listFactory.create<IComplex>(maxSize);
+  public create(sizeMax: number): ISignal {
+    const complexList: IList<IComplex> = this.listFactory.create<IComplex>(sizeMax);
 
     return new Signal(complexList);
   }
 
-  public createFromArray(complexArray: IComplex[], maxSize?: number): ISignal {
+  public createFromComplexArray(complexArray: IComplex[], sizeMax?: number): ISignal {
     let complexList: IList<IComplex>;
-    let result: ISignal;
     let sizeMaxFinal: number;
     let i;
 
-    sizeMaxFinal = (maxSize === undefined) ? complexArray.length : maxSize;
+    sizeMaxFinal = (sizeMax === undefined) ? complexArray.length : sizeMax;
     complexList = this.listFactory.create<IComplex>(sizeMaxFinal);
-    result = new Signal(complexList);
     for (i = 0; i < complexArray.length; i++) {
-      result.appendEvenIfFull(complexArray[i]);
+      complexList.appendEvenIfFull(complexArray[i]);
     }
 
-    return result;
+    return new Signal(complexList);
   }
 
-  public fromDto(complexListDto: ISignalDto): ISignal {    // TODO rename me
+  public createFromDto(signalDto: ISignalDto): ISignal {
     let tmp: IComplex[];
 
-    tmp = complexListDto.map(
+    tmp = signalDto.map(
       (complexDto: IComplexDto): IComplex => {
         return this.complexFactory.createFromDto(complexDto);
       }
     );
 
-    return this.createFromArray(tmp);
+    return this.createFromComplexArray(tmp);
   }
 
-  public fromRawIQ(rawIQ: number[]): ISignal {    // TODO rename me
+  public createFromRawIQ(rawIQ: number[]): ISignal {
     const tmp: IComplex[] = [];
+    let complex: IComplex;
     let i: number;
 
     if (rawIQ.length % 2 === 1) {
@@ -68,56 +67,11 @@ export class SignalFactory implements ISignalFactory {
     }
 
     for (i = 0; i < rawIQ.length; i += 2) {
-      tmp.push(
-        this.complexFactory.create(rawIQ[i], rawIQ[i + 1])
-      );
+      complex = this.complexFactory.create(rawIQ[i], rawIQ[i + 1]);
+      tmp.push(complex);
     }
 
-    return this.createFromArray(tmp);
-  }
-
-  public toDto(complexList: ISignal): ISignalDto {  // TODO refactor me - move to Signal class
-    return complexList
-      .toArray()
-      .map(
-        (value: IComplex): IComplexDto => {
-          /* tslint:disable:object-literal-sort-keys */
-          return {
-            real: value.getReal(),
-            imaginary: value.getImaginary()
-          };
-          /* tslint:enable:object-literal-sort-keys */
-        }
-      );
-  }
-
-  public toRawIQ(complexList: ISignal): number[] {  // TODO refactor me - move to Signal class
-    const rawIQ: number[] = [];
-
-    complexList.forEach((value: IComplex): void => {
-      rawIQ.push(...value.toRawIQ());
-    });
-
-    return rawIQ;
-  }
-
-  public isEqual(a: ISignal, b: ISignal): boolean {  // TODO refactor me - move to Signal class
-    let isEqual;
-
-    if (a.getSize() !== b.getSize()) {
-      return false;
-    }
-
-    isEqual = true;
-    a.forEach((value: IComplex, index: number): boolean => {
-      if (!value.isEqualTo(b.getAt(index))) {
-        isEqual = false;
-        return false;
-      }
-      return true;
-    });
-
-    return isEqual;
+    return this.createFromComplexArray(tmp);
   }
 }
 

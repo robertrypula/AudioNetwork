@@ -60,17 +60,17 @@ describe('Fft', () => {
       inputDto = testCase.input;
       outputExpectationDto = testCase.output;
 
-      input = signalFactory.fromDto(inputDto);
+      input = signalFactory.createFromDto(inputDto);
       output = fft.forward(input);
-      outputDto = signalFactory.toDto(output);
+      outputDto = output.toDto();
       outputDto.forEach((v: IComplexDto, i: number) => {
         expect(v.real).toBeCloseTo(outputExpectationDto[i].real, precisionDigits);
         expect(v.imaginary).toBeCloseTo(outputExpectationDto[i].imaginary, precisionDigits);
       });
 
       // alternative equality check
-      outputExpectation = signalFactory.fromDto(outputExpectationDto);
-      expect(signalFactory.isEqual(output, outputExpectation)).toBe(true);
+      outputExpectation = signalFactory.createFromDto(outputExpectationDto);
+      expect(output.isEqualTo(outputExpectation)).toBe(true);
     });
   });
 
@@ -88,16 +88,16 @@ describe('Fft', () => {
     testCaseVector.forEach((testCase: IFourierTransformTestCase) => {
       inputDto = testCase.input;
 
-      input = signalFactory.fromDto(inputDto);
+      input = signalFactory.createFromDto(inputDto);
       output = fft.inverse(fft.forward(input));
-      outputDto = signalFactory.toDto(output);
+      outputDto = output.toDto();
       outputDto.forEach((v: IComplexDto, i: number) => {
         expect(v.real).toBeCloseTo(testCase.input[i].real, precisionDigits);
         expect(v.imaginary).toBeCloseTo(testCase.input[i].imaginary, precisionDigits);
       });
 
       // alternative equality check
-      expect(signalFactory.isEqual(output, input)).toBe(true);
+      expect(output.isEqualTo(input)).toBe(true);
     });
   });
 });

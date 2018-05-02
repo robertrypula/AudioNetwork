@@ -6,6 +6,7 @@ import { IComplex, IComplexDto } from './../complex/complex.interface';
 type ISignalDto = IComplexDto[];
 
 interface ISignal {
+  // methods that should always follow IList<T> interface
   clone(): ISignal;
   getAt(position: number): IComplex;
   setAt(position: number, sample: IComplex): ISignal;
@@ -23,6 +24,11 @@ interface ISignal {
   forEach(callback: (sample: IComplex, index?: number) => void | boolean): ISignal;
   filter(callback: (sample: IComplex, index?: number) => boolean): ISignal;
   toArray(): IComplex[];
+
+  // rest of the Signal class methods
+  toDto(): ISignalDto;
+  toRawIQ(): number[];
+  isEqualTo(b: ISignal): boolean;
 }
 
 interface ISignalStatic {
