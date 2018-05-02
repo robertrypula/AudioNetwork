@@ -10,11 +10,11 @@ import { SIGNAL_FACTORY } from './di-token';
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../common';
 
 import { precisionDigits } from './../../settings';
-import { IComplexList, IComplexListDto, ISignalFactory } from './../complex-list-util/signal-factory.interface';
 import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
+import { IComplexList, IComplexListDto, ISignalFactory } from './../signal/signal-factory.interface';
 import { SignalFactory } from './signal-factory';
 
 describe('SignalFactory', () => {

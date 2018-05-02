@@ -4,19 +4,19 @@ import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../common';
 import { PRECISION_DIGITS } from './../di-token';
-import { SIGNAL_FACTORY } from './complex-list-util/di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './complex/di-token';
 import { DSP_MODULE } from './di-token';
 import { FOURIER_TRANSFORM } from './fourier-transform/di-token';
+import { SIGNAL_FACTORY } from './signal/di-token';
 
 import { ListFactory, SimpleMath } from './../common';
 import { precisionDigits } from './../settings';
-import { SignalFactory } from './complex-list-util/signal-factory';
 import { ComplexDependencyBag } from './complex/complex-dependency-bag';
 import { ComplexFactory } from './complex/complex-factory';
 import { DspModule } from './dsp-module';
 import { IDspModule } from './dsp-module.interface';
 import { FftDitRecursive } from './fourier-transform/fft-dit-recursive/fft-dit-recursive';
+import { SignalFactory } from './signal/signal-factory';
 
 describe('DspModule', () => {
   it('should properly provide all expected items', () => {

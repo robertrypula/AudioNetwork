@@ -4,18 +4,18 @@ import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../../../common';
 import { PRECISION_DIGITS } from './../../../di-token';
-import { SIGNAL_FACTORY } from './../../complex-list-util/di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../../complex/di-token';
+import { SIGNAL_FACTORY } from './../../signal/di-token';
 import { FOURIER_TRANSFORM } from './../di-token';
 
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../../common';
 import { precisionDigits } from './../../../settings';
-import { SignalFactory } from './../../complex-list-util/signal-factory';
-import { IComplexList, IComplexListDto, ISignalFactory } from './../../complex-list-util/signal-factory.interface';
 import { ComplexDependencyBag } from './../../complex/complex-dependency-bag';
 import { ComplexFactory } from './../../complex/complex-factory';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../../complex/complex.interface';
+import { SignalFactory } from './../../signal/signal-factory';
+import { IComplexList, IComplexListDto, ISignalFactory } from './../../signal/signal-factory.interface';
 import { IFourierTransform, IFourierTransformTestCase } from './../fourier-transform.interface';
 import {
   fourierTransformTestCaseA,
