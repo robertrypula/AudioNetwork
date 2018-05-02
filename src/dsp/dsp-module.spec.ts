@@ -4,14 +4,14 @@ import { Injector } from 'rr-tsdi';
 
 import { LIST_FACTORY, SIMPLE_MATH } from './../common';
 import { PRECISION_DIGITS } from './../di-token';
-import { COMPLEX_LIST_UTIL } from './complex-list-util/di-token';
+import { SIGNAL_FACTORY } from './complex-list-util/di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './complex/di-token';
 import { DSP_MODULE } from './di-token';
 import { FOURIER_TRANSFORM } from './fourier-transform/di-token';
 
 import { ListFactory, SimpleMath } from './../common';
 import { precisionDigits } from './../settings';
-import { ComplexListUtil } from './complex-list-util/complex-list-util';
+import { SignalFactory } from './complex-list-util/signal-factory';
 import { ComplexDependencyBag } from './complex/complex-dependency-bag';
 import { ComplexFactory } from './complex/complex-factory';
 import { DspModule } from './dsp-module';
@@ -27,7 +27,7 @@ describe('DspModule', () => {
     injector.registerService(LIST_FACTORY, ListFactory);
     injector.registerService(COMPLEX_DEPENDENCY_BAG, ComplexDependencyBag);
     injector.registerValue(PRECISION_DIGITS, precisionDigits);
-    injector.registerService(COMPLEX_LIST_UTIL, ComplexListUtil);
+    injector.registerService(SIGNAL_FACTORY, SignalFactory);
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(FOURIER_TRANSFORM, FftDitRecursive);
     injector.registerService(DSP_MODULE, DspModule);
@@ -35,7 +35,7 @@ describe('DspModule', () => {
     dspModule = injector.get(DSP_MODULE);
 
     expect(dspModule).toBeInstanceOf(DspModule);
-    expect(dspModule.complexListUtil).toBeInstanceOf(ComplexListUtil);
+    expect(dspModule.signalFactory).toBeInstanceOf(SignalFactory);
     expect(dspModule.complexFactory).toBeInstanceOf(ComplexFactory);
     expect(dspModule.fourierTransform).toBeInstanceOf(FftDitRecursive);
   });

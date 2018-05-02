@@ -1,18 +1,18 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-import { IComplexListUtil } from './complex-list-util/complex-list-util.interface';
+import { ISignalFactory } from './complex-list-util/signal-factory.interface';
 import { IComplexFactory } from './complex/complex-factory.interface';
 import { IFourierTransform } from './fourier-transform/fourier-transform.interface';
 
 interface IDspModule {
-  complexListUtil: IComplexListUtil;
+  signalFactory: ISignalFactory;
   complexFactory: IComplexFactory;
   fourierTransform: IFourierTransform;
 }
 
 interface IDspModuleStatic {
   new(
-    complexListUtil: IComplexListUtil,
+    signalFactory: ISignalFactory,
     complexFactory: IComplexFactory,
     fourierTransform: IFourierTransform
   ): IDspModule;

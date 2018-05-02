@@ -1,7 +1,7 @@
 // Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
 
-export * from './complex-list-util/complex-list-util.interface';
-export * from './complex-list-util/complex-list-util';
+export * from './complex-list-util/signal-factory.interface';
+export * from './complex-list-util/signal-factory';
 export * from './complex-list-util/di-token';
 export * from './complex/complex-dependency-bag.interface';
 export * from './complex/complex-dependency-bag';

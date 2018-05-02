@@ -5,20 +5,20 @@ import { Injector } from 'rr-tsdi';
 import { LIST_FACTORY, SIMPLE_MATH } from './../../common';
 import { PRECISION_DIGITS } from './../../di-token';
 import { COMPLEX_DEPENDENCY_BAG, COMPLEX_FACTORY } from './../complex/di-token';
-import { COMPLEX_LIST_UTIL } from './di-token';
+import { SIGNAL_FACTORY } from './di-token';
 
 import { IList, IListFactory, ListFactory, SimpleMath } from './../../common';
 
 import { precisionDigits } from './../../settings';
-import { IComplexList, IComplexListDto, IComplexListUtil } from './../complex-list-util/complex-list-util.interface';
+import { IComplexList, IComplexListDto, ISignalFactory } from './../complex-list-util/signal-factory.interface';
 import { ComplexDependencyBag } from './../complex/complex-dependency-bag';
 import { ComplexFactory } from './../complex/complex-factory';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
-import { ComplexListUtil } from './complex-list-util';
+import { SignalFactory } from './signal-factory';
 
-describe('ComplexListUtil', () => {
-  let complexListUtil: IComplexListUtil;
+describe('SignalFactory', () => {
+  let signalFactory: ISignalFactory;
   let listFactory: IListFactory;
   let complexFactory: IComplexFactory;
 
@@ -30,15 +30,15 @@ describe('ComplexListUtil', () => {
     injector.registerService(COMPLEX_FACTORY, ComplexFactory);
     injector.registerService(SIMPLE_MATH, SimpleMath);
     injector.registerService(LIST_FACTORY, ListFactory);
-    injector.registerService(COMPLEX_LIST_UTIL, ComplexListUtil);
+    injector.registerService(SIGNAL_FACTORY, SignalFactory);
 
-    complexListUtil = injector.get(COMPLEX_LIST_UTIL);
+    signalFactory = injector.get(SIGNAL_FACTORY);
     listFactory = injector.get(LIST_FACTORY);
     complexFactory = injector.get(COMPLEX_FACTORY);
   });
 
   it('should create proper instance', () => {
-    expect(complexListUtil).toBeInstanceOf(ComplexListUtil);
+    expect(signalFactory).toBeInstanceOf(SignalFactory);
   });
 
   it('should create a complex list from ComplexList DTO', () => {
@@ -46,7 +46,7 @@ describe('ComplexListUtil', () => {
       { real: 1, imaginary: 2 },
       { real: 3, imaginary: 4 }
     ];
-    const complexList = complexListUtil.fromDto(complexListDto);
+    const complexList = signalFactory.fromDto(complexListDto);
 
     expect(complexList.getSize()).toBe(2);
 
@@ -59,7 +59,7 @@ describe('ComplexListUtil', () => {
 
   it('should create a complex list from raw IQ data', () => {
     const rawIQ = [1, 2, 3, 4];
-    let complexList = complexListUtil.fromRawIQ(rawIQ);
+    let complexList = signalFactory.fromRawIQ(rawIQ);
 
     expect(complexList.getSize()).toBe(2);
 
@@ -71,7 +71,7 @@ describe('ComplexListUtil', () => {
 
     rawIQ.push(5);
     expect(() => {
-      complexList = complexListUtil.fromRawIQ(rawIQ);
+      complexList = signalFactory.fromRawIQ(rawIQ);
     }).toThrow();
   });
 
@@ -82,7 +82,7 @@ describe('ComplexListUtil', () => {
     complexList.append(complexFactory.create(1, 2));
     complexList.append(complexFactory.create(3, 4));
 
-    complexListDto = complexListUtil.toDto(complexList);
+    complexListDto = signalFactory.toDto(complexList);
 
     expect(complexListDto).toEqual(
       [
@@ -99,24 +99,24 @@ describe('ComplexListUtil', () => {
     complexList.append(complexFactory.create(1, 2));
     complexList.append(complexFactory.create(3, 4));
 
-    rawIQ = complexListUtil.toRawIQ(complexList);
+    rawIQ = signalFactory.toRawIQ(complexList);
 
     expect(rawIQ).toEqual([1, 2, 3, 4]);
   });
 
   it('should properly indicate that two lists are equal', () => {
-    const a = complexListUtil.fromRawIQ([1, 2, 3, 4.000000]);
-    const b = complexListUtil.fromRawIQ([1, 2, 3, 4.000000]);
-    const c = complexListUtil.fromRawIQ([1, 2, 3, 4.0000001]);
-    const d = complexListUtil.fromRawIQ([1, 2, 3, 4.000001]);
-    const e = complexListUtil.fromRawIQ([1, 2]);
-    const emptyA = complexListUtil.fromRawIQ([]);
-    const emptyB = complexListUtil.fromRawIQ([]);
+    const a = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
+    const b = signalFactory.fromRawIQ([1, 2, 3, 4.000000]);
+    const c = signalFactory.fromRawIQ([1, 2, 3, 4.0000001]);
+    const d = signalFactory.fromRawIQ([1, 2, 3, 4.000001]);
+    const e = signalFactory.fromRawIQ([1, 2]);
+    const emptyA = signalFactory.fromRawIQ([]);
+    const emptyB = signalFactory.fromRawIQ([]);
 
-    expect(complexListUtil.isEqual(a, b)).toBe(true);
-    expect(complexListUtil.isEqual(a, c)).toBe(true);
-    expect(complexListUtil.isEqual(a, d)).toBe(false);
-    expect(complexListUtil.isEqual(a, e)).toBe(false);
-    expect(complexListUtil.isEqual(emptyA, emptyB)).toBe(true);
+    expect(signalFactory.isEqual(a, b)).toBe(true);
+    expect(signalFactory.isEqual(a, c)).toBe(true);
+    expect(signalFactory.isEqual(a, d)).toBe(false);
+    expect(signalFactory.isEqual(a, e)).toBe(false);
+    expect(signalFactory.isEqual(emptyA, emptyB)).toBe(true);
   });
 });

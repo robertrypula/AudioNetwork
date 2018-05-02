@@ -8,10 +8,10 @@ import { COMPLEX_FACTORY } from './../complex/di-token';
 import { GenericException, IList, IListFactory } from './../../common';
 import { IComplexFactory } from './../complex/complex-factory.interface';
 import { IComplex, IComplexDto } from './../complex/complex.interface';
-import { IComplexList, IComplexListDto, IComplexListUtil, IComplexListUtilStatic } from './complex-list-util.interface';
+import { IComplexList, IComplexListDto, ISignalFactory, ISignalFactoryStatic } from './signal-factory.interface';
 
-@staticImplements<IComplexListUtilStatic>()
-export class ComplexListUtil implements IComplexListUtil {
+@staticImplements<ISignalFactoryStatic>()
+export class SignalFactory implements ISignalFactory {
   public static $inject: string[] = [
     COMPLEX_FACTORY,
     LIST_FACTORY

@@ -4,4 +4,29 @@
     signal.fromReal([1, 2, 3]);
     signal.mix(Signal.complexSpiral(cyclesInLength, length));
     signal.lowPass(0.5, );
+
+
+signalFactory.createFromReal();
+signalFactory.createFromRawIQ();
+signalFactory.createFromComplexListDto();
+
+signal.dropPhase().magnitudeToDecibel()
+signal.dropPhase().magnitudeFromDecibel()
+signal.dropRealPart();
+signal.swapHalves()
+signal.toReal()
+
+signal.getAmplitude
+
+
+windowFunction.applyOn(signal);
+
+spiralGeneratorFactory.create(samplePerPeriod);
+signalGenerator.fillInto(signal);
+signalAnalyser
+
+signal.mixWith(spiral)
+signal.mixWith()
+
+signal.add();
 */

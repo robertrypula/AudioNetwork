@@ -6,7 +6,7 @@ import { LIST_FACTORY } from './../../../common';
 import { COMPLEX_FACTORY } from './../../complex/di-token';
 
 import { IList, IListFactory } from './../../../common';
-import { IComplexList } from './../../complex-list-util/complex-list-util.interface';
+import { IComplexList } from './../../complex-list-util/signal-factory.interface';
 import { IComplexFactory } from './../../complex/complex-factory.interface';
 import { IComplex } from './../../complex/complex.interface';
 import { IFourierTransform, IFourierTransformStatic } from './../fourier-transform.interface';

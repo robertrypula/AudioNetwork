@@ -7,7 +7,7 @@ import { IComplex, IComplexDto } from './../complex/complex.interface';
 type IComplexListDto = IComplexDto[];
 type IComplexList = IList<IComplex>;
 
-interface IComplexListUtil {
+interface ISignalFactory {
   fromDto(complexListDto: IComplexListDto): IComplexList;
   fromRawIQ(rawIQ: number[]): IComplexList;
   toDto(complexList: IComplexList): IComplexListDto;
@@ -15,16 +15,16 @@ interface IComplexListUtil {
   isEqual(a: IComplexList, b: IComplexList): boolean;
 }
 
-interface IComplexListUtilStatic {
+interface ISignalFactoryStatic {
   new(
     complexFactory: IComplexFactory,
     listFactory: IListFactory
-  ): IComplexListUtil;
+  ): ISignalFactory;
 }
 
 export {
   IComplexListDto,
   IComplexList,
-  IComplexListUtil,
-  IComplexListUtilStatic
+  ISignalFactory,
+  ISignalFactoryStatic
 };
