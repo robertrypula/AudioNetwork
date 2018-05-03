@@ -72,6 +72,7 @@
     "npm-check": "^5.7.0",
     "rimraf": "^2.6.2",
     "rr-tsdi": "^1.0.3",
+    "showdown": "^1.8.6",
     "ts-jest": "^22.4.4",
     "ts-loader": "^4.2.0",
     "tslint": "^5.9.1",
