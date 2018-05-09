@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+      <title>Audio Network - https://slides.com/robertrypula - dft</title>
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+
+      <script src="https://audio-network.rypula.pl/build/audio-network-v1.3.0.min.js"></script>
+      <script>
+        var DFT_SIZE = 100;      // we are not using FFT algoritm so it's ok to use non power of two values
+        var FREQUENCY_BIN_SIZE = DFT_SIZE * 0.5;
+        var Queue = AudioNetwork.Common.Queue;
+        var SampleChart = AudioNetwork.Visualizer.SampleChart;
+        var FrequencyDomainChart = AudioNetwork.Visualizer.FrequencyDomainChart;
+        var WaveAnalyser = AudioNetwork.Rewrite.Dsp.WaveAnalyser;
+        var queue;
+        var sampleChart;
+        var queue2;
+        var sampleChart2;
+
+        function getFrequencyData(timeDomainData, windowFunction) {
+          var
+            dummySamplePerPeriod = 1,   // just for initialization
+            windowSize = timeDomainData.length,
+            frequencyBinCount = 0.5 * windowSize,
+            waveAnalyser = new WaveAnalyser(dummySamplePerPeriod, windowSize, windowFunction),
+            N = timeDomainData.length,
+            frequencyData = [],
+            samplePerPeriod,
+            decibel,
+            i,
+            k;
+
+          for (i = 0; i < timeDomainData.length; i++) {
+            waveAnalyser.handle(timeDomainData[i]);
+          }
+
+          for (k = 0; k < frequencyBinCount; k++) {
+            samplePerPeriod = (k === 0)
+              ? Infinity       // DC-offset (0 Hz)
+              : N / k;
+            waveAnalyser.setSamplePerPeriod(samplePerPeriod);
+            decibel = waveAnalyser.getDecibel();
+            frequencyData.push(decibel);
+          }
+
+          return frequencyData;
+        }
+
+        function init() {
+          queue = new Queue(DFT_SIZE);
+          sampleChart = new SampleChart(document.getElementById('wave'), DFT_SIZE * (7 + 1), 64, queue, 2, 7, 1);
+          queue2 = new Queue(FREQUENCY_BIN_SIZE);
+          sampleChart2 = new FrequencyDomainChart(document.getElementById('dft'), FREQUENCY_BIN_SIZE * (7 + 1), 128, queue2, -80, 2, 7, 1);
+
+          refresh();
+        }
+
+        function refresh() {
+          var frequencyDomain = [];
+          var timeDomain = [];
+          var amplitude;
+          var cycles;
+          var sample;
+          var windowFunction;
+          var i, j;
+
+          for (i = 0; i < DFT_SIZE; i++) {
+            sample = 0;
+            for (j = 1; j <= 3; j++) {
+              cycles = parseFloat(document.getElementById('cycles-' + j).value);
+              amplitude = parseFloat(document.getElementById('amplitude-' + j).value);
+              sample += amplitude * Math.cos(cycles * 2 * Math.PI * i / DFT_SIZE);
+            }
+            amplitude = parseFloat(document.getElementById('noise-amplitude').value);
+            sample += amplitude * (2 * Math.random() - 1);
+
+            queue.pushEvenIfFull(sample);
+            timeDomain.push(sample);
+          }
+
+          windowFunction = document.getElementById('window-function').checked;
+          frequencyDomain = getFrequencyData(timeDomain, windowFunction);
+          for (i = 0; i < frequencyDomain.length; i++) {
+            queue2.pushEvenIfFull(frequencyDomain[i]);
+          }
+        }
+      </script>
+
+      <style>
+        .chart div {
+          border: 1px solid lightgray;
+        }
+      </style>
+  </head>
+  <body onLoad="init()">
+    <div id="wave" class="chart"></div>
+    <br/>
+    Cycles:
+    <input type="number" id="cycles-1" value="5" onChange="refresh()" />
+    Amplitude:
+    <input type="number" id="amplitude-1" value="0.7" step="0.001" onChange="refresh()" />
+    <br/>
+    Cycles:
+    <input type="number" id="cycles-2" value="16" onChange="refresh()" />
+    Amplitude:
+    <input type="number" id="amplitude-2" value="0.3" step="0.001" onChange="refresh()" />
+    <br/>
+    Cycles:
+    <input type="number" id="cycles-3" value="25" onChange="refresh()" />
+    Amplitude:
+    <input type="number" id="amplitude-3" value="0.00" step="0.001" onChange="refresh()" />
+    <br/>
+    Noise amplitude:
+    <input type="number" id="noise-amplitude" value="0.00" step="0.001" onChange="refresh()" />
+    <br/>
+    <br/>
+    <div id="dft" class="chart"></div>
+
+    Apply window function:
+    <input type="checkbox" id="window-function" onChange="refresh()" value="1" checked="checked" />
+  </body>
+</html>

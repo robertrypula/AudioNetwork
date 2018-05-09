@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <title>Audio Network - https://slides.com/robertrypula - AnalyserNode</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <script>
+      var audioContext, microphoneNode, analyserNode;
+
+      function init() {
+        var FFT_SIZE  = 512;
+        var CANVAS_HEIGHT = 128;
+
+        audioContext = new AudioContext();
+
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = FFT_SIZE;
+        analyserNode.smoothingTimeConstant = 0.8;
+
+        connectMicrophoneTo(analyserNode);
+
+        ctxTimeDomainData = getConfiguredCanvasContext('time-domain', FFT_SIZE, CANVAS_HEIGHT);
+        ctxFrequencyData = getConfiguredCanvasContext('frequency-domain', FFT_SIZE * 0.5, CANVAS_HEIGHT);
+
+        animationFrameLoop();
+      }
+
+      function getFrequencyData() {
+        var data;
+
+        data = new Float32Array(analyserNode.frequencyBinCount);   // same as: 0.5 * fftSize
+        analyserNode.getFloatFrequencyData(data);
+
+        return data;
+      }
+
+      function getTimeDomainData() {
+        var data;
+
+        data = new Float32Array(analyserNode.fftSize);
+        analyserNode.getFloatTimeDomainData(data);
+
+        return data;
+      }
+
+      function getFftResolution() {
+        return audioContext.sampleRate / analyserNode.fftSize;
+      }
+
+      function getFrequency(fftBinIndex) {
+        return fftBinIndex * getFftResolution();
+      }
+
+      function connectMicrophoneTo(audioNode) {
+        var
+          self = this,
+          constraints = {
+            video: false,
+            audio: true
+          };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then(function (stream) {
+            microphoneNode = audioContext.createMediaStreamSource(stream);
+            microphoneNode.connect(audioNode);
+          })
+          .catch(function (error) {
+            alert(error);
+          });
+      }
+
+      function onSmoothingTimeConstantChange(value) {
+        analyserNode.smoothingTimeConstant = value;
+      }
+
+      function getIndexOfMax(data) {
+        var i, maxIndex, max, value;
+
+        for (i = 0; i < data.length; i++) {
+          value = data[i];
+          if (i === 0 || value > max) {
+            max = value;
+            maxIndex = i;
+          }
+        }
+
+        return maxIndex;
+      }
+
+      // -----------------------------------------------------------------------
+      // animation, canvas 2d context
+
+      function clear(ctx) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
+
+      function drawLine(ctx, x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      function getConfiguredCanvasContext(elementId, width, height) {
+        var element, ctx;
+
+        element = document.getElementById(elementId);
+        element.width = width;
+        element.height = height;
+        ctx = element.getContext('2d');
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'black';
+
+        return ctx;
+      }
+
+      var animationFrameFirstCall = true;
+
+      function animationFrameLoop() {
+        if (!animationFrameFirstCall) {
+          refreshDataOnScreen();
+        } else {
+          animationFrameFirstCall = false;
+        }
+        requestAnimationFrame(animationFrameLoop);
+      }
+
+      function refreshDataOnScreen() {
+        var timeDomainData, frequencyData, dbc, frequencyDataMaxValueIndex;
+
+        timeDomainData = getTimeDomainData();
+        frequencyData = getFrequencyData();
+
+        drawTimeDomainData(ctxTimeDomainData, timeDomainData);
+        drawFrequencyDomainData(ctxFrequencyData, frequencyData);
+
+        document.getElementById('smoothing-time-constant').innerHTML = analyserNode.smoothingTimeConstant;
+
+        dbc = analyserNode.frequencyBinCount;
+        document.getElementById('frequency-bin-log').innerHTML =
+            '[' + 0 + '] ' + frequencyData[0].toFixed(2) + ' dB (0.00 Hz) - DC offset' + '<br/>' +
+            '[' + (0.0625 * dbc) + '] ' + frequencyData[0.0625 * dbc].toFixed(2) + ' dB (' + getFrequency(0.0625 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.1250 * dbc) + '] ' + frequencyData[0.1250 * dbc].toFixed(2) + ' dB (' + getFrequency(0.1250 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.2500 * dbc) + '] ' + frequencyData[0.2500 * dbc].toFixed(2) + ' dB (' + getFrequency(0.2500 * dbc).toFixed(2) + ' Hz)' + '<br/>' +
+            '[' + (0.5000 * dbc) + '] ' + frequencyData[0.5000 * dbc].toFixed(2) + ' dB (' + getFrequency(0.5000 * dbc).toFixed(2) + ' Hz) - middle index' + '<br/>' +
+            '[' + (dbc - 1) + '] ' + frequencyData[dbc - 1].toFixed(2) + ' dB (' + getFrequency(dbc - 1).toFixed(2) + ' Hz) - last index';
+
+        frequencyDataMaxValueIndex = getIndexOfMax(frequencyData),
+        document.getElementById('frequency-bin-loudest').innerHTML =
+            '[' + frequencyDataMaxValueIndex + '] ' + frequencyData[frequencyDataMaxValueIndex].toFixed(2) + ' dB (' + getFrequency(frequencyDataMaxValueIndex).toFixed(2) + ' Hz)';
+      }
+
+      function drawTimeDomainData(ctx, data) {
+        var hMid, x, y1, y2;
+
+        clear(ctx);
+
+        hMid = Math.floor(0.5 * ctx.canvas.clientHeight);
+        for (x = 0; x < data.length - 1; x++) {
+          y1 = hMid * (1 - data[x]);
+          y2 = hMid * (1 - data[x + 1]);
+          drawLine(ctx, x, y1, x + 1, y2);
+        }
+      }
+
+      function drawFrequencyDomainData(ctx, data) {
+        var hMaxPix, x, y1, y2, decibelMin;
+
+        clear(ctx);
+
+        decibelMin = -120;
+        hMaxPix = ctx.canvas.clientHeight - 1;
+        for (x = 0; x < data.length - 1; x++) {
+          y1 = hMaxPix * (data[x] / decibelMin);
+          y2 = hMaxPix * (data[x  + 1] / decibelMin);
+          drawLine(ctx, x, y1, x + 1, y2);
+        }
+      }
+    </script>
+
+    <style>
+      canvas {
+        display: block;
+        border: 1px solid lightgray;
+      }
+    </style>
+</head>
+<body>
+  <div>
+    <button type="button" onClick="init()">Init</button>
+  </div>
+  <div>
+    <h2>Time domain</h2>
+    <canvas id="time-domain"></canvas>
+    <h2>Frequency domain</h2>
+    <canvas id="frequency-domain"></canvas>
+    <br/>
+    <div>
+      Smoothing time constant:
+      <input type="range" min="0" max="1" value="0.8" step="0.01" onChange="onSmoothingTimeConstantChange(this.value)" />
+      <span id="smoothing-time-constant"></span>
+    </div>
+    <br/>
+    <div>
+      Frequency bins:
+      <pre id="frequency-bin-log"></pre>
+    </div>
+    <br/>
+    <div>
+      Loudest frequency bin:
+      <pre id="frequency-bin-loudest"></pre>
+    </div>
+  </div>
+</body>
+</html>

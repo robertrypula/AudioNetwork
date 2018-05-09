@@ -7,6 +7,78 @@ Additionally you can find a lot of articles in the links below:
 
 TODO: This is direct copy of txt file. Reformat and make links clickable
 
+## Not categoried (yet) update 2018.05.02
+
+```
+AngularJs Dependency Injection with TypeScript
+!!!!!! https://codepen.io/martinmcwhorter/post/angularjs-1-x-with-typescript-or-es6-best-practices
+
+Dependency Injection in Angular
+!!!!!! https://blog.thoughtram.io/angular/2015/05/18/dependency-injection-in-angular-2.html
+
+How to define static property in TypeScript Interface
+https://stackoverflow.com/a/43674389
+In general we shouldn't do it - move code to service
+
+Solution for service inheritance:
+https://stackoverflow.com/questions/39038791/inheritance-and-dependency-injection
+
+Service or static method:
+https://stackoverflow.com/questions/39011788/typescript-and-angularjs-static-methods-vs-services
+The problem is the same in Java or other languages. Static method are hard to extends and mock that why you should use services instead of static method.
+
+Abstract classes as Tokens in Angular
+https://www.bennadel.com/blog/3327-using-abstract-classes-as-dependency-injection-tokens-for-swappable-behaviors-in-angular-4-2-3.htm
+
+Interesting EntityManager that injects all dependencies in the base class:
+https://stackoverflow.com/questions/38309481/angular-2-inject-service-into-class
+
+Mocking ES6 modules
+!!!!! https://railsware.com/blog/2017/01/10/mocking-es6-module-import-without-dependency-injection/
+
+About TypeScript decorators in general
+!!!!!!!! http://www.sparkbit.pl/typescript-decorators/
+
+Decorators in TypeScript for DependencyInjection
+!!!!!!!! http://source.coveo.com/2016/02/04/typescript-injection-decorator/
+https://github.com/GermainBergeron/injector
+https://github.com/GermainBergeron/dose
+
+Decorators in TypeScript for DependencyInjection
+!!!!!!!!! https://www.andrewmunsell.com/blog/dependency-injection-for-modern-javascript-using-es6-classes-and-es7-decorators/
+
+Refactor AnglarJs into Es6
+!!!!!! https://medium.com/@u_glow/upgrading-an-angular-es5-codebase-to-es6-85554288c08d
+
+Get class name
+https://stackoverflow.com/questions/29310530/get-the-class-name-of-es6-class-instance
+
+Mocking in AnglarJs
+https://www.sitepoint.com/mocking-dependencies-angularjs-tests/
+
+About redux-ORM
+http://blog.isquaredsoftware.com/2016/10/practical-redux-part-1-redux-orm-basics/
+
+Angular Test Beds vs Dependency Injection: GREAT!!
+https://kirjai.com/testing-angular-services-with-dependencies/
+
+https://www.andrewmunsell.com/blog/dependency-injection-for-modern-javascript-using-es6-classes-and-es7-decorators/
+http://blog.mgechev.com/2013/12/18/inheritance-services-controllers-in-angularjs/
+https://code.tutsplus.com/tutorials/stop-nesting-functions-but-not-all-of-them--net-22315
+
+--------------------
+Nice links related to DSP
+https://dsp.stackexchange.com/questions/42757/effects-of-linear-interpolation-of-a-time-series-on-its-frequency-spectrum/42761
+https://math.stackexchange.com/questions/1372632/how-does-sinc-interpolation-work
+http://aaronscher.com/wireless_com_SDR/RTL_SDR_AM_spectrum_demod.html
+https://fas.org/man/dod-101/navy/docs/es310/FM.htm
+http://jontio.zapto.org/hda1/paradise/QAM.htm
+
+Great interactive article about complex numbers and fractals
+http://acko.net/blog/how-to-fold-a-julia-fractal/
+
+```
+
 ## Not categorised (yet)
 
 ```

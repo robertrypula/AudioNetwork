@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <title>Audio Network - https://slides.com/robertrypula - simple AudioContext graph speakers</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <script>
+      var audioContext, oscillatorNode, gainNode;
+
+      function init() {
+        audioContext = new AudioContext();
+
+        oscillatorNode = audioContext.createOscillator();
+        gainNode = audioContext.createGain();
+
+        oscillatorNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillatorNode.start();
+
+        onFrequencyChange(oscillatorNode.frequency.value);
+        onVolumeChange(gainNode.gain.value);
+      }
+
+      function onFrequencyChange(frequency) {
+        var currentTime = audioContext.currentTime;
+
+        oscillatorNode.frequency.setValueAtTime(frequency, currentTime);
+        document.getElementById('frequency').innerHTML = frequency;
+      }
+
+      function onVolumeChange(volume) {
+        var currentTime = audioContext.currentTime;
+
+        gainNode.gain.setValueAtTime(volume, currentTime)
+        document.getElementById('volume').innerHTML = (100 * volume).toFixed(0);
+      }
+    </script>
+</head>
+<body>
+  <div>
+    <button type="button" onClick="init()">Init</button>
+  </div>
+  <div>
+    Frequency:
+    <input type="range" min="0" max="20000" value="440" onChange="onFrequencyChange(this.value)" />
+    <span id="frequency"></span> Hz
+  </div>
+  <div>
+    Volume:
+    <input type="range" min="0" max="1" value="1" step="0.01" onChange="onVolumeChange(this.value)" />
+    <span id="volume"></span>%
+  </div>
+</body>
+</html>
