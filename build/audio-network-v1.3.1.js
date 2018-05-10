@@ -28,7 +28,7 @@ var
     AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
     AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.version = '1.3.0';
+AudioNetwork.version = '1.3.1';
 
 // conditions from: http://stackoverflow.com/a/33697246
 AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;
@@ -229,16 +229,6 @@ AudioNetwork.DynamicScriptLoader = (function () {
     };
 
     DynamicScriptLoader.prototype.loadOne = function (url) {
-        /*
-        var
-            anRoot = document.getElementById('an-root'),
-            scriptTag = document.createElement('script'),
-            whereToAppend = anRoot ? anRoot : document.body;
-
-        scriptTag.src = AudioNetwork.bootConfig.devScriptBaseUrl + url;
-        whereToAppend.appendChild(scriptTag);
-        */
-        // block page loading - this is the best approach so far... :)
         document.write('<script src="' + AudioNetwork.bootConfig.devScriptBaseUrl + url + '"></script>')
     };
 
@@ -308,6 +298,7 @@ AudioNetwork.devScriptList = [
     'dsp/complex.js',
     'dsp/correlator.js',
     'dsp/fft-result.js',
+    'dsp/fft.js',
     'dsp/wave-analyser.js',
     'dsp/wave-generator.js',
     'physical-layer/physical-layer-builder.js',
@@ -1238,14 +1229,27 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
             return new Complex(0, 0);
         };
 
+        Complex.prototype.swap = function () {
+            var tmp = this.$$real;
+
+            this.$$real = this.$$imag;
+            this.$$imag = tmp;
+
+            return this;
+        };
+
         Complex.prototype.add = function (b) {
             this.$$real += b.$$real;
             this.$$imag += b.$$imag;
+
+            return this;
         };
 
         Complex.prototype.subtract = function (b) {
             this.$$real -= b.$$real;
             this.$$imag -= b.$$imag;
+
+            return this;
         };
 
         Complex.prototype.multiply = function (b) {
@@ -1255,20 +1259,28 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
 
             this.$$real = real;
             this.$$imag = imag;
+
+            return this;
         };
 
         Complex.prototype.conjugate = function () {
             this.$$imag *= -1;
+
+            return this;
         };
 
         Complex.prototype.multiplyScalar = function (b) {
             this.$$real *= b;
             this.$$imag *= b;
+
+            return this;
         };
 
         Complex.prototype.divideScalar = function (b) {
             this.$$real /= b;
             this.$$imag /= b;
+
+            return this;
         };
 
         Complex.prototype.getReal = function () {
@@ -1331,6 +1343,8 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
             this.divideScalar(
                 this.getMagnitude()
             );
+
+            return this;
         };
 
         return Complex;
@@ -1553,6 +1567,7 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
 'use strict';
 
 // TODO add ranges check
+// TODO rename to FftResult
 
 (function () {
     AudioNetwork.Injector
@@ -1884,6 +1899,93 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
         };
 
         return FFTResult;
+    }
+
+})();
+
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+'use strict';
+
+(function () {
+    AudioNetwork.Injector
+        .registerFactory('Rewrite.Dsp.Fft', Fft);
+
+    Fft.$inject = [
+        'Rewrite.Dsp.Complex'
+    ];
+
+    function Fft(
+        Complex
+    ) {
+        var Fft;
+
+        Fft = function () {
+        };
+
+        Fft.forward = function (input) {
+            var
+                n = input.length,
+                nHalf,
+                even,
+                odd,
+                output = [],
+                wnkMultiplied,
+                wnk,
+                k,
+                unitAngle;
+
+            if (n === 1) {
+                return input;
+            }
+
+            // even and odd parts
+            even = Fft.forward(Fft.$$getHalf(input, 0));
+            odd = Fft.forward(Fft.$$getHalf(input, 1));
+
+            // combine
+            output.length = n;
+            nHalf = n / 2;
+            for (k = 0; k < nHalf; k++) {
+                unitAngle = -k / n;
+                wnk = Complex.polar(unitAngle);
+                wnkMultiplied = wnk.clone().multiply(odd[k]);
+                output[k] = even[k].clone().add(wnkMultiplied);
+                output[nHalf + k] = even[k].clone().subtract(wnkMultiplied);
+            }
+
+            return output;
+        };
+
+        Fft.inverse = function (input) {
+            var
+                output = [],
+                i;
+
+            for (i = 0; i < input.length; i++) {
+                output.push(input[i].clone().swap());
+            }
+            output = Fft.forward(output);
+            for (i = 0; i < output.length; i++) {
+                output[i].swap().divideScalar(output.length);
+            }
+
+            return output;
+        };
+
+        Fft.$$getHalf = function (list, offset) {
+            var i, listHalf, item, lengthHalf;
+
+            listHalf = [];
+            lengthHalf = list.length / 2;
+            for (i = 0; i < lengthHalf; i++) {
+                item = list[i * 2 + offset];
+                listHalf.push(item);
+            }
+
+            return listHalf;
+        };
+
+        return Fft;
     }
 
 })();
@@ -4311,6 +4413,10 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
         AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
             var periodicWave, isPureSine;
 
+            if (this.$$audioContext.state === 'suspended') {
+              this.$$audioContext.resume();
+            }
+
             isPureSine = typeof phase === 'undefined' &&
                 typeof harmonicAmplitude === 'undefined' &&
                 typeof harmonicPhase === 'undefined';
@@ -5687,205 +5793,6 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Visualizer.ComplexPlaneChartBuilder', _ComplexPlaneChartBuilder);
-
-    _ComplexPlaneChartBuilder.$inject = [
-        'Visualizer.ComplexPlaneChart'
-    ];
-
-    function _ComplexPlaneChartBuilder(
-        ComplexPlaneChart
-    ) {
-
-        function build(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
-            return new ComplexPlaneChart(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine);
-        }
-
-        return {
-            build: build
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerService('Visualizer.ComplexPlaneChartTemplateMain', _ComplexPlaneChartTemplateMain);
-
-    _ComplexPlaneChartTemplateMain.$inject = [];
-
-    function _ComplexPlaneChartTemplateMain() {
-        var html =
-            '<div' +
-            '    class="complex-plane-chart-container"' +
-            '    style="' +
-            '        overflow: hidden;' +
-            '        width: {{ width }}px;' +
-            '        height: {{ height }}px;' +
-            '        position: relative;' +
-            '    "' +
-            '    >' +
-            '    <canvas ' +
-            '        class="complex-plane-chart"' +
-            '        style="' +
-            '            width: {{ width }}px;' +
-            '            height: {{ height }}px;' +
-            '            position: absolute;' +
-            '        "' +
-            '        width="{{ width }}"' +
-            '        height="{{ height }}"' +
-            '        ></canvas>' +
-            '</div>'
-        ;
-
-        return {
-            html: html
-        };
-    }
-
-})();
-
-// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
-        .registerFactory('Visualizer.ComplexPlaneChart', _ComplexPlaneChart);
-
-    _ComplexPlaneChart.$inject = [
-        'Visualizer.Abstract2DVisualizer',
-        'Common.Util',
-        'Visualizer.ComplexPlaneChartTemplateMain'
-    ];
-
-    function _ComplexPlaneChart(
-        Abstract2DVisualizer,
-        Util,
-        ComplexPlaneChartTemplateMain
-    ) {
-        var ComplexPlaneChart;
-
-        ComplexPlaneChart = function (parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
-            Abstract2DVisualizer.call(this, parentElement, width, height, colorAxis, colorPowerLine);
-
-            this.$$queue = queue;
-            this.$$maxValue = Util.valueOrDefault(maxValue, 1);
-
-            this.$$hashOnCanvas = null;
-        };
-
-        ComplexPlaneChart.prototype = Object.create(Abstract2DVisualizer.prototype);
-        ComplexPlaneChart.prototype.constructor = ComplexPlaneChart;
-
-        ComplexPlaneChart.$$_VALUE_CIRCLE_STEP = 1;
-        
-        ComplexPlaneChart.prototype.setMaxValue = function (maxValue) {
-            if (this.$$maxValue === maxValue) {
-                return false;
-            }
-            this.$$maxValue = maxValue;
-            this.$$hashOnCanvas = null;
-            this.$$dropXYCache();
-
-            return true;
-        };
-
-        ComplexPlaneChart.prototype.$$renderTemplate = function () {
-            var tpl = ComplexPlaneChartTemplateMain.html;
-
-            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
-            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
-
-            return tpl;
-        };
-
-        ComplexPlaneChart.prototype.$$draw = function () {
-            var
-                ctx = this.$$canvasContext,
-                w = this.$$width,
-                h = this.$$height,
-                halfW = 0.5 * w,
-                halfH = 0.5 * h,
-                q = this.$$queue,
-                item,
-                valueCircle,
-                radius, x, y, i,
-                lineWidth
-            ;
-
-            if (this.$$hashOnCanvas === q.getHash()) {
-                return;
-            }
-
-            ctx.clearRect(0, 0, w, h);
-
-            valueCircle = 0;
-            while (valueCircle <= this.$$maxValue) {
-                radius = halfH * this.$$getNormalizedValue(valueCircle);
-                this.$$drawCenteredCircle(radius);
-                valueCircle += ComplexPlaneChart.$$_VALUE_CIRCLE_STEP;
-            }
-
-            this.$$drawAxis();
-
-            lineWidth = ctx.lineWidth;
-            for (i = 0; i < q.getSize(); i++) {
-                item = q.getItem(i);
-                this.$$setItemXYCache(item);
-
-                x = halfW + halfW * item.$$cache.x;
-                y = halfH - halfH * item.$$cache.y;
-
-                if (item.point) {
-                    ctx.fillStyle = item.pointColor;
-                    ctx.beginPath();
-                    ctx.arc(x, y, item.pointRadius, 0, 2 * Math.PI, false);
-                    ctx.fill();
-                }
-
-                if (item.line) {
-                    ctx.lineWidth = item.lineWidth;
-                    ctx.strokeStyle = item.lineColor;
-                    ctx.beginPath();
-                    ctx.moveTo(halfW, halfH);
-                    ctx.lineTo(x, y);
-                    ctx.closePath();
-                    ctx.stroke();
-                }
-            }
-            ctx.lineWidth = lineWidth;
-
-            this.$$hashOnCanvas = q.getHash();
-        };
-
-        ComplexPlaneChart.prototype.$$setItemXYCache = function (item) {
-            if (item.$$cache) {
-                return;
-            }
-
-            item.$$cache = {
-                x: this.$$getNormalizedValue(item.real),
-                y: this.$$getNormalizedValue(item.imm)
-            };
-        };
-
-        ComplexPlaneChart.prototype.$$getNormalizedValue = function (value) {
-            return value / this.$$maxValue;
-        };
-
-        return ComplexPlaneChart;
-    }
-
-})();
-
-// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
-(function () {
-    'use strict';
-
-    AudioNetwork.Injector
         .registerService('Visualizer.AnalyserChartBuilder', _AnalyserChartBuilder);
 
     _AnalyserChartBuilder.$inject = [
@@ -6277,18 +6184,18 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Visualizer.FrequencyDomainChartBuilder', _FrequencyDomainChartBuilder);
+        .registerService('Visualizer.ComplexPlaneChartBuilder', _ComplexPlaneChartBuilder);
 
-    _FrequencyDomainChartBuilder.$inject = [
-        'Visualizer.FrequencyDomainChart'
+    _ComplexPlaneChartBuilder.$inject = [
+        'Visualizer.ComplexPlaneChart'
     ];
 
-    function _FrequencyDomainChartBuilder(
-        FrequencyDomainChart
+    function _ComplexPlaneChartBuilder(
+        ComplexPlaneChart
     ) {
 
-        function build(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
-            return new FrequencyDomainChart(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample);
+        function build(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
+            return new ComplexPlaneChart(parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine);
         }
 
         return {
@@ -6303,14 +6210,14 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
-        .registerService('Visualizer.FrequencyDomainChartTemplateMain', _FrequencyDomainChartTemplateMain);
+        .registerService('Visualizer.ComplexPlaneChartTemplateMain', _ComplexPlaneChartTemplateMain);
 
-    _FrequencyDomainChartTemplateMain.$inject = [];
+    _ComplexPlaneChartTemplateMain.$inject = [];
 
-    function _FrequencyDomainChartTemplateMain() {
+    function _ComplexPlaneChartTemplateMain() {
         var html =
             '<div' +
-            '    class="frequency-domain-chart-container"' +
+            '    class="complex-plane-chart-container"' +
             '    style="' +
             '        overflow: hidden;' +
             '        width: {{ width }}px;' +
@@ -6319,7 +6226,7 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
             '    "' +
             '    >' +
             '    <canvas ' +
-            '        class="frequency-domain-chart"' +
+            '        class="complex-plane-chart"' +
             '        style="' +
             '            width: {{ width }}px;' +
             '            height: {{ height }}px;' +
@@ -6343,72 +6250,48 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
     'use strict';
 
     AudioNetwork.Injector
-        .registerFactory('Visualizer.FrequencyDomainChart', _FrequencyDomainChart);
+        .registerFactory('Visualizer.ComplexPlaneChart', _ComplexPlaneChart);
 
-    _FrequencyDomainChart.$inject = [
-        'Visualizer.AbstractVisualizer',
-        'Visualizer.FrequencyDomainChartTemplateMain',
-        'Common.Util'
+    _ComplexPlaneChart.$inject = [
+        'Visualizer.Abstract2DVisualizer',
+        'Common.Util',
+        'Visualizer.ComplexPlaneChartTemplateMain'
     ];
 
-    function _FrequencyDomainChart(
-        AbstractVisualizer,
-        FrequencyDomainChartTemplateMain,
-        Util
+    function _ComplexPlaneChart(
+        Abstract2DVisualizer,
+        Util,
+        ComplexPlaneChartTemplateMain
     ) {
-        var FrequencyDomainChart;
+        var ComplexPlaneChart;
 
-        FrequencyDomainChart = function (parentElement, width, height, frequencyDomainQueue, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
-            AbstractVisualizer.call(this, parentElement, width, height);
+        ComplexPlaneChart = function (parentElement, width, height, queue, maxValue, colorAxis, colorPowerLine) {
+            Abstract2DVisualizer.call(this, parentElement, width, height, colorAxis, colorPowerLine);
 
-            this.$$frequencyDomainQueue = frequencyDomainQueue;
-            this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
-            this.$$radius = Util.valueOrDefault(radius, 1.1);
-            this.$$barWidth = Util.valueOrDefault(barWidth, 1);
-            this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
-            this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
-            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
-
-            this.$$checkWidth();
+            this.$$queue = queue;
+            this.$$maxValue = Util.valueOrDefault(maxValue, 1);
 
             this.$$hashOnCanvas = null;
         };
 
-        FrequencyDomainChart.prototype = Object.create(AbstractVisualizer.prototype);
-        FrequencyDomainChart.prototype.constructor = FrequencyDomainChart;
+        ComplexPlaneChart.prototype = Object.create(Abstract2DVisualizer.prototype);
+        ComplexPlaneChart.prototype.constructor = ComplexPlaneChart;
 
-        FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
-        FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
-
-        FrequencyDomainChart.prototype.setWidth = function (width) {
-            var element;
-
-            if (this.$$width === width) {
+        ComplexPlaneChart.$$_VALUE_CIRCLE_STEP = 1;
+        
+        ComplexPlaneChart.prototype.setMaxValue = function (maxValue) {
+            if (this.$$maxValue === maxValue) {
                 return false;
             }
-
-            this.$$width = width;
-            this.$$checkWidth();
-
-            element = this.$$find('.frequency-domain-chart-container');
-            element.style.width = width + 'px';
-            element = this.$$find('.frequency-domain-chart');
-            element.style.width = width + 'px';
-            element.setAttribute("width", width);
-
+            this.$$maxValue = maxValue;
             this.$$hashOnCanvas = null;
+            this.$$dropXYCache();
 
             return true;
         };
 
-        FrequencyDomainChart.prototype.$$checkWidth = function () {
-            if (this.$$frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
-                throw FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
-            }
-        };
-
-        FrequencyDomainChart.prototype.$$renderTemplate = function () {
-            var tpl = FrequencyDomainChartTemplateMain.html;
+        ComplexPlaneChart.prototype.$$renderTemplate = function () {
+            var tpl = ComplexPlaneChartTemplateMain.html;
 
             tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
             tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
@@ -6416,79 +6299,81 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
             return tpl;
         };
 
-        FrequencyDomainChart.prototype.setPowerDecibelMin = function (powerDecibelMin) {
-            if (this.$$powerDecibelMin === powerDecibelMin) {
-                return false;
-            }
-            this.$$powerDecibelMin = powerDecibelMin;
-            this.$$hashOnCanvas = null;
-
-            return true;
-        };
-
-        FrequencyDomainChart.prototype.$$draw = function () {
+        ComplexPlaneChart.prototype.$$draw = function () {
             var
                 ctx = this.$$canvasContext,
-                fdq = this.$$frequencyDomainQueue,
                 w = this.$$width,
                 h = this.$$height,
-                frequencyBinPowerDecibel, i, x, y,
-                barMiddle
+                halfW = 0.5 * w,
+                halfH = 0.5 * h,
+                q = this.$$queue,
+                item,
+                valueCircle,
+                radius, x, y, i,
+                lineWidth
             ;
 
-            if (this.$$hashOnCanvas === fdq.getHash()) {
+            if (this.$$hashOnCanvas === q.getHash()) {
                 return;
             }
 
             ctx.clearRect(0, 0, w, h);
 
-            ctx.strokeStyle = this.$$colorAxis;
-            for (i = 0; i <= -this.$$powerDecibelMin; i += FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP) {
-                y = i *  h / -this.$$powerDecibelMin;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(w, y);
-                ctx.closePath();
-                ctx.stroke();
+            valueCircle = 0;
+            while (valueCircle <= this.$$maxValue) {
+                radius = halfH * this.$$getNormalizedValue(valueCircle);
+                this.$$drawCenteredCircle(radius);
+                valueCircle += ComplexPlaneChart.$$_VALUE_CIRCLE_STEP;
             }
 
-            ctx.fillStyle = this.$$colorSample;
-            barMiddle = 0.5 * (this.$$barWidth - 1);
-            for (i = 0; i < fdq.getSize(); i++) {
-                frequencyBinPowerDecibel = fdq.getItem(i);
+            this.$$drawAxis();
 
-                x = i * (this.$$barWidth + this.$$barSpacingWidth);
-                y = ((frequencyBinPowerDecibel / this.$$powerDecibelMin)) * h;
+            lineWidth = ctx.lineWidth;
+            for (i = 0; i < q.getSize(); i++) {
+                item = q.getItem(i);
+                this.$$setItemXYCache(item);
 
-                if (this.$$barSpacingWidth >= 1) {
+                x = halfW + halfW * item.$$cache.x;
+                y = halfH - halfH * item.$$cache.y;
+
+                if (item.point) {
+                    ctx.fillStyle = item.pointColor;
                     ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, h);
+                    ctx.arc(x, y, item.pointRadius, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                }
+
+                if (item.line) {
+                    ctx.lineWidth = item.lineWidth;
+                    ctx.strokeStyle = item.lineColor;
+                    ctx.beginPath();
+                    ctx.moveTo(halfW, halfH);
+                    ctx.lineTo(x, y);
                     ctx.closePath();
                     ctx.stroke();
                 }
+            }
+            ctx.lineWidth = lineWidth;
 
-                if (y >= h) {
-                    continue;
-                }
+            this.$$hashOnCanvas = q.getHash();
+        };
 
-                ctx.beginPath();
-                ctx.arc(
-                    x + this.$$barSpacingWidth + barMiddle, y,
-                    this.$$radius, 0, 2 * Math.PI, false
-                );
-                ctx.fill();
-                // ctx.fillRect(x - 1, y - 1, 3, 3);
+        ComplexPlaneChart.prototype.$$setItemXYCache = function (item) {
+            if (item.$$cache) {
+                return;
             }
 
-            this.$$hashOnCanvas = fdq.getHash();
+            item.$$cache = {
+                x: this.$$getNormalizedValue(item.real),
+                y: this.$$getNormalizedValue(item.imm)
+            };
         };
 
-        FrequencyDomainChart.prototype.$$initCanvasContext = function () {
-            this.$$canvasContext.lineWidth = 1;
+        ComplexPlaneChart.prototype.$$getNormalizedValue = function (value) {
+            return value / this.$$maxValue;
         };
 
-        return FrequencyDomainChart;
+        return ComplexPlaneChart;
     }
 
 })();
@@ -6749,6 +6634,227 @@ if (AudioNetwork.isBrowser && AudioNetwork.bootConfig.devScriptLoad) {
         };
 
         return ConstellationDiagram;
+    }
+
+})();
+
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Visualizer.FrequencyDomainChartBuilder', _FrequencyDomainChartBuilder);
+
+    _FrequencyDomainChartBuilder.$inject = [
+        'Visualizer.FrequencyDomainChart'
+    ];
+
+    function _FrequencyDomainChartBuilder(
+        FrequencyDomainChart
+    ) {
+
+        function build(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+            return new FrequencyDomainChart(parentElement, width, height, frequencyDomain, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample);
+        }
+
+        return {
+            build: build
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerService('Visualizer.FrequencyDomainChartTemplateMain', _FrequencyDomainChartTemplateMain);
+
+    _FrequencyDomainChartTemplateMain.$inject = [];
+
+    function _FrequencyDomainChartTemplateMain() {
+        var html =
+            '<div' +
+            '    class="frequency-domain-chart-container"' +
+            '    style="' +
+            '        overflow: hidden;' +
+            '        width: {{ width }}px;' +
+            '        height: {{ height }}px;' +
+            '        position: relative;' +
+            '    "' +
+            '    >' +
+            '    <canvas ' +
+            '        class="frequency-domain-chart"' +
+            '        style="' +
+            '            width: {{ width }}px;' +
+            '            height: {{ height }}px;' +
+            '            position: absolute;' +
+            '        "' +
+            '        width="{{ width }}"' +
+            '        height="{{ height }}"' +
+            '        ></canvas>' +
+            '</div>'
+        ;
+
+        return {
+            html: html
+        };
+    }
+
+})();
+
+// Copyright (c) 2015-2018 Robert Rypuła - https://audio-network.rypula.pl
+(function () {
+    'use strict';
+
+    AudioNetwork.Injector
+        .registerFactory('Visualizer.FrequencyDomainChart', _FrequencyDomainChart);
+
+    _FrequencyDomainChart.$inject = [
+        'Visualizer.AbstractVisualizer',
+        'Visualizer.FrequencyDomainChartTemplateMain',
+        'Common.Util'
+    ];
+
+    function _FrequencyDomainChart(
+        AbstractVisualizer,
+        FrequencyDomainChartTemplateMain,
+        Util
+    ) {
+        var FrequencyDomainChart;
+
+        FrequencyDomainChart = function (parentElement, width, height, frequencyDomainQueue, powerDecibelMin, radius, barWidth, barSpacingWidth, colorAxis, colorSample) {
+            AbstractVisualizer.call(this, parentElement, width, height);
+
+            this.$$frequencyDomainQueue = frequencyDomainQueue;
+            this.$$powerDecibelMin = Util.valueOrDefault(powerDecibelMin, -40);
+            this.$$radius = Util.valueOrDefault(radius, 1.1);
+            this.$$barWidth = Util.valueOrDefault(barWidth, 1);
+            this.$$barSpacingWidth = Util.valueOrDefault(barSpacingWidth, 0);
+            this.$$colorAxis = Util.valueOrDefault(colorAxis, '#EEE');
+            this.$$colorSample = Util.valueOrDefault(colorSample, '#738BD7');
+
+            this.$$checkWidth();
+
+            this.$$hashOnCanvas = null;
+        };
+
+        FrequencyDomainChart.prototype = Object.create(AbstractVisualizer.prototype);
+        FrequencyDomainChart.prototype.constructor = FrequencyDomainChart;
+
+        FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH = 'Queue size not match chart width';
+        FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP = 10;
+
+        FrequencyDomainChart.prototype.setWidth = function (width) {
+            var element;
+
+            if (this.$$width === width) {
+                return false;
+            }
+
+            this.$$width = width;
+            this.$$checkWidth();
+
+            element = this.$$find('.frequency-domain-chart-container');
+            element.style.width = width + 'px';
+            element = this.$$find('.frequency-domain-chart');
+            element.style.width = width + 'px';
+            element.setAttribute("width", width);
+
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        FrequencyDomainChart.prototype.$$checkWidth = function () {
+            if (this.$$frequencyDomainQueue.getSizeMax() * (this.$$barWidth + this.$$barSpacingWidth) !== this.$$width) {
+                throw FrequencyDomainChart.QUEUE_SIZE_NOT_MATCH_CHART_WIDTH;
+            }
+        };
+
+        FrequencyDomainChart.prototype.$$renderTemplate = function () {
+            var tpl = FrequencyDomainChartTemplateMain.html;
+
+            tpl = tpl.replace(/\{\{ width \}\}/g, (this.$$width).toString());
+            tpl = tpl.replace(/\{\{ height \}\}/g, (this.$$height).toString());
+
+            return tpl;
+        };
+
+        FrequencyDomainChart.prototype.setPowerDecibelMin = function (powerDecibelMin) {
+            if (this.$$powerDecibelMin === powerDecibelMin) {
+                return false;
+            }
+            this.$$powerDecibelMin = powerDecibelMin;
+            this.$$hashOnCanvas = null;
+
+            return true;
+        };
+
+        FrequencyDomainChart.prototype.$$draw = function () {
+            var
+                ctx = this.$$canvasContext,
+                fdq = this.$$frequencyDomainQueue,
+                w = this.$$width,
+                h = this.$$height,
+                frequencyBinPowerDecibel, i, x, y,
+                barMiddle
+            ;
+
+            if (this.$$hashOnCanvas === fdq.getHash()) {
+                return;
+            }
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.strokeStyle = this.$$colorAxis;
+            for (i = 0; i <= -this.$$powerDecibelMin; i += FrequencyDomainChart.$$_POWER_DECIBEL_AXIS_LINE_STEP) {
+                y = i *  h / -this.$$powerDecibelMin;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = this.$$colorSample;
+            barMiddle = 0.5 * (this.$$barWidth - 1);
+            for (i = 0; i < fdq.getSize(); i++) {
+                frequencyBinPowerDecibel = fdq.getItem(i);
+
+                x = i * (this.$$barWidth + this.$$barSpacingWidth);
+                y = ((frequencyBinPowerDecibel / this.$$powerDecibelMin)) * h;
+
+                if (this.$$barSpacingWidth >= 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                if (y >= h) {
+                    continue;
+                }
+
+                ctx.beginPath();
+                ctx.arc(
+                    x + this.$$barSpacingWidth + barMiddle, y,
+                    this.$$radius, 0, 2 * Math.PI, false
+                );
+                ctx.fill();
+                // ctx.fillRect(x - 1, y - 1, 3, 3);
+            }
+
+            this.$$hashOnCanvas = fdq.getHash();
+        };
+
+        FrequencyDomainChart.prototype.$$initCanvasContext = function () {
+            this.$$canvasContext.lineWidth = 1;
+        };
+
+        return FrequencyDomainChart;
     }
 
 })();
@@ -10639,7 +10745,8 @@ if (AudioNetwork.bootConfig.createAlias) {
 
     AudioNetwork.Rewrite.Dsp.Complex = AudioNetwork.Injector.resolve('Rewrite.Dsp.Complex');
     AudioNetwork.Rewrite.Dsp.Correlator = AudioNetwork.Injector.resolve('Rewrite.Dsp.Correlator');
-    AudioNetwork.Rewrite.Dsp.FFTResult = AudioNetwork.Injector.resolve('Rewrite.Dsp.FFTResult');
+    AudioNetwork.Rewrite.Dsp.Fft = AudioNetwork.Injector.resolve('Rewrite.Dsp.Fft');
+    AudioNetwork.Rewrite.Dsp.FFTResult = AudioNetwork.Injector.resolve('Rewrite.Dsp.FFTResult');       // TODO rename to FftResult
     AudioNetwork.Rewrite.Dsp.WaveAnalyser = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveAnalyser');
     AudioNetwork.Rewrite.Dsp.WaveGenerator = AudioNetwork.Injector.resolve('Rewrite.Dsp.WaveGenerator');
     AudioNetwork.Rewrite.PhysicalLayer.PhysicalLayerBuilder = AudioNetwork.Injector.resolve('Rewrite.PhysicalLayer.PhysicalLayerBuilder');

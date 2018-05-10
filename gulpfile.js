@@ -18,7 +18,7 @@ gulp.task('default', function() {
             './src/audio-network-end.js'
         ])
         .pipe(debug())
-        .pipe(concat('audio-network-v1.3.0.js'))
+        .pipe(concat('audio-network-v1.3.1.js'))
         .pipe(header('/*\n' + fs.readFileSync('./LICENCE', 'utf8') + '*/\n\n'))
         .pipe(gulp.dest(DEST))
         .pipe(uglify())
