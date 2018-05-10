@@ -338,6 +338,10 @@
         AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
             var periodicWave, isPureSine;
 
+            if (this.$$audioContext.state === 'suspended') {
+              this.$$audioContext.resume();
+            }
+
             isPureSine = typeof phase === 'undefined' &&
                 typeof harmonicAmplitude === 'undefined' &&
                 typeof harmonicPhase === 'undefined';
