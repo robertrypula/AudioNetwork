@@ -2,12 +2,11 @@
   - 1.1.0 Last update for old PSK code
   - 1.2.x Completely rewritten Physical Layer with FSK support. Old PSK code marked as deprecated
   - 1.3.x Data link layer with frames and checksums
-  - 1.4.x Transport layer that supports simplified TCP protocol
-  - 1.5.x Application layer with simple text exchange protocol
-  - 1.x.x move to webpack
+  - 2.0.0 Move to WebPack, TypeScript, Jest, Travis, Coveralls
   - 2.0.0 Old PSK code removed from the project.
+  - 2.x.x Transport layer that supports simplified TCP protocol
+  - 2.x.x Application layer with simple text exchange protocol
   - 2.x.x ?? OFDM
-  - 2.x.x ?? Move to TypeScript
 
 ## v1.3.1 (2018-05-10)
   - BugFix: "The AudioContext was not allowed to start. It must be resume (or created) after a user gesture on the page. https://goo.gl/7K7WLu"
