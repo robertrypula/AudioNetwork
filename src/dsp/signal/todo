@@ -1,0 +1,38 @@
+ /*
+
+TODO align sizeMax maxSize !!!!!!!!!!!!!!
+TODO move getOdd getEven to signal
+
+TODO rr-tsdi injector useValue/useClass/useService
+TODO rr-tsdi injector report unused di entry in afterEach
+
+
+
+
+
+
+
+signalFactory.createFromReal();
+
+signal.dropPhase().magnitudeToDecibel()
+signal.dropPhase().magnitudeFromDecibel()
+signal.dropRealPart();
+signal.swapHalves()
+signal.toReal()
+
+signal.getAmplitude
+
+
+windowFunction.applyOn(signal);
+filter.applyOn(signal);
+
+spiralGeneratorFactory.create(samplePerPeriod);
+signalGenerator.fillInto(signal);
+signalAnalyser
+
+signal.mixWith(spiral)
+signal.mixWith()
+signal.add();
+
+
+*/

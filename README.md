@@ -1,14 +1,24 @@
-Audio Network
-=============
+# Audio Network
+
+[![npm version](https://badge.fury.io/js/audio-network.svg)](https://badge.fury.io/js/audio-network)
+[![Build Status](https://travis-ci.org/robertrypula/AudioNetwork.svg?branch=typescript-webpack-jest)](https://travis-ci.org/robertrypula/AudioNetwork)
+[![Coverage Status](https://coveralls.io/repos/github/robertrypula/AudioNetwork/badge.svg?branch=typescript-webpack-jest)](https://coveralls.io/github/robertrypula/AudioNetwork?branch=typescript-webpack-jest)
 
 Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
 - [Physical Layer](https://audio-network.rypula.pl/physical-layer)
 - [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
-- [Transport Layer (comming soon, almost ready!)](https://audio-network.rypula.pl/transport-layer)
+- [Transport Layer (comming soon)](https://audio-network.rypula.pl/transport-layer)
 - [Audio Chat (comming soon)](https://audio-network.rypula.pl/audio-chat)
 - [Full example List](https://github.com/robertrypula/AudioNetwork/tree/master/example)
+
+## News
+
+- [2018 May 10] Thanks to [Programista](https://programistamag.pl) magazine, all 3 parts of my articles about data transmission over sound in JavaScript are now available as PDFs.
+
+- [2018 Feb 06] Project looks like dead but it's not. Now I'm focusing on configuration that allows me to move
+entire AudioNetwork project to TypeScript, WebPack, Jest unit test with coverge, Travis etc.
 
 ## Self-made network stack based on Frequency-Shift Keying (>= v1.2.0)
 
@@ -16,9 +26,9 @@ Audio Network library is a hobby project in which the goal was to create simple 
 waves to transmit data. Initialy it was using PSK modulation technique which was later changed into FSK. If you are
 interested in details you can read more in polish Programista magazine:
 
-- [Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/) (08/2016)
-- [Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/) (02/2017)
-- [Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/) (10/2017)
+- [Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/) (08/2016) [**Download PDF**](https://cdn.rypula.pl/audio-network/pdf/TransmisjaDanychDzwiekiemJs_czesc1z3_DyskretnaTransformataFouriera.pdf)
+- [Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/) (02/2017) [**Download PDF**](https://cdn.rypula.pl/audio-network/pdf/TransmisjaDanychDzwiekiemJs_czesc2z3_WebAudioAPI.pdf)
+- [Data transmission over sound from scratch. Part 3: Self-made network stack](https://programistamag.pl/programista-10-2017-65/) (10/2017) [**Download PDF**](https://cdn.rypula.pl/audio-network/pdf/TransmisjaDanychDzwiekiemJs_czesc3z3_WlasnyStosSieciowy.pdf)
 
 Part 3 of the article was the last one. It means that more focus will go to this website and Audio Network releases. If you can't wait please go trought some of the examples:
 
@@ -32,7 +42,7 @@ Part 3 of the article was the last one. It means that more focus will go to this
   [(source)](https://audio-network.rypula.pl/physical-layer-src)
 - [Data Link Layer simple (comming soon)](https://audio-network.rypula.pl/data-link-layer-simple)
   [(source)](https://audio-network.rypula.pl/data-link-layer-simple-src)
-- [Data Link Layer listenters demo](https://audio-network.rypula.pl/data-link-layer-listeners-demo)
+- [Data Link Layer listeners demo](https://audio-network.rypula.pl/data-link-layer-listeners-demo)
   [(source)](https://audio-network.rypula.pl/data-link-layer-listeners-demo-src)
 - [Data Link Layer](https://audio-network.rypula.pl/data-link-layer)
   [(source)](https://audio-network.rypula.pl/data-link-layer-src)
@@ -50,26 +60,22 @@ Note: some of the modules are not yet in main NPM package. Please verify [roadma
 
 >This library is supported by [PGS Software](https://www.pgs-soft.com/) - the place where I work as Frontend Developer
 
-UPDATE 2018.02.06 - Project looks like dead but it's not. Now I'm focusing on configuration that allows me to move
-entire AudioNetwork project to TypeScript, WebPack, Jest unit test with coverge, Travis etc.
-
 ## Deprecated Phase-Shift Keying approach (last update at v1.1.0, will be removed at v2.0.0)
 
 Initial versions of this lib were based on Phase-Shift Keying modulation technique. Unfortunatelly after some tests
 in turned out that this implementation was not working reliable on mobile devices. Starting from v1.2.0 this part of the
 lib will be marked as deprecated.
 
+>**!!! IMPORTANT NOTE !!!** - Everything described **below (up to Licence)**  might be outdated or not working properly. Project is now in a phase of big technical changes. Entire v1.x was created mostly to learn DSP and share this knowledge in the 'Programista' magazine articles. Version 2.x will have more stable and simpler API and will be better consumable as npm package.
+
 - [Demo - simple](https://audio-network.rypula.pl/example/01-000-physical-layer-simple/physical-layer-simple.html)
 - [Demo - full features](https://audio-network.rypula.pl/example/01-001-physical-layer-full/physical-layer-full.html)
-
 
 If you want to try AudioNetwork by yourself I would recommend to first open `Demo - simple` because `Demo - full
 features` might be little scary for the first time. You can also watch YouTube video that shows how to transmit
 data over sound between two laptops:
 
 [![Data transmission over sound waves (AudioNetwork)](https://audio-network.rypula.pl/asset/image/yt.png)](https://www.youtube.com/watch?v=TjjyLaXd1Ro)
-
->This project is still under development. Documentation is also planned but... little later :)
 
 ### How can I transmit something over sound?
 

@@ -1,4 +1,7 @@
 .idea/
+.vscode/
+coverage/
+dist/
 node_modules/
-an.wav
-an100ms.wav
+index.html
+changelog.html

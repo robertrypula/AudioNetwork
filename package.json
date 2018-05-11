@@ -1,28 +1,8 @@
 {
   "name": "audio-network",
-  "version": "1.3.1",
+  "version": "2.0.0-rc",
+  "homepage": "https://audio-network.rypula.pl",
   "description": "Data transmission over sound waves written in JavaScript without any dependencies. All you need is just microphone, speakers and the browser!",
-  "main": "build/audio-network-v1.3.1.js",
-  "dependencies": {},
-  "devDependencies": {
-    "glob": "7.1.2",
-    "gulp": "3.9.1",
-    "gulp-concat": "2.6.1",
-    "gulp-debug": "3.1.0",
-    "gulp-header": "1.8.9",
-    "gulp-markdown": "1.2.0",
-    "gulp-rename": "1.2.2",
-    "gulp-uglify": "3.0.0",
-    "gulp-webserver": "0.9.1",
-    "jasmine": "2.8.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/robertrypula/AudioNetwork.git"
-  },
   "keywords": [
     "transmission over sound",
     "Web Audio API",
@@ -45,8 +25,64 @@
   ],
   "author": "Robert Rypuła",
   "license": "MIT",
+  "scripts": {
+    "dev": "npm run clean && webpack-dev-server --env.DEVELOPMENT --open",
+    "build": "npm run clean && npm run test && npm run lint && npm run lint:tsfmt:verify && webpack --env.PRODUCTION",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "lint:tsfmt:verify": "tsfmt --verify --no-tsfmt --no-tslint --no-tsconfig --no-vscode",
+    "lint:tsfmt:replace": "tsfmt --replace --no-tsfmt --no-tslint --no-tsconfig --no-vscode",
+    "report-coverage": "cat ./coverage/lcov.info | coveralls",
+    "clean": "rimraf dist && rimraf coverage",
+    "npm-check": "npm-check --skip-unused",
+    "npm-check:u": "npm-check --skip-unused -u",
+    "md2html": "node ./scripts/md2html.js"
+  },
+  "main": "dist/audio-network-v2.0.0-rc.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robertrypula/AudioNetwork.git"
+  },
   "bugs": {
     "url": "https://github.com/robertrypula/AudioNetwork/issues"
   },
-  "homepage": "https://audio-network.rypula.pl"
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.2.3",
+    "coveralls": "^3.0.1",
+    "jest": "^22.4.3",
+    "npm-check": "^5.7.0",
+    "rimraf": "^2.6.2",
+    "rr-tsdi": "^1.0.3",
+    "showdown": "^1.8.6",
+    "ts-jest": "^22.4.5",
+    "ts-loader": "^4.3.0",
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.3",
+    "typescript-formatter": "^7.2.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.8.1",
+    "webpack-cli": "^2.1.3",
+    "webpack-dev-server": "^3.1.4",
+    "wrapper-webpack-plugin": "^2.0.0"
+  }
 }

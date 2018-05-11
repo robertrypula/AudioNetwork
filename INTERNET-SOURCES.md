@@ -100,7 +100,7 @@ Freq domain time resolution:
     http://electronics.stackexchange.com/questions/12407/what-is-the-relation-between-fft-length-and-frequency-resolution
 
 IQ sampling explanation (complex signal):
-    http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!
+    http://whiteboard.ping.se/SDR/IQ                        GREAT GREAT GREAT !!!!
     https://www.youtube.com/watch?v=h_7d-m1ehoY
 
 Very nice project about DSP and Software Defined Radio

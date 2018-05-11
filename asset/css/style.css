@@ -32,6 +32,10 @@
     height: 46px;
 }
 
+.download-area a.a-icon-github:hover, .download-area a.a-icon-npm:hover {
+  opacity: 0.5;
+}
+
 .download-area a.a-icon-fb {
     width: 40px;
     height: 40px;
