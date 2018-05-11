@@ -3,8 +3,10 @@
 [![npm version](https://badge.fury.io/js/audio-network.svg)](https://badge.fury.io/js/audio-network)
 [![Build Status](https://travis-ci.org/robertrypula/AudioNetwork.svg?branch=typescript-webpack-jest)](https://travis-ci.org/robertrypula/AudioNetwork)
 [![Coverage Status](https://coveralls.io/repos/github/robertrypula/AudioNetwork/badge.svg?branch=typescript-webpack-jest)](https://coveralls.io/github/robertrypula/AudioNetwork?branch=typescript-webpack-jest)
+[![dependencies Status](https://david-dm.org/robertrypula/AudioNetwork/status.svg)](https://david-dm.org/robertrypula/AudioNetwork)
+[![devDependencies Status](https://david-dm.org/robertrypula/AudioNetwork/dev-status.svg)](https://david-dm.org/robertrypula/AudioNetwork?type=dev)
 
-Data transmission over sound waves written in JavaScript without any dependencies. All you need is just
+Data transmission over sound waves written in <strike>JavaScript</strike>TypeScript without any dependencies. All you need is just
 microphone, speakers and the browser!
 
 - [Physical Layer](https://audio-network.rypula.pl/physical-layer)
@@ -15,16 +17,25 @@ microphone, speakers and the browser!
 
 ## News
 
-- [2018 May 10] Thanks to [Programista](https://programistamag.pl) magazine, all 3 parts of my articles about data transmission over sound in JavaScript are now available as PDFs.
+- **2018 May 11!** - [PR#4](https://github.com/robertrypula/AudioNetwork/pull/4) was merged with master. Important: migration process from ES5 to TypeScript is still NOT finished. It will just continue on the master branch.
 
-- [2018 Feb 06] Project looks like dead but it's not. Now I'm focusing on configuration that allows me to move
+- **2018 May 10** - Thanks to [Programista](https://programistamag.pl) magazine, all 3 parts of my articles about *data transmission over sound in JavaScript* are now available as PDFs. Please find links in the next section.
+
+- **2018 Feb 06** - Project looks like dead but it's not. Now I'm focusing on configuration that allows me to move
 entire AudioNetwork project to TypeScript, WebPack, Jest unit test with coverge, Travis etc.
 
 ## Self-made network stack based on Frequency-Shift Keying (>= v1.2.0)
 
 Audio Network library is a hobby project in which the goal was to create simple network stack that uses sound
-waves to transmit data. Initialy it was using PSK modulation technique which was later changed into FSK. If you are
-interested in details you can read more in polish Programista magazine:
+waves to transmit data. Initialy it was using PSK modulation technique which was later changed into FSK.
+
+Brief introduction to the topic is available as **presentation hosted on slides.com [here](https://slides.com/robertrypula/data-transmission-over-sound)**.
+
+If you are interested in details you can read more in polish Programista magazine:
+
+[![Part 1](https://cdn.rypula.pl/audio-network/image/programista_1.min.jpg)](https://cdn.rypula.pl/audio-network/image/programista_1.jpg)
+[![Part 2](https://cdn.rypula.pl/audio-network/image/programista_2.min.jpg)](https://cdn.rypula.pl/audio-network/image/programista_2.jpg)
+[![Part 3](https://cdn.rypula.pl/audio-network/image/programista_3.min.jpg)](https://cdn.rypula.pl/audio-network/image/programista_3.jpg)
 
 - [Data transmission over sound from scratch. Part 1: Discrete Fourier Transform](https://programistamag.pl/programista-08-2016-51/) (08/2016) [**Download PDF**](https://cdn.rypula.pl/audio-network/pdf/TransmisjaDanychDzwiekiemJs_czesc1z3_DyskretnaTransformataFouriera.pdf)
 - [Data transmission over sound from scratch. Part 2: Web Audio API](https://programistamag.pl/programista-2-2017-57/) (02/2017) [**Download PDF**](https://cdn.rypula.pl/audio-network/pdf/TransmisjaDanychDzwiekiemJs_czesc2z3_WebAudioAPI.pdf)
