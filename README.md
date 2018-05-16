@@ -6,7 +6,7 @@
 [![dependencies Status](https://david-dm.org/robertrypula/AudioNetwork/status.svg)](https://david-dm.org/robertrypula/AudioNetwork)
 [![devDependencies Status](https://david-dm.org/robertrypula/AudioNetwork/dev-status.svg)](https://david-dm.org/robertrypula/AudioNetwork?type=dev)
 
-Data transmission over sound waves written in <strike>JavaScript</strike>TypeScript without any dependencies. All you need is just
+Data transmission over sound waves written in <strike>JavaScript</strike>TypeScript. All you need is just
 microphone, speakers and the browser!
 
 - [Physical Layer](https://audio-network.rypula.pl/physical-layer)
@@ -17,7 +17,7 @@ microphone, speakers and the browser!
 
 ## News
 
-- **2018 May 11!** - [PR#4](https://github.com/robertrypula/AudioNetwork/pull/4) was merged with master. Important: migration process from ES5 to TypeScript is still NOT finished. It will just continue on the master branch.
+- **2018 May 11** - [PR#4](https://github.com/robertrypula/AudioNetwork/pull/4) was merged with master. Important: migration process from ES5 to TypeScript is still NOT finished. It will just continue on the master branch.
 
 - **2018 May 10** - Thanks to [Programista](https://programistamag.pl) magazine, all 3 parts of my articles about *data transmission over sound in JavaScript* are now available as PDFs. Please find links in the next section.
 
@@ -140,7 +140,7 @@ In both cases at `build` directory you will find minified and unminified js file
 include it into your HTML file. For example:
 
 ```
-<script src="node_modules/audio-network/build/audio-network-v1.3.1.min.js"></script>
+<script src="node_modules/audio-network/build/audio-network-v1.3.2.min.js"></script>
 ```
 
 Now you can access `AudioNetwork` object at global JavaScript scope. It's the entry point for all components:
