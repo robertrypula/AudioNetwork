@@ -9,6 +9,9 @@
   - 2.x.x ?? OFDM
   - 2.x.x ?? Move to TypeScript
 
+## v1.3.2 (2018-05-16)
+  - BugFix for the same issue in other area: "The AudioContext was not allowed to start. It must be resume (or created) after a user gesture on the page. https://goo.gl/7K7WLu"
+
 ## v1.3.1 (2018-05-10)
   - BugFix: "The AudioContext was not allowed to start. It must be resume (or created) after a user gesture on the page. https://goo.gl/7K7WLu"
 

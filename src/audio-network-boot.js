@@ -5,7 +5,7 @@ var
     AudioNetwork = {},                                        // namespace visible to the global JavaScript scope
     AudioNetworkBootConfig = AudioNetworkBootConfig || {};    // injects boot config
 
-AudioNetwork.version = '1.3.1';
+AudioNetwork.version = '1.3.2';
 
 // conditions from: http://stackoverflow.com/a/33697246
 AudioNetwork.isNode = typeof module !== 'undefined' && module.exports ? true : false;

@@ -203,6 +203,12 @@
             return audioContext;
         };
 
+        AudioMonoIO.prototype.$$resumeAudioContext = function () {
+            if (this.$$audioContext.state === 'suspended') {
+                this.$$audioContext.resume();
+            }
+        };
+
         AudioMonoIO.prototype.$$connectMicrophoneTo = function (node) {
             var
                 self = this,
@@ -338,9 +344,7 @@
         AudioMonoIO.prototype.setPeriodicWave = function (frequency, volume, phase, harmonicAmplitude, harmonicPhase) {
             var periodicWave, isPureSine;
 
-            if (this.$$audioContext.state === 'suspended') {
-              this.$$audioContext.resume();
-            }
+            this.$$resumeAudioContext();
 
             isPureSine = typeof phase === 'undefined' &&
                 typeof harmonicAmplitude === 'undefined' &&
@@ -452,6 +456,8 @@
         AudioMonoIO.prototype.getFrequencyData = function () {
             var data;
 
+            this.$$resumeAudioContext();
+
             data = new Float32Array(this.$$inAnalyzer.frequencyBinCount);   // same as: 0.5 * fftSize
             this.$$inAnalyzer.getFloatFrequencyData(data);
 
@@ -460,6 +466,8 @@
 
         AudioMonoIO.prototype.getTimeDomainData = function () {
             var data;
+
+            this.$$resumeAudioContext();
 
             data = new Float32Array(this.$$inAnalyzer.fftSize);
             this.$$inAnalyzer.getFloatTimeDomainData(data);
